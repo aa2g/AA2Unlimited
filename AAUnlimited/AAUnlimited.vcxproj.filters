@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="ExternalData">
+      <UniqueIdentifier>{10a9fbdd-423a-4280-8672-440f46f13160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalData\ExternalClasses">
+      <UniqueIdentifier>{c79839d8-c8d4-4b0e-a1fb-2859cbea54f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExternalData\ExternalClasses\H-Classes">
+      <UniqueIdentifier>{1893b2a4-e3b4-4021-8cf3-5c4a13e39b47}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Files\Config.cpp" />
+    <ClCompile Include="Files\Logger.cpp" />
+    <ClCompile Include="Functions\AAPlay\HAi.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HGUIButton.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HInfo.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HParticipant.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HPosButtonList.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterData.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterStruct.cpp" />
+    <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
+    <ClCompile Include="External\ExternalClasses\IllusionList.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\HInjections.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\NpcPcConversation.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Misc\TanSlotUnlimit.cpp" />
+    <ClCompile Include="MemMods\Hook.cpp" />
+    <ClCompile Include="MemMods\AAEdit\TanSlotUnlimited.cpp" />
+    <ClCompile Include="General\ModuleInfo.cpp" />
+    <ClCompile Include="MemMods\AAEdit\SaveCard.cpp" />
+    <ClCompile Include="Functions\AAUCardData.cpp" />
+    <ClCompile Include="General\Buffer.cpp" />
+    <ClCompile Include="Functions\AAEdit\Globals.cpp" />
+    <ClCompile Include="MemMods\AAEdit\MeshTexture.cpp" />
+    <ClCompile Include="Functions\AAEdit\Overrides.cpp" />
+    <ClCompile Include="Functions\TextureImage.cpp" />
+    <ClCompile Include="Functions\AAEdit\UnlimitedDialog.cpp" />
+    <ClCompile Include="External\ExternalVariables\AAEdit\WindowData.cpp" />
+    <ClCompile Include="MemMods\AAEdit\Dialog.cpp" />
+    <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
+    <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
+    <ClCompile Include="General\Util.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\MeshTexture.cpp" />
+    <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Files\Config.h" />
+    <ClInclude Include="Files\Logger.h" />
+    <ClInclude Include="Functions\AAPlay\HAi.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HGUIButton.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HInfo.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HParticipant.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HPosButtonList.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterData.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterStruct.h" />
+    <ClInclude Include="External\ExternalClasses\ConversationStruct.h" />
+    <ClInclude Include="External\ExternalClasses\IllusionList.h" />
+    <ClInclude Include="External\ExternalClasses.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\HInjections.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\NpcPcConversation.h" />
+    <ClInclude Include="MemMods\AAPlay\Misc\TanSlotUnlimit.h" />
+    <ClInclude Include="MemMods\Hook.h" />
+    <ClInclude Include="MemMods\MemRightsLock.h" />
+    <ClInclude Include="MemMods\AAEdit\TanSlotUnlimited.h" />
+    <ClInclude Include="General\ModuleInfo.h" />
+    <ClInclude Include="MemMods\AAEdit\SaveCard.h" />
+    <ClInclude Include="Functions\AAUCardData.h" />
+    <ClInclude Include="General\Buffer.h" />
+    <ClInclude Include="Functions\AAEdit\Globals.h" />
+    <ClInclude Include="MemMods\AAEdit\MeshTexture.h" />
+    <ClInclude Include="Functions\AAEdit\Overrides.h" />
+    <ClInclude Include="Functions\TextureImage.h" />
+    <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
+    <ClInclude Include="External\ExternalVariables.h" />
+    <ClInclude Include="MemMods\AAEdit\Dialog.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
+    <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
+    <ClInclude Include="General\Util.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\MeshTexture.h" />
+    <ClInclude Include="Functions\AAPlay\Overrides.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Texts\config.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AAUnlimitedDll.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

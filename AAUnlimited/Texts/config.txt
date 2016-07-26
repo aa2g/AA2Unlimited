@@ -1,0 +1,13 @@
+; config file test
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; disabling and enabling features ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+bUseAdditionalTanSlots = false		; load more than 6 tan slots. currently crashes.
+
+bUseMeshTextureOverrides = false	; apply mesh texture override rules. When a xx (mesh) file is loaded, the 
+									; textures and texture list will be compared to a set of override rules,
+									; and if a rule applies, the texture will be replaced.
+
+bUseHAi = false						; enables H-AI

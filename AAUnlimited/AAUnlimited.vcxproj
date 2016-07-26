@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Functions\AAEdit\Globals.cpp" />
+    <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
+    <ClCompile Include="General\Buffer.cpp" />
+    <ClCompile Include="Functions\AAUCardData.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterData.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterStruct.cpp" />
+    <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HGUIButton.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HInfo.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HParticipant.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HPosButtonList.cpp" />
+    <ClCompile Include="External\ExternalClasses\IllusionList.cpp" />
+    <ClCompile Include="Files\Config.cpp" />
+    <ClCompile Include="Files\Logger.cpp" />
+    <ClCompile Include="Functions\AAPlay\HAi.cpp" />
+    <ClCompile Include="General\ModuleInfo.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemMods\AAEdit\Dialog.cpp" />
+    <ClCompile Include="MemMods\AAEdit\TanSlotUnlimited.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\HInjections.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\NpcPcConversation.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Misc\TanSlotUnlimit.cpp" />
+    <ClCompile Include="MemMods\Hook.cpp" />
+    <ClCompile Include="MemMods\AAEdit\SaveCard.cpp" />
+    <ClCompile Include="MemMods\AAEdit\MeshTexture.cpp" />
+    <ClCompile Include="Functions\AAEdit\Overrides.cpp" />
+    <ClCompile Include="Functions\TextureImage.cpp" />
+    <ClCompile Include="Functions\AAEdit\UnlimitedDialog.cpp" />
+    <ClCompile Include="External\ExternalVariables\AAEdit\WindowData.cpp" />
+    <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
+    <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
+    <ClCompile Include="General\Util.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\MeshTexture.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="config.h" />
+    <ClInclude Include="External\ExternalVariables.h" />
+    <ClInclude Include="Functions\AAEdit\Globals.h" />
+    <ClInclude Include="Functions\AAPlay\Overrides.h" />
+    <ClInclude Include="General\Buffer.h" />
+    <ClInclude Include="Functions\AAUCardData.h" />
+    <ClInclude Include="External\ExternalClasses.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterData.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterStruct.h" />
+    <ClInclude Include="External\ExternalClasses\ConversationStruct.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HGUIButton.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HInfo.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HParticipant.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HPosButtonList.h" />
+    <ClInclude Include="External\ExternalClasses\IllusionList.h" />
+    <ClInclude Include="Files\Config.h" />
+    <ClInclude Include="Files\Logger.h" />
+    <ClInclude Include="Functions\AAPlay\HAi.h" />
+    <ClInclude Include="General\ModuleInfo.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
+    <ClInclude Include="MemMods\AAEdit\Dialog.h" />
+    <ClInclude Include="MemMods\AAEdit\TanSlotUnlimited.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\HInjections.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\NpcPcConversation.h" />
+    <ClInclude Include="MemMods\AAPlay\Misc\TanSlotUnlimit.h" />
+    <ClInclude Include="MemMods\Hook.h" />
+    <ClInclude Include="MemMods\MemRightsLock.h" />
+    <ClInclude Include="MemMods\AAEdit\SaveCard.h" />
+    <ClInclude Include="MemMods\AAEdit\MeshTexture.h" />
+    <ClInclude Include="Functions\AAEdit\Overrides.h" />
+    <ClInclude Include="Functions\TextureImage.h" />
+    <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
+    <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\MeshTexture.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
+    <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
+    <ClInclude Include="General\Util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Texts\config.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AAUnlimitedDll.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
+    <RootNamespace>AAUnlimited</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>AAUnlimitedDll</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="AAUnlimitedDll.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
