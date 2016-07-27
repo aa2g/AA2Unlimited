@@ -157,6 +157,7 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/NpcPcConversation.h"
 #include "MemMods/AAPlay/Events/MeshTexture.h"
+#include "MemMods/AAPlay/Events/ArchiveFileOpen.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 
@@ -164,6 +165,7 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 #include "MemMods/AAEdit/SaveCard.h"
 #include "MemMods/AAEdit/OpenCard.h"
 #include "MemMods/AAEdit/MeshTexture.h"
+#include "MemMods/AAEdit/ArchiveFileOpen.h"
 #include "MemMods/AAEdit/Dialog.h"
 
 void InitializeHooks() {
@@ -189,7 +191,7 @@ void InitializeHooks() {
 		
 
 		Loads::HiPolyLoadsInjection();
-
+		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
@@ -213,6 +215,7 @@ void InitializeHooks() {
 		SaveCard::AddUnlimitDataInject();
 		OpenCard::ReadUnlimitDataInject();
 
+		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
 			MeshTexture::OverrideTextureListSizeInject();
 			MeshTexture::OverrideTextureListNameInject();

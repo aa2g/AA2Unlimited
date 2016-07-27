@@ -78,6 +78,7 @@ void PreTick(HInfo* hinfo)
 		//initialize
 		Initialize(hinfo);
 	}
+	DisableAllButtons(hinfo);
 	loc_tickCount++;
 
 	/* this ai will follow a really bad choreography for now. */

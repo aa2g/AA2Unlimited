@@ -22,7 +22,7 @@ const char* OpenFileDialog(const char* initialDir) {
 		opfn.nMaxFileTitle = 0;
 		opfn.lpstrInitialDir = NULL;
 		opfn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-		opfn.lpstrFilter = "Bitmap\0*.bmp\0Targa Image Files\0*.tga\0Texture File\0.bmp;.tga\0All\0*\0";
+		opfn.lpstrFilter = "All\0*\0";
 	}
 	opfn.lpstrFile = path;
 	opfn.lpstrFile[0] = '\0';

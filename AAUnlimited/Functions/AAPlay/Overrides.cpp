@@ -4,11 +4,14 @@
 
 #include "Files\Logger.h"
 #include "General\Util.h"
+#include "Functions\AAPlay\Globals.h"
 #include "Functions\TextureImage.h"
 #include "Functions\AAUCardData.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace AAPlay {
+
+
 
 AAUCardData g_currentCard;
 
@@ -19,7 +22,6 @@ AAUCardData g_currentCard;
 void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter) {
 	DWORD size = loadCharacter->m_charData->m_pngBufferSize;
 	BYTE* buffer = (BYTE*)loadCharacter->m_charData->m_pngBuffer;
-	g_currentCard.Reset();
 	if (buffer != NULL) {
 		BYTE* chunkPtr = General::FindPngChunk(buffer, size, AAUCardData::PngChunkIdBigEndian);
 		if (chunkPtr != NULL) {
@@ -29,7 +31,32 @@ void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter) {
 }
 
 void MeshTextureCharLoadEnd() {
+	g_currentCard.Reset();
+}
 
+/*********************************/
+/* General Archive File Override */
+/*********************************/
+
+bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
+	size_t nConverted = 0;
+	char strArchivePath[256];
+	wcstombs_s(&nConverted, strArchivePath, 256, archive, 256);
+	if (nConverted == 0) return false;
+	char* strArchive = General::FindFileInPath(strArchivePath);
+
+	char strFile[256];
+	wcstombs_s(&nConverted, strFile, 256, file, 256);
+	if (nConverted == 0) return false;
+
+	const OverrideFile* match = g_currentCard.GetArchiveOverrideTexture(strArchive, strFile);
+	if (match == NULL) return false;
+
+	void* fileBuffer = AAPlay::IllusionMemAlloc(match->GetFileSize());
+	match->WriteToBuffer((BYTE*)fileBuffer);
+	*outBuffer = (BYTE*)fileBuffer;
+	*readBytes = match->GetFileSize();
+	return true;
 }
 
 /**************************/
@@ -57,7 +84,7 @@ DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset) {
 	file += 4;
 
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
-	loc_match = g_currentCard.GetOverrideTexture((char*)file);
+	loc_match = g_currentCard.GetMeshOverrideTexture((char*)file);
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
 
 	if (loc_match != NULL) {
@@ -113,7 +140,7 @@ void __stdcall MeshTextureStart(BYTE* xxFile, DWORD offset) {
 	file += 4;
 	//"decrypt" the string name in place so we can compare better
 	for (DWORD i = 0; i < nameLength; i++) file[i] = ~file[i];
-	loc_match = g_currentCard.GetOverrideTexture((char*)file);
+	loc_match = g_currentCard.GetMeshOverrideTexture((char*)file);
 
 	//remember to encrypt again
 	for (DWORD i = 0; i < nameLength; i++) file[i] = ~file[i];

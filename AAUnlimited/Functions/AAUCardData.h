@@ -5,6 +5,7 @@
 #include <map>
 
 #include "TextureImage.h"
+#include "OverrideFile.h"
 
 /*
  * Additional card data.
@@ -21,7 +22,6 @@ class AAUCardData
 public:
 	static const DWORD PngChunkId = 'AAUD';
 	static const DWORD PngChunkIdBigEndian = 'DUAA';
-
 public:
 	AAUCardData();
 	~AAUCardData();
@@ -33,24 +33,34 @@ public:
 	int ToBuffer(char** buffer, int* size, bool resize);
 	void Reset();
 
-	bool AddOverride(const char* texture, const char* override);
-	bool RemoveOverride(const char* texture, const char* override);
+	bool AddMeshOverride(const char* texture, const char* override);
+	bool RemoveMeshOverride(const char* texture, const char* override);
+	bool RemoveMeshOverride(int index);
+	bool AddArchiveOverride(const char* archice, const char* archivefile, const char* override);
+	bool RemoveArchiveOverride(const char* archive, const char* archivefile, const char* override);
+	bool RemoveArchiveOverride(int index);
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
-	inline const std::vector<std::pair<std::string, std::string>> GetOverrideList() const {
-		return m_overrides;
+	inline const std::vector<std::pair<std::string, std::string>> GetMeshOverrideList() const { return m_meshOverrides; }
+	inline const TextureImage* GetMeshOverrideTexture(const char* texture) const {
+		auto it = m_meshOverrideMap.find(texture);
+		return it == m_meshOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const TextureImage* GetOverrideTexture(const char* texture) const {
-		auto it = m_overrideMap.find(texture);
-		return it == m_overrideMap.end() ? NULL : &it->second;
+	inline const std::vector<std::pair<std::pair<std::string, std::string>,std::string>> GetArchiveOverrideList() const { return m_archiveOverrides; }
+	inline const OverrideFile* GetArchiveOverrideTexture(const char* archive, const char* texture) const {
+		auto it = m_archiveOverrideMap.find(std::pair<std::string, std::string>(archive, texture));
+		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
 	}
+
 
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
-	std::vector<std::pair<std::string, std::string>> m_overrides;	//replaces textures by other textures
-	std::multimap<std::string, TextureImage> m_overrideMap;	//map-representation of vector above for actual use
-
+	std::vector<std::pair<std::string, std::string>> m_meshOverrides;	//replaces textures by other textures
+	std::multimap<std::string, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
+	
+	std::vector<std::pair<std::pair<std::string,std::string>,std::string>> m_archiveOverrides; //<archive,file>->file
+	std::multimap<std::pair<std::string, std::string>, OverrideFile> m_archiveOverrideMap;
 private:
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
@@ -61,7 +71,7 @@ private:
 		template<typename T>
 		T ReadData_sub(char*& buffer,int& size, T*);
 		template<typename T>
-		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T*>*);
+		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T>*);
 		template<typename T, typename U>
 		std::pair<T,U> ReadData_sub(char*& buffer,int& size,std::pair<T,U>*);
 		std::string ReadData_sub(char*& buffer,int& size,std::string*);

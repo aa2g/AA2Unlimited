@@ -50,6 +50,10 @@
     <ClCompile Include="MemMods\AAPlay\Events\MeshTexture.cpp" />
     <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
+    <ClCompile Include="Functions\OverrideFile.cpp" />
+    <ClCompile Include="MemMods\AAEdit\ArchiveFileOpen.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ArchiveFileOpen.cpp" />
+    <ClCompile Include="Functions\AAPlay\Globals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -90,6 +94,10 @@
     <ClInclude Include="MemMods\AAPlay\Events\MeshTexture.h" />
     <ClInclude Include="Functions\AAPlay\Overrides.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
+    <ClInclude Include="Functions\OverrideFile.h" />
+    <ClInclude Include="MemMods\AAEdit\ArchiveFileOpen.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ArchiveFileOpen.h" />
+    <ClInclude Include="Functions\AAPlay\Globals.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

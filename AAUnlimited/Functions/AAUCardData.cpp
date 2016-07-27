@@ -1,6 +1,7 @@
 #include "AAUCardData.h"
 
 #include <limits>
+#include <algorithm>
 #include <intrin.h>
 
 #include "General\Buffer.h"
@@ -62,7 +63,7 @@ std::string AAUCardData::ReadData_sub(char*& buffer,int& size,std::string*) {
 
 //read for vectors
 template<typename T>
-std::vector<T> AAUCardData::ReadData_sub(char*&buffer,int& size,std::vector<T*>*) {
+std::vector<T> AAUCardData::ReadData_sub(char*&buffer,int& size,std::vector<T>*) {
 	DWORD length = ReadData<DWORD>(buffer,size);
 	std::vector<T> retVal;
 	retVal.reserve(length);
@@ -143,24 +144,28 @@ void AAUCardData::FromBuffer(char* buffer) {
 		DWORD identifier = *(DWORD*)(buffer);
 		m_currReadMemberId = identifier;
 		buffer += 4,size -= 4;
-		switch(identifier) {
+		switch (identifier) {
 		case 'TanS':
-			m_tanSlot = ReadData<BYTE>(buffer,size);
+			m_tanSlot = ReadData<BYTE>(buffer, size);
 			break;
-		case 'OvrT':
-			int nOverrides = ReadData<int>(buffer,size);
-			for (int i = 0; i < nOverrides; i++) {
-				std::string overridden = ReadData<std::string>(buffer,size);
-				std::string override = ReadData<std::string>(buffer,size);
-				//always add the file data to the vector, so we dont lose the information
-				//if we dont have the texture
-				m_overrides.emplace_back(overridden,override);
-				TextureImage img(override.c_str());
+		case 'OvrT': {
+			m_meshOverrides = ReadData<decltype(m_meshOverrides)>(buffer, size);
+			for (const auto& it : m_meshOverrides) {
+				TextureImage img(it.second.c_str());
 				if (img.IsGood()) {
-					m_overrideMap.emplace(std::move(overridden), std::move(img));
+					m_meshOverrideMap.emplace(it.first, std::move(img));
 				}
 			}
-			break;
+			break; }
+		case 'AOvT': {
+			m_archiveOverrides = ReadData<decltype(m_archiveOverrides)>(buffer, size);
+			for (const auto& it : m_archiveOverrides) {
+				OverrideFile img(it.second.c_str());
+				if (img.IsGood()) {
+					m_archiveOverrideMap.emplace(it.first, std::move(img));
+				}
+			}
+			break; }
 		}
 	}
 	if (size != 0) {
@@ -208,7 +213,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	//tan-slot
 	DUMP_MEMBER('TanS',m_tanSlot);
 	//overrides
-	DUMP_MEMBER_CONTAINER('OvrT',m_overrides);
+	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
+	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	int dataSize = at - 8;
@@ -227,34 +233,98 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	
 }
 
-bool AAUCardData::AddOverride(const char* texture, const char* override) {
+bool AAUCardData::AddMeshOverride(const char* texture, const char* override) {
 	TextureImage img(override);
 	if (img.IsGood()) {
 		std::string texStr(texture);
-		m_overrides.emplace_back(texStr, std::string(override));
-		m_overrideMap.emplace(std::move(texStr), std::move(img));
+		m_meshOverrides.emplace_back(texStr, std::string(override));
+		m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
 	}
 	return false;
 }
 
-bool AAUCardData::RemoveOverride(const char* texture, const char* override) {
+bool AAUCardData::RemoveMeshOverride(const char* texture, const char* override) {
 	bool found = false;
-	for (auto it = m_overrides.begin(); it != m_overrides.end(); it++) {
+	for (auto it = m_meshOverrides.begin(); it != m_meshOverrides.end(); it++) {
 		if (it->first == texture && it->second == override) {
-			m_overrides.erase(it);
+			m_meshOverrides.erase(it);
 			found = true;
 			break;
 		}
 	}
-	auto mapMatch = m_overrideMap.equal_range(texture);
+	auto mapMatch = m_meshOverrideMap.equal_range(texture);
 	if (mapMatch.first != mapMatch.second) {
 		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
 			if (it->second.GetFileName() == override) {
-				m_overrideMap.erase(it);
+				m_meshOverrideMap.erase(it);
 				break;
 			}
 		}
 	}
 	return found;
+}
+
+bool AAUCardData::RemoveMeshOverride(int index) {
+	if (m_meshOverrides.size() <= index) return false;
+	auto vMatch = m_meshOverrides.begin() + index;
+	auto mapMatch = m_meshOverrideMap.equal_range(vMatch->first);
+	if (mapMatch.first != mapMatch.second) {
+		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
+			if (it->second.GetFileName() == vMatch->second) {
+				m_meshOverrideMap.erase(it);
+				break;
+			}
+		}
+	}
+	m_meshOverrides.erase(vMatch);
+	return true;
+}
+
+bool AAUCardData::AddArchiveOverride(const char* archive, const char* archivefile, const char* override) {
+	OverrideFile img(override);
+	if (img.IsGood()) {
+		auto toOverride = std::pair<std::string, std::string>(archive, archivefile);
+		m_archiveOverrides.emplace_back(toOverride, override);
+		m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
+		return true;
+	}
+	return false;
+}
+
+bool AAUCardData::RemoveArchiveOverride(const char* archive, const char* archivefile, const char* override) {
+	bool found = false;
+	auto leftPair = std::pair<std::string, std::string>(archive, archivefile);
+	auto toFind = std::pair<std::pair<std::string, std::string>, std::string>(leftPair, override);
+	auto match = std::find(m_archiveOverrides.begin(), m_archiveOverrides.end(), toFind);
+	if (match != m_archiveOverrides.end()) {
+		m_archiveOverrides.erase(match);
+		found = true;
+	}
+	auto mapMatch = m_archiveOverrideMap.equal_range(leftPair);
+	if (mapMatch.first != mapMatch.second) {
+		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
+			if (it->second.GetFileName() == override) {
+				m_archiveOverrideMap.erase(it);
+				break;
+			}
+		}
+	}
+	return found;
+}
+
+bool AAUCardData::RemoveArchiveOverride(int index) {
+	if (m_archiveOverrides.size() <= index) return false;
+	auto vMatch = m_archiveOverrides.begin() + index;
+	auto mapMatch = m_archiveOverrideMap.equal_range(vMatch->first);
+	if (mapMatch.first != mapMatch.second) {
+		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
+			if (it->second.GetFileName() == vMatch->second) {
+				m_archiveOverrideMap.erase(it);
+				break;
+			}
+		}
+	}
+	m_archiveOverrides.erase(vMatch);
+	return true;
 }

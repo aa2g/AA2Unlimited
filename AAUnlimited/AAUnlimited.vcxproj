@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
+    <ClCompile Include="Functions\AAPlay\Globals.cpp" />
     <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
     <ClCompile Include="Functions\AAUCardData.cpp" />
@@ -35,6 +36,8 @@
     <ClCompile Include="Files\Logger.cpp" />
     <ClCompile Include="Functions\AAPlay\HAi.cpp" />
     <ClCompile Include="General\ModuleInfo.cpp" />
+    <ClCompile Include="MemMods\AAEdit\ArchiveFileOpen.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemMods\AAEdit\Dialog.cpp" />
@@ -53,11 +56,13 @@
     <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
     <ClCompile Include="General\Util.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\MeshTexture.cpp" />
+    <ClCompile Include="Functions\OverrideFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="Functions\AAEdit\Globals.h" />
+    <ClInclude Include="Functions\AAPlay\Globals.h" />
     <ClInclude Include="Functions\AAPlay\Overrides.h" />
     <ClInclude Include="General\Buffer.h" />
     <ClInclude Include="Functions\AAUCardData.h" />
@@ -74,6 +79,8 @@
     <ClInclude Include="Files\Logger.h" />
     <ClInclude Include="Functions\AAPlay\HAi.h" />
     <ClInclude Include="General\ModuleInfo.h" />
+    <ClInclude Include="MemMods\AAEdit\ArchiveFileOpen.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ArchiveFileOpen.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
     <ClInclude Include="MemMods\AAEdit\Dialog.h" />
     <ClInclude Include="MemMods\AAEdit\TanSlotUnlimited.h" />
@@ -89,6 +96,7 @@
     <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="MemMods\AAPlay\Events\MeshTexture.h" />
+    <ClInclude Include="Functions\OverrideFile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />

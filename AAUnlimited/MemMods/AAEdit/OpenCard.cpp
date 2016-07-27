@@ -27,7 +27,7 @@ void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
 	if (chunk != NULL) {
 		AAEdit::g_cardData.FromBuffer((char*)chunk);
 	}
-	AAEdit::g_AAUnlimitDialog.RefreshRuleList();
+	AAEdit::g_AAUnlimitDialog.Refresh();
 }
 
 DWORD ReadUnlimitDataOriginal;

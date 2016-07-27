@@ -20,7 +20,7 @@ public:
 	~ConversationStruct() = delete;
 
 	inline ConversationSubStruct* getSubStruct() {
-		return ((ConversationSubStruct**)m_virtualTable)[1];
+		return (ConversationSubStruct*)((BYTE*)(this) + ((DWORD*)m_virtualTable)[1]); //cast-madness
 	}
 };
 

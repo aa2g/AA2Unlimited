@@ -7,11 +7,31 @@ namespace General {
 	
 
 inline bool StartsWith(const char* str, const char* prefix) {
-	while (str && prefix && str == prefix) str++, prefix++;
-	return str && prefix;
+	while (*str && *prefix && *str == *prefix) str++, prefix++;
+	return !*prefix;
 }
 inline bool StartsWith(const std::string& str, const char* prefix) {
 	return strncmp(str.c_str(), prefix, str.size()) == 0;
+}
+
+inline char* FindFileInPath(char* path) {
+	char* lastSlash = path;
+	while (*path) {
+		char c = *path;
+		if (c == '\\' || c == '/') lastSlash = path+1;
+		path++;
+	}
+	return lastSlash;
+}
+
+inline const char* FindFileInPath(const char* path) {
+	const char* lastSlash = path;
+	while (*path) {
+		char c = *path;
+		if (c == '\\' || c == '/') lastSlash = path+1;
+		path++;
+	}
+	return lastSlash;
 }
 
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.

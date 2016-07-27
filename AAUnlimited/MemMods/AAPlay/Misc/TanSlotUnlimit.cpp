@@ -230,10 +230,10 @@ void InsertLoopEnd() {
 /***************************/
 void __declspec(naked) LoadLowPolyRedirect() {
 	_asm {
-		//its [esp+70] now
-		cmp byte ptr [esp+70], 5
+		//its [esp+74] now
+		cmp byte ptr [esp+0x74], 5
 		jbe LoadLowPolyRedirect_End
-		mov byte ptr [esp+70], 0 //default to tan 0
+		mov byte ptr [esp+0x74], 0 //default to tan 0
 	LoadLowPolyRedirect_End:
 		mov edi, 3
 		ret
