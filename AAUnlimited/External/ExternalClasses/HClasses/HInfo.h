@@ -29,23 +29,23 @@ public:
 	BYTE m_unknown4[0x31];
 	BYTE m_bEnd;
 	WORD m_unknown5;
-	HParticipant* m_player;
-	HParticipant* m_npc;
+	HParticipant* m_activeParticipant;
+	HParticipant* m_passiveParticipant;
 	BYTE m_unknown6[0x50C];
 	DWORD m_currPosition;
 	BYTE m_unknown7[0x18];
 	HGUIButton* m_exitButton;			//button to exit the scene
 	HGUIButton* m_swapButton;			//the two circle arrows that swap positions between the two participants
 	HGUIButton* m_expandClothesButton;	//hides or unhides the cloth select buttons
-	HGUIButton* m_category1;	//category buttons that hide the h-actions until clicked on
-	HGUIButton* m_category2;
-	HGUIButton* m_category3;
-	HGUIButton* m_category4;
-	HGUIButton* m_category5;
-	HGUIButton* m_category6;
-	HGUIButton* m_category7;
-	HGUIButton* m_category8;
-	HGUIButton* m_category9;
+	HGUIButton* m_category1;	//category buttons that hide the h-actions until clicked on. 1: Hand
+	HGUIButton* m_category2;	//2: tounge
+	HGUIButton* m_category3;	//3: m|f
+	HGUIButton* m_category4;	//4: m in f
+	HGUIButton* m_category5;	//5: flower
+	HGUIButton* m_category6;	//6: finish hand
+	HGUIButton* m_category7;	//7: finish m|f/tounge
+	HGUIButton* m_category8;	//8: finish m in f
+	HGUIButton* m_category9;	//9: finish flower
 	BYTE m_unknown8[0x4];
 	HPosButtonList m_hPosButtons[9];
 	BYTE m_unknown9[0x8C];

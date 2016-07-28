@@ -48,7 +48,7 @@ public:
 		return it == m_meshOverrideMap.end() ? NULL : &it->second;
 	}
 	inline const std::vector<std::pair<std::pair<std::string, std::string>,std::string>> GetArchiveOverrideList() const { return m_archiveOverrides; }
-	inline const OverrideFile* GetArchiveOverrideTexture(const char* archive, const char* texture) const {
+	inline const OverrideFile* GetArchiveOverrideFile(const char* archive, const char* texture) const {
 		auto it = m_archiveOverrideMap.find(std::pair<std::string, std::string>(archive, texture));
 		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
 	}

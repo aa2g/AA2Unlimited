@@ -10,6 +10,8 @@ namespace ExtClass {
  * of both the game and the maker.
  * Its a strictly recursive list implimentation, whose last elements next
  * is not NULLED, but instead points back to its beginning.
+ * similarily, the prev of the first element is the last element.
+ * In a way, its not really a list, but rather a circle.
  */
 class IllusionList
 {

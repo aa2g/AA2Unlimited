@@ -49,7 +49,7 @@ bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYT
 	wcstombs_s(&nConverted, strFile, 256, file, 256);
 	if (nConverted == 0) return false;
 
-	const OverrideFile* match = g_currentCard.GetArchiveOverrideTexture(strArchive, strFile);
+	const OverrideFile* match = g_currentCard.GetArchiveOverrideFile(strArchive, strFile);
 	if (match == NULL) return false;
 
 	void* fileBuffer = AAPlay::IllusionMemAlloc(match->GetFileSize());

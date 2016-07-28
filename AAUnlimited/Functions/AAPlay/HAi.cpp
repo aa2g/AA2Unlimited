@@ -59,6 +59,13 @@ void DisableAllButtons(HInfo* info) {
 	info->m_skirtButton->m_bActive = FALSE;
 
 	info->m_exitButton->m_bActive = FALSE; //NO ESCAPE
+
+	//note that the outside finish button is dynamically created and added to the end of this
+	//list only when an appropriate position is taken.
+	//there is nothing we want to enable though, so its never wrong to just disable
+	//whatever the last button is if the button does not currently exist
+	HGUIButton* outside = (HGUIButton*)info->m_ptrAllButtons->buttonList->prev->data;
+	if (outside != NULL) outside->m_bActive = FALSE;
 }
 
 void Initialize(HInfo* info) {
