@@ -1,6 +1,6 @@
 #pragma once
 
-namespace PlayInjections {
+namespace SharedInjections {
 namespace MeshTexture {
 
 

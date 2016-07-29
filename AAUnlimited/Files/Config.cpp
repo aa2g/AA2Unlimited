@@ -6,6 +6,7 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bUseAdditionalTanSlots", false),	//USE_TAN_SLOTS
 	MemberInfo(Config::BOOL,	"bUseMeshTextureOverrides", false),	//USE_MESH_TEXTURE_OVERRIDES
 	MemberInfo(Config::BOOL,	"bUseHAi", false),	//USE_H_AI
+	MemberInfo(Config::BOOL,	"bUseShadowing", false),	//USE_SHADOWING
 };
 
 Config g_Config;
@@ -46,9 +47,10 @@ Config::Config(const char* path) : Config()
 		CloseHandle(hFile);
 		return;
 	}
-	char* buffer = new char[size];
+	char* buffer = new char[size+1];
 	ReadFile(hFile,buffer,size,&hi,NULL);
 	CloseHandle(hFile);
+	buffer[size] = '\0';
 
 	//read line by line for value changes
 	char* it = NULL,*nextLine = buffer;

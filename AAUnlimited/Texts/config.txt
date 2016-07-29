@@ -6,8 +6,12 @@
 
 bUseAdditionalTanSlots = false		; load more than 6 tan slots. currently crashes.
 
-bUseMeshTextureOverrides = false	; apply mesh texture override rules. When a xx (mesh) file is loaded, the 
+bUseMeshTextureOverrides = true		; apply mesh texture override rules. When a xx (mesh) file is loaded, the 
 									; textures and texture list will be compared to a set of override rules,
 									; and if a rule applies, the texture will be replaced.
 
-bUseHAi = false						; enables H-AI
+bUseHAi = true						; enables H-AI
+
+bUseShadowing = true				; when shadowing is enabled, every time a file is opened from a pp archive, the game
+									; checks for a folder of the same name (excluding the pp at the end) containing
+									; the same file first. If it exists, this file is taken instead.

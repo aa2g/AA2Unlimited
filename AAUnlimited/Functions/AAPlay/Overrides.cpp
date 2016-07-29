@@ -4,9 +4,9 @@
 
 #include "Files\Logger.h"
 #include "General\Util.h"
-#include "Functions\AAPlay\Globals.h"
 #include "Functions\TextureImage.h"
 #include "Functions\AAUCardData.h"
+#include "Functions\Shared\Globals.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace AAPlay {
@@ -52,7 +52,7 @@ bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYT
 	const OverrideFile* match = g_currentCard.GetArchiveOverrideFile(strArchive, strFile);
 	if (match == NULL) return false;
 
-	void* fileBuffer = AAPlay::IllusionMemAlloc(match->GetFileSize());
+	void* fileBuffer = Shared::IllusionMemAlloc(match->GetFileSize());
 	match->WriteToBuffer((BYTE*)fileBuffer);
 	*outBuffer = (BYTE*)fileBuffer;
 	*readBytes = match->GetFileSize();

@@ -1,9 +1,8 @@
 #pragma once
 
-
 #include <Windows.h>
 
-namespace EditInjections {
+namespace SharedInjections {
 namespace ArchiveFile {
 
 

@@ -8,7 +8,7 @@ class Config
 {
 public:
 	enum Members {
-		USE_TAN_SLOTS, USE_MESH_TEXTURE_OVERRIDES, USE_H_AI,
+		USE_TAN_SLOTS, USE_MESH_TEXTURE_OVERRIDES, USE_H_AI, USE_SHADOWING,
 
 		num_elements
 	};

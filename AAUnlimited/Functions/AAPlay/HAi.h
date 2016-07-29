@@ -23,7 +23,9 @@ void PostTick(ExtClass::HInfo* hinfo, bool end);
  * Called periodically in an npc->pc conversation. used to determined
  * if pc is getting forced.
  */
-void ConversationTick(ExtClass::ConversationStruct* param);
+void ConversationTickPre(ExtClass::ConversationStruct* param);
+void ConversationTickPost(ExtClass::ConversationStruct* param);
+void ConversationPcResponse(ExtClass::ConversationStruct* param);
 
 
 

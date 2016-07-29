@@ -5,7 +5,8 @@ namespace NpcPcConversation {
 
 
 void TickInjection();
-		
+void NpcAnswerInjection();
+void PcAnswerInjection();
 
 }
 }

@@ -22,12 +22,6 @@ namespace HookControl {
 	}
 };
 
-/*
- * Calculates the difference between currLoc and the targetLoc in such a way
- * that a call whose offset starts at currLoc, if given the return value of this
- * function as an offset, will jump to the target location.
- * Version for DWORD offsets
- */
 DWORD DWAbsoluteToRelative(BYTE* currLoc, DWORD targetLoc) {
 	return targetLoc - (DWORD)(currLoc + 4);
 }
@@ -44,17 +38,12 @@ DWORD DWRelativeToAbsolute(BYTE* currLoc, DWORD offset) {
 	return (DWORD)(currLoc + 4) + offset;
 }
 
-WORD WRelativeToAbsolute(BYTE* currLoc,WORD offset) {
+DWORD WRelativeToAbsolute(BYTE* currLoc,WORD offset) {
 	//zero-extend the word so negative numbers actually substract
 	DWORD dOffset = offset; if (offset & 0x80) offset |= 0xFFFF0000;
-	return (DWORD)(currLoc + 4) + dOffset;
+	return (DWORD)(currLoc + 2) + dOffset;
 }
 
-/*
- * Replaces the bytes at the target location by the values in newData, temporarily changing access rights in the process.
- * newData may contain HookControl codes to do other things than just replace bytes.
- * If not null, hookedValue will be filled with the original value that was replaced by the last HookControl.
- */
 bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer_list<DWORD> newData, DWORD* hookedValue) {
 	using namespace HookControl;
 
@@ -149,37 +138,65 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 		return false;
 	}
 }
+
+void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
+	BYTE* funcIt = (BYTE*)redirectFunction;
+	BYTE firstOp = *funcIt;
+	if (firstOp == 0xE9) {
+		//relative jump. probably 32 bit
+		funcIt++;
+		DWORD offset = *(DWORD*)(funcIt);
+		DWORD target = DWRelativeToAbsolute(funcIt, offset);
+		funcIt = (BYTE*)target;
+	}
+	else if (firstOp == 0xFF) {
+		//absolute memory jump
+		//TODO: Implement
+		LOGPRIO(Logger::Priority::CRIT_ERR) << "Absoulte memory jumps are not implemented yet\r\n";
+	}
+	if (offset == -1) {
+		//search nops
+		static const BYTE nop5[] = { 0x90,0x90,0x90,0x90,0x90 };
+		while (memcmp(funcIt, nop5, 5) != 0) {
+			funcIt++;
+		}
+	}
+	else {
+		funcIt += offset;
+	}
+	Memrights rights(funcIt, 5);
+	*funcIt = 0xE8;
+	funcIt++;
+	*(DWORD*)(funcIt) = DWAbsoluteToRelative(funcIt, (DWORD)toCall);
+}
+
 #include "General/ModuleInfo.h"
 
 #include "External/ExternalClasses.h"
 #include "External/ExternalVariables.h"
+#include "Functions/Shared/Globals.h"
+
+#include "MemMods/Shared/Events/MeshTexture.h"
+#include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/NpcPcConversation.h"
-#include "MemMods/AAPlay/Events/MeshTexture.h"
-#include "MemMods/AAPlay/Events/ArchiveFileOpen.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAEdit/SaveCard.h"
 #include "MemMods/AAEdit/OpenCard.h"
-#include "MemMods/AAEdit/MeshTexture.h"
-#include "MemMods/AAEdit/ArchiveFileOpen.h"
 #include "MemMods/AAEdit/Dialog.h"
 
 void InitializeHooks() {
 	ExtVars::InitializeExtVars();
+	Shared::Init();
 
-	if (General::IsAAPlay) {
-		using namespace ExtClass;
-		HGUIButton::InitializeHooks();
-
-		using namespace PlayInjections;
-		HPlayInjections::TickInjection();
-
-		NpcPcConversation::TickInjection();
-
+	//shared
+	{
+		using namespace SharedInjections;
+		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
 			MeshTexture::OverrideTextureListSizeInject();
 			MeshTexture::OverrideTextureListNameInject();
@@ -188,10 +205,20 @@ void InitializeHooks() {
 			MeshTexture::OverrideFileSizeInject();
 			MeshTexture::OverrideFileInject();
 		}
-		
+	}
+
+	if (General::IsAAPlay) {
+		using namespace ExtClass;
+		HGUIButton::InitializeHooks();
+
+		using namespace PlayInjections;
+		HPlayInjections::TickInjection();
+
+		NpcPcConversation::TickInjection();	
+		NpcPcConversation::NpcAnswerInjection();
+		NpcPcConversation::PcAnswerInjection();
 
 		Loads::HiPolyLoadsInjection();
-		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
@@ -215,15 +242,7 @@ void InitializeHooks() {
 		SaveCard::AddUnlimitDataInject();
 		OpenCard::ReadUnlimitDataInject();
 
-		ArchiveFile::OpenFileInject();
-		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
-			MeshTexture::OverrideTextureListSizeInject();
-			MeshTexture::OverrideTextureListNameInject();
-			MeshTexture::OverrideStartInject();
-			MeshTexture::OverrideNameInject();
-			MeshTexture::OverrideFileSizeInject();
-			MeshTexture::OverrideFileInject();
-		}
+		
 
 		Dialog::DialogProcInject();
 	}

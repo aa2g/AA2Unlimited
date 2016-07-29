@@ -6,6 +6,7 @@
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
 #include "Functions\TextureImage.h"
+#include "Functions\Shared\Globals.h"
 
 namespace AAEdit {
 
@@ -15,6 +16,7 @@ namespace AAEdit {
 /*********************************/
 
 bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
+	
 	size_t nConverted = 0;
 	char strArchivePath[256];
 	wcstombs_s(&nConverted, strArchivePath, 256, archive, 256);
@@ -28,7 +30,7 @@ bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYT
 	const OverrideFile* match = g_cardData.GetArchiveOverrideFile(strArchive, strFile);
 	if (match == NULL) return false;
 
-	void* fileBuffer = IllusionMemAlloc(match->GetFileSize());
+	void* fileBuffer = Shared::IllusionMemAlloc(match->GetFileSize());
 	match->WriteToBuffer((BYTE*)fileBuffer);
 	*outBuffer = (BYTE*)fileBuffer;
 	*readBytes = match->GetFileSize();

@@ -1,8 +1,10 @@
 #pragma once
 
-namespace AAPlay {
+namespace Shared {
 
 
 void* __stdcall IllusionMemAlloc(size_t size);
+
+void Init();
 
 }

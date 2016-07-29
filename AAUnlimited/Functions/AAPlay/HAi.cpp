@@ -158,17 +158,42 @@ void PostTick(HInfo* hinfo, bool end)
 
 }
 
-void ConversationTick(ConversationStruct* param)
+namespace {
+	bool loc_isTalkedTo = false;
+}
+
+void ConversationTickPre(ConversationStruct* param)
 {
 	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+
 	ConversationSubStruct* convData = param->getSubStruct();
-	if(convData->m_conversationId == ConversationId::FORCE
-		&& convData->m_response == 1) 
-	{
-		loc_isForcedH = true;
+
+}
+
+void ConversationTickPost(ExtClass::ConversationStruct* param) {
+	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+
+	ConversationSubStruct* convData = param->getSubStruct();
+	if (convData->m_conversationId == ConversationId::FORCE_H) {	//npc wants to force
+		loc_isTalkedTo = true;
+		if (convData->m_npcTalkState == 1) {					//we just answered
+			if (convData->m_response == 1) {					//and our answer was positive
+				loc_isForcedH = true;
+				return;
+			}
+		}
 	}
 	else {
-		loc_isForcedH = false;
+		loc_isTalkedTo = false;
+	}
+}
+
+void ConversationPcResponse(ExtClass::ConversationStruct* param) {
+	if (loc_isTalkedTo) {
+		ConversationSubStruct* convData = param->getSubStruct();
+		convData->m_playerAnswer = 0; //positive player answer
+		convData->m_response = 1;
+		loc_isForcedH = true;
 	}
 }
 

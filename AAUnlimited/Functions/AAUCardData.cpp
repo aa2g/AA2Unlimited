@@ -132,6 +132,7 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::pair
 
 void AAUCardData::FromBuffer(char* buffer) {
 	Reset();
+	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
 	//first, read chunk size (big endian)
 	int size = _byteswap_ulong(*(DWORD*)(buffer)); buffer += 4;
 	//then, read png chunk (also big endian)
@@ -147,6 +148,7 @@ void AAUCardData::FromBuffer(char* buffer) {
 		switch (identifier) {
 		case 'TanS':
 			m_tanSlot = ReadData<BYTE>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found TanS, value " << m_tanSlot << "\r\n";
 			break;
 		case 'OvrT': {
 			m_meshOverrides = ReadData<decltype(m_meshOverrides)>(buffer, size);
@@ -156,6 +158,8 @@ void AAUCardData::FromBuffer(char* buffer) {
 					m_meshOverrideMap.emplace(it.first, std::move(img));
 				}
 			}
+			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_meshOverrides.size() << " elements; "
+				" only " << m_meshOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'AOvT': {
 			m_archiveOverrides = ReadData<decltype(m_archiveOverrides)>(buffer, size);
@@ -165,6 +169,8 @@ void AAUCardData::FromBuffer(char* buffer) {
 					m_archiveOverrideMap.emplace(it.first, std::move(img));
 				}
 			}
+			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_archiveOverrides.size() << " elements; "
+				" only " << m_archiveOverrideMap.size() << " were valid\r\n";
 			break; }
 		}
 	}
@@ -184,22 +190,26 @@ void AAUCardData::FromBuffer(char* buffer) {
  * DWORD checksum
  */
 int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
-	
+	LOGPRIO(Logger::Priority::SPAM) << "dumping card info...\r\n";
 	int at = 0;
 	bool ret = true;
 	//a define to make this function look simpler.
 	//dumps the given id, followed by the value, but only if its actually different from the default value
-	#define DUMP_MEMBER(id,x) \
+#define DUMP_MEMBER(id,x) \
 		if(x != g_defaultValues.x) { \
 			DWORD varId = id; \
 			ret &= WriteData(buffer,size,at,varId,resize); \
 			ret &= WriteData(buffer,size,at,x,resize);\
+		} else { \
+			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
 		}
 	#define DUMP_MEMBER_CONTAINER(id,x) \
 		if(!x.empty()) { \
 			DWORD varId = id; \
 			ret &= WriteData(buffer,size,at,varId,resize); \
 			ret &= WriteData(buffer,size,at,x,resize);\
+		} else { \
+			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
 		}
 
 	//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder

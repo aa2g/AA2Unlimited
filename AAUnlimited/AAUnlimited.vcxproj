@@ -19,8 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
-    <ClCompile Include="Functions\AAPlay\Globals.cpp" />
+    <ClCompile Include="Functions\Shared\Globals.cpp" />
     <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
     <ClCompile Include="Functions\AAUCardData.cpp" />
@@ -36,8 +37,6 @@
     <ClCompile Include="Files\Logger.cpp" />
     <ClCompile Include="Functions\AAPlay\HAi.cpp" />
     <ClCompile Include="General\ModuleInfo.cpp" />
-    <ClCompile Include="MemMods\AAEdit\ArchiveFileOpen.cpp" />
-    <ClCompile Include="MemMods\AAPlay\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemMods\AAEdit\Dialog.cpp" />
@@ -47,7 +46,6 @@
     <ClCompile Include="MemMods\AAPlay\Misc\TanSlotUnlimit.cpp" />
     <ClCompile Include="MemMods\Hook.cpp" />
     <ClCompile Include="MemMods\AAEdit\SaveCard.cpp" />
-    <ClCompile Include="MemMods\AAEdit\MeshTexture.cpp" />
     <ClCompile Include="Functions\AAEdit\Overrides.cpp" />
     <ClCompile Include="Functions\TextureImage.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialog.cpp" />
@@ -55,14 +53,16 @@
     <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
     <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
     <ClCompile Include="General\Util.cpp" />
-    <ClCompile Include="MemMods\AAPlay\Events\MeshTexture.cpp" />
     <ClCompile Include="Functions\OverrideFile.cpp" />
+    <ClCompile Include="Functions\Shared\Shadowing.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="Functions\AAEdit\Globals.h" />
-    <ClInclude Include="Functions\AAPlay\Globals.h" />
+    <ClInclude Include="Functions\Shared\Globals.h" />
     <ClInclude Include="Functions\AAPlay\Overrides.h" />
     <ClInclude Include="General\Buffer.h" />
     <ClInclude Include="Functions\AAUCardData.h" />
@@ -79,8 +79,6 @@
     <ClInclude Include="Files\Logger.h" />
     <ClInclude Include="Functions\AAPlay\HAi.h" />
     <ClInclude Include="General\ModuleInfo.h" />
-    <ClInclude Include="MemMods\AAEdit\ArchiveFileOpen.h" />
-    <ClInclude Include="MemMods\AAPlay\Events\ArchiveFileOpen.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
     <ClInclude Include="MemMods\AAEdit\Dialog.h" />
     <ClInclude Include="MemMods\AAEdit\TanSlotUnlimited.h" />
@@ -90,17 +88,17 @@
     <ClInclude Include="MemMods\Hook.h" />
     <ClInclude Include="MemMods\MemRightsLock.h" />
     <ClInclude Include="MemMods\AAEdit\SaveCard.h" />
-    <ClInclude Include="MemMods\AAEdit\MeshTexture.h" />
     <ClInclude Include="Functions\AAEdit\Overrides.h" />
     <ClInclude Include="Functions\TextureImage.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
-    <ClInclude Include="MemMods\AAPlay\Events\MeshTexture.h" />
     <ClInclude Include="Functions\OverrideFile.h" />
+    <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="General\Util.h" />
+    <ClInclude Include="Functions\Shared\Shadowing.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

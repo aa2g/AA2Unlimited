@@ -93,7 +93,7 @@ bool Initialize() {
 			MessageBox(NULL,TEXT("Could not find AAPlay INSTALLDIR key in registry") , TEXT("Critical Error"), 0);
 			return false;
 		}
-		if (buffer[outSize - 1] != '\0') { buffer[outSize - 1] = '\0'; outSize++; }
+		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
 		AAPlayPath = std::string((char*)buffer);
 		if (buffer[outSize - 2] != '\\') AAPlayPath.push_back('\\');
 
@@ -111,7 +111,7 @@ bool Initialize() {
 			MessageBox(NULL, TEXT("Could not find AAEdit INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
 			return false;
 		}
-		if (buffer[outSize - 1] != '\0') { buffer[outSize - 1] = '\0'; outSize++; }
+		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
 		AAEditPath = std::string((char*)buffer);
 		if (buffer[outSize - 2] != '\\') AAEditPath.push_back('\\');
 
