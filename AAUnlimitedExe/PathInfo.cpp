@@ -75,6 +75,7 @@ std::vector<std::string> GetPossiblePlayExeList() {
 		list.push_back(data.cFileName);
 		suc = FindNextFile(hSearch, &data);
 	} while (suc != FALSE);
+	FindClose(hSearch);
 	return list;
 }
 
@@ -95,5 +96,6 @@ std::vector<std::string> GetPossibleEditExeList() {
 		list.push_back(data.cFileName);
 		suc = FindNextFile(hSearch, &data);
 	} while (suc != FALSE);
+	FindClose(hSearch);
 	return list;
 }
