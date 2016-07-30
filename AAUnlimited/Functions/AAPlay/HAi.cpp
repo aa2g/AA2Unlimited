@@ -114,9 +114,9 @@ void PreTick(HInfo* hinfo)
 		break;
 	case 3: {
 		double percent = loc_timers[1].GetTime() / loc_speedChangeDuration;
-		hinfo->m_speed = loc_speedStart + percent * (loc_speedTarget - loc_speedStart);
+		hinfo->m_speed = (float)(loc_speedStart + percent * (loc_speedTarget - loc_speedStart));
 		if (percent >= 1) {
-			hinfo->m_speed = loc_speedTarget;
+			hinfo->m_speed = (float)loc_speedTarget;
 			if (loc_continueChance >= (rand() / (double)RAND_MAX)) {
 				loc_continueChance *= loc_continueChanceDecay;
 				loc_timers[1].Start();

@@ -6,6 +6,7 @@
 
 #include "Error.h"
 #include "PathInfo.h"
+#include "PickExe.h"
 
 #pragma comment( lib, "psapi.lib" )
 
@@ -15,6 +16,7 @@ DWORD FindProcess() {
 
 	std::vector<std::string> playExeList = GetPossiblePlayExeList();
 	std::vector<std::string> editExeList = GetPossibleEditExeList();
+	std::vector<std::pair<std::string, DWORD>>  matches;
 	if (playExeList.size() == 0) {
 		MessageBox(NULL, "No exe files where found in the AAPlay folder", "Error", MB_ICONERROR);
 		return (DWORD)-1;
@@ -40,23 +42,19 @@ DWORD FindProcess() {
 					while (*buffit) buffit++;
 					while (buffit != buffer && *buffit != '\\') buffit--;
 					buffit++;
-					bool match = false;
-					for (const auto& exe : playExeList) {
+					bool match = false; //make sure we dont count exes twice in single folder installations
+						for (const auto& exe : playExeList) {
 						if (exe == buffit) {
 							match = true;
-							break;
+							procId = procBuffer[i];
+							matches.push_back(std::make_pair(buffit, procId));
 						}
 					}
 					if (!match) for (const auto& exe : editExeList) {
 						if (exe == buffit) {
-							match = true;
-							break;
+							procId = procBuffer[i];
+							matches.push_back(std::make_pair(buffit, procId));
 						}
-					}
-					if (match) {
-						procId = procBuffer[i];
-						CloseHandle(proc);
-						break;
 					}
 				}
 			}
@@ -76,6 +74,12 @@ DWORD FindProcess() {
 		else {
 			break;
 		}
+	}
+	if (matches.size() > 1) {
+		//more than one exe match
+		int sel = ChooseIndex(matches);
+		if (sel == -1) return (DWORD)-1;
+		procId = matches.at(sel).second;
 	}
 	return procId;
 }

@@ -218,7 +218,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 void UnlimitedDialog::MODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
 	auto list = AAEdit::g_cardData.GetMeshOverrideList();
-	for (int i = 0; i < list.size(); i++) {
+	for (size_t i = 0; i < list.size(); i++) {
 		std::string listEntry(list[i].first);
 		listEntry += " -> " + list[i].second;
 		SendMessage(this->m_lbOverrides, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
@@ -326,7 +326,7 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 void UnlimitedDialog::AODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
 	auto list = AAEdit::g_cardData.GetArchiveOverrideList();
-	for (int i = 0; i < list.size(); i++) {
+	for (size_t i = 0; i < list.size(); i++) {
 		std::string listEntry("[");
 		listEntry += list[i].first.first + "/" + list[i].first.second + "] -> ";
 		listEntry += list[i].second;

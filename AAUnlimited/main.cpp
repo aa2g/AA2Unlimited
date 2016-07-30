@@ -5,6 +5,8 @@
 #include "MemMods/Hook.h"
 #include "config.h"
 
+#include <time.h>
+
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,
 	_In_ DWORD     fdwReason,
@@ -12,6 +14,7 @@ BOOL WINAPI DllMain(
 	)
 { 
 	if (fdwReason == DLL_PROCESS_ATTACH) {
+		srand(time(NULL));
 		//change calls in code to ours
 		General::DllInst = hinstDLL;
 		if (!General::Initialize()) {

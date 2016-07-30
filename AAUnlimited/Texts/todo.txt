@@ -1,0 +1,25 @@
+- more than one hairstyle / x-hair for y-hair (full support or override ui?)
+- save eye highlight in card (the entire file)
+- peeping into H-Scenes of other couples
+- use compressed pngs
+- use compressed wavs/oggs
+- "There's an animation in AEditFacePartsXX.xa that allows for resizing of the mouth width. Would it be possible to add a slider for that? And while we're on the subject, would it be possible to implement more sliders overall, perhaps an extra page of them to allow modders to add more face sliding options to their faces?"
+- more reeoms? doesnt this work allready?
+- trait for h ai?
+- Object slots: The game currently loads the 3D Room object assignments from the MP_ITEMS.lst file. It is limited to 4 columns with slots from 7 to 10. It would be great to unlock this limitation to include more columns in this file and assign them slots 11, 12, 13...
+(- Basically edit poses either in dialog mode or during sex. You could edit the facial expressions, body pose, etc. and even the displayed message during an interaction with an NPC. Bonus idea: Load dialog poses during sex to take advantage of the existing 3D rooms.)
+- Cloth load adhoc: A way to load cloth saves (.cloth files) for any character at any moment of the day. Bonus: change the clothing state (clothed, partially clothed, underwear, etc.) any time during an interaction with an NPC.
+- More than 255 slots: Right now we have lots of unlocked settings but we are still limited to 255 slots for anything. May it be possible to use the extra card data to store values higher than 255 and have the game load even more assets? More hair and face slots would be really nice, for example.
+- extra socks: I think it would be feasible to add wings to any uniform with this feature, for example. The file jg2p_00_01_00_03.lst in jg2e00_00_00.pp seems to control which leg meshes to load for each type of sock.
+
+
+h idear:
+>If you have ideas for better behavior, shout it out
+step 1: pick some foreplay position from the more dom ones.
+step 2: pick a foreplay position according to the rapists' sexual preferences.
+step 3: pick some rapey position("rapey" is defined by the sex of the rapist)
+step 4: pick some position according to the rapist's preference. Include cumming position in the list
+step 5: pick some cumming position
+repeat steps 3-5 a few times
+if rapee has ahegao repeat 3-5 with all positions a few times
+maybe add another cumming position and end the scene.

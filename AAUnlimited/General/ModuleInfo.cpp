@@ -1,5 +1,10 @@
-#include "ModuleInfo.h"
+﻿#include "ModuleInfo.h"
 #include "Files/Logger.h"
+
+#pragma comment( lib, "version.lib" )
+
+#include <string>
+#include <sstream>
 
 namespace General {
 
@@ -11,66 +16,17 @@ bool IsAAEdit = false;
 
 std::string AAEditPath;
 std::string AAPlayPath;
+std::string GameExeName;
 
 namespace {
-	static const WORD AAPlayResLength = 0x264;
-	static const WORD AAEditResLength = 0x284;
-	static const DWORD AANameOffset = 0xF4;
-	//name and file version in here
-	static const unsigned char AAEditName[] = {
-		0xB8, 0x30, 0xF3, 0x30, 0xB3, 0x30, 0xA6, 0x30, 0xAC, 0x30, 0xAF, 0x30, 0xA8, 0x30, 0xF3, 0x30, 0x12,
-		0xFF, 0x20, 0x00, 0x4D, 0x30, 0x83, 0x30, 0x89, 0x30, 0x81, 0x30, 0x44, 0x30, 0x4F, 0x30, 0x00,
-		0x00, 0x00, 0x00, 0x2C, 0x00, 0x06, 0x00, 0x01, 0x00, 0x46, 0x00, 0x69, 0x00, 0x6C, 0x00, 0x65,
-		0x00, 0x56, 0x00, 0x65, 0x00, 0x72, 0x00, 0x73, 0x00, 0x69, 0x00, 0x6F, 0x00, 0x6E, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x31, 0x00, 0x2E, 0x00, 0x30, 0x00, 0x2E, 0x00, 0x31, 0x00, 0x00
-	};
-	static const unsigned char AAPlayName[] = {
-		0xB8, 0x30, 0xF3, 0x30, 0xB3, 0x30, 0xA6, 0x30, 0xAC, 0x30, 0xAF, 0x30, 0xA8, 0x30, 0xF3, 0x30,
-		0x12, 0xFF, 0x00, 0x00, 0x2C, 0x00, 0x06, 0x00, 0x01, 0x00, 0x46, 0x00, 0x69, 0x00, 0x6C, 0x00,
-		0x65, 0x00, 0x56, 0x00, 0x65, 0x00, 0x72, 0x00, 0x73, 0x00, 0x69, 0x00, 0x6F, 0x00, 0x6E, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x32, 0x00, 0x2E, 0x00, 0x30, 0x00, 0x2E, 0x00, 0x31, 0x00, 0x00
-	};
+	wchar_t AAPlayVersion[] = L"2.0.1";
+	wchar_t AAEditVersion[] = L"1.0.1";
+	wchar_t AAPlayProductName[] = L"ジンコウガクエン２";
+	wchar_t AAEditProductName[] = L"ジンコウガクエン２ きゃらめいく";
 }
 
 bool Initialize() {
 	GameBase = (DWORD)GetModuleHandle(NULL);
-
-	//try to find out what program we were attached to. im not going to do this the correct way.
-	//im just gonna load the version resource and compare predefined bytes with hardcoded references.
-	{
-
-		HRSRC version = FindResource((HMODULE)GameBase, MAKEINTRESOURCE(VS_VERSION_INFO), MAKEINTRESOURCE(RT_VERSION));
-		if (version == NULL) {
-			MessageBox(NULL, TEXT("Failed to get version resource of executable that we were injected in. ")
-				TEXT("We probably were not injected into AAPlay or AAEdit.\r\n"), TEXT("Critical Error"), 0);
-			return false;
-		}
-		HGLOBAL resource = LoadResource((HMODULE)GameBase, version);
-		if (resource == NULL) {
-			int lastError = GetLastError();
-			MessageBox(NULL, TEXT("Failed to load version resource."), TEXT("Critical Error"), 0);
-			return false;
-		}
-
-		DWORD size = SizeofResource((HMODULE)GameBase, version);
-		LPVOID buffer = LockResource(resource);
-		if (size == 0 || buffer == NULL) {
-			MessageBox(NULL, TEXT("Failed to copy resource data.\r\n"), TEXT("Critical Error"), 0);
-			return false;
-		}
-
-		WORD length = *(WORD*)(buffer);
-		if (length == AAEditResLength && memcmp(((BYTE*)buffer) + AANameOffset, AAEditName, sizeof(AAEditName)) == 0) {
-			IsAAEdit = true;
-		}
-		else if (length == AAPlayResLength && memcmp(((BYTE*)buffer) + AANameOffset, AAPlayName, sizeof(AAPlayName)) == 0) {
-			IsAAPlay = true;
-		}
-		else {
-			MessageBox(NULL, TEXT("Resource Data does not match AAEdit or AAPlay.\r\n"), TEXT("Critical Error"), 0);
-			return false;
-		}
-	}
 
 	// find paths in registry
 	{
@@ -81,7 +37,7 @@ bool Initialize() {
 
 		//aaplay path
 		HKEY playKey;
-			
+
 		res = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\illusion\\AA2Play"), 0, KEY_READ, &playKey);
 		if (res != ERROR_SUCCESS) {
 			MessageBox(NULL, TEXT("Could not find AAPlay path in registry"), TEXT("Critical Error"), 0);
@@ -90,7 +46,7 @@ bool Initialize() {
 		outSize = sizeof(buffer);
 		RegQueryValueEx(playKey, TEXT("INSTALLDIR"), NULL, &keyType, buffer, &outSize);
 		if (keyType != REG_SZ || outSize < 2) {
-			MessageBox(NULL,TEXT("Could not find AAPlay INSTALLDIR key in registry") , TEXT("Critical Error"), 0);
+			MessageBox(NULL, TEXT("Could not find AAPlay INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
 			return false;
 		}
 		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
@@ -116,6 +72,84 @@ bool Initialize() {
 		if (buffer[outSize - 2] != '\\') AAEditPath.push_back('\\');
 
 	}
+
+	//get name of exe we are in
+	{
+		char buffer[512];
+		GetModuleFileName(GetModuleHandle(NULL), buffer, 512);
+		GameExeName = buffer;
+	}
+
+	//try to check the resource file to figure out where we are
+	
+	{
+		std::wstringstream resourceInfo(L""); //keps additional information in case of fail
+		DWORD legacy;
+		DWORD size = GetFileVersionInfoSize(GameExeName.c_str(), &legacy);
+		if (size == 0) {
+			int error = GetLastError();
+			resourceInfo << L"Failed to load version resource (error " + error << L")";
+		}
+		else {
+			BYTE* buffer = new BYTE[size];
+			GetFileVersionInfo(GameExeName.c_str(), NULL, size, buffer);
+			VS_FIXEDFILEINFO* info = NULL;
+			UINT infoSize;
+			VerQueryValue(buffer, "\\", (void**)&info, &infoSize);
+			wchar_t* strFileVersion = NULL;
+			UINT strFileVersionLength;
+			wchar_t* strProductName = NULL;
+			UINT strProductNameLength;
+			//note: version is japanese (0411), codepage unicode (04B0)
+			BOOL suc = TRUE;
+			suc = suc && VerQueryValueW(buffer, L"\\StringFileInfo\\041104b0\\FileVersion", (void**)&strFileVersion, &strFileVersionLength);
+			suc = suc && VerQueryValueW(buffer, L"\\StringFileInfo\\041104b0\\ProductName", (void**)&strProductName, &strProductNameLength);
+			if (suc) {
+				bool editVersion = false, editName = false,
+					playVersion = false, playName = false;
+				if (wcscmp(AAPlayVersion, strFileVersion) == 0) playVersion = true;
+				if (wcscmp(AAEditVersion, strFileVersion) == 0) editVersion = true;
+				if (wcscmp(AAPlayProductName, strProductName) == 0) playName = true;
+				if (wcscmp(AAEditProductName, strProductName) == 0) editName = true;
+				if (editVersion && editName) IsAAEdit = true;
+				else if (playVersion && playName) IsAAPlay = true;
+				else {
+					resourceInfo << L"Resource data unconclusive:\r\n\tVersion: " << strFileVersion;
+					if		(editVersion) resourceInfo << L" (Version of AAEdit)";
+					else if (playVersion) resourceInfo << L" (Version of AAPlay)";
+					else				  resourceInfo << L" (unknown version number; expected " << AAPlayVersion << L" for play or " << AAEditVersion << L" for edit)";
+					resourceInfo << L"\r\n\tProduct Name: " << strProductName;
+					if		(editName) resourceInfo << L" (Name of AAEdit)";
+					else if (playName) resourceInfo << L" (Name of AAPlay)";
+					else			   resourceInfo << L" (unknown Name; expected " << AAPlayProductName << L" for play or " << AAEditProductName << L" for edit)";
+				}
+			}
+			delete[] buffer;
+		}
+
+		if (!IsAAEdit && !IsAAPlay) {
+			std::wstringstream msg(L"Resource Analysis was inconclusive. Information:\r\n");
+			msg << resourceInfo.str() << L"\r\n\r\n";
+			msg << "With that, we do not know which program we were injected into. If YOU know, you may now choose manually where we are.\r\n"
+				"Keep in mind that a wrong choice will crash the Program. To choose are we in AAPlay?:\r\n"
+				"Press YES if we are in AAPLAY (the Game)\r\n"
+				"Press NO if we are in AAEDIT (the Maker)\r\n"
+				"Press CANCEL to abort\r\n";
+			int ret = MessageBoxW(NULL, msg.str().c_str(), L"Resource Analysis failed", MB_YESNOCANCEL);
+			if (ret == IDYES) {
+				IsAAPlay = true;
+			}
+			else if (ret == IDNO) {
+				IsAAEdit = true;
+			}
+			else {
+				//failed
+				return false;
+			}
+		}
+	}
+
+	
 
 	return true;
 }

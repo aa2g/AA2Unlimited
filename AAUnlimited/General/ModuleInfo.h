@@ -13,6 +13,7 @@ extern bool IsAAEdit;
 //path to the aa2 folders from the registry, including trailing backslash
 extern std::string AAEditPath;
 extern std::string AAPlayPath;
+extern std::string GameExeName; //name of the exe we are hooked to
 
 bool Initialize();
 

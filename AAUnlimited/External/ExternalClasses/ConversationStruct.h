@@ -49,6 +49,7 @@ public:
 
 public:
 	ConversationStructPcNpc() = delete;
+	~ConversationStructPcNpc() = delete;
 };
 
 /*

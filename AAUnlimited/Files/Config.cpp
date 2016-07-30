@@ -58,19 +58,33 @@ Config::Config(const char* path) : Config()
 		it = nextLine;
 		GetLine(it,&nextLine);
 		if (*it == '\0') continue;
-		//analise line
+		//analyse line
 		char* varName;
 		char* value;
 		//skip whitespaces till name
-		while (isspace(*it)) it++;
+		while (isspace(*it) && *it) it++;
+		if (*it == '\0') continue; //was just line of whitespaces
 		varName = it;
 		//skip till equals or whitespaces (after name)
-		while (!isspace(*it) && *it != '=') it++;
+		while (!isspace(*it) && *it && *it != '=') it++;
+		if (*it == '\0') {
+			LOGPRIO(Logger::Priority::WARN) << "varaible without assigned value in config file: " << varName << "\r\n";
+			continue;
+		}
 		//nullterminate; now we have varName
 		char old = *it; *it = '\0';
-		//skip over equals sign
-		if (old != '=') while (*it != '=') it++;
 		it++;
+		//skip over equals sign
+		if (old != '=') {
+			while (*it != '=' && *it) it++;
+			it++;
+		}
+		//skip whitespaces till value
+		while (isspace(*it) && *it) it++;
+		if (*it == '\0') {
+			LOGPRIO(Logger::Priority::WARN) << "empty assignment statement in config file for variable: " << varName << "\r\n";
+			continue;
+		}
 		//rest is value
 		value = it;
 
@@ -90,8 +104,6 @@ Config::Config(const char* path) : Config()
 		//interpret value depending on type
 		switch (knownMembers[index].type) {
 		case BOOL:
-			//skip whitespaces
-			while (isspace(*value)) value++;
 			if (StartsWith(value,"true")) {
 				m_members[index].bVal = true;
 			}
