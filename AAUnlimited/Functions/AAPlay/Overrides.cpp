@@ -79,14 +79,15 @@ namespace {
 	*/
 DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset) {
 	loc_currentlyOverriding = false;
+	
 	BYTE* file = xxFileBuffer + offset;
 	DWORD size = *(DWORD*)(file);
 	file += 4;
-
+	
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
 	loc_match = g_currentCard.GetMeshOverrideTexture((char*)file);
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
-
+	
 	if (loc_match != NULL) {
 		loc_currentlyOverriding = true;
 		loc_oldNameLength = size;
@@ -132,7 +133,6 @@ bool __stdcall MeshTextureListFill(BYTE* name, DWORD* xxReadOffset) {
 	*/
 void __stdcall MeshTextureStart(BYTE* xxFile, DWORD offset) {
 	loc_currentlyOverriding = false;
-		
 
 	BYTE* file = xxFile + offset;
 	DWORD* ptrNameLength = (DWORD*)(file);

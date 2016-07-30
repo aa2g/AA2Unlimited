@@ -44,7 +44,7 @@ const char* OpenFileDialog(const char* initialDir) {
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD targetChunk) {
 	if (bufferSize < 12) return NULL;
 	DWORD chunkLength = 0, chunkId = 0;
-	for (DWORD i = 8; i < bufferSize; i += 12) { //8 to skip header, 12 for each chunk
+	for (DWORD i = 8; i < bufferSize+12; i += 12) { //8 to skip header, 12 for each chunk
 		if (i > bufferSize - 12)  return NULL; //not even a chunk left. must be incorrect buffer
 		chunkLength = _byteswap_ulong(*(DWORD*)(buffer + i));
 		chunkId = *(DWORD*)(buffer + i + 4);

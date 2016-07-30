@@ -32,7 +32,6 @@ void __declspec(naked) DialogProcRedirect() {
 	__asm {
 		//original code
 		push ebx
-		mov ecx, esi
 		//also, save edx
 		push edx
 		//copy parameters
@@ -40,11 +39,11 @@ void __declspec(naked) DialogProcRedirect() {
 		push [esp+0x10]
 		push [esp+0x10]
 		push [esp+0x10]
-		push ecx //also, class as parameter
+		push esi //also, class as parameter
 		call DialogProcPre
+		pop edx
 		//call original function
 		mov ecx, esi
-		pop edx
 		call edx
 		push eax //save return value
 		call DialogProcPost

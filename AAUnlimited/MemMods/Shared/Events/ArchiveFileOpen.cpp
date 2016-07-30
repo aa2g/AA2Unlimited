@@ -50,7 +50,7 @@ void __declspec(naked) OpenFileRedirect() {
 		push[esp + 0x20 + 0xC + 8]
 		push[esp + 0x20 + 4 + 0xC]
 		__asm nop __asm nop __asm nop __asm nop __asm nop //call OpenFileEvent
-		test eax, eax
+		test al, al
 		popad
 		jz OpenFileRedirect_NormalExit
 		mov al, 1

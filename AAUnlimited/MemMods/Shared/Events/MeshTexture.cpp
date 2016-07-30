@@ -30,13 +30,13 @@ void __declspec(naked) OverrideTextureListSizeRedirect() {
 		push eax
 		push edi
 		__asm nop __asm nop __asm nop __asm nop __asm nop //call xyz::MeshTextureListStart
-		test eax, eax
 		mov edx, eax
 		pop ecx
 		pop eax
+		test edx, edx
 		je OverrideTextureListSizeRedirect_NormalSize
 		ret
-		OverrideTextureListSizeRedirect_NormalSize :
+	OverrideTextureListSizeRedirect_NormalSize :
 		mov edx, [eax + edi]
 		ret
 	}
@@ -84,7 +84,7 @@ void __declspec(naked) OverrideTextureListNameRedirect() {
 		push esi
 		push ebp
 		__asm nop __asm nop __asm nop __asm nop __asm nop //call AAEdit::MeshTextureListFill
-		test eax, eax
+		test al, al
 		popad
 		jnz OverrideTextureListNameRedirect_Skip
 		jmp[OverrideTextureListNameOriginal] //original function call
@@ -153,7 +153,7 @@ void OverrideTextureListNameInject() {
 			{ 0xE8, 0x4E, 0x88, 0x08, 0x00 },						//expected values
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&OverrideTextureListNameOriginal);
-		OverrideTextureListNameSkipExit = General::GameBase + 0x206D10;
+		OverrideTextureListNameSkipExit = General::GameBase + 0x206D0C;
 		InsertRedirectCall((void*)redirectAddress, (void*)AAPlay::MeshTextureListFill);
 	}
 
@@ -268,7 +268,7 @@ void _declspec(naked) OverrideNameRedirect() {
 		push ebp //pointer to offset
 		push esi //destination buffer
 		__asm nop __asm nop __asm nop __asm nop __asm nop // call AAEdit::MeshTextureOverrideName
-		test eax, eax
+		test al,al
 		popad
 		jz OverrideNameRedirect_Original
 		jmp[OverrideNameCustomExit]
@@ -424,7 +424,7 @@ void __declspec(naked) OverrideFileRedirect() {
 		push ebp //offset pointer
 		push eax
 		__asm nop __asm nop __asm nop __asm nop __asm nop //call AAEdit::MeshTextureOverrideFile
-		test eax, eax
+		test al,al
 		popad
 		jz OverrideFile_Original //if function returned false, do normal call
 		ret //else, we did it allready, so just return

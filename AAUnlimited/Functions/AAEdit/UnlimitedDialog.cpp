@@ -164,7 +164,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
 			//remove this rule
-			g_cardData.RemoveArchiveOverride(sel);
+			g_cardData.RemoveMeshOverride(sel);
 			thisPtr->RefreshRuleList();
 			return TRUE;
 		}

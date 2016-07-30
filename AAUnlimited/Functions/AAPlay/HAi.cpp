@@ -172,7 +172,7 @@ void ConversationTickPre(ConversationStruct* param)
 
 void ConversationTickPost(ExtClass::ConversationStruct* param) {
 	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
-
+	loc_initialized = false;
 	ConversationSubStruct* convData = param->getSubStruct();
 	if (convData->m_conversationId == ConversationId::FORCE_H) {	//npc wants to force
 		loc_isTalkedTo = true;
