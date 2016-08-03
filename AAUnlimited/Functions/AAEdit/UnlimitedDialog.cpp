@@ -57,6 +57,11 @@ void UnlimitedDialog::Refresh() {
 	case 1:
 		m_aoDialog.Refresh();
 		break;
+	case 2:
+		m_arDialog.Refresh();
+		break;
+	case 3:
+		m_hrDialog.Refresh();
 	default:
 		break;
 	}
@@ -76,6 +81,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			thisPtr->m_tabs, MODialog::DialogProc, (LPARAM)&thisPtr->m_moDialog);
 		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_ARCHIVEOVERRIDE),
 			thisPtr->m_tabs, AODialog::DialogProc, (LPARAM)&thisPtr->m_aoDialog);
+		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_ARCHIVEREDIRECT),
+			thisPtr->m_tabs, ARDialog::DialogProc, (LPARAM)&thisPtr->m_arDialog);
+		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_HAIRREDIRECT),
+			thisPtr->m_tabs, HRDialog::DialogProc, (LPARAM)&thisPtr->m_hrDialog);
 		RECT rct;
 		GetWindowRect(hwndDlg, &rct);
 		rct.top += 20; rct.right -= 20;
@@ -83,14 +92,22 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
 		MoveWindow(thisPtr->m_moDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
 		MoveWindow(thisPtr->m_aoDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+		MoveWindow(thisPtr->m_arDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+		MoveWindow(thisPtr->m_hrDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
 		TCITEM item;
 		item.mask = TCIF_TEXT | TCIF_PARAM;
-		item.pszText = "Mesh Overrides";
+		item.pszText = TEXT("Mesh Overrides");
 		item.lParam = (LPARAM)(&thisPtr->m_moDialog);
 		TabCtrl_InsertItem(thisPtr->m_tabs, 0, &item);
-		item.pszText = "Archive Overrides";
+		item.pszText = TEXT("Archive Overrides");
 		item.lParam = (LPARAM)(&thisPtr->m_aoDialog);
 		TabCtrl_InsertItem(thisPtr->m_tabs, 1, &item);
+		item.pszText = TEXT("Archive Redirects");
+		item.lParam = (LPARAM)(&thisPtr->m_arDialog);
+		TabCtrl_InsertItem(thisPtr->m_tabs, 2, &item);
+		item.pszText = TEXT("Hair Redirects");
+		item.lParam = (LPARAM)(&thisPtr->m_hrDialog);
+		TabCtrl_InsertItem(thisPtr->m_tabs, 3, &item);
 		ShowWindow(thisPtr->m_moDialog.m_dialog, SW_SHOW);
 		return TRUE;
 		break; }
@@ -181,11 +198,11 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_MO_BTNBROWSE) {
 				//TODO: implement browse button. should be put into the aaedit/data/texture/override folder.
-				std::string initialDir = General::BuildEditPath(OVERRIDE_IMAGE_PATH, NULL);
-				const char* choice = General::OpenFileDialog(initialDir.c_str());
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_IMAGE_PATH, NULL);
+				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialDir.c_str())) {
-						const char* rest = choice + initialDir.size();
+						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edOverrideWith, WM_SETTEXT, 0, (LPARAM)rest);
 					}
 				}
@@ -193,8 +210,8 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			}
 			else if (identifier == IDC_MO_BTNAPPLY) {
 				//apply button pressed.
-				std::string override, toOverride;
-				char buffer[1024];
+				std::wstring override, toOverride;
+				TCHAR buffer[1024];
 				SendMessage(thisPtr->m_cbOverride, WM_GETTEXT, 1024, (LPARAM)buffer);
 				override = buffer;
 				SendMessage(thisPtr->m_edOverrideWith, WM_GETTEXT, 1024, (LPARAM)buffer);
@@ -219,8 +236,8 @@ void UnlimitedDialog::MODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
 	auto list = AAEdit::g_cardData.GetMeshOverrideList();
 	for (size_t i = 0; i < list.size(); i++) {
-		std::string listEntry(list[i].first);
-		listEntry += " -> " + list[i].second;
+		std::wstring listEntry(list[i].first);
+		listEntry += TEXT(" -> ") + list[i].second;
 		SendMessage(this->m_lbOverrides, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
 	}
 }
@@ -235,7 +252,10 @@ void UnlimitedDialog::MODialog::RefreshTextureList() {
 	TextureStruct** arrTex = (TextureStruct**)(General::GameBase + 0x353290 + 0x1408);
 	for (int i = 0; i < 1024; i++) {
 		if (arrTex[i] != NULL) {
-			SendMessage(this->m_cbOverride, CB_ADDSTRING, 0, (LPARAM)(arrTex[i]->m_name));
+			TCHAR buffer[256];
+			size_t out;
+			mbstowcs_s(&out, buffer, arrTex[i]->m_name, 256);
+			SendMessage(this->m_cbOverride, CB_ADDSTRING, 0, (LPARAM)(buffer));
 		}
 	}
 }
@@ -286,16 +306,16 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_AO_BTNBROWSE) {
-				std::string initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH, NULL);
-				std::string initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH, NULL);
-				const char* choice = General::OpenFileDialog(initialPlayDir.c_str());
+				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH, NULL);
+				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH, NULL);
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialPlayDir.c_str())) {
-						const char* rest = choice + initialPlayDir.size();
+						const TCHAR* rest = choice + initialPlayDir.size();
 						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
 					}
 					else if (General::StartsWith(choice, initialEditDir.c_str())) {
-						const char* rest = choice + initialEditDir.size();
+						const TCHAR* rest = choice + initialEditDir.size();
 						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
 					}
 				}
@@ -303,8 +323,8 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			}
 			else if (identifier == IDC_AO_BTNAPPLY) {
 				//apply button pressed.
-				std::string archive, archivefile, toOverride;
-				char buffer[1024];
+				std::wstring archive, archivefile, toOverride;
+				TCHAR buffer[1024];
 				SendMessage(thisPtr->m_edArchive, WM_GETTEXT, 1024, (LPARAM)buffer);
 				archive = buffer;
 				SendMessage(thisPtr->m_edArchiveFile, WM_GETTEXT, 1024, (LPARAM)buffer);
@@ -327,8 +347,8 @@ void UnlimitedDialog::AODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
 	auto list = AAEdit::g_cardData.GetArchiveOverrideList();
 	for (size_t i = 0; i < list.size(); i++) {
-		std::string listEntry("[");
-		listEntry += list[i].first.first + "/" + list[i].first.second + "] -> ";
+		std::wstring listEntry(TEXT("["));
+		listEntry += list[i].first.first + TEXT("/") + list[i].first.second + TEXT("] -> ");
 		listEntry += list[i].second;
 		SendMessage(this->m_lbOverrides, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
 	}
@@ -336,6 +356,142 @@ void UnlimitedDialog::AODialog::RefreshRuleList() {
 
 void UnlimitedDialog::AODialog::Refresh() {
 	RefreshRuleList();
+}
+
+
+/***************************/
+/* Archive Redirect Dialog */
+/***************************/
+
+INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		ARDialog* thisPtr = (ARDialog*)lparam;
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_edArFrom = GetDlgItem(hwndDlg, IDC_AR_EDARCHFROM);
+		thisPtr->m_edFileFrom = GetDlgItem(hwndDlg, IDC_AR_EDFILEFROM);
+		thisPtr->m_edArTo = GetDlgItem(hwndDlg, IDC_AR_EDARCHTO);
+		thisPtr->m_edFileTo = GetDlgItem(hwndDlg, IDC_AR_EDFILETO);
+		thisPtr->m_btApply = GetDlgItem(hwndDlg, IDC_AR_BTNAPPLY);
+		thisPtr->m_lbOverrides = GetDlgItem(hwndDlg, IDC_AR_LIST);
+
+		thisPtr->RefreshRuleList();
+		return TRUE;
+		break; }
+	case WM_VKEYTOITEM: {
+		//DEL-key was pressed while the list box had the focus. our target is to remove
+		//the selected override rule.
+		ARDialog* thisPtr = (ARDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			//get current selection text
+			int sel = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+			//remove this rule
+			g_cardData.RemoveArchiveRedirect(sel);
+			thisPtr->RefreshRuleList();
+			return TRUE;
+		}
+		break; }
+	case WM_COMMAND: {
+		ARDialog* thisPtr = (ARDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_AR_BTNAPPLY) {
+				//apply button pressed.
+				std::wstring archive, archivefile, overrArchive, overrFile;
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edArFrom, WM_GETTEXT, 1024, (LPARAM)buffer);
+				archive = buffer;
+				SendMessage(thisPtr->m_edFileFrom, WM_GETTEXT, 1024, (LPARAM)buffer);
+				archivefile = buffer;
+				SendMessage(thisPtr->m_edArTo, WM_GETTEXT, 1024, (LPARAM)buffer);
+				overrArchive = buffer;
+				SendMessage(thisPtr->m_edFileTo, WM_GETTEXT, 1024, (LPARAM)buffer);
+				overrFile = buffer;
+				
+				if (AAEdit::g_cardData.AddArchiveRedirect(archive.c_str(), archivefile.c_str(),
+						overrArchive.c_str(), overrFile.c_str())) {
+					thisPtr->RefreshRuleList();
+				}
+				return TRUE;
+			}
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::ARDialog::RefreshRuleList() {
+	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
+	auto list = AAEdit::g_cardData.GetArchiveRedirectList();
+	for (size_t i = 0; i < list.size(); i++) {
+		std::wstring listEntry(TEXT("["));
+		listEntry += list[i].first.first + TEXT("/") + list[i].first.second + TEXT("] -> [");
+		listEntry += list[i].second.first + TEXT("/") + list[i].second.second + TEXT("]");
+		SendMessage(this->m_lbOverrides, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
+	}
+}
+
+void UnlimitedDialog::ARDialog::Refresh() {
+	RefreshRuleList();
+}
+
+/************************/
+/* Hair Redirect Dialog */
+/************************/
+
+
+INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		HRDialog* thisPtr = (HRDialog*)lparam;
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_arrRbRedirects[0][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_00);
+		thisPtr->m_arrRbRedirects[0][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_01);
+		thisPtr->m_arrRbRedirects[0][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_02);
+		thisPtr->m_arrRbRedirects[0][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_03);
+		thisPtr->m_arrRbRedirects[1][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_10);
+		thisPtr->m_arrRbRedirects[1][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_11);
+		thisPtr->m_arrRbRedirects[1][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_12);
+		thisPtr->m_arrRbRedirects[1][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_13);
+		thisPtr->m_arrRbRedirects[2][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_20);
+		thisPtr->m_arrRbRedirects[2][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_21);
+		thisPtr->m_arrRbRedirects[2][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_22);
+		thisPtr->m_arrRbRedirects[2][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_23);
+		thisPtr->m_arrRbRedirects[3][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_30);
+		thisPtr->m_arrRbRedirects[3][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_31);
+		thisPtr->m_arrRbRedirects[3][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_32);
+		thisPtr->m_arrRbRedirects[3][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_33);
+		SendMessage(thisPtr->m_arrRbRedirects[0][0], BM_SETCHECK, BST_CHECKED, 0);
+		SendMessage(thisPtr->m_arrRbRedirects[1][1], BM_SETCHECK, BST_CHECKED, 0);
+		SendMessage(thisPtr->m_arrRbRedirects[2][2], BM_SETCHECK, BST_CHECKED, 0);
+		SendMessage(thisPtr->m_arrRbRedirects[3][3], BM_SETCHECK, BST_CHECKED, 0);
+		return TRUE;
+		break; }
+	}
+	return FALSE;
+}
+
+BYTE UnlimitedDialog::HRDialog::GetHairTarget(BYTE hairCategory) {
+	for (BYTE i = 0; i < 4; i++) {
+		if (SendMessage(this->m_arrRbRedirects[hairCategory][i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
+			return i;
+		}
+	}
+	return hairCategory; //fallback
+}
+
+void UnlimitedDialog::HRDialog::Refresh() {
+	for (BYTE i = 0; i < 4; i++) {
+		BYTE n = g_cardData.GetHairRedirect(i);
+		if (n > 3) n = i;
+		SendMessage(this->m_arrRbRedirects[i][n], BM_CLICK, BST_CHECKED, 0);
+	}
 }
 
 UnlimitedDialog g_AAUnlimitDialog;

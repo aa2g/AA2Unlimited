@@ -6,14 +6,17 @@ namespace ExtClass {
 
 	void (HGUIButton::*HGUIButton::vmptrRefreshState)() = NULL;
 	void* HGUIButton::VirtualTable = NULL;
-	HGUIButton* HGUIButton::PressedButton; //used for Press() function
+	HGUIButton* HGUIButton::PressedButton[5]; //used for Press() function
 
 /*
  * Marks Button as Pressed. The next time this buttons state is polled, it will be set to pressed afterwards
  */
 void HGUIButton::Press()
 {
-	HGUIButton::PressedButton = this;
+	for (int i = 0; i < 5; i++) if (PressedButton[i] == NULL) {
+		PressedButton[i] = this;
+		break;
+	}
 }
 
 void HGUIButton::HookedRefreshState()
@@ -21,10 +24,13 @@ void HGUIButton::HookedRefreshState()
 	//call original method first
 	(this->*vmptrRefreshState)();
 	//if we were supposed to be pressed, do that now
-	if(this == HGUIButton::PressedButton) {
-		HGUIButton::PressedButton = NULL;
-		m_bClicked = TRUE;
+	for (int i = 0; i < 5; i++) {
+		if (this == PressedButton[i]) {
+			PressedButton[i] = NULL;
+			m_bClicked = TRUE;
+		}
 	}
+	
 }
 
 void HGUIButton::InitializeHooks()

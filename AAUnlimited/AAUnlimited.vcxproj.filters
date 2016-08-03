@@ -53,6 +53,9 @@
     <ClCompile Include="Functions\Shared\Shadowing.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
+    <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
+    <ClCompile Include="Functions\AAPlay\HAis\ForceAi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -96,6 +99,9 @@
     <ClInclude Include="Functions\Shared\Shadowing.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
+    <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
+    <ClInclude Include="Functions\AAPlay\HAis\ForceAi.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

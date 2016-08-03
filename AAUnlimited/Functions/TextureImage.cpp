@@ -8,15 +8,15 @@
 #include "config.h"
 
 
-TextureImage::TextureImage(const char* fileName) : OverrideFile(OVERRIDE_IMAGE_PATH, fileName, false, true) {
+TextureImage::TextureImage(const TCHAR* fileName) : OverrideFile(OVERRIDE_IMAGE_PATH, fileName, false, true) {
 	m_good = false; //we need additional things
 	//find out if its tga or bmp
-	int length = strlen(fileName);
+	int length = wcslen(fileName);
 	if (length > 4) {
-		if (strcmp(fileName+length - 4, ".bmp") == 0) {
+		if (wcscmp(fileName+length - 4, TEXT(".bmp")) == 0) {
 			m_type = BMP;
 		}
-		else if (strcmp(fileName+length - 4, ".tga") == 0) {
+		else if (wcscmp(fileName+length - 4, TEXT(".tga")) == 0) {
 			m_type = TGA;
 		}
 	}

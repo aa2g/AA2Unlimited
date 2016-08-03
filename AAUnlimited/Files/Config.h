@@ -20,7 +20,7 @@ public:
 	};
 public:
 	Config();
-	Config(const char* path);
+	Config(const TCHAR* path);
 	Config(Config& rhs);
 	Config(Config&& rhs);
 	Config& operator=(Config& rhs);

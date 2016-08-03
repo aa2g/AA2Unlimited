@@ -16,12 +16,12 @@ namespace ArchiveFile {
 * If false is returned, the original function will be executed.
 * else, the function is aborted and the results from this function are used.
 */
-bool __stdcall AAPlayOpenFileEvent(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
+bool __stdcall AAPlayOpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	bool ret;
-	ret = AAPlay::ArchiveOverrideRules(archive, file, readBytes, outBuffer);
+	ret = AAPlay::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
 	if (ret) return true;
 	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
-		ret = Shared::OpenShadowedFile(archive, file, readBytes, outBuffer);
+		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
 		if (ret) return true;
 	}
 	return false;
@@ -30,12 +30,14 @@ bool __stdcall AAPlayOpenFileEvent(wchar_t* archive, wchar_t* file, DWORD* readB
 * If false is returned, the original function will be executed.
 * else, the function is aborted and the results from this function are used.
 */
-bool __stdcall AAEditOpenFileEvent(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
+bool __stdcall AAEditOpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	bool ret;
-	ret = AAEdit::ArchiveOverrideRules(archive, file, readBytes, outBuffer);
+	ret = AAEdit::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
+	if (ret) return true;
+	ret = AAEdit::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
 	if (ret) return true;
 	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
-		ret = Shared::OpenShadowedFile(archive, file, readBytes, outBuffer);
+		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
 		if (ret) return true;
 	}
 	return false;
@@ -47,8 +49,10 @@ void __declspec(naked) OpenFileRedirect() {
 		pushad
 		push[esp + 0x20 + 0x10 + 0]
 		push edi
-		push[esp + 0x20 + 0xC + 8]
-		push[esp + 0x20 + 4 + 0xC]
+		lea eax, [esp + 0x20 + 0xC + 8]
+		push eax
+		lea eax, [esp + 0x20 + 4 + 0xC]
+		push eax
 		__asm nop __asm nop __asm nop __asm nop __asm nop //call OpenFileEvent
 		test al, al
 		popad

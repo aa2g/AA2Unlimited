@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "HParticipant.h"
 #include "HPosButtonList.h"
+#include "HPosData.h"
 #include "../IllusionList.h"
 
 namespace ExtClass {
@@ -13,7 +14,10 @@ namespace ExtClass {
 class HInfo
 {
 public:
-	BYTE m_unknown1[0x68];
+	BYTE m_unknown1[0x3C];
+	void* m_positionInfo; //some position info it seems. *(*m_positionInfo + 4) points to an array with 0x8C per struct
+						  //describing h positions
+	BYTE m_unknown__[0x28];
 	DWORD m_nPosChanges;
 	BYTE m_unknown2[8];
 	float m_speed; //maximum value accessable through buttons ingame is 3
@@ -48,13 +52,36 @@ public:
 	HGUIButton* m_category9;	//9: finish flower
 	BYTE m_unknown8[0x4];
 	HPosButtonList m_hPosButtons[9];
-	BYTE m_unknown9[0x8C];
+	struct {
+		DWORD* m_arrPositions; //positions belonging to the buttons in the corresponding button arrays
+		DWORD* m_arrPositionsEnd; //first invalid element behind arrPositoins
+		DWORD m_unknown1;	//usually same as arrPositionsEnd, sometimes pointing past it, with 0s inbetween
+		DWORD m_padding;	//pretty much always 0
+	} m_hPosButtonPositions[8];
+	struct {
+		DWORD* m_arrPositions; //positions belonging to the buttons in the corresponding button arrays
+		DWORD* m_arrPositionsEnd; //first invalid element behind arrPositoins
+		DWORD m_unknown1;	//usually same as arrPositionsEnd, sometimes pointing past it, with 0s inbetween
+	} m_hPosButtonPositions_; //the last one doesnt have padding.
 	HGUIButton* m_maleButton; //the button that switches male between blue / off / ugly
 	HGUIButton* m_skirtButton;	//toggles skirt state
 	HGUIButton* m_shoeButton;	//toggles shoe visibility on and off
 	HGUIButton* m_underwearButton; //toggles underwear state
 	HGUIButton* m_outfitButton; //toggles outfit state
 public:
+	inline DWORD GetHPosition(int category, int buttonNumber) {
+		if (category < 0 || category > 8) return -1;
+		auto* list = &(m_hPosButtonPositions[category]);
+		DWORD* ptrHPos = list->m_arrPositions + buttonNumber;
+		if (ptrHPos >= list->m_arrPositionsEnd) return 0;
+		return *ptrHPos;
+	}
+
+	inline HPosData* GetHPosData(DWORD position) {
+		HPosData* arr = *(HPosData**)((BYTE*)(m_positionInfo)+4);
+		return arr + position;
+	}
+
 	HInfo() = delete;
 	~HInfo() = delete;
 };

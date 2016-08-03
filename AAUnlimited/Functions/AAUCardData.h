@@ -33,34 +33,58 @@ public:
 	int ToBuffer(char** buffer, int* size, bool resize);
 	void Reset();
 
-	bool AddMeshOverride(const char* texture, const char* override);
-	bool RemoveMeshOverride(const char* texture, const char* override);
+	bool AddMeshOverride(const TCHAR* texture, const TCHAR* override);
 	bool RemoveMeshOverride(int index);
-	bool AddArchiveOverride(const char* archice, const char* archivefile, const char* override);
-	bool RemoveArchiveOverride(const char* archive, const char* archivefile, const char* override);
+	bool AddArchiveOverride(const TCHAR* archice, const TCHAR* archivefile, const TCHAR* override);
 	bool RemoveArchiveOverride(int index);
+	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
+	bool RemoveArchiveRedirect(int index);
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
-	inline const std::vector<std::pair<std::string, std::string>> GetMeshOverrideList() const { return m_meshOverrides; }
-	inline const TextureImage* GetMeshOverrideTexture(const char* texture) const {
+	inline const std::vector<std::pair<std::wstring, std::wstring>> GetMeshOverrideList() const { return m_meshOverrides; }
+	inline const TextureImage* GetMeshOverrideTexture(const TCHAR* texture) const {
 		auto it = m_meshOverrideMap.find(texture);
 		return it == m_meshOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const std::vector<std::pair<std::pair<std::string, std::string>,std::string>> GetArchiveOverrideList() const { return m_archiveOverrides; }
-	inline const OverrideFile* GetArchiveOverrideFile(const char* archive, const char* texture) const {
-		auto it = m_archiveOverrideMap.find(std::pair<std::string, std::string>(archive, texture));
+	inline const std::vector<std::pair<std::pair<std::wstring, std::wstring>,std::wstring>> GetArchiveOverrideList() const { return m_archiveOverrides; }
+	inline const OverrideFile* GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
+		auto it = m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
 	}
+	inline const std::vector<std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>>> 
+		GetArchiveRedirectList() const { return m_archiveRedirects; }
+	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
+		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
+	}
+
+	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
+	inline void SetHairRedirect(BYTE value, BYTE category) { m_hairRedirects.arr[category] = value; }
 
 
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
-	std::vector<std::pair<std::string, std::string>> m_meshOverrides;	//replaces textures by other textures
-	std::multimap<std::string, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
+	std::vector<std::pair<std::wstring, std::wstring>> m_meshOverrides;	//replaces textures by other textures
+	std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
 	
-	std::vector<std::pair<std::pair<std::string,std::string>,std::string>> m_archiveOverrides; //<archive,file>->file
-	std::multimap<std::pair<std::string, std::string>, OverrideFile> m_archiveOverrideMap;
+	std::vector<std::pair<std::pair<std::wstring,std::wstring>,std::wstring>> m_archiveOverrides; //<archive,file>->file
+	std::map<std::pair<std::wstring, std::wstring>, OverrideFile> m_archiveOverrideMap;
+
+	std::vector<std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>>> 
+		m_archiveRedirects; //<archive,file>-><archive,file>
+	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
+
+	union {
+		DWORD full;
+		BYTE arr[4];
+		struct {
+			BYTE front;
+			BYTE side;
+			BYTE back;
+			BYTE extension;
+		};
+	} m_hairRedirects;
 private:
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
@@ -74,14 +98,14 @@ private:
 		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T>*);
 		template<typename T, typename U>
 		std::pair<T,U> ReadData_sub(char*& buffer,int& size,std::pair<T,U>*);
-		std::string ReadData_sub(char*& buffer,int& size,std::string*);
+		std::wstring ReadData_sub(char*& buffer,int& size,std::wstring*);
 
 	//write help functions
 	template<typename T>
 	bool WriteData(char** buffer,int* size,int& at,const T& data, bool resize);
 		template<typename T>
 		bool WriteData_sub(char** buffer,int* size,int& at, const T& data,bool resize, T*);
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::string& data,bool resize,std::string*);
+		bool WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*);
 		template<typename T>
 		bool WriteData_sub(char** buffer,int* size,int& at, const std::vector<T>& data,bool resize,std::vector<T>*);
 		template<typename T, typename U>

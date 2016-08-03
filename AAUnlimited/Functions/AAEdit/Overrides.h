@@ -4,6 +4,7 @@
 
 namespace AAEdit {
 
+bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer);
 bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer);
 
 DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset);

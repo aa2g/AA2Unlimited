@@ -4,11 +4,11 @@
 #include "Files\Logger.h"
 #include "config.h"
 
-OverrideFile::OverrideFile(const char* fileName) : OverrideFile(OVERRIDE_ARCHIVE_PATH, fileName, true, true) {
+OverrideFile::OverrideFile(const TCHAR* fileName) : OverrideFile(OVERRIDE_ARCHIVE_PATH, fileName, true, true) {
 	
 }
 
-OverrideFile::OverrideFile(const char* path, const char* fileName, bool tryAAPlay, bool tryAAEdit) : m_good(false), m_cache(NULL) {
+OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool tryAAPlay, bool tryAAEdit) : m_good(false), m_cache(NULL) {
 	m_fileName = fileName;
 
 	HANDLE file = NULL;

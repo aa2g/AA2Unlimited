@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Functions\AAPlay\HAis\ForceAi.cpp" />
+    <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
@@ -58,6 +61,9 @@
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Functions\AAPlay\HAis\ForceAi.h" />
+    <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalVariables.h" />
@@ -119,14 +125,14 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>

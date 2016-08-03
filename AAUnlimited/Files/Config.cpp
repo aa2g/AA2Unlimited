@@ -32,7 +32,7 @@ Config::Config() {
 	}
 }
 
-Config::Config(const char* path) : Config()
+Config::Config(const TCHAR* path) : Config()
 {
 	HANDLE hFile = CreateFile(path,FILE_READ_ACCESS,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
 	if (hFile == NULL ||hFile == INVALID_HANDLE_VALUE) {

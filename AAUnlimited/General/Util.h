@@ -6,36 +6,40 @@
 namespace General {
 	
 
-inline bool StartsWith(const char* str, const char* prefix) {
+inline bool StartsWith(const TCHAR* str, const TCHAR* prefix) {
 	while (*str && *prefix && *str == *prefix) str++, prefix++;
 	return !*prefix;
 }
-inline bool StartsWith(const std::string& str, const char* prefix) {
-	return strncmp(str.c_str(), prefix, str.size()) == 0;
+inline bool StartsWith(const std::wstring& str, const TCHAR* prefix) {
+	return wcscmp(str.c_str(), prefix) == 0;
 }
 
-inline char* FindFileInPath(char* path) {
-	char* lastSlash = path;
+inline TCHAR* FindFileInPath(TCHAR* path) {
+	TCHAR* lastSlash = path;
 	while (*path) {
-		char c = *path;
+		TCHAR c = *path;
 		if (c == '\\' || c == '/') lastSlash = path+1;
 		path++;
 	}
 	return lastSlash;
 }
 
-inline const char* FindFileInPath(const char* path) {
-	const char* lastSlash = path;
+inline const TCHAR* FindFileInPath(const TCHAR* path) {
+	const TCHAR* lastSlash = path;
 	while (*path) {
-		char c = *path;
+		TCHAR c = *path;
 		if (c == '\\' || c == '/') lastSlash = path+1;
 		path++;
 	}
 	return lastSlash;
+}
+
+inline float GetRandomFloat(float min, float max) {
+	return min + rand() / (RAND_MAX / (max - min));
 }
 
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.
-const char* OpenFileDialog(const char* initialDir);
+const TCHAR* OpenFileDialog(const TCHAR* initialDir);
 
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);

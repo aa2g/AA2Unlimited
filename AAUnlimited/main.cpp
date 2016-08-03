@@ -15,6 +15,7 @@ BOOL WINAPI DllMain(
 { 
 	if (fdwReason == DLL_PROCESS_ATTACH) {
 		srand(time(NULL));
+		MessageBox(NULL, L"hi", L"hi", 0);
 		//change calls in code to ours
 		General::DllInst = hinstDLL;
 		if (!General::Initialize()) {

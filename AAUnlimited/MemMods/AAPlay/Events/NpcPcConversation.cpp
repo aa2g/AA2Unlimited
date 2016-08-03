@@ -65,13 +65,14 @@ void TickInjection() {
 
 void __declspec(naked) NpcAnswerRedirect() {
 	__asm {
+		//orignal code
+		mov ecx, [edx + 04]
+		mov[ecx + ebp + 0x30], eax
+		//give a chance to change it
 		pushad
 		push ebp
 		call NpcAnswer
 		popad
-		//orignal code
-		mov ecx, [edx+04]
-		mov [ecx+ebp+30], eax
 		ret
 	}
 }

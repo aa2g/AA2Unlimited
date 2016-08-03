@@ -12,31 +12,31 @@ namespace ExtClass {
 class HParticipant
 {
 public:
-	CharacterStruct* charPtr;
-	BYTE unknown1[0x1C];
-	DWORD nClimedInFront;
-	BYTE unknown2[4];
-	DWORD nClimedInRear;
-	BYTE unknown3[0xC];
-	DWORD nClim;
-	DWORD nClimTogether;
-	BYTE unknown4[0x14];
-	DWORD nPosChanges;
-	BYTE unknown5[8];
-	DWORD nClimedOutside;
-	BYTE unknown6[0xC];
-	void* someSoundPointer;
-	BYTE unknown7[0x14];
-	DWORD nCremeOnFront;
-	DWORD nCremeOn1;
-	DWORD nCremeOn2;
-	DWORD nCremeOnBack;
-	DWORD nCremeOn3;
-	WORD unknown8;
-	WORD clothesState;
-	BYTE bClothesSlipped;
-	BYTE unknown9;
-	BYTE bShoesOff;
+	CharacterStruct* m_charPtr;
+	BYTE m_unknown1[0x1C];
+	DWORD m_nClimedInFront;
+	BYTE m_unknown2[4];
+	DWORD m_nClimedInRear;
+	BYTE m_unknown3[0xC];
+	DWORD m_nClim;
+	DWORD m_nClimTogether;
+	BYTE m_unknown4[0x14];
+	DWORD m_nPosChanges;
+	BYTE m_unknown5[8];
+	DWORD m_nClimedOutside;
+	BYTE m_unknown6[0xC];
+	void* m_someSoundPointer;
+	BYTE m_unknown7[0x14];
+	DWORD m_nCremeOnFront;
+	DWORD m_nCremeOn1;
+	DWORD m_nCremeOn2;
+	DWORD m_nCremeOnBack;
+	DWORD m_nCremeOn3;
+	WORD m_unknown8;
+	WORD m_clothesState;
+	BYTE m_bClothesSlipped;
+	BYTE m_unknown9;
+	BYTE m_bShoesOff;
 public:
 	HParticipant() = delete;
 	~HParticipant() = delete;

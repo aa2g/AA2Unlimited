@@ -9,15 +9,15 @@ Logger::Logger() : currPrio(Priority::ERR), filter(Priority::SPAM) {
 
 }
 
-Logger::Logger(const char * file,Priority prio) : currPrio(Priority::ERR),filter(prio)
+Logger::Logger(const TCHAR * file,Priority prio) : currPrio(Priority::ERR),filter(prio)
 {
 	Initialize(file, prio);
 }
 
-void Logger::Initialize(const char * file, Priority prio) {
+void Logger::Initialize(const TCHAR * file, Priority prio) {
 	outfile.open(file);
 	if (!outfile.good()) {
-		MessageBox(0, (std::string("Could not open Logfile ") + file).c_str(), "Error", 0);
+		MessageBox(0, (std::wstring(TEXT("Could not open Logfile ")) + file).c_str(), TEXT("Error"), 0);
 	}
 }
 

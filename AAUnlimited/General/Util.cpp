@@ -8,11 +8,11 @@ namespace General {
 
 double PassiveTimer::m_freq;
 
-const char* OpenFileDialog(const char* initialDir) {
+const TCHAR* OpenFileDialog(const TCHAR* initialDir) {
 	static OPENFILENAME opfn;
 	static bool opfnInit = false;
-	static char workingDir[512];
-	static char path[512];
+	static TCHAR workingDir[512];
+	static TCHAR path[512];
 	if (!opfnInit) {
 		ZeroMemory((void*)(&opfn), sizeof(opfn));
 		opfn.lStructSize = sizeof(opfn);
@@ -22,7 +22,7 @@ const char* OpenFileDialog(const char* initialDir) {
 		opfn.nMaxFileTitle = 0;
 		opfn.lpstrInitialDir = NULL;
 		opfn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-		opfn.lpstrFilter = "All\0*\0";
+		opfn.lpstrFilter = TEXT("All\0*\0");
 	}
 	opfn.lpstrFile = path;
 	opfn.lpstrFile[0] = '\0';

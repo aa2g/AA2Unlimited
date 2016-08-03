@@ -1,7 +1,17 @@
 #pragma once
 #include <Windows.h>
 
+#include "HClasses\HPosData.h"
+
 namespace ExtClass {
+
+enum Gender {
+	GENDER_MALE = 0, GENDER_FEMALE = 1
+};
+
+enum PregnancyRisk {
+	PREGRISK_DANGEROUS = 2, PREGRISK_NORMAL = 0, PREGRISK_SAFE = 1
+};
 
 #pragma pack(push, 1)
 /*
@@ -172,6 +182,17 @@ public:
 		DWORD shadowUnderwearLightness;
 	} m_clothes[4];
 public:
+	
+	inline DWORD GetPreferenceFlags() {
+		DWORD retVal = 0;
+		DWORD currFlag = 1;
+		for (int i = 0; i < 13; i++) {
+			if (m_preferenceBools[i]) retVal |= currFlag;
+			currFlag <<= 1;
+		}
+		return retVal;
+	}
+
 	CharacterData() = delete;
 	~CharacterData() = delete;
 };

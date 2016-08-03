@@ -12,6 +12,10 @@ const AAUCardData AAUCardData::g_defaultValues;
 AAUCardData::AAUCardData()
 {
 	m_tanSlot = 0;
+	m_hairRedirects.front = 0;
+	m_hairRedirects.side = 1;
+	m_hairRedirects.back = 2;
+	m_hairRedirects.extension = 3;
 }
 
 
@@ -47,7 +51,7 @@ T AAUCardData::ReadData_sub(char*& buffer,int& size,T*) {
 }
 
 //read for string
-std::string AAUCardData::ReadData_sub(char*& buffer,int& size,std::string*) {
+std::wstring AAUCardData::ReadData_sub(char*& buffer,int& size,std::wstring*) {
 	DWORD length = ReadData<DWORD>(buffer,size);
 	if (size < 0 || (DWORD)size < length) {
 		char idName[5];
@@ -56,8 +60,8 @@ std::string AAUCardData::ReadData_sub(char*& buffer,int& size,std::string*) {
 		LOGPRIO(Logger::Priority::WARN) << "Not enough space left to parse member " << idName << "(" << m_currReadMemberId << "); expected " << length << ", but has " << size << "\r\n";
 		return NULL;
 	}
-	std::string retVal(buffer,length);
-	buffer += length,size -= length;
+	std::wstring retVal((TCHAR*)buffer,length);
+	buffer += length*sizeof(TCHAR),size -= length*sizeof(TCHAR);
 	return retVal;
 }
 
@@ -98,13 +102,13 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T& data,bo
 	return ret;
 }
 //for string
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::string& data,bool resize,std::string*) {
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*) {
 	bool ret = true;
 	//write size first, then buffer
 	DWORD ssize = data.size();
 	ret &= General::BufferAppend(buffer,size,at,(const char*)(&ssize),4,resize);
 	at += 4;
-	ret &= General::BufferAppend(buffer,size,at,data.c_str(),data.size(),resize);
+	ret &= General::BufferAppend(buffer,size,at,(const char*)data.c_str(),data.size()*sizeof(TCHAR),resize);
 	at += data.size();
 	return ret;
 }
@@ -172,7 +176,20 @@ void AAUCardData::FromBuffer(char* buffer) {
 			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_archiveOverrides.size() << " elements; "
 				" only " << m_archiveOverrideMap.size() << " were valid\r\n";
 			break; }
+		case 'ARdr':
+			m_archiveRedirects = ReadData<decltype(m_archiveRedirects)>(buffer, size);
+			for (const auto& it : m_archiveRedirects) {
+				if (m_archiveRedirectMap.find(it.first) == m_archiveRedirectMap.end()) {
+					m_archiveRedirectMap.emplace(it.first, it.second);
+				}
+			}
+			break;
+		case 'HrRd':
+			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, value " << m_hairRedirects.full << "\r\n";
+			break;
 		}
+		
 	}
 	if (size != 0) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
@@ -195,7 +212,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	bool ret = true;
 	//a define to make this function look simpler.
 	//dumps the given id, followed by the value, but only if its actually different from the default value
-#define DUMP_MEMBER(id,x) \
+	#define DUMP_MEMBER(id,x) \
 		if(x != g_defaultValues.x) { \
 			DWORD varId = id; \
 			ret &= WriteData(buffer,size,at,varId,resize); \
@@ -225,6 +242,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	//overrides
 	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
 	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
+	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
+	//hair redirect
+	DUMP_MEMBER('HrRd', m_hairRedirects.full);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	int dataSize = at - 8;
@@ -243,58 +263,32 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	
 }
 
-bool AAUCardData::AddMeshOverride(const char* texture, const char* override) {
+bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
+	if (m_meshOverrideMap.find(texture) != m_meshOverrideMap.end()) return false;
 	TextureImage img(override);
 	if (img.IsGood()) {
-		std::string texStr(texture);
-		m_meshOverrides.emplace_back(texStr, std::string(override));
+		std::wstring texStr(texture);
+		m_meshOverrides.emplace_back(texStr, std::wstring(override));
 		m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
 	}
 	return false;
 }
 
-bool AAUCardData::RemoveMeshOverride(const char* texture, const char* override) {
-	bool found = false;
-	for (auto it = m_meshOverrides.begin(); it != m_meshOverrides.end(); it++) {
-		if (it->first == texture && it->second == override) {
-			m_meshOverrides.erase(it);
-			found = true;
-			break;
-		}
-	}
-	auto mapMatch = m_meshOverrideMap.equal_range(texture);
-	if (mapMatch.first != mapMatch.second) {
-		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
-			if (it->second.GetFileName() == override) {
-				m_meshOverrideMap.erase(it);
-				break;
-			}
-		}
-	}
-	return found;
-}
-
 bool AAUCardData::RemoveMeshOverride(int index) {
 	if (m_meshOverrides.size() <= index) return false;
 	auto vMatch = m_meshOverrides.begin() + index;
-	auto mapMatch = m_meshOverrideMap.equal_range(vMatch->first);
-	if (mapMatch.first != mapMatch.second) {
-		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
-			if (it->second.GetFileName() == vMatch->second) {
-				m_meshOverrideMap.erase(it);
-				break;
-			}
-		}
-	}
+	auto mapMatch = m_meshOverrideMap.find(vMatch->first);
 	m_meshOverrides.erase(vMatch);
+	if(mapMatch != m_meshOverrideMap.end()) m_meshOverrideMap.erase(mapMatch);
 	return true;
 }
 
-bool AAUCardData::AddArchiveOverride(const char* archive, const char* archivefile, const char* override) {
+bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override) {
+	if (m_archiveOverrideMap.find(std::pair<std::wstring,std::wstring>(archive, archivefile)) != m_archiveOverrideMap.end()) return false;
 	OverrideFile img(override);
 	if (img.IsGood()) {
-		auto toOverride = std::pair<std::string, std::string>(archive, archivefile);
+		auto toOverride = std::pair<std::wstring, std::wstring>(archive, archivefile);
 		m_archiveOverrides.emplace_back(toOverride, override);
 		m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
 		return true;
@@ -302,39 +296,29 @@ bool AAUCardData::AddArchiveOverride(const char* archive, const char* archivefil
 	return false;
 }
 
-bool AAUCardData::RemoveArchiveOverride(const char* archive, const char* archivefile, const char* override) {
-	bool found = false;
-	auto leftPair = std::pair<std::string, std::string>(archive, archivefile);
-	auto toFind = std::pair<std::pair<std::string, std::string>, std::string>(leftPair, override);
-	auto match = std::find(m_archiveOverrides.begin(), m_archiveOverrides.end(), toFind);
-	if (match != m_archiveOverrides.end()) {
-		m_archiveOverrides.erase(match);
-		found = true;
-	}
-	auto mapMatch = m_archiveOverrideMap.equal_range(leftPair);
-	if (mapMatch.first != mapMatch.second) {
-		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
-			if (it->second.GetFileName() == override) {
-				m_archiveOverrideMap.erase(it);
-				break;
-			}
-		}
-	}
-	return found;
-}
-
 bool AAUCardData::RemoveArchiveOverride(int index) {
 	if (m_archiveOverrides.size() <= index) return false;
 	auto vMatch = m_archiveOverrides.begin() + index;
-	auto mapMatch = m_archiveOverrideMap.equal_range(vMatch->first);
-	if (mapMatch.first != mapMatch.second) {
-		for (auto it = mapMatch.first; it != mapMatch.second; it++) {
-			if (it->second.GetFileName() == vMatch->second) {
-				m_archiveOverrideMap.erase(it);
-				break;
-			}
-		}
-	}
+	auto mapMatch = m_archiveOverrideMap.find(vMatch->first);
 	m_archiveOverrides.erase(vMatch);
+	if (mapMatch != m_archiveOverrideMap.end()) m_archiveOverrideMap.erase(mapMatch);
+	return true;
+}
+
+bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile) {
+	//here i should check if the archive is valid, but meh
+	auto left = std::pair<std::wstring, std::wstring>(archive, archivefile);
+	auto right = std::pair<std::wstring, std::wstring>(redirectarchive, redirectfile);
+	if (m_archiveRedirectMap.find(left) != m_archiveRedirectMap.end()) return false; //allready contains it
+	m_archiveRedirects.emplace_back(left, right);
+	m_archiveRedirectMap.insert(std::make_pair(left, right));
+	return true;
+}
+bool AAUCardData::RemoveArchiveRedirect(int index) {
+	if (m_archiveRedirects.size() <= index) return false;
+	auto vMatch = m_archiveRedirects.begin() + index;
+	auto mapMatch = m_archiveRedirectMap.find(vMatch->first);
+	m_archiveRedirects.erase(vMatch);
+	if (mapMatch != m_archiveRedirectMap.end()) m_archiveRedirectMap.erase(mapMatch);
 	return true;
 }

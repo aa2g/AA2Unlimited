@@ -27,9 +27,9 @@ public:
 	};
 public:
 	Logger();
-	Logger(const char* file,Priority prio);
+	Logger(const TCHAR* file,Priority prio);
 	~Logger();
-	void Initialize(const char * file, Priority prio);
+	void Initialize(const TCHAR * file, Priority prio);
 
 	template<typename T>
 	Logger& operator<<(const T& p) {
@@ -60,6 +60,11 @@ public:
 			*this << "[CRITICAL ERROR] ";
 			break;
 		}
+		return *this;
+	}
+
+	Logger& operator<<(const std::wstring& str) {
+		outfile << str.c_str();
 		return *this;
 	}
 

@@ -12,6 +12,7 @@ namespace AAPlay {
 */
 extern AAUCardData g_currentCard;
 
+bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer);
 /*
  * Event-Callback for archive-file opening
  */

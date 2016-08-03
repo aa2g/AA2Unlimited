@@ -10,24 +10,37 @@
 
 namespace AAEdit {
 
+/*********************************/
+/* General Archive File Redirect */
+/*********************************/
+
+namespace {
+	TCHAR loc_archiveBuffer[256];
+	TCHAR loc_fileBuffer[256];
+}
+
+bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
+	TCHAR* strArchive = General::FindFileInPath(*archive);
+	auto match = g_cardData.GetArchiveRedirectFile(strArchive, *file);
+	if (match != NULL) {
+		size_t size = (strArchive - *archive); //note that the /2 is done automatically
+		wcsncpy_s(loc_archiveBuffer, *archive, size);
+		wcscpy_s(loc_archiveBuffer + size, 256 - size, match->first.c_str());
+		wcscpy_s(loc_fileBuffer, match->second.c_str());
+		*archive = loc_archiveBuffer;
+		*file = loc_fileBuffer;
+	}
+	return false;
+}
 
 /*********************************/
 /* General Archive File Override */
 /*********************************/
 
 bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
-	
-	size_t nConverted = 0;
-	char strArchivePath[256];
-	wcstombs_s(&nConverted, strArchivePath, 256, archive, 256);
-	if (nConverted == 0) return false;
-	char* strArchive = General::FindFileInPath(strArchivePath);
+	TCHAR* strArchive = General::FindFileInPath(archive);
 
-	char strFile[256];
-	wcstombs_s(&nConverted, strFile, 256, file, 256);
-	if (nConverted == 0) return false;
-
-	const OverrideFile* match = g_cardData.GetArchiveOverrideFile(strArchive, strFile);
+	const OverrideFile* match = g_cardData.GetArchiveOverrideFile(strArchive, file);
 	if (match == NULL) return false;
 
 	void* fileBuffer = Shared::IllusionMemAlloc(match->GetFileSize());
@@ -62,7 +75,12 @@ DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset) {
 	file += 4;
 
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
-	loc_match = g_cardData.GetMeshOverrideTexture((char*)file);
+	{
+		size_t out;
+		TCHAR nameBuffer[256];
+		mbstowcs_s(&out, nameBuffer, (char*)file, 256);
+		loc_match = g_cardData.GetMeshOverrideTexture(nameBuffer);
+	}
 	for (DWORD i = 0; i < size; i++) file[i] = ~file[i];
 
 	if (loc_match != NULL) {
@@ -81,11 +99,11 @@ DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset) {
 	*/
 bool __stdcall MeshTextureListFill(BYTE* name, DWORD* xxReadOffset) {
 	if (!loc_currentlyOverriding) return false;
-	const std::string& matchname = loc_match->GetFileName();
-	for (size_t i = 0; i < matchname.size(); i++) {
-		name[i] = matchname[i];
-	}
-	name[matchname.size()] = '\0';
+	const std::wstring& matchname = loc_match->GetFileName();
+
+	size_t out;
+	wcstombs_s(&out, (char*)name, matchname.size()+1, matchname.c_str(), matchname.size());
+	
 	DWORD difference = loc_oldNameLength - (matchname.size() + 1); //note that it incudes \0
 	*xxReadOffset += difference;
 	return true;
@@ -117,14 +135,18 @@ void __stdcall MeshTextureStart(BYTE* xxFile, DWORD offset) {
 	file += 4;
 	//"decrypt" the string name in place so we can compare better
 	for (DWORD i = 0; i < nameLength; i++) file[i] = ~file[i];
-	loc_match = g_cardData.GetMeshOverrideTexture((char*)file);
-
+	{
+		size_t out;
+		TCHAR nameBuffer[256];
+		mbstowcs_s(&out,nameBuffer, (char*)file, 256);
+		loc_match = g_cardData.GetMeshOverrideTexture(nameBuffer);
+	}
 	//remember to encrypt again
 	for (DWORD i = 0; i < nameLength; i++) file[i] = ~file[i];
 
 	//if we found a file to override with, change length (thats our job here after all)
 	if (loc_match != NULL) {
-		const std::string& matchPath = loc_match->GetFileName();
+		const std::wstring& matchPath = loc_match->GetFileName();
 		loc_matchFile = CreateFile(loc_match->GetFilePath().c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 		if (loc_matchFile != NULL && loc_matchFile != INVALID_HANDLE_VALUE) {
 			//successfully opened file
@@ -148,11 +170,10 @@ void __stdcall MeshTextureStart(BYTE* xxFile, DWORD offset) {
 bool __stdcall MeshTextureOverrideName(BYTE* buffer, DWORD* xxReadOffset) {
 	if (!loc_currentlyOverriding) return false;
 	//we cant replace the name. it will erase it later for some reason, or not find the texture.
-	const std::string& matchPath = loc_match->GetFileName();
-	for (unsigned int i = 0; i < matchPath.size(); i++) {
-		buffer[i] = matchPath[i];
-	}
-	buffer[matchPath.size()] = '\0';
+	const std::wstring& matchPath = loc_match->GetFileName();
+	size_t out;
+	wcstombs_s(&out, (char*)buffer, matchPath.size() + 1, matchPath.c_str(), matchPath.size());
+
 	//also, adjust his current offset
 	DWORD difference = loc_oldNameLength - (matchPath.size()+1); //note that it incudes \0
 	*xxReadOffset += difference;

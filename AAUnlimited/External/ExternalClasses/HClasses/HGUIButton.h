@@ -19,7 +19,7 @@ public:
 	DWORD m_unknown1;
 	BYTE m_bClicked;
 	BYTE m_unkown2[3];
-	float m_someFloat;		//if 1, visible, if 0, not. However, these are constantly reset, so changing is of no use.
+	float m_opacity;		//if 1, visible, if 0, not. However, these are constantly reset, so changing is of no use.
 	BYTE m_bActive;			//if 0 (FALSE), this button is greyed out and can not be clicked
 	BYTE m_unknown3[3];
 	BYTE m_unknown4[0x20];
@@ -32,7 +32,7 @@ public:
 	DWORD m_posBottom;
 	BYTE m_mouseHover;
 
-	static HGUIButton* PressedButton; //used for Press() function
+	static HGUIButton* PressedButton[5]; //used for Press() function
 
 	//virtual table
 	static void* VirtualTable;
