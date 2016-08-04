@@ -41,6 +41,11 @@ inline float GetRandomFloat(float min, float max) {
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.
 const TCHAR* OpenFileDialog(const TCHAR* initialDir);
 
+inline bool DirExists(const TCHAR* dir) {
+	DWORD type = GetFileAttributes(dir);
+	return (type != INVALID_FILE_ATTRIBUTES && (type & FILE_ATTRIBUTE_DIRECTORY));
+}
+
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
 

@@ -7,6 +7,8 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bUseMeshTextureOverrides", false),	//USE_MESH_TEXTURE_OVERRIDES
 	MemberInfo(Config::BOOL,	"bUseHAi", false),	//USE_H_AI
 	MemberInfo(Config::BOOL,	"bUseShadowing", false),	//USE_SHADOWING
+	MemberInfo(Config::BOOL,	"bNoPromptHIsRape", false),	//NO_PROMPT_IS_FORCE
+	MemberInfo(Config::BOOL,	"bHAiOnNoPromptH", false),	//HAI_ON_NO_PROMPT
 };
 
 Config g_Config;

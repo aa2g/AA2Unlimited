@@ -19,43 +19,21 @@ namespace ExtClass {
  * 9: fight
  */
 
+enum PcConversationTypes{
+	PCCONTYPE_PCNPC = 0,
+	PCCONTYPE_NPCPC_GIVEANSWER = 1, //when the npc initiates the conversation, and the pc has to give a yes/no answer
+	PCCONTYPE_NPCPC_NOASNWER = 3, //when the npc initiates the conversation, but no answer is required
+	PCCONTYPE_FIGHT = 9
+};
+
 #pragma pack(push, 1)
-class ConversationSubStruct;
-/*
- * Saves data about the currently ongoing conversation of the PC with a NPC
- */
-class ConversationStruct
-{
-public:
-	void* m_virtualTable;
-	DWORD m_askWaitTime; //how long the npc has been waiting for you to make a question if you talked to it. Stops at 10000
-	BYTE m_unknown1[0x10];
-	DWORD m_answerWaitTime; //how long the npc has been waiting for an answer. if a certain time has been waited, an automatic decision will be made.
-public:
-	ConversationStruct() = delete;
-	~ConversationStruct() = delete;
 
-	inline ConversationSubStruct* getSubStruct() {
-		return (ConversationSubStruct*)((BYTE*)(this) + ((DWORD*)m_virtualTable)[1]); //cast-madness
-	}
-};
 
-class ConversationStructPcNpc {
-public:
-	void* m_virtualTable;
-	DWORD m_unknown1;
-	DWORD m_unknown2;
-	ConversationStruct m_rest;
-
-public:
-	ConversationStructPcNpc() = delete;
-	~ConversationStructPcNpc() = delete;
-};
 
 /*
- * Referenced from within the struct; most likely polymorphic or something, as it seems to be
- * at a current offset of 0x5B60, yet the offset is taken out of the virtual table at [[ConversationStruct]+4]
- */
+* Referenced from within the struct; most likely polymorphic or something, as the offset
+* is taken out of the virtual table at [[XYZConversationStruct]+4]
+*/
 class ConversationSubStruct {
 public:
 	BYTE m_unknown[0x25];
@@ -74,12 +52,64 @@ public:
 	DWORD m_conversationAnswerId; //after the npc made a positive or negative answer, this id will be what he answers with.
 	DWORD m_playerAnswer; //0 = positive, 1 = negative
 public:
-	inline int GetConversationKindInt() { return *(int*)((BYTE*)(this) + 0x839C); }
+	inline DWORD GetConversationKind() { return *(DWORD*)((BYTE*)(this) + 0x839C); }
 	ConversationSubStruct() = delete;
 	~ConversationSubStruct() = delete;
 };
 
-static_assert(sizeof(ConversationSubStruct) == 0x50,"Invalid size");
+static_assert(sizeof(ConversationSubStruct) == 0x50, "Invalid size");
+
+/*
+ * All subclasses as well as the main class (which is tecnically just the PcNpcConversation struct)
+ * have a virtual table at their start and use this formular to get to the substruct
+ */
+class BaseConversationStruct {
+public:
+	void* m_virtualTable;
+	inline ConversationSubStruct* GetSubStruct() {
+		return (ConversationSubStruct*)((BYTE*)(this) + ((DWORD*)m_virtualTable)[1]); //cast-madness
+	}
+};
+
+class MainConversationStruct : public BaseConversationStruct {
+public:
+	static const DWORD SubstructOffsets[13]; //offsets of the different substructs
+	inline DWORD GetSubstructType() {
+		//we are esi, eax is the substruct type
+		/*AA2Play v12 FP v1.4.0a.exe+50FA2 - 8B 06                 - mov eax,[esi]
+		AA2Play v12 FP v1.4.0a.exe+50FA4 - 8B 48 04              - mov ecx,[eax+04]
+		AA2Play v12 FP v1.4.0a.exe+50FA7 - 8B 84 31 9C830000     - mov eax,[ecx+esi+0000839C]*/
+		return GetSubStruct()->GetConversationKind();
+	}
+};
+
+class NpcPcInteractiveConversationStruct : public BaseConversationStruct
+{
+public:
+	DWORD m_askWaitTime; //how long the npc has been waiting for you to make a question if you talked to it. Stops at 10000
+	BYTE m_unknown1[0x10];
+	DWORD m_answerWaitTime; //how long the npc has been waiting for an answer. if a certain time has been waited, an automatic decision will be made.
+public:
+	NpcPcInteractiveConversationStruct() = delete;
+	~NpcPcInteractiveConversationStruct() = delete;
+
+};
+
+class NpcPcNonInteractiveConversationStruct : public BaseConversationStruct {
+
+};
+
+class PcNpcConversationStruct : public BaseConversationStruct {
+public:
+	DWORD m_unknown1;
+	DWORD m_unknown2;
+	NpcPcInteractiveConversationStruct m_rest;
+
+public:
+	PcNpcConversationStruct() = delete;
+	~PcNpcConversationStruct() = delete;
+};
+
 
 //ids can be seen at https://docs.google.com/spreadsheets/d/1gwmoVpKuSuF0PtEPLEB17eK_dexPaKU106ShZEpBLhg/edit#gid=1592342892
 enum ConversationId {
@@ -102,8 +132,6 @@ enum ConversationId {
 	
 	COMPETE = 63,
 
-	NEVERMIND = 66,
-
 	REQUEST_MASSAGE = 69,
 	REQEUST_KISS = 70,
 	REQUEST_HUG = 71,
@@ -116,6 +144,7 @@ enum ConversationId {
 	AWARD_LEWD_PROMISE = 80,
 
 	EXPLOITABLE_LINE = 90,
+	NO_PROMPT_H = 99,
 	AFTER_H = 101
 };
 

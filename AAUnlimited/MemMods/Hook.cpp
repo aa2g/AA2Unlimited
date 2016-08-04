@@ -180,7 +180,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
-#include "MemMods/AAPlay/Events/NpcPcConversation.h"
+#include "MemMods/AAPlay/Events/PcConversation.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 
@@ -214,9 +214,9 @@ void InitializeHooks() {
 		using namespace PlayInjections;
 		HPlayInjections::TickInjection();
 
-		NpcPcConversation::TickInjection();	
-		NpcPcConversation::NpcAnswerInjection();
-		NpcPcConversation::PcAnswerInjection();
+		PcConversation::TickInjection();	
+		PcConversation::NpcAnswerInjection();
+		PcConversation::PcAnswerInjection();
 
 		Loads::HiPolyLoadsInjection();
 		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {

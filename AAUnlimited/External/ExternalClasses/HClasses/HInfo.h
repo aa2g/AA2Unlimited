@@ -38,18 +38,18 @@ public:
 	BYTE m_unknown6[0x50C];
 	DWORD m_currPosition;
 	BYTE m_unknown7[0x18];
-	HGUIButton* m_exitButton;			//button to exit the scene
-	HGUIButton* m_swapButton;			//the two circle arrows that swap positions between the two participants
-	HGUIButton* m_expandClothesButton;	//hides or unhides the cloth select buttons
-	HGUIButton* m_category1;	//category buttons that hide the h-actions until clicked on. 1: Hand
-	HGUIButton* m_category2;	//2: tounge
-	HGUIButton* m_category3;	//3: m|f
-	HGUIButton* m_category4;	//4: m in f
-	HGUIButton* m_category5;	//5: flower
-	HGUIButton* m_category6;	//6: finish hand
-	HGUIButton* m_category7;	//7: finish m|f/tounge
-	HGUIButton* m_category8;	//8: finish m in f
-	HGUIButton* m_category9;	//9: finish flower
+	HGUIButton* m_btnExit;			//button to exit the scene
+	HGUIButton* m_btnSwap;			//the two circle arrows that swap positions between the two participants
+	HGUIButton* m_btnExpandClothes;	//hides or unhides the cloth select buttons
+	HGUIButton* m_btnCategory1;	//category buttons that hide the h-actions until clicked on. 1: Hand
+	HGUIButton* m_btnCategory2;	//2: tounge
+	HGUIButton* m_btnCategory3;	//3: m|f
+	HGUIButton* m_btnCategory4;	//4: m in f
+	HGUIButton* m_btnCategory5;	//5: flower
+	HGUIButton* m_btnCategory6;	//6: finish hand
+	HGUIButton* m_btnCategory7;	//7: finish m|f/tounge
+	HGUIButton* m_btnCategory8;	//8: finish m in f
+	HGUIButton* m_btnCategory9;	//9: finish flower
 	BYTE m_unknown8[0x4];
 	HPosButtonList m_hPosButtons[9];
 	struct {
@@ -63,11 +63,11 @@ public:
 		DWORD* m_arrPositionsEnd; //first invalid element behind arrPositoins
 		DWORD m_unknown1;	//usually same as arrPositionsEnd, sometimes pointing past it, with 0s inbetween
 	} m_hPosButtonPositions_; //the last one doesnt have padding.
-	HGUIButton* m_maleButton; //the button that switches male between blue / off / ugly
-	HGUIButton* m_skirtButton;	//toggles skirt state
-	HGUIButton* m_shoeButton;	//toggles shoe visibility on and off
-	HGUIButton* m_underwearButton; //toggles underwear state
-	HGUIButton* m_outfitButton; //toggles outfit state
+	HGUIButton* m_btnMale; //the button that switches male between blue / off / ugly
+	HGUIButton* m_btnSkirt;	//toggles skirt state
+	HGUIButton* m_btnShoe;	//toggles shoe visibility on and off
+	HGUIButton* m_btnUnderwear; //toggles underwear state
+	HGUIButton* m_btnOutfit; //toggles outfit state
 public:
 	inline DWORD GetHPosition(int category, int buttonNumber) {
 		if (category < 0 || category > 8) return -1;

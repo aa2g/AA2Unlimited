@@ -29,7 +29,6 @@
     <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
     <ClCompile Include="External\ExternalClasses\IllusionList.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\HInjections.cpp" />
-    <ClCompile Include="MemMods\AAPlay\Events\NpcPcConversation.cpp" />
     <ClCompile Include="MemMods\AAPlay\Misc\TanSlotUnlimit.cpp" />
     <ClCompile Include="MemMods\Hook.cpp" />
     <ClCompile Include="MemMods\AAEdit\TanSlotUnlimited.cpp" />
@@ -56,6 +55,8 @@
     <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
     <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
     <ClCompile Include="Functions\AAPlay\HAis\ForceAi.cpp" />
+    <ClCompile Include="External\ExternalVariables\AAPlay\GameGlobals.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\PcConversation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -71,7 +72,6 @@
     <ClInclude Include="External\ExternalClasses\IllusionList.h" />
     <ClInclude Include="External\ExternalClasses.h" />
     <ClInclude Include="MemMods\AAPlay\Events\HInjections.h" />
-    <ClInclude Include="MemMods\AAPlay\Events\NpcPcConversation.h" />
     <ClInclude Include="MemMods\AAPlay\Misc\TanSlotUnlimit.h" />
     <ClInclude Include="MemMods\Hook.h" />
     <ClInclude Include="MemMods\MemRightsLock.h" />
@@ -102,6 +102,9 @@
     <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
     <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
     <ClInclude Include="Functions\AAPlay\HAis\ForceAi.h" />
+    <ClInclude Include="External\ExternalVariables\AAPlay\GameGlobals.h" />
+    <ClInclude Include="External\ExternalVariables\AddressRule.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\PcConversation.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

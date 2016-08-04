@@ -1,7 +1,7 @@
 #pragma once
 
 namespace PlayInjections {
-namespace NpcPcConversation {
+namespace PcConversation {
 
 
 void TickInjection();

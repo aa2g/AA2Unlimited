@@ -1,5 +1,7 @@
 #include "ForceAi.h"
 
+#include "External\ExternalVariables\AAPlay\GameGlobals.h"
+
 using namespace ExtClass;
 
 ForceAi::ForceAi() {
@@ -9,6 +11,7 @@ ForceAi::ForceAi() {
 ForceAi::~ForceAi() {
 }
 
+//note that certain positions may swap passive and active automatically depending on the priority member
 void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool active, bool allowForeplay, bool allowNormal, float climaxChance) {
 	int chosenPassiveActive = 0;
 	size_t nNormalPoses = 0;
@@ -43,8 +46,8 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 				}
 				chosen -= size;
 			}
-			return 0;
 		}
+		return 0;
 	};
 	
 	
@@ -199,12 +202,18 @@ ForceAi::State ForceAi::states[] = {
 	//step 2: pick a foreplay position according to the rapists' sexual preferences.
 	{ FOREPLAY,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
-			thisPtr->PickRandomDomPosition(info, false, true, true, false, 0 );
+			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, true, false, 0 );
 			thisPtr->StartTimerRandom(0, 15, 20);
 			if (state->m_customValue == 0) {
 				info->m_speed = 1;
 				thisPtr->SetSpeedChangeLinear(1, 2, 10);
 				thisPtr->SetRepeatParams(0, 1.0f, 0.8f);
+				if (thisPtr->m_forcee->m_shoesOffState == 0) {
+					info->m_btnShoe->Press(); //slip of shoes. they suck.
+				}
+			}
+			else if (state->m_customValue == 1 && thisPtr->m_forcee->m_bClothesSlipped == 0) {
+				info->m_btnUnderwear->Press();
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -219,11 +228,17 @@ ForceAi::State ForceAi::states[] = {
 	//step 3: pick some rapey position("rapey" is defined by the sex of the rapist)
 	{ DOMINANCE,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
-			thisPtr->PickRandomDomPosition(info, false, true, false, true, 0.1);
+			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, false, true, 0.1f);
 			thisPtr->StartTimerRandom(0, 15, 20);
 			if (state->m_customValue == 0) {
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2, 3);
 				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
+				if (thisPtr->m_forcee->m_bClothesSlipped == 0) {
+					info->m_btnUnderwear->Press(); //slip now if not done yet
+				}
+				if (thisPtr->m_forcee->m_clothesState == 0) {
+					info->m_btnOutfit->Press();
+				}
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -258,16 +273,32 @@ ForceAi::State ForceAi::states[] = {
 	{ CLIMAX,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
 			thisPtr->PickRandomPrefPosition(info, true, true, 1);
-			thisPtr->StartTimerRandom(0, 10.0f, 10.0f);
-			info->m_speed = 4;
+			thisPtr->StartTimerRandom(0, 20.0f, 20.0f);
 			if (state->m_customValue == 0) {
 				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
 			}
 		},
-		NULL,
+		[](State* state, ForceAi* thisPtr, HInfo* info) {
+			if (thisPtr->m_forcer->m_charPtr->m_charData->m_traitBools[TRAIT_VIOLENT]) {
+				info->m_speed = 2;
+			}
+			else {
+				info->m_speed = 1;
+			}
+		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) -> DWORD {
 			if (!thisPtr->TimerPassed(0)) return INVALID;
-			if (thisPtr->WantRepeat(0)) { state->m_customValue++;  return PREFERENCES; }
+			if (thisPtr->WantRepeat(0)) { 
+				if (state->m_customValue == 0) {
+					//if repeat the first time, unress fully
+					if (thisPtr->m_forcee->m_clothesState != 2) {
+						thisPtr->m_forcee->m_clothesState = 1;
+						info->m_btnOutfit->Press();
+					}
+				}
+				state->m_customValue++;  
+				return PREFERENCES; 
+			}
 			return END;
 		}
 	}
@@ -283,9 +314,22 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 		m_dominantPositionsPassive[i].clear();
 		m_preferencePositions[i].clear();
 	}
-
-	m_forcerGender = info->m_activeParticipant->m_charPtr->m_charData->m_gender;
-	m_forceeGender = info->m_passiveParticipant->m_charPtr->m_charData->m_gender;
+	//find out who we and our forcer are
+	if (info->m_activeParticipant->m_charPtr == *ExtVars::AAPlay::PlayerCharacterPtr()) {
+		//we are the active, so forcer is the passive
+		m_forcee = info->m_activeParticipant;
+		m_forcer = info->m_passiveParticipant;
+		m_isActive = false;
+	}
+	else {
+		//we are the passive, so forcer is the active
+		m_forcer = info->m_activeParticipant;
+		m_forcee = info->m_passiveParticipant;
+		m_isActive = true;
+	}
+	m_forcerGender = m_forcer->m_charPtr->m_charData->m_gender;
+	m_forceeGender = m_forcee->m_charPtr->m_charData->m_gender;
+	
 	m_isYuri = m_forceeGender == m_forcerGender;
 	for (int i = 0; i < 9; i++) {
 		HPosButtonList* list = &(info->m_hPosButtons[i]);
@@ -324,7 +368,7 @@ void ForceAi::Tick(ExtClass::HInfo* info) {
 	if (states[m_aiState].m_tickFunc != NULL) states[m_aiState].m_tickFunc(&states[m_aiState], this, info);
 	DWORD nextState = states[m_aiState].m_endFunc(&states[m_aiState], this, info);
 	if (nextState == END) {
-		info->m_exitButton->Press();
+		info->m_btnExit->Press();
 	}
 	else if (nextState != INVALID) {
 		m_aiState = nextState;

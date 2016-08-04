@@ -58,7 +58,7 @@ std::wstring AAUCardData::ReadData_sub(char*& buffer,int& size,std::wstring*) {
 		*(DWORD*)(idName) = m_currReadMemberId;
 		idName[4] = '\0';
 		LOGPRIO(Logger::Priority::WARN) << "Not enough space left to parse member " << idName << "(" << m_currReadMemberId << "); expected " << length << ", but has " << size << "\r\n";
-		return NULL;
+		return std::wstring(L"");
 	}
 	std::wstring retVal((TCHAR*)buffer,length);
 	buffer += length*sizeof(TCHAR),size -= length*sizeof(TCHAR);
@@ -109,7 +109,7 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::wstr
 	ret &= General::BufferAppend(buffer,size,at,(const char*)(&ssize),4,resize);
 	at += 4;
 	ret &= General::BufferAppend(buffer,size,at,(const char*)data.c_str(),data.size()*sizeof(TCHAR),resize);
-	at += data.size();
+	at += data.size() * sizeof(TCHAR);
 	return ret;
 }
 //for vector

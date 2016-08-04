@@ -36,7 +36,7 @@ public:
 	WORD m_clothesState;
 	BYTE m_bClothesSlipped;
 	BYTE m_unknown9;
-	BYTE m_bShoesOff;
+	BYTE m_shoesOffState; //0 = all on, 1 = shoe off, 2 = shoe & knees off, 3 = shoe off again?!
 public:
 	HParticipant() = delete;
 	~HParticipant() = delete;

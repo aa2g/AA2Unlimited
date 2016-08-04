@@ -1,4 +1,4 @@
-#include "NpcPcConversation.h"
+#include "PcConversation.h"
 #include "MemMods/Hook.h"
 #include "General/ModuleInfo.h"
 #include "External/ExternalClasses.h"
@@ -8,58 +8,121 @@ namespace PlayInjections {
 /*
  * Events that are thrown when a npc talks to a pc.
  */
-namespace NpcPcConversation {
+namespace PcConversation {
 
-/*
-	* Tick that is called while a NPC->PC conversation is taking place
-	*/
-void __stdcall PreTick(ExtClass::ConversationStruct* param) {
-	HAi::ConversationTickPre(param);
+/********************
+ * General tick Event
+ ********************/
+
+void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
+
 }
 
-void __stdcall PostTick(ExtClass::ConversationStruct* param) {
-	HAi::ConversationTickPost(param);
+void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
+
 }
 
-/*
- * Called after the NPC sets the response-member of the param struct to answer something.
- */
-void __stdcall NpcAnswer(ExtClass::ConversationStruct* param) {
+/********************
+ * NPC -> PC interactive conversation tick event
+ *******************/
+void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
 	
 }
 
-/*
+void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
+	HAi::ConversationTickPost(param);
+}
+
+/********************
+* NPC -> PC non interactive conversation tick event
+*******************/
+
+void __stdcall NpcPcNonInteractivePreTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
+
+}
+
+void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
+	HAi::ConversationTickPost(param);
+}
+
+/********************
+ * Called after the NPC sets the response-member of the param struct to answer something.
+ * Parameter type is whatever it currently is
+ ********************/
+void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
+	
+}
+
+/*******************
  * Called before the response of the PC in playerAnswer is copied into the response.
- */
-void __stdcall PcAnswer(ExtClass::ConversationStruct* param) {
+ * Parameter type is whatever it currently is
+ *******************/
+void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	HAi::ConversationPcResponse(param);
 }
 
-DWORD OriginalTickFunction;
 
+/***
+* Called for every pc conversation tick. do distributes to other callbacks. do not touch.
+*/
+void __stdcall PreTick(ExtClass::MainConversationStruct* param) {
+	GeneralPreTick(param);
+	DWORD substruct = param->GetSubstructType();
+	switch (substruct) {
+	case ExtClass::PCCONTYPE_NPCPC_GIVEANSWER:
+		NpcPcInteractivePreTick((ExtClass::NpcPcInteractiveConversationStruct*) (((DWORD)(param)+param->SubstructOffsets[substruct])));
+		break;
+	case ExtClass::PCCONTYPE_NPCPC_NOASNWER:
+		NpcPcNonInteractivePreTick((ExtClass::NpcPcNonInteractiveConversationStruct*)(((DWORD)(param)+param->SubstructOffsets[substruct])));
+		break;
+	default:
+		break;
+	}
+}
+
+void __stdcall PostTick(ExtClass::MainConversationStruct* param) {
+	GeneralPostTick(param);
+	DWORD substruct = param->GetSubstructType();
+	switch (substruct) {
+	case ExtClass::PCCONTYPE_NPCPC_GIVEANSWER:
+		NpcPcInteractivePostTick((ExtClass::NpcPcInteractiveConversationStruct*) (((DWORD)(param)+param->SubstructOffsets[substruct])));
+		break;
+	case ExtClass::PCCONTYPE_NPCPC_NOASNWER:
+		NpcPcNonInteractivePostTick((ExtClass::NpcPcNonInteractiveConversationStruct*)(((DWORD)(param)+param->SubstructOffsets[substruct])));
+		break;
+	default:
+		break;
+	}
+}
+
+
+DWORD OriginalTickFunction;
 void __declspec(naked) TickRedirect() {
-	_asm {
-		//remember, its an eax thiscall
+	__asm {
+		mov eax, [edi+0x2C]
 		push eax
 		call PreTick
-		lea eax, [esi+0x0C]
-		call [OriginalTickFunction] //redirect to original function (it will return for us)
-		lea eax, [esi + 0x0C]
+		mov eax, [edi+ 0x2C]
+		call [OriginalTickFunction]
+		push eax //rescue return value
+		mov eax, [edi+ 0x2C]
 		push eax
 		call PostTick
+		pop eax //restore return value
 		ret
 	}
 }
 
 void TickInjection() {
-	//eax-thiscall with ConversationStruct
-	//AA2Play v12 FP v1.4.0a.exe + 50FCB - 8D 46 0C - lea eax, [esi + 0C]
-	//AA2Play v12 FP v1.4.0a.exe+50FCE - E8 4D750000 - call "AA2Play v12 FP v1.4.0a.exe"+58520 {->AA2Play v12 FP v1.4.0a.exe+58520 }
-	DWORD address = General::GameBase + 0x50FCE;
+	//a general callback for conversations with the pc. eax thiscall, no stack parameters.
+	//eax is a pointer to a struct that transmorphs as described in ConversationStruct.h
+	//AA2Play v12 FP v1.4.0a.exe+4A237 - 8B 47 2C              - mov eax,[edi+2C]
+	//AA2Play v12 FP v1.4.0a.exe + 4A23A - E8 416C0000 - call "AA2Play v12 FP v1.4.0a.exe" + 50E80 {->AA2Play v12 FP v1.4.0a.exe + 50E80 }
+	DWORD address = General::GameBase + 0x4A23A;
 	DWORD redirectAddress = (DWORD)(&TickRedirect);
 	Hook((BYTE*)address,
-		{ 0xE8, 0x4D, 0x75, 0x00, 0x00 },						//expected values
-		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+	{ 0xE8, 0x41, 0x6C, 0x00, 0x00 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		(DWORD*)(&OriginalTickFunction));
 }
 

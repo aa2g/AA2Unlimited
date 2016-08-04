@@ -19,7 +19,7 @@ public:
 
 	//constants (some of them)
 	//https://docs.google.com/spreadsheets/d/1gwmoVpKuSuF0PtEPLEB17eK_dexPaKU106ShZEpBLhg/edit?pref=2&pli=1#gid=453712916 for names
-	//these are dominant by the receiver (passive)
+	//in normal hetero h, these are dominant for the passive (female) one
 	const std::vector<std::wstring> m_passiveDomNames{
 		L"h_00_02", L"h_00_03", L"h_00_06", L"h_00_51" //standing Cunnil, face sitting, spread licking, standing cunnil,
 		L"h_01_01", L"h_01_03", L"h_01_06", L"h_01_09", L"h_01_10", L"h_01_11", L"h_01_17",//lying down hand, palzuri, legs up, foot,sack,blindfolded,chestjob
@@ -31,7 +31,7 @@ public:
 		L"h_11_04",
 		L"h_13_00"
 	};
-	//these are dominant by the active
+	//in normal hetero h, these are dominant for the active (male) one. Note that in yuri force, the forcer will start as dominant, but can be switched.
 	const std::vector<std::wstring> m_activeDomNames{
 		L"h_00_00", L"h_00_01", L"h_00_04", L"h_00_05", L"h_00_07", L"h_01_15", //groping, nip lick, piledriveranal teasing, anilingus, fingering, stand blow 2
 		L"h_01_00", L"h_01_02", L"h_01_12", L"h_01_13", L"h_01_50",//lick stand, stand blow, sitting blow
@@ -60,8 +60,11 @@ public:
 	std::array<std::vector<std::pair<DWORD, DWORD>>, 9> m_preferencePositions;
 
 	bool m_isYuri;
+	bool m_isActive;
 	DWORD m_forcerGender;
 	DWORD m_forceeGender;
+	ExtClass::HParticipant* m_forcer;
+	ExtClass::HParticipant* m_forcee;
 	DWORD m_aiState;
 
 	void PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool active, bool allowForeplay, bool allowNormal, float climaxChance);

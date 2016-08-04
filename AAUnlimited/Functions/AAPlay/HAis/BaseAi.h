@@ -100,7 +100,7 @@ inline float BaseAi::GetSpeed() {
 		auto& d = m_speedLinear;
 		float passed = (float)m_speedTimer.GetTime();
 		if (passed > d.changeOver) return d.end;
-		return d.start + (d.end - d.start) * (d.changeOver / passed);
+		return d.start + (d.end - d.start) * (passed / d.changeOver);
 		break; }
 	case 1: {
 		auto& d = m_speedFluctuate;
@@ -110,13 +110,14 @@ inline float BaseAi::GetSpeed() {
 			//set new linear progression
 			ld.start = ld.end;
 			ld.end = General::GetRandomFloat(d.min, d.max);
-			ld.changeOver = (ld.end - ld.start) / (General::GetRandomFloat(0.2f,0.3f));
+			ld.changeOver = abs((ld.end - ld.start) / (General::GetRandomFloat(0.01f, 0.3f)));
+			m_speedTimer.Start();
 			return ld.start;
 		}
 		else {
 			//return linear progression
 			if (passed >= ld.changeOver) return ld.end;
-			return ld.start + (ld.end - ld.start) * (ld.changeOver / passed);
+			return ld.start + (ld.end - ld.start) * (passed / ld.changeOver);
 		}
 		break; }
 	default:

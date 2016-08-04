@@ -83,8 +83,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			thisPtr->m_tabs, AODialog::DialogProc, (LPARAM)&thisPtr->m_aoDialog);
 		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_ARCHIVEREDIRECT),
 			thisPtr->m_tabs, ARDialog::DialogProc, (LPARAM)&thisPtr->m_arDialog);
-		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_HAIRREDIRECT),
-			thisPtr->m_tabs, HRDialog::DialogProc, (LPARAM)&thisPtr->m_hrDialog);
+		//CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_HAIRREDIRECT),
+		//	thisPtr->m_tabs, HRDialog::DialogProc, (LPARAM)&thisPtr->m_hrDialog);
 		RECT rct;
 		GetWindowRect(hwndDlg, &rct);
 		rct.top += 20; rct.right -= 20;
@@ -93,7 +93,7 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		MoveWindow(thisPtr->m_moDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
 		MoveWindow(thisPtr->m_aoDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
 		MoveWindow(thisPtr->m_arDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
-		MoveWindow(thisPtr->m_hrDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+		//MoveWindow(thisPtr->m_hrDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
 		TCITEM item;
 		item.mask = TCIF_TEXT | TCIF_PARAM;
 		item.pszText = TEXT("Mesh Overrides");
@@ -105,9 +105,9 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		item.pszText = TEXT("Archive Redirects");
 		item.lParam = (LPARAM)(&thisPtr->m_arDialog);
 		TabCtrl_InsertItem(thisPtr->m_tabs, 2, &item);
-		item.pszText = TEXT("Hair Redirects");
-		item.lParam = (LPARAM)(&thisPtr->m_hrDialog);
-		TabCtrl_InsertItem(thisPtr->m_tabs, 3, &item);
+		//item.pszText = TEXT("Hair Redirects");
+		//item.lParam = (LPARAM)(&thisPtr->m_hrDialog);
+		//TabCtrl_InsertItem(thisPtr->m_tabs, 3, &item);
 		ShowWindow(thisPtr->m_moDialog.m_dialog, SW_SHOW);
 		return TRUE;
 		break; }
@@ -199,6 +199,9 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			if (identifier == IDC_MO_BTNBROWSE) {
 				//TODO: implement browse button. should be put into the aaedit/data/texture/override folder.
 				std::wstring initialDir = General::BuildEditPath(OVERRIDE_IMAGE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
 				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialDir.c_str())) {
