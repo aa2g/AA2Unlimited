@@ -6,7 +6,8 @@
 
 #include "General\Util.h"
 #include "Files\Config.h"
-#include "HAis/ForceAi.h"
+#include "Files\Logger.h"
+#include "HAis\ForceAi.h"
 
 using namespace ExtClass;
 
@@ -30,6 +31,7 @@ void PreTick(HInfo* hinfo)
 {
 	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
 	if (!loc_isForcedH) return; //only do something if forced
+	if (!loc_initialized) return;
 	loc_forceAi.Tick(hinfo);
 
 }
@@ -40,9 +42,11 @@ void PostTick(HInfo* hinfo, bool notEnd)
 	if (!loc_isForcedH) return; //only do something if forced
 	if (!loc_initialized) {
 		//initialize
+		LOGPRIO(Logger::Priority::SPAM) << "initializing H-Ai\r\n";
 		Initialize(hinfo);
 	}
 	if (!notEnd || hinfo->m_bEnd) {
+		LOGPRIO(Logger::Priority::SPAM) << "ending H-Ai\r\n";
 		loc_initialized = false;
 		loc_isForcedH = false;
 		loc_isTalkedTo = false;

@@ -1,6 +1,7 @@
 #include "ForceAi.h"
 
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Files\Logger.h"
 
 using namespace ExtClass;
 
@@ -50,16 +51,20 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 		return 0;
 	};
 	
-	
 	if (allowForeplay) nNormalPoses += countPoses(HCAT_FOREPLAY_FEMALE, HCAT_FOREPLAY_MUTUAL);
 	if (allowNormal) nNormalPoses += countPoses(HCAT_FRONTAL, HCAT_BACK);
 	if (climaxChance > 0) {
 		if (allowForeplay) nClimaxPoses += countPoses(HCAT_CLIMAX_FOREPLAY_FEMALE, HCAT_CLIMAX_FOREPLAY_MALE);
 		if (allowNormal ) nClimaxPoses += countPoses(HCAT_CLIMAX_FRONTAL, HCAT_CLIMAX_BACK);
 	}
+
+	LOGPRIO(Logger::Priority::SPAM) << "Picking dom position from " << nNormalPoses << " normal and " << nClimaxPoses <<
+		" climax poses, climax chance " << climaxChance << "\r\n";
+
 	float f = General::GetRandomFloat(0, 1);
 	if (nClimaxPoses > 0 && f <= climaxChance) {
 		size_t randChoice = rand() % nClimaxPoses;
+		LOGPRIO(Logger::Priority::SPAM) << "chose random climax position " << randChoice << "\r\n";
 		if (allowForeplay && (chosenPassiveActive = findPose(randChoice, HCAT_CLIMAX_FOREPLAY_FEMALE, HCAT_CLIMAX_FOREPLAY_MALE))) {
 			//TODO: if active->passive swap required, do that
 			return;
@@ -71,6 +76,7 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	}
 	else if (nNormalPoses > 0) {
 		size_t randChoice = rand() % nNormalPoses;
+		LOGPRIO(Logger::Priority::SPAM) << "chose random position " << randChoice << "\r\n";
 		if (allowForeplay && (chosenPassiveActive = findPose(randChoice, HCAT_FOREPLAY_FEMALE, HCAT_FOREPLAY_MUTUAL))) {
 			//TODO: if active->passive swap required, do that
 			return;
@@ -81,8 +87,10 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 		}
 	}
 	else {
-		
+		LOGPRIO(Logger::Priority::WARN) << "no dominant positions for this type!\r\n";
+		return;
 	}
+	LOGPRIO(Logger::Priority::WARN) << "did not find corresponding position. This means the algorithm is wrong. shit.\r\n";
 }
 
 void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, bool allowNormal, float climaxChance) {
@@ -112,11 +120,15 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 		}
 	}
 	
+	LOGPRIO(Logger::Priority::SPAM) << "Picking dom position from " << nNormalPoses << " normal and " << nClimaxPoses <<
+		" climax poses, climax chance " << climaxChance << "\r\n";
+
 	//choose pose
 	float f = General::GetRandomFloat(0, 1);
 	if (nClimaxPoses > 0 && f <= climaxChance) {
 		//choose cliamx
 		size_t randChoice = rand() % nClimaxPoses;
+		LOGPRIO(Logger::Priority::SPAM) << "chose random climax position " << randChoice << "\r\n";
 		if (allowForeplay) {
 			for (int i = HCAT_CLIMAX_FOREPLAY_FEMALE; i <= HCAT_CLIMAX_FOREPLAY_MALE; i++) {
 				size_t size = m_preferencePositions[i].size();
@@ -143,6 +155,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 	else if(nNormalPoses > 0) {
 		//choose normal
 		size_t randChoice = rand() % nNormalPoses;
+		LOGPRIO(Logger::Priority::SPAM) << "chose random position " << randChoice << "\r\n";
 		if (allowForeplay) {
 			for (int i = HCAT_FOREPLAY_FEMALE; i <= HCAT_FOREPLAY_MUTUAL; i++) {
 				size_t size = m_preferencePositions[i].size();
@@ -168,9 +181,11 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 	}
 	else {
 		//none were available
-		PickRandomDomPosition(info, true, true, allowForeplay, allowNormal, climaxChance);
+		LOGPRIO(Logger::Priority::SPAM) << "no preference positions were avaiable, so a dominant is chosen instead.\r\n";
+		PickRandomDomPosition(info, !this->m_isActive, this->m_isActive, allowForeplay, allowNormal, climaxChance);
+		return;
 	}
-	
+	LOGPRIO(Logger::Priority::WARN) << "did not find corresponding position. This means the algorithm is wrong. shit.\r\n";
 }
 
 /*plan:
@@ -207,7 +222,7 @@ ForceAi::State ForceAi::states[] = {
 			if (state->m_customValue == 0) {
 				info->m_speed = 1;
 				thisPtr->SetSpeedChangeLinear(1, 2, 10);
-				thisPtr->SetRepeatParams(0, 1.0f, 0.8f);
+				thisPtr->SetRepeatParams(0, 1.0f, 0.5f);
 				if (thisPtr->m_forcee->m_shoesOffState == 0) {
 					info->m_btnShoe->Press(); //slip of shoes. they suck.
 				}
@@ -257,7 +272,7 @@ ForceAi::State ForceAi::states[] = {
 			thisPtr->StartTimerRandom(0, 15.0f, 20.0f);
 			if (state->m_customValue == 0) {
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2.5, 3.5);
-				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
+				thisPtr->SetRepeatParams(0, 1.0f, 0.5f);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -305,6 +320,7 @@ ForceAi::State ForceAi::states[] = {
 };
 
 void ForceAi::Initialize(ExtClass::HInfo* info) {
+	LOGPRIO(Logger::Priority::SPAM) << "initializing ForceAi\r\n";
 	m_aiState = 0;
 	for (int i = 0; i < INVALID; i++) {
 		states[i].m_customValue = 0;
@@ -331,6 +347,11 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 	m_forceeGender = m_forcee->m_charPtr->m_charData->m_gender;
 	
 	m_isYuri = m_forceeGender == m_forcerGender;
+	if (g_Logger.FilterPriority(Logger::Priority::SPAM)) {
+		LOGPRIO(Logger::Priority::SPAM) << "Force information:\r\n";
+		g_Logger << "Forcer: \r\n\tPointer: " << m_forcer << "\r\n\tGender: " << m_forcerGender << "\r\n";
+		g_Logger << "Forcee: \r\n\tPointer: " << m_forcee << "\r\n\tGender: " << m_forceeGender << "\r\n";
+	}
 	for (int i = 0; i < 9; i++) {
 		HPosButtonList* list = &(info->m_hPosButtons[i]);
 		HGUIButton** arrIt = list->m_arrButtonList;
@@ -359,8 +380,25 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 
 		}
 	}
-
-
+	if (g_Logger.FilterPriority(Logger::Priority::WARN)) {
+		if (m_dominantPositionsActive.size() == 0) {
+			LOGPRIO(Logger::Priority::WARN) << "no dominant active positions found\r\n";
+		}
+		if (m_dominantPositionsPassive.size() == 0) {
+			LOGPRIO(Logger::Priority::WARN) << "no dominant passive positions found\r\n";
+		}
+		size_t size = 0;
+		for (int i = HCAT_FOREPLAY_FEMALE; i <= HCAT_BACK; i++) size += m_preferencePositions[i].size();
+		if (size == 0) {
+			LOGPRIO(Logger::Priority::WARN) << "no preference positions found\r\n";
+		}
+		size = 0;
+		for (int i = HCAT_CLIMAX_FOREPLAY_FEMALE; i <= HCAT_CLIMAX_BACK; i++) size += m_preferencePositions[i].size();
+		if (size == 0) {
+			LOGPRIO(Logger::Priority::WARN) << "no climax preference positions found\r\n";
+		}
+	}
+	LOGPRIO(Logger::Priority::SPAM) << "initialized ForceAi\r\n";
 }
 
 void ForceAi::Tick(ExtClass::HInfo* info) {
@@ -371,6 +409,7 @@ void ForceAi::Tick(ExtClass::HInfo* info) {
 		info->m_btnExit->Press();
 	}
 	else if (nextState != INVALID) {
+		LOGPRIO(Logger::Priority::SPAM) << "Switching from state " << m_aiState << " to " << nextState << "\r\n";
 		m_aiState = nextState;
 		if (states[m_aiState].m_initFunc != NULL) states[m_aiState].m_initFunc(&states[m_aiState], this, info);
 	}

@@ -18,6 +18,8 @@ namespace ArchiveFile {
 */
 bool __stdcall AAPlayOpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	bool ret;
+	ret = AAPlay::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
+	if (ret) return true;
 	ret = AAPlay::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
 	if (ret) return true;
 	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {

@@ -50,12 +50,12 @@ void ReadUnlimitDataInject() {
 	AA2Edit.exe+127E1C - 6A 00                 - push 00 { 0 }
 	AA2Edit.exe+127E1E - 57                    - push edi
 	AA2Edit.exe+127E1F - 55                    - push ebp
-	AA2Edit.exe+127E20 - FF 15 EC41C100        - call dword ptr [AA2Edit.exe+2C41EC] { ->->KERNELBASE.SetFilePointer }
+	AA2Edit.exe+127E20 - FF 15 EC414F00        - call dword ptr [AA2Edit.exe+2C41EC] { ->->KERNELBASE.SetFilePointer }
 	*/
 	DWORD address = General::GameBase + 0x127E20;
 	DWORD redirectAddress = (DWORD)(&ReadUnlimitDataRedirect);
 	Hook((BYTE*)address,
-		{ 0xFF, 0x15, 0xEC, 0x41, 0xC1, 0x00 },							//expected values
+		{ 0xFF, 0x15, 0xEC, 0x41, 0x4f, 0x00 },							//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 		NULL);
 	ReadUnlimitDataOriginal = General::GameBase + 0x2C41EC;

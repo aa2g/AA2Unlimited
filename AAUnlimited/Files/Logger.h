@@ -74,6 +74,7 @@ public:
 	}
 
 	void SetPriority(Priority prio);
+	//returns true if the logger would print messages for the given priority
 	bool FilterPriority(Priority prio);
 private:
 	std::ofstream outfile;
