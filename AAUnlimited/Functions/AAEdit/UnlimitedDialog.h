@@ -65,6 +65,18 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_arDialog;
+	struct ETDialog : public Dialog {
+		struct {
+			HWND cbActive;
+			HWND cbSaveInside;
+			HWND edFile;
+			HWND btBrowse;
+		} m_eyes[2];
+
+		void RefreshEnableState();
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
+	} m_etDialog;
 	struct HRDialog : public Dialog {
 		HWND m_arrRbRedirects[4][4];
 		BYTE GetHairTarget(BYTE hairCategory);
@@ -79,6 +91,8 @@ namespace AAEdit {
 
 	bool m_visible;
 
+	void AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName, 
+			RECT targetRct, INT_PTR (CALLBACK *DialogProc)(HWND,UINT,WPARAM,LPARAM));
 	LPARAM GetCurrTabItemData();
 private:
 

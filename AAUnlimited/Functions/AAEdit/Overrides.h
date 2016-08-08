@@ -7,6 +7,9 @@ namespace AAEdit {
 bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer);
 bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer);
 
+void __stdcall EyeTextureStart(int leftRight, TCHAR** texture);
+void __stdcall EyeTextureEnd(int leftRight, TCHAR** texture);
+
 DWORD __stdcall MeshTextureListStart(BYTE* xxFileBuffer, DWORD offset);
 bool __stdcall MeshTextureListFill(BYTE* name, DWORD* xxReadOffset);
 

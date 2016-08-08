@@ -26,8 +26,10 @@ public:
 	AAUCardData();
 	~AAUCardData();
 
-	//fils data from buffer. buffer should point to start of the png chunk (the length member)
+	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer);
+	//searches for AAUnlimited data inside file, then reads it.
+	void FromFileBuffer(char* buffer, DWORD size);
 	//writes data to a buffer, including png chunk. Returns size of buffer filled,
 	//or 0 if it failed (because the buffer was too small and resize was false)
 	int ToBuffer(char** buffer, int* size, bool resize);
@@ -39,6 +41,8 @@ public:
 	bool RemoveArchiveOverride(int index);
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
+
+	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
@@ -62,6 +66,7 @@ public:
 	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
 	inline void SetHairRedirect(BYTE value, BYTE category) { m_hairRedirects.arr[category] = value; }
 
+	inline const std::wstring& GetEyeTexture(int leftright) { return m_eyeTextures[leftright].texName; }
 
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
@@ -75,6 +80,11 @@ private:
 		m_archiveRedirects; //<archive,file>-><archive,file>
 	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
 
+	struct {
+		std::wstring texName;
+		std::vector<BYTE> texFile; //contains file if it should be saved inside the card
+	} m_eyeTextures[2];
+
 	union {
 		DWORD full;
 		BYTE arr[4];
@@ -85,6 +95,7 @@ private:
 			BYTE extension;
 		};
 	} m_hairRedirects;
+
 private:
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file

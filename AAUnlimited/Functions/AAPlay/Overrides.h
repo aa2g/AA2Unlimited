@@ -24,6 +24,9 @@ bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYT
 void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter);
 void MeshTextureCharLoadEnd();
 
+void __stdcall EyeTextureStart(int leftRight, TCHAR** texture);
+void __stdcall EyeTextureEnd(int leftRight, TCHAR** texture);
+
 /*
 * Functions that do the actual texture override in the xxFile analisys functions
 */

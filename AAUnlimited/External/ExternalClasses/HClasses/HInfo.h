@@ -41,15 +41,20 @@ public:
 	HGUIButton* m_btnExit;			//button to exit the scene
 	HGUIButton* m_btnSwap;			//the two circle arrows that swap positions between the two participants
 	HGUIButton* m_btnExpandClothes;	//hides or unhides the cloth select buttons
-	HGUIButton* m_btnCategory1;	//category buttons that hide the h-actions until clicked on. 1: Hand
-	HGUIButton* m_btnCategory2;	//2: tounge
-	HGUIButton* m_btnCategory3;	//3: m|f
-	HGUIButton* m_btnCategory4;	//4: m in f
-	HGUIButton* m_btnCategory5;	//5: flower
-	HGUIButton* m_btnCategory6;	//6: finish hand
-	HGUIButton* m_btnCategory7;	//7: finish m|f/tounge
-	HGUIButton* m_btnCategory8;	//8: finish m in f
-	HGUIButton* m_btnCategory9;	//9: finish flower
+	union {
+		struct {
+			HGUIButton* m_btnCategory1;	//category buttons that hide the h-actions until clicked on. 1: Hand
+			HGUIButton* m_btnCategory2;	//2: tounge
+			HGUIButton* m_btnCategory3;	//3: m|f
+			HGUIButton* m_btnCategory4;	//4: m in f
+			HGUIButton* m_btnCategory5;	//5: flower
+			HGUIButton* m_btnCategory6;	//6: finish hand
+			HGUIButton* m_btnCategory7;	//7: finish m|f/tounge
+			HGUIButton* m_btnCategory8;	//8: finish m in f
+			HGUIButton* m_btnCategory9;	//9: finish flower
+		};
+		HGUIButton* m_btnCategories[9];
+	};
 	BYTE m_unknown8[0x4];
 	HPosButtonList m_hPosButtons[9];
 	struct {

@@ -176,7 +176,8 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "External/ExternalVariables.h"
 #include "Functions/Shared/Globals.h"
 
-#include "MemMods/Shared/Events/MeshTexture.h"
+#include "MemMods/Shared/Misc/MeshTexture.h"
+#include "MemMods/Shared/Misc/EyeTexture.h"
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
@@ -204,6 +205,8 @@ void InitializeHooks() {
 			MeshTexture::OverrideNameInject();
 			MeshTexture::OverrideFileSizeInject();
 			MeshTexture::OverrideFileInject();
+
+			EyeTexture::EyeTextureInject();
 		}
 	}
 

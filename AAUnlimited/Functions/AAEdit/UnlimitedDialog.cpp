@@ -61,10 +61,25 @@ void UnlimitedDialog::Refresh() {
 		m_arDialog.Refresh();
 		break;
 	case 3:
+		m_etDialog.Refresh();
+		break;
+	case 4:
 		m_hrDialog.Refresh();
 	default:
 		break;
 	}
+}
+
+void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName,
+								RECT rct, INT_PTR(CALLBACK *dialogProc)(HWND, UINT, WPARAM, LPARAM)) {
+	CreateDialogParam(General::DllInst, MAKEINTRESOURCE(resourceName),
+		this->m_tabs, dialogProc, (LPARAM)dialog);
+	MoveWindow(dialog->m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+	TCITEM item;
+	item.mask = TCIF_TEXT | TCIF_PARAM;
+	item.pszText = (LPWSTR)tabName;
+	item.lParam = (LPARAM)dialog;
+	TabCtrl_InsertItem(this->m_tabs, tabN, &item);
 }
 
 /******
@@ -77,37 +92,22 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_tabs = GetDlgItem(hwndDlg, IDC_TABS);
-		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_MESHOVERRIDE),
-			thisPtr->m_tabs, MODialog::DialogProc, (LPARAM)&thisPtr->m_moDialog);
-		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_ARCHIVEOVERRIDE),
-			thisPtr->m_tabs, AODialog::DialogProc, (LPARAM)&thisPtr->m_aoDialog);
-		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_ARCHIVEREDIRECT),
-			thisPtr->m_tabs, ARDialog::DialogProc, (LPARAM)&thisPtr->m_arDialog);
-		//CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_HAIRREDIRECT),
-		//	thisPtr->m_tabs, HRDialog::DialogProc, (LPARAM)&thisPtr->m_hrDialog);
+		
 		RECT rct;
 		GetWindowRect(hwndDlg, &rct);
 		rct.top += 20; rct.right -= 20;
 		rct.left += 10; rct.left -= 10;
 		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
-		MoveWindow(thisPtr->m_moDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
-		MoveWindow(thisPtr->m_aoDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
-		MoveWindow(thisPtr->m_arDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
-		//MoveWindow(thisPtr->m_hrDialog.m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
-		TCITEM item;
-		item.mask = TCIF_TEXT | TCIF_PARAM;
-		item.pszText = TEXT("Mesh Overrides");
-		item.lParam = (LPARAM)(&thisPtr->m_moDialog);
-		TabCtrl_InsertItem(thisPtr->m_tabs, 0, &item);
-		item.pszText = TEXT("Archive Overrides");
-		item.lParam = (LPARAM)(&thisPtr->m_aoDialog);
-		TabCtrl_InsertItem(thisPtr->m_tabs, 1, &item);
-		item.pszText = TEXT("Archive Redirects");
-		item.lParam = (LPARAM)(&thisPtr->m_arDialog);
-		TabCtrl_InsertItem(thisPtr->m_tabs, 2, &item);
-		//item.pszText = TEXT("Hair Redirects");
-		//item.lParam = (LPARAM)(&thisPtr->m_hrDialog);
-		//TabCtrl_InsertItem(thisPtr->m_tabs, 3, &item);
+
+		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog, 0, TEXT("Mesh Overrides"),
+				rct, MODialog::DialogProc);
+		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog, 1, TEXT("Archive Overrides"),
+			rct, AODialog::DialogProc);
+		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog, 2, TEXT("Archive Redirects"),
+			rct, ARDialog::DialogProc);
+		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog, 3, TEXT("Eye Textures"),
+			rct, ETDialog::DialogProc);
+
 		ShowWindow(thisPtr->m_moDialog.m_dialog, SW_SHOW);
 		return TRUE;
 		break; }
@@ -440,6 +440,90 @@ void UnlimitedDialog::ARDialog::RefreshRuleList() {
 
 void UnlimitedDialog::ARDialog::Refresh() {
 	RefreshRuleList();
+}
+
+/**********************/
+/* Eye Texture Dialog */
+/**********************/
+
+
+INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		ETDialog* thisPtr = (ETDialog*)lparam;
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_eyes[0].cbActive = GetDlgItem(hwndDlg, IDC_ET_LEFT_CBUSE);
+		thisPtr->m_eyes[0].cbSaveInside = GetDlgItem(hwndDlg, IDC_ET_LEFT_CBSAVEINSIDE);
+		thisPtr->m_eyes[0].edFile = GetDlgItem(hwndDlg, IDC_ET_LEFT_EDTEX);
+		thisPtr->m_eyes[0].btBrowse = GetDlgItem(hwndDlg, IDC_ET_LEFT_BTBROWSE);
+		thisPtr->m_eyes[1].cbActive = GetDlgItem(hwndDlg, IDC_ET_RIGHT_CBUSE);
+		thisPtr->m_eyes[1].cbSaveInside = GetDlgItem(hwndDlg, IDC_ET_RIGHT_CBSAVEINSIDE);
+		thisPtr->m_eyes[1].edFile = GetDlgItem(hwndDlg, IDC_ET_RIGHT_EDTEX);
+		thisPtr->m_eyes[1].btBrowse = GetDlgItem(hwndDlg, IDC_ET_RIGHT_BTBROWSE);
+		thisPtr->RefreshEnableState();
+
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		ETDialog* thisPtr = (ETDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_ET_LEFT_CBUSE || identifier == IDC_ET_RIGHT_CBUSE) {
+				thisPtr->RefreshEnableState();
+				return TRUE;
+			}
+			else if (identifier == IDC_ET_LEFT_BTBROWSE || identifier == IDC_ET_RIGHT_BTBROWSE) {
+				std::wstring initDir = General::BuildEditPath(TEXT("data\\texture\\eye"));
+				const TCHAR* path = General::OpenFileDialog(initDir.c_str());
+				if (path != NULL && General::StartsWith(path, initDir.c_str())) {
+					const TCHAR* fileName = General::FindFileInPath(path);
+					int index = identifier == IDC_ET_LEFT_BTBROWSE ? 0 : 1;
+					SendMessage(thisPtr->m_eyes[index].edFile, WM_SETTEXT, 0, (LPARAM)fileName);
+				}
+				return TRUE;
+			}
+			break; }
+		case EN_UPDATE: {
+			DWORD identifier = LOWORD(wparam);
+			int index = identifier == IDC_ET_LEFT_EDTEX ? 0 : 1;
+			TCHAR fileName[512];
+			fileName[0] = '\0';
+			SendMessage((HWND)lparam, WM_GETTEXT, 512, (LPARAM)fileName);
+			bool save = SendMessage(thisPtr->m_eyes[index].cbSaveInside, BM_GETCHECK, 0, 0) == BST_CHECKED;
+			g_cardData.SetEyeTexture(index, fileName, save);
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::ETDialog::RefreshEnableState() {
+	BOOL state = (SendMessage(this->m_eyes[0].cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
+	EnableWindow(this->m_eyes[0].cbSaveInside, state);
+	EnableWindow(this->m_eyes[0].edFile, state);
+	EnableWindow(this->m_eyes[0].btBrowse, state);
+	if (state == FALSE) {
+		g_cardData.SetEyeTexture(0, NULL, false);
+	}
+
+	state = (SendMessage(this->m_eyes[1].cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
+	EnableWindow(this->m_eyes[1].cbSaveInside, state);
+	EnableWindow(this->m_eyes[1].edFile, state);
+	EnableWindow(this->m_eyes[1].btBrowse, state);
+	if (state == FALSE) {
+		g_cardData.SetEyeTexture(1, NULL, false);
+	}
+}
+
+void UnlimitedDialog::ETDialog::Refresh() {
+	const std::wstring& leftPath = g_cardData.GetEyeTexture(0);
+	const std::wstring& rightPath = g_cardData.GetEyeTexture(1);
+	SendMessage(this->m_eyes[0].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
+	SendMessage(this->m_eyes[1].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
 }
 
 /************************/

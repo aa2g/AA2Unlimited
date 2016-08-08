@@ -4,6 +4,7 @@
 
 #include "Files\Logger.h"
 #include "General\Util.h"
+#include "General\ModuleInfo.h"
 #include "Functions\TextureImage.h"
 #include "Functions\AAUCardData.h"
 #include "Functions\Shared\Globals.h"
@@ -23,10 +24,7 @@ void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter) {
 	DWORD size = loadCharacter->m_charData->m_pngBufferSize;
 	BYTE* buffer = (BYTE*)loadCharacter->m_charData->m_pngBuffer;
 	if (buffer != NULL) {
-		BYTE* chunkPtr = General::FindPngChunk(buffer, size, AAUCardData::PngChunkIdBigEndian);
-		if (chunkPtr != NULL) {
-			g_currentCard.FromBuffer((char*)chunkPtr);
-		}
+		g_currentCard.FromFileBuffer((char*)buffer, size);
 	}	
 }
 
@@ -72,6 +70,33 @@ bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYT
 	*outBuffer = (BYTE*)fileBuffer;
 	*readBytes = match->GetFileSize();
 	return true;
+}
+
+/*************************/
+/* Eye Texture Overrides */
+/*************************/
+
+namespace {
+	TCHAR* loc_savedPointer = NULL;
+	BYTE loc_replaceBuffer[1024];
+};
+
+void __stdcall EyeTextureStart(int leftRight, TCHAR** texture) {
+	const std::wstring& eyeTexture = g_currentCard.GetEyeTexture(leftRight);
+	if (eyeTexture.size() > 0) {
+		loc_savedPointer = *texture;
+		//*texture = (TCHAR*)eyeTexture.c_str();
+		memcpy_s((void*)loc_replaceBuffer, 1024, (BYTE*)(*texture) - 16, 16);
+		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), eyeTexture.c_str());
+		wcscpy_s((TCHAR*)(loc_replaceBuffer + 16), 512 - 16 / 2, fullPath.c_str());
+		*texture = (TCHAR*)(loc_replaceBuffer + 16);
+	}
+}
+void __stdcall EyeTextureEnd(int leftRight, TCHAR** texture) {
+	if (loc_savedPointer != NULL) {
+		*texture = loc_savedPointer;
+		loc_savedPointer = NULL;
+	}
 }
 
 /**************************/

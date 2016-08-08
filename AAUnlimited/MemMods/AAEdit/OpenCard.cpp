@@ -22,11 +22,8 @@ void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
 	BYTE* needed = new BYTE[lo];
 	SetFilePointer(hFile, 0, NULL, FILE_BEGIN);
 	ReadFile(hFile, needed, lo, &hi, NULL);
-	//find our png chunk
-	BYTE* chunk = General::FindPngChunk(needed, lo, AAUCardData::PngChunkIdBigEndian);
-	if (chunk != NULL) {
-		AAEdit::g_cardData.FromBuffer((char*)chunk);
-	}
+	//load data
+	AAEdit::g_cardData.FromFileBuffer((char*)needed, lo);
 	AAEdit::g_AAUnlimitDialog.Refresh();
 }
 

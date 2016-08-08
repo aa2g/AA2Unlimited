@@ -13,13 +13,14 @@ namespace SaveCard {
 void __cdecl AddUnlimitData(HANDLE h) {
 	static const BYTE IENDPart[] = { 0,0,0,0, 0x49,0x45,0x4E,0x44, 0xAE,0x42,0x60,0x82 };
 
+
 	//write extended card data
 	char* buffer = NULL;
 	int size = 0;
 	DWORD written;
-	int partSize = AAEdit::g_cardData.ToBuffer(&buffer,&size,true);
-	if(buffer != NULL) {
-		WriteFile(h,buffer,partSize,&written,0);
+	int partSize = AAEdit::g_cardData.ToBuffer(&buffer, &size, true);
+	if (buffer != NULL) {
+		WriteFile(h, buffer, partSize, &written, 0);
 	}
 
 	//write iend part

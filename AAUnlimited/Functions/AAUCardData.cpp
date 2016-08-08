@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <intrin.h>
 
+#include "General\ModuleInfo.h"
 #include "General\Buffer.h"
+#include "General\Util.h"
 #include "Files\Logger.h"
 
 const AAUCardData AAUCardData::g_defaultValues;
@@ -163,7 +165,7 @@ void AAUCardData::FromBuffer(char* buffer) {
 				}
 			}
 			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_meshOverrides.size() << " elements; "
-				" only " << m_meshOverrideMap.size() << " were valid\r\n";
+				<< m_meshOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'AOvT': {
 			m_archiveOverrides = ReadData<decltype(m_archiveOverrides)>(buffer, size);
@@ -174,7 +176,7 @@ void AAUCardData::FromBuffer(char* buffer) {
 				}
 			}
 			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_archiveOverrides.size() << " elements; "
-				" only " << m_archiveOverrideMap.size() << " were valid\r\n";
+				<< m_archiveOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'ARdr':
 			m_archiveRedirects = ReadData<decltype(m_archiveRedirects)>(buffer, size);
@@ -183,6 +185,23 @@ void AAUCardData::FromBuffer(char* buffer) {
 					m_archiveRedirectMap.emplace(it.first, it.second);
 				}
 			}
+			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements.\r\n";
+			break;
+		case 'EtLN':
+			m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_eyeTextures[0].texName << "\r\n";
+			break;
+		case 'EtRN':
+			m_eyeTextures[1].texName = ReadData<std::wstring>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_eyeTextures[1].texName << "\r\n";
+			break;
+		case 'EtLF':
+			m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_eyeTextures[0].texFile.size() << "\r\n";
+			break;
+		case 'EtRF':
+			m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_eyeTextures[1].texFile.size() << "\r\n";
 			break;
 		case 'HrRd':
 			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
@@ -196,6 +215,14 @@ void AAUCardData::FromBuffer(char* buffer) {
 	}
 
 	
+}
+
+void AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
+	//find our png chunk
+	BYTE* chunk = General::FindPngChunk((BYTE*)buffer, size, AAUCardData::PngChunkIdBigEndian);
+	if (chunk != NULL) {
+		FromBuffer((char*)chunk);
+	}
 }
 
 /*
@@ -243,6 +270,11 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
 	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
 	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
+	//eye textures
+	DUMP_MEMBER('EtLN', m_eyeTextures[0].texFile);
+	DUMP_MEMBER('EtRN', m_eyeTextures[1].texFile);
+	DUMP_MEMBER_CONTAINER('EtLF', m_eyeTextures[0].texName);
+	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texName);
 	//hair redirect
 	DUMP_MEMBER('HrRd', m_hairRedirects.full);
 
@@ -320,5 +352,27 @@ bool AAUCardData::RemoveArchiveRedirect(int index) {
 	auto mapMatch = m_archiveRedirectMap.find(vMatch->first);
 	m_archiveRedirects.erase(vMatch);
 	if (mapMatch != m_archiveRedirectMap.end()) m_archiveRedirectMap.erase(mapMatch);
+	return true;
+}
+
+bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) {
+	if (texName == NULL) {
+		m_eyeTextures[leftright].texName = TEXT("");
+		m_eyeTextures[leftright].texFile.clear();
+		return true;
+	}
+	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), texName);
+	HANDLE file = CreateFile(fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (file == INVALID_HANDLE_VALUE || file == NULL) {
+		return false;
+	}
+	if (save) {
+		DWORD lo, hi;
+		lo = GetFileSize(file, &hi);
+		m_eyeTextures[leftright].texFile.resize(lo);
+		ReadFile(file, m_eyeTextures[leftright].texFile.data(), lo, &hi, NULL);
+	}
+	m_eyeTextures[leftright].texName = texName;
+	CloseHandle(file);
 	return true;
 }

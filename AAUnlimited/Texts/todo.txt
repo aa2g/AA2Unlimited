@@ -11,9 +11,9 @@
 - Cloth load adhoc: A way to load cloth saves (.cloth files) for any character at any moment of the day. Bonus: change the clothing state (clothed, partially clothed, underwear, etc.) any time during an interaction with an NPC.
 - More than 255 slots: Right now we have lots of unlocked settings but we are still limited to 255 slots for anything. May it be possible to use the extra card data to store values higher than 255 and have the game load even more assets? More hair and face slots would be really nice, for example.
 - extra socks: I think it would be feasible to add wings to any uniform with this feature, for example. The file jg2p_00_01_00_03.lst in jg2e00_00_00.pp seems to control which leg meshes to load for each type of sock.
-- h ai on no prompt evil
+- seperate eye texture
 
-
+somewhat done:
 h idear:
 >If you have ideas for better behavior, shout it out
 step 1: pick some foreplay position from the more dom ones.
@@ -24,3 +24,6 @@ step 5: pick some cumming position
 repeat steps 3-5 a few times
 if rapee has ahegao repeat 3-5 with all positions a few times
 maybe add another cumming position and end the scene.
+
+done:
+- h ai on no prompt evil

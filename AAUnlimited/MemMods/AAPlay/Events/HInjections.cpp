@@ -4,6 +4,7 @@
 #include "External/ExternalClasses.h"
 
 #include "Functions/AAPlay/HAi.h"
+#include "Functions/AAPlay/HButtonMove.h"
 
 namespace PlayInjections {
 namespace HPlayInjections {
@@ -15,6 +16,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	HAi::PreTick(hInfo);
 	bool retVal = loc_OriginalTickFunction(hInfo);
 	HAi::PostTick(hInfo, retVal);
+	HButtonMove::PostTick(hInfo, retVal);
 	return retVal;
 }
 
