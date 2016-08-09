@@ -26,13 +26,11 @@ public:
 	AAUCardData();
 	~AAUCardData();
 
-	//fills data from buffer. buffer should point to start of the png chunk (the length member)
-	void FromBuffer(char* buffer);
 	//searches for AAUnlimited data inside file, then reads it.
 	void FromFileBuffer(char* buffer, DWORD size);
 	//writes data to a buffer, including png chunk. Returns size of buffer filled,
 	//or 0 if it failed (because the buffer was too small and resize was false)
-	int ToBuffer(char** buffer, int* size, bool resize);
+	int ToBuffer(char** buffer, int* size, bool resize, bool pngChunks);
 	void Reset();
 
 	bool AddMeshOverride(const TCHAR* texture, const TCHAR* override);
@@ -68,6 +66,9 @@ public:
 
 	inline const std::wstring& GetEyeTexture(int leftright) { return m_eyeTextures[leftright].texName; }
 
+	inline std::wstring& GetHairHighlight() { return m_hairHighlightName; }
+	inline std::wstring& GetTanName() { return m_tanName; }
+
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<std::pair<std::wstring, std::wstring>> m_meshOverrides;	//replaces textures by other textures
@@ -85,6 +86,10 @@ private:
 		std::vector<BYTE> texFile; //contains file if it should be saved inside the card
 	} m_eyeTextures[2];
 
+	std::wstring m_hairHighlightName; //hair highlight
+
+	std::wstring m_tanName; //tan settings
+
 	union {
 		DWORD full;
 		BYTE arr[4];
@@ -97,6 +102,9 @@ private:
 	} m_hairRedirects;
 
 private:
+	//fills data from buffer. buffer should point to start of the png chunk (the length member)
+	void FromBuffer(char* buffer, int size);
+
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
 

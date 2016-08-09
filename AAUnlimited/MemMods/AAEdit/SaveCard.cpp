@@ -4,62 +4,75 @@
 
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
+#include "General\Buffer.h"
 #include "Functions\AAEdit\Globals.h"
 
 namespace EditInjections {
 namespace SaveCard {
 
 
-void __cdecl AddUnlimitData(HANDLE h) {
-	static const BYTE IENDPart[] = { 0,0,0,0, 0x49,0x45,0x4E,0x44, 0xAE,0x42,0x60,0x82 };
+void __stdcall AddUnlimitData(wchar_t* fileName) {
+	//open card
+	HANDLE hFile = CreateFile(fileName, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;
 
-
-	//write extended card data
-	char* buffer = NULL;
+	//generate unlimited data buffer
 	int size = 0;
-	DWORD written;
-	int partSize = AAEdit::g_cardData.ToBuffer(&buffer, &size, true);
-	if (buffer != NULL) {
-		WriteFile(h, buffer, partSize, &written, 0);
-	}
+	char* buffer = NULL;
+	int retSize = AAEdit::g_cardData.ToBuffer(&buffer, &size, true, false);
+	if (retSize == 0) return;
 
-	//write iend part
-	WriteFile(h,IENDPart,sizeof(IENDPart),&written,0);
+	DWORD foo = 0;
+
+	//read data offset from end
+	SetFilePointer(hFile, -4, NULL, FILE_END);
+	DWORD aa2DataOffset = 0;
+	ReadFile(hFile, &aa2DataOffset, 4, &foo, NULL);
+
+	//add our data
+	WriteFile(hFile, buffer, retSize, &foo, NULL);
+
+	//write new offset to end
+	aa2DataOffset += retSize + 4; //+4 cause the old offset is also between it
+	WriteFile(hFile, &aa2DataOffset, 4, &foo, NULL);
+
+	delete[] buffer;
+	CloseHandle(hFile);
 }
 
 DWORD AddUnlimitDataOriginalFunction;
 void __declspec(naked) AddUnlimitDataRedirect() {
-	_asm {
-		sub esi, 0xC	//remove IEND from buffer
-		push 00			//copy parameters
-		push ecx
-		push edi
+	__asm {
+		push eax //save file path
+
+		push [esp+8]
 		call [AddUnlimitDataOriginalFunction]
-		add esp, 0xC	//note that its a _cdecl function
-		push edi		//edi is still file handle
+		push eax //save return value
+
+		mov eax, [esp+4]
+		push eax //push rescued parameter
 		call AddUnlimitData
-		add esp, 4
-		ret				//again, original function was cdecl
+
+		pop eax //get return value back
+		add esp, 4 //get rid of file path that was saved
+		ret 4
 	}
 }
 
+
 void AddUnlimitDataInject() {
-	//this code adds the png-part of a card (ecx = buffer, size = esi) to the file handle (edi).
-	//note that the call has 3 stack parameters as well as esi and edi and is _cdecl. its a really awkward function...
-	/*AA2Edit.exe+1262D0 - 8B 4B 34              - mov ecx,[ebx+34]
-	AA2Edit.exe+1262D3 - 8B 73 30              - mov esi,[ebx+30]
-	AA2Edit.exe+1262D6 - 6A 00                 - push 00 { 0 }
-	AA2Edit.exe+1262D8 - 51                    - push ecx
-	AA2Edit.exe+1262D9 - 57                    - push edi
-	AA2Edit.exe+1262DA - E8 51CF0800           - call AA2Edit.exe+1B3230 { first writing chunk }
-	*/
-	DWORD address = General::GameBase + 0x1262DA;
+	//the save card data function call. one stack parameter stdcall, as well as eax (wchar_t* fileName) and ecx (?)
+	/*AA2Edit.exe+1BEC8 - 50                    - push eax
+	AA2Edit.exe+1BEC9 - 8D 84 24 34050000     - lea eax,[esp+00000534]
+	AA2Edit.exe+1BED0 - E8 EBA21000           - call AA2Edit.exe+1261C0	*/
+	DWORD address = General::GameBase + 0x1BED0;
 	DWORD redirectAddress = (DWORD)(&AddUnlimitDataRedirect);
 	Hook((BYTE*)address,
-		{ 0xE8, 0x51, 0xCF, 0x08, 0x00 },						//expected values
-		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+	{ 0xE8, 0xEB, 0xA2, 0x10, 0x00 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&AddUnlimitDataOriginalFunction);
 }
+
 
 
 }

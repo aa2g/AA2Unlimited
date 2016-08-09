@@ -136,16 +136,8 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::pair
 
 
 
-void AAUCardData::FromBuffer(char* buffer) {
-	Reset();
+void AAUCardData::FromBuffer(char* buffer, int size) {
 	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
-	//first, read chunk size (big endian)
-	int size = _byteswap_ulong(*(DWORD*)(buffer)); buffer += 4;
-	//then, read png chunk (also big endian)
-	DWORD chunk = _byteswap_ulong(*(DWORD*)(buffer)); buffer += 4;
-	if (chunk != PngChunkId) {
-		return;
-	}
 	//read members
 	while(size > 4) {
 		DWORD identifier = *(DWORD*)(buffer);
@@ -218,22 +210,46 @@ void AAUCardData::FromBuffer(char* buffer) {
 }
 
 void AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
-	//find our png chunk
+	Reset();
+	//try to find it at the end first
+	if (size < 8) return;
+	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
+	if (aauDataSize < size - 8) {
+		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
+		if (id == PngChunkIdBigEndian) {
+			FromBuffer((char*)(&buffer[size - 8 - aauDataSize]), aauDataSize);
+			return;
+		}
+	}
+	//else, find our png chunk
 	BYTE* chunk = General::FindPngChunk((BYTE*)buffer, size, AAUCardData::PngChunkIdBigEndian);
 	if (chunk != NULL) {
-		FromBuffer((char*)chunk);
+		//first, read chunk size (big endian)
+		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 4;
+		//then, read png chunk (also big endian)
+		DWORD chunkId = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 4;
+		if (chunkId != PngChunkId) {
+			return;
+		}
+		FromBuffer((char*)chunk, size);
+		return;
 	}
 }
 
 /*
- * Will write the entire png chunk corresponding to this card. Format is like this:
+ * Will write the png file to a buffer. If pngChunks == true, the old format will be printed,
+ * that includes a pngChunk structure like this:
  * DWORD chunkDataLength;
  * DWORD chunkId;
  * BYTE chunkData[chunkDataLength];
  * --> list of data entrys
  * DWORD checksum
+ * Else, it will print a different structure:
+ * DWORD chunkId;
+ * BYTE chunkData[chunkDataLength]
+ * DWORD chunkDataLength
  */
-int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
+int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) {
 	LOGPRIO(Logger::Priority::SPAM) << "dumping card info...\r\n";
 	int at = 0;
 	bool ret = true;
@@ -256,9 +272,11 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
 		}
 
-	//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder
-	ret &= General::BufferAppend(buffer, size, at, "Msgn", 4, resize);
-	at += 4;
+	if (pngChunks) {
+		//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder
+		ret &= General::BufferAppend(buffer, size, at, "Msgn", 4, resize);
+		at += 4;
+	}
 	//write chunk id (big endian)
 	ret &= General::BufferAppend(buffer, size, at, (const char*)(&PngChunkIdBigEndian), 4, resize);
 	at += 4;
@@ -279,19 +297,28 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize) {
 	DUMP_MEMBER('HrRd', m_hairRedirects.full);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
-	int dataSize = at - 8;
-	int dataSizeSwapped = _byteswap_ulong(at - 8);
-	ret &= General::BufferAppend(buffer, size, 0, (const char*)(&dataSizeSwapped), 4, resize);
+	if (pngChunks) {
+		int dataSize = at - 8;
+		int dataSizeSwapped = _byteswap_ulong(at - 8);
+		ret &= General::BufferAppend(buffer, size, 0, (const char*)(&dataSizeSwapped), 4, resize);
 
-	//write checksum. stub for now
-	DWORD checksum = 0;
-	ret &= General::BufferAppend(buffer, size, at, (const char*)(&checksum), 4, resize);
+		//write checksum. stub for now
+		DWORD checksum = 0;
+		ret &= General::BufferAppend(buffer, size, at, (const char*)(&checksum), 4, resize);
+		return !ret ? 0 : dataSize + 12;
+	}
+	else {
+		int dataSize = at - 4;
+		ret &= General::BufferAppend(buffer, size, at, (const char*)(&dataSize), 4, resize);
+		return !ret ? 0 : dataSize + 8;
+	}
+	
 
 	//undefine macros again
 	#undef DUMP_MEMBER_CONTAINER
 	#undef DUMP_NUMBER
 
-	return !ret ? 0 : dataSize + 12;
+	
 	
 }
 

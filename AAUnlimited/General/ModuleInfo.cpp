@@ -22,6 +22,7 @@ namespace {
 	wchar_t AAPlayVersion[] = L"2.0.1";
 	wchar_t AAEditVersion[] = L"1.0.1";
 	wchar_t AAPlayProductName[] = L"ジンコウガクエン２";
+	wchar_t AAPlayASUProductName[] = L"Artificial Academy 2";
 	wchar_t AAEditProductName[] = L"ジンコウガクエン２ きゃらめいく";
 }
 
@@ -112,6 +113,7 @@ bool Initialize() {
 				if (wcscmp(AAPlayVersion, strFileVersion) == 0) playVersion = true;
 				if (wcscmp(AAEditVersion, strFileVersion) == 0) editVersion = true;
 				if (wcscmp(AAPlayProductName, strProductName) == 0) playName = true;
+				if (wcscmp(AAPlayASUProductName, strProductName) == 0) playName = true;
 				if (wcscmp(AAEditProductName, strProductName) == 0) editName = true;
 				if (editVersion && editName) IsAAEdit = true;
 				else if (playVersion && playName) IsAAPlay = true;
