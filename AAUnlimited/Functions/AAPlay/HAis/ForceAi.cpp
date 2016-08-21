@@ -120,7 +120,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 		}
 	}
 	
-	LOGPRIO(Logger::Priority::SPAM) << "Picking dom position from " << nNormalPoses << " normal and " << nClimaxPoses <<
+	LOGPRIO(Logger::Priority::SPAM) << "Picking pref position from " << nNormalPoses << " normal and " << nClimaxPoses <<
 		" climax poses, climax chance " << climaxChance << "\r\n";
 
 	//choose pose
@@ -137,7 +137,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 					info->m_hPosButtons[pos.first].m_arrButtonList[pos.second]->Press();
 					return;
 				}
-				nClimaxPoses -= size;
+				randChoice -= size;
 			}
 		}
 		if (allowNormal) {
@@ -148,7 +148,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 					info->m_hPosButtons[pos.first].m_arrButtonList[pos.second]->Press();
 					return;
 				}
-				nClimaxPoses -= m_preferencePositions[i].size();
+				randChoice -= size;
 			}
 		}
 	}
@@ -164,7 +164,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 					info->m_hPosButtons[pos.first].m_arrButtonList[pos.second]->Press();
 					return;
 				}
-				nNormalPoses -= m_preferencePositions[i].size();
+				randChoice -= size;
 			}
 		}
 		if (allowNormal) {
@@ -175,7 +175,7 @@ void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, 
 					info->m_hPosButtons[pos.first].m_arrButtonList[pos.second]->Press();
 					return;
 				}
-				nNormalPoses -= m_preferencePositions[i].size();
+				randChoice -= size;
 			}
 		}
 	}
@@ -229,6 +229,7 @@ ForceAi::State ForceAi::states[] = {
 			}
 			else if (state->m_customValue == 1 && thisPtr->m_forcee->m_bClothesSlipped == 0) {
 				info->m_btnUnderwear->Press();
+				thisPtr->m_forcee->m_bClothesSlipped = 1;
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -247,12 +248,14 @@ ForceAi::State ForceAi::states[] = {
 			thisPtr->StartTimerRandom(0, 15, 20);
 			if (state->m_customValue == 0) {
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2, 3);
-				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
-				if (thisPtr->m_forcee->m_bClothesSlipped == 0) {
-					info->m_btnUnderwear->Press(); //slip now if not done yet
-				}
+				thisPtr->SetRepeatParams(0, 0.8f, 0.5f);
 				if (thisPtr->m_forcee->m_clothesState == 0) {
 					info->m_btnOutfit->Press();
+					thisPtr->m_forcee->m_clothesState = 1;
+				}
+				if (thisPtr->m_forcee->m_bClothesSlipped == 0) {
+					info->m_btnUnderwear->Press(); //slip now if not done yet
+					thisPtr->m_forcee->m_bClothesSlipped = 1;
 				}
 			}
 		},
@@ -262,6 +265,9 @@ ForceAi::State ForceAi::states[] = {
 		[](State* state, ForceAi* thisPtr, HInfo* info) -> DWORD {
 			if (!thisPtr->TimerPassed(0)) return INVALID;
 			if (thisPtr->WantRepeat(0)) { state->m_customValue++;  return DOMINANCE; }
+
+			//reset the repeat counter before moving on so the repeat params reset when we come back to this state
+			state->m_customValue = 0; 
 			return PREFERENCES;
 		}
 	},
@@ -281,6 +287,9 @@ ForceAi::State ForceAi::states[] = {
 		[](State* state, ForceAi* thisPtr, HInfo* info) -> DWORD {
 			if (!thisPtr->TimerPassed(0)) return INVALID;
 			if (thisPtr->WantRepeat(0)) { state->m_customValue++;  return PREFERENCES; }
+
+			//reset the repeat counter before moving on so the repeat params reset when we come back to this state
+			state->m_customValue = 0;
 			return CLIMAX;
 		}
 	},
@@ -290,7 +299,7 @@ ForceAi::State ForceAi::states[] = {
 			thisPtr->PickRandomPrefPosition(info, true, true, 1);
 			thisPtr->StartTimerRandom(0, 20.0f, 20.0f);
 			if (state->m_customValue == 0) {
-				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
+				thisPtr->SetRepeatParams(1, 1.0f, 0.8f);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -303,17 +312,22 @@ ForceAi::State ForceAi::states[] = {
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) -> DWORD {
 			if (!thisPtr->TimerPassed(0)) return INVALID;
-			if (thisPtr->WantRepeat(0)) { 
+			if (thisPtr->WantRepeat(1)) { 
 				if (state->m_customValue == 0) {
 					//if repeat the first time, unress fully
 					if (thisPtr->m_forcee->m_clothesState != 2) {
-						thisPtr->m_forcee->m_clothesState = 1;
 						info->m_btnOutfit->Press();
+						thisPtr->m_forcee->m_clothesState = 2;
 					}
 				}
 				state->m_customValue++;  
-				return PREFERENCES; 
+				return DOMINANCE; 
 			}
+
+			//need to reset clothes data here or the next run may not undress correctly
+			thisPtr->m_forcee->m_clothesState = 0;
+			thisPtr->m_forcee->m_bClothesSlipped = 0;
+
 			return END;
 		}
 	}
@@ -321,6 +335,10 @@ ForceAi::State ForceAi::states[] = {
 
 void ForceAi::Initialize(ExtClass::HInfo* info) {
 	LOGPRIO(Logger::Priority::SPAM) << "initializing ForceAi\r\n";
+
+	//seed our random number generator
+	srand((unsigned int)time(NULL));
+
 	m_aiState = 0;
 	for (int i = 0; i < INVALID; i++) {
 		states[i].m_customValue = 0;
@@ -362,7 +380,7 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 			if (data->m_yuriAllowance == GENDERALLOW_HETERO_ONLY && m_isYuri) continue; //not allowed
 			if (data->m_yuriAllowance == GENDERALLOW_HOMO_ONLY && !m_isYuri) continue;
 			//check if it fullfills preferences
-			if (data->m_preferenceFlags & info->m_activeParticipant->m_charPtr->m_charData->GetPreferenceFlags()) {
+			if (data->m_preferenceFlags & m_forcer->m_charPtr->m_charData->GetPreferenceFlags()) {
 				m_preferencePositions[i].emplace_back(i, j);
 			}
 			//check if its dominant
