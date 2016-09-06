@@ -12,6 +12,8 @@ public:
 		
 		NO_PROMPT_IS_FORCE, HAI_ON_NO_PROMPT,
 
+		SAVED_EYE_TEXTURE_USAGE,
+
 		num_elements
 	};
 	union MemberData {

@@ -50,24 +50,12 @@ void UnlimitedDialog::Destroy() {
 
 void UnlimitedDialog::Refresh() {
 	int index = TabCtrl_GetCurSel(m_tabs);
-	switch (index) {
-	case 0:
-		m_moDialog.Refresh();
-		break;
-	case 1:
-		m_aoDialog.Refresh();
-		break;
-	case 2:
-		m_arDialog.Refresh();
-		break;
-	case 3:
-		m_etDialog.Refresh();
-		break;
-	case 4:
-		m_hrDialog.Refresh();
-	default:
-		break;
-	}
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	BOOL suc = TabCtrl_GetItem(m_tabs, index, &item);
+	if (suc == FALSE) return;
+	Dialog* diag = (Dialog*)(item.lParam);
+	diag->Refresh();
 }
 
 void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName,
@@ -99,16 +87,20 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		rct.left += 10; rct.left -= 10;
 		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
 
-		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog, 0, TEXT("Mesh Overrides"),
-				rct, MODialog::DialogProc);
-		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog, 1, TEXT("Archive Overrides"),
-			rct, AODialog::DialogProc);
-		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog, 2, TEXT("Archive Redirects"),
-			rct, ARDialog::DialogProc);
-		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog, 3, TEXT("Eye Textures"),
+		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog, 0, TEXT("Eye Textures"),
 			rct, ETDialog::DialogProc);
+		thisPtr->AddDialog(IDD_TANSELECT, &thisPtr->m_tsDialog, 1, TEXT("Tan"),
+			rct, TSDialog::DialogProc);
+		thisPtr->AddDialog(IDD_HAIR, &thisPtr->m_hrDialog, 2, TEXT("Hair"),
+			rct, HRDialog::DialogProc);
+		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog, 3, TEXT("Mesh Overrides"),
+			rct, MODialog::DialogProc);
+		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog, 4, TEXT("Archive Overrides"),
+			rct, AODialog::DialogProc);
+		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog, 5, TEXT("Archive Redirects"),
+			rct, ARDialog::DialogProc);
 
-		ShowWindow(thisPtr->m_moDialog.m_dialog, SW_SHOW);
+		thisPtr->Refresh();
 		return TRUE;
 		break; }
 	case WM_NOTIFY: {
@@ -475,6 +467,14 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				thisPtr->RefreshEnableState();
 				return TRUE;
 			}
+			else if (identifier == IDC_ET_LEFT_CBSAVEINSIDE || identifier == IDC_ET_RIGHT_CBSAVEINSIDE) {
+				int index = identifier == IDC_ET_LEFT_CBSAVEINSIDE ? 0 : 1;
+				TCHAR fileName[512];
+				fileName[0] = '\0';
+				SendMessage(thisPtr->m_eyes[index].edFile, WM_GETTEXT, 512, (LPARAM)fileName);
+				bool save = SendMessage((HWND)lparam, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				g_cardData.SetEyeTexture(index, fileName, save);
+			}
 			else if (identifier == IDC_ET_LEFT_BTBROWSE || identifier == IDC_ET_RIGHT_BTBROWSE) {
 				std::wstring initDir = General::BuildEditPath(TEXT("data\\texture\\eye"));
 				const TCHAR* path = General::OpenFileDialog(initDir.c_str());
@@ -526,9 +526,96 @@ void UnlimitedDialog::ETDialog::Refresh() {
 	SendMessage(this->m_eyes[1].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
 }
 
-/************************/
-/* Hair Redirect Dialog */
-/************************/
+/*********************/
+/* Tan Select Dialog */
+/*********************/
+
+INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		TSDialog* thisPtr = (TSDialog*)lparam;
+		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_cbSelect = GetDlgItem(hwndDlg, IDC_TS_CBSELECTION);
+		
+		thisPtr->LoadTanList();
+
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		switch (HIWORD(wparam)) {
+		case CBN_SELCHANGE: {
+			int sel = SendMessage(thisPtr->m_cbSelect, CB_GETCURSEL, 0, 0);
+			TCHAR name[256];
+			name[0] = '\0';
+			SendMessage(thisPtr->m_cbSelect, CB_GETLBTEXT, sel, (LPARAM)name);
+			g_cardData.SetTan(name);
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::TSDialog::LoadTanList() {
+	//always need a none field
+	SendMessage(m_cbSelect, CB_ADDSTRING, 0, (LPARAM)TEXT("-- None --")); 
+
+	//list all tan directories
+	std::wstring tanDirectory = General::BuildEditPath(TAN_PATH, TEXT("*"));
+	if (!General::DirExists(tanDirectory.c_str())) {
+		CreateDirectory(tanDirectory.c_str(), NULL);
+	}
+	WIN32_FIND_DATA data;
+	HANDLE hSearch = FindFirstFile(tanDirectory.c_str(), &data);
+
+	const std::wstring& currentTan = g_cardData.GetTanName();
+	bool containsTan = false;
+	static const TCHAR* exceptionNames[] {TEXT("."), TEXT("..")};
+	if (hSearch != INVALID_HANDLE_VALUE) {
+		BOOL suc = FALSE;
+		do {
+			if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				bool allowed = true;
+				for (const TCHAR* name : exceptionNames) {
+					if (wcscmp(data.cFileName, name) == 0) {
+						allowed = false;
+						break;
+					}
+				}
+				if (allowed) {
+					SendMessage(m_cbSelect, CB_ADDSTRING, 0, (LPARAM)data.cFileName);
+					if (currentTan == data.cFileName) containsTan = true;
+				}
+			}
+			suc = FindNextFile(hSearch, &data);
+		} while (suc != FALSE);
+		FindClose(hSearch);
+	}
+
+	//if the tan doesnt exists, at it anyway so we dont loose the data
+	if (!containsTan && currentTan.size() > 0) {
+		SendMessage(m_cbSelect, CB_ADDSTRING, 0, (LPARAM)currentTan.c_str());
+	}
+	
+	//select tan in combobox as default, or none if no tan is set
+	if (currentTan.size() > 0) {
+		SendMessage(m_cbSelect, CB_SELECTSTRING, -1, (LPARAM)currentTan.c_str());
+	}
+	else {
+		SendMessage(m_cbSelect, CB_SELECTSTRING, -1, (LPARAM)TEXT("-- None --"));
+	}
+}
+
+void UnlimitedDialog::TSDialog::Refresh() {
+	
+}
+
+/***************/
+/* Hair Dialog */
+/***************/
 
 
 INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam) {
@@ -558,10 +645,45 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SendMessage(thisPtr->m_arrRbRedirects[1][1], BM_SETCHECK, BST_CHECKED, 0);
 		SendMessage(thisPtr->m_arrRbRedirects[2][2], BM_SETCHECK, BST_CHECKED, 0);
 		SendMessage(thisPtr->m_arrRbRedirects[3][3], BM_SETCHECK, BST_CHECKED, 0);
+		thisPtr->m_edHighlight = GetDlgItem(hwndDlg, IDC_HR_EDHIGHLIGHT);
 		return TRUE;
 		break; }
+	case WM_COMMAND: {
+		HRDialog* thisPtr = (HRDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_HR_BTNBROWSE) {
+				std::wstring initialDir = General::BuildEditPath(HAIR_HIGHLIGHT_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
+				if (choice != NULL) {
+					if (General::StartsWith(choice, initialDir.c_str())) {
+						const TCHAR* rest = choice + initialDir.size();
+						SendMessage(thisPtr->m_edHighlight, WM_SETTEXT, 0, (LPARAM)rest);
+						g_cardData.SetHairHighlight(rest);
+					}
+				}
+				return TRUE;
+			}
+			else {
+				thisPtr->SetCardDataFromGui();
+			}
+			break; }
+		}
+		break; }
+						
 	}
 	return FALSE;
+}
+
+void UnlimitedDialog::HRDialog::SetCardDataFromGui() {
+	for (int i = 0; i < 4; i++) {
+		BYTE target = GetHairTarget(i);
+		g_cardData.SetHairRedirect(i, target);
+	}
 }
 
 BYTE UnlimitedDialog::HRDialog::GetHairTarget(BYTE hairCategory) {

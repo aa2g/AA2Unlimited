@@ -37,7 +37,6 @@
     <ClCompile Include="Functions\AAUCardData.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
-    <ClCompile Include="Functions\AAEdit\Overrides.cpp" />
     <ClCompile Include="Functions\TextureImage.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialog.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\WindowData.cpp" />
@@ -45,7 +44,6 @@
     <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
     <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
     <ClCompile Include="General\Util.cpp" />
-    <ClCompile Include="Functions\AAPlay\Overrides.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
     <ClCompile Include="Functions\OverrideFile.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
@@ -57,8 +55,11 @@
     <ClCompile Include="External\ExternalVariables\AAPlay\GameGlobals.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\PcConversation.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
-    <ClCompile Include="MemMods\Shared\Misc\MeshTexture.cpp" />
     <ClCompile Include="Functions\AAPlay\HButtonMove.cpp" />
+    <ClCompile Include="Functions\Shared\Overrides.cpp" />
+    <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\FileDump.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -83,7 +84,6 @@
     <ClInclude Include="Functions\AAUCardData.h" />
     <ClInclude Include="General\Buffer.h" />
     <ClInclude Include="Functions\AAEdit\Globals.h" />
-    <ClInclude Include="Functions\AAEdit\Overrides.h" />
     <ClInclude Include="Functions\TextureImage.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
     <ClInclude Include="resource.h" />
@@ -94,7 +94,6 @@
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="General\Util.h" />
-    <ClInclude Include="Functions\AAPlay\Overrides.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
     <ClInclude Include="Functions\OverrideFile.h" />
     <ClInclude Include="Functions\Shared\Globals.h" />
@@ -107,8 +106,11 @@
     <ClInclude Include="External\ExternalVariables\AddressRule.h" />
     <ClInclude Include="MemMods\AAPlay\Events\PcConversation.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
-    <ClInclude Include="MemMods\Shared\Misc\MeshTexture.h" />
     <ClInclude Include="Functions\AAPlay\HButtonMove.h" />
+    <ClInclude Include="Functions\Shared\Overrides.h" />
+    <ClInclude Include="Functions\Shared\SpecialOverrides.h" />
+    <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
+    <ClInclude Include="MemMods\Shared\Events\FileDump.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

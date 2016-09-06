@@ -18,13 +18,16 @@ public:
 	BYTE m_bClothesOn;
 	BYTE m_unknown3;
 	BYTE m_currClothes;
+	BYTE m_unknown4[0xF17];
+	void* m_somedata;
+	BYTE m_unknown5[0x3C];
 
 public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
 };
 
-static_assert(sizeof(CharacterStruct) == 0x45,"CharacterStruct size missmatch");
+static_assert(sizeof(CharacterStruct) == 0xF9C, "CharacterStruct size missmatch; must be 0xF9C bytes (allocation size)");
 
 
 #pragma pack(pop)

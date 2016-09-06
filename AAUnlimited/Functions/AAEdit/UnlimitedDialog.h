@@ -77,10 +77,19 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_etDialog;
+	struct TSDialog : public Dialog {
+		HWND m_cbSelect;
+
+		void LoadTanList();
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
+	} m_tsDialog;
 	struct HRDialog : public Dialog {
 		HWND m_arrRbRedirects[4][4];
+		HWND m_edHighlight;
 		BYTE GetHairTarget(BYTE hairCategory);
 
+		void SetCardDataFromGui();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_hrDialog;

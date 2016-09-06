@@ -8,7 +8,11 @@
 #include "config.h"
 
 
-TextureImage::TextureImage(const TCHAR* fileName) : OverrideFile(OVERRIDE_IMAGE_PATH, fileName, false, true) {
+TextureImage::TextureImage() {
+
+}
+
+TextureImage::TextureImage(const TCHAR* fileName, bool absPath) : OverrideFile(OVERRIDE_IMAGE_PATH, fileName, absPath, false, true) {
 	m_good = false; //we need additional things
 	//find out if its tga or bmp
 	int length = wcslen(fileName);

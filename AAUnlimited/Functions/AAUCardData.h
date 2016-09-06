@@ -42,43 +42,58 @@ public:
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 
+	bool SetHairHighlight(const TCHAR* name);
+
+	bool SetTan(const TCHAR* name);
+
+	
+	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
+	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
+	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
+
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
-	inline const std::vector<std::pair<std::wstring, std::wstring>> GetMeshOverrideList() const { return m_meshOverrides; }
+	inline const std::vector<MeshOverrideRule> GetMeshOverrideList() const { return m_meshOverrides; }
 	inline const TextureImage* GetMeshOverrideTexture(const TCHAR* texture) const {
 		auto it = m_meshOverrideMap.find(texture);
 		return it == m_meshOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const std::vector<std::pair<std::pair<std::wstring, std::wstring>,std::wstring>> GetArchiveOverrideList() const { return m_archiveOverrides; }
+	inline const std::vector<ArchiveOverrideRule> GetArchiveOverrideList() const { return m_archiveOverrides; }
 	inline const OverrideFile* GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const std::vector<std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>>> 
-		GetArchiveRedirectList() const { return m_archiveRedirects; }
+	inline const std::vector<ArchiveRedirectRule> GetArchiveRedirectList() const { return m_archiveRedirects; }
 	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
 	}
 
 	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
-	inline void SetHairRedirect(BYTE value, BYTE category) { m_hairRedirects.arr[category] = value; }
+	inline void SetHairRedirect(BYTE category, BYTE value) { m_hairRedirects.arr[category] = value; }
 
 	inline const std::wstring& GetEyeTexture(int leftright) { return m_eyeTextures[leftright].texName; }
+	inline const std::vector<BYTE>& GetEyeTextureBuffer(int leftright) { return m_eyeTextures[leftright].texFile; }
 
-	inline std::wstring& GetHairHighlight() { return m_hairHighlightName; }
-	inline std::wstring& GetTanName() { return m_tanName; }
+	inline const std::wstring& GetHairHighlightName() { return m_hairHighlightName; }
+	inline const TextureImage& GetHairHighlightTex() { return m_hairHighlightImage; }
+
+	inline const std::wstring& GetTanName() { return m_tanName; }
+	inline const TextureImage& GetTanTex(int i) {
+		if (i >= 0 && i < 5) return m_tanImages[i];
+		return m_tanImages[0];
+	}
+	
 
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
-	std::vector<std::pair<std::wstring, std::wstring>> m_meshOverrides;	//replaces textures by other textures
+	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
 	std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
 	
-	std::vector<std::pair<std::pair<std::wstring,std::wstring>,std::wstring>> m_archiveOverrides; //<archive,file>->file
+	std::vector<ArchiveOverrideRule> m_archiveOverrides; //<archive,file>->file
 	std::map<std::pair<std::wstring, std::wstring>, OverrideFile> m_archiveOverrideMap;
 
-	std::vector<std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>>> 
-		m_archiveRedirects; //<archive,file>-><archive,file>
+	std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
 	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
 
 	struct {
@@ -87,8 +102,10 @@ private:
 	} m_eyeTextures[2];
 
 	std::wstring m_hairHighlightName; //hair highlight
+	TextureImage m_hairHighlightImage;
 
 	std::wstring m_tanName; //tan settings
+	TextureImage m_tanImages[5];
 
 	union {
 		DWORD full;
@@ -118,6 +135,8 @@ private:
 		template<typename T, typename U>
 		std::pair<T,U> ReadData_sub(char*& buffer,int& size,std::pair<T,U>*);
 		std::wstring ReadData_sub(char*& buffer,int& size,std::wstring*);
+		template<typename T, typename U>
+		std::map<T, U> ReadData_sub(char*& buffer, int& size, std::map<T, U>*);
 
 	//write help functions
 	template<typename T>
@@ -129,5 +148,7 @@ private:
 		bool WriteData_sub(char** buffer,int* size,int& at, const std::vector<T>& data,bool resize,std::vector<T>*);
 		template<typename T, typename U>
 		bool WriteData_sub(char** buffer,int* size,int& at, const std::pair<T,U>& data,bool resize,std::pair<T,U>*);
+		template<typename T, typename U>
+		bool WriteData_sub(char** buffer,int* size,int& at, const std::map<T, U>& data, bool resize, std::map<T, U>*);
 };
 

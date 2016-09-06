@@ -1,31 +1,46 @@
 #include "OverrideFile.h"
 
+#include "General\Util.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
 #include "config.h"
 
-OverrideFile::OverrideFile(const TCHAR* fileName) : OverrideFile(OVERRIDE_ARCHIVE_PATH, fileName, true, true) {
+OverrideFile::OverrideFile() : m_good(false) {
+}
+
+OverrideFile::OverrideFile(const TCHAR* fileName, bool absPath) : OverrideFile(OVERRIDE_ARCHIVE_PATH, fileName, absPath, true, true) {
 	
 }
 
-OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool tryAAPlay, bool tryAAEdit) : m_good(false), m_cache(NULL) {
+OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPath, bool tryAAPlay, bool tryAAEdit) : OverrideFile() {
 	m_fileName = fileName;
 
 	HANDLE file = NULL;
-	if (tryAAPlay) {
-		m_fullPath = General::BuildPlayPath(path, fileName);
+	if (absPath) {
+		m_fileName = General::FindFileInPath(fileName);
+		m_fullPath = fileName;
 		file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 		if (file != INVALID_HANDLE_VALUE && file != NULL) {
 			m_good = true;
 		}
 	}
-	if (!m_good && tryAAEdit) {
-		m_fullPath = General::BuildEditPath(path, fileName);
-		file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-		if (file != INVALID_HANDLE_VALUE && file != NULL) {
-			m_good = true;
+	else {
+		if (tryAAPlay) {
+			m_fullPath = General::BuildPlayPath(path, fileName);
+			file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+			if (file != INVALID_HANDLE_VALUE && file != NULL) {
+				m_good = true;
+			}
+		}
+		if (!m_good && tryAAEdit) {
+			m_fullPath = General::BuildEditPath(path, fileName);
+			file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+			if (file != INVALID_HANDLE_VALUE && file != NULL) {
+				m_good = true;
+			}
 		}
 	}
+	
 
 	if (!m_good) return;
 

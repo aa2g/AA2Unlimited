@@ -28,7 +28,8 @@ struct TgaHeader {
 class TextureImage : public OverrideFile
 {
 public:
-	TextureImage(const TCHAR* fileName);
+	TextureImage();
+	TextureImage(const TCHAR* fileName, bool absPath = false);
 	~TextureImage();
 
 	inline int GetWidth() const { return m_width; }

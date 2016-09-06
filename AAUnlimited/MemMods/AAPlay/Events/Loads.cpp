@@ -4,7 +4,7 @@
 #include "General\ModuleInfo.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
-#include "Functions\AAPlay\Overrides.h"
+#include "Functions\Shared\Overrides.h"
 
 namespace PlayInjections {
 /*
@@ -14,11 +14,11 @@ namespace Loads {
 
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
-	AAPlay::MeshTextureCharLoadStart(loadCharacter);
+	Shared::MeshTextureCharLoadStart(loadCharacter);
 }
 
 void __stdcall HiPolyLoadEndEvent() {
-	AAPlay::MeshTextureCharLoadEnd();
+	Shared::MeshTextureCharLoadEnd();
 }
 
 void __declspec(naked) HiPolyLoadsStartRedirect() {

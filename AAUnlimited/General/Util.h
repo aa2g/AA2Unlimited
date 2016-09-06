@@ -46,6 +46,11 @@ inline bool DirExists(const TCHAR* dir) {
 	return (type != INVALID_FILE_ATTRIBUTES && (type & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+inline bool FileExists(const TCHAR* file) {
+	DWORD type = GetFileAttributes(file);
+	return (type != INVALID_FILE_ATTRIBUTES && !(type & FILE_ATTRIBUTE_DIRECTORY));
+}
+
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
 

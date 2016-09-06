@@ -4,10 +4,12 @@
 #include <algorithm>
 #include <intrin.h>
 
+#include "config.h"
 #include "General\ModuleInfo.h"
 #include "General\Buffer.h"
 #include "General\Util.h"
 #include "Files\Logger.h"
+#include "Files\Config.h"
 
 const AAUCardData AAUCardData::g_defaultValues;
 
@@ -87,6 +89,20 @@ std::pair<T,U> AAUCardData::ReadData_sub(char*&buffer,int& size,std::pair<T,U>*)
 	return std::make_pair(std::move(val1),std::move(val2));
 }
 
+template<typename T, typename U>
+std::map<T, U> AAUCardData::ReadData_sub(char *& buffer, int & size, std::map<T, U>*)
+{
+	DWORD length = ReadData<DWORD>(buffer, size);
+	std::map<T,U> retVal;
+	retVal.reserve(length);
+	for (int i = 0; i < length; i++) {
+		T tval = ReadData<T>(buffer, size);
+		U uval = ReadData<U>(buffer, size);
+		retVal.emplace(std::move(tval), std::move(uval));
+	}
+	return retVal;
+}
+
 //
 // generic write functions
 //
@@ -131,6 +147,16 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::pair
 	bool ret = true;
 	ret &= WriteData(buffer,size,at,data.first,resize);
 	ret &= WriteData(buffer,size,at,data.second,resize);
+	return ret;
+}
+
+template<typename T, typename U>
+bool AAUCardData::WriteData_sub(char ** buffer, int * size, int & at, const std::map<T, U>& data, bool resize, std::map<T, U>*) {
+	bool ret = true;
+	ret &= WriteData(buffer, size, at, data.size(), resize);
+	for (const auto& it : data) {
+		ret &= WriteData(buffer, size, at, it, resize);
+	}
 	return ret;
 }
 
@@ -202,6 +228,35 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		}
 		
 	}
+
+	//save eye textures in eye texture folder if not allready there
+	if (g_Config.GetKeyValue(Config::SAVED_EYE_TEXTURE_USAGE).iVal == 1) {
+		for (int i = 0; i < 2; i++) {
+			if (m_eyeTextures[i].texName.size() > 0 && m_eyeTextures[i].texFile.size() > 0) {
+				//make sure texture has no folders in it first
+				bool validFileName = true;
+				for (wchar_t c : m_eyeTextures[i].texName) {
+					if (c == L'\\') {
+						validFileName = false;
+					}
+				}
+				if (!validFileName) {
+					LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_eyeTextures[i].texName << " contains paths in "
+						"file name and was not extracted for safety purposes.\r\n";
+					continue;
+				}
+				std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), m_eyeTextures[i].texName.c_str());
+				if (!General::FileExists(fullPath.c_str())) {
+					HANDLE h = CreateFile(fullPath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_NEW, 0, NULL);
+					DWORD written;
+					WriteFile(h, m_eyeTextures[i].texFile.data(), m_eyeTextures[i].texFile.size(), &written, NULL);
+					CloseHandle(h);
+				}
+			}
+		}
+	}
+	
+
 	if (size != 0) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
 	}
@@ -383,6 +438,7 @@ bool AAUCardData::RemoveArchiveRedirect(int index) {
 }
 
 bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) {
+	int other = leftright == 0 ? 1 : 0;
 	if (texName == NULL) {
 		m_eyeTextures[leftright].texName = TEXT("");
 		m_eyeTextures[leftright].texFile.clear();
@@ -393,7 +449,7 @@ bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) 
 	if (file == INVALID_HANDLE_VALUE || file == NULL) {
 		return false;
 	}
-	if (save) {
+	if (save && m_eyeTextures[other].texName != m_eyeTextures[leftright].texName) {
 		DWORD lo, hi;
 		lo = GetFileSize(file, &hi);
 		m_eyeTextures[leftright].texFile.resize(lo);
@@ -402,4 +458,26 @@ bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) 
 	m_eyeTextures[leftright].texName = texName;
 	CloseHandle(file);
 	return true;
+}
+
+bool AAUCardData::SetHairHighlight(const TCHAR* name) {
+	m_hairHighlightImage = TextureImage(General::BuildEditPath(HAIR_HIGHLIGHT_PATH, name).c_str(), true);
+	if (m_hairHighlightImage.IsGood()) {
+		m_hairHighlightName = name;
+		return true;
+	}
+	return false;
+}
+
+bool AAUCardData::SetTan(const TCHAR* name) {
+	std::wstring path = General::BuildEditPath(TAN_PATH, name);
+	bool anyGood = false;
+	for (int i = 0; i < 5; i++) {
+		wchar_t iChar = L'0' + i;
+		std::wstring pathi = path + TEXT("\\0") + iChar + TEXT(".bmp"); 
+		m_tanImages[i] = TextureImage(pathi.c_str(), true);
+		anyGood = anyGood || m_tanImages[i].IsGood();
+	}
+	if (anyGood) m_tanName = name;
+	return anyGood;
 }

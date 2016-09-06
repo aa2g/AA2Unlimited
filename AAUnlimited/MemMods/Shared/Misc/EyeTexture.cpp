@@ -2,8 +2,7 @@
 
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
-#include "Functions\AAEdit\Overrides.h"
-#include "Functions\AAPlay\Overrides.h"
+#include "Functions\Shared\Overrides.h"
 
 namespace SharedInjections {
 namespace EyeTexture {
@@ -16,7 +15,7 @@ void __declspec(naked) EyeTextureStartRedirect() {
 		lea eax, [esp + 0x20 + 4 + 0x18]
 		push eax
 		push esi
-		__asm nop __asm nop __asm nop __asm nop __asm nop
+		call Shared::EyeTextureStart
 		popad
 		//original code
 		mov ecx, [esp + esi*4 + 0x28]
@@ -33,7 +32,7 @@ void __declspec(naked) EyeTextureEndRedirect() {
 		push eax
 		dec esi
 		push esi
-		__asm nop __asm nop __asm nop __asm nop __asm nop
+		call Shared::EyeTextureEnd
 		popad
 		cmp esi, 02
 		jl EyeTextureEndRedirect_JLExit
@@ -63,7 +62,6 @@ void EyeTextureInject() {
 			  0x83, 0xF9, 0xFF},						//expected values
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
 			NULL);
-		InsertRedirectCall((void*)redirectAddress, (void*)AAEdit::EyeTextureStart);
 		address = General::GameBase + 0x118B0A;
 		redirectAddress = (DWORD)(&EyeTextureEndRedirect);
 		Hook((BYTE*)address,
@@ -71,7 +69,6 @@ void EyeTextureInject() {
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 			NULL);
 		EyeTextureJLExit = General::GameBase + 0x118A18;
-		InsertRedirectCall((void*)redirectAddress, (void*)AAEdit::EyeTextureEnd);
 
 	}
 	else if (General::IsAAPlay) {
@@ -86,7 +83,6 @@ void EyeTextureInject() {
 			  0x83, 0xF9, 0xFF },						//expected values
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
 			NULL);
-		InsertRedirectCall((void*)redirectAddress, (void*)AAPlay::EyeTextureStart);
 		address = General::GameBase + 0x12A5FA;
 		redirectAddress = (DWORD)(&EyeTextureEndRedirect);
 		Hook((BYTE*)address,
@@ -94,7 +90,6 @@ void EyeTextureInject() {
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 			NULL);
 		EyeTextureJLExit = General::GameBase + 0x12A508;
-		InsertRedirectCall((void*)redirectAddress, (void*)AAPlay::EyeTextureEnd);
 	}
 }
 

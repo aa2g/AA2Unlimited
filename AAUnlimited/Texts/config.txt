@@ -22,3 +22,10 @@ bUseShadowing = true				; when shadowing is enabled, every time a file is opened
 
 bHAiOnNoPromptH = true				; HAi should be activated at no prompt h done by evil npcs
 
+;;;;;;;;;;;;;;;;
+; Card Options ;
+;;;;;;;;;;;;;;;;
+
+savedEyeTextureUsage = 1			; determines how eye textures that were saved into the card data are handled.
+									; 1: save eye textures in data/texture/eye folder on load
+									; 2: use eye texture directly from memory

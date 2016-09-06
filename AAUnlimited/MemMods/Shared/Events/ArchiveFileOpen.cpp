@@ -5,8 +5,8 @@
 #include "Files\Config.h"
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
-#include "Functions\AAPlay\Overrides.h"
-#include "Functions\AAEdit\Overrides.h"
+#include "Functions\Shared\Overrides.h"
+#include "Functions\Shared\SpecialOverrides.h"
 #include "Functions\Shared\Shadowing.h"
 
 namespace SharedInjections {
@@ -16,27 +16,15 @@ namespace ArchiveFile {
 * If false is returned, the original function will be executed.
 * else, the function is aborted and the results from this function are used.
 */
-bool __stdcall AAPlayOpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
+bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	bool ret;
-	ret = AAPlay::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
+	ret = Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
 	if (ret) return true;
-	ret = AAPlay::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
+	ret = Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer);
 	if (ret) return true;
-	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
-		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
-		if (ret) return true;
-	}
-	return false;
-}
-/*
-* If false is returned, the original function will be executed.
-* else, the function is aborted and the results from this function are used.
-*/
-bool __stdcall AAEditOpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	bool ret;
-	ret = AAEdit::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
+	ret = Shared::HairRedirect(paramArchive, paramFile, readBytes, outBuffer);
 	if (ret) return true;
-	ret = AAEdit::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
+	ret = Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
 	if (ret) return true;
 	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
 		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
@@ -55,7 +43,7 @@ void __declspec(naked) OpenFileRedirect() {
 		push eax
 		lea eax, [esp + 0x20 + 4 + 0xC]
 		push eax
-		__asm nop __asm nop __asm nop __asm nop __asm nop //call OpenFileEvent
+		call OpenFileEvent
 		test al, al
 		popad
 		jz OpenFileRedirect_NormalExit
@@ -91,7 +79,6 @@ void OpenFileInject() {
 			{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
 			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 			NULL);
-		InsertRedirectCall((void*)redirectAddress, (void*)AAEditOpenFileEvent);
 		OpenFileNormalExit = General::GameBase + 0x1F89F6;
 	}
 	else if (General::IsAAPlay) {
@@ -116,7 +103,6 @@ void OpenFileInject() {
 			{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
 			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 			NULL);
-		InsertRedirectCall((void*)redirectAddress, (void*)AAPlayOpenFileEvent);
 		OpenFileNormalExit = General::GameBase + 0x216476;
 	}
 			

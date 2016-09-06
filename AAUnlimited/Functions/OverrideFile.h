@@ -10,7 +10,8 @@
 class OverrideFile
 {
 public:
-	OverrideFile(const TCHAR* fileName);
+	OverrideFile();
+	OverrideFile(const TCHAR* fileName, bool absPath = false);
 	~OverrideFile();
 
 	inline int GetFileSize() const { return m_fileSize; }
@@ -20,7 +21,7 @@ public:
 
 	bool WriteToBuffer(BYTE* buffer) const;
 protected:
-	OverrideFile(const TCHAR* path, const TCHAR* filename, bool tryAAPlay, bool tryAAEdit);
+	OverrideFile(const TCHAR* path, const TCHAR* filename, bool absPath, bool tryAAPlay, bool tryAAEdit);
 	bool m_good;
 	DWORD m_fileSize;
 
