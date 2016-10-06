@@ -5,7 +5,7 @@ namespace HPlayInjections {
 
 
 void TickInjection();
-
+void FocusCameraInjection();
 
 }
 }

@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 
+namespace ExtClass {
+
 #pragma pack(push, 1)
 /*
  * Represents a texture.
@@ -20,3 +22,6 @@ public:
 
 };
 #pragma pack(pop)
+
+
+}

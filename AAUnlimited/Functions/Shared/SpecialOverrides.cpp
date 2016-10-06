@@ -15,7 +15,7 @@ bool TanOverride(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** out
 	/* C:\Users\user1\Desktop\04.bmp (11-Aug-16 3:10:42 AM)
 	StartOffset: 00000000, EndOffset: 0000007D, Length: 0000007E */
 
-	static const BYTE transpBmp[] = { 
+	static const BYTE transpBmp[] = {
 			0x42, 0x4D, 0x7E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7A, 0x00,
 			0x00, 0x00, 0x6C, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
 			0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00,
@@ -73,7 +73,7 @@ const TextureImage* HairHighlightOverride(wchar_t* texture) {
 }
 
 bool HairRedirect(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
-	//jg2e02_01|2|3|4_*.pp. file names AS00_20|1|2|3_slot_flip.xx|xa|bps
+	//jg2e(l)02_01|2|3|4_*.pp. file names AS00_20|1|2|3_slot_flip.xx|xa|bps
 	//first, check if archive fits
 	TCHAR* archiveFile = General::FindFileInPath(*archive);
 	if (!General::StartsWith(archiveFile, TEXT("jg2e02_0"))) return false;

@@ -5,7 +5,9 @@
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
 #include "General\Buffer.h"
+#include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
+#include "Files\Logger.h"
 
 namespace EditInjections {
 namespace SaveCard {
@@ -16,27 +18,68 @@ void __stdcall AddUnlimitData(wchar_t* fileName) {
 	HANDLE hFile = CreateFile(fileName, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;
 
-	//generate unlimited data buffer
-	int size = 0;
-	char* buffer = NULL;
-	int retSize = AAEdit::g_cardData.ToBuffer(&buffer, &size, true, false);
-	if (retSize == 0) return;
+	if(true) {
+		//write in png chunk
+		//since we need to insert into the file, read it first
+		DWORD hi,lo = GetFileSize(hFile,&hi);
+		BYTE* fileBuffer = new BYTE[lo];
+		ReadFile(hFile,fileBuffer,lo,&hi,NULL);
+		//find iend
+		BYTE* chunk = General::FindPngChunk(fileBuffer,lo,*(DWORD*)"IEND");
+		if(chunk == NULL) {
+			LOGPRIO(Logger::Priority::WARN) << "Failed to add Unlimited data to card at " << fileName << ": could not find IEND chunk\r\n";
+			CloseHandle(hFile);
+			delete[] fileBuffer;
+			return;
+		}	 
+		//generate unlimited data buffer
+		int size = 0;
+		char* buffer = NULL;
+		int retSize = AAEdit::g_cardData.ToBuffer(&buffer,&size,true,true);
+		if (retSize == 0) {
+			CloseHandle(hFile);
+			delete[] fileBuffer;
+			return;
+		}
 
-	DWORD foo = 0;
+		//rewrite file
+		LONG himove = 0;
+		SetFilePointer(hFile,0,&himove,FILE_BEGIN);
+		WriteFile(hFile,fileBuffer,(DWORD)(chunk-fileBuffer),&hi,NULL);
+		WriteFile(hFile,buffer,(DWORD)(retSize),&hi,NULL);
+		WriteFile(hFile,chunk,lo-(DWORD)(chunk-fileBuffer),&hi,NULL);
 
-	//read data offset from end
-	SetFilePointer(hFile, -4, NULL, FILE_END);
-	DWORD aa2DataOffset = 0;
-	ReadFile(hFile, &aa2DataOffset, 4, &foo, NULL);
+		delete[] buffer;
+		delete[] fileBuffer;
+	}
+	else {
+		//write to end
+		//generate unlimited data buffer
+		int size = 0;
+		char* buffer = NULL;
+		int retSize = AAEdit::g_cardData.ToBuffer(&buffer,&size,true,false);
+		if (retSize == 0) {
+			CloseHandle(hFile);
+			return;
+		}
 
-	//add our data
-	WriteFile(hFile, buffer, retSize, &foo, NULL);
+		DWORD foo = 0;
 
-	//write new offset to end
-	aa2DataOffset += retSize + 4; //+4 cause the old offset is also between it
-	WriteFile(hFile, &aa2DataOffset, 4, &foo, NULL);
+		//read data offset from end
+		SetFilePointer(hFile,-4,NULL,FILE_END);
+		DWORD aa2DataOffset = 0;
+		ReadFile(hFile,&aa2DataOffset,4,&foo,NULL);
 
-	delete[] buffer;
+		//add our data
+		WriteFile(hFile,buffer,retSize,&foo,NULL);
+
+		//write new offset to end
+		aa2DataOffset += retSize + 4; //+4 cause the old offset is also between it
+		WriteFile(hFile,&aa2DataOffset,4,&foo,NULL);
+		delete[] buffer;
+	}
+	
+
 	CloseHandle(hFile);
 }
 

@@ -244,8 +244,8 @@ ForceAi::State ForceAi::states[] = {
 	{ DOMINANCE,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
 			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, false, true, 0.1f);
-			thisPtr->StartTimerRandom(0, 15, 20);
 			if (state->m_customValue == 0) {
+				thisPtr->StartTimerRandom(0,15,20);
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2, 3);
 				thisPtr->SetRepeatParams(0, 1.0f, 0.9f);
 				if (thisPtr->m_forcee->m_bClothesSlipped == 0) {
@@ -254,6 +254,9 @@ ForceAi::State ForceAi::states[] = {
 				if (thisPtr->m_forcee->m_clothesState == 0) {
 					info->m_btnOutfit->Press();
 				}
+			}
+			else {
+				thisPtr->StartTimerRandom(0,5,10);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -269,10 +272,13 @@ ForceAi::State ForceAi::states[] = {
 	{ PREFERENCES,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
 			thisPtr->PickRandomPrefPosition(info, true, true, 0.1f);
-			thisPtr->StartTimerRandom(0, 15.0f, 20.0f);
 			if (state->m_customValue == 0) {
+				thisPtr->StartTimerRandom(0,15.0f,20.0f);
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2.5, 3.5);
 				thisPtr->SetRepeatParams(0, 1.0f, 0.5f);
+			}
+			else {
+				thisPtr->StartTimerRandom(0,5.0f,10.0f);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {

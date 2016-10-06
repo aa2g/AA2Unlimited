@@ -1,7 +1,10 @@
 #include "MeshTexture.h"
 
+#include <d3d9.h>
+
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
+#include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
 #include "Functions\Shared\SpecialOverrides.h"
 
@@ -624,6 +627,106 @@ void OverrideFileInject() {
 			&OverrideFileOriginalCall);
 	}
 }
+
+void __stdcall OverrideOutlineColorFunc(float* colors) {
+	if (!Shared::g_isOverriding) return;
+	if (!Shared::g_currentCard->HasOutlineColor()) return;
+	COLORREF color = Shared::g_currentCard->GetOutlineColor();
+	//colors are sequentially in rgba order in *colors
+	*colors++ = GetRValue(color)/255.0f;
+	*colors++ = GetGValue(color)/255.0f;
+	*colors++ = GetBValue(color)/255.0f;
+}
+
+void __declspec(naked) OverrideOutlineColorRedirect() {
+	__asm {
+		pushad
+		lea ecx, [eax+ebx]
+		push ecx
+		call OverrideOutlineColorFunc
+		popad
+		mov ecx, [eax+ebx]
+		fldz
+		ret
+	}
+}
+
+void OverrideOutlineColorInject() {
+	if (General::IsAAEdit) {
+		//reads the color (floats starting there)
+		/*AA2Edit.exe+1E8840 - 8B 0C 18              - mov ecx,[eax+ebx]
+		AA2Edit.exe+1E8843 - D9EE                  - fldz 
+		*/
+		DWORD address = General::GameBase + 0x1E8840;
+		DWORD redirectAddress = (DWORD)(&OverrideOutlineColorRedirect);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x0c, 0x18, 0xD9, 0xEE, },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+	else if (General::IsAAPlay) {
+		/*AA2Play v12 FP v1.4.0a.exe+205C40 - 8B 0C 18              - mov ecx,[eax+ebx]
+		AA2Play v12 FP v1.4.0a.exe+205C43 - D9EE                  - fldz 
+		*/
+		DWORD address = General::GameBase + 0x205C40;
+		DWORD redirectAddress = (DWORD)(&OverrideOutlineColorRedirect);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x0c, 0x18, 0xD9, 0xEE, },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+}
+
+void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
+	//note that this event fires for the child bones first, then the parent. dont enumerate child bones again.
+	if (!Shared::g_isOverriding) return;
+	TCHAR nameBuffer[256];
+	size_t out;
+	mbstowcs_s(&out,nameBuffer,bone->m_name,256);
+	const D3DMATRIX* ret = Shared::g_currentCard->GetBoneTransformationRule(nameBuffer);
+	if(ret != NULL) {
+		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix5,ret,&bone->m_matrix5);
+		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,ret,&bone->m_matrix1);
+		bone->m_matrix1 = *ret;
+		bone->m_matrix5 = *ret;
+	}
+}
+
+void __declspec(naked) OverrideBoneRedirect() {
+	__asm {
+		push eax
+		push ebx
+		call OverrideBoneEvent
+		pop eax
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
+		ret
+	}
+}
+
+void OverrideBoneInject() {
+	if (General::IsAAEdit) {
+		//this is where the function ends that generates a bone struct. this struct is currently in ebx.
+		/*AA2Edit.exe+1E847A - 5F                    - pop edi
+		AA2Edit.exe+1E847B - 5E                    - pop esi
+		AA2Edit.exe+1E847C - 5D                    - pop ebp
+		AA2Edit.exe+1E847D - 5B                    - pop ebx
+		AA2Edit.exe+1E847E - C3                    - ret*/
+		DWORD address = General::GameBase + 0x1E847A;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirect);
+		Hook((BYTE*)address,
+		{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3, },
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+	else if (General::IsAAPlay) {
+
+	}
+}
+
+
 
 
 }

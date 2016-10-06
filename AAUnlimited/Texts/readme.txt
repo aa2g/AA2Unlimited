@@ -27,8 +27,6 @@ Card Data: adds additional card data to cards:
   Note: Archive Override (jg2e03_00_00.pp,A00_00_00_*_*)->(file)
 - Hair Highlight: Use a hair Highlight from AAEdit\data\texture\hair_highlight.
   Note: Mesh Texture (Asp00_20_00_00_00*)->(file), so this will not work if you have custom highlights without this name prefix
-- Hair Redirects: Uses the slots for one type of hair for the other (e.g use a Side Hair Slot for a second Back Hair).
-  Note: Archive Redirect (jg2e02_0(1|2|3|4)_*.pp, AS00_2(0|1|2|3)_*_*.xx|xa|bps) -> (jg2e02_0(1|2|3|4)_*.pp, AS00_2(0|1|2|3)_*_*.xx|xa|bps) 
 These Features are all simply special, wild-carded rules of one of the three types below. While the rules below do NOT
 support wild cards naturally, all of these things could be done for specific slots or files using the rules directly.
 Whenever a High-Poly model is loaded (or all the time in AAEdit), these rules from the corresponding card are applied.

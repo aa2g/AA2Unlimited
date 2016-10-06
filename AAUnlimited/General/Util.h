@@ -51,8 +51,16 @@ inline bool FileExists(const TCHAR* file) {
 	return (type != INVALID_FILE_ATTRIBUTES && !(type & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+inline int GetEditInt(HWND ed) {
+	TCHAR tempbuf[256];
+	SendMessage(ed,WM_GETTEXT,256,(LPARAM)tempbuf);
+	return _wtoi(tempbuf);
+}
+
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
+
+
 
 /*
  * Keeps Track of the Time it was started, and can be told to return the difference, in seconds,
@@ -76,5 +84,7 @@ public:
 	}
 };
 
+
+DWORD Crc32(BYTE* data,int len,DWORD regInit = 0xFFFFFFFF,bool invertResult = true);
 
 }

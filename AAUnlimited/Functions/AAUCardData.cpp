@@ -20,6 +20,7 @@ AAUCardData::AAUCardData()
 	m_hairRedirects.side = 1;
 	m_hairRedirects.back = 2;
 	m_hairRedirects.extension = 3;
+	m_bOutlineColor = false;
 }
 
 
@@ -225,6 +226,25 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, value " << m_hairRedirects.full << "\r\n";
 			break;
+		case 'TnRd':
+			m_tanName = ReadData<std::wstring>(buffer,size);
+			SetTan(m_tanName.c_str());
+			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_tanName << "\r\n";
+			break;
+		case 'OlCl':
+			m_bOutlineColor = true;
+			m_outlineColor = ReadData<DWORD>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_outlineColor << "\r\n";
+			break;
+		case 'BnTr':
+			m_boneTransforms = ReadData<decltype(m_boneTransforms)>(buffer,size);
+			for (const auto& it : m_boneTransforms) {
+				if (m_boneTransformMap.find(it.first) == m_boneTransformMap.end()) {
+					m_boneTransformMap.emplace(it.first,it.second);
+				}
+			}
+			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_boneTransformMap.size() << " elements.\r\n";
+			break;
 		}
 		
 	}
@@ -278,14 +298,10 @@ void AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	}
 	//else, find our png chunk
 	BYTE* chunk = General::FindPngChunk((BYTE*)buffer, size, AAUCardData::PngChunkIdBigEndian);
+	if(chunk == NULL) chunk = General::FindPngChunk((BYTE*)buffer,size,*(DWORD*)"AAUD");
 	if (chunk != NULL) {
 		//first, read chunk size (big endian)
 		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 4;
-		//then, read png chunk (also big endian)
-		DWORD chunkId = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 4;
-		if (chunkId != PngChunkId) {
-			return;
-		}
 		FromBuffer((char*)chunk, size);
 		return;
 	}
@@ -350,6 +366,13 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texName);
 	//hair redirect
 	DUMP_MEMBER('HrRd', m_hairRedirects.full);
+	//tans
+	DUMP_MEMBER('TnRd',m_tanName);
+	//bone transforms
+	DUMP_MEMBER_CONTAINER('BnTr',m_boneTransforms);
+	if(m_bOutlineColor) {
+		DUMP_MEMBER('OlCl',m_outlineColor);
+	}
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	if (pngChunks) {
@@ -357,8 +380,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 		int dataSizeSwapped = _byteswap_ulong(at - 8);
 		ret &= General::BufferAppend(buffer, size, 0, (const char*)(&dataSizeSwapped), 4, resize);
 
-		//write checksum. stub for now
-		DWORD checksum = 0;
+		//write checksum
+		DWORD checksum = General::Crc32((BYTE*)(*buffer)+4, dataSize+4);
 		ret &= General::BufferAppend(buffer, size, at, (const char*)(&checksum), 4, resize);
 		return !ret ? 0 : dataSize + 12;
 	}
@@ -437,6 +460,21 @@ bool AAUCardData::RemoveArchiveRedirect(int index) {
 	return true;
 }
 
+bool AAUCardData::AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform) {
+	if (m_boneTransformMap.find(boneName) != m_boneTransformMap.end()) return false; //allready contains it
+	m_boneTransforms.emplace_back(boneName,transform);
+	m_boneTransformMap.insert(std::make_pair(boneName,transform));
+	return true;
+}
+bool AAUCardData::RemoveBoneTransformation(int index) {
+	if (m_boneTransforms.size() <= index) return false;
+	auto vMatch = m_boneTransforms.begin() + index;
+	auto mapMatch = m_boneTransformMap.find(vMatch->first);
+	m_boneTransforms.erase(vMatch);
+	if (mapMatch != m_boneTransformMap.end()) m_boneTransformMap.erase(mapMatch);
+	return true;
+}
+
 bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) {
 	int other = leftright == 0 ? 1 : 0;
 	if (texName == NULL) {
@@ -481,3 +519,4 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 	if (anyGood) m_tanName = name;
 	return anyGood;
 }
+

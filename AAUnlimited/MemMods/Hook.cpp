@@ -175,6 +175,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "External/ExternalClasses.h"
 #include "External/ExternalVariables.h"
 #include "Functions/Shared/Globals.h"
+#include "Functions/Shared/Overrides.h"
 
 #include "MemMods/Shared/Events/MeshTexture.h"
 #include "MemMods/Shared/Misc/EyeTexture.h"
@@ -206,6 +207,10 @@ void InitializeHooks() {
 			MeshTexture::OverrideNameInject();
 			MeshTexture::OverrideFileSizeInject();
 			MeshTexture::OverrideFileInject();
+			MeshTexture::OverrideOutlineColorInject();
+			MeshTexture::OverrideBoneInject();
+
+			Shared::g_isOverriding = General::IsAAEdit; //always override in aaedit
 		}
 		EyeTexture::EyeTextureInject();
 
@@ -218,6 +223,7 @@ void InitializeHooks() {
 
 		using namespace PlayInjections;
 		HPlayInjections::TickInjection();
+		HPlayInjections::FocusCameraInjection();
 
 		PcConversation::TickInjection();	
 		PcConversation::NpcAnswerInjection();

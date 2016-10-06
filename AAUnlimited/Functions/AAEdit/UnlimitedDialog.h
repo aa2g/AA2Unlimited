@@ -93,6 +93,24 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_hrDialog;
+	struct BDDialog : public Dialog {
+		HWND m_cbOutlineColor;
+		HWND m_edOutlineColorRed;
+		HWND m_edOutlineColorGreen;
+		HWND m_edOutlineColorBlue;
+
+		HWND m_bmBtnAdd;
+		HWND m_bmCbSelect;
+		HWND m_bmList;
+		HWND m_bmSldHeight;
+		HWND m_bmSldWidth;
+		HWND m_bmEdMatrix[4][4];
+		
+		void LoadData(int listboxId);
+		void ApplyInput();
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_bdDialog;
 
 
 	HWND m_dialog;

@@ -17,6 +17,7 @@ namespace Shared {
 
 
 	AAUCardData* g_currentCard = &AAEdit::g_cardData;
+	bool g_isOverriding = false;
 
 	/********************/
 	/* Poly Load Events */
@@ -29,10 +30,12 @@ namespace Shared {
 		BYTE* buffer = (BYTE*)loadCharacter->m_charData->m_pngBuffer;
 		if (buffer != NULL) {
 			g_currentCard->FromFileBuffer((char*)buffer, size);
+			g_isOverriding = true;
 		}
 	}
 
 	void MeshTextureCharLoadEnd() {
+		g_isOverriding = false;
 		g_currentCard->Reset();
 	}
 

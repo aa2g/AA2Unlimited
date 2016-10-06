@@ -12,6 +12,9 @@ void OverrideNameInject();
 void OverrideFileSizeInject();
 void OverrideFileInject();
 
+void OverrideOutlineColorInject();
+
+void OverrideBoneInject();
 
 }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 
+#include "Bone.h"
 #include "CharacterData.h"
 namespace ExtClass {
 
@@ -18,7 +19,10 @@ public:
 	BYTE m_bClothesOn;
 	BYTE m_unknown3;
 	BYTE m_currClothes;
-	BYTE m_unknown4[0xF17];
+	BYTE m_unknown_[0x15B];
+	Bone** m_bonePtrArray; //first one is neck (focused on q press), second one is spin (focused on w press)
+	Bone** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
+	BYTE m_unknown4[0xDB4];
 	void* m_somedata;
 	BYTE m_unknown5[0x3C];
 

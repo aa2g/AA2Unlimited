@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <d3d9.h>
 
 #include "TextureImage.h"
 #include "OverrideFile.h"
@@ -20,8 +21,8 @@
 class AAUCardData
 {
 public:
-	static const DWORD PngChunkId = 'AAUD';
-	static const DWORD PngChunkIdBigEndian = 'DUAA';
+	static const DWORD PngChunkId = 'aaUd';
+	static const DWORD PngChunkIdBigEndian = 'dUaa';
 public:
 	AAUCardData();
 	~AAUCardData();
@@ -39,6 +40,9 @@ public:
 	bool RemoveArchiveOverride(int index);
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
+	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
+	bool RemoveBoneTransformation(int index);
+
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 
@@ -46,24 +50,25 @@ public:
 
 	bool SetTan(const TCHAR* name);
 
-	
+	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
+	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
-	inline const std::vector<MeshOverrideRule> GetMeshOverrideList() const { return m_meshOverrides; }
+	inline const std::vector<MeshOverrideRule>& GetMeshOverrideList() const { return m_meshOverrides; }
 	inline const TextureImage* GetMeshOverrideTexture(const TCHAR* texture) const {
 		auto it = m_meshOverrideMap.find(texture);
 		return it == m_meshOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const std::vector<ArchiveOverrideRule> GetArchiveOverrideList() const { return m_archiveOverrides; }
+	inline const std::vector<ArchiveOverrideRule>& GetArchiveOverrideList() const { return m_archiveOverrides; }
 	inline const OverrideFile* GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
 	}
-	inline const std::vector<ArchiveRedirectRule> GetArchiveRedirectList() const { return m_archiveRedirects; }
+	inline const std::vector<ArchiveRedirectRule>& GetArchiveRedirectList() const { return m_archiveRedirects; }
 	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
@@ -84,7 +89,16 @@ public:
 		return m_tanImages[0];
 	}
 	
+	inline const DWORD GetOutlineColor() { return m_outlineColor; }
+	inline const DWORD SetOutlineColor(COLORREF color) { return m_outlineColor = color; }
+	inline const bool HasOutlineColor() { return m_bOutlineColor; }
+	inline const DWORD SetHasOutlineColor(bool has) { return m_bOutlineColor = has; }
 
+	inline const std::vector<BoneRule> GetBoneTransformationList() { return m_boneTransforms; }
+	inline const D3DMATRIX* GetBoneTransformationRule(const TCHAR* boneName) {
+		auto it = m_boneTransformMap.find(boneName);
+		return it == m_boneTransformMap.end() ? NULL : &it->second;
+	}
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
@@ -118,6 +132,11 @@ private:
 		};
 	} m_hairRedirects;
 
+	bool m_bOutlineColor;
+	DWORD m_outlineColor;
+
+	std::vector<BoneRule> m_boneTransforms;
+	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

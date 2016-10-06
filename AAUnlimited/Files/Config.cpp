@@ -7,9 +7,10 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bUseMeshTextureOverrides", false),	//USE_MESH_TEXTURE_OVERRIDES
 	MemberInfo(Config::BOOL,	"bUseHAi", false),	//USE_H_AI
 	MemberInfo(Config::BOOL,	"bUseShadowing", false),	//USE_SHADOWING
+	MemberInfo(Config::BOOL,	"bEnableFacecam", false), //USE_H_FACECAM
 	MemberInfo(Config::BOOL,	"bNoPromptHIsRape", false),	//NO_PROMPT_IS_FORCE
 	MemberInfo(Config::BOOL,	"bHAiOnNoPromptH", false),	//HAI_ON_NO_PROMPT
-	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1)	//SAVED_EYE_TEXTURE_USAGE,
+	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1)	//SAVED_EYE_TEXTURE_USAGE,	
 };
 
 Config g_Config;

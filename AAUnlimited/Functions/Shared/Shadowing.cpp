@@ -14,9 +14,11 @@ namespace Shared {
  */
 bool OpenShadowedFile(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
 	TCHAR strArchivePath[512];
+	int length = wcslen(archive);
+	if (length < 3) return false;
 	wcscpy_s(strArchivePath, 512, archive);
-	wcscpy_s(strArchivePath, 512, TEXT("\\"));
-	wcscat_s(strArchivePath, 512, file);
+	wcscpy_s(strArchivePath+length-3, 512-length+3, TEXT("\\"));
+	wcscpy_s(strArchivePath+length-2, 512-length+2, file);
 
 	HANDLE hFile = CreateFile(strArchivePath, FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == NULL || hFile == INVALID_HANDLE_VALUE) {

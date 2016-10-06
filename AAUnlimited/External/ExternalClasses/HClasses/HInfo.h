@@ -3,7 +3,9 @@
 #include "HParticipant.h"
 #include "HPosButtonList.h"
 #include "HPosData.h"
+#include "HCamera.h"
 #include "../IllusionList.h"
+#include "../../AddressRule.h"
 
 namespace ExtClass {
 
@@ -14,7 +16,9 @@ namespace ExtClass {
 class HInfo
 {
 public:
-	BYTE m_unknown1[0x3C];
+	BYTE m_unknown1[0x24];
+	DWORD m_somePtr; //points to somthing that includes something that includes the camera
+	BYTE m_unknown___[0x14];
 	void* m_positionInfo; //some position info it seems. *(*m_positionInfo + 4) points to an array with 0x8C per struct
 						  //describing h positions
 	BYTE m_unknown__[0x28];
@@ -85,6 +89,11 @@ public:
 	inline HPosData* GetHPosData(DWORD position) {
 		HPosData* arr = *(HPosData**)((BYTE*)(m_positionInfo)+4);
 		return arr + position;
+	}
+
+	inline HCamera* GetCamera() { 
+		const static DWORD rule[] { 0x24, 0x4, 0x198, 0 };
+		return (HCamera*)ExtVars::ApplyRule(this,rule); 
 	}
 
 	HInfo() = delete;
