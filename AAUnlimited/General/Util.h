@@ -87,4 +87,6 @@ public:
 
 DWORD Crc32(BYTE* data,int len,DWORD regInit = 0xFFFFFFFF,bool invertResult = true);
 
+
+
 }
