@@ -10,7 +10,9 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bEnableFacecam", false), //USE_H_FACECAM
 	MemberInfo(Config::BOOL,	"bNoPromptHIsRape", false),	//NO_PROMPT_IS_FORCE
 	MemberInfo(Config::BOOL,	"bHAiOnNoPromptH", false),	//HAI_ON_NO_PROMPT
-	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1)	//SAVED_EYE_TEXTURE_USAGE,	
+	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1),	//SAVED_EYE_TEXTURE_USAGE,	
+	MemberInfo(Config::INT,		"facelessMaleSlot", 90),	//FACELESS_SLOT_MALE,	
+	MemberInfo(Config::INT,		"facelessFemaleSlot", 7)	//FACELESS_SLOT_FEMALE
 };
 
 Config g_Config;

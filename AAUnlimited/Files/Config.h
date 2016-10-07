@@ -14,6 +14,8 @@ public:
 
 		SAVED_EYE_TEXTURE_USAGE,
 
+		FACELESS_SLOT_MALE, FACELESS_SLOT_FEMALE,
+
 		num_elements
 	};
 	union MemberData {
