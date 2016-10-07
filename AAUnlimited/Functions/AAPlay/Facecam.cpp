@@ -41,10 +41,10 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
 		//prevent losing your heads
-		loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;							//restore active's face slot
-		loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);	//restore active's haircut
-		loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;							//restore passive's face slot
-		loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);	//restore passive's haircut
+		//loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;							//restore active's face slot
+		//loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);	//restore active's haircut
+		//loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;							//restore passive's face slot
+		//loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);	//restore passive's haircut
 
 		loc_state = 0;
 		loc_focusBone = NULL;
