@@ -16,6 +16,8 @@ public:
 
 		FACELESS_SLOT_MALE, FACELESS_SLOT_FEMALE,
 
+		POV_OFFSET_X, POV_OFFSET_Y, POV_OFFSET_Z,
+
 		num_elements
 	};
 	union MemberData {

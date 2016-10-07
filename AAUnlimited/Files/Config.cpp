@@ -12,7 +12,10 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bHAiOnNoPromptH", false),	//HAI_ON_NO_PROMPT
 	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1),	//SAVED_EYE_TEXTURE_USAGE,	
 	MemberInfo(Config::INT,		"facelessMaleSlot", 90),	//FACELESS_SLOT_MALE,	
-	MemberInfo(Config::INT,		"facelessFemaleSlot", 7)	//FACELESS_SLOT_FEMALE
+	MemberInfo(Config::INT,		"facelessFemaleSlot", 7),	//FACELESS_SLOT_FEMALE
+	MemberInfo(Config::FLOAT,		"fPOVOffsetX", 0.0f),	//POV_OFFSET_X
+	MemberInfo(Config::FLOAT,		"fPOVOffsetY", 0.0f),	//POV_OFFSET_Y
+	MemberInfo(Config::FLOAT,		"fPOVOffsetZ", 0.0f)	//POV_OFFSET_Z
 };
 
 Config g_Config;

@@ -89,8 +89,9 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 
 			//we align the camera with the bone by copying the matrix
 			auto mat = loc_focusBone->m_matrix2;
-			mat._42 += 1;	//slight adjustment so that the partner looks vaguely in to the camera and not above
-			//mat._43 += 1;	//TODO: possibly adjust position so that the pivot is right between the eyes instead of inside the head
+			mat._41 += g_Config.GetKeyValue(Config::POV_OFFSET_X).fVal;
+			mat._42 += g_Config.GetKeyValue(Config::POV_OFFSET_Y).fVal;	//slight adjustment so that the partner looks vaguely in to the camera and not above
+			mat._43 += g_Config.GetKeyValue(Config::POV_OFFSET_Z).fVal;	//TODO: possibly adjust position so that the pivot is right between the eyes instead of inside the head
 			cam->m_matrix = mat;
 
 			//*(BYTE*)(General::GameBase + 0x3A6C80) = 3; //whether the q button is pressed
@@ -109,6 +110,7 @@ void AdjustCamera(ExtClass::Bone* bone) {
 		baldHaircut.frontHair = 0;
 		baldHaircut.sideHair = 0;
 		baldHaircut.backhair = 0;
+		baldHaircut.backhairFlip = 1;
 		baldHaircut.hairExtension = 0;
 		
 	if (loc_hinfo == NULL) return;
@@ -153,7 +155,10 @@ void AdjustCamera(ExtClass::Bone* bone) {
 			}
 			return;
 		}
-		else return;
+		else {
+			LOGPRIO(Logger::Priority::INFO) << "Some other key was pressed\n";
+			return;
+		}
 	} else { //if Q was pressed
 		//switch state
 		loc_state++;
