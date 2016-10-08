@@ -26,51 +26,63 @@ namespace Facecam {
 
 ExtClass::HInfo* loc_hinfo = NULL;
 ExtClass::Bone* loc_focusBone = NULL;
-int loc_state = 0;
+int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
 
-BYTE facelessSlotMale = 90;	//if default fails us set it to something
-BYTE facelessSlotFemale = 7;
+ExtClass::CharacterData* m_passiveActor = NULL;										//Passive Actor's reference obtained at the start of the scene
+BYTE m_passiveFaceSlot = BYTE(255);													//Passive Actor's original face slot, obtained at the start of the scene
+ExtClass::CharacterData::Hair* m_passiveHair = NULL;								//Passive Actor's hairstyle reference, obtained at the start of the scene         
+BYTE facelessSlotPassive = BYTE(255);												//Passive Actor's desired faceless face, depending on sex               
 
-BYTE m_activeFaceSlot = BYTE(255);
-BYTE m_passiveFaceSlot = BYTE(255);
-
-ExtClass::CharacterData::Hair* m_activeHair = NULL;
-ExtClass::CharacterData::Hair* m_passiveHair = NULL;
+ExtClass::CharacterData* m_activeActor = NULL;										//Active Actor's reference obtained at the start of the scene
+BYTE m_activeFaceSlot = BYTE(255);													//Active Actor's original face slot, obtained at the start of the scene
+ExtClass::CharacterData::Hair* m_activeHair = NULL;									//Active Actor's hairstyle reference, obtained at the start of the scene
+BYTE facelessSlotActive = BYTE(255);												//Active Actor's desired faceless face, depending on sex
 
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
 		//prevent losing your heads
-		//loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;							//restore active's face slot
-		//loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);	//restore active's haircut
-		//loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;							//restore passive's face slot
-		//loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);	//restore passive's haircut
+		//m_activeActor->m_faceSlot = m_activeFaceSlot;								//restore active's face slot
+		//m_activeActor->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);		//restore active's haircut
+		//m_passiveActor->m_faceSlot = m_passiveFaceSlot;							//restore passive's face slot
+		//m_passiveActor->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);	//restore passive's haircut
+
+		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
 
 		loc_state = 0;
 		loc_focusBone = NULL;
 		loc_hinfo = NULL;
-		if (m_passiveHair != NULL) {
+
+		if (m_passiveHair) {
 			delete m_passiveHair;
-			m_passiveHair == NULL;
+			m_passiveHair = NULL;
 		}
-		if (m_activeHair != NULL) {
+		if (m_activeHair) {
 			delete m_activeHair;
-			m_activeHair == NULL;
+			m_activeHair = NULL;
 		}
-		m_activeFaceSlot = BYTE(255);
+
 		m_passiveFaceSlot = BYTE(255);
+		m_activeFaceSlot = BYTE(255);
+		facelessSlotPassive = BYTE(255);
+		facelessSlotActive = BYTE(255);
+
+		LOGPRIO(Logger::Priority::INFO) << "Cleaned up!\n";
 	}
-	else {		
+	else {
 		loc_hinfo = hInfo;
+		//remember actors the first time
+		if (m_passiveActor == NULL)	m_passiveActor = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData;
+		if (m_activeActor == NULL)	m_activeActor = loc_hinfo->m_activeParticipant->m_charPtr->m_charData;
 		//remember faces the first time
-		if (m_passiveFaceSlot == BYTE(255)) m_passiveFaceSlot = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot;
-		if (m_activeFaceSlot == BYTE(255)) m_activeFaceSlot = loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot;
+		if (m_passiveFaceSlot == BYTE(255))	m_passiveFaceSlot = m_passiveActor->m_faceSlot;
+		if (m_activeFaceSlot == BYTE(255))	m_activeFaceSlot = m_activeActor->m_faceSlot;
 		//remember hairstyles the first time
-		if (m_passiveHair == NULL) m_passiveHair = new ExtClass::CharacterData::Hair(loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair);
-		if (m_activeHair == NULL) m_activeHair = new ExtClass::CharacterData::Hair(loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair);
-		//remember the empty face slots
-		facelessSlotMale = (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
-		facelessSlotFemale = (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal;
+		if (m_passiveHair == NULL)	m_passiveHair = new ExtClass::CharacterData::Hair(m_passiveActor->m_hair);
+		if (m_activeHair == NULL)	m_activeHair = new ExtClass::CharacterData::Hair(m_activeActor->m_hair);
+		//remember the empty face slots the first time
+		if (facelessSlotPassive == BYTE(255))	facelessSlotPassive = (m_passiveActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
+		if (facelessSlotActive == BYTE(255))	facelessSlotActive = (m_activeActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
 
 		if (loc_state != 0) {
 
@@ -97,14 +109,10 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 			//*(BYTE*)(General::GameBase + 0x3A6C80) = 3; //whether the q button is pressed
 		}
 	}
-	
-	
 }
 
 
 void AdjustCamera(ExtClass::Bone* bone) {
-	const BYTE facelessSlotActive = (loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_gender) ? facelessSlotFemale : facelessSlotMale;
-	const BYTE facelessSlotPassive = (loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_gender) ? facelessSlotFemale : facelessSlotMale;
 
 	ExtClass::CharacterData::Hair baldHaircut = ExtClass::CharacterData::Hair();
 		baldHaircut.frontHair = 0;
@@ -121,35 +129,57 @@ void AdjustCamera(ExtClass::Bone* bone) {
 	//		state 2 - active's POV
 	//		state 3 - default camera
 	if (bone != loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0]
-		&& bone != loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) {	//if not Q was pressed
+		&& bone != loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) {		//if not Q was pressed
 
 		if (bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]
-			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) { //if W was pressed
+			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {	//if W was pressed
 			
+			//Sorry for this piece of cancer but it helps with tracking the actors and stuff.
+			//
+			//LOGPRIO(Logger::Priority::INFO) << "W was pressed\n"
+
+			//	<< "Active partner:\n\t["
+			//	<< m_activeActor->m_surname << " " << m_activeActor->m_forename << "]" << (m_activeActor->m_gender ? "F" : "M")
+			//	<< "\n\tFace Slot: " << m_activeActor->m_faceSlot
+			//	<< " Hairstyle: (" << m_activeActor->m_hair.frontHair << ", " << m_activeActor->m_hair.sideHair << ", " << m_activeActor->m_hair.backhair << ", " << m_activeActor->m_hair.hairExtension << ")\n"
+
+			//	<< "Passive partner:\n\t["
+			//	<< m_passiveActor->m_surname << " " << m_passiveActor->m_forename << "]" << (m_passiveActor->m_gender ? "F" : "M")
+			//	<< "\n\tFace Slot: " << m_passiveActor->m_faceSlot
+			//	<< " Hairstyle: (" << m_passiveActor->m_hair.frontHair << ", " << m_passiveActor->m_hair.sideHair << ", " << m_passiveActor->m_hair.backhair << ", " << m_passiveActor->m_hair.hairExtension << ")\n"
+
+			//	<< "Saved data:"
+			//	<< "\n\tFace slots: "
+			//	<< "Active=" << m_activeFaceSlot
+			//	<< ", Passive=" << m_passiveFaceSlot
+			//	<< "\n\tHairstyles: "
+			//	<< "Active=(" << m_activeHair->frontHair << ", " << m_activeHair->sideHair << ", " << m_activeHair->backhair << ", " << m_activeHair->hairExtension << ")"
+			//	<< ", Passive=(" << m_passiveHair->frontHair << ", " << m_passiveHair->sideHair << ", " << m_passiveHair->backhair << ", " << m_passiveHair->hairExtension << ")\n\n";
+
 			if (loc_state == 1) { //toggle passive
-				if (loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot != facelessSlotPassive) {			//if head is visible
-					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = facelessSlotPassive;				//set passive's face slot to faceless(male only for now)
-					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = baldHaircut;						//set passive's haircut to bald
+				if (m_passiveActor->m_faceSlot != facelessSlotPassive) {							//if head is visible
+					m_passiveActor->m_faceSlot = facelessSlotPassive;								//set passive's face slot to faceless(male only for now)
+					m_passiveActor->m_hair = baldHaircut;											//set passive's haircut to bald
 				} else {
-					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;	//restore passive's face slot
-					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);			//restore passive's haircut
+					m_passiveActor->m_faceSlot = m_passiveFaceSlot;									//restore passive's face slot
+					m_passiveActor->m_hair = *m_passiveHair;										//restore passive's haircut
 				}
 				//possibly reload the model
 			} else if (loc_state == 2) { //toggle active
-				if (loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot != facelessSlotActive) {			//if head is visible
-					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = facelessSlotActive;				//set active's face slot to faceless(male only for now)
-					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = baldHaircut;						//set active's haircut to bald
+				if (m_activeActor->m_faceSlot != facelessSlotActive) {								//if head is visible
+					m_activeActor->m_faceSlot = facelessSlotActive;									//set active's face slot to faceless(male only for now)
+					m_activeActor->m_hair = baldHaircut;											//set active's haircut to bald
 				} else {
-					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;				//restore active's face slot
-					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);			//restore active's haircut
+					m_activeActor->m_faceSlot = m_activeFaceSlot;									//restore active's face slot
+					m_activeActor->m_hair = *m_activeHair;											//restore active's haircut
 				}
 				//possibly reload the model
 			} else { //restore both
-				loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;				//restore active's face slot
-				loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);			//restore active's haircut
+				m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
+				m_activeActor->m_hair = *m_activeHair;												//restore active's haircut
 
-				loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;				//restore passive's face slot
-				loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);			//restore passive's haircut
+				m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
+				m_passiveActor->m_hair = *m_passiveHair;											//restore passive's haircut
 
 				//possibly reload the models
 			}
