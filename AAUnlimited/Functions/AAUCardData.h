@@ -50,11 +50,15 @@ public:
 
 	bool SetTan(const TCHAR* name);
 
+	void SaveOverrideFiles();
+	void DumpSavedOverrideFiles();
+
 	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
 	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
+	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
@@ -137,6 +141,8 @@ private:
 
 	std::vector<BoneRule> m_boneTransforms;
 	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
+
+	std::vector<SavedFile> m_savedFiles;
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

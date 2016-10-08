@@ -26,7 +26,7 @@ public:
 };
 #pragma pack(pop)
 
-static_assert(sizeof(CharacterStruct) == 0x21C,"XXFile size missmatch; must be 0x21C bytes");
+static_assert(sizeof(XXFile) == 0x21C,"XXFile size missmatch; must be 0x21C bytes");
 
 
 }

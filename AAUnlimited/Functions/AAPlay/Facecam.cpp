@@ -31,11 +31,11 @@ int loc_state = 0;
 BYTE facelessSlotMale = 90;	//if default fails us set it to something
 BYTE facelessSlotFemale = 7;
 
-BYTE m_activeFaceSlot = BYTE(255);
-BYTE m_passiveFaceSlot = BYTE(255);
+BYTE m_activeFaceSlot = 255;
+BYTE m_passiveFaceSlot = 255;
 
-ExtClass::CharacterData::Hair* m_activeHair = NULL;
-ExtClass::CharacterData::Hair* m_passiveHair = NULL;
+ExtClass::CharacterData::Hair m_activeHair;
+ExtClass::CharacterData::Hair m_passiveHair;
 
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
@@ -49,25 +49,20 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		loc_state = 0;
 		loc_focusBone = NULL;
 		loc_hinfo = NULL;
-		if (m_passiveHair != NULL) {
-			delete m_passiveHair;
-			m_passiveHair == NULL;
-		}
-		if (m_activeHair != NULL) {
-			delete m_activeHair;
-			m_activeHair == NULL;
-		}
-		m_activeFaceSlot = BYTE(255);
-		m_passiveFaceSlot = BYTE(255);
+		m_activeFaceSlot = 255;
+		m_passiveFaceSlot = 255;
 	}
 	else {		
 		loc_hinfo = hInfo;
-		//remember faces the first time
-		if (m_passiveFaceSlot == BYTE(255)) m_passiveFaceSlot = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot;
-		if (m_activeFaceSlot == BYTE(255)) m_activeFaceSlot = loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot;
-		//remember hairstyles the first time
-		if (m_passiveHair == NULL) m_passiveHair = new ExtClass::CharacterData::Hair(loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair);
-		if (m_activeHair == NULL) m_activeHair = new ExtClass::CharacterData::Hair(loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair);
+		//remember faces/hairs the first time
+		if (m_passiveFaceSlot == 255) {
+			m_passiveHair = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair;
+			m_passiveFaceSlot = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot;
+		}
+		if (m_activeFaceSlot == 255) {
+			m_activeFaceSlot = loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot;
+			m_activeHair = loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair;
+		}
 		//remember the empty face slots
 		facelessSlotMale = (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
 		facelessSlotFemale = (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal;
@@ -132,7 +127,7 @@ void AdjustCamera(ExtClass::Bone* bone) {
 					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = baldHaircut;						//set passive's haircut to bald
 				} else {
 					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;	//restore passive's face slot
-					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);			//restore passive's haircut
+					loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(m_passiveHair);			//restore passive's haircut
 				}
 				//possibly reload the model
 			} else if (loc_state == 2) { //toggle active
@@ -141,15 +136,15 @@ void AdjustCamera(ExtClass::Bone* bone) {
 					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = baldHaircut;						//set active's haircut to bald
 				} else {
 					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;				//restore active's face slot
-					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);			//restore active's haircut
+					loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(m_activeHair);			//restore active's haircut
 				}
 				//possibly reload the model
 			} else { //restore both
 				loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_faceSlot = m_activeFaceSlot;				//restore active's face slot
-				loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);			//restore active's haircut
+				loc_hinfo->m_activeParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(m_activeHair);			//restore active's haircut
 
 				loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_faceSlot = m_passiveFaceSlot;				//restore passive's face slot
-				loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);			//restore passive's haircut
+				loc_hinfo->m_passiveParticipant->m_charPtr->m_charData->m_hair = ExtClass::CharacterData::Hair(m_passiveHair);			//restore passive's haircut
 
 				//possibly reload the models
 			}
