@@ -3,6 +3,7 @@
 
 #include "Bone.h"
 #include "CharacterData.h"
+#include "XXFile.h"
 namespace ExtClass {
 
 #pragma pack(push, 1)
@@ -19,12 +20,25 @@ public:
 	BYTE m_bClothesOn;
 	BYTE m_unknown3;
 	BYTE m_currClothes;
-	BYTE m_unknown_[0x15B];
+	BYTE m_unknown4[3];
+	XXFile* m_xxFace; //certain pointers to model files. all of these may be NULL if they are not loaded yet or not used
+	XXFile* m_xxGlasses;
+	XXFile* m_xxFrontHair;
+	XXFile* m_xxSideHair;
+	XXFile* m_xxBackHair;
+	XXFile* m_xxHairExtension;
+	XXFile* m_xxTounge;
+	XXFile* m_xxSkeleton;
+	XXFile* m_xxBody;
+	XXFile* m_xxLegs;
+	BYTE m_unknown5[0x130];
 	Bone** m_bonePtrArray; //first one is neck (focused on q press), second one is spin (focused on w press)
 	Bone** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
-	BYTE m_unknown4[0xDB4];
+	BYTE m_unknown6[0xDB8];
 	void* m_somedata;
-	BYTE m_unknown5[0x3C];
+	BYTE m_unknown7[0x1C];
+	XXFile* m_xxSkirt;
+	BYTE m_unknown8[0x18];
 
 public:
 	CharacterStruct() = delete;

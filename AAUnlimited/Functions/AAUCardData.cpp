@@ -520,3 +520,52 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 	return anyGood;
 }
 
+void AAUCardData::SaveOverrideFiles() {
+	m_savedFiles.clear();
+
+	//general overrides first:
+	//mesh overrides:
+	for(const auto& mrule : m_meshOverrideMap) {
+		std::vector<BYTE> buffer(mrule.second.GetFileSize());
+		mrule.second.WriteToBuffer(buffer.data());
+		if(buffer.size() > 0) {
+			m_savedFiles.emplace_back(std::make_pair(1, OVERRIDE_IMAGE_PATH + mrule.second.GetFileName()),buffer);
+		}
+	}
+
+	//archive overrides
+	for(const auto& arule : m_archiveOverrideMap) {
+		std::vector<BYTE> buffer(arule.second.GetFileSize());
+		arule.second.WriteToBuffer(buffer.data());
+		if (buffer.size() > 0) {
+			int location;
+			if(General::StartsWith(arule.second.GetFilePath().c_str(), General::AAPlayPath.c_str())) {
+				location = 0;
+			}
+			else {
+				location = 1;
+			}
+			m_savedFiles.emplace_back(std::make_pair(location, OVERRIDE_ARCHIVE_PATH + arule.second.GetFileName()),buffer);
+		}
+	}
+
+	//hair highlight
+	if(m_hairHighlightImage.IsGood()) {
+		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());
+		m_hairHighlightImage.WriteToBuffer(buffer.data());
+		m_savedFiles.emplace_back(std::make_pair(0,HAIR_HIGHLIGHT_PATH + m_hairHighlightImage.GetFileName()),buffer);
+	}
+
+	//tan
+	for (int i = 0; i < 5; i++) {
+		if (m_tanImages[i].IsGood()) {
+			std::vector<BYTE> buffer(m_tanImages[i].GetFileSize());
+			m_tanImages[i].WriteToBuffer(buffer.data());
+			m_savedFiles.emplace_back(std::make_pair(0,TAN_PATH + m_tanImages[i].GetFileName()),buffer);
+		}
+	}
+}
+
+void DumpSavedOverrideFiles() {
+
+}

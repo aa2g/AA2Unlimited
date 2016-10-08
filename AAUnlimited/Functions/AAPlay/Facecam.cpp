@@ -29,14 +29,14 @@ ExtClass::Bone* loc_focusBone = NULL;
 int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
 
 ExtClass::CharacterData* m_passiveActor = NULL;										//Passive Actor's reference obtained at the start of the scene
-BYTE m_passiveFaceSlot = BYTE(255);													//Passive Actor's original face slot, obtained at the start of the scene
-ExtClass::CharacterData::Hair* m_passiveHair = NULL;								//Passive Actor's hairstyle reference, obtained at the start of the scene         
-BYTE facelessSlotPassive = BYTE(255);												//Passive Actor's desired faceless face, depending on sex               
+BYTE m_passiveFaceSlot = 255;														//Passive Actor's original face slot, obtained at the start of the scene
+ExtClass::CharacterData::Hair m_passiveHair;										//Passive Actor's hairstyle reference, obtained at the start of the scene         
+BYTE facelessSlotPassive = 255;														//Passive Actor's desired faceless face, depending on sex               
 
 ExtClass::CharacterData* m_activeActor = NULL;										//Active Actor's reference obtained at the start of the scene
-BYTE m_activeFaceSlot = BYTE(255);													//Active Actor's original face slot, obtained at the start of the scene
-ExtClass::CharacterData::Hair* m_activeHair = NULL;									//Active Actor's hairstyle reference, obtained at the start of the scene
-BYTE facelessSlotActive = BYTE(255);												//Active Actor's desired faceless face, depending on sex
+BYTE m_activeFaceSlot = 255;														//Active Actor's original face slot, obtained at the start of the scene
+ExtClass::CharacterData::Hair m_activeHair;											//Active Actor's hairstyle reference, obtained at the start of the scene
+BYTE facelessSlotActive = 255;														//Active Actor's desired faceless face, depending on sex
 
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
@@ -46,12 +46,12 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		//prevent losing your heads
 		if (m_activeActor) {
 			m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
-			m_activeActor->m_hair = *m_activeHair;												//restore active's haircut
+			m_activeActor->m_hair = m_activeHair;												//restore active's haircut
 			m_activeActor = NULL;
 		}
 		if (m_passiveActor) {
 			m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
-			m_passiveActor->m_hair = *m_passiveHair;											//restore passive's haircut
+			m_passiveActor->m_hair = m_passiveHair;											//restore passive's haircut
 			m_passiveActor = NULL;
 		}
 
@@ -59,19 +59,10 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		loc_focusBone = NULL;
 		loc_hinfo = NULL;
 
-		if (m_passiveHair) {
-			delete m_passiveHair;
-			m_passiveHair = NULL;
-		}
-		if (m_activeHair) {
-			delete m_activeHair;
-			m_activeHair = NULL;
-		}
-
-		m_passiveFaceSlot = BYTE(255);
-		m_activeFaceSlot = BYTE(255);
-		facelessSlotPassive = BYTE(255);
-		facelessSlotActive = BYTE(255);
+		m_passiveFaceSlot = 255;
+		m_activeFaceSlot = 255;
+		facelessSlotPassive = 255;
+		facelessSlotActive = 255;
 
 		LOGPRIO(Logger::Priority::INFO) << "Cleaned up!\n";
 	}
@@ -80,12 +71,15 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		//remember actors the first time
 		if (m_passiveActor == NULL)	m_passiveActor = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData;
 		if (m_activeActor == NULL)	m_activeActor = loc_hinfo->m_activeParticipant->m_charPtr->m_charData;
-		//remember faces the first time
-		if (m_passiveFaceSlot == BYTE(255))	m_passiveFaceSlot = m_passiveActor->m_faceSlot;
-		if (m_activeFaceSlot == BYTE(255))	m_activeFaceSlot = m_activeActor->m_faceSlot;
-		//remember hairstyles the first time
-		if (m_passiveHair == NULL)	m_passiveHair = new ExtClass::CharacterData::Hair(m_passiveActor->m_hair);
-		if (m_activeHair == NULL)	m_activeHair = new ExtClass::CharacterData::Hair(m_activeActor->m_hair);
+		//remember faces/hairs the first time
+		if (m_passiveFaceSlot == 255) {
+			m_passiveFaceSlot = m_passiveActor->m_faceSlot;
+			m_passiveHair = m_passiveActor->m_hair;
+		}
+		if (m_activeFaceSlot == 255) {
+			m_activeFaceSlot = m_activeActor->m_faceSlot;
+			m_activeHair = m_activeActor->m_hair;
+		}
 		//remember the empty face slots the first time
 		if (facelessSlotPassive == BYTE(255))	facelessSlotPassive = (m_passiveActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
 		if (facelessSlotActive == BYTE(255))	facelessSlotActive = (m_activeActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
@@ -168,7 +162,7 @@ void AdjustCamera(ExtClass::Bone* bone) {
 					m_passiveActor->m_hair = baldHaircut;											//set passive's haircut to bald
 				} else {
 					m_passiveActor->m_faceSlot = m_passiveFaceSlot;									//restore passive's face slot
-					m_passiveActor->m_hair = *m_passiveHair;										//restore passive's haircut
+					m_passiveActor->m_hair = m_passiveHair;											//restore passive's haircut
 				}
 				//possibly reload the model
 			} else if (loc_state == 2) { //toggle active
@@ -177,15 +171,15 @@ void AdjustCamera(ExtClass::Bone* bone) {
 					m_activeActor->m_hair = baldHaircut;											//set active's haircut to bald
 				} else {
 					m_activeActor->m_faceSlot = m_activeFaceSlot;									//restore active's face slot
-					m_activeActor->m_hair = *m_activeHair;											//restore active's haircut
+					m_activeActor->m_hair = m_activeHair;											//restore active's haircut
 				}
 				//possibly reload the model
 			} else { //restore both
 				m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
-				m_activeActor->m_hair = *m_activeHair;												//restore active's haircut
+				m_activeActor->m_hair = m_activeHair;												//restore active's haircut
 
 				m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
-				m_passiveActor->m_hair = *m_passiveHair;											//restore passive's haircut
+				m_passiveActor->m_hair = m_passiveHair;												//restore passive's haircut
 
 				//possibly reload the models
 			}
@@ -219,12 +213,7 @@ void AdjustCamera(ExtClass::Bone* bone) {
 	}
 	else {
 		loc_focusBone = loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0];
-	}
-	
-
-	
+	}	
 }
-
-
 
 }

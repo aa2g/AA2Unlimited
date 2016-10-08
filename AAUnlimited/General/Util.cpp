@@ -105,4 +105,22 @@ DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 }
 
 
+std::vector<BYTE> FileToBuffer(const TCHAR* path) {
+	std::vector<BYTE> retval;
+
+	HANDLE hFile = CreateFile(path,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
+	if (hFile == NULL || hFile == INVALID_HANDLE_VALUE) return retval;
+	DWORD hi;
+	DWORD size = GetFileSize(hFile,&hi);
+	
+	retval.resize(size);
+	ReadFile(hFile,retval.data(),size,&hi,NULL);
+
+	CloseHandle(hFile);
+	return retval;
+}
+
+
+
+
 }
