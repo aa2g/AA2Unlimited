@@ -38,10 +38,22 @@ BYTE m_activeFaceSlot = 255;														//Active Actor's original face slot, o
 ExtClass::CharacterData::Hair m_activeHair;											//Active Actor's hairstyle reference, obtained at the start of the scene
 BYTE facelessSlotActive = 255;														//Active Actor's desired faceless face, depending on sex
 
+
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
 		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
+
+
+		if (loc_hinfo) {
+			static const D3DMATRIX idMatr = {
+				1.0f,0,0,0,
+				0,1.0f,0,0,
+				0,0,1.0f,0,
+				0,0,0,1.0f
+			};
+			loc_hinfo->GetCamera()->m_matrix = idMatr;
+		}
 
 		//prevent losing your heads
 		if (m_activeActor) {
@@ -55,14 +67,15 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 			m_passiveActor = NULL;
 		}
 
-		loc_state = 0;
-		loc_focusBone = NULL;
-		loc_hinfo = NULL;
 
 		m_passiveFaceSlot = 255;
 		m_activeFaceSlot = 255;
 		facelessSlotPassive = 255;
 		facelessSlotActive = 255;
+
+		loc_state = 0;
+		loc_focusBone = NULL;
+		loc_hinfo = NULL;
 
 		LOGPRIO(Logger::Priority::INFO) << "Cleaned up!\n";
 	}
