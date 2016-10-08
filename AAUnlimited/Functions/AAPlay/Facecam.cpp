@@ -41,13 +41,19 @@ BYTE facelessSlotActive = BYTE(255);												//Active Actor's desired faceles
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
-		//prevent losing your heads
-		//m_activeActor->m_faceSlot = m_activeFaceSlot;								//restore active's face slot
-		//m_activeActor->m_hair = ExtClass::CharacterData::Hair(*m_activeHair);		//restore active's haircut
-		//m_passiveActor->m_faceSlot = m_passiveFaceSlot;							//restore passive's face slot
-		//m_passiveActor->m_hair = ExtClass::CharacterData::Hair(*m_passiveHair);	//restore passive's haircut
-
 		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
+
+		//prevent losing your heads
+		if (m_activeActor) {
+			m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
+			m_activeActor->m_hair = *m_activeHair;												//restore active's haircut
+			m_activeActor = NULL;
+		}
+		if (m_passiveActor) {
+			m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
+			m_passiveActor->m_hair = *m_passiveHair;											//restore passive's haircut
+			m_passiveActor = NULL;
+		}
 
 		loc_state = 0;
 		loc_focusBone = NULL;
