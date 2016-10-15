@@ -15,5 +15,17 @@ ExtClass::CharacterStruct** PlayerCharacterPtr() {
 		ApplyRule(offsets);
 }
 
+ExtClass::CharacterStruct** ClassMembersArray() {
+	static const DWORD offsets[]{ 0x376164, 0x6C, 0 };
+	return (ExtClass::CharacterStruct**)
+		ApplyRule(offsets);
+}
+
+ExtClass::CharacterStruct** ClassMembersArrayEnd() {
+	static const DWORD offsets[]{ 0x376164, 0x70, 0 };
+	return (ExtClass::CharacterStruct**)
+		ApplyRule(offsets);
+}
+
 }
 }

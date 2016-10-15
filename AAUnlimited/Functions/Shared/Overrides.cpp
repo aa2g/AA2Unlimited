@@ -6,7 +6,9 @@
 #include "Files\Config.h"
 #include "General\Util.h"
 #include "General\ModuleInfo.h"
+#include "Functions\CharInstData.h"
 #include "Functions\AAEdit\Globals.h"
+#include "Functions\AAPlay\Globals.h"
 #include "Functions\TextureImage.h"
 #include "Functions\AAUCardData.h"
 #include "Functions\Shared\Globals.h"
@@ -15,8 +17,7 @@
 namespace Shared {
 
 
-
-	AAUCardData* g_currentCard = &AAEdit::g_cardData;
+	CharInstData* g_currentChar = &AAEdit::g_currChar;
 	bool g_isOverriding = false;
 
 	/********************/
@@ -26,17 +27,12 @@ namespace Shared {
 	//AAEdit::g_cardData if we are in AAEdit
 
 	void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter) {
-		DWORD size = loadCharacter->m_charData->m_pngBufferSize;
-		BYTE* buffer = (BYTE*)loadCharacter->m_charData->m_pngBuffer;
-		if (buffer != NULL) {
-			g_currentCard->FromFileBuffer((char*)buffer, size);
-			g_isOverriding = true;
-		}
+		g_currentChar = &AAPlay::g_characters[loadCharacter->m_seat];
+		g_isOverriding = true;
 	}
 
 	void MeshTextureCharLoadEnd() {
 		g_isOverriding = false;
-		g_currentCard->Reset();
 	}
 
 	/*********************************/
@@ -50,7 +46,7 @@ namespace Shared {
 
 	bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
 		TCHAR* strArchive = General::FindFileInPath(*archive);
-		auto match = g_currentCard->GetArchiveRedirectFile(strArchive, *file);
+		auto match = g_currentChar->m_cardData.GetArchiveRedirectFile(strArchive, *file);
 		if (match != NULL) {
 			size_t size = (strArchive - *archive); //note that the /2 is done automatically
 			wcsncpy_s(loc_archiveBuffer, *archive, size);
@@ -69,7 +65,7 @@ namespace Shared {
 	bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
 		TCHAR* strArchive = General::FindFileInPath(archive);
 
-		const OverrideFile* match = g_currentCard->GetArchiveOverrideFile(strArchive, file);
+		const OverrideFile* match = g_currentChar->m_cardData.GetArchiveOverrideFile(strArchive, file);
 		if (match == NULL) return false;
 
 		void* fileBuffer = Shared::IllusionMemAlloc(match->GetFileSize());
@@ -91,10 +87,10 @@ namespace Shared {
 	};
 
 	void __stdcall EyeTextureStart(int leftRight, TCHAR** texture) {
-		const std::wstring& eyeTexture = g_currentCard->GetEyeTexture(leftRight);
+		const std::wstring& eyeTexture = g_currentChar->m_cardData.GetEyeTexture(leftRight);
 		if (eyeTexture.size() > 0) {
 			//if usage is 2, texture should be dumped from the buffer directly
-			const std::vector<BYTE>& fileSave = g_currentCard->GetEyeTextureBuffer(leftRight);
+			const std::vector<BYTE>& fileSave = g_currentChar->m_cardData.GetEyeTextureBuffer(leftRight);
 			if (fileSave.size() > 0 && g_Config.GetKeyValue(Config::SAVED_EYE_TEXTURE_USAGE).iVal == 2) {
 				loc_dumpTexture = true;
 				loc_textureBuffer = &fileSave;
@@ -135,7 +131,7 @@ namespace Shared {
 	//for more information, look at the MemMods/AAEdit/MeshTexture.cpp
 
 	const TextureImage* MeshTextureOverrideRules(wchar_t* fileName) {
-		return g_currentCard->GetMeshOverrideTexture(fileName);
+		return g_currentChar->m_cardData.GetMeshOverrideTexture(fileName);
 	}
 
 

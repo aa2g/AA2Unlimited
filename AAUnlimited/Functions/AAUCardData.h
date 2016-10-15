@@ -27,8 +27,14 @@ public:
 	AAUCardData();
 	~AAUCardData();
 
+	//the part of the buffer that contains the file-chunk and has to be removed.
+	//todo: make this into a better system. this is a retarded way to handle this
+	char* ret_fileStart;
+	char* ret_fileEnd;
+	char* ret_chunkSize;
+
 	//searches for AAUnlimited data inside file, then reads it.
-	void FromFileBuffer(char* buffer, DWORD size);
+	bool FromFileBuffer(char* buffer, DWORD size);
 	//writes data to a buffer, including png chunk. Returns size of buffer filled,
 	//or 0 if it failed (because the buffer was too small and resize was false)
 	int ToBuffer(char** buffer, int* size, bool resize, bool pngChunks);
@@ -42,6 +48,8 @@ public:
 	bool RemoveArchiveRedirect(int index);
 	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
+	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
+	bool RemoveHair(int index);
 
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
@@ -51,7 +59,7 @@ public:
 	bool SetTan(const TCHAR* name);
 
 	void SaveOverrideFiles();
-	void DumpSavedOverrideFiles();
+	bool DumpSavedOverrideFiles();
 
 	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
@@ -59,6 +67,12 @@ public:
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
 	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
 	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
+	struct HairPart {
+		BYTE kind; //0-3
+		BYTE slot;
+		BYTE flip;
+		BYTE adjustment;
+	};
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
@@ -103,6 +117,10 @@ public:
 		auto it = m_boneTransformMap.find(boneName);
 		return it == m_boneTransformMap.end() ? NULL : &it->second;
 	}
+
+	inline bool HasFilesSaved() { return m_savedFiles.size() > 0; }
+
+	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
@@ -143,6 +161,8 @@ private:
 	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
 
 	std::vector<SavedFile> m_savedFiles;
+
+	std::vector<HairPart> m_hairs[4];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
@@ -155,6 +175,7 @@ private:
 	T ReadData(char*& buffer,int& size);
 		template<typename T>
 		T ReadData_sub(char*& buffer,int& size, T*);
+		std::vector<BYTE> ReadData_sub(char*& buffer,int& size,std::vector<BYTE>*);
 		template<typename T>
 		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T>*);
 		template<typename T, typename U>

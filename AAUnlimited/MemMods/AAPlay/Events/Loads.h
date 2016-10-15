@@ -5,7 +5,9 @@ namespace Loads {
 
 
 void HiPolyLoadsInjection();
-
+void SaveFileLoadInjection();
+void TransferInInjection();
+void TransferOutInjection();
 
 }
 }

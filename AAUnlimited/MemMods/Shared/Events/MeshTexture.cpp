@@ -630,8 +630,8 @@ void OverrideFileInject() {
 
 void __stdcall OverrideOutlineColorFunc(float* colors) {
 	if (!Shared::g_isOverriding) return;
-	if (!Shared::g_currentCard->HasOutlineColor()) return;
-	COLORREF color = Shared::g_currentCard->GetOutlineColor();
+	if (!Shared::g_currentChar->m_cardData.HasOutlineColor()) return;
+	COLORREF color = Shared::g_currentChar->m_cardData.GetOutlineColor();
 	//colors are sequentially in rgba order in *colors
 	*colors++ = GetRValue(color)/255.0f;
 	*colors++ = GetGValue(color)/255.0f;
@@ -683,7 +683,7 @@ void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
 	TCHAR nameBuffer[256];
 	size_t out;
 	mbstowcs_s(&out,nameBuffer,bone->m_name,256);
-	const D3DMATRIX* ret = Shared::g_currentCard->GetBoneTransformationRule(nameBuffer);
+	const D3DMATRIX* ret = Shared::g_currentChar->m_cardData.GetBoneTransformationRule(nameBuffer);
 	if(ret != NULL) {
 		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix5,ret,&bone->m_matrix5);
 		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,ret,&bone->m_matrix1);

@@ -181,6 +181,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/Shared/Misc/EyeTexture.h"
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 #include "MemMods/Shared/Events/FileDump.h"
+#include "MemMods/Shared/Events/HairMeshes.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/PcConversation.h"
@@ -210,6 +211,9 @@ void InitializeHooks() {
 			MeshTexture::OverrideOutlineColorInject();
 			MeshTexture::OverrideBoneInject();
 
+			HairMeshes::HairLoadInject();
+			HairMeshes::XXCleanupInjection();
+
 			Shared::g_isOverriding = General::IsAAEdit; //always override in aaedit
 		}
 		EyeTexture::EyeTextureInject();
@@ -230,6 +234,9 @@ void InitializeHooks() {
 		PcConversation::PcAnswerInjection();
 
 		Loads::HiPolyLoadsInjection();
+		Loads::SaveFileLoadInjection();
+		Loads::TransferInInjection();
+		Loads::TransferOutInjection();
 		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();

@@ -7,5 +7,8 @@ namespace AAPlay {
 
 ExtClass::CharacterStruct** PlayerCharacterPtr();
 
+ExtClass::CharacterStruct** ClassMembersArray();
+ExtClass::CharacterStruct** ClassMembersArrayEnd(); //first invalid pointer in the array
+
 }
 }

@@ -11,7 +11,7 @@ namespace Shared {
 
 
 bool TanOverride(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
-	if (g_currentCard->GetTanName().size() == 0) return false;
+	if (g_currentChar->m_cardData.GetTanName().size() == 0) return false;
 	/* C:\Users\user1\Desktop\04.bmp (11-Aug-16 3:10:42 AM)
 	StartOffset: 00000000, EndOffset: 0000007D, Length: 0000007E */
 
@@ -43,7 +43,7 @@ bool TanOverride(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** out
 	//slot is the tan slot, imgNum the image number. to checks on that next.
 	if (imgNum < 0 || imgNum >= 5) return false;
 
-	const TextureImage& img = g_currentCard->GetTanTex(imgNum);
+	const TextureImage& img = g_currentChar->m_cardData.GetTanTex(imgNum);
 	if (img.IsGood()) {
 		void* fileBuffer = Shared::IllusionMemAlloc(img.GetFileSize());
 		img.WriteToBuffer((BYTE*)fileBuffer);
@@ -64,7 +64,7 @@ bool TanOverride(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** out
 
 const TextureImage* HairHighlightOverride(wchar_t* texture) {
 	if (General::StartsWith(texture, TEXT("Asp00_20_00_00_00"))) {
-		const TextureImage& img = g_currentCard->GetHairHighlightTex();
+		const TextureImage& img = g_currentChar->m_cardData.GetHairHighlightTex();
 		if (img.IsGood()) {
 			return &img;
 		}
@@ -99,7 +99,7 @@ bool HairRedirect(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** ou
 	if (*it != L'.') return false;
 	it++;
 
-	BYTE newCat = g_currentCard->GetHairRedirect(fileHairKind);
+	BYTE newCat = g_currentChar->m_cardData.GetHairRedirect(fileHairKind);
 	wchar_t wcNewCat = L'0' + newCat;
 	*archiveKindIt = wcNewCat;
 	*fileKindIt = wcNewCat;

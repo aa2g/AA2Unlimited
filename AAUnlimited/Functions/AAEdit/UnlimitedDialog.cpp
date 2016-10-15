@@ -2,9 +2,11 @@
 
 #include <Windows.h>
 #include <CommCtrl.h>
+#include <queue>
 
 #include "External\ExternalVariables\AAEdit\WindowData.h"
 #include "External\ExternalClasses\TextureStruct.h"
+#include "External\ExternalVariables\AAEdit\CardData.h"
 #include "General\ModuleInfo.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
@@ -93,12 +95,14 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
 
 		int index = 0;
+		thisPtr->AddDialog(IDD_GENERAL,&thisPtr->m_gnDialog,index++,TEXT("General"),
+			rct,GNDialog::DialogProc);
 		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog,index++, TEXT("Eye Textures"),
 			rct, ETDialog::DialogProc);
 		thisPtr->AddDialog(IDD_TANSELECT, &thisPtr->m_tsDialog,index++, TEXT("Tan"),
 			rct, TSDialog::DialogProc);
-		/*thisPtr->AddDialog(IDD_HAIR, &thisPtr->m_hrDialog,index++, TEXT("Hair"),
-			rct, HRDialog::DialogProc);*/
+		thisPtr->AddDialog(IDD_HAIR, &thisPtr->m_hrDialog,index++, TEXT("Hair"),
+			rct, HRDialog::DialogProc);
 		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog,index++, TEXT("Mesh Overrides"),
 			rct, MODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog,index++, TEXT("Archive Overrides"),
@@ -152,6 +156,36 @@ LPARAM UnlimitedDialog::GetCurrTabItemData() {
 	return item.lParam;
 }
 
+
+/***************************/
+/* General Override Dialog */
+/***************************/
+
+INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,
+	_In_ WPARAM wparam,_In_ LPARAM lparam)
+{
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		GNDialog* thisPtr = (GNDialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_cbSaveFiles = GetDlgItem(hwndDlg,IDC_GN_CBSAVEFILES);
+
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::GNDialog::Refresh() {
+
+}
+
 /************************/
 /* Mesh Override Dialog */
 /************************/
@@ -184,7 +218,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
 			//remove this rule
-			g_cardData.RemoveMeshOverride(sel);
+			g_currChar.m_cardData.RemoveMeshOverride(sel);
 			thisPtr->RefreshRuleList();
 			return TRUE;
 		}
@@ -222,7 +256,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				override = buffer;
 				SendMessage(thisPtr->m_edOverrideWith, WM_GETTEXT, 1024, (LPARAM)buffer);
 				toOverride = buffer;
-				if (AAEdit::g_cardData.AddMeshOverride(override.c_str(), toOverride.c_str())) {
+				if (AAEdit::g_currChar.m_cardData.AddMeshOverride(override.c_str(), toOverride.c_str())) {
 					thisPtr->RefreshRuleList();
 				}
 				return TRUE;
@@ -240,7 +274,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
  */
 void UnlimitedDialog::MODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
-	auto list = AAEdit::g_cardData.GetMeshOverrideList();
+	auto list = AAEdit::g_currChar.m_cardData.GetMeshOverrideList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(list[i].first);
 		listEntry += TEXT(" -> ") + list[i].second;
@@ -302,7 +336,7 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
 			//remove this rule
-			g_cardData.RemoveArchiveOverride(sel);
+			g_currChar.m_cardData.RemoveArchiveOverride(sel);
 			thisPtr->RefreshRuleList();
 			return TRUE;
 		}
@@ -339,7 +373,7 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				archivefile = buffer;
 				SendMessage(thisPtr->m_edOverrideFile, WM_GETTEXT, 1024, (LPARAM)buffer);
 				toOverride = buffer;
-				if (AAEdit::g_cardData.AddArchiveOverride(archive.c_str(), archivefile.c_str(), toOverride.c_str())) {
+				if (AAEdit::g_currChar.m_cardData.AddArchiveOverride(archive.c_str(), archivefile.c_str(), toOverride.c_str())) {
 					thisPtr->RefreshRuleList();
 				}
 				return TRUE;
@@ -353,7 +387,7 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 
 void UnlimitedDialog::AODialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
-	auto list = AAEdit::g_cardData.GetArchiveOverrideList();
+	auto list = AAEdit::g_currChar.m_cardData.GetArchiveOverrideList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(TEXT("["));
 		listEntry += list[i].first.first + TEXT("/") + list[i].first.second + TEXT("] -> ");
@@ -396,7 +430,7 @@ INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
 			//remove this rule
-			g_cardData.RemoveArchiveRedirect(sel);
+			g_currChar.m_cardData.RemoveArchiveRedirect(sel);
 			thisPtr->RefreshRuleList();
 			return TRUE;
 		}
@@ -420,7 +454,7 @@ INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				SendMessage(thisPtr->m_edFileTo, WM_GETTEXT, 1024, (LPARAM)buffer);
 				overrFile = buffer;
 				
-				if (AAEdit::g_cardData.AddArchiveRedirect(archive.c_str(), archivefile.c_str(),
+				if (AAEdit::g_currChar.m_cardData.AddArchiveRedirect(archive.c_str(), archivefile.c_str(),
 						overrArchive.c_str(), overrFile.c_str())) {
 					thisPtr->RefreshRuleList();
 				}
@@ -435,7 +469,7 @@ INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 
 void UnlimitedDialog::ARDialog::RefreshRuleList() {
 	SendMessage(this->m_lbOverrides, LB_RESETCONTENT, 0, 0);
-	auto list = AAEdit::g_cardData.GetArchiveRedirectList();
+	auto list = AAEdit::g_currChar.m_cardData.GetArchiveRedirectList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(TEXT("["));
 		listEntry += list[i].first.first + TEXT("/") + list[i].first.second + TEXT("] -> [");
@@ -488,7 +522,7 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				fileName[0] = '\0';
 				SendMessage(thisPtr->m_eyes[index].edFile, WM_GETTEXT, 512, (LPARAM)fileName);
 				bool save = SendMessage((HWND)lparam, BM_GETCHECK, 0, 0) == BST_CHECKED;
-				g_cardData.SetEyeTexture(index, fileName, save);
+				g_currChar.m_cardData.SetEyeTexture(index, fileName, save);
 			}
 			else if (identifier == IDC_ET_LEFT_BTBROWSE || identifier == IDC_ET_RIGHT_BTBROWSE) {
 				std::wstring initDir = General::BuildEditPath(TEXT("data\\texture\\eye"));
@@ -508,7 +542,7 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			fileName[0] = '\0';
 			SendMessage((HWND)lparam, WM_GETTEXT, 512, (LPARAM)fileName);
 			bool save = SendMessage(thisPtr->m_eyes[index].cbSaveInside, BM_GETCHECK, 0, 0) == BST_CHECKED;
-			g_cardData.SetEyeTexture(index, fileName, save);
+			g_currChar.m_cardData.SetEyeTexture(index, fileName, save);
 			break; }
 		}
 		break; }
@@ -522,7 +556,7 @@ void UnlimitedDialog::ETDialog::RefreshEnableState() {
 	EnableWindow(this->m_eyes[0].edFile, state);
 	EnableWindow(this->m_eyes[0].btBrowse, state);
 	if (state == FALSE) {
-		g_cardData.SetEyeTexture(0, NULL, false);
+		g_currChar.m_cardData.SetEyeTexture(0, NULL, false);
 	}
 
 	state = (SendMessage(this->m_eyes[1].cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
@@ -530,13 +564,13 @@ void UnlimitedDialog::ETDialog::RefreshEnableState() {
 	EnableWindow(this->m_eyes[1].edFile, state);
 	EnableWindow(this->m_eyes[1].btBrowse, state);
 	if (state == FALSE) {
-		g_cardData.SetEyeTexture(1, NULL, false);
+		g_currChar.m_cardData.SetEyeTexture(1, NULL, false);
 	}
 }
 
 void UnlimitedDialog::ETDialog::Refresh() {
-	const std::wstring& leftPath = g_cardData.GetEyeTexture(0);
-	const std::wstring& rightPath = g_cardData.GetEyeTexture(1);
+	const std::wstring& leftPath = g_currChar.m_cardData.GetEyeTexture(0);
+	const std::wstring& rightPath = g_currChar.m_cardData.GetEyeTexture(1);
 	SendMessage(this->m_eyes[0].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
 	SendMessage(this->m_eyes[1].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
 }
@@ -567,7 +601,7 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			TCHAR name[256];
 			name[0] = '\0';
 			SendMessage(thisPtr->m_cbSelect, CB_GETLBTEXT, sel, (LPARAM)name);
-			g_cardData.SetTan(name);
+			g_currChar.m_cardData.SetTan(name);
 			break; }
 		}
 		break; }
@@ -587,7 +621,7 @@ void UnlimitedDialog::TSDialog::LoadTanList() {
 	WIN32_FIND_DATA data;
 	HANDLE hSearch = FindFirstFile(tanDirectory.c_str(), &data);
 
-	const std::wstring& currentTan = g_cardData.GetTanName();
+	const std::wstring& currentTan = g_currChar.m_cardData.GetTanName();
 	bool containsTan = false;
 	static const TCHAR* exceptionNames[] {TEXT("."), TEXT("..")};
 	if (hSearch != INVALID_HANDLE_VALUE) {
@@ -626,7 +660,7 @@ void UnlimitedDialog::TSDialog::LoadTanList() {
 }
 
 void UnlimitedDialog::TSDialog::Refresh() {
-	std::wstring name = g_cardData.GetTanName();
+	std::wstring name = g_currChar.m_cardData.GetTanName();
 	if(SendMessage(m_cbSelect,CB_SELECTSTRING,-1,(LPARAM)name.c_str()) == CB_ERR) {
 		//we dont have this tan
 		SendMessage(m_cbSelect,CB_SELECTSTRING,-1,(LPARAM)TEXT("-- None --"));
@@ -645,27 +679,29 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		HRDialog* thisPtr = (HRDialog*)lparam;
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
-		thisPtr->m_arrRbRedirects[0][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_00);
-		thisPtr->m_arrRbRedirects[0][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_01);
-		thisPtr->m_arrRbRedirects[0][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_02);
-		thisPtr->m_arrRbRedirects[0][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_03);
-		thisPtr->m_arrRbRedirects[1][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_10);
-		thisPtr->m_arrRbRedirects[1][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_11);
-		thisPtr->m_arrRbRedirects[1][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_12);
-		thisPtr->m_arrRbRedirects[1][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_13);
-		thisPtr->m_arrRbRedirects[2][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_20);
-		thisPtr->m_arrRbRedirects[2][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_21);
-		thisPtr->m_arrRbRedirects[2][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_22);
-		thisPtr->m_arrRbRedirects[2][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_23);
-		thisPtr->m_arrRbRedirects[3][0] = GetDlgItem(hwndDlg, IDC_HR_RADIO_30);
-		thisPtr->m_arrRbRedirects[3][1] = GetDlgItem(hwndDlg, IDC_HR_RADIO_31);
-		thisPtr->m_arrRbRedirects[3][2] = GetDlgItem(hwndDlg, IDC_HR_RADIO_32);
-		thisPtr->m_arrRbRedirects[3][3] = GetDlgItem(hwndDlg, IDC_HR_RADIO_33);
-		SendMessage(thisPtr->m_arrRbRedirects[0][0], BM_SETCHECK, BST_CHECKED, 0);
-		SendMessage(thisPtr->m_arrRbRedirects[1][1], BM_SETCHECK, BST_CHECKED, 0);
-		SendMessage(thisPtr->m_arrRbRedirects[2][2], BM_SETCHECK, BST_CHECKED, 0);
-		SendMessage(thisPtr->m_arrRbRedirects[3][3], BM_SETCHECK, BST_CHECKED, 0);
+		thisPtr->m_rbKind[0] = GetDlgItem(hwndDlg,IDC_HR_RBFRONT);
+		thisPtr->m_rbKind[1] = GetDlgItem(hwndDlg,IDC_HR_RBSIDE);
+		thisPtr->m_rbKind[2] = GetDlgItem(hwndDlg,IDC_HR_RBBACK);
+		thisPtr->m_rbKind[3] = GetDlgItem(hwndDlg,IDC_HR_RBEXT);
+		SendMessage(thisPtr->m_rbKind[0], BM_SETCHECK, BST_CHECKED, 0);
+		thisPtr->m_edSlot = GetDlgItem(hwndDlg,IDC_HR_EDSLOT);
+		thisPtr->m_edAdjustment = GetDlgItem(hwndDlg,IDC_HR_EDADJUSTMENT);
+		thisPtr->m_cbFlip = GetDlgItem(hwndDlg,IDC_HR_CBFLIP);
 		thisPtr->m_edHighlight = GetDlgItem(hwndDlg, IDC_HR_EDHIGHLIGHT);
+		thisPtr->m_lstHairs = GetDlgItem(hwndDlg,IDC_HR_LIST);
+
+		LVCOLUMN column;
+		column.mask = LVCF_TEXT | LVCF_WIDTH;
+		column.cx = 50;
+		column.pszText = TEXT("Hair Kind");
+		ListView_InsertColumn(thisPtr->m_lstHairs,0,&column);
+		column.pszText = TEXT("Slot");
+		ListView_InsertColumn(thisPtr->m_lstHairs,1,&column);
+		column.pszText = TEXT("Adjustment");
+		ListView_InsertColumn(thisPtr->m_lstHairs,2,&column);
+		column.pszText = TEXT("Flip");
+		ListView_InsertColumn(thisPtr->m_lstHairs,3,&column);
+
 		return TRUE;
 		break; }
 	case WM_COMMAND: {
@@ -684,15 +720,49 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 					if (General::StartsWith(choice, initialDir.c_str())) {
 						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edHighlight, WM_SETTEXT, 0, (LPARAM)rest);
-						g_cardData.SetHairHighlight(rest);
+						g_currChar.m_cardData.SetHairHighlight(rest);
 					}
 				}
 				return TRUE;
 			}
-			else {
-				thisPtr->SetCardDataFromGui();
+			else if(identifier == IDC_HR_BTNADD) {
+				BYTE kind;
+				for(kind = 0; kind < 4; kind++) {
+					if (SendMessage(thisPtr->m_rbKind[kind],BM_GETCHECK,0,0) == BST_CHECKED) break;
+				}
+				if (kind == 4) kind = 0;
+				TCHAR buf[256];
+				SendMessage(thisPtr->m_edSlot,WM_GETTEXT,256,(LPARAM)buf);
+				BYTE slot = _wtoi(buf);
+				SendMessage(thisPtr->m_edAdjustment,WM_GETTEXT,256,(LPARAM)buf);
+				BYTE adjustment = _wtoi(buf);
+				bool flip = SendMessage(thisPtr->m_cbFlip,BM_GETCHECK,0,0) == BST_CHECKED;
+				g_currChar.m_cardData.AddHair(kind,slot,adjustment,flip);
+				thisPtr->Refresh();
+				return TRUE;
 			}
+			
 			break; }
+		}
+		break; }
+	case WM_NOTIFY: {
+		HRDialog* thisPtr = (HRDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		NMHDR* mi = (NMHDR*)lparam;
+		switch (mi->code) {
+		case LVN_KEYDOWN:
+			if(mi->idFrom == IDC_HR_LIST) {
+				NMLVKEYDOWN* param = (NMLVKEYDOWN*)mi;
+				if(param->wVKey == VK_DELETE) {
+					//delete key was pressed in list
+					int sel = SendMessage(thisPtr->m_lstHairs,LVM_GETSELECTIONMARK,0,0);
+					if (sel == -1) return TRUE;
+					g_currChar.m_cardData.RemoveHair(sel);
+					thisPtr->Refresh();
+					return TRUE;
+				}
+			}
+			break;
 		}
 		break; }
 						
@@ -700,28 +770,60 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 	return FALSE;
 }
 
-void UnlimitedDialog::HRDialog::SetCardDataFromGui() {
-	for (int i = 0; i < 4; i++) {
-		BYTE target = GetHairTarget(i);
-		g_cardData.SetHairRedirect(i, target);
-	}
-}
-
-BYTE UnlimitedDialog::HRDialog::GetHairTarget(BYTE hairCategory) {
-	for (BYTE i = 0; i < 4; i++) {
-		if (SendMessage(this->m_arrRbRedirects[hairCategory][i], BM_GETCHECK, 0, 0) == BST_CHECKED) {
-			return i;
+void UnlimitedDialog::HRDialog::RefreshHairList() {
+	ListView_DeleteAllItems(m_lstHairs);
+	int n = 0; //element
+	for(int kind = 0; kind < 4; kind++) {
+		const auto& list = g_currChar.m_cardData.GetHairs(kind);
+		LVITEM item;
+		item.mask = LVIF_TEXT;
+		for (int i = 0; i < list.size(); i++) {
+			//hair kind
+			switch (list[i].kind) {
+			case 0:
+				item.pszText = TEXT("Front Hair");
+				break;
+			case 1:
+				item.pszText = TEXT("Side Hair");
+				break;
+			case 2:
+				item.pszText = TEXT("Back Hair");
+				break;
+			case 3:
+				item.pszText = TEXT("Hair Extension");
+				break;
+			default:
+				item.pszText = TEXT("Error");
+				break;
+			}
+			item.iItem = n++;
+			item.iSubItem = 0;
+			ListView_InsertItem(m_lstHairs,&item);
+			//hair slot
+			TCHAR buf[256];
+			_itow_s(list[i].slot,buf,10);
+			item.iSubItem = 1;
+			item.pszText = buf;
+			ListView_SetItem(m_lstHairs,&item);
+			//hair adjustment
+			_itow_s(list[i].adjustment,buf,10);
+			item.iSubItem = 2;
+			item.pszText = buf;
+			ListView_SetItem(m_lstHairs,&item);
+			//flip
+			if (list[i].flip) item.pszText = TEXT("true");
+			else item.pszText = TEXT("false");
+			item.iSubItem = 3;
+			ListView_SetItem(m_lstHairs,&item);
 		}
 	}
-	return hairCategory; //fallback
 }
 
+
 void UnlimitedDialog::HRDialog::Refresh() {
-	for (BYTE i = 0; i < 4; i++) {
-		BYTE n = g_cardData.GetHairRedirect(i);
-		if (n > 3) n = i;
-		SendMessage(this->m_arrRbRedirects[i][n], BM_CLICK, BST_CHECKED, 0);
-	}
+	RefreshHairList();
+	const std::wstring& name = g_currChar.m_cardData.GetHairHighlightName();
+	SendMessage(m_edHighlight,WM_SETTEXT,0,(LPARAM)name.c_str());
 }
 
 /***************/
@@ -783,7 +885,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
 			if (sel == LB_ERR) return TRUE;
 			//remove this rule
-			g_cardData.RemoveBoneTransformation(sel);
+			g_currChar.m_cardData.RemoveBoneTransformation(sel);
 			thisPtr->Refresh();
 			return TRUE;
 		}
@@ -797,7 +899,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			DWORD identifier = LOWORD(wparam);
 			if(identifier == IDC_BD_CBOUTLINECOLOR) {
 				BOOL visible = SendMessage(thisPtr->m_cbOutlineColor,BM_GETCHECK,0,0) == BST_CHECKED;
-				g_cardData.SetHasOutlineColor(visible == TRUE);
+				g_currChar.m_cardData.SetHasOutlineColor(visible == TRUE);
 				thisPtr->Refresh();
 				return TRUE;
 			}
@@ -823,7 +925,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int red = General::GetEditInt(thisPtr->m_edOutlineColorRed);
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
-					g_cardData.SetOutlineColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetOutlineColor(RGB(red,green,blue));
 				}
 			}
 			else {
@@ -850,7 +952,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
-	const auto& vec = g_cardData.GetBoneTransformationList();
+	const auto& vec = g_currChar.m_cardData.GetBoneTransformationList();
 	const auto& rule = vec[listboxId];
 	//combo box with title
 	SendMessage(m_bmCbSelect,WM_SETTEXT,0,(LPARAM)rule.first.c_str());
@@ -868,12 +970,12 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	TCHAR name[128];
 	SendMessage(m_bmCbSelect,WM_GETTEXT,128,(LPARAM)name);
 	//remove transformation if it allready exists
-	const auto& vec = g_cardData.GetBoneTransformationList();
+	const auto& vec = g_currChar.m_cardData.GetBoneTransformationList();
 	int match;
 	for(match = 0; match < vec.size(); match++) {
 		if (vec[match].first == name) break;
 	}
-	if (match < vec.size()) g_cardData.RemoveBoneTransformation(match);
+	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneTransformation(match);
 
 	//get matrix
 	D3DMATRIX m;
@@ -886,18 +988,18 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		}
 	}
 	//save
-	g_cardData.AddBoneTransformation(name,m);
+	g_currChar.m_cardData.AddBoneTransformation(name,m);
 	Refresh();
 }
 
 void UnlimitedDialog::BDDialog::Refresh() {
-	bool bOutline = g_cardData.HasOutlineColor();
+	bool bOutline = g_currChar.m_cardData.HasOutlineColor();
 	
 	EnableWindow(this->m_edOutlineColorRed,bOutline);
 	EnableWindow(this->m_edOutlineColorGreen,bOutline);
 	EnableWindow(this->m_edOutlineColorBlue,bOutline);
 
-	COLORREF color = g_cardData.GetOutlineColor();
+	COLORREF color = g_currChar.m_cardData.GetOutlineColor();
 	TCHAR text[10];
 	_itow_s(GetRValue(color),text,10);
 	SendMessage(this->m_edOutlineColorRed,WM_SETTEXT,0,(LPARAM)text);
@@ -908,11 +1010,40 @@ void UnlimitedDialog::BDDialog::Refresh() {
 
 	//listbox
 	SendMessage(this->m_bmList,LB_RESETCONTENT,0,0);
-	const auto& list = AAEdit::g_cardData.GetBoneTransformationList();
+	const auto& list = AAEdit::g_currChar.m_cardData.GetBoneTransformationList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(list[i].first);
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
+
+	//list possible bones
+	ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
+	if(curr != NULL) {
+		ExtClass::XXFile* xxlist[] = {
+			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+			curr->m_xxBody, curr->m_xxLegs
+		};
+		TCHAR tmpBuff[256];
+		std::queue<ExtClass::Bone*> fileQueue;
+		for (ExtClass::XXFile* file : xxlist) {
+			if (file == NULL) continue;
+			ExtClass::Bone* root = file->m_root;
+			fileQueue.push(root);
+			while (!fileQueue.empty()) {
+				ExtClass::Bone* bone = fileQueue.front();
+				fileQueue.pop();
+				size_t conv;
+				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
+				SendMessage(m_bmCbSelect,CB_ADDSTRING,0,(LPARAM)tmpBuff);
+				for (int i = 0; i < bone->m_arrSize; i++) {
+					fileQueue.push(bone->m_boneArray + i);
+				}
+			}
+		}
+	}
+	
+
 }
 
 UnlimitedDialog g_AAUnlimitDialog;

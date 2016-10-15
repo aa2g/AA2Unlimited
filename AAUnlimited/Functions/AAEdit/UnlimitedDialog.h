@@ -23,6 +23,13 @@ namespace AAEdit {
 		inline bool IsVisible() const {
 			return m_visible;
 		}
+
+		inline bool IsSaveFilesSet() const {
+			return SendMessage(m_gnDialog.m_cbSaveFiles,BM_GETCHECK,0,0) == BST_CHECKED;
+		}
+		inline void SetSaveFiles(BOOL state) {
+			SendMessage(m_gnDialog.m_cbSaveFiles,BM_SETCHECK,state ? BST_CHECKED : BST_UNCHECKED,0);
+		}
 	private:
 	struct Dialog {
 		HWND m_dialog;
@@ -31,6 +38,12 @@ namespace AAEdit {
 		}
 		virtual void Refresh() = 0;
 	};
+	struct GNDialog : public Dialog {
+		HWND m_cbSaveFiles;
+
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_gnDialog;
 	struct MODialog : public Dialog {
 		HWND m_cbOverride;
 		HWND m_edOverrideWith;
@@ -85,11 +98,15 @@ namespace AAEdit {
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_tsDialog;
 	struct HRDialog : public Dialog {
-		HWND m_arrRbRedirects[4][4];
-		HWND m_edHighlight;
-		BYTE GetHairTarget(BYTE hairCategory);
+		HWND m_rbKind[4];
+		HWND m_edSlot;
+		HWND m_edAdjustment;
+		HWND m_cbFlip;
+		HWND m_lstHairs;
 
-		void SetCardDataFromGui();
+		HWND m_edHighlight;
+
+		void RefreshHairList();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_hrDialog;

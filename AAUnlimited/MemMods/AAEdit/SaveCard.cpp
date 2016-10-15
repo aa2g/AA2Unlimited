@@ -7,6 +7,7 @@
 #include "General\Buffer.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
+#include "Functions\AAEdit\UnlimitedDialog.h"
 #include "Files\Logger.h"
 
 namespace EditInjections {
@@ -14,6 +15,9 @@ namespace SaveCard {
 
 
 void __stdcall AddUnlimitData(wchar_t* fileName) {
+	if(AAEdit::g_AAUnlimitDialog.IsSaveFilesSet()) {
+		AAEdit::g_currChar.m_cardData.SaveOverrideFiles();
+	}
 	//open card
 	HANDLE hFile = CreateFile(fileName, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;
@@ -35,7 +39,7 @@ void __stdcall AddUnlimitData(wchar_t* fileName) {
 		//generate unlimited data buffer
 		int size = 0;
 		char* buffer = NULL;
-		int retSize = AAEdit::g_cardData.ToBuffer(&buffer,&size,true,true);
+		int retSize = AAEdit::g_currChar.m_cardData.ToBuffer(&buffer,&size,true,true);
 		if (retSize == 0) {
 			CloseHandle(hFile);
 			delete[] fileBuffer;
@@ -57,7 +61,7 @@ void __stdcall AddUnlimitData(wchar_t* fileName) {
 		//generate unlimited data buffer
 		int size = 0;
 		char* buffer = NULL;
-		int retSize = AAEdit::g_cardData.ToBuffer(&buffer,&size,true,false);
+		int retSize = AAEdit::g_currChar.m_cardData.ToBuffer(&buffer,&size,true,false);
 		if (retSize == 0) {
 			CloseHandle(hFile);
 			return;

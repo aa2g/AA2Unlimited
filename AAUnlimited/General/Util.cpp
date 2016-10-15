@@ -8,6 +8,25 @@ namespace General {
 
 double PassiveTimer::m_freq;
 
+void CreatePathForFile(const TCHAR* name) {
+	
+	int len = wcslen(name);
+	TCHAR* nameCpy = new TCHAR[len+1];
+	wcscpy_s(nameCpy,len+1,name);
+	
+	for (int i = 0; nameCpy[i]; i++) {
+		if(nameCpy[i] == '\\' || nameCpy[i] == '/') {
+			TCHAR tmp = nameCpy[i];
+			nameCpy[i] = '\0';
+			if(!DirExists(nameCpy)) {
+				CreateDirectory(nameCpy,NULL);
+			}
+			nameCpy[i] = tmp;
+		}
+	}
+	delete[] nameCpy;
+}
+
 const TCHAR* OpenFileDialog(const TCHAR* initialDir) {
 	static OPENFILENAME opfn;
 	static bool opfnInit = false;

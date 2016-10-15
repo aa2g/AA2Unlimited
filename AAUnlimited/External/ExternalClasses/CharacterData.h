@@ -122,18 +122,33 @@ public:
 		DWORD glassesColor;
 	} m_faceDetails;
 	struct Hair {
-		BYTE frontHair;
-		BYTE sideHair;
-		BYTE backhair;
-		BYTE hairExtension;
-		BYTE frontHairAdjustment;
-		BYTE sideHairAdjustment;
-		BYTE backhairAdjustment;
-		BYTE hairExtensionAdjustment;
-		BYTE frontHairFlip;
-		BYTE sideHairFlip;
-		BYTE backhairFlip;
-		BYTE hairExtensionFlip;
+		union {
+			struct {
+				BYTE frontHair;
+				BYTE sideHair;
+				BYTE backhair;
+				BYTE hairExtension;
+			};
+			BYTE hairs[4];
+		};
+		union {
+			struct {
+				BYTE frontHairAdjustment;
+				BYTE sideHairAdjustment;
+				BYTE backhairAdjustment;
+				BYTE hairExtensionAdjustment;
+			};
+			BYTE hairAdjustment[4];
+		};
+		union {
+			struct {
+				BYTE frontHairFlip;
+				BYTE sideHairFlip;
+				BYTE backhairFlip;
+				BYTE hairExtensionFlip;
+			};
+			BYTE hairFlips[4];
+		};
 		DWORD hairColor;
 	} m_hair;
 	struct Character {

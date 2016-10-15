@@ -4,8 +4,7 @@
 
 namespace AAEdit {
 
-
+CharInstData g_currChar;
 AAUCardData g_cardData;
-
 
 }

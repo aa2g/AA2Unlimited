@@ -22,6 +22,10 @@ public:
 
 	D3DMATRIX m_matrix5; //constant translation matrix, copy of matrixx1 when read in;
 						 //used by neck3 to build matrix1, maybe attachment matrix for other body parts?
+
+	BYTE m_unknown[0x41A0];
 };
+
+static_assert(sizeof(Bone) == 0x42F4,"size mismatch");
 
 }

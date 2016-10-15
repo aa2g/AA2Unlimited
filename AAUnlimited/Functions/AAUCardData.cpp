@@ -3,6 +3,7 @@
 #include <limits>
 #include <algorithm>
 #include <intrin.h>
+#include <sstream>
 
 #include "config.h"
 #include "General\ModuleInfo.h"
@@ -67,6 +68,16 @@ std::wstring AAUCardData::ReadData_sub(char*& buffer,int& size,std::wstring*) {
 	}
 	std::wstring retVal((TCHAR*)buffer,length);
 	buffer += length*sizeof(TCHAR),size -= length*sizeof(TCHAR);
+	return retVal;
+}
+
+//special vector read for byte vectors, doesnt push every element
+std::vector<BYTE> AAUCardData::ReadData_sub(char*& buffer,int& size,std::vector<BYTE>*) {
+	DWORD length = ReadData<DWORD>(buffer,size);
+	std::vector<BYTE> retVal;
+	retVal.reserve(length);
+	retVal.assign(buffer,buffer+length);
+	buffer += length,size -= length;
 	return retVal;
 }
 
@@ -245,6 +256,28 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			}
 			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_boneTransformMap.size() << " elements.\r\n";
 			break;
+		case 'File':
+			ret_fileStart = buffer-4; //before the 'File'
+			m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer,size);
+			ret_fileEnd = buffer;
+			LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
+			break;
+		case 'HrA0':
+			m_hairs[0] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA0, loaded " << m_hairs[0].size() << " elements\r\n";
+			break;
+		case 'HrA1':
+			m_hairs[1] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA1, loaded " << m_hairs[1].size() << " elements\r\n";
+			break;
+		case 'HrA2':
+			m_hairs[2] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA2, loaded " << m_hairs[2].size() << " elements\r\n";
+			break;
+		case 'HrA3':
+			m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_hairs[3].size() << " elements\r\n";
+			break;
 		}
 		
 	}
@@ -284,16 +317,16 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	
 }
 
-void AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
+bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	Reset();
 	//try to find it at the end first
-	if (size < 8) return;
+	if (size < 8) return false;
 	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
 	if (aauDataSize < size - 8) {
 		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
 		if (id == PngChunkIdBigEndian) {
 			FromBuffer((char*)(&buffer[size - 8 - aauDataSize]), aauDataSize);
-			return;
+			return true;
 		}
 	}
 	//else, find our png chunk
@@ -301,10 +334,12 @@ void AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	if(chunk == NULL) chunk = General::FindPngChunk((BYTE*)buffer,size,*(DWORD*)"AAUD");
 	if (chunk != NULL) {
 		//first, read chunk size (big endian)
-		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 4;
+		ret_chunkSize = (char*)chunk;
+		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 8;
 		FromBuffer((char*)chunk, size);
-		return;
+		return true;
 	}
+	return false;
 }
 
 /*
@@ -373,6 +408,11 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	if(m_bOutlineColor) {
 		DUMP_MEMBER('OlCl',m_outlineColor);
 	}
+	DUMP_MEMBER_CONTAINER('File',m_savedFiles);
+	DUMP_MEMBER_CONTAINER('HrA0',m_hairs[0]);
+	DUMP_MEMBER_CONTAINER('HrA1',m_hairs[1]);
+	DUMP_MEMBER_CONTAINER('HrA2',m_hairs[2]);
+	DUMP_MEMBER_CONTAINER('HrA3',m_hairs[3]);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	if (pngChunks) {
@@ -520,6 +560,27 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 	return anyGood;
 }
 
+bool AAUCardData::AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip) {
+	m_hairs[kind].push_back({ kind,slot,flip,adjustment });
+	return true;
+}
+
+//index is extended index for all 4 hair kinds, front, side, back, ext
+bool AAUCardData::RemoveHair(int index) {
+	int kind;
+	for(kind = 0; kind < 4; kind++) {
+		if(index < m_hairs[kind].size()) {
+			break;
+		}
+		index -= m_hairs[kind].size();
+	}
+	if (kind >= 4) return false;
+
+	auto vMatch = m_hairs[kind].begin() + index;
+	m_hairs[kind].erase(vMatch);
+	return true; 
+}
+
 void AAUCardData::SaveOverrideFiles() {
 	m_savedFiles.clear();
 
@@ -529,7 +590,7 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(mrule.second.GetFileSize());
 		mrule.second.WriteToBuffer(buffer.data());
 		if(buffer.size() > 0) {
-			m_savedFiles.emplace_back(std::make_pair(1, OVERRIDE_IMAGE_PATH + mrule.second.GetFileName()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(1,mrule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -545,7 +606,7 @@ void AAUCardData::SaveOverrideFiles() {
 			else {
 				location = 1;
 			}
-			m_savedFiles.emplace_back(std::make_pair(location, OVERRIDE_ARCHIVE_PATH + arule.second.GetFileName()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -553,7 +614,7 @@ void AAUCardData::SaveOverrideFiles() {
 	if(m_hairHighlightImage.IsGood()) {
 		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());
 		m_hairHighlightImage.WriteToBuffer(buffer.data());
-		m_savedFiles.emplace_back(std::make_pair(0,HAIR_HIGHLIGHT_PATH + m_hairHighlightImage.GetFileName()),buffer);
+		m_savedFiles.emplace_back(std::make_pair(1,m_hairHighlightImage.GetRelPath()),buffer);
 	}
 
 	//tan
@@ -561,11 +622,87 @@ void AAUCardData::SaveOverrideFiles() {
 		if (m_tanImages[i].IsGood()) {
 			std::vector<BYTE> buffer(m_tanImages[i].GetFileSize());
 			m_tanImages[i].WriteToBuffer(buffer.data());
-			m_savedFiles.emplace_back(std::make_pair(0,TAN_PATH + m_tanImages[i].GetFileName()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(1,m_tanImages[i].GetRelPath()),buffer);
 		}
 	}
 }
 
-void DumpSavedOverrideFiles() {
+bool AAUCardData::DumpSavedOverrideFiles() {
+	if (m_savedFiles.size() == 0) return false;
+	int mode = g_Config.GetKeyValue(Config::SAVED_FILE_USAGE).iVal;
+	
+	// look for which files to extract
+	std::vector<std::pair<int,std::wstring>> toExtract;
+	for (int i = 0; i < m_savedFiles.size(); i++) {
+		auto& file = m_savedFiles[i];
+		int basePath = file.first.first;
+		std::wstring fullPath;
+		if (basePath == 0) fullPath = General::BuildPlayPath(file.first.second.c_str());
+		else			   fullPath = General::BuildEditPath(file.first.second.c_str());
+		//check if path has any backdirections (two dots or more)
+		bool suspicious = false;
+		for(int i = 0; i < fullPath.size()-1; i++) {
+			if(fullPath[i] == '.') {
+				if(fullPath[i+1] == '.') {
+					suspicious = true;
+					break;
+				}
+				else {
+					i++; //skip the second dot as well
+				}
+			}
+		}
+		if(suspicious) {
+			std::wstringstream warningMessage;
+			warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
+			warningMessage << fullPath << TEXT("This cards files will not be extracted. Blame the guy who made the card");
+			MessageBox(NULL,warningMessage.str().c_str(),TEXT("Warning"),MB_ICONWARNING);
+			return false;
+		}
+		if (!General::FileExists(fullPath.c_str())) toExtract.emplace_back(i, std::move(fullPath));
+	}
+	
+	if (toExtract.size() == 0) return true; //all is existent; return true in case they want it deleted
+	//if mode is 1, build a popup asking for extraction
+	if(mode == 1) {
+		std::wstringstream text(TEXT("This card contains files that were not found in your installation:\r\n"));
+		for(auto& elem : toExtract) {
+			int i = elem.first;
+			if(m_savedFiles[i].first.first == 0) text << TEXT("AAPlay\\");
+			else								 text << TEXT("AAEdit\\");
+			text << m_savedFiles[i].first.second << TEXT("\r\n");
+		}
+		text << TEXT("These files are probably required for the card to work properly.\r\n"
+					 "Do you want to extract these files now?");
+		int res = MessageBox(NULL,text.str().c_str(),TEXT("Info"),MB_YESNO);
+		if(res != IDYES) {
+			//doesnt want to extract, abort
+			return false;
+		}
+	}
 
+	bool success = true;
+	for (auto& elem : toExtract) {
+		General::CreatePathForFile(elem.second.c_str());
+		HANDLE file = CreateFile(elem.second.c_str(),GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_NEW,0,NULL);
+		if(file == INVALID_HANDLE_VALUE || file == NULL) {
+			int err = GetLastError();
+			LOGPRIO(Logger::Priority::WARN) << "could not create file " << elem.second.c_str() << ": error " << err << "\r\n";
+			success = false;
+			continue;
+		}
+		DWORD written = 0;
+		auto& vec = m_savedFiles[elem.first].second;
+		WriteFile(file,vec.data(),vec.size(),&written,NULL);
+		CloseHandle(file);
+
+		if(written != vec.size()) {
+			success = false;
+		}
+	}
+	
+	if(!success) {
+		LOGPRIO(Logger::Priority::WARN) << "failed to extract some files from aau card\r\n";
+	}
+	return success;
 }

@@ -35,6 +35,8 @@ inline const TCHAR* FindFileInPath(const TCHAR* path) {
 	return lastSlash;
 }
 
+void CreatePathForFile(const TCHAR* name);
+
 inline float GetRandomFloat(float min, float max) {
 	return min + rand() / (RAND_MAX / (max - min));
 }

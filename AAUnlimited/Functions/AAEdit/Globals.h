@@ -1,9 +1,12 @@
 #pragma once
 #include "Functions\AAUCardData.h"
+#include "Functions\CharInstData.h"
+#include "External\ExternalClasses\CharacterStruct.h"
 
 namespace AAEdit {
 
-
-extern AAUCardData g_cardData;
+//TODO: merge these
+extern CharInstData g_currChar;
+//extern AAUCardData g_cardData;
 
 }

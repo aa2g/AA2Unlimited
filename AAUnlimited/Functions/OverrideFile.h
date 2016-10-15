@@ -16,6 +16,7 @@ public:
 
 	inline int GetFileSize() const { return m_fileSize; }
 	inline const std::wstring& GetFileName() const { return m_fileName; }
+	inline const std::wstring& GetRelPath() const { return m_relPath; }
 	inline const std::wstring& GetFilePath() const { return m_fullPath; }
 	inline bool IsGood() const { return m_good; }
 
@@ -27,6 +28,7 @@ protected:
 
 	std::wstring m_fullPath;
 	std::wstring m_fileName;
+	std::wstring m_relPath;
 	std::vector<BYTE> m_cache;
 };
 

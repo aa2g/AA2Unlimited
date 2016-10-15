@@ -17,6 +17,13 @@ OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPat
 
 	HANDLE file = NULL;
 	if (absPath) {
+		//we need to find the relPath out for ourselfes
+		if (General::StartsWith(fileName,General::AAEditPath.c_str())) {
+			m_relPath = fileName + General::AAEditPath.size();
+		}
+		else {
+			m_relPath = fileName + General::AAPlayPath.size();
+		}
 		m_fileName = General::FindFileInPath(fileName);
 		m_fullPath = fileName;
 		file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -27,6 +34,7 @@ OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPat
 	else {
 		if (tryAAPlay) {
 			m_fullPath = General::BuildPlayPath(path, fileName);
+			m_relPath = path; m_relPath += fileName;
 			file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 			if (file != INVALID_HANDLE_VALUE && file != NULL) {
 				m_good = true;
@@ -34,6 +42,7 @@ OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPat
 		}
 		if (!m_good && tryAAEdit) {
 			m_fullPath = General::BuildEditPath(path, fileName);
+			m_relPath = path; m_relPath += fileName;
 			file = CreateFile(m_fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 			if (file != INVALID_HANDLE_VALUE && file != NULL) {
 				m_good = true;
