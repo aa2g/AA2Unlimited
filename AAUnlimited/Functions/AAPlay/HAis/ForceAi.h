@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <ctime>
 
 #include "External\ExternalClasses\HClasses\HGUIButton.h"
 #include "External\ExternalClasses\HClasses\HInfo.h"
