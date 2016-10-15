@@ -14,8 +14,11 @@ public:
 	Bone* m_boneArray; //probably children
 	Bone* m_parent;
 
-	D3DMATRIX m_matrix1; //constantly renewed using different matrices; contains offset of bone to parent when read in from xx file
-	D3DMATRIX m_matrix2; //same, also contains matrix1
+	D3DMATRIX m_matrix1; //constantly renewed using different matrices; 
+						 //contains offset of bone to parent when read in from xx file
+	D3DMATRIX m_matrix2; //final generated matrix. used as a base to calculate matrix of sub-bones.
+						 //some bones (base bones, i suppose, such as A00_kao) do NOT constantly modify this matrix.
+						 //changing it has a permanent effect on the model in these cases
 
 	D3DMATRIX m_matrix3; //not sure, usually identity matrix
 	D3DMATRIX m_matrix4; //not sure, usually almost identity matrix (0.999999994 or some shit cause its inverted for some reason)
