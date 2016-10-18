@@ -69,13 +69,22 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 
 	bool dumped = aauData.DumpSavedOverrideFiles();
 
-	if(!suc || !g_Config.GetKeyValue(Config::SAVED_FILE_REMOVE).bVal) {
+	if(!suc || !dumped || !g_Config.GetKeyValue(Config::SAVED_FILE_REMOVE).bVal) {
 		//not an aau card
 		CloseHandle(hFile);
 		delete[] fileBuffer;
 		return;
 	}
 	
+	if(g_Config.GetKeyValue(Config::SAVED_FILE_BACKUP).bVal) {
+		//do a backup
+		const wchar_t* filePart = General::FindFileInPath(card);
+		std::wstring backupName(card,filePart);
+		backupName += TEXT("\\aaubackup\\");
+		backupName += filePart;
+		General::CreatePathForFile(backupName.c_str());
+		CopyFile(card,backupName.c_str(),FALSE);
+	}
 	//remove the saved files
 	
 	//modify size first
@@ -97,12 +106,14 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 		std::pair<BYTE*,DWORD> pair;
 		pair.first = fileBuffer + it;
 		pair.second = (DWORD)(aauData.ret_files[i].fileStart - (char*)(fileBuffer + it));
+		toWrite.push_back(pair);
 		it += pair.second + aauData.ret_files[i].size();
 	}
 	{
 		std::pair<BYTE*,DWORD> pair;
 		pair.first = fileBuffer + it;
 		pair.second = (DWORD)(lo - it);
+		toWrite.push_back(pair);
 	}
 
 

@@ -37,4 +37,5 @@ savedFileUsage = 1					; determines how eye files that were saved into the card 
 									; 3: do not extract files
 
 bSaveFileAutoRemove = false			; if true, after saved files were successfully extracted, they will be removed from the card
-									  in an attempt to save hard drive space
+									; in an attempt to save hard drive space
+bSaveFileBackup = true				; does a backup of a card before saved files are removed

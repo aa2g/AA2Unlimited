@@ -357,35 +357,41 @@ void XXCleanupInjection() {
 void __declspec(naked) HairRefreshRedirect() {
 	__asm {
 
-		ret
+		ret 4
 	}
 }
 
 void HairRefreshInject() {
-	//stack param, esi is this
-	/*AA2Edit.exe+FA470 - 55                    - push ebp{ redraws some meshes.flags filter which ones are
+	if(General::IsAAEdit) {
+		//stack param, esi is this
+		/*AA2Edit.exe+FA470 - 55                    - push ebp{ redraws some meshes.flags filter which ones are
 		drawn. disabling some will cause animations to stop
 		Flags: skelleton, face, tounge, glasses, front hair,
 		back hair, side hair, hair extension
-	}
-	AA2Edit.exe+FA471 - 8B EC                 - mov ebp,esp
-	AA2Edit.exe+FA473 - 83 E4 F8              - and esp,-08 { 248 }
-	AA2Edit.exe+FA476 - 51                    - push ecx
-	AA2Edit.exe+FA477 - 53                    - push ebx
-	AA2Edit.exe+FA478 - 8A 5D 08              - mov bl,[ebp+08]*/
-	//...
-	/*AA2Edit.exe+FA65E - B0 01                 - mov al,01 { 1 }
-	AA2Edit.exe+FA660 - 5B                    - pop ebx
-	AA2Edit.exe+FA661 - 8B E5                 - mov esp,ebp
-	AA2Edit.exe+FA663 - 5D                    - pop ebp
-	AA2Edit.exe+FA664 - C2 0400               - ret 0004 { 4 }
-	*/
-	/*DWORD address = General::GameBase + 0x1F89F0;
-	DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
-	Hook((BYTE*)address,
-		{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
-		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		}
+		AA2Edit.exe+FA471 - 8B EC                 - mov ebp,esp
+		AA2Edit.exe+FA473 - 83 E4 F8              - and esp,-08 { 248 }
+		AA2Edit.exe+FA476 - 51                    - push ecx
+		AA2Edit.exe+FA477 - 53                    - push ebx
+		AA2Edit.exe+FA478 - 8A 5D 08              - mov bl,[ebp+08]*/
+		//...
+		/*AA2Edit.exe+FA65E - B0 01                 - mov al,01 { 1 }
+		AA2Edit.exe+FA660 - 5B                    - pop ebx
+		AA2Edit.exe+FA661 - 8B E5                 - mov esp,ebp
+		AA2Edit.exe+FA663 - 5D                    - pop ebp
+		AA2Edit.exe+FA664 - C2 0400               - ret 0004 { 4 }
+		*/
+		/*DWORD address = General::GameBase + 0x1F89F0;
+		DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
+		Hook((BYTE*)address,
+			{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 		NULL);*/
+	}
+	else if(General::IsAAPlay) {
+
+	}
+	
 }
 
 

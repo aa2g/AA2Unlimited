@@ -13,6 +13,7 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1),	//SAVED_EYE_TEXTURE_USAGE,	
 	MemberInfo(Config::INT,		"savedFileUsage", 1),	////SAVED_FILE_USAGE,
 	MemberInfo(Config::BOOL,	"bSaveFileAutoRemove", false),	//SAVED_FILE_REMOVE,	
+	MemberInfo(Config::BOOL,	"bSaveFileBackup",true), //SAVED_FILE_BACKUP
 	MemberInfo(Config::INT,		"facelessMaleSlot", 90),	//FACELESS_SLOT_MALE,	
 	MemberInfo(Config::INT,		"facelessFemaleSlot", 7),	//FACELESS_SLOT_FEMALE
 	MemberInfo(Config::FLOAT,	"fPOVOffsetX", 0.0f),	//POV_OFFSET_X

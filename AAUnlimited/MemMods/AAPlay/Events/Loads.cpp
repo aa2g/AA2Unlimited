@@ -58,8 +58,23 @@ void __declspec(naked) HiPolyLoadsEndRedirect() {
 	}
 }
 
+//while the exit looks the same, the entry for the male method is slightly different,
+//so it needs its own function
+void __declspec(naked) HiPolyLoadsStartRedirectMale() {
+	__asm {
+		pushad
+		push ecx
+		call HiPolyLoadStartEvent
+		popad
+		//emulate original code (mov eax, fs[00000000])
+		mov eax, fs:[00000000]
+		ret
+	}
+}
+
 
 void HiPolyLoadsInjection() {
+	//female load function
 	/*AA2Play v12 FP v1.4.0a.exe+111B70 - 55                    - push ebp			<-- beginning of function
 	AA2Play v12 FP v1.4.0a.exe+111B71 - 8B EC                 - mov ebp,esp
 	AA2Play v12 FP v1.4.0a.exe+111B73 - 83 E4 F8              - and esp,-08 { 248 }
@@ -93,6 +108,43 @@ void HiPolyLoadsInjection() {
 		0xC2, 0x10, 0x00 },							//expected values
 		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 		NULL);
+
+	//male load function
+	/*AA2Play v12 FP v1.4.0a.exe+108490 - 55                    - push ebp
+	AA2Play v12 FP v1.4.0a.exe+108491 - 8B EC                 - mov ebp,esp
+	AA2Play v12 FP v1.4.0a.exe+108493 - 83 E4 F8              - and esp,-08 { 248 }
+	AA2Play v12 FP v1.4.0a.exe+108496 - 6A FF                 - push -01 { 255 }
+	AA2Play v12 FP v1.4.0a.exe+108498 - 68 2A084A01           - push "AA2Play v12 FP v1.4.0a.exe"+2E082A { [139] }
+	AA2Play v12 FP v1.4.0a.exe+10849D - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+	AA2Play v12 FP v1.4.0a.exe+1084A3 - 50                    - push eax
+	AA2Play v12 FP v1.4.0a.exe+1084A4 - 81 EC A0040000        - sub esp,000004A0 { 1184 }
+	AA2Play v12 FP v1.4.0a.exe+1084AA - A1 A03A5201           - mov eax,["AA2Play v12 FP v1.4.0a.exe"+363AA0] { [4ADAB32A] }
+	AA2Play v12 FP v1.4.0a.exe+1084AF - 33 C4                 - xor eax,esp
+	*/
+	//...
+	//
+	/*AA2Play v12 FP v1.4.0a.exe+109656 - E8 FE031800           - call "AA2Play v12 FP v1.4.0a.exe"+289A59 { ->AA2Play v12 FP v1.4.0a.exe+289A59 }
+	AA2Play v12 FP v1.4.0a.exe+10965B - 8B E5                 - mov esp,ebp
+	AA2Play v12 FP v1.4.0a.exe+10965D - 5D                    - pop ebp
+	AA2Play v12 FP v1.4.0a.exe+10965E - C2 1000               - ret 0010 { 16 }
+	*/
+
+	address = General::GameBase + 0x10849D;
+	redirectAddress = (DWORD)(&HiPolyLoadsStartRedirectMale);
+	Hook((BYTE*)address,
+		{ 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+
+	address = General::GameBase + 0x10965B;
+	redirectAddress = (DWORD)(&HiPolyLoadsEndRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0xE5,
+		0x5D,
+		0xC2, 0x10, 0x00 },							//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+	
 }
 
 DWORD SaveFileLoadOriginalFunc;

@@ -385,10 +385,10 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
 	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
 	//eye textures
-	DUMP_MEMBER('EtLN', m_eyeTextures[0].texFile);
-	DUMP_MEMBER('EtRN', m_eyeTextures[1].texFile);
-	DUMP_MEMBER_CONTAINER('EtLF', m_eyeTextures[0].texName);
-	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texName);
+	DUMP_MEMBER('EtLN', m_eyeTextures[0].texName);
+	DUMP_MEMBER('EtRN', m_eyeTextures[1].texName);
+	DUMP_MEMBER_CONTAINER('EtLF', m_eyeTextures[0].texFile);
+	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texFile);
 	//highlight texture
 	DUMP_MEMBER('EhXN',m_eyeHighlightName);
 	DUMP_MEMBER_CONTAINER('EhXF',m_eyeHighlightFile);
