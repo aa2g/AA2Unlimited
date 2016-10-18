@@ -18,6 +18,29 @@ void __stdcall AddUnlimitData(wchar_t* fileName) {
 	if(AAEdit::g_AAUnlimitDialog.IsSaveFilesSet()) {
 		AAEdit::g_currChar.m_cardData.SaveOverrideFiles();
 	}
+	if(AAEdit::g_AAUnlimitDialog.IsSaveEyesSet()) {
+		auto& eyes = AAEdit::g_currChar.m_char->m_charData->m_eyes;
+		if(eyes.bExtTextureUsed) {
+			TCHAR buffer[256];
+			mbtowc(buffer,eyes.texture,260);
+			AAEdit::g_currChar.m_cardData.SetEyeTexture(0,buffer,true);
+		}
+		else {
+			AAEdit::g_currChar.m_cardData.SetEyeTexture(0,NULL,false);
+		}
+	}
+	if(AAEdit::g_AAUnlimitDialog.IsSaveEyeHighlightSet()) {
+		auto& eyes = AAEdit::g_currChar.m_char->m_charData->m_eyes;
+		if(eyes.bExtHighlightUsed) {
+			TCHAR buffer[256];
+			mbtowc(buffer,eyes.highlight,260);
+			AAEdit::g_currChar.m_cardData.SetEyeHighlight(buffer);
+		}
+		else {
+			AAEdit::g_currChar.m_cardData.SetEyeHighlight(NULL); //reset in case it was still set
+		}
+		
+	}
 	//open card
 	HANDLE hFile = CreateFile(fileName, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;

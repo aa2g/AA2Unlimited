@@ -7,6 +7,7 @@
 #include "External\ExternalVariables\AAEdit\WindowData.h"
 #include "External\ExternalClasses\TextureStruct.h"
 #include "External\ExternalVariables\AAEdit\CardData.h"
+#include "External\ExternalVariables\AAEdit\RefreshTable.h"
 #include "General\ModuleInfo.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
@@ -171,6 +172,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_cbSaveFiles = GetDlgItem(hwndDlg,IDC_GN_CBSAVEFILES);
+		thisPtr->m_cbSaveEyeTexture = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYETEX);
+		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
 
 		return TRUE;
 		break; }
@@ -494,14 +497,9 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		ETDialog* thisPtr = (ETDialog*)lparam;
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
-		thisPtr->m_eyes[0].cbActive = GetDlgItem(hwndDlg, IDC_ET_LEFT_CBUSE);
-		thisPtr->m_eyes[0].cbSaveInside = GetDlgItem(hwndDlg, IDC_ET_LEFT_CBSAVEINSIDE);
-		thisPtr->m_eyes[0].edFile = GetDlgItem(hwndDlg, IDC_ET_LEFT_EDTEX);
-		thisPtr->m_eyes[0].btBrowse = GetDlgItem(hwndDlg, IDC_ET_LEFT_BTBROWSE);
-		thisPtr->m_eyes[1].cbActive = GetDlgItem(hwndDlg, IDC_ET_RIGHT_CBUSE);
-		thisPtr->m_eyes[1].cbSaveInside = GetDlgItem(hwndDlg, IDC_ET_RIGHT_CBSAVEINSIDE);
-		thisPtr->m_eyes[1].edFile = GetDlgItem(hwndDlg, IDC_ET_RIGHT_EDTEX);
-		thisPtr->m_eyes[1].btBrowse = GetDlgItem(hwndDlg, IDC_ET_RIGHT_BTBROWSE);
+		thisPtr->m_eye.cbActive = GetDlgItem(hwndDlg, IDC_ET_RIGHT_CBUSE);
+		thisPtr->m_eye.edFile = GetDlgItem(hwndDlg, IDC_ET_RIGHT_EDTEX);
+		thisPtr->m_eye.btBrowse = GetDlgItem(hwndDlg, IDC_ET_RIGHT_BTBROWSE);
 		thisPtr->RefreshEnableState();
 
 		return TRUE;
@@ -516,21 +514,20 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				thisPtr->RefreshEnableState();
 				return TRUE;
 			}
-			else if (identifier == IDC_ET_LEFT_CBSAVEINSIDE || identifier == IDC_ET_RIGHT_CBSAVEINSIDE) {
-				int index = identifier == IDC_ET_LEFT_CBSAVEINSIDE ? 0 : 1;
+			else if (identifier == IDC_ET_RIGHT_CBSAVEINSIDE) {
 				TCHAR fileName[512];
 				fileName[0] = '\0';
-				SendMessage(thisPtr->m_eyes[index].edFile, WM_GETTEXT, 512, (LPARAM)fileName);
+				SendMessage(thisPtr->m_eye.edFile, WM_GETTEXT, 512, (LPARAM)fileName);
 				bool save = SendMessage((HWND)lparam, BM_GETCHECK, 0, 0) == BST_CHECKED;
-				g_currChar.m_cardData.SetEyeTexture(index, fileName, save);
+				g_currChar.m_cardData.SetEyeTexture(1, fileName, save);
 			}
-			else if (identifier == IDC_ET_LEFT_BTBROWSE || identifier == IDC_ET_RIGHT_BTBROWSE) {
+			else if (identifier == IDC_ET_RIGHT_BTBROWSE) {
 				std::wstring initDir = General::BuildEditPath(TEXT("data\\texture\\eye"));
 				const TCHAR* path = General::OpenFileDialog(initDir.c_str());
 				if (path != NULL && General::StartsWith(path, initDir.c_str())) {
 					const TCHAR* fileName = General::FindFileInPath(path);
 					int index = identifier == IDC_ET_LEFT_BTBROWSE ? 0 : 1;
-					SendMessage(thisPtr->m_eyes[index].edFile, WM_SETTEXT, 0, (LPARAM)fileName);
+					SendMessage(thisPtr->m_eye.edFile, WM_SETTEXT, 0, (LPARAM)fileName);
 				}
 				return TRUE;
 			}
@@ -541,38 +538,27 @@ INT_PTR CALLBACK UnlimitedDialog::ETDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			TCHAR fileName[512];
 			fileName[0] = '\0';
 			SendMessage((HWND)lparam, WM_GETTEXT, 512, (LPARAM)fileName);
-			bool save = SendMessage(thisPtr->m_eyes[index].cbSaveInside, BM_GETCHECK, 0, 0) == BST_CHECKED;
-			g_currChar.m_cardData.SetEyeTexture(index, fileName, save);
+			g_currChar.m_cardData.SetEyeTexture(index, fileName, false);
+			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::EYES,ExtVars::AAEdit::RedrawId::EYES_ALL);
 			break; }
 		}
 		break; }
 	}
 	return FALSE;
-}
+} 
 
 void UnlimitedDialog::ETDialog::RefreshEnableState() {
-	BOOL state = (SendMessage(this->m_eyes[0].cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
-	EnableWindow(this->m_eyes[0].cbSaveInside, state);
-	EnableWindow(this->m_eyes[0].edFile, state);
-	EnableWindow(this->m_eyes[0].btBrowse, state);
-	if (state == FALSE) {
-		g_currChar.m_cardData.SetEyeTexture(0, NULL, false);
-	}
-
-	state = (SendMessage(this->m_eyes[1].cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
-	EnableWindow(this->m_eyes[1].cbSaveInside, state);
-	EnableWindow(this->m_eyes[1].edFile, state);
-	EnableWindow(this->m_eyes[1].btBrowse, state);
+	BOOL state = (SendMessage(this->m_eye.cbActive, BM_GETCHECK, 0, 0) == BST_CHECKED) ? TRUE : FALSE;
+	EnableWindow(this->m_eye.edFile, state);
+	EnableWindow(this->m_eye.btBrowse, state);
 	if (state == FALSE) {
 		g_currChar.m_cardData.SetEyeTexture(1, NULL, false);
 	}
 }
 
 void UnlimitedDialog::ETDialog::Refresh() {
-	const std::wstring& leftPath = g_currChar.m_cardData.GetEyeTexture(0);
 	const std::wstring& rightPath = g_currChar.m_cardData.GetEyeTexture(1);
-	SendMessage(this->m_eyes[0].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
-	SendMessage(this->m_eyes[1].edFile, WM_SETTEXT, 0, (LPARAM)leftPath.c_str());
+	SendMessage(this->m_eye.edFile, WM_SETTEXT, 0, (LPARAM)rightPath.c_str());
 }
 
 /*********************/
@@ -602,6 +588,8 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			name[0] = '\0';
 			SendMessage(thisPtr->m_cbSelect, CB_GETLBTEXT, sel, (LPARAM)name);
 			g_currChar.m_cardData.SetTan(name);
+			//redraw tan
+			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_TAN);
 			break; }
 		}
 		break; }
@@ -721,6 +709,12 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edHighlight, WM_SETTEXT, 0, (LPARAM)rest);
 						g_currChar.m_cardData.SetHairHighlight(rest);
+						//redraw all hairs
+						using namespace ExtVars::AAEdit;
+						RedrawBodyPart(HAIR,HAIR_BACK);
+						RedrawBodyPart(HAIR,HAIR_FRONT);
+						RedrawBodyPart(HAIR,HAIR_SIDE);
+						RedrawBodyPart(HAIR,HAIR_EXTENSION);
 					}
 				}
 				return TRUE;
@@ -739,6 +733,12 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				bool flip = SendMessage(thisPtr->m_cbFlip,BM_GETCHECK,0,0) == BST_CHECKED;
 				g_currChar.m_cardData.AddHair(kind,slot,adjustment,flip);
 				thisPtr->Refresh();
+				//redraw hair of added king
+				using namespace ExtVars::AAEdit;
+				if(kind == 0) RedrawBodyPart(HAIR,HAIR_FRONT);
+				else if(kind == 1) RedrawBodyPart(HAIR,HAIR_SIDE);
+				else if(kind == 2) RedrawBodyPart(HAIR,HAIR_BACK);
+				else if(kind == 3) RedrawBodyPart(HAIR,HAIR_EXTENSION);
 				return TRUE;
 			}
 			
@@ -777,7 +777,7 @@ void UnlimitedDialog::HRDialog::RefreshHairList() {
 		const auto& list = g_currChar.m_cardData.GetHairs(kind);
 		LVITEM item;
 		item.mask = LVIF_TEXT;
-		for (int i = 0; i < list.size(); i++) {
+		for (unsigned int i = 0; i < list.size(); i++) {
 			//hair kind
 			switch (list[i].kind) {
 			case 0:
@@ -875,6 +875,10 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
+
+		//disable slider for now
+		EnableWindow(thisPtr->m_bmSldHeight,FALSE);
+		EnableWindow(thisPtr->m_bmSldWidth,FALSE);
 		return TRUE; }
 	case WM_VKEYTOITEM: {
 		//DEL-key was pressed while the list box had the focus.
@@ -942,9 +946,13 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			
 			return TRUE; }
 		case LBN_SELCHANGE: {
-			int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
-			thisPtr->LoadData(sel);
-			return TRUE; }
+			HWND wnd = (HWND)lparam;
+			if(wnd == thisPtr->m_bmList) {
+				int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
+				thisPtr->LoadData(sel);
+				return TRUE;
+			}
+			break; }
 		};
 		break; }
 	};
@@ -971,7 +979,7 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	SendMessage(m_bmCbSelect,WM_GETTEXT,128,(LPARAM)name);
 	//remove transformation if it allready exists
 	const auto& vec = g_currChar.m_cardData.GetBoneTransformationList();
-	int match;
+	unsigned int match;
 	for(match = 0; match < vec.size(); match++) {
 		if (vec[match].first == name) break;
 	}
@@ -1036,7 +1044,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 				size_t conv;
 				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
 				SendMessage(m_bmCbSelect,CB_ADDSTRING,0,(LPARAM)tmpBuff);
-				for (int i = 0; i < bone->m_arrSize; i++) {
+				for (unsigned int i = 0; i < bone->m_arrSize; i++) {
 					fileQueue.push(bone->m_boneArray + i);
 				}
 			}

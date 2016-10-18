@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalClasses\Bone.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\CardData.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="Functions\CharInstData.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\XXFile.h" />

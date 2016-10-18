@@ -67,6 +67,7 @@
     <ClCompile Include="MemMods\Shared\Events\HairMeshes.cpp" />
     <ClCompile Include="Functions\AAPlay\Globals.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
+    <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="MemMods\Shared\Events\HairMeshes.h" />
     <ClInclude Include="Functions\AAPlay\Globals.h" />
     <ClInclude Include="Functions\CharInstData.h" />
+    <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

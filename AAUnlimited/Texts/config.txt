@@ -28,16 +28,13 @@ bHAiOnNoPromptH = true				; HAi should be activated at no prompt h done by evil 
 ; Card Options ;
 ;;;;;;;;;;;;;;;;
 
-savedEyeTextureUsage = 1			; determines how eye textures that were saved into the card data are handled.
-									; 1: save eye textures in data/texture/eye folder on load
-									; 2: use eye texture directly from memory
-
 savedFileUsage = 1					; determines how eye files that were saved into the card data are handled.
 									; unlike eye textures, these can not be loaded from memory, are probably huge, and might
 									; be malicious, so take caution
 									; 1: on first load, check if all files are there. If not, give a pop up informing about
 										 the missing files and extract if wanted
 									; 2: same as 1, but do not ask for permission; just extract
+									; 3: do not extract files
 
 bSaveFileAutoRemove = false			; if true, after saved files were successfully extracted, they will be removed from the card
 									  in an attempt to save hard drive space

@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <intrin.h>
+#include <algorithm>
 
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
@@ -26,13 +27,23 @@ void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
 	//load data
 	AAEdit::g_currChar.m_cardData.FromFileBuffer((char*)needed, lo);
 	AAEdit::g_currChar.m_cardData.DumpSavedOverrideFiles();
+	//set save checkboxes in GUI depending on data
+	//override files
 	BOOL savedFiles = AAEdit::g_currChar.m_cardData.HasFilesSaved();
 	AAEdit::g_AAUnlimitDialog.SetSaveFiles(savedFiles);
+	//eye highlight
+	savedFiles = AAEdit::g_currChar.m_cardData.GetEyeHighlightTextureBuffer().size() > 0;
+	AAEdit::g_AAUnlimitDialog.SetSaveHighlight(savedFiles);
+	//eye texture
+	savedFiles = AAEdit::g_currChar.m_cardData.GetEyeTextureBuffer(0).size() > 0 ||
+				 AAEdit::g_currChar.m_cardData.GetEyeTextureBuffer(1).size() > 0;
+	AAEdit::g_AAUnlimitDialog.SetSaveEyes(savedFiles);
 	AAEdit::g_AAUnlimitDialog.Refresh();
 }
 
 void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
-	AAEdit::g_currChar.m_cardData.Reset();
+	auto& aauData = AAEdit::g_currChar.m_cardData;
+	aauData.Reset();
 
 	HANDLE hFile = CreateFile(card,FILE_GENERIC_READ | FILE_GENERIC_WRITE,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
 	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;
@@ -42,13 +53,23 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 	BYTE* fileBuffer = new BYTE[lo];
 	ReadFile(hFile,fileBuffer,lo,&hi,NULL);
 	//read from data
-	bool suc = AAEdit::g_currChar.m_cardData.FromFileBuffer((char*)fileBuffer,lo);
-	BOOL savedFiles = AAEdit::g_currChar.m_cardData.HasFilesSaved();
+	bool suc = aauData.FromFileBuffer((char*)fileBuffer,lo);
+	//set save checkboxes in GUI depending on data
+	//override files
+	BOOL savedFiles = aauData.HasFilesSaved();
 	AAEdit::g_AAUnlimitDialog.SetSaveFiles(savedFiles);
+	//eye highlight
+	BOOL savedHighlights = aauData.GetEyeHighlightTextureBuffer().size() > 0;
+	AAEdit::g_AAUnlimitDialog.SetSaveHighlight(savedHighlights);
+	//eye texture
+	BOOL savedEyeTextureLeft = aauData.GetEyeTextureBuffer(0).size() > 0;
+	BOOL savedEyeTextureRight = aauData.GetEyeTextureBuffer(1).size() > 0;
+	AAEdit::g_AAUnlimitDialog.SetSaveEyes(savedEyeTextureLeft || savedEyeTextureRight);
 	AAEdit::g_AAUnlimitDialog.Refresh();
 
-	suc = suc && AAEdit::g_currChar.m_cardData.DumpSavedOverrideFiles();
-	if(!suc || !savedFiles || !g_Config.GetKeyValue(Config::SAVED_FILE_REMOVE).bVal) {
+	bool dumped = aauData.DumpSavedOverrideFiles();
+
+	if(!suc || !g_Config.GetKeyValue(Config::SAVED_FILE_REMOVE).bVal) {
 		//not an aau card
 		CloseHandle(hFile);
 		delete[] fileBuffer;
@@ -56,17 +77,43 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 	}
 	
 	//remove the saved files
-	BYTE* start = (BYTE*)AAEdit::g_currChar.m_cardData.ret_fileStart;
-	BYTE* end = (BYTE*)AAEdit::g_currChar.m_cardData.ret_fileEnd;
-	DWORD* chunkSize = (DWORD*)AAEdit::g_currChar.m_cardData.ret_chunkSize;
+	
+	//modify size first
+	DWORD* chunkSize = (DWORD*)aauData.ret_chunkSize;
 	DWORD currSize = _byteswap_ulong(*chunkSize);
-	currSize -= (end-start);
+	
+	for(int i = 0; i < 4; i++) {
+		currSize -= aauData.ret_files[i].size();
+	}
 	*chunkSize = _byteswap_ulong(currSize);
 
+	//make a list of chunks that we need to write (the inverse of these ret_files, essentially)
+	
+	std::vector<std::pair<BYTE*,DWORD>> toWrite;
+	
+	DWORD it = 0;
+	for(int i = 0; i < 4; i++) {
+		if (aauData.ret_files[0].size() == 0) continue;
+		std::pair<BYTE*,DWORD> pair;
+		pair.first = fileBuffer + it;
+		pair.second = (DWORD)(aauData.ret_files[i].fileStart - (char*)(fileBuffer + it));
+		it += pair.second + aauData.ret_files[i].size();
+	}
+	{
+		std::pair<BYTE*,DWORD> pair;
+		pair.first = fileBuffer + it;
+		pair.second = (DWORD)(lo - it);
+	}
+
+
+	//now write file
 	LONG himove = 0;
 	SetFilePointer(hFile,0,&himove,FILE_BEGIN);
-	WriteFile(hFile,fileBuffer,(DWORD)(start-fileBuffer),&hi,NULL);
-	WriteFile(hFile,end,lo - (end-fileBuffer),&hi,NULL);
+
+	for(auto& pair : toWrite) {
+		WriteFile(hFile,pair.first,pair.second,&hi,NULL);
+	}
+	
 	SetEndOfFile(hFile);
 
 	CloseHandle(hFile);

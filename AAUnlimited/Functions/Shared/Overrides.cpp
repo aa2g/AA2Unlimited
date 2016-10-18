@@ -109,6 +109,7 @@ namespace Shared {
 
 	BYTE* EyeTextureDump(wchar_t* fileName, DWORD* readBytes) {
 		if (loc_dumpTexture) {
+			loc_dumpTexture = false;
 			void* mem = IllusionMemAlloc(loc_textureBuffer->size());
 			memcpy_s(mem, loc_textureBuffer->size(), loc_textureBuffer->data(), loc_textureBuffer->size());
 			*readBytes = loc_textureBuffer->size();

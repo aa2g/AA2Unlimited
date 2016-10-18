@@ -22,6 +22,10 @@ AAUCardData::AAUCardData()
 	m_hairRedirects.back = 2;
 	m_hairRedirects.extension = 3;
 	m_bOutlineColor = false;
+	for(int i = 0; i < sizeof(ret_files)/sizeof(ret_files[0]); i++) {
+		ret_files[i].fileEnd = 0;
+		ret_files[i].fileStart = 0;
+	}
 }
 
 
@@ -87,7 +91,7 @@ std::vector<T> AAUCardData::ReadData_sub(char*&buffer,int& size,std::vector<T>*)
 	DWORD length = ReadData<DWORD>(buffer,size);
 	std::vector<T> retVal;
 	retVal.reserve(length);
-	for (int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; i++) {
 		T val = ReadData<T>(buffer,size);
 		retVal.push_back(std::move(val));
 	}
@@ -226,12 +230,26 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_eyeTextures[1].texName << "\r\n";
 			break;
 		case 'EtLF':
+			ret_files[0].fileStart = buffer-4; //before the chunk
 			m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			ret_files[0].fileEnd = buffer;
 			LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_eyeTextures[0].texFile.size() << "\r\n";
 			break;
 		case 'EtRF':
+			ret_files[1].fileStart = buffer-4; //before the chunk
 			m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			ret_files[1].fileEnd = buffer;
 			LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_eyeTextures[1].texFile.size() << "\r\n";
+			break;
+		case 'EhXN':
+			m_eyeHighlightName = ReadData<decltype(m_eyeHighlightName)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_eyeHighlightName << "\r\n";
+			break;
+		case 'EhXF':
+			ret_files[2].fileStart = buffer-4; //before the chunk
+			m_eyeHighlightFile = ReadData<decltype(m_eyeHighlightFile)>(buffer,size);
+			ret_files[2].fileEnd = buffer;
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_eyeHighlightFile.size() << "\r\n";
 			break;
 		case 'HrRd':
 			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
@@ -257,9 +275,9 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_boneTransformMap.size() << " elements.\r\n";
 			break;
 		case 'File':
-			ret_fileStart = buffer-4; //before the 'File'
+			ret_files[3].fileStart = buffer-4; //before the 'File'
 			m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer,size);
-			ret_fileEnd = buffer;
+			ret_files[3].fileEnd = buffer;
 			LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
 			break;
 		case 'HrA0':
@@ -281,34 +299,6 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		}
 		
 	}
-
-	//save eye textures in eye texture folder if not allready there
-	if (g_Config.GetKeyValue(Config::SAVED_EYE_TEXTURE_USAGE).iVal == 1) {
-		for (int i = 0; i < 2; i++) {
-			if (m_eyeTextures[i].texName.size() > 0 && m_eyeTextures[i].texFile.size() > 0) {
-				//make sure texture has no folders in it first
-				bool validFileName = true;
-				for (wchar_t c : m_eyeTextures[i].texName) {
-					if (c == L'\\') {
-						validFileName = false;
-					}
-				}
-				if (!validFileName) {
-					LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_eyeTextures[i].texName << " contains paths in "
-						"file name and was not extracted for safety purposes.\r\n";
-					continue;
-				}
-				std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), m_eyeTextures[i].texName.c_str());
-				if (!General::FileExists(fullPath.c_str())) {
-					HANDLE h = CreateFile(fullPath.c_str(), GENERIC_WRITE, 0, NULL, CREATE_NEW, 0, NULL);
-					DWORD written;
-					WriteFile(h, m_eyeTextures[i].texFile.data(), m_eyeTextures[i].texFile.size(), &written, NULL);
-					CloseHandle(h);
-				}
-			}
-		}
-	}
-	
 
 	if (size != 0) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
@@ -399,6 +389,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER('EtRN', m_eyeTextures[1].texFile);
 	DUMP_MEMBER_CONTAINER('EtLF', m_eyeTextures[0].texName);
 	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texName);
+	//highlight texture
+	DUMP_MEMBER('EhXN',m_eyeHighlightName);
+	DUMP_MEMBER_CONTAINER('EhXF',m_eyeHighlightFile);
 	//hair redirect
 	DUMP_MEMBER('HrRd', m_hairRedirects.full);
 	//tans
@@ -453,7 +446,7 @@ bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
 }
 
 bool AAUCardData::RemoveMeshOverride(int index) {
-	if (m_meshOverrides.size() <= index) return false;
+	if (index < 0 || (size_t)index >= m_meshOverrides.size()) return false;
 	auto vMatch = m_meshOverrides.begin() + index;
 	auto mapMatch = m_meshOverrideMap.find(vMatch->first);
 	m_meshOverrides.erase(vMatch);
@@ -474,7 +467,7 @@ bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivef
 }
 
 bool AAUCardData::RemoveArchiveOverride(int index) {
-	if (m_archiveOverrides.size() <= index) return false;
+	if (index < 0 || (size_t)index >= m_archiveOverrides.size()) return false;
 	auto vMatch = m_archiveOverrides.begin() + index;
 	auto mapMatch = m_archiveOverrideMap.find(vMatch->first);
 	m_archiveOverrides.erase(vMatch);
@@ -492,7 +485,7 @@ bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivef
 	return true;
 }
 bool AAUCardData::RemoveArchiveRedirect(int index) {
-	if (m_archiveRedirects.size() <= index) return false;
+	if (index < 0 || (size_t)index >= m_archiveRedirects.size()) return false;
 	auto vMatch = m_archiveRedirects.begin() + index;
 	auto mapMatch = m_archiveRedirectMap.find(vMatch->first);
 	m_archiveRedirects.erase(vMatch);
@@ -507,7 +500,7 @@ bool AAUCardData::AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transfor
 	return true;
 }
 bool AAUCardData::RemoveBoneTransformation(int index) {
-	if (m_boneTransforms.size() <= index) return false;
+	if (index < 0 || (size_t)index >= m_boneTransforms.size()) return false;
 	auto vMatch = m_boneTransforms.begin() + index;
 	auto mapMatch = m_boneTransformMap.find(vMatch->first);
 	m_boneTransforms.erase(vMatch);
@@ -534,6 +527,31 @@ bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) 
 		ReadFile(file, m_eyeTextures[leftright].texFile.data(), lo, &hi, NULL);
 	}
 	m_eyeTextures[leftright].texName = texName;
+	CloseHandle(file);
+	return true;
+}
+
+bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
+	if (texName == NULL) {
+		m_eyeHighlightName = TEXT("");
+		m_eyeHighlightFile.clear();
+		return true;
+	}
+	if(m_eyeHighlightFile.size() > 0) {
+		m_eyeHighlightFile.clear();
+	}
+	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"),texName);
+	HANDLE file = CreateFile(fullPath.c_str(),FILE_READ_ACCESS,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
+	if (file == INVALID_HANDLE_VALUE || file == NULL) {
+		return false;
+	}
+	m_eyeHighlightName = texName;
+	
+	DWORD lo,hi;
+	lo = GetFileSize(file,&hi);
+	m_eyeHighlightFile.resize(lo);
+	ReadFile(file,m_eyeHighlightFile.data(),lo,&hi,NULL);
+
 	CloseHandle(file);
 	return true;
 }
@@ -569,7 +587,7 @@ bool AAUCardData::AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip) {
 bool AAUCardData::RemoveHair(int index) {
 	int kind;
 	for(kind = 0; kind < 4; kind++) {
-		if(index < m_hairs[kind].size()) {
+		if(index < 0 || (size_t)index < m_hairs[kind].size()) {
 			break;
 		}
 		index -= m_hairs[kind].size();
@@ -630,10 +648,12 @@ void AAUCardData::SaveOverrideFiles() {
 bool AAUCardData::DumpSavedOverrideFiles() {
 	if (m_savedFiles.size() == 0) return false;
 	int mode = g_Config.GetKeyValue(Config::SAVED_FILE_USAGE).iVal;
+	if (mode == 3) return false; //if 3, do not extract
 	
 	// look for which files to extract
+	//override files
 	std::vector<std::pair<int,std::wstring>> toExtract;
-	for (int i = 0; i < m_savedFiles.size(); i++) {
+	for (unsigned int i = 0; i < m_savedFiles.size(); i++) {
 		auto& file = m_savedFiles[i];
 		int basePath = file.first.first;
 		std::wstring fullPath;
@@ -641,7 +661,7 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		else			   fullPath = General::BuildEditPath(file.first.second.c_str());
 		//check if path has any backdirections (two dots or more)
 		bool suspicious = false;
-		for(int i = 0; i < fullPath.size()-1; i++) {
+		for(unsigned int i = 0; i < fullPath.size()-1; i++) {
 			if(fullPath[i] == '.') {
 				if(fullPath[i+1] == '.') {
 					suspicious = true;
@@ -661,8 +681,53 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		}
 		if (!General::FileExists(fullPath.c_str())) toExtract.emplace_back(i, std::move(fullPath));
 	}
-	
-	if (toExtract.size() == 0) return true; //all is existent; return true in case they want it deleted
+	//eye textures/highlights
+	std::pair<std::wstring,std::vector<BYTE>*> eyeStuff[3];
+	for (int i = 0; i < 2; i++) {
+		if (m_eyeTextures[i].texName.size() > 0 && m_eyeTextures[i].texFile.size() > 0) {
+			//make sure texture has no folders in it first
+			bool validFileName = true;
+			for (wchar_t c : m_eyeTextures[i].texName) {
+				if (c == L'\\') {
+					validFileName = false;
+				}
+			}
+			if (!validFileName) {
+				std::wstringstream warningMessage;
+				warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
+				warningMessage << m_eyeTextures[i].texName << TEXT("This cards files will not be extracted. Blame the guy who made the card");
+				MessageBox(NULL,warningMessage.str().c_str(),TEXT("Warning"),MB_ICONWARNING);
+				return false;
+			}
+			std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"),m_eyeTextures[i].texName.c_str());
+			if (!General::FileExists(fullPath.c_str())) {
+				eyeStuff[i] = make_pair(fullPath, &m_eyeTextures[i].texFile);
+			}
+		}
+	}
+	//eye highlight
+	if (m_eyeHighlightName.size() > 0 && m_eyeHighlightFile.size() > 0) {
+		//make sure texture has no folders in it first
+		bool validFileName = true;
+		for (wchar_t c : m_eyeHighlightName) {
+			if (c == L'\\') {
+				validFileName = false;
+			}
+		}
+		if (!validFileName) {
+			LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_eyeHighlightName << " contains paths in "
+				"file name and was not extracted for safety purposes.\r\n";
+		}
+		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"),m_eyeHighlightName.c_str());
+		if (!General::FileExists(fullPath.c_str())) {
+			eyeStuff[2] = make_pair(fullPath,&m_eyeHighlightFile);
+		}
+	}
+
+	if(toExtract.size() == 0 && eyeStuff[0].second == NULL && eyeStuff[1].second == NULL &&eyeStuff[2].second == NULL) {
+		return false;
+	}
+
 	//if mode is 1, build a popup asking for extraction
 	if(mode == 1) {
 		std::wstringstream text(TEXT("This card contains files that were not found in your installation:\r\n"));
@@ -681,6 +746,8 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		}
 	}
 
+	//create files
+	//overrides
 	bool success = true;
 	for (auto& elem : toExtract) {
 		General::CreatePathForFile(elem.second.c_str());
@@ -697,6 +764,26 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		CloseHandle(file);
 
 		if(written != vec.size()) {
+			success = false;
+		}
+	}
+	//eye stuff
+	for (int i = 0; i < 3; i++) {
+		auto& elem = eyeStuff[i];
+		if (elem.second == NULL) continue;
+		HANDLE file = CreateFile(elem.first.c_str(),GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_NEW,0,NULL);
+		if (file == INVALID_HANDLE_VALUE || file == NULL) {
+			int err = GetLastError();
+			LOGPRIO(Logger::Priority::WARN) << "could not create file " << elem.first.c_str() << ": error " << err << "\r\n";
+			success = false;
+			continue;
+		}
+		DWORD written = 0;
+		auto& vec = *elem.second;
+		WriteFile(file,vec.data(),vec.size(),&written,NULL);
+		CloseHandle(file);
+
+		if (written != vec.size()) {
 			success = false;
 		}
 	}

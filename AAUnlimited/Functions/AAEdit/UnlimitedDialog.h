@@ -30,6 +30,18 @@ namespace AAEdit {
 		inline void SetSaveFiles(BOOL state) {
 			SendMessage(m_gnDialog.m_cbSaveFiles,BM_SETCHECK,state ? BST_CHECKED : BST_UNCHECKED,0);
 		}
+		inline bool IsSaveEyesSet() const {
+			return SendMessage(m_gnDialog.m_cbSaveEyeTexture,BM_GETCHECK,0,0) == BST_CHECKED;
+		}
+		inline void SetSaveEyes(BOOL state) {
+			SendMessage(m_gnDialog.m_cbSaveEyeTexture,BM_SETCHECK,state ? BST_CHECKED : BST_UNCHECKED,0);
+		}
+		inline bool IsSaveEyeHighlightSet() const {
+			return SendMessage(m_gnDialog.m_cbSaveEyeHighlight,BM_GETCHECK,0,0) == BST_CHECKED;
+		}
+		inline void SetSaveHighlight(BOOL state) {
+			SendMessage(m_gnDialog.m_cbSaveEyeHighlight,BM_SETCHECK,state ? BST_CHECKED : BST_UNCHECKED,0);
+		}
 	private:
 	struct Dialog {
 		HWND m_dialog;
@@ -40,6 +52,8 @@ namespace AAEdit {
 	};
 	struct GNDialog : public Dialog {
 		HWND m_cbSaveFiles;
+		HWND m_cbSaveEyeTexture;
+		HWND m_cbSaveEyeHighlight;
 
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
@@ -81,10 +95,9 @@ namespace AAEdit {
 	struct ETDialog : public Dialog {
 		struct {
 			HWND cbActive;
-			HWND cbSaveInside;
 			HWND edFile;
 			HWND btBrowse;
-		} m_eyes[2];
+		} m_eye;
 
 		void RefreshEnableState();
 		void Refresh();

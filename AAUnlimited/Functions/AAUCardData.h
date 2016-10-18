@@ -28,9 +28,14 @@ public:
 	~AAUCardData();
 
 	//the part of the buffer that contains the file-chunk and has to be removed.
+	//[0] is eye texture left, [1] is eye tetxture right, [2] is eye highlights, [3] are files.
 	//todo: make this into a better system. this is a retarded way to handle this
-	char* ret_fileStart;
-	char* ret_fileEnd;
+	struct {
+		char* fileStart;
+		char* fileEnd;
+
+		inline DWORD size() { return fileEnd - fileStart; }
+	}  ret_files[4];
 	char* ret_chunkSize;
 
 	//searches for AAUnlimited data inside file, then reads it.
@@ -53,6 +58,7 @@ public:
 
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
+	bool SetEyeHighlight(const TCHAR* texName);
 
 	bool SetHairHighlight(const TCHAR* name);
 
@@ -98,6 +104,9 @@ public:
 	inline const std::wstring& GetEyeTexture(int leftright) { return m_eyeTextures[leftright].texName; }
 	inline const std::vector<BYTE>& GetEyeTextureBuffer(int leftright) { return m_eyeTextures[leftright].texFile; }
 
+	inline const std::wstring GetEyeHighlightTexture() { return m_eyeHighlightName; }
+	inline const std::vector<BYTE>& GetEyeHighlightTextureBuffer() { return m_eyeHighlightFile; }
+
 	inline const std::wstring& GetHairHighlightName() { return m_hairHighlightName; }
 	inline const TextureImage& GetHairHighlightTex() { return m_hairHighlightImage; }
 
@@ -135,7 +144,10 @@ private:
 	struct {
 		std::wstring texName;
 		std::vector<BYTE> texFile; //contains file if it should be saved inside the card
-	} m_eyeTextures[2];
+	} m_eyeTextures[2]; //0 is the left (default), 1 is the right (the extra eye texture)
+
+	std::wstring m_eyeHighlightName;
+	std::vector<BYTE> m_eyeHighlightFile; //contains file if it should be saved inside the card
 
 	std::wstring m_hairHighlightName; //hair highlight
 	TextureImage m_hairHighlightImage;
