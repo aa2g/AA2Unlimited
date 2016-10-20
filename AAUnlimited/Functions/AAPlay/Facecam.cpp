@@ -8,6 +8,7 @@
 #include "External\ExternalClasses\Bone.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
+#include "Functions\Shared\Globals.h"
 
 /*
  * Here is the glorious plan (please dont laugh):
@@ -26,18 +27,90 @@ namespace Facecam {
 
 ExtClass::HInfo* loc_hinfo = NULL;
 ExtClass::Bone* loc_focusBone = NULL;
+D3DVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
 int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
 
-ExtClass::CharacterData* m_passiveActor = NULL;										//Passive Actor's reference obtained at the start of the scene
-BYTE m_passiveFaceSlot = 255;														//Passive Actor's original face slot, obtained at the start of the scene
-ExtClass::CharacterData::Hair m_passiveHair;										//Passive Actor's hairstyle reference, obtained at the start of the scene         
-BYTE facelessSlotPassive = 255;														//Passive Actor's desired faceless face, depending on sex               
+ExtClass::CharacterStruct* loc_passiveChar = NULL;
+ExtClass::CharacterStruct* loc_activeChar = NULL;
+ExtClass::XXFile* loc_passiveFaceXX = NULL; //face xx of the characters. if changed, model was reloaded
+ExtClass::XXFile* loc_activeFaceXX = NULL;
+D3DVECTOR3 loc_passiveEyeOffset; //offsets from neck to eyes
+D3DVECTOR3 loc_activeEyeOffset;
+bool loc_passiveFaceHidden = false;
+bool loc_activeFaceHidden = false;
 
-ExtClass::CharacterData* m_activeActor = NULL;										//Active Actor's reference obtained at the start of the scene
-BYTE m_activeFaceSlot = 255;														//Active Actor's original face slot, obtained at the start of the scene
-ExtClass::CharacterData::Hair m_activeHair;											//Active Actor's hairstyle reference, obtained at the start of the scene
-BYTE facelessSlotActive = 255;														//Active Actor's desired faceless face, depending on sex
+D3DMATRIX loc_activeKaos[6]; //will hold the original kao matrizes. probably always id-matrix, but just to make sure
+D3DMATRIX loc_passiveKaos[6];
+//shows or hides face, hair and tounge
+void ShowFace(bool active, bool visible) {
+	ExtClass::CharacterStruct* character = active ? loc_hinfo->m_activeParticipant->m_charPtr 
+												  : loc_hinfo->m_passiveParticipant->m_charPtr;
+	ExtClass::XXFile* toHide[6] = {character->m_xxFace, character->m_xxTounge,
+								  character->m_xxHairs[0],character->m_xxHairs[1],
+								  character->m_xxHairs[2],character->m_xxHairs[3]}; //alternative, we could scale the neck
+	D3DMATRIX(&kaoBackup)[6] = active ? loc_activeKaos : loc_passiveKaos;
+	for(int i = 0; i < 6; i++) {
+		//all_root->scene_root->kao; we scale kao to 0 or id
+		//do save search for kao
+		ExtClass::XXFile* it = toHide[i];
+		if (it == NULL) continue; //some of them might not be there (e.g has no side hair)
+		ExtClass::Bone* boneIt = it->m_root; //all_root
+		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
+		boneIt = &boneIt->m_boneArray[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
+		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
+		boneIt = &boneIt->m_boneArray[0]; //kao
+		//backup the matrix if possible
+		static const D3DMATRIX nullMatrix = {0.001f,0,0,0,  0,0.001f,0,0,  0,0,0.001f,0,  0,0,0,1.0f};
+		if(memcmp(&boneIt->m_matrix1, &nullMatrix, sizeof(nullMatrix)) != 0) {
+			//its not a nullmatrix, back up the current one into the array
+			kaoBackup[i] = boneIt->m_matrix1;
+		}
+		//set to 0 matrix or backup depending on visible parameter
+		if(visible) {
+			boneIt->m_matrix1 = kaoBackup[i];
+		}
+		else {
+			boneIt->m_matrix1 = nullMatrix;
+		}
+	}
 
+}
+
+D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
+	D3DVECTOR3 retVal{ 0,0,0 };
+	//find left and right eye
+	ExtClass::Bone* rightEye,*leftEye;
+	rightEye = character->m_xxFace->FindBone("A00_J_meR2",-1);
+	leftEye = character->m_xxFace->FindBone("A00_J_meL2",-1);
+
+	if (rightEye != NULL && leftEye != NULL) {
+		ExtClass::Bone* it;
+		D3DVECTOR3 rightEyePos {0,0,0};
+		it = rightEye;
+		while(it != NULL) {
+			rightEyePos.x += it->m_matrix5._41;
+			rightEyePos.y += it->m_matrix5._42;
+			rightEyePos.z += it->m_matrix5._43;
+			it = it->m_parent;
+		}
+		D3DVECTOR3 leftEyePos {0,0,0};
+		it = leftEye;
+		while (it != NULL) {
+			rightEyePos.x += it->m_matrix5._41;
+			rightEyePos.y += it->m_matrix5._42;
+			rightEyePos.z += it->m_matrix5._43;
+			it = it->m_parent;
+		}
+		//point in the middle between the two eyes
+		D3DVECTOR3 eyeMid;
+		eyeMid.x = rightEyePos.x - leftEyePos.x; eyeMid.x = leftEyePos.x + eyeMid.x/2;
+		eyeMid.y = rightEyePos.y - leftEyePos.y; eyeMid.y = leftEyePos.y + eyeMid.y/2;
+		eyeMid.z = rightEyePos.z - leftEyePos.z; eyeMid.z = leftEyePos.z + eyeMid.z/2;
+		return eyeMid;
+	}
+	
+	return retVal;
+}
 
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
@@ -55,50 +128,46 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 			loc_hinfo->GetCamera()->m_matrix = idMatr;
 		}
 
-		//prevent losing your heads
-		if (m_activeActor) {
-			m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
-			m_activeActor->m_hair = m_activeHair;												//restore active's haircut
-			m_activeActor = NULL;
-		}
-		if (m_passiveActor) {
-			m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
-			m_passiveActor->m_hair = m_passiveHair;											//restore passive's haircut
-			m_passiveActor = NULL;
-		}
-
-
-		m_passiveFaceSlot = 255;
-		m_activeFaceSlot = 255;
-		facelessSlotPassive = 255;
-		facelessSlotActive = 255;
-
+		loc_activeFaceXX = NULL;
+		loc_passiveFaceXX = NULL;
+		loc_passiveFaceHidden = false;
+		loc_activeFaceHidden = false;
 		loc_state = 0;
 		loc_focusBone = NULL;
 		loc_hinfo = NULL;
+		loc_activeChar = NULL;
+		loc_passiveChar = NULL;
 
 		LOGPRIO(Logger::Priority::INFO) << "Cleaned up!\n";
 	}
 	else {
-		loc_hinfo = hInfo;
-		//remember actors the first time
-		if (m_passiveActor == NULL)	m_passiveActor = loc_hinfo->m_passiveParticipant->m_charPtr->m_charData;
-		if (m_activeActor == NULL)	m_activeActor = loc_hinfo->m_activeParticipant->m_charPtr->m_charData;
-		//remember faces/hairs the first time
-		if (m_passiveFaceSlot == 255) {
-			m_passiveFaceSlot = m_passiveActor->m_faceSlot;
-			m_passiveHair = m_passiveActor->m_hair;
+		//save active/passive characters at start
+		if(loc_activeChar == NULL) {
+			loc_activeChar = hInfo->m_activeParticipant->m_charPtr;
+			loc_passiveChar = hInfo->m_passiveParticipant->m_charPtr;
+			loc_hinfo = hInfo;
 		}
-		if (m_activeFaceSlot == 255) {
-			m_activeFaceSlot = m_activeActor->m_faceSlot;
-			m_activeHair = m_activeActor->m_hair;
+
+		//if 3d model was reloaded
+		if(loc_activeChar->m_xxFace != loc_activeFaceXX) {
+			loc_activeFaceXX = loc_activeChar->m_xxFace;
+			if (loc_activeFaceHidden) {
+				ShowFace(true,false);
+			}
+			loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
 		}
-		//remember the empty face slots the first time
-		if (facelessSlotPassive == BYTE(255))	facelessSlotPassive = (m_passiveActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
-		if (facelessSlotActive == BYTE(255))	facelessSlotActive = (m_activeActor->m_gender) ? (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_FEMALE).iVal : (BYTE)g_Config.GetKeyValue(Config::FACELESS_SLOT_MALE).iVal;
+		if(loc_passiveChar->m_xxFace != loc_passiveFaceXX) {
+			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
+			if (loc_passiveFaceHidden) {
+				ShowFace(false,false);
+			}
+			loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
+		}
+		
 
-		if (loc_state != 0) {
-
+		if (loc_focusBone != NULL) {
 			//we need to keep all camera parameters at 0 (except for fov of course)
 			ExtClass::HCamera* cam = hInfo->GetCamera();
 
@@ -114,9 +183,11 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 
 			//we align the camera with the bone by copying the matrix
 			auto mat = loc_focusBone->m_matrix2;
-			mat._41 += g_Config.GetKeyValue(Config::POV_OFFSET_X).fVal;
-			mat._42 += g_Config.GetKeyValue(Config::POV_OFFSET_Y).fVal;	//slight adjustment so that the partner looks vaguely in to the camera and not above
-			mat._43 += g_Config.GetKeyValue(Config::POV_OFFSET_Z).fVal;	//TODO: possibly adjust position so that the pivot is right between the eyes instead of inside the head
+			//adjust with the offsets BEFORE the matrix (not doing an actual multiplication here cause its just a translation)
+			float x = loc_focusOffset.x ,y = loc_focusOffset.y,z = loc_focusOffset.z;
+			mat._41 += x*mat._11 + y*mat._21 + z*mat._31;
+			mat._42 += x*mat._12 + y*mat._22 + z*mat._32;
+			mat._43 += x*mat._13 + y*mat._23 + z*mat._33;
 			cam->m_matrix = mat;
 
 			//*(BYTE*)(General::GameBase + 0x3A6C80) = 3; //whether the q button is pressed
@@ -141,92 +212,77 @@ void AdjustCamera(ExtClass::Bone* bone) {
 	//		state 1 - passive's POV
 	//		state 2 - active's POV
 	//		state 3 - default camera
-	if (bone != loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0]
-		&& bone != loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) {		//if not Q was pressed
+	if (bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0]	//if Q was pressed
+			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) { 
+		loc_state++;
+		if (loc_state == 3) {
+			//if we come back to free camera mode, restore the matrix to an identity matrix
+			loc_state = 0;
+			static const D3DMATRIX idMatr = {
+				1.0f,0,0,0,
+				0,1.0f,0,0,
+				0,0,1.0f,0,
+				0,0,0,1.0f
+			};
+			loc_hinfo->GetCamera()->m_matrix = idMatr;
 
-		if (bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]
+		}
+
+		//set bone depending on state
+		ExtClass::CharacterStruct* toFocus;
+		switch(loc_state) {
+		case 1:
+			toFocus = loc_passiveChar;
+			loc_focusOffset = loc_passiveEyeOffset;
+			break;
+		case 2:
+			toFocus = loc_activeChar;
+			loc_focusOffset = loc_activeEyeOffset;
+			break;
+		case 0:
+		default:
+			toFocus = NULL;
+			loc_focusBone = NULL;
+			loc_focusOffset = { 0,0,0 };
+		}
+		if(toFocus != NULL) {
+			loc_focusBone = toFocus->m_bonePtrArray[0];
+			loc_focusOffset.x += g_Config.GetKeyValue(Config::POV_OFFSET_X).fVal;
+			loc_focusOffset.y += g_Config.GetKeyValue(Config::POV_OFFSET_Y).fVal;
+			loc_focusOffset.z += g_Config.GetKeyValue(Config::POV_OFFSET_Z).fVal;
+
+
+			loc_hinfo->GetCamera()->m_yRotRad = M_PI; //put this to pi cause its reversed for some reason
+		}
+		return;
+	}
+	else if(bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]
 			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {	//if W was pressed
-			
-			//Sorry for this piece of cancer but it helps with tracking the actors and stuff.
-			//
-			//LOGPRIO(Logger::Priority::INFO) << "W was pressed\n"
-
-			//	<< "Active partner:\n\t["
-			//	<< m_activeActor->m_surname << " " << m_activeActor->m_forename << "]" << (m_activeActor->m_gender ? "F" : "M")
-			//	<< "\n\tFace Slot: " << m_activeActor->m_faceSlot
-			//	<< " Hairstyle: (" << m_activeActor->m_hair.frontHair << ", " << m_activeActor->m_hair.sideHair << ", " << m_activeActor->m_hair.backhair << ", " << m_activeActor->m_hair.hairExtension << ")\n"
-
-			//	<< "Passive partner:\n\t["
-			//	<< m_passiveActor->m_surname << " " << m_passiveActor->m_forename << "]" << (m_passiveActor->m_gender ? "F" : "M")
-			//	<< "\n\tFace Slot: " << m_passiveActor->m_faceSlot
-			//	<< " Hairstyle: (" << m_passiveActor->m_hair.frontHair << ", " << m_passiveActor->m_hair.sideHair << ", " << m_passiveActor->m_hair.backhair << ", " << m_passiveActor->m_hair.hairExtension << ")\n"
-
-			//	<< "Saved data:"
-			//	<< "\n\tFace slots: "
-			//	<< "Active=" << m_activeFaceSlot
-			//	<< ", Passive=" << m_passiveFaceSlot
-			//	<< "\n\tHairstyles: "
-			//	<< "Active=(" << m_activeHair->frontHair << ", " << m_activeHair->sideHair << ", " << m_activeHair->backhair << ", " << m_activeHair->hairExtension << ")"
-			//	<< ", Passive=(" << m_passiveHair->frontHair << ", " << m_passiveHair->sideHair << ", " << m_passiveHair->backhair << ", " << m_passiveHair->hairExtension << ")\n\n";
-
-			if (loc_state == 1) { //toggle passive
-				if (m_passiveActor->m_faceSlot != facelessSlotPassive) {							//if head is visible
-					m_passiveActor->m_faceSlot = facelessSlotPassive;								//set passive's face slot to faceless(male only for now)
-					m_passiveActor->m_hair = baldHaircut;											//set passive's haircut to bald
-				} else {
-					m_passiveActor->m_faceSlot = m_passiveFaceSlot;									//restore passive's face slot
-					m_passiveActor->m_hair = m_passiveHair;											//restore passive's haircut
-				}
-				//possibly reload the model
-			} else if (loc_state == 2) { //toggle active
-				if (m_activeActor->m_faceSlot != facelessSlotActive) {								//if head is visible
-					m_activeActor->m_faceSlot = facelessSlotActive;									//set active's face slot to faceless(male only for now)
-					m_activeActor->m_hair = baldHaircut;											//set active's haircut to bald
-				} else {
-					m_activeActor->m_faceSlot = m_activeFaceSlot;									//restore active's face slot
-					m_activeActor->m_hair = m_activeHair;											//restore active's haircut
-				}
-				//possibly reload the model
-			} else { //restore both
-				m_activeActor->m_faceSlot = m_activeFaceSlot;										//restore active's face slot
-				m_activeActor->m_hair = m_activeHair;												//restore active's haircut
-
-				m_passiveActor->m_faceSlot = m_passiveFaceSlot;										//restore passive's face slot
-				m_passiveActor->m_hair = m_passiveHair;												//restore passive's haircut
-
-				//possibly reload the models
-			}
-			return;
+		//switch face on or off depending on loc_state
+		if(loc_state == 1) {
+			//switch passive
+			loc_passiveFaceHidden = !loc_passiveFaceHidden;
+			ShowFace(false,!loc_passiveFaceHidden);
+		}
+		else if(loc_state == 2) {
+			//switch active
+			loc_activeFaceHidden = !loc_activeFaceHidden;
+			ShowFace(true,!loc_activeFaceHidden);
 		}
 		else {
-			LOGPRIO(Logger::Priority::INFO) << "Some other key was pressed\n";
-			return;
+			//return both to normal
+			loc_activeFaceHidden = false;
+			ShowFace(false,!loc_activeFaceHidden);
+			loc_passiveFaceHidden = false;
+			ShowFace(true,!loc_passiveFaceHidden);
 		}
-	} else { //if Q was pressed
-		//switch state
-		loc_state++;
-	}
-
-	if (loc_state == 3) {
-		//if we come back to free camera mode, restore the matrix to an identity matrix
-		loc_state = 0;
-		static const D3DMATRIX idMatr = {
-											1.0f,0,0,0,
-											0,1.0f,0,0,
-											0,0,1.0f,0,
-											0,0,0,1.0f
-										};
-		loc_hinfo->GetCamera()->m_matrix = idMatr;
-
-	}
-
-	//set bone depending on state
-	if(loc_state == 1) {
-		loc_focusBone = loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0];
+		
+		return;
 	}
 	else {
-		loc_focusBone = loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0];
-	}	
+		LOGPRIO(Logger::Priority::INFO) << "Some other key was pressed\n";
+		return;
+	}
 }
 
 }

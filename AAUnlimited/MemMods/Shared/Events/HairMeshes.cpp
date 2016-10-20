@@ -389,7 +389,20 @@ void HairRefreshInject() {
 		NULL);*/
 	}
 	else if(General::IsAAPlay) {
-
+		/*AA2Play v12 FP v1.4.0a.exe+10B7E0 - 55                    - push ebp
+		AA2Play v12 FP v1.4.0a.exe+10B7E1 - 8B EC                 - mov ebp,esp
+		AA2Play v12 FP v1.4.0a.exe+10B7E3 - 83 E4 F8              - and esp,-08 { 248 }
+		AA2Play v12 FP v1.4.0a.exe+10B7E6 - 51                    - push ecx
+		AA2Play v12 FP v1.4.0a.exe+10B7E7 - 53                    - push ebx
+		AA2Play v12 FP v1.4.0a.exe+10B7E8 - 8A 5D 08              - mov bl,[ebp+08]
+		*/
+		//...
+		/*AA2Play v12 FP v1.4.0a.exe+10B9CE - B0 01                 - mov al,01 { 1 }
+		AA2Play v12 FP v1.4.0a.exe+10B9D0 - 5B                    - pop ebx
+		AA2Play v12 FP v1.4.0a.exe+10B9D1 - 8B E5                 - mov esp,ebp
+		AA2Play v12 FP v1.4.0a.exe+10B9D3 - 5D                    - pop ebp
+		AA2Play v12 FP v1.4.0a.exe+10B9D4 - C2 0400               - ret 0004 { 4 }
+		*/
 	}
 	
 }

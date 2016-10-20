@@ -722,7 +722,24 @@ void OverrideBoneInject() {
 			NULL);
 	}
 	else if (General::IsAAPlay) {
-
+		/*AA2Play v12 FP v1.4.0a.exe+205867 - 40                    - inc eax
+		AA2Play v12 FP v1.4.0a.exe+205868 - 83 C4 14              - add esp,14 { 20 }
+		AA2Play v12 FP v1.4.0a.exe+20586B - 81 C7 F4420000        - add edi,000042F4 { 17140 }
+		AA2Play v12 FP v1.4.0a.exe+205871 - 3B 43 08              - cmp eax,[ebx+08]
+		AA2Play v12 FP v1.4.0a.exe+205874 - 89 44 24 20           - mov [esp+20],eax
+		AA2Play v12 FP v1.4.0a.exe+205878 - 7C DB                 - jl "AA2Play v12 FP v1.4.0a.exe"+205855 { ->AA2Play v12 FP v1.4.0a.exe+205855 }
+		AA2Play v12 FP v1.4.0a.exe+20587A - 5F                    - pop edi
+		AA2Play v12 FP v1.4.0a.exe+20587B - 5E                    - pop esi
+		AA2Play v12 FP v1.4.0a.exe+20587C - 5D                    - pop ebp
+		AA2Play v12 FP v1.4.0a.exe+20587D - 5B                    - pop ebx
+		AA2Play v12 FP v1.4.0a.exe+20587E - C3                    - ret 
+		*/
+		DWORD address = General::GameBase + 0x20587A;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirect);
+		Hook((BYTE*)address,
+		{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3, },
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
 	}
 }
 

@@ -22,6 +22,10 @@ public:
 	XXFile() = delete;
 	~XXFile() = delete;
 
+	//finds a bone belonging to this xx file in depth-first-search
+	//with a maximum depth of maxDepth (or infinity if maxDepth < 0)
+	Bone* FindBone(const char* name, int maxDepth = -1);
+
 
 };
 #pragma pack(pop)
