@@ -130,11 +130,10 @@ namespace AAEdit {
 		HWND m_edOutlineColorBlue;
 
 		HWND m_bmBtnAdd;
-		HWND m_bmCbSelect;
+		HWND m_bmCbXXFile;
+		HWND m_bmCbBone;
 		HWND m_bmList;
-		HWND m_bmSldHeight;
-		HWND m_bmSldWidth;
-		HWND m_bmEdMatrix[4][4];
+		HWND m_bmEdMatrix[3][3];
 		
 		void LoadData(int listboxId);
 		void ApplyInput();

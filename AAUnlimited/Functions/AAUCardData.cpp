@@ -296,6 +296,21 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
 			LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_hairs[3].size() << " elements\r\n";
 			break;
+		case 'BnT2':
+			m_boneRules = ReadData<decltype(m_boneRules)>(buffer,size);
+			for(auto& elem : m_boneRules) {
+				auto m = m_boneRuleMap.find(elem.first.first);
+				if(m == m_boneRuleMap.end()) {
+					m->second.emplace(elem.first.second,elem.second);
+				}
+				else {
+					std::map<std::wstring,BoneMod> tmp;
+					tmp.emplace(elem.first.second,elem.second);
+					m_boneRuleMap.emplace(elem.first.first,std::move(tmp)); (elem.first.second,elem.second);
+				}
+			}
+			LOGPRIO(Logger::Priority::SPAM) << "found BnT2, loaded " << m_boneRules.size() << " elements\r\n";
+			break;
 		}
 		
 	}
@@ -406,6 +421,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('HrA1',m_hairs[1]);
 	DUMP_MEMBER_CONTAINER('HrA2',m_hairs[2]);
 	DUMP_MEMBER_CONTAINER('HrA3',m_hairs[3]);
+	DUMP_MEMBER_CONTAINER('BnT2',m_boneRules);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	if (pngChunks) {
@@ -505,6 +521,41 @@ bool AAUCardData::RemoveBoneTransformation(int index) {
 	auto mapMatch = m_boneTransformMap.find(vMatch->first);
 	m_boneTransforms.erase(vMatch);
 	if (mapMatch != m_boneTransformMap.end()) m_boneTransformMap.erase(mapMatch);
+	return true;
+}
+
+bool AAUCardData::AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
+	for(int i = 0; i < m_boneRules.size(); i++) {
+		if(m_boneRules[i].first.first == xxFileName && m_boneRules[i].first.second == boneName) {
+			//allready exists
+			return false;
+		}
+	}
+
+	m_boneRules.emplace_back(std::pair<std::wstring,std::wstring>(xxFileName,boneName),mod);
+	
+	auto mapIt = m_boneRuleMap.find(xxFileName);
+	if(mapIt != m_boneRuleMap.end()) {
+		mapIt->second.emplace(boneName,mod);
+	}
+	else {
+		std::map<std::wstring,BoneMod> map;
+		map.emplace(boneName,mod);
+		m_boneRuleMap.emplace(xxFileName,std::move(map));
+	}
+	return true;
+}
+
+bool AAUCardData::RemoveBoneRule(int index) {
+	if (index < 0 || (size_t)index >= m_boneRules.size()) return false;
+	auto vIt = m_boneRules.begin() + index;
+	auto mapIt = m_boneRuleMap.find(vIt->first.first);
+	std::map<std::wstring,BoneMod>& map = mapIt->second;
+	map.erase(vIt->first.second);
+	if(map.size() == 0) {
+		m_boneRuleMap.erase(mapIt);
+	}
+	m_boneRules.erase(vIt);
 	return true;
 }
 

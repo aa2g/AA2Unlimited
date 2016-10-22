@@ -135,6 +135,45 @@ namespace Shared {
 		return g_currentChar->m_cardData.GetMeshOverrideTexture(fileName);
 	}
 
+	void XXFileModification(ExtClass::XXFile* xxFile) {
+		size_t written;
+		TCHAR name[256];
+		mbstowcs_s(&written,name,xxFile->m_name,256);
+		const auto* match = Shared::g_currentChar->m_cardData.GetBoneRule(name);
+		if (match == NULL) return;
+
+		xxFile->EnumBonesPreOrder([&](ExtClass::Bone* bone) {
+			mbstowcs_s(&written,name,bone->m_name,256);
+			auto it = match->find(name);
+			if (it != match->end()) {
+				//applies to this rule
+				//TODO: all transformations, not only scale
+				D3DMATRIX mat = {
+					it->second.scales[0],0,0,0,
+					0,it->second.scales[1],0,0,
+					0,0,it->second.scales[2],0,
+					0,0,0,1.0f
+				};
+				(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,&mat,&bone->m_matrix1);
+				(*Shared::D3DXMatrixMultiply)(&bone->m_matrix5,&mat,&bone->m_matrix5);
+			}
+		});
+		//also do animations
+		for (int i = 0; i < xxFile->m_animArraySize; i++) {
+			mbstowcs_s(&written,name,xxFile->m_animArray[i].m_name,256);
+			auto it = match->find(name);
+			if (it != match->end()) {
+				for (int j = 0; j < xxFile->m_animArray[i].m_nFrames; i++) {
+
+					xxFile->m_animArray[i].m_frameArray[j].m_scaleX *= it->second.scales[0];
+					xxFile->m_animArray[i].m_frameArray[j].m_scaleY *= it->second.scales[1];
+					xxFile->m_animArray[i].m_frameArray[j].m_scaleZ *= it->second.scales[2];
+
+				}
+			}
+		}
+	}
+
 
 
 }

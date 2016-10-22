@@ -11,6 +11,7 @@
 #include "General\ModuleInfo.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
+#include "Functions\Shared\Overrides.h"
 #include "Files\Logger.h"
 #include "resource.h"
 #include "config.h"
@@ -842,43 +843,29 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_BLUE);
 
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
-		thisPtr->m_bmCbSelect = GetDlgItem(hwndDlg,IDC_BD_BM_CBSELECT);
+		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
+		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg,IDC_BD_BM_CBBONE);
 		thisPtr->m_bmList = GetDlgItem(hwndDlg,IDC_BD_BM_LIST);
-		thisPtr->m_bmSldWidth = GetDlgItem(hwndDlg,IDC_BD_BM_SLDWIDTH);
-		thisPtr->m_bmSldHeight = GetDlgItem(hwndDlg,IDC_BD_BM_SLDHEIGHT);
 		thisPtr->m_bmEdMatrix[0][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR11);
 		thisPtr->m_bmEdMatrix[0][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR12);
 		thisPtr->m_bmEdMatrix[0][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR13);
-		thisPtr->m_bmEdMatrix[0][3] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR14);
 		thisPtr->m_bmEdMatrix[1][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR21);
 		thisPtr->m_bmEdMatrix[1][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR22);
 		thisPtr->m_bmEdMatrix[1][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR23);
-		thisPtr->m_bmEdMatrix[1][3] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR24);
 		thisPtr->m_bmEdMatrix[2][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR31);
 		thisPtr->m_bmEdMatrix[2][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR32);
 		thisPtr->m_bmEdMatrix[2][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR33);
-		thisPtr->m_bmEdMatrix[2][3] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR34);
-		thisPtr->m_bmEdMatrix[3][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR41);
-		thisPtr->m_bmEdMatrix[3][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR42);
-		thisPtr->m_bmEdMatrix[3][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR43);
-		thisPtr->m_bmEdMatrix[3][3] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR44);
 
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
 				SendMessage(thisPtr->m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)TEXT("0"));
 			}
-		}
-		for (int i = 0; i < 4; i++) {
-			SendMessage(thisPtr->m_bmEdMatrix[i][i],WM_SETTEXT,0,(LPARAM)TEXT("1"));
 		}
 		
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
 
-		//disable slider for now
-		EnableWindow(thisPtr->m_bmSldHeight,FALSE);
-		EnableWindow(thisPtr->m_bmSldWidth,FALSE);
 		return TRUE; }
 	case WM_VKEYTOITEM: {
 		//DEL-key was pressed while the list box had the focus.
@@ -949,7 +936,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			HWND wnd = (HWND)lparam;
 			if(wnd == thisPtr->m_bmList) {
 				int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
-				thisPtr->LoadData(sel);
+				if(sel != LB_ERR) {
+					thisPtr->LoadData(sel);
+				}
 				return TRUE;
 			}
 			break; }
@@ -960,14 +949,16 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
-	const auto& vec = g_currChar.m_cardData.GetBoneTransformationList();
+	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
 	const auto& rule = vec[listboxId];
 	//combo box with title
-	SendMessage(m_bmCbSelect,WM_SETTEXT,0,(LPARAM)rule.first.c_str());
+	SendMessage(m_bmCbXXFile,WM_SETTEXT,0,(LPARAM)rule.first.first.c_str());
+	SendMessage(m_bmCbBone,WM_SETTEXT,0,(LPARAM)rule.first.second.c_str());
 	//the matrix
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++) {
-			std::wstring num = std::to_wstring(rule.second.m[i][j]);
+
+	for(int i = 0; i < 3; i++) {
+		for(int j = 0; j < 3; j++) {
+			std::wstring num = std::to_wstring(rule.second.mods[i][j]);
 			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num.c_str());
 		}
 	}
@@ -975,29 +966,32 @@ void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
 }
 
 void UnlimitedDialog::BDDialog::ApplyInput() {
-	TCHAR name[128];
-	SendMessage(m_bmCbSelect,WM_GETTEXT,128,(LPARAM)name);
+	TCHAR xxname[128];
+	SendMessage(m_bmCbXXFile,WM_GETTEXT,128,(LPARAM)xxname);
+	TCHAR bonename[128];
+	SendMessage(m_bmCbBone,WM_GETTEXT,128,(LPARAM)bonename);
 	//remove transformation if it allready exists
-	const auto& vec = g_currChar.m_cardData.GetBoneTransformationList();
+	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
 	unsigned int match;
 	for(match = 0; match < vec.size(); match++) {
-		if (vec[match].first == name) break;
+		if (vec[match].first.first == xxname && vec[match].first.second == bonename) break;
 	}
 	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneTransformation(match);
 
 	//get matrix
-	D3DMATRIX m;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
+	AAUCardData::BoneMod mod;
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
 			TCHAR num[128];
 			SendMessage(m_bmEdMatrix[i][j],WM_GETTEXT,128,(LPARAM)num);
 			float f = wcstof(num, NULL);
-			m.m[i][j] = f;
+			mod.mods[i][j] = f;
 		}
 	}
 	//save
-	g_currChar.m_cardData.AddBoneTransformation(name,m);
+	g_currChar.m_cardData.AddBoneRule(xxname,bonename,mod);
 	Refresh();
+
 }
 
 void UnlimitedDialog::BDDialog::Refresh() {
@@ -1018,9 +1012,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 
 	//listbox
 	SendMessage(this->m_bmList,LB_RESETCONTENT,0,0);
-	const auto& list = AAEdit::g_currChar.m_cardData.GetBoneTransformationList();
+	const auto& list = AAEdit::g_currChar.m_cardData.GetBoneRuleList();
 	for (size_t i = 0; i < list.size(); i++) {
-		std::wstring listEntry(list[i].first);
+		std::wstring listEntry(TEXT("["));
+		listEntry += list[i].first.first + TEXT("|") + list[i].first.second + TEXT("]");
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 
@@ -1043,7 +1038,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 				fileQueue.pop();
 				size_t conv;
 				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
-				SendMessage(m_bmCbSelect,CB_ADDSTRING,0,(LPARAM)tmpBuff);
+				SendMessage(m_bmCbBone,CB_ADDSTRING,0,(LPARAM)tmpBuff);
 				for (unsigned int i = 0; i < bone->m_arrSize; i++) {
 					fileQueue.push(bone->m_boneArray + i);
 				}

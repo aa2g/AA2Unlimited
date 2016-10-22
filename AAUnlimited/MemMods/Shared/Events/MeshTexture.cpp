@@ -745,6 +745,47 @@ void OverrideBoneInject() {
 
 
 
+void __stdcall OverrideBoneEventV2(ExtClass::XXFile* xxFile) {
+	Shared::XXFileModification(xxFile);
+}
+
+DWORD OverrideBoneOriginalFunctionV2;
+void __declspec(naked) OverrideBoneRedirectV2() {
+	__asm {
+		push [esp+0xC]
+		push [esp+0xC]
+		push [esp+0xC]
+		call [OverrideBoneOriginalFunctionV2]
+		add esp, 0x0C
+		push eax //save return value
+		push [esp+0x8] //esi, the xx file
+		call OverrideBoneEventV2
+		pop eax
+		ret
+	}
+}
+
+void OverrideBoneInjectV2() {
+	if (General::IsAAEdit) {
+		/*
+		AA2Edit.exe+1EA464 - 51                    - push ecx
+		AA2Edit.exe+1EA465 - 57                    - push edi
+		AA2Edit.exe+1EA466 - 56                    - push esi
+		AA2Edit.exe+1EA467 - E8 14000000           - call AA2Edit.exe+1EA480 //reads animation struct for esi (xx file)
+		AA2Edit.exe+1EA46C - 83 C4 0C              - add esp,0C { 12 }
+		*/
+		DWORD address = General::GameBase + 0x1EA467;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV2);
+		Hook((BYTE*)address,
+		{ 0xE8, 0x14, 0x00, 0x00, 0x00, },
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneOriginalFunctionV2);
+	}
+	else if (General::IsAAPlay) {
+
+	}
+}
+
 
 }
 }

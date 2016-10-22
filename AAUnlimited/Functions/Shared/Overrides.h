@@ -32,5 +32,9 @@ namespace Shared {
 
 	const TextureImage* MeshTextureOverrideRules(wchar_t* fileName);
 
+	/*
+	 * XX file modification
+	 */ 
+	void XXFileModification(ExtClass::XXFile* file);
 
 }

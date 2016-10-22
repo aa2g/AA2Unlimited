@@ -55,7 +55,9 @@ public:
 	bool RemoveBoneTransformation(int index);
 	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
 	bool RemoveHair(int index);
-
+	struct BoneMod;
+	bool AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
+	bool RemoveBoneRule(int index);
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 	bool SetEyeHighlight(const TCHAR* texName);
@@ -79,6 +81,18 @@ public:
 		BYTE flip;
 		BYTE adjustment;
 	};
+	struct BoneMod {
+		union {
+			struct {
+				float scales[3];
+				float rotations[3];
+				float transformations[3];
+			};
+			float mods[3][3];
+			float data[9];
+		};
+	};
+	typedef std::pair<std::pair<std::wstring,std::wstring>,BoneMod> BoneRuleV2;
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
@@ -130,6 +144,12 @@ public:
 	inline bool HasFilesSaved() { return m_savedFiles.size() > 0; }
 
 	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
+
+	inline const std::vector<BoneRuleV2> GetBoneRuleList() { return m_boneRules; }
+	inline const std::map<std::wstring, BoneMod>* GetBoneRule(const TCHAR* xxFileName) {
+		auto it = m_boneRuleMap.find(xxFileName);
+		return it == m_boneRuleMap.end() ? NULL : &it->second;
+	}
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
@@ -175,6 +195,9 @@ private:
 	std::vector<SavedFile> m_savedFiles;
 
 	std::vector<HairPart> m_hairs[4];
+
+	std::vector<BoneRuleV2> m_boneRules;
+	std::map<std::wstring,std::map<std::wstring,BoneMod>> m_boneRuleMap;
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

@@ -15,6 +15,7 @@ void OverrideFileInject();
 void OverrideOutlineColorInject();
 
 void OverrideBoneInject();
+void OverrideBoneInjectV2();
 
 }
 }

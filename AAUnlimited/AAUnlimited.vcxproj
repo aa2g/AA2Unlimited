@@ -74,6 +74,8 @@
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="External\ExternalClasses\Animation.h" />
+    <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="Functions\CharInstData.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
