@@ -28,7 +28,7 @@ namespace Facecam {
 ExtClass::HInfo* loc_hinfo = NULL;
 ExtClass::Bone* loc_focusBone = NULL;
 D3DVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
-int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
+int loc_state = 0; //0 - default, 1 - active POV, 2 - passive POV
 
 ExtClass::CharacterStruct* loc_passiveChar = NULL;
 ExtClass::CharacterStruct* loc_activeChar = NULL;
@@ -43,8 +43,8 @@ D3DMATRIX loc_activeKaos[6]; //will hold the original kao matrizes. probably alw
 D3DMATRIX loc_passiveKaos[6];
 //shows or hides face, hair and tounge
 void ShowFace(bool active, bool visible) {
-	ExtClass::CharacterStruct* character = active ? loc_hinfo->m_activeParticipant->m_charPtr 
-												  : loc_hinfo->m_passiveParticipant->m_charPtr;
+	ExtClass::CharacterStruct* character = active ? loc_activeChar
+												  : loc_passiveChar;
 	ExtClass::XXFile* toHide[6] = {character->m_xxFace, character->m_xxTounge,
 								  character->m_xxHairs[0],character->m_xxHairs[1],
 								  character->m_xxHairs[2],character->m_xxHairs[3]}; //alternative, we could scale the neck
@@ -209,8 +209,8 @@ void AdjustCamera(ExtClass::Bone* bone) {
 	//make sure the q button was pressed, which means bone is the first bone of participant 2 (or 1 depending on position ._.)
 	//	Q - toggles states
 	//	W - toggles head visibility depending on the state:
-	//		state 1 - passive's POV
-	//		state 2 - active's POV
+	//		state 1 - active's POV
+	//		state 2 - passive's POV
 	//		state 3 - default camera
 	if (bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0]	//if Q was pressed
 			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) { 
@@ -232,15 +232,27 @@ void AdjustCamera(ExtClass::Bone* bone) {
 		ExtClass::CharacterStruct* toFocus;
 		switch(loc_state) {
 		case 1:
-			toFocus = loc_passiveChar;
-			loc_focusOffset = loc_passiveEyeOffset;
-			break;
-		case 2:
 			toFocus = loc_activeChar;
 			loc_focusOffset = loc_activeEyeOffset;
+			//hide active
+			loc_activeFaceHidden = !loc_activeFaceHidden;
+			ShowFace(true, !loc_activeFaceHidden);
+			break;
+		case 2:
+			toFocus = loc_passiveChar;
+			loc_focusOffset = loc_passiveEyeOffset;
+			//hide passive
+			loc_passiveFaceHidden = !loc_passiveFaceHidden;
+			ShowFace(false, !loc_passiveFaceHidden);
+			//return active
+			loc_activeFaceHidden = !loc_activeFaceHidden;
+			ShowFace(true, !loc_activeFaceHidden);
 			break;
 		case 0:
 		default:
+			//return passive
+			loc_passiveFaceHidden = !loc_passiveFaceHidden;
+			ShowFace(false, !loc_passiveFaceHidden);
 			toFocus = NULL;
 			loc_focusBone = NULL;
 			loc_focusOffset = { 0,0,0 };
@@ -256,18 +268,18 @@ void AdjustCamera(ExtClass::Bone* bone) {
 		}
 		return;
 	}
-	else if(bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]
-			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {	//if W was pressed
+	else if(bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]	//if W was pressed
+			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {
 		//switch face on or off depending on loc_state
 		if(loc_state == 1) {
-			//switch passive
-			loc_passiveFaceHidden = !loc_passiveFaceHidden;
-			ShowFace(false,!loc_passiveFaceHidden);
-		}
-		else if(loc_state == 2) {
 			//switch active
 			loc_activeFaceHidden = !loc_activeFaceHidden;
-			ShowFace(true,!loc_activeFaceHidden);
+			ShowFace(false,!loc_activeFaceHidden);
+		}
+		else if(loc_state == 2) {
+			//switch passive
+			loc_passiveFaceHidden = !loc_passiveFaceHidden;
+			ShowFace(true,!loc_passiveFaceHidden);
 		}
 		else {
 			//return both to normal
