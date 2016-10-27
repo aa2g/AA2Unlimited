@@ -131,6 +131,7 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="External\ExternalClasses\Animation.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
+    <ClInclude Include="Functions\Shared\Slider.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

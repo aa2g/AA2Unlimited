@@ -35,6 +35,6 @@ namespace Shared {
 	/*
 	 * XX file modification
 	 */ 
-	void XXFileModification(ExtClass::XXFile* file);
+	void XXFileModification(ExtClass::XXFile* file, bool backup);
 
 }

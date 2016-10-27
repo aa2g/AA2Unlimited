@@ -746,7 +746,7 @@ void OverrideBoneInject() {
 
 
 void __stdcall OverrideBoneEventV2(ExtClass::XXFile* xxFile) {
-	Shared::XXFileModification(xxFile);
+	Shared::XXFileModification(xxFile, General::IsAAEdit);
 }
 
 DWORD OverrideBoneOriginalFunctionV2;
@@ -777,12 +777,23 @@ void OverrideBoneInjectV2() {
 		DWORD address = General::GameBase + 0x1EA467;
 		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV2);
 		Hook((BYTE*)address,
-		{ 0xE8, 0x14, 0x00, 0x00, 0x00, },
-		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			{ 0xE8, 0x14, 0x00, 0x00, 0x00, },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&OverrideBoneOriginalFunctionV2);
 	}
 	else if (General::IsAAPlay) {
-
+		/*AA2Play v12 FP v1.4.0a.exe+207834 - 51                    - push ecx
+		AA2Play v12 FP v1.4.0a.exe+207835 - 57                    - push edi
+		AA2Play v12 FP v1.4.0a.exe+207836 - 56                    - push esi
+		AA2Play v12 FP v1.4.0a.exe+207837 - E8 14000000           - call "AA2Play v12 FP v1.4.0a.exe"+207850 { ->AA2Play v12 FP v1.4.0a.exe+207850 }
+		AA2Play v12 FP v1.4.0a.exe+20783C - 83 C4 0C              - add esp,0C { 12 }
+		*/
+		DWORD address = General::GameBase + 0x207837;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV2);
+		Hook((BYTE*)address,
+			{ 0xE8, 0x14, 0x00, 0x00, 0x00, },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneOriginalFunctionV2);
 	}
 }
 

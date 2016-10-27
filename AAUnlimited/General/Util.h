@@ -60,6 +60,12 @@ inline int GetEditInt(HWND ed) {
 	return _wtoi(tempbuf);
 }
 
+inline float GetEditFloat(HWND ed) {
+	TCHAR tempbuf[256];
+	SendMessage(ed,WM_GETTEXT,256,(LPARAM)tempbuf);
+	return (float)_wtof(tempbuf);
+}
+
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
 
