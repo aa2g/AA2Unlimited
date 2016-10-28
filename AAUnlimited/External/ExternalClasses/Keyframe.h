@@ -27,8 +27,7 @@ namespace ExtClass {
 		float m_scaleY;
 		float m_scaleX;
 	public:
-		Keyframe() = delete;
-		~Keyframe() = delete;
+		//notabily not deleted, can be copied and constructed correctly
 
 
 	};

@@ -1,10 +1,12 @@
 #pragma once
 #include <Windows.h>
 
+#include "External\AddressRule.h"
 #include "Bone.h"
 #include "CharacterData.h"
 #include "XXFile.h"
 namespace ExtClass {
+
 
 #pragma pack(push, 1)
 /*
@@ -12,6 +14,13 @@ namespace ExtClass {
  */
 class CharacterStruct
 {
+public:
+	enum Models {
+		FACE,SKELETON,BODY,HAIR_FRONT,HAIR_SIDE,HAIR_BACK,HAIR_EXT,
+		FACE_SLIDERS,
+		N_MODELS
+	};
+
 public:
 	void* m_virtualTable;
 	BYTE m_unknown1[0x24];
@@ -51,6 +60,31 @@ public:
 public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
+
+	inline XXFile* GetXXFile(Models target) {
+		switch (target) {
+		case FACE:
+			return m_xxFace;
+		case SKELETON:
+			return m_xxSkeleton;
+		case BODY:
+			return m_xxBody;
+		case HAIR_FRONT:
+			return m_xxFrontHair;
+		case HAIR_SIDE:
+			return m_xxSideHair;
+		case HAIR_BACK:
+			return m_xxBackHair;
+		case HAIR_EXT:
+			return m_xxHairExtension;
+		case FACE_SLIDERS: {
+			DWORD rule[] {0x70, 4, 0};
+			return (XXFile*)ExtVars::ApplyRule(this, rule);
+			break; }
+		default:
+			return NULL;
+		}
+	}
 };
 
 static_assert(sizeof(CharacterStruct) == 0xF9C, "CharacterStruct size missmatch; must be 0xF9C bytes (allocation size)");

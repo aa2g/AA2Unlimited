@@ -7,6 +7,7 @@
 
 #include "TextureImage.h"
 #include "OverrideFile.h"
+#include "External\ExternalClasses\CharacterStruct.h"
 
 /*
  * Additional card data.
@@ -58,6 +59,7 @@ public:
 	struct BoneMod;
 	bool AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
 	bool RemoveBoneRule(int index);
+	void SetSliderValue(int sliderTarget,int sliderIndex,float value);
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 	bool SetEyeHighlight(const TCHAR* texName);
@@ -91,8 +93,12 @@ public:
 			float mods[3][3];
 			float data[9];
 		};
+		inline bool operator==(const BoneMod& rhs) {
+			for (int i = 0; i < 9; i++) if (data[i] != rhs.data[i]) return false; return true;
+		}
 	};
 	typedef std::pair<std::pair<std::wstring,std::wstring>,BoneMod> BoneRuleV2;
+	typedef std::pair<std::pair<int,int>,float> SliderRule; //int is slider index in global array, float is selected value
 
 	//getter functions
 	inline BYTE GetTanSlot() const { return m_tanSlot; }
@@ -146,9 +152,14 @@ public:
 	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
 
 	inline const std::vector<BoneRuleV2> GetBoneRuleList() { return m_boneRules; }
-	inline const std::map<std::wstring, BoneMod>* GetBoneRule(const TCHAR* xxFileName) {
+	inline const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName) {
 		auto it = m_boneRuleMap.find(xxFileName);
 		return it == m_boneRuleMap.end() ? NULL : &it->second;
+	}
+
+	inline const std::vector<SliderRule> GetSliderList() { return m_sliders; }
+	inline const std::map<std::wstring,std::vector<BoneMod>>& GetSliderRuleMap(int type) {
+		return m_sliderMap[type];
 	}
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
@@ -197,7 +208,10 @@ private:
 	std::vector<HairPart> m_hairs[4];
 
 	std::vector<BoneRuleV2> m_boneRules;
-	std::map<std::wstring,std::map<std::wstring,BoneMod>> m_boneRuleMap;
+	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
+
+	std::vector<SliderRule> m_sliders;
+	std::map<std::wstring,std::vector<BoneMod>> m_sliderMap[ExtClass::CharacterStruct::N_MODELS];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
@@ -231,5 +245,12 @@ private:
 		bool WriteData_sub(char** buffer,int* size,int& at, const std::pair<T,U>& data,bool resize,std::pair<T,U>*);
 		template<typename T, typename U>
 		bool WriteData_sub(char** buffer,int* size,int& at, const std::map<T, U>& data, bool resize, std::map<T, U>*);
+
+	//generate the maps from the vectors read from the file
+	void GenMeshOverrideMap();
+	void GenArchiveOverrideMap();
+	void GenArchiveRedirectMap();
+	void GenBoneRuleMap();
+	void GenSliderMap();
 };
 

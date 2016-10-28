@@ -5,8 +5,8 @@
 
 namespace AAEdit {
 
-//TODO: merge these
+
 extern CharInstData g_currChar;
-//extern AAUCardData g_cardData;
+
 
 }

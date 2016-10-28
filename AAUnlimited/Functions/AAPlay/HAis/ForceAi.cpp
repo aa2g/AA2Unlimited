@@ -28,7 +28,7 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 		return cnt;
 	};
 	auto findPose = [this, passive, active, info](size_t& chosen, DWORD start, DWORD end) -> int {
-		for (int i = start; i <= end; i++) {
+		for (DWORD i = start; i <= end; i++) {
 			if (passive) {
 				size_t size = m_dominantPositionsPassive[i].size();
 				if (chosen < size) {

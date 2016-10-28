@@ -3,14 +3,18 @@
 #include <Windows.h>
 #include <CommCtrl.h>
 #include <queue>
+#include <set>
+#include <stdio.h>
 
 #include "External\ExternalVariables\AAEdit\WindowData.h"
 #include "External\ExternalClasses\TextureStruct.h"
 #include "External\ExternalVariables\AAEdit\CardData.h"
 #include "External\ExternalVariables\AAEdit\RefreshTable.h"
+#include "External\AddressRule.h"
 #include "General\ModuleInfo.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
+#include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
 #include "Files\Logger.h"
 #include "resource.h"
@@ -113,9 +117,13 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			rct, ARDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODY,&thisPtr->m_bdDialog,index++,TEXT("Body"),
 			rct, BDDialog::DialogProc);
-
+		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
+			rct,BSDialog::DialogProc);
 
 		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
+
+		DWORD charDataRule[] { 0x353254, 0x2C, 0};
+		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
 
 		thisPtr->Refresh();
 		return TRUE;
@@ -876,7 +884,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
 			if (sel == LB_ERR) return TRUE;
 			//remove this rule
-			g_currChar.m_cardData.RemoveBoneTransformation(sel);
+			g_currChar.m_cardData.RemoveBoneRule(sel);
 			thisPtr->Refresh();
 			return TRUE;
 		}
@@ -976,7 +984,7 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	for(match = 0; match < vec.size(); match++) {
 		if (vec[match].first.first == xxname && vec[match].first.second == bonename) break;
 	}
-	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneTransformation(match);
+	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneRule(match);
 
 	//get matrix
 	AAUCardData::BoneMod mod;
@@ -1047,6 +1055,188 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	}
 	
 
+}
+
+/**********************/
+/* Body Slider Dialog */
+/**********************/
+
+INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	static bool ignoreNextSlider = false;
+
+	switch (msg) {
+	case WM_INITDIALOG: {
+		BSDialog* thisPtr = (BSDialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+
+		const static struct {
+			ExtClass::CharacterStruct::Models model;
+			int index;
+			float min;
+			float max;
+		} sliderIds[] = {
+			{ ExtClass::CharacterStruct::FACE, 0, -0.9f, 0.5f },		//mouth
+			{ ExtClass::CharacterStruct::SKELETON, 0, -0.9f, 1.0f },	//total height
+			{ ExtClass::CharacterStruct::SKELETON, 1, -0.9f, 1.0f },	//total width
+			{ ExtClass::CharacterStruct::SKELETON, 2, -0.9f, 1.0f },	//total thickness
+			{ ExtClass::CharacterStruct::FACE, 1, -0.05, 0.05f },		//ear height
+			{ ExtClass::CharacterStruct::FACE, 2, -0.05, 0.05f }		//mouth height
+		};
+		for(int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+			thisPtr->m_sliders[i] = BodySlider(hwndDlg,IDC_BS_SLD1 + i,IDC_BS_ED1 + i,
+			{ &Shared::g_sliders[sliderIds[i].model][sliderIds[i].index] },
+				sliderIds[i].min,sliderIds[i].max);
+		}
+
+		
+
+		return TRUE; }
+	case WM_HSCROLL: {
+		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		if (ignoreNextSlider) {
+			ignoreNextSlider = false;
+			//return TRUE;
+		}
+		HWND wnd = (HWND)lparam;
+		if (wnd == NULL) break; //not slider control, but automatic scroll
+		for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+			if(wnd == thisPtr->m_sliders[i].slider) {
+				ignoreNextSlider = true;
+				thisPtr->m_sliders[i].Sync(false);
+				thisPtr->ApplySlider(i);
+				break;
+			}
+		}
+		break; }
+	case WM_COMMAND: {
+		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		switch (HIWORD(wparam)) {
+		case EN_CHANGE: {
+			if (ignoreNextSlider) {
+				ignoreNextSlider = false;
+				return TRUE;
+			}
+			HWND ed = (HWND)lparam;
+			for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+				if (ed == thisPtr->m_sliders[i].edit) {
+					ignoreNextSlider = true;
+					thisPtr->m_sliders[i].Sync(true);
+					thisPtr->ApplySlider(i);
+					break;
+				}
+			}
+			return TRUE; }
+		};
+		break; }
+	};
+	return FALSE;
+}
+
+void UnlimitedDialog::BSDialog::ApplySlider(int index) {
+	std::set<ExtClass::XXFile*> renewFiles;
+	for (auto& slider : m_sliders[index].sliderData) {
+		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
+		renewFiles.insert(g_currChar.m_char->GetXXFile(slider->target));
+	}
+	
+
+	for (ExtClass::XXFile* file : renewFiles) {
+		if (file != NULL) {
+			Shared::XXFileModification(file,true);
+		}
+	}
+}
+
+void UnlimitedDialog::BSDialog::Refresh() {
+	for (int i = 0; i < ARRAYSIZE(m_sliders); i++) {
+		m_sliders[i].FromCard();
+	}
+}
+
+void UnlimitedDialog::BSDialog::BodySlider::Sync(bool useEdit) {
+	if(useEdit) {
+		//sync slider with edit
+		currVal = General::GetEditFloat(edit);
+		int ret = SendMessage(slider,TBM_SETPOS,TRUE,Val2Sld(currVal));
+		ret++;
+	}
+	else {
+		//sync edit with slider
+		int pos = SendMessage(slider,TBM_GETPOS,0,0);
+		currVal = Sld2Val(pos);
+		TCHAR number[52];
+		swprintf_s(number,TEXT("%f"),currVal);
+		SendMessage(edit,WM_SETTEXT,0,(LPARAM)number);
+	}
+}
+
+
+UnlimitedDialog::BSDialog::BodySlider::BodySlider()  {
+
+}
+
+UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, int slider, int edit,
+												std::vector<const Shared::Slider*> sliderData, float min, float max)
+	: sliderData(sliderData) {
+
+	this->slider = GetDlgItem(dialog,slider);
+	this->edit = GetDlgItem(dialog,edit);
+	sliderMin = min;
+	sliderMax = max;
+	int ret = SendMessage(this->slider,TBM_SETRANGEMIN,TRUE,0);
+	ret = SendMessage(this->slider,TBM_SETRANGEMAX,TRUE,0x10000);
+}
+
+float UnlimitedDialog::BSDialog::BodySlider::Sld2Val(int sld) {
+	return sliderMin + (sliderMax-sliderMin)/0x10000 * sld;
+}
+
+int UnlimitedDialog::BSDialog::BodySlider::Val2Sld(float val) {
+	if (val < sliderMin || val > sliderMax) return 0;
+	float max = sliderMax - sliderMin; //map from [min,max] to [0,max]
+	val -= sliderMin;
+	float coeff = 0x10000 / max;
+	return int(coeff * val);
+}
+
+float UnlimitedDialog::BSDialog::BodySlider::GetCoeffFromMod(AAUCardData::BoneMod mod) {
+	float lastCoeff = 0;
+	for (int i = 0; i < 9; i++) {
+		float coeff = 0;
+		if (mod.data[i] != 0) coeff = mod.data[i] / mod.data[i];
+		if (lastCoeff == 0) lastCoeff = coeff;
+		else {
+			//different coeffs, doesnt add up
+			return 0;
+		}
+	}
+	return lastCoeff;
+}
+
+/*
+ * Set slider and edit from card data
+ */
+void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
+	currVal = 0;
+	if (sliderData.size() == 0) return;
+	const auto& list = g_currChar.m_cardData.GetSliderList();
+	for(auto& slider : sliderData) {
+		for (auto elem : list) {
+			if (&Shared::g_sliders[elem.first.first][elem.first.second] == slider) {
+				currVal = elem.second;
+				break;
+			}
+		}
+	}
+	
+
+	TCHAR buffer[256];
+	swprintf_s(buffer,TEXT("%f"),currVal);
+	SendMessage(edit,WM_SETTEXT,0,(LPARAM)buffer);
+	Sync(true);
 }
 
 UnlimitedDialog g_AAUnlimitDialog;

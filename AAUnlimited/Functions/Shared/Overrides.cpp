@@ -12,6 +12,7 @@
 #include "Functions\TextureImage.h"
 #include "Functions\AAUCardData.h"
 #include "Functions\Shared\Globals.h"
+#include "Functions\Shared\Slider.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace Shared {
@@ -135,40 +136,204 @@ namespace Shared {
 		return g_currentChar->m_cardData.GetMeshOverrideTexture(fileName);
 	}
 
-	void XXFileModification(ExtClass::XXFile* xxFile) {
+	void XXFileModification(ExtClass::XXFile* xxFile, bool backup) {
+		
+		static struct Backups {
+			ExtClass::XXFile* oldFile;
+			std::map<void*,D3DMATRIX> matrixMap;
+			std::map<void*,std::vector<ExtClass::Keyframe>> keyframeMap;
+		} backups[ExtClass::CharacterStruct::N_MODELS];
+		Backups* thisBackup = NULL;
+
+		//find xx file in bone rules
 		size_t written;
 		TCHAR name[256];
 		mbstowcs_s(&written,name,xxFile->m_name,256);
-		const auto* match = Shared::g_currentChar->m_cardData.GetBoneRule(name);
-		if (match == NULL) return;
+		const auto* rmatch = Shared::g_currentChar->m_cardData.GetBoneRule(name);
 
+		//find model type of xx file and slider rule if existant
+		const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* smatch = NULL;
+		if (Shared::g_currentChar->m_char != NULL) {
+			for (int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
+				if (xxFile == Shared::g_currentChar->m_char->GetXXFile((ExtClass::CharacterStruct::Models)i)) {
+					smatch = &Shared::g_currentChar->m_cardData.GetSliderRuleMap(i);
+					thisBackup = &backups[i];
+					if (backup && xxFile != backups[i].oldFile) {
+						backups[i].oldFile = xxFile;
+						backups[i].keyframeMap.clear();
+						backups[i].matrixMap.clear();
+					}
+					break;
+				}
+			}
+		}
+		
+		if (rmatch == NULL && smatch == NULL) return;
+
+		//adjust bone matrizes
 		xxFile->EnumBonesPreOrder([&](ExtClass::Bone* bone) {
 			mbstowcs_s(&written,name,bone->m_name,256);
-			auto it = match->find(name);
-			if (it != match->end()) {
-				//applies to this rule
-				//TODO: all transformations, not only scale
-				D3DMATRIX mat = {
-					it->second.scales[0],0,0,0,
-					0,it->second.scales[1],0,0,
-					0,0,it->second.scales[2],0,
+
+			//try to find matches in both the bone rules and slider rules
+			bool match = false;
+			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator mit;
+			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator sit;
+			
+			if (rmatch) {
+				mit = rmatch->find(name);
+				if (mit != rmatch->end()) match = true;
+			}
+			if(smatch) {
+				sit = smatch->find(name);
+				if (sit != smatch->end()) {
+					match = true;
+					//load or save backup if requested
+					if(thisBackup) {
+						auto it = thisBackup->matrixMap.find(bone);
+						if(it != thisBackup->matrixMap.end()) {
+							//allready exists, this means its the second time, so we restore
+							bone->m_matrix1 = it->second;
+							bone->m_matrix5 = it->second;
+						}
+						else {
+							//save backups
+							thisBackup->matrixMap.insert(std::make_pair(bone,bone->m_matrix5));
+						}
+					}
+				}
+			}
+			
+			if (match) {
+				//decompose current matrix
+				D3DVECTOR3 scales;
+				D3DQUATERNION rot;
+				D3DVECTOR3 trans;
+				float rotx = 0,roty = 0,rotz = 0;
+				(*Shared::D3DXMatrixDecompose)(&scales,&rot,&trans,&bone->m_matrix5);
+				//add our values
+				if(rmatch && mit != rmatch->end()) {
+					for (auto mod : mit->second) {
+						scales.x += mod.scales[0];
+						scales.y += mod.scales[1];
+						scales.z += mod.scales[2];
+						trans.x += mod.transformations[0];
+						trans.y += mod.transformations[1];
+						trans.z += mod.transformations[2];
+						rotx += mod.rotations[0];
+						roty += mod.rotations[1];
+						rotz += mod.rotations[2];
+					}
+				}
+				if(smatch && sit != smatch->end()) {
+					for (auto mod : sit->second) {
+						scales.x += mod.scales[0];
+						scales.y += mod.scales[1];
+						scales.z += mod.scales[2];
+						trans.x += mod.transformations[0];
+						trans.y += mod.transformations[1];
+						trans.z += mod.transformations[2];
+						rotx += mod.rotations[0];
+						roty += mod.rotations[1];
+						rotz += mod.rotations[2];
+					}
+				}
+
+				D3DQUATERNION modRot;
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&modRot,roty,rotx,rotz);
+				D3DQUATERNION combinedRot;
+				(*Shared::D3DXQuaternionMultiply)(&combinedRot,&rot,&modRot);
+				//recompose matrix
+				D3DMATRIX mscale = {
+					scales.x,0,0,0,
+					0,scales.y,0,0,
+					0,0,scales.z,0,
 					0,0,0,1.0f
 				};
-				(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,&mat,&bone->m_matrix1);
-				(*Shared::D3DXMatrixMultiply)(&bone->m_matrix5,&mat,&bone->m_matrix5);
+				D3DMATRIX mtrans = {
+					1,0,0,0,
+					0,1,0,0,
+					0,0,1,0,
+					trans.x,trans.y,trans.z,1.0f
+				};
+				D3DMATRIX mrot;
+				(*Shared::D3DXMatrixRotationQuaternion)(&mrot,&combinedRot);
+
+				D3DMATRIX combined;
+				(*Shared::D3DXMatrixMultiply)(&combined,&mscale,&mrot);
+				(*Shared::D3DXMatrixMultiply)(&combined,&combined,&mtrans);
+
+				//apply new matrix
+				bone->m_matrix1 = combined;
+				bone->m_matrix5 = combined;
 			}
 		});
-		//also do animations
-		for (int i = 0; i < xxFile->m_animArraySize; i++) {
+
+		//adjust animations
+		for (DWORD i = 0; i < xxFile->m_animArraySize; i++) {
 			mbstowcs_s(&written,name,xxFile->m_animArray[i].m_name,256);
-			auto it = match->find(name);
-			if (it != match->end()) {
-				for (int j = 0; j < xxFile->m_animArray[i].m_nFrames; i++) {
+			bool match = false;
+			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator mit;
+			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator sit;
 
-					xxFile->m_animArray[i].m_frameArray[j].m_scaleX *= it->second.scales[0];
-					xxFile->m_animArray[i].m_frameArray[j].m_scaleY *= it->second.scales[1];
-					xxFile->m_animArray[i].m_frameArray[j].m_scaleZ *= it->second.scales[2];
-
+			if (rmatch) {
+				mit = rmatch->find(name);
+				if (mit != rmatch->end()) match = true;
+			}
+			if (smatch) {
+				sit = smatch->find(name);
+				if (sit != smatch->end()) {
+					match = true;
+					//load or save backup if requested
+					if (thisBackup) {
+						auto it = thisBackup->keyframeMap.find(&xxFile->m_animArray[i]);
+						if (it != thisBackup->keyframeMap.end()) {
+							//allready exists, this means its the second time, so we restore
+							for(DWORD j = 0; j < it->second.size(); j++) {
+								xxFile->m_animArray[i].m_frameArray[j] = it->second[j];
+							}
+						}
+						else {
+							//save backups
+							std::vector<ExtClass::Keyframe> vec;
+							for (DWORD j = 0; j < xxFile->m_animArray[i].m_nFrames; j++) {
+								vec.push_back(xxFile->m_animArray[i].m_frameArray[j]);
+							}
+							thisBackup->keyframeMap.insert(make_pair(&xxFile->m_animArray[i],vec));
+						}
+					}
+				}
+			}
+			if (match) {
+				for (DWORD j = 0; j < xxFile->m_animArray[i].m_nFrames; j++) {
+					ExtClass::Keyframe& frame = xxFile->m_animArray[i].m_frameArray[j];
+					if (rmatch && mit != rmatch->end()) {
+						for (auto elem : mit->second) {
+							frame.m_scaleX += elem.scales[0];
+							frame.m_scaleY += elem.scales[1];
+							frame.m_scaleZ += elem.scales[2];
+							D3DQUATERNION rotQuat;
+							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
+							D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame.m_quatX;
+							(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
+							frame.m_transX += elem.transformations[0];
+							frame.m_transY += elem.transformations[1];
+							frame.m_transZ += elem.transformations[2];
+						}
+					}
+					if (smatch && sit != smatch->end()) {
+						for (auto elem : sit->second) {
+							frame.m_scaleX += elem.scales[0];
+							frame.m_scaleY += elem.scales[1];
+							frame.m_scaleZ += elem.scales[2];
+							D3DQUATERNION rotQuat;
+							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
+							D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame.m_quatX;
+							(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
+							frame.m_transX += elem.transformations[0];
+							frame.m_transY += elem.transformations[1];
+							frame.m_transZ += elem.transformations[2];
+						}
+					}
 				}
 			}
 		}

@@ -13,12 +13,23 @@ struct D3DVECTOR3 {
 	FLOAT x,y,z;
 };
 
+struct D3DQUATERNION {
+	FLOAT x,y,z,w;
+};
+
 namespace Shared {
 
 void* __stdcall IllusionMemAlloc(size_t size);
-extern D3DMATRIX* (__stdcall *D3DXMatrixMultiply)(D3DMATRIX *pOut, const D3DMATRIX *pM1,const D3DMATRIX *pM2);
-extern D3DVECTOR4* (__stdcall *D3DXVec3Transform)(D3DVECTOR4 *pOut, const D3DVECTOR3 *pV, const D3DMATRIX  *pM);
 void __stdcall IllusionDeleteXXFile(ExtClass::XXFile* file, ExtClass::CharacterStruct* owner);
+
+//direct x functions
+extern D3DMATRIX* (__stdcall *D3DXMatrixMultiply)(D3DMATRIX *pOut,const D3DMATRIX *pM1,const D3DMATRIX *pM2);
+extern D3DVECTOR4* (__stdcall *D3DXVec3Transform)(D3DVECTOR4 *pOut,const D3DVECTOR3 *pV,const D3DMATRIX  *pM);
+extern D3DQUATERNION* (__stdcall *D3DXQuaternionRotationYawPitchRoll)(D3DQUATERNION *pOut, FLOAT Yaw, FLOAT Pitch, FLOAT Roll);
+extern D3DQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DQUATERNION *pOut,D3DQUATERNION *pQ);
+extern D3DQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DQUATERNION *pOut, const D3DQUATERNION *pQ1, const D3DQUATERNION *pQ2);
+extern HRESULT (__stdcall *D3DXMatrixDecompose)(D3DVECTOR3 *pOutScale,D3DQUATERNION *pOutRotation,D3DVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
+extern D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut,const D3DQUATERNION *pQ);
 
 void Init();
 

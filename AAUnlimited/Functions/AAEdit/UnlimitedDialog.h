@@ -3,6 +3,10 @@
 #include <Windows.h>
 #include <vector>
 
+#include "Functions\AAUCardData.h"
+#include "External\ExternalClasses\XXFile.h"
+#include "Functions\Shared\Slider.h"
+
 namespace AAEdit {
 
 /*
@@ -140,6 +144,38 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_bdDialog;
+	struct BSDialog : public Dialog {
+		struct BodySlider {
+			//windows
+			HWND slider;
+			HWND edit;
+
+			//slider data
+			float sliderMin;
+			float sliderMax;
+			std::vector<const Shared::Slider*> sliderData;
+
+			//current selection
+			float currVal;
+
+			BodySlider();
+			BodySlider(HWND dialog,int slider,int edit,
+				std::vector<const Shared::Slider*> sliderData, float min, float max);
+
+			float GetCoeffFromMod(AAUCardData::BoneMod);
+			void Sync(bool useEdit);
+			void FromCard();
+
+			float Sld2Val(int sld);
+			int Val2Sld(float val);
+		};
+		
+		BodySlider m_sliders[6];
+			
+		void ApplySlider(int index);
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_bsDialog;
 
 
 	HWND m_dialog;
