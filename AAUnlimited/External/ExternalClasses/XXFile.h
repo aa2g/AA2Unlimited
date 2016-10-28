@@ -48,6 +48,7 @@ static_assert(sizeof(XXFile) == 0x35C,"XXFile size missmatch; must be 0x35C byte
 
 template<class Callback>
 void XXFile::EnumBonesPreOrder(Callback& callback) {
+	if (!m_root) return;
 	EnumBonesPreOrder_sub(callback,m_root);
 }
 

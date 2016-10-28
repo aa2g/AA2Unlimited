@@ -170,9 +170,9 @@ namespace AAEdit {
 			int Val2Sld(float val);
 		};
 		
-		BodySlider m_sldMouthWidth;
+		BodySlider m_sliders[6];
 			
-		void ApplySliders();
+		void ApplySlider(int index);
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_bsDialog;

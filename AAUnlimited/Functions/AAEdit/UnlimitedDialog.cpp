@@ -1070,9 +1070,26 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 
-		thisPtr->m_sldMouthWidth = BodySlider(hwndDlg,IDC_BS_SLDMOUTHWIDTH,IDC_BS_EDMOUTHWIDTH,
-			{&Shared::g_sliders[ExtClass::CharacterStruct::FACE][0]},
-			-0.9f,0.5f);
+		const static struct {
+			ExtClass::CharacterStruct::Models model;
+			int index;
+			float min;
+			float max;
+		} sliderIds[] = {
+			{ ExtClass::CharacterStruct::FACE, 0, -0.9f, 0.5f },		//mouth
+			{ ExtClass::CharacterStruct::SKELETON, 0, -0.9f, 1.0f },	//total height
+			{ ExtClass::CharacterStruct::SKELETON, 1, -0.9f, 1.0f },	//total width
+			{ ExtClass::CharacterStruct::SKELETON, 2, -0.9f, 1.0f },	//total thickness
+			{ ExtClass::CharacterStruct::FACE, 1, -0.05, 0.05f },		//ear height
+			{ ExtClass::CharacterStruct::FACE, 2, -0.05, 0.05f }		//mouth height
+		};
+		for(int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+			thisPtr->m_sliders[i] = BodySlider(hwndDlg,IDC_BS_SLD1 + i,IDC_BS_ED1 + i,
+			{ &Shared::g_sliders[sliderIds[i].model][sliderIds[i].index] },
+				sliderIds[i].min,sliderIds[i].max);
+		}
+
+		
 
 		return TRUE; }
 	case WM_HSCROLL: {
@@ -1084,11 +1101,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		}
 		HWND wnd = (HWND)lparam;
 		if (wnd == NULL) break; //not slider control, but automatic scroll
-		if(wnd == thisPtr->m_sldMouthWidth.slider) {
-			ignoreNextSlider = true;
-			thisPtr->m_sldMouthWidth.Sync(false);
+		for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+			if(wnd == thisPtr->m_sliders[i].slider) {
+				ignoreNextSlider = true;
+				thisPtr->m_sliders[i].Sync(false);
+				thisPtr->ApplySlider(i);
+				break;
+			}
 		}
-		thisPtr->ApplySliders();
 		break; }
 	case WM_COMMAND: {
 		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
@@ -1100,11 +1120,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				return TRUE;
 			}
 			HWND ed = (HWND)lparam;
-			if(ed == thisPtr->m_sldMouthWidth.edit) {
-				ignoreNextSlider = true;
-				thisPtr->m_sldMouthWidth.Sync(true);
+			for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+				if (ed == thisPtr->m_sliders[i].edit) {
+					ignoreNextSlider = true;
+					thisPtr->m_sliders[i].Sync(true);
+					thisPtr->ApplySlider(i);
+					break;
+				}
 			}
-			thisPtr->ApplySliders();
 			return TRUE; }
 		};
 		break; }
@@ -1112,8 +1135,25 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	return FALSE;
 }
 
+void UnlimitedDialog::BSDialog::ApplySlider(int index) {
+	std::set<ExtClass::XXFile*> renewFiles;
+	for (auto& slider : m_sliders[index].sliderData) {
+		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
+		renewFiles.insert(g_currChar.m_char->GetXXFile(slider->target));
+	}
+	
+
+	for (ExtClass::XXFile* file : renewFiles) {
+		if (file != NULL) {
+			Shared::XXFileModification(file,true);
+		}
+	}
+}
+
 void UnlimitedDialog::BSDialog::Refresh() {
-	m_sldMouthWidth.FromCard();
+	for (int i = 0; i < ARRAYSIZE(m_sliders); i++) {
+		m_sliders[i].FromCard();
+	}
 }
 
 void UnlimitedDialog::BSDialog::BodySlider::Sync(bool useEdit) {
@@ -1148,19 +1188,6 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, int slider, int e
 	sliderMax = max;
 	int ret = SendMessage(this->slider,TBM_SETRANGEMIN,TRUE,0);
 	ret = SendMessage(this->slider,TBM_SETRANGEMAX,TRUE,0x10000);
-}
-
-void UnlimitedDialog::BSDialog::ApplySliders() {
-	std::set<ExtClass::XXFile*> renewFiles;
-	for (auto& slider : m_sldMouthWidth.sliderData) {
-		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sldMouthWidth.currVal);
-		renewFiles.insert(g_currChar.m_char->GetXXFile(slider->target));
-	}
-	for(ExtClass::XXFile* file : renewFiles) {
-		if(file != NULL) {
-			Shared::XXFileModification(file,true);
-		}
-	}	
 }
 
 float UnlimitedDialog::BSDialog::BodySlider::Sld2Val(int sld) {

@@ -37,7 +37,34 @@ struct Slider {
 const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 	{
 		//FACE
-		{ExtClass::CharacterStruct::FACE, 0, TEXT("A00_J_kuti"), {1,0,0, 0,0,0, 0,0,0}/*, Slider::ADDITIVE*/} //mouth
+		{ExtClass::CharacterStruct::FACE, 0, TEXT("A00_J_kuti"), {1,0,0, 0,0,0, 0,0,0}}, //mouth
+		{ExtClass::CharacterStruct::FACE, 1, TEXT("A00_O_mimi"),{ 0,0,0, 0,0,0, 0,1,0 }}, //ear height
+		{ExtClass::CharacterStruct::FACE, 2, TEXT("A00_J_kuti"),{ 0,0,0, 0,0,0, 0,1,0.9f }} //mouth height
+	},
+	{
+		//SKELETON
+		{ ExtClass::CharacterStruct::SKELETON, 0, TEXT("SCENE_ROOT"),{ 0,1,0, 0,0,0, 0,0,0 } }, //body height,
+		{ ExtClass::CharacterStruct::SKELETON, 1, TEXT("SCENE_ROOT"),{ 1,0,0, 0,0,0, 0,0,0 } }, //body width,
+		{ ExtClass::CharacterStruct::SKELETON, 2, TEXT("SCENE_ROOT"),{ 0,0,1, 0,0,0, 0,0,0 } } //body thickness
+	},
+	{
+		//BODY
+	},
+	{
+		//HAIR_FRONT
+	},
+	{
+		//HAIR_SIDE
+	},
+	{
+		//HAIR_BACK
+	},
+	{
+		//HAIR_EXT
+	},
+	{
+		//FACE_SLIDERS
+		
 	}
 };
 

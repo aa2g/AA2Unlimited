@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 
+#include "External\AddressRule.h"
 #include "Bone.h"
 #include "CharacterData.h"
 #include "XXFile.h"
@@ -16,7 +17,7 @@ class CharacterStruct
 public:
 	enum Models {
 		FACE,SKELETON,BODY,HAIR_FRONT,HAIR_SIDE,HAIR_BACK,HAIR_EXT,
-
+		FACE_SLIDERS,
 		N_MODELS
 	};
 
@@ -76,6 +77,10 @@ public:
 			return m_xxBackHair;
 		case HAIR_EXT:
 			return m_xxHairExtension;
+		case FACE_SLIDERS: {
+			DWORD rule[] {0x70, 4, 0};
+			return (XXFile*)ExtVars::ApplyRule(this, rule);
+			break; }
 		default:
 			return NULL;
 		}
