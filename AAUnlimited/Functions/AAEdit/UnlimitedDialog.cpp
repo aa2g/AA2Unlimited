@@ -20,6 +20,19 @@
 #include "resource.h"
 #include "config.h"
 
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"") 
+
+namespace {
+	static HFONT GetSysFont() {
+		NONCLIENTMETRICS ncm;
+		ncm.cbSize = sizeof(ncm);
+		SystemParametersInfo(SPI_GETNONCLIENTMETRICS,sizeof(NONCLIENTMETRICS),&ncm,0);
+		return CreateFontIndirect(&(ncm.lfMenuFont));
+	}
+	HFONT sysFont = GetSysFont();
+}
 
 namespace AAEdit {
 
@@ -1054,7 +1067,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		}
 	}
 	
-
 }
 
 /**********************/
@@ -1070,23 +1082,68 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 
-		const static struct {
-			ExtClass::CharacterStruct::Models model;
-			int index;
+		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_STEXAMPLE),SW_HIDE);
+		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_SLDEXAMPLE),SW_HIDE);
+		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_EDEXAMPLE),SW_HIDE);
+
+		using namespace ExtClass;
+		static struct GUISlider { //this needs a name for some reason, else it wont compile
+			const TCHAR* label;
+			struct LogicalSlider {
+				CharacterStruct::Models model;
+				int index;
+			};
+			std::vector<LogicalSlider> logicalSliders;
 			float min;
 			float max;
 		} sliderIds[] = {
-			{ ExtClass::CharacterStruct::FACE, 0, -0.9f, 0.5f },		//mouth
-			{ ExtClass::CharacterStruct::SKELETON, 0, -0.9f, 1.0f },	//total height
-			{ ExtClass::CharacterStruct::SKELETON, 1, -0.9f, 1.0f },	//total width
-			{ ExtClass::CharacterStruct::SKELETON, 2, -0.9f, 1.0f },	//total thickness
-			{ ExtClass::CharacterStruct::FACE, 1, -0.05, 0.05f },		//ear height
-			{ ExtClass::CharacterStruct::FACE, 2, -0.05, 0.05f }		//mouth height
+			{ TEXT("Mouth Width"), 
+				{ { CharacterStruct::FACE, 0 } }, 
+				-0.9f, 0.5f 
+			},
+			{ TEXT("Total Body Height"),
+				{ { CharacterStruct::SKELETON, 0 } },
+				-0.9f, 1.0f 
+			},
+			{ TEXT("Total Body Width"),
+				{ { CharacterStruct::SKELETON, 1 } }, 
+				-0.9f, 1.0f
+			},
+			{ TEXT("Total Body Thickness"),
+				{ { CharacterStruct::SKELETON, 2 } }, 
+				-0.9f, 1.0f
+			},
+			{ TEXT("Total Ear Height"),
+				{ { CharacterStruct::FACE, 1 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Mouth Height"),
+				{ { CharacterStruct::FACE, 2 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Hand Length"),
+				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 } },
+				-0.5f, 1.0f
+			},
+			{ TEXT("Eyebrow Height"),
+				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Eye Depth"),
+				{ { CharacterStruct::FACE_SLIDERS, 0 } },
+				-0.1f, 0.1f
+			}
 		};
-		for(int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
-			thisPtr->m_sliders[i] = BodySlider(hwndDlg,IDC_BS_SLD1 + i,IDC_BS_ED1 + i,
-			{ &Shared::g_sliders[sliderIds[i].model][sliderIds[i].index] },
-				sliderIds[i].min,sliderIds[i].max);
+		
+		int xpos = 10,ypos = 10;
+		for(int i = 0; i < ARRAYSIZE(sliderIds); i++) {
+			std::vector<const Shared::Slider*> sldVec;
+			for(size_t j = 0; j < sliderIds[i].logicalSliders.size(); j++) {
+				sldVec.push_back(&Shared::g_sliders[sliderIds[i].logicalSliders[j].model][sliderIds[i].logicalSliders[j].index]);
+			}
+			thisPtr->m_sliders.push_back(BodySlider(hwndDlg,sliderIds[i].label,xpos,ypos,
+				sldVec,sliderIds[i].min,sliderIds[i].max));
+			ypos += 40; //move next one a bit farer down
 		}
 
 		
@@ -1101,7 +1158,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		}
 		HWND wnd = (HWND)lparam;
 		if (wnd == NULL) break; //not slider control, but automatic scroll
-		for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+		for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
 			if(wnd == thisPtr->m_sliders[i].slider) {
 				ignoreNextSlider = true;
 				thisPtr->m_sliders[i].Sync(false);
@@ -1120,7 +1177,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				return TRUE;
 			}
 			HWND ed = (HWND)lparam;
-			for (int i = 0; i < ARRAYSIZE(thisPtr->m_sliders); i++) {
+			for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
 				if (ed == thisPtr->m_sliders[i].edit) {
 					ignoreNextSlider = true;
 					thisPtr->m_sliders[i].Sync(true);
@@ -1136,10 +1193,13 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BSDialog::ApplySlider(int index) {
+	bool faceSliderRenew = false;
 	std::set<ExtClass::XXFile*> renewFiles;
 	for (auto& slider : m_sliders[index].sliderData) {
 		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
-		renewFiles.insert(g_currChar.m_char->GetXXFile(slider->target));
+		auto* xxfile = g_currChar.m_char->GetXXFile(slider->target);
+		renewFiles.insert(xxfile);
+		faceSliderRenew = faceSliderRenew || slider->target == ExtClass::CharacterStruct::FACE_SLIDERS;
 	}
 	
 
@@ -1148,10 +1208,14 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			Shared::XXFileModification(file,true);
 		}
 	}
+
+	if(faceSliderRenew) {
+		ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::EYES,ExtVars::AAEdit::EYES_ALL);
+	}
 }
 
 void UnlimitedDialog::BSDialog::Refresh() {
-	for (int i = 0; i < ARRAYSIZE(m_sliders); i++) {
+	for (size_t i = 0; i < m_sliders.size(); i++) {
 		m_sliders[i].FromCard();
 	}
 }
@@ -1178,14 +1242,60 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider()  {
 
 }
 
-UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, int slider, int edit,
+UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* label, int xStart, int yStart,
 												std::vector<const Shared::Slider*> sliderData, float min, float max)
 	: sliderData(sliderData) {
+	HWND templateStatic = GetDlgItem(dialog,IDC_BS_STEXAMPLE);
+	HWND templateSlider = GetDlgItem(dialog,IDC_BS_SLDEXAMPLE);
+	HWND templateEdit = GetDlgItem(dialog,IDC_BS_EDEXAMPLE);
 
-	this->slider = GetDlgItem(dialog,slider);
-	this->edit = GetDlgItem(dialog,edit);
+	this->stLabel = CreateWindowEx(0,TEXT("STATIC"),label,WS_CHILD | WS_VISIBLE,
+		0,0,0,0,
+		dialog,0,General::DllInst,0);
+	this->slider = CreateWindowEx(0,TEXT("msctls_trackbar32"),label,WS_CHILD | WS_VISIBLE | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,
+		0,0,0,0,
+		dialog,0,General::DllInst,0);
+	this->edit = CreateWindowEx(WS_EX_CLIENTEDGE,TEXT("EDIT"),label,WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+		0,0,0,0,
+		dialog,0,General::DllInst,0);
+
+	using namespace General;
+
+	auto CopyStyleFromWindow = [](HWND to, HWND from){
+		LONG exStyles = GetWindowLong(from,GWL_EXSTYLE);
+		LONG styles = GetWindowLong(from,GWL_STYLE) | WS_VISIBLE;
+		SetWindowLong(to,GWL_EXSTYLE,exStyles);
+		SetWindowLong(to,GWL_STYLE,styles);
+		HFONT font = (HFONT)SendMessage(from,WM_GETFONT,0,0);
+		SendMessage(to,WM_SETFONT,(WPARAM)font,FALSE);
+	};
+
+	//adjust style from templace
+	CopyStyleFromWindow(stLabel,templateStatic);
+	CopyStyleFromWindow(slider,templateSlider);
+	CopyStyleFromWindow(edit,templateEdit);
+
+	//move window according to template
+	RECT rctTmplStatic,rctTmplSlider,rctTmplEdit;
+	GetWindowRect(templateStatic,&rctTmplStatic);
+	GetWindowRect(templateSlider,&rctTmplSlider);
+	GetWindowRect(templateEdit,&rctTmplEdit);
+	//get top left corner
+	LONG left = rctTmplStatic.left,top = min(rctTmplStatic.top,min(rctTmplSlider.top,rctTmplEdit.top));
+	//adjust top left corner to (xStart|yStart)
+	RectMoveBy(rctTmplStatic,-left+xStart,-top+yStart);
+	RectMoveBy(rctTmplSlider,-left+xStart,-top+yStart);
+	RectMoveBy(rctTmplEdit,-left+xStart,-top+yStart);
+	//move actual window
+	MoveWindowRect(stLabel,rctTmplStatic,FALSE);
+	MoveWindowRect(slider,rctTmplSlider,FALSE);
+	MoveWindowRect(edit,rctTmplEdit,FALSE);
+
+
+
 	sliderMin = min;
 	sliderMax = max;
+	staticLabel = label;
 	int ret = SendMessage(this->slider,TBM_SETRANGEMIN,TRUE,0);
 	ret = SendMessage(this->slider,TBM_SETRANGEMAX,TRUE,0x10000);
 }
@@ -1222,6 +1332,7 @@ float UnlimitedDialog::BSDialog::BodySlider::GetCoeffFromMod(AAUCardData::BoneMo
 void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	currVal = 0;
 	if (sliderData.size() == 0) return;
+	currVal = sliderData[0]->GetNeutralValue();
 	const auto& list = g_currChar.m_cardData.GetSliderList();
 	for(auto& slider : sliderData) {
 		for (auto elem : list) {

@@ -152,7 +152,7 @@ namespace Shared {
 		const auto* rmatch = Shared::g_currentChar->m_cardData.GetBoneRule(name);
 
 		//find model type of xx file and slider rule if existant
-		const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* smatch = NULL;
+		const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>* smatch = NULL;
 		if (Shared::g_currentChar->m_char != NULL) {
 			for (int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
 				if (xxFile == Shared::g_currentChar->m_char->GetXXFile((ExtClass::CharacterStruct::Models)i)) {
@@ -177,7 +177,7 @@ namespace Shared {
 			//try to find matches in both the bone rules and slider rules
 			bool match = false;
 			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator mit;
-			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator sit;
+			std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>::const_iterator sit;
 			
 			if (rmatch) {
 				mit = rmatch->find(name);
@@ -208,38 +208,22 @@ namespace Shared {
 				D3DVECTOR3 scales;
 				D3DQUATERNION rot;
 				D3DVECTOR3 trans;
-				float rotx = 0,roty = 0,rotz = 0;
+				D3DVECTOR3 vecRot = {0,0,0};
 				(*Shared::D3DXMatrixDecompose)(&scales,&rot,&trans,&bone->m_matrix5);
 				//add our values
 				if(rmatch && mit != rmatch->end()) {
 					for (auto mod : mit->second) {
-						scales.x += mod.scales[0];
-						scales.y += mod.scales[1];
-						scales.z += mod.scales[2];
-						trans.x += mod.transformations[0];
-						trans.y += mod.transformations[1];
-						trans.z += mod.transformations[2];
-						rotx += mod.rotations[0];
-						roty += mod.rotations[1];
-						rotz += mod.rotations[2];
+						Shared::Slider::ModifySRT(&scales,&vecRot,&trans,Shared::Slider::ADD,mod);
 					}
 				}
 				if(smatch && sit != smatch->end()) {
 					for (auto mod : sit->second) {
-						scales.x += mod.scales[0];
-						scales.y += mod.scales[1];
-						scales.z += mod.scales[2];
-						trans.x += mod.transformations[0];
-						trans.y += mod.transformations[1];
-						trans.z += mod.transformations[2];
-						rotx += mod.rotations[0];
-						roty += mod.rotations[1];
-						rotz += mod.rotations[2];
+						Shared::Slider::ModifySRT(&scales,&vecRot,&trans,mod.first->op,mod.second);
 					}
 				}
 
 				D3DQUATERNION modRot;
-				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&modRot,roty,rotx,rotz);
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&modRot,vecRot.y,vecRot.x,vecRot.z);
 				D3DQUATERNION combinedRot;
 				(*Shared::D3DXQuaternionMultiply)(&combinedRot,&rot,&modRot);
 				//recompose matrix
@@ -273,7 +257,7 @@ namespace Shared {
 			mbstowcs_s(&written,name,xxFile->m_animArray[i].m_name,256);
 			bool match = false;
 			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator mit;
-			std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator sit;
+			std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>::const_iterator sit;
 
 			if (rmatch) {
 				mit = rmatch->find(name);
@@ -308,30 +292,12 @@ namespace Shared {
 					ExtClass::Keyframe& frame = xxFile->m_animArray[i].m_frameArray[j];
 					if (rmatch && mit != rmatch->end()) {
 						for (auto elem : mit->second) {
-							frame.m_scaleX += elem.scales[0];
-							frame.m_scaleY += elem.scales[1];
-							frame.m_scaleZ += elem.scales[2];
-							D3DQUATERNION rotQuat;
-							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
-							D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame.m_quatX;
-							(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
-							frame.m_transX += elem.transformations[0];
-							frame.m_transY += elem.transformations[1];
-							frame.m_transZ += elem.transformations[2];
+							Shared::Slider::ModifyKeyframe(&frame,Shared::Slider::ADD,elem);
 						}
 					}
 					if (smatch && sit != smatch->end()) {
 						for (auto elem : sit->second) {
-							frame.m_scaleX += elem.scales[0];
-							frame.m_scaleY += elem.scales[1];
-							frame.m_scaleZ += elem.scales[2];
-							D3DQUATERNION rotQuat;
-							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
-							D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame.m_quatX;
-							(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
-							frame.m_transX += elem.transformations[0];
-							frame.m_transY += elem.transformations[1];
-							frame.m_transZ += elem.transformations[2];
+							Shared::Slider::ModifyKeyframe(&frame,elem.first->op,elem.second);
 						}
 					}
 				}

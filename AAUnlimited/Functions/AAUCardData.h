@@ -9,6 +9,10 @@
 #include "OverrideFile.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
+namespace Shared {
+	struct Slider;
+}
+
 /*
  * Additional card data.
  * In the file, it is saved as a png chunk.
@@ -158,7 +162,7 @@ public:
 	}
 
 	inline const std::vector<SliderRule> GetSliderList() { return m_sliders; }
-	inline const std::map<std::wstring,std::vector<BoneMod>>& GetSliderRuleMap(int type) {
+	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderRuleMap(int type) {
 		return m_sliderMap[type];
 	}
 private:
@@ -211,7 +215,7 @@ private:
 	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
 
 	std::vector<SliderRule> m_sliders;
-	std::map<std::wstring,std::vector<BoneMod>> m_sliderMap[ExtClass::CharacterStruct::N_MODELS];
+	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_sliderMap[ExtClass::CharacterStruct::N_MODELS];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

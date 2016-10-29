@@ -32,6 +32,7 @@
     <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
     <ClCompile Include="Functions\AAPlay\HButtonMove.cpp" />
     <ClCompile Include="Functions\Shared\Overrides.cpp" />
+    <ClCompile Include="Functions\Shared\Slider.cpp" />
     <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
