@@ -137,7 +137,7 @@ namespace Shared {
 	}
 
 	void XXFileModification(ExtClass::XXFile* xxFile, bool backup) {
-		
+		if (!g_isOverriding) return;
 		static struct Backups {
 			ExtClass::XXFile* oldFile;
 			std::map<void*,D3DMATRIX> matrixMap;
