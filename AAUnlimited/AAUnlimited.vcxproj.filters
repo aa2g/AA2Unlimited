@@ -69,6 +69,7 @@
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
+    <ClCompile Include="Functions\Shared\Slider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />

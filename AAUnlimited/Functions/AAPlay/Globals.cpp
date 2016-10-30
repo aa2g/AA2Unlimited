@@ -16,7 +16,7 @@ void InitOnLoad() {
 
 	//initialize characters
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
-	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArray();
+	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 	for(start; start != end; start++) {
 		ExtClass::CharacterStruct* it = *start;
 

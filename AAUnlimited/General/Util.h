@@ -69,7 +69,37 @@ inline float GetEditFloat(HWND ed) {
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
 
+/*
+ * Rect utility functions
+ */
+inline LONG RectWidth(const RECT& rct) {
+	return rct.right - rct.left;
+}
+inline LONG RectHeight(const RECT& rct) {
+	return rct.bottom - rct.top;
+}
 
+inline void RectMoveTo(RECT& rct, LONG left, LONG top) {
+	LONG height = RectHeight(rct);
+	LONG width = RectWidth(rct);
+	rct.left = left;
+	rct.top = top;
+	rct.right = left + width;
+	rct.bottom = top + height;
+}
+
+inline void RectMoveBy(RECT& rct,LONG x,LONG y) {
+	LONG height = RectHeight(rct);
+	LONG width = RectWidth(rct);
+	rct.left += x;
+	rct.top += y;
+	rct.right += x;
+	rct.bottom += y;
+}
+
+inline void MoveWindowRect(HWND wnd, RECT& rct, BOOL redraw) {
+	MoveWindow(wnd,rct.left,rct.top,RectWidth(rct),RectHeight(rct),redraw);
+}
 
 /*
  * Keeps Track of the Time it was started, and can be told to return the difference, in seconds,

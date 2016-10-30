@@ -647,15 +647,13 @@ void AAUCardData::GenSliderMap() {
 		const Shared::Slider& slider = Shared::g_sliders[target][elem.first.second];
 		auto it = map.find(slider.boneName);
 		if(it != map.end()) {
-			BoneMod mod = slider.mod;
-			for (int i = 0; i < 9; i++) mod.data[i] *= elem.second;
-			it->second.push_back(mod);
+			BoneMod mod = slider.GenerateModifier(elem.second);
+			it->second.push_back(std::make_pair(&slider,mod));
 		}
 		else {
-			std::vector<BoneMod> vec;
-			BoneMod mod = slider.mod;
-			for (int i = 0; i < 9; i++) mod.data[i] *= elem.second;
-			vec.push_back(mod);
+			std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
+			BoneMod mod = slider.GenerateModifier(elem.second);
+			vec.push_back(std::make_pair(&slider,mod));
 			map.emplace(slider.boneName,vec);
 		}
 	}

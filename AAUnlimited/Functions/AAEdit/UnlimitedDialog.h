@@ -147,6 +147,7 @@ namespace AAEdit {
 	struct BSDialog : public Dialog {
 		struct BodySlider {
 			//windows
+			HWND stLabel;
 			HWND slider;
 			HWND edit;
 
@@ -154,12 +155,13 @@ namespace AAEdit {
 			float sliderMin;
 			float sliderMax;
 			std::vector<const Shared::Slider*> sliderData;
+			const TCHAR* staticLabel;
 
 			//current selection
 			float currVal;
 
 			BodySlider();
-			BodySlider(HWND dialog,int slider,int edit,
+			BodySlider(HWND dialog,const TCHAR* label, int xStart,int yStart,
 				std::vector<const Shared::Slider*> sliderData, float min, float max);
 
 			float GetCoeffFromMod(AAUCardData::BoneMod);
@@ -170,7 +172,7 @@ namespace AAEdit {
 			int Val2Sld(float val);
 		};
 		
-		BodySlider m_sliders[6];
+		std::vector<BodySlider> m_sliders;
 			
 		void ApplySlider(int index);
 		void Refresh();
