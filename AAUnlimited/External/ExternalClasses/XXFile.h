@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "Bone.h"
+#include "Frame.h"
 #include "Animation.h"
 
 
@@ -18,25 +18,29 @@ public:
 	DWORD m_unknown;
 	char m_name[512];
 	BYTE m_unknown2[0x14];
-	Bone* m_root;
+	Frame* m_root;
 	BYTE m_unknown3[0x138];
 	DWORD m_animArraySize;
 	Animation* m_animArray;
 
 	template<class Callback>
-	void EnumBonesPreOrder_sub(Callback& callback, Bone* bone);
+	void EnumBonesPreOrder_sub(Callback& callback, Frame* bone);
+	template<class Callback>
+	void EnumBonesPostOrder_sub(Callback& callback,Frame* bone);
 public:
 	XXFile() = delete;
 	~XXFile() = delete;
 
 	//finds a bone belonging to this xx file in depth-first-search
 	//with a maximum depth of maxDepth (or infinity if maxDepth < 0)
-	Bone* FindBone(const char* name, int maxDepth = -1);
+	Frame* FindBone(const char* name, int maxDepth = -1);
 
 
 	//for each function
 	template<class Callback>
 	void EnumBonesPreOrder(Callback& callback);
+	template<class Callback>
+	void EnumBonesPostOrder(Callback& callback);
 
 	
 
@@ -53,11 +57,25 @@ void XXFile::EnumBonesPreOrder(Callback& callback) {
 }
 
 template<class Callback>
-void XXFile::EnumBonesPreOrder_sub(Callback& callback,Bone* bone) {
+void XXFile::EnumBonesPostOrder(Callback& callback) {
+	if (!m_root) return;
+	EnumBonesPostOrder_sub(callback,m_root);
+}
+
+template<class Callback>
+void XXFile::EnumBonesPreOrder_sub(Callback& callback,Frame* bone) {
 	callback(bone);
-	for(DWORD i = 0; i < bone->m_arrSize; i++) {
-		EnumBonesPreOrder_sub(callback,&bone->m_boneArray[i]);
+	for(DWORD i = 0; i < bone->m_nChildren; i++) {
+		EnumBonesPreOrder_sub(callback,&bone->m_children[i]);
 	}
+}
+
+template<class Callback>
+void XXFile::EnumBonesPostOrder_sub(Callback& callback,Frame* bone) {
+	for (DWORD i = 0; i < bone->m_nChildren; i++) {
+		EnumBonesPostOrder_sub(callback,&bone->m_children[i]);
+	}
+	callback(bone);
 }
 
 

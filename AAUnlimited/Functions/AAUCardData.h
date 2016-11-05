@@ -165,6 +165,11 @@ public:
 	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderRuleMap(int type) {
 		return m_sliderMap[type];
 	}
+	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+		auto it = m_sliderMap[model].find(bone);
+		return (it != m_sliderMap[model].end()) ? &it->second : NULL;
+	}
+
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures

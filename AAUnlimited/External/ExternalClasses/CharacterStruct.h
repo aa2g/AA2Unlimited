@@ -2,7 +2,7 @@
 #include <Windows.h>
 
 #include "External\AddressRule.h"
-#include "Bone.h"
+#include "Frame.h"
 #include "CharacterData.h"
 #include "XXFile.h"
 namespace ExtClass {
@@ -18,7 +18,8 @@ public:
 	enum Models {
 		FACE,SKELETON,BODY,HAIR_FRONT,HAIR_SIDE,HAIR_BACK,HAIR_EXT,
 		FACE_SLIDERS,
-		N_MODELS
+		N_MODELS,
+		INVALID
 	};
 
 public:
@@ -49,8 +50,8 @@ public:
 	XXFile* m_xxBody;
 	XXFile* m_xxLegs;
 	BYTE m_unknown6[0x130];
-	Bone** m_bonePtrArray; //first one is neck (focused on q press), second one is spin (focused on w press)
-	Bone** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
+	Frame** m_bonePtrArray; //first one is neck (focused on q press), second one is spin (focused on w press)
+	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
 	BYTE m_unknown7[0xDB8];
 	void* m_somedata;
 	BYTE m_unknown8[0x1C];

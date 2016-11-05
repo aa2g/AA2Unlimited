@@ -59,6 +59,7 @@ struct Slider {
 
 	static void ModifySRT(D3DVECTOR3* scale,D3DVECTOR3* rot,D3DVECTOR3* trans, Slider::Operation op, const AAUCardData::BoneMod& mod);
 	static void ModifyKeyframe(ExtClass::Keyframe* frame,Slider::Operation op,const AAUCardData::BoneMod& mod);
+	static ExtClass::CharacterStruct::Models GetModelFromName(const char* name);
 };
 
 const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
@@ -101,7 +102,12 @@ const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 	}
 };
 
-
+//info from thicker x/y mod
+//note that their way of scaling seems to be to add additional bones with an _ofst suffix and giving them scales instead
+//a01_J_Kosi_010: unterer körper, startet beim bauchnabel, endet bei beinen leicht unter beckenhöhe
+//a01_J_Spin_020: oberer körper, startet am brustkorb und endet an hals und arm ansatz
+//a01_J_SiriR_010|a01_J_SiriL_010: linker/rechter hintern. note that 20 is also part of it, but not modified in the mod
+//a01_J_UplegL_010|a01_J_UplegR_010: linker/rechter oberschenkel. 20 affects the entire leg, interistingly
 
 
 

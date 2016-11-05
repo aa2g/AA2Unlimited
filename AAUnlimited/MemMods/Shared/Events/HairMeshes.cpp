@@ -36,6 +36,7 @@ bool __stdcall HairLoadAAEdit(BYTE kind, ExtClass::CharacterStruct* character) {
 	static ExtClass::XXFile* savedPtr; //the original hair pointer
 	static std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> savedPointers; //hairs we generated
 	
+	if (!Shared::g_isOverriding) return false;
 	const auto& list = Shared::g_currentChar->m_cardData.GetHairs(kind);
 	auto& data = character->m_charData->m_hair;
 

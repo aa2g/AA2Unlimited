@@ -2,20 +2,9 @@
 
 #include <d3d9.h>
 
+#include "General\DirectXStructs.h"
 #include "External\ExternalClasses\XXFile.h"
 #include "External\ExternalClasses\CharacterStruct.h"
-
-struct D3DVECTOR4 {
-	FLOAT x,y,z,w;
-};
-
-struct D3DVECTOR3 {
-	FLOAT x,y,z;
-};
-
-struct D3DQUATERNION {
-	FLOAT x,y,z,w;
-};
 
 namespace Shared {
 
@@ -30,6 +19,7 @@ extern D3DQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DQUATERNION *pOut,D
 extern D3DQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DQUATERNION *pOut, const D3DQUATERNION *pQ1, const D3DQUATERNION *pQ2);
 extern HRESULT (__stdcall *D3DXMatrixDecompose)(D3DVECTOR3 *pOutScale,D3DQUATERNION *pOutRotation,D3DVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
 extern D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut,const D3DQUATERNION *pQ);
+extern D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
 
 void Init();
 

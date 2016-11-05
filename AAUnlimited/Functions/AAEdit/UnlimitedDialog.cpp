@@ -1049,19 +1049,19 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			curr->m_xxBody, curr->m_xxLegs
 		};
 		TCHAR tmpBuff[256];
-		std::queue<ExtClass::Bone*> fileQueue;
+		std::queue<ExtClass::Frame*> fileQueue;
 		for (ExtClass::XXFile* file : xxlist) {
 			if (file == NULL) continue;
-			ExtClass::Bone* root = file->m_root;
+			ExtClass::Frame* root = file->m_root;
 			fileQueue.push(root);
 			while (!fileQueue.empty()) {
-				ExtClass::Bone* bone = fileQueue.front();
+				ExtClass::Frame* bone = fileQueue.front();
 				fileQueue.pop();
 				size_t conv;
 				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
 				SendMessage(m_bmCbBone,CB_ADDSTRING,0,(LPARAM)tmpBuff);
-				for (unsigned int i = 0; i < bone->m_arrSize; i++) {
-					fileQueue.push(bone->m_boneArray + i);
+				for (unsigned int i = 0; i < bone->m_nChildren; i++) {
+					fileQueue.push(bone->m_children + i);
 				}
 			}
 		}
@@ -1194,18 +1194,35 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 	bool faceSliderRenew = false;
-	std::set<ExtClass::XXFile*> renewFiles;
+	std::set<ExtClass::CharacterStruct::Models> renewFiles;
 	for (auto& slider : m_sliders[index].sliderData) {
 		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
-		auto* xxfile = g_currChar.m_char->GetXXFile(slider->target);
-		renewFiles.insert(xxfile);
+		renewFiles.insert(slider->target);
 		faceSliderRenew = faceSliderRenew || slider->target == ExtClass::CharacterStruct::FACE_SLIDERS;
 	}
 	
 
-	for (ExtClass::XXFile* file : renewFiles) {
-		if (file != NULL) {
-			Shared::XXFileModification(file,true);
+	for (ExtClass::CharacterStruct::Models model : renewFiles) {
+		for(auto& elem : Shared::g_xxMods[model]) {
+			ExtClass::Frame* bone = elem.first;
+			TCHAR buff[256];
+			size_t written;
+			mbstowcs_s(&written,buff,bone->m_name+5,256);
+			std::wstring str(buff);
+			auto* rule = Shared::g_currentChar->m_cardData.GetSliderRule(model,str);
+			if(rule != NULL) {
+				D3DMATRIX& mat = elem.second;
+				D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+				D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+				D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+				for(auto& elem : *rule) {
+					Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+				}
+				auto res = General::MatrixFromSRT(scale,rot,trans);
+				bone->m_matrix1 = res;
+				bone->m_matrix5 = res;
+				
+			}
 		}
 	}
 

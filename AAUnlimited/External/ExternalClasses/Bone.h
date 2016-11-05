@@ -5,30 +5,31 @@
 
 namespace ExtClass {
 
-class Bone
-{
-public:
-	DWORD m_nameBufferSize;
-	char* m_name;
-	DWORD m_arrSize;
-	Bone* m_boneArray; //probably children
-	Bone* m_parent;
+	class Frame;
 
-	D3DMATRIX m_matrix1; //constantly renewed using different matrices; 
-						 //contains offset of bone to parent when read in from xx file
-	D3DMATRIX m_matrix2; //final generated matrix. used as a base to calculate matrix of sub-bones.
-						 //some bones (base bones, i suppose, such as A00_kao) do NOT constantly modify this matrix.
-						 //changing it has a permanent effect on the model in these cases
+	class Bone
+	{
+	public:
+		DWORD m_nameBufferSize;
+		char* m_name;
+		void* m_unknownPointer;
 
-	D3DMATRIX m_matrix3; //not sure, usually identity matrix
-	D3DMATRIX m_matrix4; //not sure, usually almost identity matrix (0.999999994 or some shit cause its inverted for some reason)
+		D3DMATRIX m_matrix;
 
-	D3DMATRIX m_matrix5; //constant translation matrix, copy of matrixx1 when read in;
-						 //used by neck3 to build matrix1, maybe attachment matrix for other body parts?
+		D3DMATRIX* m_attachmentMatrix; //actually a pointer into a frame struct, offset 0x54 (the second matrix).
+									   //seems to be the corresponding frame to this bone
+	public:
+		inline Frame* GetFrame() {
+			if (m_attachmentMatrix == NULL) return NULL;
+			return (Frame*)((BYTE*)(m_attachmentMatrix)-0x54);
+		}
 
-	BYTE m_unknown[0x41A0];
-};
+		inline void SetFrame(Frame* newFrame) {
+			if (newFrame == NULL) m_attachmentMatrix = NULL;
+			else m_attachmentMatrix = (D3DMATRIX*)((BYTE*)(newFrame)+0x54);
+		}
+	};
 
-static_assert(sizeof(Bone) == 0x42F4,"size mismatch");
+	static_assert(sizeof(Bone) == 0x50,"size mismatch"); //full size known, lea eax, [eax+eax*4], shl eax, 4
 
 }

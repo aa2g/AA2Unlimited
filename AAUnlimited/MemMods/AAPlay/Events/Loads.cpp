@@ -201,10 +201,14 @@ void TransferInInjection() {
 DWORD TransferOutOriginalFunc;
 void __declspec(naked) TransferOutRedirect() {
 	__asm {
-		call [TransferOutOriginalFunc]
-		push [esi]
+		pushad 
+
+		push[esi]
 		call TransferOutEvent
-		ret
+
+		popad
+
+		jmp [TransferOutOriginalFunc]
 	}
 }
 

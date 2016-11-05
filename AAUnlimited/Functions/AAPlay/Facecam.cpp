@@ -5,7 +5,7 @@
 
 #include "Files\Config.h"
 #include "External\ExternalClasses\HClasses\HInfo.h"
-#include "External\ExternalClasses\Bone.h"
+#include "External\ExternalClasses\Frame.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
 #include "Functions\Shared\Globals.h"
@@ -26,7 +26,7 @@ namespace Facecam {
 
 
 ExtClass::HInfo* loc_hinfo = NULL;
-ExtClass::Bone* loc_focusBone = NULL;
+ExtClass::Frame* loc_focusBone = NULL;
 D3DVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
 int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
 
@@ -54,11 +54,11 @@ void ShowFace(bool active, bool visible) {
 		//do save search for kao
 		ExtClass::XXFile* it = toHide[i];
 		if (it == NULL) continue; //some of them might not be there (e.g has no side hair)
-		ExtClass::Bone* boneIt = it->m_root; //all_root
-		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
-		boneIt = &boneIt->m_boneArray[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
-		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
-		boneIt = &boneIt->m_boneArray[0]; //kao
+		ExtClass::Frame* boneIt = it->m_root; //all_root
+		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+		boneIt = &boneIt->m_children[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
+		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+		boneIt = &boneIt->m_children[0]; //kao
 		//backup the matrix if possible
 		static const D3DMATRIX nullMatrix = {0.001f,0,0,0,  0,0.001f,0,0,  0,0,0.001f,0,  0,0,0,1.0f};
 		if(memcmp(&boneIt->m_matrix1, &nullMatrix, sizeof(nullMatrix)) != 0) {
@@ -79,12 +79,12 @@ void ShowFace(bool active, bool visible) {
 D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 	D3DVECTOR3 retVal{ 0,0,0 };
 	//find left and right eye
-	ExtClass::Bone* rightEye,*leftEye;
+	ExtClass::Frame* rightEye,*leftEye;
 	rightEye = character->m_xxFace->FindBone("A00_J_meR2",-1);
 	leftEye = character->m_xxFace->FindBone("A00_J_meL2",-1);
 
 	if (rightEye != NULL && leftEye != NULL) {
-		ExtClass::Bone* it;
+		ExtClass::Frame* it;
 		D3DVECTOR3 rightEyePos {0,0,0};
 		it = rightEye;
 		while(it != NULL) {
@@ -196,7 +196,7 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 }
 
 
-void AdjustCamera(ExtClass::Bone* bone) {
+void AdjustCamera(ExtClass::Frame* bone) {
 
 	ExtClass::CharacterData::Hair baldHaircut = ExtClass::CharacterData::Hair();
 		baldHaircut.frontHair = 0;

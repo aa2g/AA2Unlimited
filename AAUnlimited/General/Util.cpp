@@ -1,5 +1,6 @@
 #include "Util.h"
 
+#include "Functions\Shared\Globals.h"
 #include <Windows.h>
 
 
@@ -121,6 +122,25 @@ DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 	}
 	if (invertResult) reg = ~reg;
 	return reg;
+}
+
+D3DMATRIX MatrixFromSRT(D3DVECTOR3 & scales,D3DVECTOR3 & rots,D3DVECTOR3 & trans)
+{
+	D3DMATRIX matr;
+
+	D3DMATRIX matrScale = { scales.x,0,0,0,
+		0,scales.y,0,0,
+		0,0,scales.z,0,
+		0,0,0,1.0f };
+	D3DMATRIX matrRot;
+	(*Shared::D3DXMatrixRotationYawPitchRoll)(&matrRot,rots.y,rots.x,rots.z);
+	D3DMATRIX matrTrans = { 1.0f,0,0,0,
+		0,1.0f,0,0,
+		0,0,1.0f,0,
+		trans.x,trans.y,trans.z,1.0f };
+	(*Shared::D3DXMatrixMultiply)(&matr,&matrScale,&matrRot);
+	(*Shared::D3DXMatrixMultiply)(&matr,&matr,&matrTrans);
+	return matr;
 }
 
 

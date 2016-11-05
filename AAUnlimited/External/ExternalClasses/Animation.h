@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "Bone.h"
+#include "Frame.h"
 #include "Keyframe.h"
 
 namespace ExtClass {
@@ -19,7 +19,7 @@ namespace ExtClass {
 		DWORD m_nFrames;
 		DWORD m_unknown;
 		Keyframe* m_frameArray;
-		Bone* m_bone;
+		Frame* m_bone;
 	public:
 		Animation() = delete;
 		~Animation() = delete;

@@ -210,7 +210,8 @@ void InitializeHooks() {
 			MeshTexture::OverrideFileInject();
 			MeshTexture::OverrideOutlineColorInject();
 			//MeshTexture::OverrideBoneInject();
-			MeshTexture::OverrideBoneInjectV2();
+			//MeshTexture::OverrideBoneInjectV2();
+			MeshTexture::OverrideBoneInjectV3();
 
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();

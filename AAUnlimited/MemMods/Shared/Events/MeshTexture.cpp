@@ -677,8 +677,8 @@ void OverrideOutlineColorInject() {
 	}
 }
 
-void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
-	//note that this event fires for the child bones first, then the parent. dont enumerate child bones again.
+void __stdcall OverrideBoneEvent(ExtClass::Frame* bone) {
+	/*//note that this event fires for the child bones first, then the parent. dont enumerate child bones again.
 	if (!Shared::g_isOverriding) return;
 	TCHAR nameBuffer[256];
 	size_t out;
@@ -689,7 +689,33 @@ void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
 		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,ret,&bone->m_matrix1);
 		bone->m_matrix1 = *ret;
 		bone->m_matrix5 = *ret;
+	}*/
+	if (strcmp(bone->m_name,"a01_J_UdeR_01") != 0) return;
+	using namespace ExtClass;
+	Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+	memcpy_s(newMatch,sizeof(Frame),bone,sizeof(Frame));
+
+	//change parent and child stuff
+	bone->m_parent = newMatch->m_parent;
+	bone->m_nChildren = 1;
+	bone->m_children = newMatch;
+	newMatch->m_parent = bone;
+	for (int i = 0; i < newMatch->m_nChildren; i++) {
+		newMatch->m_children[i].m_parent = newMatch;
 	}
+
+	//change name
+	int namelength = newMatch->m_nameBufferSize + 5;
+	bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+	bone->m_nameBufferSize = namelength;
+	//strcpy_s(match->m_name,match->m_nameBufferSize,newMatch->m_name);
+	//strcat_s(match->m_name,match->m_nameBufferSize,"_artf");
+	strcpy_s(bone->m_name,bone->m_nameBufferSize,"newname");
+
+	//some values
+	const D3DMATRIX idMatr = { 1.0f,0,0,0, 0,1.0f,0,0, 0,0,1.0f,0, 0,0,0,1.0f };
+	bone->m_matrix1 = idMatr;
+	bone->m_matrix5 = idMatr;
 }
 
 void __declspec(naked) OverrideBoneRedirect() {
@@ -707,6 +733,7 @@ void __declspec(naked) OverrideBoneRedirect() {
 }
 
 void OverrideBoneInject() {
+	//end of function that reads a bone from the xx file
 	if (General::IsAAEdit) {
 		//this is where the function ends that generates a bone struct. this struct is currently in ebx.
 		/*AA2Edit.exe+1E847A - 5F                    - pop edi
@@ -751,7 +778,7 @@ void __stdcall OverrideBoneEventV2(ExtClass::XXFile* xxFile) {
 
 DWORD OverrideBoneOriginalFunctionV2;
 void __declspec(naked) OverrideBoneRedirectV2() {
-	__asm {
+	/*__asm {
 		push [esp+0xC]
 		push [esp+0xC]
 		push [esp+0xC]
@@ -762,10 +789,17 @@ void __declspec(naked) OverrideBoneRedirectV2() {
 		call OverrideBoneEventV2
 		pop eax
 		ret
+	}*/
+	__asm {
+		push[esp+0x4] //esi, the xx file
+		call OverrideBoneEventV2
+
+		jmp [OverrideBoneOriginalFunctionV2]
 	}
 }
 
 void OverrideBoneInjectV2() {
+	//place that inserts animation into an xx file
 	if (General::IsAAEdit) {
 		/*
 		AA2Edit.exe+1EA464 - 51                    - push ecx
@@ -795,6 +829,56 @@ void OverrideBoneInjectV2() {
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&OverrideBoneOriginalFunctionV2);
 	}
+}
+
+void __stdcall OverrideBoneEventV3(ExtClass::XXFile* xxFile) {
+	Shared::XXFileModification(xxFile,General::IsAAEdit);
+}
+
+void __declspec(naked) OverrideBoneRedirectV3() {
+	__asm {
+		add esp, 0x20
+		pushad
+		push eax
+		call OverrideBoneEventV3
+		popad
+		ret
+	}
+}
+
+void OverrideBoneInjectV3() {
+	if(General::IsAAEdit) {
+		//function that reads an xx file from an xx file (no animations and stuff)
+		/*AA2Edit.exe+1F8B50 - 6A FF                 - push -01 { function that reads an xx file }
+		AA2Edit.exe+1F8B52 - 68 B0BE5500           - push AA2Edit.exe+2BBEB0 { [0824548B] }
+		AA2Edit.exe+1F8B57 - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+		AA2Edit.exe+1F8B5D - 50                    - push eax
+		AA2Edit.exe+1F8B5E - 83 EC 14              - sub esp,14 { 20 }
+		AA2Edit.exe+1F8B61 - A1 A00A5E00           - mov eax,[AA2Edit.exe+340AA0] { [1942D58A] }
+		AA2Edit.exe+1F8B66 - 33 C4                 - xor eax,esp
+		*/
+		//...
+		/*AA2Edit.exe+1F8D1A - 8B 4C 24 10           - mov ecx,[esp+10]
+		AA2Edit.exe+1F8D1E - 33 CC                 - xor ecx,esp
+		AA2Edit.exe+1F8D20 - E8 442F0700           - call AA2Edit.exe+26BC69
+		AA2Edit.exe+1F8D25 - 83 C4 20              - add esp,20 { 32 }
+		AA2Edit.exe+1F8D28 - C3                    - ret
+		AA2Edit.exe+1F8D29 - CC                    - int 3
+		AA2Edit.exe+1F8D2A - CC                    - int 3
+		AA2Edit.exe+1F8D2B - CC                    - int 3
+		AA2Edit.exe+1F8D2C - CC                    - int 3
+		*/
+		DWORD address = General::GameBase + 0x1F8D25;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV3);
+		Hook((BYTE*)address,
+			{ 0x83, 0xC4, 0x20, 
+				0xC3, 
+				0xCC, },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneOriginalFunctionV2);
+	}
+	
+
 }
 
 

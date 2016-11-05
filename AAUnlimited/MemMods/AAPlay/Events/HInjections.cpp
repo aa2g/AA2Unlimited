@@ -2,7 +2,7 @@
 #include "MemMods/Hook.h"
 #include "General/ModuleInfo.h"
 #include "External/ExternalClasses.h"
-#include "External/ExternalClasses/Bone.h"
+#include "External/ExternalClasses/Frame.h"
 
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/HButtonMove.h"
@@ -42,7 +42,7 @@ void TickInjection() {
 		(DWORD*)(&loc_OriginalTickFunction));						//save old function to call in our redirect function
 }
 
-void __stdcall FocusCameraEvent(ExtClass::Bone* bone) {
+void __stdcall FocusCameraEvent(ExtClass::Frame* bone) {
 	Facecam::AdjustCamera(bone);
 }
 

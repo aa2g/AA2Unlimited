@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "Bone.h"
+#include "Frame.h"
 
 namespace ExtClass {
 

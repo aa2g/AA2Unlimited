@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <vector>
 
+#include "DirectXStructs.h"
+
 namespace General {
 	
 
@@ -125,6 +127,8 @@ public:
 
 
 DWORD Crc32(BYTE* data,int len,DWORD regInit = 0xFFFFFFFF,bool invertResult = true);
+
+D3DMATRIX MatrixFromSRT(D3DVECTOR3& scales,D3DVECTOR3& rots,D3DVECTOR3& trans);
 
 std::vector<BYTE> FileToBuffer(const TCHAR* path);
 

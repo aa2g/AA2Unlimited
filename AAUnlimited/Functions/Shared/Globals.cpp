@@ -22,6 +22,7 @@ D3DQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DQUATERNION *pOut,D3DQUATE
 D3DQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DQUATERNION *pOut,const D3DQUATERNION *pQ1,const D3DQUATERNION *pQ2);
 HRESULT(__stdcall *D3DXMatrixDecompose)(D3DVECTOR3 *pOutScale,D3DQUATERNION *pOutRotation,D3DVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
 D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut,const D3DQUATERNION *pQ);
+D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
 
 
 void (__cdecl *IllusionDeleteXXFileProc)(void* someStruct, ExtClass::XXFile* file);
@@ -66,6 +67,7 @@ void Init() {
 	GETPROC(D3DXQuaternionNormalize);
 	GETPROC(D3DXQuaternionRotationYawPitchRoll);
 	GETPROC(D3DXMatrixRotationQuaternion);
+	GETPROC(D3DXMatrixRotationYawPitchRoll);
 
 #undef GETPROC
 
