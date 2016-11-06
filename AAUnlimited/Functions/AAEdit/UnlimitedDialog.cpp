@@ -1121,18 +1121,51 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 2 } },
 				-0.05f, 0.05f
 			},
-			{ TEXT("Hand Length"),
-				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 } },
+			/*{ TEXT("Arm Thickness"),
+				{ { CharacterStruct::SKELETON, 3 },{ CharacterStruct::SKELETON, 4 } },
 				-0.5f, 1.0f
+			},*/
+			{ TEXT("Hand Length"),
+				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 },
+				  { CharacterStruct::SKELETON, 13 },{ CharacterStruct::SKELETON, 14 } },
+				-0.4f, 0.2f
+			},
+			{ TEXT("Foot Length"),
+			{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
+				-0.15f, 0.2f
+			},
+			{ TEXT("Foot Width"),
+				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
+				-0.2f, 0.2f
 			},
 			{ TEXT("Eyebrow Height"),
 				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
 				-0.1f, 0.1f
 			},
 			{ TEXT("Eye Depth"),
-				{ { CharacterStruct::FACE_SLIDERS, 0 } },
+				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
-			}
+			},
+			{ TEXT("Bottom Width"),
+				{ { CharacterStruct::SKELETON, 7 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Bottom Thickness"),
+				{ { CharacterStruct::SKELETON, 8 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Lower Bottom Thickness"),
+				{ { CharacterStruct::SKELETON, 9 }, { CharacterStruct::SKELETON, 10 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Lower Bottom Width"),
+				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Thigh Thickness"),
+				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
+				-0.5f, 0.5f
+			},
 		};
 		
 		int xpos = 10,ypos = 10;
@@ -1144,6 +1177,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			thisPtr->m_sliders.push_back(BodySlider(hwndDlg,sliderIds[i].label,xpos,ypos,
 				sldVec,sliderIds[i].min,sliderIds[i].max));
 			ypos += 40; //move next one a bit farer down
+			if(i != 0 && i % 9 == 0) {
+				ypos -= 400;
+				xpos += 330;
+			}
 		}
 
 		

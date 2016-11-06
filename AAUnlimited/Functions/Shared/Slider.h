@@ -69,17 +69,32 @@ const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 		{ExtClass::CharacterStruct::FACE, 1, TEXT("A00_O_mimi"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD }, //ear height
 		{ExtClass::CharacterStruct::FACE, 2, TEXT("A00_J_kuti"),{ 0,0,0, 0,0,0, 0,1,0.9f }, Slider::ADD }, //mouth height
 		{ExtClass::CharacterStruct::FACE, 3, TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD }, //left eyebrow height
-		{ExtClass::CharacterStruct::FACE, 4, TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD } //right eyebrow height
+		{ExtClass::CharacterStruct::FACE, 4, TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD }, //right eyebrow height
+		{ ExtClass::CharacterStruct::FACE, 5, TEXT("A00_J_meC"),{ 0,0,0, 0,0,0, 0,0,1 }, Slider::ADD }, //eye depth?
 	},
 	{
 		//SKELETON
 		{ ExtClass::CharacterStruct::SKELETON, 0, TEXT("SCENE_ROOT"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD }, //body height,
 		{ ExtClass::CharacterStruct::SKELETON, 1, TEXT("SCENE_ROOT"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //body width,
 		{ ExtClass::CharacterStruct::SKELETON, 2, TEXT("SCENE_ROOT"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //body thickness
-		{ ExtClass::CharacterStruct::SKELETON, 3, TEXT("a01_J_ArmL_01"),{ 1,1,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left arm thickness
-		{ ExtClass::CharacterStruct::SKELETON, 4, TEXT("a01_J_ArmR_01"),{ 1,1,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right arm thickness
-		{ ExtClass::CharacterStruct::SKELETON, 5, TEXT("a01_J_HandL_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //left hand length
-		{ ExtClass::CharacterStruct::SKELETON, 6, TEXT("a01_J_HandR_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //right hand length
+		{ ExtClass::CharacterStruct::SKELETON, 3, TEXT("a01_J_ArmL_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //left arm thickness
+		{ ExtClass::CharacterStruct::SKELETON, 4, TEXT("a01_J_ArmR_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //right arm thickness
+		{ ExtClass::CharacterStruct::SKELETON, 5, TEXT("a01_J_HandL_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left hand fingers length
+		{ ExtClass::CharacterStruct::SKELETON, 6, TEXT("a01_J_HandR_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right hand fingers length
+		{ ExtClass::CharacterStruct::SKELETON, 7, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //kosi thickness
+		{ ExtClass::CharacterStruct::SKELETON, 8, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON, 9, TEXT("a01_J_SiriL_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON,10, TEXT("a01_J_SiriR_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON,11, TEXT("a01_J_SiriL_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON,12, TEXT("a01_J_SiriR_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON,13, TEXT("a01_J_OyaL_01"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left hand thumb length
+		{ ExtClass::CharacterStruct::SKELETON,14, TEXT("a01_J_OyaR_01"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right hand thumb length
+		{ ExtClass::CharacterStruct::SKELETON,15, TEXT("a01_J_FootL_03"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //left foot length
+		{ ExtClass::CharacterStruct::SKELETON,16, TEXT("a01_J_FootR_03"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //right foot length
+		{ ExtClass::CharacterStruct::SKELETON,17, TEXT("a01_J_FootL_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left foot width
+		{ ExtClass::CharacterStruct::SKELETON,18, TEXT("a01_J_FootR_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right foot width
+		{ ExtClass::CharacterStruct::SKELETON,19, TEXT("a01_J_UplegL_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left thigh thickness
+		{ ExtClass::CharacterStruct::SKELETON,20, TEXT("a01_J_UplegR_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right thigh thickness
 	},
 	{
 		//BODY
@@ -98,7 +113,6 @@ const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 	},
 	{
 		//FACE_SLIDERS
-		{ ExtClass::CharacterStruct::FACE_SLIDERS, 0, TEXT("A00_J_meC"),{ 0,0,0, 0,0,0, 0,0,1 }, Slider::ADD }, //eye depth?
 	}
 };
 
