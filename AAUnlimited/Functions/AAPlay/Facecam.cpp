@@ -118,24 +118,12 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
 		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
-
-
-		if (loc_hinfo) {
-			static const D3DMATRIX idMatr = {
-				1.0f,0,0,0,
-				0,1.0f,0,0,
-				0,0,1.0f,0,
-				0,0,0,1.0f
-			};
-			loc_hinfo->GetCamera()->m_matrix = idMatr;
-		}
-
+		
+		loc_state = 0;
+		RestoreCamera();
 		loc_activeFaceXX = NULL;
 		loc_passiveFaceXX = NULL;
-		loc_passiveFaceHidden = false;
-		loc_activeFaceHidden = false;
-		loc_state = 0;
-		loc_focusBone = NULL;
+
 		loc_hinfo = NULL;
 		loc_activeChar = NULL;
 		loc_passiveChar = NULL;
@@ -151,12 +139,14 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		}
 
 		//if 3d model was reloaded
-		if(loc_activeChar->m_xxFace != loc_activeFaceXX) {
+		if(loc_activeChar->m_xxFace != loc_activeFaceXX &&
+			loc_state == 1) {
 			loc_activeFaceXX = loc_activeChar->m_xxFace;
 			RestoreCamera();
 			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
 		}
-		if(loc_passiveChar->m_xxFace != loc_passiveFaceXX) {
+		if(loc_passiveChar->m_xxFace != loc_passiveFaceXX &&
+			loc_state == 2) {
 			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
 			RestoreCamera();
 			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
@@ -193,24 +183,26 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 
 void RestoreCamera()
 {
+	if (loc_hinfo) {
 	//restore the matrix to an identity matrix
-	static const D3DMATRIX idMatr = {
-		1.0f,0,0,0,
-		0,1.0f,0,0,
-		0,0,1.0f,0,
-		0,0,0,1.0f
-	};
-	loc_hinfo->GetCamera()->m_matrix = idMatr;
+		static const D3DMATRIX idMatr = {
+			1.0f,0,0,0,
+			0,1.0f,0,0,
+			0,0,1.0f,0,
+			0,0,0,1.0f
+		};
+		loc_hinfo->GetCamera()->m_matrix = idMatr;
 
-	//unbind camera from the bone
-	loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
-	loc_focusOffset = { 0,0,0 };
+		//unbind camera from the bone
+		loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+		loc_focusOffset = { 0,0,0 };
 
-	//return both faces to normal
-	loc_activeFaceHidden = false;
-	ShowFace(false, !loc_activeFaceHidden);
-	loc_passiveFaceHidden = false;
-	ShowFace(true, !loc_passiveFaceHidden);
+		//return both faces to normal
+		loc_activeFaceHidden = false;
+		ShowFace(false, !loc_activeFaceHidden);
+		loc_passiveFaceHidden = false;
+		ShowFace(true, !loc_passiveFaceHidden);
+	}
 }
 
 void AdjustCamera(ExtClass::Frame* bone) {
