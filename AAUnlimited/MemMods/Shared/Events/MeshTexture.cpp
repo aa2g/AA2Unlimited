@@ -875,7 +875,36 @@ void OverrideBoneInjectV3() {
 				0xC3, 
 				0xCC, },
 			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
-			&OverrideBoneOriginalFunctionV2);
+			NULL);
+	}
+	else if(General::IsAAPlay) {
+		/*AA2Play v12 FP v1.4.0a.exe+2165D0 - 6A FF                 - push -01 { 255 }
+		AA2Play v12 FP v1.4.0a.exe+2165D2 - 68 D0A4D500           - push "AA2Play v12 FP v1.4.0a.exe"+2DA4D0 { [0824548B] }
+		AA2Play v12 FP v1.4.0a.exe+2165D7 - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+		AA2Play v12 FP v1.4.0a.exe+2165DD - 50                    - push eax
+		AA2Play v12 FP v1.4.0a.exe+2165DE - 83 EC 14              - sub esp,14 { 20 }
+		AA2Play v12 FP v1.4.0a.exe+2165E1 - A1 A03ADE00           - mov eax,["AA2Play v12 FP v1.4.0a.exe"+363AA0] { [198] }
+		AA2Play v12 FP v1.4.0a.exe+2165E6 - 33 C4                 - xor eax,esp
+		*/
+		//...
+		/*AA2Play v12 FP v1.4.0a.exe+21679A - 8B 4C 24 10           - mov ecx,[esp+10]
+		AA2Play v12 FP v1.4.0a.exe+21679E - 33 CC                 - xor ecx,esp
+		AA2Play v12 FP v1.4.0a.exe+2167A0 - E8 B4320700           - call "AA2Play v12 FP v1.4.0a.exe"+289A59 { ->AA2Play v12 FP v1.4.0a.exe+289A59 }
+		AA2Play v12 FP v1.4.0a.exe+2167A5 - 83 C4 20              - add esp,20 { 32 }
+		AA2Play v12 FP v1.4.0a.exe+2167A8 - C3                    - ret 
+		AA2Play v12 FP v1.4.0a.exe+2167A9 - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AA - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AB - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AC - CC                    - int 3 
+		*/
+		DWORD address = General::GameBase + 0x2167A5;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV3);
+		Hook((BYTE*)address,
+			{ 0x83, 0xC4, 0x20,
+				0xC3,
+				0xCC, },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
 	}
 	
 
