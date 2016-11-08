@@ -186,7 +186,7 @@ namespace AAEdit {
 	bool m_visible;
 
 	void AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName, 
-			RECT targetRct, INT_PTR (CALLBACK *DialogProc)(HWND,UINT,WPARAM,LPARAM));
+			INT_PTR (CALLBACK *DialogProc)(HWND,UINT,WPARAM,LPARAM));
 	LPARAM GetCurrTabItemData();
 private:
 

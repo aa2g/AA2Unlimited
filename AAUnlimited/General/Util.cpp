@@ -109,6 +109,56 @@ namespace {
 	}();
 };
 
+void ScrollWindow(HWND wnd,WPARAM scrollType,DWORD scrollKind) {
+	SCROLLINFO si;
+	// Get all the vertial scroll bar information.
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_ALL;
+	GetScrollInfo(wnd,scrollKind,&si);
+
+	// Save the position for comparison later on.
+	int oldPos = si.nPos;
+	switch (LOWORD(scrollType))
+	{
+	case SB_TOP:
+		si.nPos = si.nMin;
+		break;
+	case SB_BOTTOM:
+		si.nPos = si.nMax;
+		break;
+	case SB_LINEUP:
+		si.nPos -= 1;
+		break;
+	case SB_LINEDOWN:
+		si.nPos += 1;
+		break;
+	case SB_PAGEUP:
+		si.nPos -= si.nPage;
+		break;
+	case SB_PAGEDOWN:
+		si.nPos += si.nPage;
+		break;
+	case SB_THUMBTRACK:
+		si.nPos = si.nTrackPos;
+		break;
+	default:
+		break;
+	}
+
+	// Set the position and then retrieve it.  Due to adjustments
+	// by Windows it may not be the same as the value set.
+	si.fMask = SIF_POS;
+	SetScrollInfo(wnd,scrollKind,&si,TRUE);
+	GetScrollInfo(wnd,scrollKind,&si);
+
+	// If the position has changed, scroll window and update it.
+	if (si.nPos != oldPos)
+	{
+		ScrollWindow(wnd,0,(oldPos - si.nPos),NULL,NULL);
+		UpdateWindow(wnd);
+	}
+}
+
 DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 	DWORD reg = regInit;
 	for (int i = 0; i < len; i++) {
