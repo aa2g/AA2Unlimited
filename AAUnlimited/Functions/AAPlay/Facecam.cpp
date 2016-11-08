@@ -139,19 +139,28 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		}
 
 		//if 3d model was reloaded
+		if (loc_state == 0 && 
+			(loc_activeChar->m_xxFace != loc_activeFaceXX || loc_passiveChar->m_xxFace != loc_passiveFaceXX))
+		{
+			loc_activeFaceXX = loc_activeChar->m_xxFace;
+			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
+			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
+			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
+			RestoreCamera();
+		}
 		if(loc_activeChar->m_xxFace != loc_activeFaceXX &&
 			loc_state == 1) {
 			loc_activeFaceXX = loc_activeChar->m_xxFace;
 			RestoreCamera();
 			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
 		}
-		if(loc_passiveChar->m_xxFace != loc_passiveFaceXX &&
+		if (loc_passiveChar->m_xxFace != loc_passiveFaceXX &&
 			loc_state == 2) {
 			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
 			RestoreCamera();
 			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
 		}
-		
+
 
 		if (loc_focusBone != NULL) {
 			//we need to keep all camera parameters at 0 (except for fov of course)
