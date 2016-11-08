@@ -81,8 +81,8 @@ const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 		{ ExtClass::CharacterStruct::SKELETON, 4, TEXT("a01_J_ArmR_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //right arm thickness
 		{ ExtClass::CharacterStruct::SKELETON, 5, TEXT("a01_J_HandL_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left hand fingers length
 		{ ExtClass::CharacterStruct::SKELETON, 6, TEXT("a01_J_HandR_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right hand fingers length
-		{ ExtClass::CharacterStruct::SKELETON, 7, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //kosi thickness
-		{ ExtClass::CharacterStruct::SKELETON, 8, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD },
+		{ ExtClass::CharacterStruct::SKELETON, 7, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //kosi thickness
+		{ ExtClass::CharacterStruct::SKELETON, 8, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY },
 		{ ExtClass::CharacterStruct::SKELETON, 9, TEXT("a01_J_SiriL_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD },
 		{ ExtClass::CharacterStruct::SKELETON,10, TEXT("a01_J_SiriR_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD },
 		{ ExtClass::CharacterStruct::SKELETON,11, TEXT("a01_J_SiriL_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD },
@@ -93,8 +93,23 @@ const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS] = {
 		{ ExtClass::CharacterStruct::SKELETON,16, TEXT("a01_J_FootR_03"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD }, //right foot length
 		{ ExtClass::CharacterStruct::SKELETON,17, TEXT("a01_J_FootL_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left foot width
 		{ ExtClass::CharacterStruct::SKELETON,18, TEXT("a01_J_FootR_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right foot width
-		{ ExtClass::CharacterStruct::SKELETON,19, TEXT("a01_J_UplegL_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left thigh thickness
-		{ ExtClass::CharacterStruct::SKELETON,20, TEXT("a01_J_UplegR_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right thigh thickness
+		{ ExtClass::CharacterStruct::SKELETON,19, TEXT("a01_J_UplegL_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left thigh thickness
+		{ ExtClass::CharacterStruct::SKELETON,20, TEXT("a01_J_UplegR_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right thigh thickness
+		{ ExtClass::CharacterStruct::SKELETON,21, TEXT("a01_J_KataL_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD }, //left shoulder width
+		{ ExtClass::CharacterStruct::SKELETON,22, TEXT("a01_J_KataR_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD }, //right shoulder width
+		{ ExtClass::CharacterStruct::SKELETON,23, TEXT("a01_J_KataL_01"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD }, //left shoulder height
+		{ ExtClass::CharacterStruct::SKELETON,24, TEXT("a01_J_KataR_01"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD }, //right shoulder height
+		{ ExtClass::CharacterStruct::SKELETON,25, TEXT("a01_J_Kosi_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::DIVIDE }, //counterpart to 7
+		{ ExtClass::CharacterStruct::SKELETON,26, TEXT("a01_J_Kosi_020"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::DIVIDE }, //counterpart to 8
+		{ ExtClass::CharacterStruct::SKELETON,27, TEXT("a01_J_Neck_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //neck size
+		{ ExtClass::CharacterStruct::SKELETON,28, TEXT("a01_J_Neck_02"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::DIVIDE }, //neck size counterpart
+		{ ExtClass::CharacterStruct::SKELETON,29, TEXT("a_J_dan07"),{ 1,1,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //male only
+		{ ExtClass::CharacterStruct::SKELETON,30, TEXT("a_J_dan03"),{ 0,0,0, 0,0,0, 0,0,1 }, Slider::ADD }, //apply to females too
+		{ ExtClass::CharacterStruct::SKELETON,31, TEXT("a_J_ana03"),{ 0,0,0, 0,0,0, 0,0,1 }, Slider::ADD }, //not sure why these exist twice
+		{ ExtClass::CharacterStruct::SKELETON,32, TEXT("a_J_dan03"),{ 1,1,0, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //girth
+		{ ExtClass::CharacterStruct::SKELETON,33, TEXT("a_J_ana03"),{ 1,1,0, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //
+		{ ExtClass::CharacterStruct::SKELETON,34, TEXT("a_J_dan06"),{ 1,1,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //apply to females too
+		{ ExtClass::CharacterStruct::SKELETON,35, TEXT("a_J_ana06"),{ 1,1,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY }, //not sure why these exist twice
 	},
 	{
 		//BODY

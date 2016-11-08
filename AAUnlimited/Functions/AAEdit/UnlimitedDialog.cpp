@@ -81,14 +81,14 @@ void UnlimitedDialog::Refresh() {
 }
 
 void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName,
-								RECT rct, INT_PTR(CALLBACK *dialogProc)(HWND, UINT, WPARAM, LPARAM)) {
+								INT_PTR(CALLBACK *dialogProc)(HWND, UINT, WPARAM, LPARAM)) {
 	HWND res = CreateDialogParam(General::DllInst, MAKEINTRESOURCE(resourceName),
 		this->m_tabs, dialogProc, (LPARAM)dialog);
 	if(res == NULL) {
 		int error = GetLastError();
 		LOGPRIO(Logger::Priority::WARN) << "failed to make dialog " << resourceName << ": " << error << "\r\n";
 	}
-	MoveWindow(dialog->m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+
 	TCITEM item;
 	item.mask = TCIF_TEXT | TCIF_PARAM;
 	item.pszText = (LPWSTR)tabName;
@@ -106,37 +106,45 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_tabs = GetDlgItem(hwndDlg, IDC_TABS);
-		
-		RECT rct;
-		GetWindowRect(hwndDlg, &rct);
-		rct.top += 20; rct.right -= 20;
-		rct.left += 10; rct.left -= 10;
-		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
 
 		int index = 0;
 		thisPtr->AddDialog(IDD_GENERAL,&thisPtr->m_gnDialog,index++,TEXT("General"),
-			rct,GNDialog::DialogProc);
+			GNDialog::DialogProc);
 		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog,index++, TEXT("Eye Textures"),
-			rct, ETDialog::DialogProc);
+			ETDialog::DialogProc);
 		thisPtr->AddDialog(IDD_TANSELECT, &thisPtr->m_tsDialog,index++, TEXT("Tan"),
-			rct, TSDialog::DialogProc);
+			TSDialog::DialogProc);
 		thisPtr->AddDialog(IDD_HAIR, &thisPtr->m_hrDialog,index++, TEXT("Hair"),
-			rct, HRDialog::DialogProc);
+			HRDialog::DialogProc);
 		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog,index++, TEXT("Mesh Overrides"),
-			rct, MODialog::DialogProc);
+			MODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog,index++, TEXT("Archive Overrides"),
-			rct, AODialog::DialogProc);
+			AODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog,index++, TEXT("Archive Redirects"),
-			rct, ARDialog::DialogProc);
+			ARDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODY,&thisPtr->m_bdDialog,index++,TEXT("Body"),
-			rct, BDDialog::DialogProc);
+			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
-			rct,BSDialog::DialogProc);
+			BSDialog::DialogProc);
 
-		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
+		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
+		RECT rct;
+		GetClientRect(thisPtr->m_tabs,&rct);
+		TabCtrl_AdjustRect(thisPtr->m_tabs,FALSE,&rct);
+		for(int i = 0; i < count; i++) {
+			TCITEM item;
+			item.mask = TCIF_PARAM;
+			BOOL suc = TabCtrl_GetItem(thisPtr->m_tabs,i,&item);
+			if (suc == FALSE) continue;
+			Dialog* diag = (Dialog*)(item.lParam);
+
+			MoveWindow(diag->m_dialog,rct.left,rct.top,rct.right - rct.left,rct.bottom - rct.top,FALSE);
+		}
 
 		DWORD charDataRule[] { 0x353254, 0x2C, 0};
 		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+
+		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
 
 		thisPtr->Refresh();
 		return TRUE;
@@ -1147,12 +1155,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.1f, 0.1f
 			},
 			{ TEXT("Bottom Width"),
-				{ { CharacterStruct::SKELETON, 7 } },
-				-0.1f, 0.1f
+				{ { CharacterStruct::SKELETON, 7 },{ CharacterStruct::SKELETON, 25 } },
+				0.5f, 1.5f
 			},
 			{ TEXT("Bottom Thickness"),
-				{ { CharacterStruct::SKELETON, 8 } },
-				-0.1f, 0.1f
+				{ { CharacterStruct::SKELETON, 8 },{ CharacterStruct::SKELETON, 26 } },
+				0.5f, 1.5f
 			},
 			{ TEXT("Lower Bottom Thickness"),
 				{ { CharacterStruct::SKELETON, 9 }, { CharacterStruct::SKELETON, 10 } },
@@ -1166,6 +1174,35 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
 				-0.5f, 0.5f
 			},
+			{ TEXT("Shoulder Width"),
+				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulder Height"),
+				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
+				-0.5f, 0.5f
+			},
+
+			{ TEXT("Neck Size"),
+				{ { CharacterStruct::SKELETON, 27 },{ CharacterStruct::SKELETON, 28 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Ball Size"),
+				{ { CharacterStruct::SKELETON, 29 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Strapon Length"),
+				{ { CharacterStruct::SKELETON, 30 },{ CharacterStruct::SKELETON, 31 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Strapon Girth"),
+				{ { CharacterStruct::SKELETON, 32 },{ CharacterStruct::SKELETON, 33 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Glans Size"),
+				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
+				0.5f, 1.5f
+			},
 		};
 		
 		int xpos = 10,ypos = 10;
@@ -1177,12 +1214,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			thisPtr->m_sliders.push_back(BodySlider(hwndDlg,sliderIds[i].label,xpos,ypos,
 				sldVec,sliderIds[i].min,sliderIds[i].max));
 			ypos += 40; //move next one a bit farer down
-			if(i != 0 && i % 9 == 0) {
-				ypos -= 400;
-				xpos += 330;
-			}
 		}
-
+		SCROLLINFO si;
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_PAGE | SIF_RANGE;
+		si.nMin = 0;
+		si.nMax = ypos;
+		si.nPage = 200;
+		SetScrollInfo(hwndDlg,SB_VERT,&si,FALSE);
 		
 
 		return TRUE; }
@@ -1202,6 +1241,15 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->ApplySlider(i);
 				break;
 			}
+		}
+		break; }
+	case WM_VSCROLL: {
+		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		HWND wnd = (HWND)lparam;
+		if(wnd == NULL) {
+			General::ScrollWindow(hwndDlg,wparam);
+			return TRUE;
 		}
 		break; }
 	case WM_COMMAND: {

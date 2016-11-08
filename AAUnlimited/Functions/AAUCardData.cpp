@@ -566,6 +566,11 @@ bool AAUCardData::RemoveBoneRule(int index) {
 }
 
 void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
+	//save guard
+	if (sliderTarget < 0 || sliderTarget > ExtClass::CharacterStruct::N_MODELS || Shared::g_sliders[sliderTarget].size() >= sliderIndex) {
+		LOGPRIO(Logger::Priority::WARN) << "invalid slider id (" << sliderTarget << "|" << sliderIndex << ") set\r\n";
+		return;
+	}
 	//add the value to the slider vector, or remove if value is 0 and its contained
 	size_t i;
 	for(i = 0; i < m_sliders.size(); i++) {
@@ -643,6 +648,10 @@ void AAUCardData::GenSliderMap() {
 
 	for(auto elem : m_sliders) {
 		int target = elem.first.first;
+		if(target < 0 || target > ExtClass::CharacterStruct::N_MODELS || Shared::g_sliders[target].size() >= elem.first.second) {
+			LOGPRIO(Logger::Priority::WARN) << "invalid slider id (" << target << "|" << elem.first.second << ") read; the slider was skipped\r\n";
+			continue;
+		}
 		auto& map = m_sliderMap[target];
 		const Shared::Slider& slider = Shared::g_sliders[target][elem.first.second];
 		auto it = map.find(slider.boneName);

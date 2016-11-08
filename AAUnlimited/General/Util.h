@@ -103,6 +103,8 @@ inline void MoveWindowRect(HWND wnd, RECT& rct, BOOL redraw) {
 	MoveWindow(wnd,rct.left,rct.top,RectWidth(rct),RectHeight(rct),redraw);
 }
 
+void ScrollWindow(HWND wnd,WPARAM scrollType, DWORD scrollKind = SB_VERT);
+
 /*
  * Keeps Track of the Time it was started, and can be told to return the difference, in seconds,
  * that it is "running" allready. No active time measurement is performed, the time is only polled
