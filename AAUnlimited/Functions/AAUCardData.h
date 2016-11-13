@@ -28,6 +28,9 @@ class AAUCardData
 public:
 	static const DWORD PngChunkId = 'aaUd';
 	static const DWORD PngChunkIdBigEndian = 'dUaa';
+	enum MeshModFlag {
+		MODIFY_FRAME = 1,MODIFY_BONE = 2
+	};
 public:
 	AAUCardData();
 	~AAUCardData();
@@ -61,7 +64,7 @@ public:
 	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
 	bool RemoveHair(int index);
 	struct BoneMod;
-	bool AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
+	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
 	bool RemoveBoneRule(int index);
 	void SetSliderValue(int sliderTarget,int sliderIndex,float value);
 
@@ -101,7 +104,8 @@ public:
 			for (int i = 0; i < 9; i++) if (data[i] != rhs.data[i]) return false; return true;
 		}
 	};
-	typedef std::pair<std::pair<std::wstring,std::wstring>,BoneMod> BoneRuleV2;
+	
+	typedef std::pair<std::pair<int,std::pair<std::wstring,std::wstring>>,BoneMod> BoneRuleV2;
 	typedef std::pair<std::pair<int,int>,float> SliderRule; //int is slider index in global array, float is selected value
 
 	//getter functions
@@ -155,19 +159,30 @@ public:
 
 	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
 
-	inline const std::vector<BoneRuleV2> GetBoneRuleList() { return m_boneRules; }
+	inline const std::vector<BoneRuleV2> GetMeshRuleList() { return m_boneRules; }
 	inline const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName) {
 		auto it = m_boneRuleMap.find(xxFileName);
 		return it == m_boneRuleMap.end() ? NULL : &it->second;
 	}
+	inline const std::map<std::wstring,std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName) {
+		auto it = m_frameRuleMap.find(xxFileName);
+		return it == m_frameRuleMap.end() ? NULL : &it->second;
+	}
 
 	inline const std::vector<SliderRule> GetSliderList() { return m_sliders; }
-	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderRuleMap(int type) {
-		return m_sliderMap[type];
+	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderBoneRuleMap(int type) {
+		return m_boneSliderMap[type];
 	}
-	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
-		auto it = m_sliderMap[model].find(bone);
-		return (it != m_sliderMap[model].end()) ? &it->second : NULL;
+	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderFrameRuleMap(int type) {
+		return m_frameSliderMap[type];
+	}
+	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+		auto it = m_boneSliderMap[model].find(bone);
+		return (it != m_boneSliderMap[model].end()) ? &it->second : NULL;
+	}
+	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model,std::wstring bone) {
+		auto it = m_frameSliderMap[model].find(bone);
+		return (it != m_frameSliderMap[model].end()) ? &it->second : NULL;
 	}
 
 private:
@@ -218,9 +233,11 @@ private:
 
 	std::vector<BoneRuleV2> m_boneRules;
 	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
+	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_frameRuleMap;
 
 	std::vector<SliderRule> m_sliders;
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_sliderMap[ExtClass::CharacterStruct::N_MODELS];
+	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
+	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

@@ -14,7 +14,7 @@ namespace Shared {
 			unsigned int num4;
 			char suffix;
 
-			Name(const char* name) {
+			Name(const char* name) : prefix(0), suffix(0), num1(0),num2(0),num3(0),num4(0) {
 				valid = false;
 				//two prefixes first
 				prefix = *name;

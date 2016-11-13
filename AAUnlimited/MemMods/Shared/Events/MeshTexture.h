@@ -16,7 +16,9 @@ void OverrideOutlineColorInject();
 
 void OverrideBoneInject();
 void OverrideBoneInjectV2();
-void OverrideBoneInjectV3();
+
+void OverrideFrameInject();
+void OverrideBoneManipulationInject();
 
 }
 }

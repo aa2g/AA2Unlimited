@@ -831,22 +831,22 @@ void OverrideBoneInjectV2() {
 	}
 }
 
-void __stdcall OverrideBoneEventV3(ExtClass::XXFile* xxFile) {
+void __stdcall OverrideFrameEvent(ExtClass::XXFile* xxFile) {
 	Shared::XXFileModification(xxFile,General::IsAAEdit);
 }
 
-void __declspec(naked) OverrideBoneRedirectV3() {
+void __declspec(naked) OverrideFrameRedirect() {
 	__asm {
 		add esp, 0x20
 		pushad
 		push eax
-		call OverrideBoneEventV3
+		call OverrideFrameEvent
 		popad
 		ret
 	}
 }
 
-void OverrideBoneInjectV3() {
+void OverrideFrameInject() {
 	if(General::IsAAEdit) {
 		//function that reads an xx file from an xx file (no animations and stuff)
 		/*AA2Edit.exe+1F8B50 - 6A FF                 - push -01 { function that reads an xx file }
@@ -869,7 +869,7 @@ void OverrideBoneInjectV3() {
 		AA2Edit.exe+1F8D2C - CC                    - int 3
 		*/
 		DWORD address = General::GameBase + 0x1F8D25;
-		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV3);
+		DWORD redirectAddress = (DWORD)(&OverrideFrameRedirect);
 		Hook((BYTE*)address,
 			{ 0x83, 0xC4, 0x20, 
 				0xC3, 
@@ -898,7 +898,7 @@ void OverrideBoneInjectV3() {
 		AA2Play v12 FP v1.4.0a.exe+2167AC - CC                    - int 3 
 		*/
 		DWORD address = General::GameBase + 0x2167A5;
-		DWORD redirectAddress = (DWORD)(&OverrideBoneRedirectV3);
+		DWORD redirectAddress = (DWORD)(&OverrideFrameRedirect);
 		Hook((BYTE*)address,
 			{ 0x83, 0xC4, 0x20,
 				0xC3,
@@ -906,9 +906,53 @@ void OverrideBoneInjectV3() {
 			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			NULL);
 	}
-	
 
 }
+
+void __stdcall OverrideBoneManipulationEvent(ExtClass::Frame* boneFrame) {
+	Shared::XXBoneModification(boneFrame,General::IsAAEdit);
+}
+
+DWORD OverrideBoneManipulationOriginal;
+void __declspec(naked) OverrideBoneManipulationRedirect() {
+	__asm {
+		push [esp+8]
+		push [esp+8]
+		call [OverrideBoneManipulationOriginal]
+		add esp, 8
+
+		push eax
+
+		push ebx
+		call OverrideBoneManipulationEvent
+
+		pop eax
+		ret
+	}
+}
+
+void OverrideBoneManipulationInject() {
+	if (General::IsAAEdit) {
+		/*
+		AA2Edit.exe+1F9792 - 56                    - push esi
+		AA2Edit.exe+1F9793 - 53                    - push ebx{ frame of which the subbones will be set }
+		AA2Edit.exe+1F9794 - 8B C7                 - mov eax,edi
+		AA2Edit.exe+1F9796 - E8 F5080000           - call AA2Edit.exe+1FA090{ changes all bones from this frame }
+		AA2Edit.exe+1F979B - 83 C4 08              - add esp,08 { 8 }
+		*/
+		DWORD address = General::GameBase + 0x1F9796;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneManipulationRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0x08, 00, 00 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneManipulationOriginal);
+	}
+	else if (General::IsAAPlay) {
+		
+	}
+}
+
+
 
 
 }

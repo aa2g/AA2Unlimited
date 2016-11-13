@@ -137,6 +137,8 @@ namespace AAEdit {
 		HWND m_bmCbXXFile;
 		HWND m_bmCbBone;
 		HWND m_bmList;
+		HWND m_bmRbFrameMod;
+		HWND m_bmRbBoneMod;
 		HWND m_bmEdMatrix[3][3];
 		
 		void LoadData(int listboxId);

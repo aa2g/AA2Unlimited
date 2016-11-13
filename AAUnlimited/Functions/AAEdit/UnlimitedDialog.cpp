@@ -884,6 +884,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_bmEdMatrix[2][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR31);
 		thisPtr->m_bmEdMatrix[2][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR32);
 		thisPtr->m_bmEdMatrix[2][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR33);
+		thisPtr->m_bmRbFrameMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME);
+		thisPtr->m_bmRbBoneMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBBONE);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -894,6 +896,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
+
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
 		return TRUE; }
 	case WM_VKEYTOITEM: {
@@ -978,11 +982,18 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
-	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
+	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 	const auto& rule = vec[listboxId];
 	//combo box with title
-	SendMessage(m_bmCbXXFile,WM_SETTEXT,0,(LPARAM)rule.first.first.c_str());
-	SendMessage(m_bmCbBone,WM_SETTEXT,0,(LPARAM)rule.first.second.c_str());
+	SendMessage(m_bmCbXXFile,WM_SETTEXT,0,(LPARAM)rule.first.second.first.c_str());
+	SendMessage(m_bmCbBone,WM_SETTEXT,0,(LPARAM)rule.first.second.second.c_str());
+	int flags = rule.first.first;
+	if(flags & AAUCardData::MODIFY_BONE) {
+		SendMessage(m_bmRbBoneMod,BM_SETCHECK,BST_CHECKED,0);
+	}
+	if (flags & AAUCardData::MODIFY_FRAME) {
+		SendMessage(m_bmRbFrameMod,BM_SETCHECK,BST_CHECKED,0);
+	}
 	//the matrix
 
 	for(int i = 0; i < 3; i++) {
@@ -999,11 +1010,14 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	SendMessage(m_bmCbXXFile,WM_GETTEXT,128,(LPARAM)xxname);
 	TCHAR bonename[128];
 	SendMessage(m_bmCbBone,WM_GETTEXT,128,(LPARAM)bonename);
+	int flags = 0;
+	if (SendMessage(m_bmRbBoneMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_BONE;
+	if (SendMessage(m_bmRbFrameMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_FRAME;
 	//remove transformation if it allready exists
-	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
+	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 	unsigned int match;
 	for(match = 0; match < vec.size(); match++) {
-		if (vec[match].first.first == xxname && vec[match].first.second == bonename) break;
+		if (vec[match].first.first == flags && vec[match].first.second.first == xxname && vec[match].first.second.second == bonename) break;
 	}
 	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneRule(match);
 
@@ -1018,7 +1032,7 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		}
 	}
 	//save
-	g_currChar.m_cardData.AddBoneRule(xxname,bonename,mod);
+	g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname,bonename,mod);
 	Refresh();
 
 }
@@ -1041,10 +1055,13 @@ void UnlimitedDialog::BDDialog::Refresh() {
 
 	//listbox
 	SendMessage(this->m_bmList,LB_RESETCONTENT,0,0);
-	const auto& list = AAEdit::g_currChar.m_cardData.GetBoneRuleList();
+	const auto& list = AAEdit::g_currChar.m_cardData.GetMeshRuleList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(TEXT("["));
-		listEntry += list[i].first.first + TEXT("|") + list[i].first.second + TEXT("]");
+		if (list[i].first.first & AAUCardData::MODIFY_BONE) listEntry += TEXT("BONE");
+		else listEntry += TEXT("FRAME");
+		listEntry += TEXT("]");
+		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second + TEXT("]");
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 
@@ -1154,12 +1171,20 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Bottom Bone Width"),
+				{ { CharacterStruct::BODY, 0 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Bottom Bone Thickness"),
+				{ { CharacterStruct::BODY, 1 }  },
+				-0.5f, 0.5f
+			},
 			{ TEXT("Bottom Width"),
-				{ { CharacterStruct::SKELETON, 7 },{ CharacterStruct::SKELETON, 25 } },
+				{ { CharacterStruct::SKELETON, 7 } },
 				0.5f, 1.5f
 			},
 			{ TEXT("Bottom Thickness"),
-				{ { CharacterStruct::SKELETON, 8 },{ CharacterStruct::SKELETON, 26 } },
+				{ { CharacterStruct::SKELETON, 8 } },
 				0.5f, 1.5f
 			},
 			{ TEXT("Lower Bottom Thickness"),
@@ -1175,6 +1200,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.5f, 0.5f
 			},
 			{ TEXT("Shoulder Width"),
+				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulder Size"),
 				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
 				-0.5f, 0.5f
 			},
@@ -1182,10 +1211,15 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
 				-0.5f, 0.5f
 			},
-
-			{ TEXT("Neck Size"),
-				{ { CharacterStruct::SKELETON, 27 },{ CharacterStruct::SKELETON, 28 } },
-				0.5f, 1.5f
+			{ TEXT("Neck Bone Size"),
+				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Arm Bone Size"),
+				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
+				  { CharacterStruct::BODY, 7 },{ CharacterStruct::BODY, 8 },{ CharacterStruct::BODY, 9 },
+				  { CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
+				-0.5f, 0.5f
 			},
 			{ TEXT("Ball Size"),
 				{ { CharacterStruct::SKELETON, 29 } },
@@ -1289,12 +1323,12 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 
 	for (ExtClass::CharacterStruct::Models model : renewFiles) {
 		for(auto& elem : Shared::g_xxMods[model]) {
-			ExtClass::Frame* bone = elem.first;
+			ExtClass::Frame* frame = (ExtClass::Frame*)elem.first;
 			TCHAR buff[256];
 			size_t written;
-			mbstowcs_s(&written,buff,bone->m_name+5,256);
+			mbstowcs_s(&written,buff,frame->m_name+5,256);
 			std::wstring str(buff);
-			auto* rule = Shared::g_currentChar->m_cardData.GetSliderRule(model,str);
+			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
 			if(rule != NULL) {
 				D3DMATRIX& mat = elem.second;
 				D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
@@ -1304,9 +1338,30 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 					Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
 				}
 				auto res = General::MatrixFromSRT(scale,rot,trans);
-				bone->m_matrix1 = res;
-				bone->m_matrix5 = res;
-				
+				frame->m_matrix1 = res;
+				frame->m_matrix5 = res;
+			}
+		}
+		for(auto& elem : Shared::g_xxBoneMods[model]) {
+			for(auto& savedBone : elem.bones) {
+				ExtClass::Bone* bone = savedBone.ptr;
+				TCHAR buff[256];
+				size_t written;
+				mbstowcs_s(&written,buff,bone->m_name,256);
+				std::wstring str(buff);
+				auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,str);
+				if (rule != NULL) {
+					D3DMATRIX& mat = elem.srtMatrix;
+					D3DMATRIX& origMat = elem.origMatrix;
+					D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+					D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+					D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+					for (auto& elem : *rule) {
+						Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+					}
+					auto res = General::MatrixFromSRT(scale,rot,trans);
+					(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
+				}
 			}
 		}
 	}

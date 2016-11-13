@@ -512,56 +512,106 @@ bool AAUCardData::RemoveBoneTransformation(int index) {
 	return true;
 }
 
-bool AAUCardData::AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
-	m_boneRules.emplace_back(std::pair<std::wstring,std::wstring>(xxFileName,boneName),mod);
-	
-	auto mapIt = m_boneRuleMap.find(xxFileName);
-	if(mapIt != m_boneRuleMap.end()) {
-		auto map2it = mapIt->second.find(boneName);
-		if(map2it != mapIt->second.end()) {
-			//add mod
-			map2it->second.push_back(mod);
+bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
+	m_boneRules.push_back(std::make_pair(std::make_pair(flags, std::pair<std::wstring,std::wstring>(xxFileName,boneName)),mod));
+	if(flags & MODIFY_BONE) {
+		auto mapIt = m_boneRuleMap.find(xxFileName);
+		if (mapIt != m_boneRuleMap.end()) {
+			auto map2it = mapIt->second.find(boneName);
+			if (map2it != mapIt->second.end()) {
+				//add mod
+				map2it->second.push_back(mod);
+			}
+			else {
+				//new map with mod
+				std::vector<BoneMod> vec;
+				vec.push_back(mod);
+				mapIt->second.emplace(boneName,std::move(vec));
+			}
 		}
 		else {
-			//new map with mod
+			std::map<std::wstring,std::vector<BoneMod>> map;
 			std::vector<BoneMod> vec;
 			vec.push_back(mod);
-			mapIt->second.emplace(boneName,std::move(vec));
+			map.emplace(boneName,vec);
+			m_boneRuleMap.emplace(xxFileName,std::move(map));
 		}
 	}
-	else {
-		std::map<std::wstring,std::vector<BoneMod>> map;
-		std::vector<BoneMod> vec;
-		vec.push_back(mod);
-		map.emplace(boneName,vec);
-		m_boneRuleMap.emplace(xxFileName,std::move(map));
+	if(flags & MODIFY_FRAME) {
+		auto mapIt = m_frameRuleMap.find(xxFileName);
+		if (mapIt != m_frameRuleMap.end()) {
+			auto map2it = mapIt->second.find(boneName);
+			if (map2it != mapIt->second.end()) {
+				//add mod
+				map2it->second.push_back(mod);
+			}
+			else {
+				//new map with mod
+				std::vector<BoneMod> vec;
+				vec.push_back(mod);
+				mapIt->second.emplace(boneName,std::move(vec));
+			}
+		}
+		else {
+			std::map<std::wstring,std::vector<BoneMod>> map;
+			std::vector<BoneMod> vec;
+			vec.push_back(mod);
+			map.emplace(boneName,vec);
+			m_frameRuleMap.emplace(xxFileName,std::move(map));
+		}
 	}
+	
 	return true;
 }
 
 bool AAUCardData::RemoveBoneRule(int index) {
 	if (index < 0 || (size_t)index >= m_boneRules.size()) return false;
 	auto vIt = m_boneRules.begin() + index;
-	auto mapIt = m_boneRuleMap.find(vIt->first.first);
-	std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
-	auto map2It = map.find(vIt->first.second);
-	auto& modVec = map2It->second;
-	//remove this mod from the mod vector
-	for(auto it = modVec.begin(); it != modVec.end(); it++) {
-		if(*it == vIt->second) {
-			modVec.erase(it);
-			break;
+	int flags = vIt->first.first;
+	if(flags & MODIFY_BONE) {
+		auto mapIt = m_boneRuleMap.find(vIt->first.second.first);
+		std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
+		auto map2It = map.find(vIt->first.second.second);
+		auto& modVec = map2It->second;
+		//remove this mod from the mod vector
+		for (auto it = modVec.begin(); it != modVec.end(); it++) {
+			if (*it == vIt->second) {
+				modVec.erase(it);
+				break;
+			}
 		}
+		//if vector is empty, remove it from the second map
+		if (modVec.size() == 0) {
+			map.erase(map2It);
+		}
+		//if this map is now empty, remove it from first map
+		if (map.size() == 0) {
+			m_boneRuleMap.erase(mapIt);
+		}
+		m_boneRules.erase(vIt);
 	}
-	//if vector is empty, remove it from the second map
-	if(modVec.size() == 0) {
-		map.erase(map2It);
+	if(flags & MODIFY_FRAME) {
+		auto mapIt = m_frameRuleMap.find(vIt->first.second.first);
+		std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
+		auto map2It = map.find(vIt->first.second.second);
+		auto& modVec = map2It->second;
+		//remove this mod from the mod vector
+		for (auto it = modVec.begin(); it != modVec.end(); it++) {
+			if (*it == vIt->second) {
+				modVec.erase(it);
+				break;
+			}
+		}
+		//if vector is empty, remove it from the second map
+		if (modVec.size() == 0) {
+			map.erase(map2It);
+		}
+		//if this map is now empty, remove it from first map
+		if (map.size() == 0) {
+			m_frameRuleMap.erase(mapIt);
+		}
+		m_boneRules.erase(vIt);
 	}
-	//if this map is now empty, remove it from first map
-	if(map.size() == 0) {
-		m_boneRuleMap.erase(mapIt);
-	}
-	m_boneRules.erase(vIt);
 	return true;
 }
 
@@ -585,7 +635,7 @@ void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
 			break;
 		}
 	}
-	if(i == m_sliders.size()) {
+	if(i == m_sliders.size() && value != Shared::g_sliders[sliderTarget][sliderIndex].GetNeutralValue()) {
 		//didnt find, so we need to add it
 		m_sliders.push_back(std::make_pair(std::make_pair(sliderTarget,sliderIndex),value));
 	}
@@ -625,25 +675,46 @@ void AAUCardData::GenArchiveRedirectMap() {
 void AAUCardData::GenBoneRuleMap() {
 	m_boneRuleMap.clear();
 	for (auto& elem : m_boneRules) {
-		auto m = m_boneRuleMap.find(elem.first.first);
-		if (m != m_boneRuleMap.end()) {
-			std::vector<BoneMod> vec;
-			vec.push_back(elem.second);
-			m->second.emplace(elem.first.second,std::move(vec));
-		}
-		else {
-			std::map<std::wstring,std::vector<BoneMod>> tmp;
-			std::vector<BoneMod> vec;
-			vec.push_back(elem.second);
-			tmp.emplace(elem.first.second,std::move(vec));
+		if(elem.first.first & MODIFY_BONE) {
+			auto m = m_boneRuleMap.find(elem.first.second.first);
+			if (m != m_boneRuleMap.end()) {
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				m->second.emplace(elem.first.second.second,std::move(vec));
+			}
+			else {
+				std::map<std::wstring,std::vector<BoneMod>> tmp;
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				tmp.emplace(elem.first.second.second,std::move(vec));
 
-			m_boneRuleMap.emplace(elem.first.first,std::move(tmp));
+				m_boneRuleMap.emplace(elem.first.second.first,std::move(tmp));
+			}
+		}
+		if (elem.first.first & MODIFY_FRAME) {
+			auto m = m_frameRuleMap.find(elem.first.second.first);
+			if (m != m_frameRuleMap.end()) {
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				m->second.emplace(elem.first.second.second,std::move(vec));
+			}
+			else {
+				std::map<std::wstring,std::vector<BoneMod>> tmp;
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				tmp.emplace(elem.first.second.second,std::move(vec));
+
+				m_frameRuleMap.emplace(elem.first.second.first,std::move(tmp));
+			}
 		}
 	}
 }
 void AAUCardData::GenSliderMap() {
-	for(int i = 0; i < ARRAYSIZE(m_sliderMap); i++) {
-		m_sliderMap[i].clear();
+	for(int i = 0; i < ARRAYSIZE(m_boneSliderMap); i++) {
+		m_boneSliderMap[i].clear();
+	}
+	for (int i = 0; i < ARRAYSIZE(m_frameSliderMap); i++) {
+		m_frameSliderMap[i].clear();
 	}
 
 	for(auto elem : m_sliders) {
@@ -652,18 +723,34 @@ void AAUCardData::GenSliderMap() {
 			LOGPRIO(Logger::Priority::WARN) << "invalid slider id (" << target << "|" << elem.first.second << ") read; the slider was skipped\r\n";
 			continue;
 		}
-		auto& map = m_sliderMap[target];
 		const Shared::Slider& slider = Shared::g_sliders[target][elem.first.second];
-		auto it = map.find(slider.boneName);
-		if(it != map.end()) {
-			BoneMod mod = slider.GenerateModifier(elem.second);
-			it->second.push_back(std::make_pair(&slider,mod));
+		if(slider.flags & MODIFY_BONE) {
+			auto& map = m_boneSliderMap[target];
+			auto it = map.find(slider.boneName);
+			if (it != map.end()) {
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				it->second.push_back(std::make_pair(&slider,mod));
+			}
+			else {
+				std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				vec.push_back(std::make_pair(&slider,mod));
+				map.emplace(slider.boneName,vec);
+			}
 		}
-		else {
-			std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
-			BoneMod mod = slider.GenerateModifier(elem.second);
-			vec.push_back(std::make_pair(&slider,mod));
-			map.emplace(slider.boneName,vec);
+		if (slider.flags & MODIFY_FRAME) {
+			auto& map = m_frameSliderMap[target];
+			auto it = map.find(slider.boneName);
+			if (it != map.end()) {
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				it->second.push_back(std::make_pair(&slider,mod));
+			}
+			else {
+				std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				vec.push_back(std::make_pair(&slider,mod));
+				map.emplace(slider.boneName,vec);
+			}
 		}
 	}
 }
