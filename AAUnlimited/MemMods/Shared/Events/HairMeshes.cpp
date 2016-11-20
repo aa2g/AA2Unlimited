@@ -5,6 +5,7 @@
 
 #include "Functions\Shared\Globals.h"
 #include "Functions\AAPlay\Globals.h"
+#include "Functions\AAEdit\Globals.h"
 #include "Files\Config.h"
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
@@ -103,16 +104,23 @@ bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 	bool repeat = false; //if we need to repeat the function to load more hairs
 						 //for every hair kind
 	for (int kind = 0; kind < 4; kind++) {
-		auto& list = AAPlay::GetInstFromStruct(character)->m_hairs[kind];
-		if(list.size() > 0) {
-			if (currIndex < list.size()) {
+		std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>>* list;
+		if(General::IsAAEdit) {
+			list = &AAEdit::g_currChar.m_hairs[kind];
+		}
+		else {
+			list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+		}
+		
+		if(list->size() > 0) {
+			if (currIndex < list->size()) {
 				//still have to do something
 				repeat = true;
-				character->m_xxHairs[kind] = list[currIndex].second;
+				character->m_xxHairs[kind] = (*list)[currIndex].second;
 			}
 			else {
 				//we're done, clear the list
-				list.clear();
+				list->clear();
 			}
 		}
 	}
@@ -246,8 +254,6 @@ void __declspec(naked) HairLoadRedirectAAPlay() {
 
 
 void HairLoadInject() {
-	//these are different functions. The AAEdit version is loading a certain hair slot only,
-	//while the AAPlay version loads all of them. Therefor, the AAPlay version needs different handling
 	if (General::IsAAEdit) {
 		//stack: retVal, [classStruct+2C], someBool, hairSlot, someBool, whereas [[classStruct+2C]+24] == classStruct
 		/*AA2Edit.exe+119A10 - 6A FF                 - push -01 { 255 }
@@ -326,8 +332,28 @@ void __declspec(naked) XXCleanupRedirect() {
 }
 
 void XXCleanupInjection() {
-
-	if(General::IsAAPlay) {
+	if(General::IsAAEdit) {
+		/*AA2Edit.exe+103180 - 83 EC 40              - sub esp,40 { 64 }
+		AA2Edit.exe+103183 - 53                    - push ebx
+		AA2Edit.exe+103184 - 55                    - push ebp
+		AA2Edit.exe+103185 - 56                    - push esi
+		AA2Edit.exe+103186 - 57                    - push edi
+		*/
+		//...
+		/*AA2Edit.exe+1035AD - B0 01                 - mov al,01 { 1 }
+		AA2Edit.exe+1035AF - 5B                    - pop ebx
+		AA2Edit.exe+1035B0 - 83 C4 40              - add esp,40 { 64 }
+		AA2Edit.exe+1035B3 - C3                    - ret 
+		*/
+		DWORD address = General::GameBase + 0x1035AF;
+		DWORD redirectAddress = (DWORD)(&XXCleanupRedirect);
+		Hook((BYTE*)address,
+			{ 0x5B, 0x83, 0xC4, 0x40, 0xC3 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		XXCleanupFuncStart = General::GameBase + 0x103180;
+	}
+	else if(General::IsAAPlay) {
 		//ecx this call characterStruct, deletes all xx files.
 		//at the end (before the esp), no trace of the this pointer is left, but esp+8 should contain an array
 		//of pointers to xx files for easier deletion (so it should always be there), starting with the face xx.

@@ -8,6 +8,7 @@
 #include "General\ModuleInfo.h"
 #include "General\Util.h"
 #include "Files\Config.h"
+#include "Files\Logger.h"
 #include "Functions\AAEdit\Globals.h"
 #include "Functions\AAEdit\UnlimitedDialog.h"
 
@@ -46,7 +47,11 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 	aauData.Reset();
 
 	HANDLE hFile = CreateFile(card,FILE_GENERIC_READ | FILE_GENERIC_WRITE,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
-	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) return;
+	if (hFile == INVALID_HANDLE_VALUE || hFile == NULL) {
+		int error = GetLastError();
+		LOGPRIO(Logger::Priority::WARN) << "Could not read card " << card << " to preview; error: " << error << "\r\n";
+		return;
+	}
 
 	//read file first, we will need to truncate it anyway
 	DWORD hi,lo = GetFileSize(hFile,&hi);
@@ -102,7 +107,7 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 	
 	DWORD it = 0;
 	for(int i = 0; i < 4; i++) {
-		if (aauData.ret_files[0].size() == 0) continue;
+		if (aauData.ret_files[i].size() == 0) continue;
 		std::pair<BYTE*,DWORD> pair;
 		pair.first = fileBuffer + it;
 		pair.second = (DWORD)(aauData.ret_files[i].fileStart - (char*)(fileBuffer + it));
@@ -189,6 +194,49 @@ void ReadUnlimitDataInject() {
 	{ 0xE8, 0x92, 0x0C, 0x00, 0x00 },							//expected values
 	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&ReadUnlimitDataOriginal);
+}
+
+void __stdcall PreviewCardEvent(const wchar_t* card) {
+	AAEdit::g_AAUnlimitDialog.Initialize();
+	ReadUnlimitDataV2(card);
+}
+
+DWORD PreviewCardOriginal;
+void __declspec(naked) PreviewCardRedirect() {
+	__asm {
+		pushad
+		push ecx
+		call PreviewCardEvent
+		popad
+		jmp [PreviewCardOriginal]
+	}
+}
+
+void PreviewCardInject() {
+	//eax is the card path. some stack parameter, some class. function allocates buffer and reads card, not sure where the buffer goes
+	/*AA2Edit.exe+1A467 - 8D 84 24 64020000     - lea eax,[esp+00000264]
+	AA2Edit.exe+1A46E - 89 74 24 18           - mov [esp+18],esi
+	AA2Edit.exe+1A472 - E8 C9CD1000           - call AA2Edit.exe+127240
+	*/
+	/*DWORD address = General::GameBase + 0x1A472;
+	DWORD redirectAddress = (DWORD)(&PreviewCardRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0xC9, 0xCD, 0x10, 0x00 },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		&PreviewCardOriginal);*/
+
+	//no stack params, some registers tho; eax is path to card.
+	//note that this is called when clicking a name in the list, not the preview button;
+	//this function loads the image to preview, and that is done using a gdi createbitmapfromfile call,
+	//which keeps the file open for some godfucking retarded reason
+	/*AA2Edit.exe+18B5F - 8B 77 54              - mov esi,[edi+54]
+	AA2Edit.exe+18B62 - E8 39F7FFFF           - call AA2Edit.exe+182A0*/
+	DWORD address = General::GameBase + 0x18B62;
+	DWORD redirectAddress = (DWORD)(&PreviewCardRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0x39, 0xF7, 0xFF, 0xFF },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		&PreviewCardOriginal);
 }
 
 
