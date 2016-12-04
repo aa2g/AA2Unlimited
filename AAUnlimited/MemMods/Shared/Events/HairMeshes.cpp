@@ -381,9 +381,93 @@ void XXCleanupInjection() {
 	
 }
 
+/*
+ * return true to repeat.
+ * return false to end.
+ */
+bool HairRefreshEvent(ExtClass::CharacterStruct* character, BYTE* flags) {
+	enum Flags {
+		SKELETON = 1, FACE = 2, TOUNGE = 4, GLASSES = 8, 
+		FRONT_HAIR = 0x10, BACK_HAIR = 0x20, SIDE_HAIR = 0x40, HAIR_EXTENSION = 0x80
+	};
+	static const Flags hairMap[4] = {FRONT_HAIR, SIDE_HAIR, BACK_HAIR, HAIR_EXTENSION};
+
+	static int currIndex = 0;
+	static ExtClass::XXFile* savedPtr[4]; //the original hair pointer
+	static bool done[4]; //what kinds we are done with
+
+	//get char instance
+	CharInstData* charInst = NULL;
+	if (General::IsAAEdit) {
+		charInst = &AAEdit::g_currChar;
+	}
+	else if (General::IsAAPlay) {
+		charInst = AAPlay::GetInstFromStruct(character);
+	}
+
+	if (currIndex == 0) {
+		for (int i = 0; i < 4; i++) done[i] = Shared::g_currentChar->m_cardData.GetHairs(i).empty();
+	}
+
+	*flags = 0;
+
+	bool repeat = false; //if we need to repeat the function to load more hairs
+						 //for every hair kind
+	for (int kind = 0; kind < 4; kind++) {
+		if (done[kind]) continue; //done with this one
+
+		const auto& list = charInst->m_hairs[kind];
+
+		if (currIndex == 0) {
+			//the first, original hair
+			savedPtr[kind] = character->m_xxHairs[kind];
+		}
+		else {
+			//if this was the last hair, mark us as done, restore state and continue
+			if (currIndex >= list.size()) {
+				done[kind] = true;
+				character->m_xxHairs[kind] = savedPtr[kind];
+				continue;
+			}
+		}
+
+		character->m_xxHairs[kind] = list[currIndex].second;
+		*flags |= hairMap[kind];
+
+		repeat = true;
+	}
+
+	if (repeat) {
+		currIndex++;
+		return true;
+	}
+	else {
+		currIndex = 0;
+		return false;
+	}
+
+
+	return false;
+}
+
+DWORD HairRefreshFuncStart;
 void __declspec(naked) HairRefreshRedirect() {
 	__asm {
+		pop ebx
+		mov esp, ebp
+		pop ebp
 
+		pushad
+		lea eax, [esp+ 0x20 + 4]
+		push eax
+		push esi
+		call HairRefreshEvent
+		test al, al
+		popad
+
+		jz HairRefreshRedirect_end
+		jmp [HairRefreshFuncStart]
+	  HairRefreshRedirect_end:
 		ret 4
 	}
 }
@@ -408,12 +492,13 @@ void HairRefreshInject() {
 		AA2Edit.exe+FA663 - 5D                    - pop ebp
 		AA2Edit.exe+FA664 - C2 0400               - ret 0004 { 4 }
 		*/
-		/*DWORD address = General::GameBase + 0x1F89F0;
+		DWORD address = General::GameBase + 0xFA660;
 		DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
 		Hook((BYTE*)address,
-			{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
-			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
-		NULL);*/
+			{ 0x5B, 0x8B, 0xE5, 0x5D, 0xC2, 0x04, 0x04 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+		NULL);
+		HairRefreshFuncStart = General::GameBase + 0xFA471;
 	}
 	else if(General::IsAAPlay) {
 		/*AA2Play v12 FP v1.4.0a.exe+10B7E0 - 55                    - push ebp
@@ -430,6 +515,13 @@ void HairRefreshInject() {
 		AA2Play v12 FP v1.4.0a.exe+10B9D3 - 5D                    - pop ebp
 		AA2Play v12 FP v1.4.0a.exe+10B9D4 - C2 0400               - ret 0004 { 4 }
 		*/
+		DWORD address = General::GameBase + 0x10B9D0;
+		DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
+		Hook((BYTE*)address,
+			{ 0x5B, 0x8B, 0xE5, 0x5D, 0xC2, 0x04, 0x04 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+			NULL);
+		HairRefreshFuncStart = General::GameBase + 0x10B7E0;
 	}
 	
 }

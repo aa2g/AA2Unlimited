@@ -948,7 +948,19 @@ void OverrideBoneManipulationInject() {
 			&OverrideBoneManipulationOriginal);
 	}
 	else if (General::IsAAPlay) {
-		
+		/*
+		AA2Play v12 FP v1.4.0a.exe+217212 - 56                    - push esi
+		AA2Play v12 FP v1.4.0a.exe+217213 - 53                    - push ebx
+		AA2Play v12 FP v1.4.0a.exe+217214 - 8B C7                 - mov eax,edi
+		AA2Play v12 FP v1.4.0a.exe+217216 - E8 F5080000           - call "AA2Play v12 FP v1.4.0a.exe"+217B10 { ->AA2Play v12 FP v1.4.0a.exe+217B10 }
+		AA2Play v12 FP v1.4.0a.exe+21721B - 83 C4 08              - add esp,08 { 8 }
+		*/
+		DWORD address = General::GameBase + 0x217216;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneManipulationRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0x08, 00, 00 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneManipulationOriginal);
 	}
 }
 

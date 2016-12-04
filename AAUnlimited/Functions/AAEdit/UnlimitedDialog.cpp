@@ -5,6 +5,8 @@
 #include <queue>
 #include <set>
 #include <stdio.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "External\ExternalVariables\AAEdit\WindowData.h"
 #include "External\ExternalClasses\TextureStruct.h"
@@ -1237,6 +1239,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
 				0.5f, 1.5f
 			},
+			{ TEXT("[split] Ear Width"),
+				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				-0.5f, 1.5f
+			},
+			{ TEXT("[split] Ear Height"),
+				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				-0.5f, 1.5f
+			},
 		};
 		
 		int xpos = 10,ypos = 10;
@@ -1312,12 +1322,51 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BSDialog::ApplySlider(int index) {
+	//make sure slider operations are valid. else, crashes might occur
+	if(ExtVars::AAEdit::GetCurrentCharacter() == NULL || ExtVars::AAEdit::GetCurrentCharacter()->m_xxSkeleton == NULL) {
+		//every character has a skeleton, and the current character is only filled in the editor (previews dont count). therefor,
+		//if neither is true, we are not currently editing a valid model
+		for(int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
+			Shared::g_xxBoneMods[i].clear();
+			Shared::g_xxMods[i].clear();
+		}
+		return;
+	}
 	bool faceSliderRenew = false;
 	std::set<ExtClass::CharacterStruct::Models> renewFiles;
 	for (auto& slider : m_sliders[index].sliderData) {
 		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
 		renewFiles.insert(slider->target);
 		faceSliderRenew = faceSliderRenew || slider->target == ExtClass::CharacterStruct::FACE_SLIDERS;
+
+		//reset targeted matrix in case we 0ed it and the for loops below do not cover it anymore
+		if(m_sliders[index].currVal == slider->GetNeutralValue()) {
+			if(slider->flags & AAUCardData::MODIFY_FRAME) {
+				for (auto& elem : Shared::g_xxMods[slider->target]) {
+					ExtClass::Frame* frame = elem.first;
+					TCHAR buff[256];
+					size_t written;
+					mbstowcs_s(&written,buff,frame->m_name+5,256);
+					std::wstring str(buff);
+					if (str == slider->boneName) {
+						frame->m_matrix1 = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+						frame->m_matrix5 = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+						break;
+					}
+				}
+			}
+			if (slider->flags & AAUCardData::MODIFY_BONE) {
+				for (auto& elem : Shared::g_xxBoneMods[slider->target]) {
+					if (elem.name == slider->boneName) {
+						for(auto& bone : elem.bones) {
+							bone.ptr->m_matrix = elem.origMatrix;
+						}
+						break;
+					}
+				}
+			}
+
+		}
 	}
 	
 
@@ -1345,6 +1394,10 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 		for(auto& elem : Shared::g_xxBoneMods[model]) {
 			for(auto& savedBone : elem.bones) {
 				ExtClass::Bone* bone = savedBone.ptr;
+				if (bone->m_name == NULL) {
+					LOGPRIO(Logger::Priority::WARN) << "bone name is NULL for some reason\r\n";
+					continue;
+				}
 				TCHAR buff[256];
 				size_t written;
 				mbstowcs_s(&written,buff,bone->m_name,256);

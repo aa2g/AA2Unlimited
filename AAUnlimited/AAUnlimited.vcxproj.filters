@@ -148,5 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="resource.hm" />
+    <None Include="Cheat Engine Tables\AA2Edit.CT" />
+    <None Include="Cheat Engine Tables\AA2Play v12 FP v1.4.0a.CT" />
   </ItemGroup>
 </Project>
