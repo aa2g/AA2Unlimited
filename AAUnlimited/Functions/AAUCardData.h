@@ -7,6 +7,7 @@
 
 #include "TextureImage.h"
 #include "OverrideFile.h"
+#include "XXObjectFile.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace Shared {
@@ -59,6 +60,8 @@ public:
 	bool RemoveArchiveOverride(int index);
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
+	bool AddObjectOverride(const TCHAR* object,const TCHAR* file);
+	bool RemoveObjectOverride(int index);
 	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
 	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
@@ -82,6 +85,7 @@ public:
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
+	typedef std::pair<std::wstring,std::wstring> ObjectOverrideRule;
 	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
 	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 	struct HairPart {
@@ -124,6 +128,12 @@ public:
 	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
+	}
+
+	inline const std::vector<ObjectOverrideRule>& GetObjectOverrideList() const { return m_objectOverrides; }
+	inline const XXObjectFile* GetObjectOverrideFile(const char* objectName) const {
+		auto it = m_objectOverrideMap.find(objectName);
+		return it == m_objectOverrideMap.end() ? NULL : &it->second;
 	}
 
 	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
@@ -195,6 +205,9 @@ private:
 
 	std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
 	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
+
+	std::vector<ObjectOverrideRule> m_objectOverrides;
+	std::map<std::string,XXObjectFile> m_objectOverrideMap;
 
 	struct {
 		std::wstring texName;
@@ -276,6 +289,7 @@ private:
 	void GenMeshOverrideMap();
 	void GenArchiveOverrideMap();
 	void GenArchiveRedirectMap();
+	void GenObjectOverrideMap();
 	void GenBoneRuleMap();
 	void GenSliderMap();
 };

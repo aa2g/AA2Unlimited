@@ -214,6 +214,8 @@ void InitializeHooks() {
 			MeshTexture::OverrideFrameInject();
 			MeshTexture::OverrideBoneManipulationInject();
 
+			MeshTexture::OverrideObjectInject();
+
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
 

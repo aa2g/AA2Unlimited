@@ -20,5 +20,7 @@ void OverrideBoneInjectV2();
 void OverrideFrameInject();
 void OverrideBoneManipulationInject();
 
+void OverrideObjectInject();
+
 }
 }

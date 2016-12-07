@@ -70,6 +70,8 @@
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="Functions\Shared\Slider.cpp" />
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
+    <ClCompile Include="Files\XXFile.cpp" />
+    <ClCompile Include="Functions\XXObjectFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -135,6 +137,8 @@
     <ClInclude Include="General\DirectXStructs.h" />
     <ClInclude Include="External\ExternalClasses\Frame.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
+    <ClInclude Include="Files\XXFile.h" />
+    <ClInclude Include="Functions\XXObjectFile.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

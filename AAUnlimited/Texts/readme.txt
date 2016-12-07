@@ -38,6 +38,12 @@ The following rule types exist:
   Whenever a given file is read from a given archive, a different file from the harddrive will be loaded instead.
 - Archive Redirects: A set of rules of the form (archive.pp|file)->(archive.pp|file)
   Whenever a given file is read from a given archive, a different file from a different archive is loaded instead.
+- Object Overrides:  A set of rules of the form (ObjectName)->(file)
+  Whenever a xx file is loaded that contains the given Object, it is replaced by the object in the given file.
+  The format of the given file must be exactly how it is stored inside the xx file.
+  There is a different exe in this project that can extract those.
+  WARNING: by the looks of it, the file is radically different depending on the xx file version. These overrides probably
+  only work for xx files version 8. 
 
 
 /////////////////////////////////////////

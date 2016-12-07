@@ -96,6 +96,17 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_arDialog;
+	struct OODialog : public Dialog {
+		HWND m_edObject;
+		HWND m_edFile;
+		HWND m_btnApply;
+		HWND m_btnBrowse;
+		HWND m_lbOverrides;
+
+		void Refresh();
+		void RefreshRuleList();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_ooDialog;
 	struct ETDialog : public Dialog {
 		struct {
 			HWND cbActive;

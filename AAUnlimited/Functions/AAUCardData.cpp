@@ -497,6 +497,33 @@ bool AAUCardData::RemoveArchiveRedirect(int index) {
 	return true;
 }
 
+bool AAUCardData::AddObjectOverride(const TCHAR * object,const TCHAR * file) {
+	char buff[256];
+	size_t n;
+	wcstombs_s(&n,buff,object,256);
+	std::string strObject = buff;
+	wcstombs_s(&n,buff,file,256);
+	std::string strFile = buff;
+	if (m_objectOverrideMap.find(strObject) != m_objectOverrideMap.end()) return false; //allready contains it
+	XXObjectFile ofile(file);
+	m_objectOverrides.emplace_back(object, file);
+	m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+	return true;
+}
+
+bool AAUCardData::RemoveObjectOverride(int index) {
+	if (index < 0 || (size_t)index >= m_objectOverrides.size()) return false;
+	auto vMatch = m_objectOverrides.begin() + index;
+	char buff[256];
+	size_t n;
+	wcstombs_s(&n,buff,vMatch->first.c_str(),256);
+	auto mapMatch = m_objectOverrideMap.find(buff);
+	m_objectOverrides.erase(vMatch);
+	if (mapMatch != m_objectOverrideMap.end()) m_objectOverrideMap.erase(mapMatch);
+	return true;
+}
+
+
 bool AAUCardData::AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform) {
 	if (m_boneTransformMap.find(boneName) != m_boneTransformMap.end()) return false; //allready contains it
 	m_boneTransforms.emplace_back(boneName,transform);

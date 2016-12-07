@@ -137,6 +137,14 @@ namespace Shared {
 		return g_currentChar->m_cardData.GetMeshOverrideTexture(fileName);
 	}
 
+	/*********************/
+	/* Object  overrides */
+	/*********************/
+
+	const XXObjectFile * ObjectOverrideRules(char * fileName) {
+		return g_currentChar->m_cardData.GetObjectOverrideFile(fileName);
+	}
+
 	/**********************/
 	/* body modifications */
 	/**********************/

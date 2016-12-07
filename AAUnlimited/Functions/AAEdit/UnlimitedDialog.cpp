@@ -124,6 +124,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			AODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog,index++, TEXT("Archive Redirects"),
 			ARDialog::DialogProc);
+		thisPtr->AddDialog(IDD_OBJECTOVERRIDE,&thisPtr->m_ooDialog,index++,TEXT("Object Overrides"),
+			OODialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODY,&thisPtr->m_bdDialog,index++,TEXT("Body"),
 			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
@@ -516,6 +518,98 @@ void UnlimitedDialog::ARDialog::RefreshRuleList() {
 void UnlimitedDialog::ARDialog::Refresh() {
 	RefreshRuleList();
 }
+
+/**************************/
+/* Object Override Dialog */
+/**************************/
+
+INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		OODialog* thisPtr = (OODialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_edFile = GetDlgItem(hwndDlg,IDC_OO_EDFILE);
+		thisPtr->m_edObject = GetDlgItem(hwndDlg,IDC_OO_EDOBJECT);
+		thisPtr->m_btnApply = GetDlgItem(hwndDlg,IDC_OO_BTNAPPLY);
+		thisPtr->m_btnBrowse = GetDlgItem(hwndDlg,IDC_OO_BTNBROWSE);
+		thisPtr->m_lbOverrides = GetDlgItem(hwndDlg,IDC_OO_LIST);
+
+		thisPtr->RefreshRuleList();
+		return TRUE;
+		break; }
+	case WM_VKEYTOITEM: {
+		//DEL-key was pressed while the list box had the focus. our target is to remove
+		//the selected override rule.
+		OODialog* thisPtr = (OODialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			//get current selection text
+			int sel = SendMessage(thisPtr->m_lbOverrides,LB_GETCURSEL,0,0);
+			//remove this rule
+			g_currChar.m_cardData.RemoveObjectOverride(sel);
+			thisPtr->RefreshRuleList();
+			return TRUE;
+		}
+		break; }
+	case WM_COMMAND: {
+		OODialog* thisPtr = (OODialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_OO_BTNBROWSE) {
+				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH,NULL);
+				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH,NULL);
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
+				if (choice != NULL) {
+					if (General::StartsWith(choice,initialPlayDir.c_str())) {
+						const TCHAR* rest = choice + initialPlayDir.size();
+						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
+					}
+					else if (General::StartsWith(choice,initialEditDir.c_str())) {
+						const TCHAR* rest = choice + initialEditDir.size();
+						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
+					}
+				}
+				return TRUE;
+			}
+			else if (identifier == IDC_OO_BTNAPPLY) {
+				//apply button pressed.
+				std::wstring object,file;
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edObject,WM_GETTEXT,1024,(LPARAM)buffer);
+				object = buffer;
+				SendMessage(thisPtr->m_edFile,WM_GETTEXT,1024,(LPARAM)buffer);
+				file = buffer;
+
+				if (AAEdit::g_currChar.m_cardData.AddObjectOverride(object.c_str(),file.c_str())) {
+					thisPtr->RefreshRuleList();
+				}
+				return TRUE;
+			}
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::OODialog::RefreshRuleList() {
+	SendMessage(this->m_lbOverrides,LB_RESETCONTENT,0,0);
+	auto list = AAEdit::g_currChar.m_cardData.GetObjectOverrideList();
+	for (size_t i = 0; i < list.size(); i++) {
+		std::wstring listEntry(TEXT("["));
+		listEntry += list[i].first + TEXT("] -> [");
+		listEntry += list[i].second + TEXT("]");
+		SendMessage(this->m_lbOverrides,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
+	}
+}
+
+void UnlimitedDialog::OODialog::Refresh() {
+	RefreshRuleList();
+}
+
 
 /**********************/
 /* Eye Texture Dialog */

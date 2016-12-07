@@ -4,6 +4,7 @@
 
 #include "Functions\AAUCardData.h"
 #include "Functions\CharInstData.h"
+#include "Functions\XXObjectFile.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace Shared {
@@ -32,6 +33,8 @@ namespace Shared {
 	void __stdcall EyeTextureEnd(int leftRight, TCHAR** texture);
 
 	const TextureImage* MeshTextureOverrideRules(wchar_t* fileName);
+
+	const XXObjectFile* ObjectOverrideRules(char* fileName);
 
 	/*
 	 * XX file modification

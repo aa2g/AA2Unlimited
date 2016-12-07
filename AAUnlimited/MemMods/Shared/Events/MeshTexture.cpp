@@ -7,6 +7,7 @@
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
 #include "Functions\Shared\SpecialOverrides.h"
+#include "Files\XXFile.h"
 
 /*
 * xx file textures are loaded in two steps. First, an array of mesh structs is created, each of which
@@ -964,8 +965,127 @@ void OverrideBoneManipulationInject() {
 	}
 }
 
+BYTE* loc_overrideObjectOrigFile = NULL;
+DWORD loc_overrideObjectOrigOffset = 0;
+DWORD* loc_overrideObjectOrigOffsetPtr = NULL;
+BYTE* loc_overrideObjectFileBuffer = NULL;
+bool loc_overrideObjectIsOverriding = false;
+int loc_overrideObjectRecursionCount = 0;
+void __stdcall OverrideObjectStart(BYTE** ptrFile, DWORD* offset) {
+	if(loc_overrideObjectIsOverriding) {
+		loc_overrideObjectRecursionCount++;
+	}
+	else {
+		BYTE* objectBuffer = *ptrFile + *offset;
+		DWORD size = *(DWORD*)(objectBuffer);
+		if (size == 0 || size > 256) return;
+		char buffer[256];
+		char* it = (char*)(objectBuffer + 4);
+		for (int i = 0; i < size; i++) buffer[i] = ~it[i];
+		const XXObjectFile* match = Shared::ObjectOverrideRules(buffer);
+		if (match == NULL) return;
 
+		//read through this object so we can skip it
+		DWORD osize = FileFormats::XXFile::ReadObjectLength(objectBuffer);
+		if (osize == 0) return; //error
+
+		loc_overrideObjectOrigFile = *ptrFile;
+		loc_overrideObjectOrigOffset = *offset + osize;
+		loc_overrideObjectOrigOffsetPtr = offset;
+		loc_overrideObjectFileBuffer = new BYTE[match->GetFileSize()];
+		match->WriteToBuffer(loc_overrideObjectFileBuffer);
+		loc_overrideObjectIsOverriding = true;
+
+		*ptrFile = loc_overrideObjectFileBuffer;
+		*offset = 0;
+	}
+	
+}
+
+void __stdcall OverrideObjectEnd() {
+	if (loc_overrideObjectIsOverriding) {
+		loc_overrideObjectRecursionCount--;
+		if(loc_overrideObjectRecursionCount < 0) {
+			//we're done, restore values
+			*loc_overrideObjectOrigOffsetPtr = loc_overrideObjectOrigOffset;
+			loc_overrideObjectIsOverriding = false;
+			loc_overrideObjectRecursionCount = 0;
+			delete[] loc_overrideObjectFileBuffer;
+			loc_overrideObjectFileBuffer = NULL;
+		}
+	}
+}
+
+void __declspec(naked) OverrideObjectRedirectStart() {
+	__asm {
+		pushad
+
+		mov eax, [esp + 4 + 0x20 + 0x14] //pointer to offset (thats the parameter, a pointer to the offset)
+		lea edx, [esp + 4 + 0x20 + 0x10] //pointer to the file (to the parameter on the stack)
+		push eax
+		push edx
+		call OverrideObjectStart
+
+		popad
+
+		mov eax, [esp+ 4 + 0x0C]
+		push [esp]
+		mov [esp+4], ebx
+		
+		ret
+	};
+}
+void __declspec(naked) OverrideObjectRedirectEnd() {
+	__asm {
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
+		pushad
+		call OverrideObjectEnd
+		popad
+
+		ret
+	};
+}
+
+void OverrideObjectInject() {
+	if (General::IsAAEdit) {
+		//reads an object from the file buffer, including its children. [esp+10] is the file, [esp+14] is the pointer to the current offset
+		/*
+		AA2Edit.exe+1E8120 - 8B 44 24 0C           - mov eax,[esp+0C] { creates a bone }
+		AA2Edit.exe+1E8124 - 53                    - push ebx
+		*/
+		//...
+		//
+		/*
+		AA2Edit.exe+1E847A - 5F                    - pop edi
+		AA2Edit.exe+1E847B - 5E                    - pop esi
+		AA2Edit.exe+1E847C - 5D                    - pop ebp
+		AA2Edit.exe+1E847D - 5B                    - pop ebx
+		AA2Edit.exe+1E847E - C3                    - ret
+		AA2Edit.exe+1E847F - CC                    - int 3
+		*/
+		DWORD address = General::GameBase + 0x1E8120;
+		DWORD redirectAddress = (DWORD)(&OverrideObjectRedirectStart);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x44, 0x24, 0x0C, 0x53 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		address = General::GameBase + 0x1E847A;
+		redirectAddress = (DWORD)(&OverrideObjectRedirectEnd);
+		Hook((BYTE*)address,
+		{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3 },
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+	else if (General::IsAAPlay) {
+		
+		
+	}
+}
 
 
 }
 }
+
