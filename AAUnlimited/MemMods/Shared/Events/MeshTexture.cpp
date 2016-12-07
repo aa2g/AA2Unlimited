@@ -1080,8 +1080,28 @@ void OverrideObjectInject() {
 			NULL);
 	}
 	else if (General::IsAAPlay) {
-		
-		
+		/*AA2Play v12 FP v1.4.0a.exe+205520 - 8B 44 24 0C           - mov eax,[esp+0C]
+		AA2Play v12 FP v1.4.0a.exe+205524 - 53                    - push ebx
+		*/
+		//...
+		/*AA2Play v12 FP v1.4.0a.exe+20587A - 5F                    - pop edi
+		AA2Play v12 FP v1.4.0a.exe+20587B - 5E                    - pop esi
+		AA2Play v12 FP v1.4.0a.exe+20587C - 5D                    - pop ebp
+		AA2Play v12 FP v1.4.0a.exe+20587D - 5B                    - pop ebx
+		AA2Play v12 FP v1.4.0a.exe+20587E - C3                    - ret 
+		*/
+		DWORD address = General::GameBase + 0x205520;
+		DWORD redirectAddress = (DWORD)(&OverrideObjectRedirectStart);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x44, 0x24, 0x0C, 0x53 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		address = General::GameBase + 0x20587A;
+		redirectAddress = (DWORD)(&OverrideObjectRedirectEnd);
+		Hook((BYTE*)address,
+			{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3 },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
 	}
 }
 
