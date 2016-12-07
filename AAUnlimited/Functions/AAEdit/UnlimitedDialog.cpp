@@ -416,6 +416,20 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				return TRUE;
 			}
 			break; }
+		case LBN_DBLCLK: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_AO_LIST) {
+				LRESULT res = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					auto list = AAEdit::g_currChar.m_cardData.GetArchiveOverrideList();
+					auto override = list.at(res);
+					SetWindowText(thisPtr->m_edArchive, override.first.first.c_str());
+					SetWindowText(thisPtr->m_edArchiveFile, override.first.second.c_str());
+					SetWindowText(thisPtr->m_edOverrideFile, override.second.c_str());
+				}
+			}
+
+			break; }
 		}
 		break; }
 	}
@@ -497,6 +511,21 @@ INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				}
 				return TRUE;
 			}
+			break; }
+		case LBN_DBLCLK: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_AR_LIST) {
+				LRESULT res = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					auto list = AAEdit::g_currChar.m_cardData.GetArchiveRedirectList();
+					auto override = list.at(res);
+					SetWindowText(thisPtr->m_edArFrom, override.first.first.c_str());
+					SetWindowText(thisPtr->m_edFileFrom, override.first.second.c_str());
+					SetWindowText(thisPtr->m_edArTo, override.second.first.c_str());
+					SetWindowText(thisPtr->m_edFileTo, override.second.second.c_str());
+				}
+			}
+
 			break; }
 		}
 		break; }
