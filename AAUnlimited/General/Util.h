@@ -134,4 +134,5 @@ D3DMATRIX MatrixFromSRT(D3DVECTOR3& scales,D3DVECTOR3& rots,D3DVECTOR3& trans);
 
 std::vector<BYTE> FileToBuffer(const TCHAR* path);
 
+
 }

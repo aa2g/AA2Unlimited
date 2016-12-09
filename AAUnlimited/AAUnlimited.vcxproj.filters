@@ -72,6 +72,11 @@
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\XXObjectFile.cpp" />
+    <ClCompile Include="Functions\AAPlay\Poser.cpp" />
+    <ClCompile Include="General\GuiSlider.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
+    <ClCompile Include="General\IllusionUtil.cpp" />
+    <ClCompile Include="Files\PoseMods.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -139,11 +144,17 @@
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="Files\XXFile.h" />
     <ClInclude Include="Functions\XXObjectFile.h" />
+    <ClInclude Include="Functions\AAPlay\Poser.h" />
+    <ClInclude Include="General\GuiSlider.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
+    <ClInclude Include="General\IllusionUtil.h" />
+    <ClInclude Include="Files\PoseMods.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
     <Text Include="Texts\todo.txt" />
     <Text Include="Texts\readme.txt" />
+    <Text Include="Texts\poserframes.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

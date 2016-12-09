@@ -6,6 +6,7 @@
 #include "Files\Logger.h"
 #include "Files\Config.h"
 #include "General\Util.h"
+#include "General\IllusionUtil.h"
 #include "General\ModuleInfo.h"
 #include "Functions\CharInstData.h"
 #include "Functions\AAEdit\Globals.h"
@@ -169,7 +170,7 @@ namespace Shared {
 		const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
 
 		ExtClass::CharacterStruct::Models model;
-		model = Shared::Slider::GetModelFromName(xxFile->m_name);
+		model = General::GetModelFromName(xxFile->m_name);
 		if(model !=  ExtClass::CharacterStruct::INVALID) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderFrameRuleMap(model);
 			if(saveMods) {
@@ -306,7 +307,7 @@ namespace Shared {
 		const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
 
 		ExtClass::CharacterStruct::Models model;
-		model = Shared::Slider::GetModelFromName(xxFile->m_name);
+		model = General::GetModelFromName(xxFile->m_name);
 		if (model !=  ExtClass::CharacterStruct::INVALID) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
 		}

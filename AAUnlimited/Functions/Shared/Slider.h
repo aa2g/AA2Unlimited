@@ -86,7 +86,6 @@ struct Slider {
 
 	static void ModifySRT(D3DVECTOR3* scale,D3DVECTOR3* rot,D3DVECTOR3* trans, Slider::Operation op, const AAUCardData::BoneMod& mod);
 	static void ModifyKeyframe(ExtClass::Keyframe* frame,Slider::Operation op,const AAUCardData::BoneMod& mod);
-	static ExtClass::CharacterStruct::Models GetModelFromName(const char* name);
 };
 
 extern const std::vector<Slider> g_sliders[ExtClass::CharacterStruct::N_MODELS];

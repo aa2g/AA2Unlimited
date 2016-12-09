@@ -7,6 +7,7 @@
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
 #include "Functions\Shared\SpecialOverrides.h"
+#include "Functions\AAPlay\Poser.h"
 #include "Files\XXFile.h"
 
 /*
@@ -834,6 +835,7 @@ void OverrideBoneInjectV2() {
 
 void __stdcall OverrideFrameEvent(ExtClass::XXFile* xxFile) {
 	Shared::XXFileModification(xxFile,General::IsAAEdit);
+	if (General::IsAAPlay) Poser::FrameModEvent(xxFile);
 }
 
 void __declspec(naked) OverrideFrameRedirect() {

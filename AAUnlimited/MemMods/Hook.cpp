@@ -187,6 +187,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/AAPlay/Events/PcConversation.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
+#include "MemMods/AAPlay/Events/ClothingDialog.h"
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAEdit/SaveCard.h"
@@ -250,7 +251,8 @@ void InitializeHooks() {
 			TanSlotUnlimit::InsertLoopEnd();
 			TanSlotUnlimit::LoadLowPolyInject();
 		}
-
+		ClothingDialog::InitInjection();
+		ClothingDialog::ExitInjection();
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;

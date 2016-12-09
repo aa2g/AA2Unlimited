@@ -17,11 +17,17 @@ class XXFile
 public:
 	DWORD m_unknown;
 	char m_name[512];
-	BYTE m_unknown2[0x14];
+	BYTE m_unknown2[0x8];
+	Frame* m_attachmentFrame;
+	BYTE m_unknown3[0x8];
 	Frame* m_root;
-	BYTE m_unknown3[0x138];
+	BYTE m_unknown4[0x138];
 	DWORD m_animArraySize;
 	Animation* m_animArray;
+	BYTE m_unknown5[0x1C018];
+	DWORD m_poseNumber;
+	BYTE m_unknown6[8];
+	float m_animFrame;
 
 	template<class Callback>
 	void EnumBonesPreOrder_sub(Callback& callback, Frame* bone);
@@ -47,7 +53,7 @@ public:
 };
 #pragma pack(pop)
 
-static_assert(sizeof(XXFile) == 0x35C,"XXFile size missmatch; must be 0x35C bytes");
+static_assert(sizeof(XXFile) == 0x1C384,"XXFile size missmatch; must be 0x35C bytes");
 
 
 template<class Callback>

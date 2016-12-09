@@ -1,0 +1,29 @@
+a01_J_ArmL_01 X		Left Arm X
+a01_J_ArmL_01 Y		Left Arm Y
+a01_J_ArmL_01 Z		Left Arm Z
+
+a01_J_ArmR_01 X		Right Arm X
+a01_J_ArmR_01 Y		Right Arm Y
+a01_J_ArmR_01 Z		Right Arm Z
+
+a01_J_Neck_02 X 	Neck X 
+a01_J_Neck_02 Y 	Neck Y 
+a01_J_Neck_02 Z 	Neck Z 
+
+a01_J_FootL_03 X 	Left Foot X 
+a01_J_FootL_03 Y 	Left Foot Y 
+a01_J_FootL_03 Z 	Left Foot Z 
+
+a01_J_FootR_03 X 	Right Foot X 
+a01_J_FootR_03 Y 	Right Foot Y 
+a01_J_FootR_03 Z 	Right Foot Z 
+
+
+a01_J_Spin_010 X 	Spin X 
+a01_J_Spin_010 Y 	Spin Y 
+a01_J_Spin_010 Z 	Spin Z 
+
+a01_J_Kosi_010 X 	Kosi X 
+a01_J_Kosi_010 Y 	Kosi Y 
+a01_J_Kosi_010 Z 	Kosi Z 
+
