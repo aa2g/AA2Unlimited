@@ -1451,6 +1451,7 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 		//if neither is true, we are not currently editing a valid model
 		for(int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
 			Shared::g_xxBoneMods[i].clear();
+			Shared::g_xxBoneParents[i].clear();
 			Shared::g_xxMods[i].clear();
 		}
 		return;
@@ -1479,10 +1480,17 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 				}
 			}
 			if (slider->flags & AAUCardData::MODIFY_BONE) {
-				for (auto& elem : Shared::g_xxBoneMods[slider->target]) {
-					if (elem.name == slider->boneName) {
-						for(auto& bone : elem.bones) {
-							bone.ptr->m_matrix = elem.origMatrix;
+				for (auto& elem : Shared::g_xxBoneParents[slider->target]) {
+					std::string mbBoneName(elem.boneName.begin(),elem.boneName.end());
+					if (elem.boneName == slider->boneName) {
+						for(auto& frameParents : elem.parents) {
+							for(int i = 0; i < frameParents->m_nBones; i++) {
+								ExtClass::Bone* bone = &frameParents->m_bones[i];
+								if(bone->m_name == mbBoneName) {
+									bone->m_matrix = elem.origMatrix;
+									break;
+								}
+							}
 						}
 						break;
 					}
@@ -1514,7 +1522,30 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 				frame->m_matrix5 = res;
 			}
 		}
-		for(auto& elem : Shared::g_xxBoneMods[model]) {
+		for (auto& elem : Shared::g_xxBoneParents[model]) {
+			auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,elem.boneName);
+			if(rule != NULL) {
+				std::string strBoneName(elem.boneName.begin(), elem.boneName.end());
+				for(auto* frame : elem.parents) {
+					for(int i = 0; i < frame->m_nBones; i++) {
+						ExtClass::Bone* bone = &frame->m_bones[i];
+						if(bone->m_name == strBoneName) {
+							D3DMATRIX& mat = elem.srtMatrix;
+							D3DMATRIX& origMat = elem.origMatrix;
+							D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+							D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+							D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+							for (auto& elem : *rule) {
+								Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+							}
+							auto res = General::MatrixFromSRT(scale,rot,trans);
+							(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
+						}
+					}
+				}
+			}
+		}
+		/*for(auto& elem : Shared::g_xxBoneMods[model]) {
 			for(auto& savedBone : elem.bones) {
 				ExtClass::Bone* bone = savedBone.ptr;
 				if (bone->m_name == NULL) {
@@ -1539,7 +1570,7 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 					(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
 				}
 			}
-		}
+		}*/
 	}
 
 	if(faceSliderRenew) {

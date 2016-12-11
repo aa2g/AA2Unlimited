@@ -57,6 +57,13 @@ namespace Shared {
 			D3DMATRIX origMatrix;
 			D3DMATRIX srtMatrix;
 		};
+		struct Loc_BoneSaveDataV2 {
+			std::wstring boneName;
+			std::vector<ExtClass::Frame*> parents;
+			D3DMATRIX origMatrix;
+			D3DMATRIX srtMatrix;
+		};
 		extern std::vector<Loc_BoneSaveData> g_xxBoneMods[ExtClass::CharacterStruct::N_MODELS];
+		extern std::vector<Loc_BoneSaveDataV2> g_xxBoneParents[ExtClass::CharacterStruct::N_MODELS];
 
 }

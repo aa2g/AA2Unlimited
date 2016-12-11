@@ -151,6 +151,7 @@ namespace Shared {
 	/**********************/
 
 	std::vector<std::pair<ExtClass::Frame*,D3DMATRIX>> g_xxMods[ExtClass::CharacterStruct::N_MODELS];
+	std::vector<Loc_BoneSaveDataV2> g_xxBoneParents[ExtClass::CharacterStruct::N_MODELS];
 	void XXFileModification(ExtClass::XXFile* xxFile, bool saveMods) {
 		using namespace ExtClass;
 		if (xxFile == NULL) return;
@@ -175,6 +176,7 @@ namespace Shared {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderFrameRuleMap(model);
 			if(saveMods) {
 				g_xxMods[model].clear();
+				g_xxBoneParents[model].clear();
 			}
 		}
 		
@@ -282,6 +284,102 @@ namespace Shared {
 			}
 		});
 
+		//lastly, do the bone stuff.
+		//find xx file in bone rules
+		{
+			mbstowcs_s(&written,name,xxFile->m_name,256);
+			const auto* rmatch = Shared::g_currentChar->m_cardData.GetBoneRule(name);
+
+			//find model type of xx file and slider rule if existant
+			const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
+
+			ExtClass::CharacterStruct::Models model;
+			model = General::GetModelFromName(xxFile->m_name);
+			if (model !=  ExtClass::CharacterStruct::INVALID) {
+				smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
+			}
+
+			if (rmatch == NULL && smatch == NULL) return;
+
+			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
+				if (frame->m_nBones == 0) return;
+				std::wstring frameName;
+				mbstowcs_s(&written,name,frame->m_name,256);
+				frameName = name;
+				for (int i = 0; i < frame->m_nBones; i++) {
+					Bone* bone = &frame->m_bones[i];
+					mbstowcs_s(&written,name,bone->m_name,256);
+					
+					//try to find matches in both the bone rules and slider rules
+					bool match = false;
+					bool makeSave = false;
+					std::map<std::wstring,std::vector<AAUCardData::BoneMod>>::const_iterator mit;
+					std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>::const_iterator sit;
+
+					if (rmatch) {
+						mit = rmatch->find(name);
+						if (mit != rmatch->end()) match = true;
+					}
+					if (saveMods) {
+						//if save mods, we have to make a bone for every slider, always
+						for (const auto& elem : g_sliders[model]) {
+							if (elem.boneName == name) {
+								match = true;
+								makeSave = true;
+								break;
+							}
+						}
+					}
+					if (smatch) {
+						sit = smatch->find(name);
+						if (sit != smatch->end()) {
+							match = true;
+						}
+					}
+
+					//apply matches by adding matrizes
+					if (match) {
+						//change matchNews matrix
+						D3DMATRIX matr;
+						D3DVECTOR3 scales = { 1.0f,1.0f,1.0f };
+						D3DVECTOR3 trans = { 0,0,0 };
+						D3DVECTOR3 vecRot = { 0,0,0 };
+						//add our values
+						if (rmatch && mit != rmatch->end()) {
+							for (auto mod : mit->second) {
+								Shared::Slider::ModifySRT(&scales,&vecRot,&trans,Shared::Slider::ADD,mod);
+							}
+						}
+						if (makeSave) {
+							bool added = false;
+							for(auto& elem : g_xxBoneParents[model]) {
+								if(elem.boneName == name) {
+									added = true;
+									elem.parents.push_back(frame);
+									break;
+								}
+							}
+							if(!added) {
+								Loc_BoneSaveDataV2 data;
+								D3DMATRIX str = { scales.x, scales.y, scales.z, 0, vecRot.x, vecRot.y, vecRot.z, 0, trans.x, trans.y, trans.z, 0 };
+								data.srtMatrix = str;
+								data.origMatrix = bone->m_matrix;
+								data.boneName = name;
+								data.parents.push_back(frame);
+								g_xxBoneParents[model].push_back(data);
+							}
+						}
+						if (smatch && sit != smatch->end()) {
+							for (auto mod : sit->second) {
+								Shared::Slider::ModifySRT(&scales,&vecRot,&trans,mod.first->op,mod.second);
+							}
+						}
+						matr = General::MatrixFromSRT(scales,vecRot,trans);
+						(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&matr,&bone->m_matrix);
+					}
+				}
+			});
+		}
 		
 	}
 
