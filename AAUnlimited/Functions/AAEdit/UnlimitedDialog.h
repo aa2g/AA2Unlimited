@@ -144,6 +144,11 @@ namespace AAEdit {
 		HWND m_edOutlineColorGreen;
 		HWND m_edOutlineColorBlue;
 
+		HWND m_cbTanColor;
+		HWND m_edTanColorRed;
+		HWND m_edTanColorGreen;
+		HWND m_edTanColorBlue;
+
 		HWND m_bmBtnAdd;
 		HWND m_bmCbXXFile;
 		HWND m_bmCbBone;

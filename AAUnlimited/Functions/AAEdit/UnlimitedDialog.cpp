@@ -996,6 +996,11 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_GREEN);
 		thisPtr->m_edOutlineColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_BLUE);
 
+		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg,IDC_BD_CBTANCOLOR);
+		thisPtr->m_edTanColorRed = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_RED);
+		thisPtr->m_edTanColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_GREEN);
+		thisPtr->m_edTanColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_BLUE);
+
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
 		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
 		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg,IDC_BD_BM_CBBONE);
@@ -1021,6 +1026,10 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
+
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINREDTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREENTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUETAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
@@ -1052,6 +1061,12 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->Refresh();
 				return TRUE;
 			}
+			else if (identifier == IDC_BD_CBTANCOLOR) {
+				BOOL visible = SendMessage(thisPtr->m_cbTanColor,BM_GETCHECK,0,0) == BST_CHECKED;
+				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
+				thisPtr->Refresh();
+				return TRUE;
+			}
 			else if(identifier == IDC_BD_BM_BTNADD) {
 				thisPtr->ApplyInput();
 				return TRUE;
@@ -1075,6 +1090,26 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
 					g_currChar.m_cardData.SetOutlineColor(RGB(red,green,blue));
+				}
+			}
+			else if(ed == thisPtr->m_edTanColorRed
+				     || ed == thisPtr->m_edTanColorGreen
+					 || ed == thisPtr->m_edTanColorBlue)
+			{
+				int newval = General::GetEditInt(ed);
+				if (newval < 0) {
+					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+				}
+				else if (newval > 255) {
+					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+				}
+				else {
+					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
+					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
+					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
+					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
+					using namespace ExtVars::AAEdit;
+					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
 				}
 			}
 			else {

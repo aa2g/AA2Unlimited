@@ -159,6 +159,11 @@ public:
 	inline const bool HasOutlineColor() { return m_bOutlineColor; }
 	inline const DWORD SetHasOutlineColor(bool has) { return m_bOutlineColor = has; }
 
+	inline const DWORD GetTanColor() { return m_tanColor; }
+	inline const DWORD SetTanColor(COLORREF color) { return m_tanColor = color; }
+	inline const bool HasTanColor() { return m_bTanColor; }
+	inline const DWORD SetHasTanColor(bool has) { return m_bTanColor = has; }
+
 	inline const std::vector<BoneRule> GetBoneTransformationList() { return m_boneTransforms; }
 	inline const D3DMATRIX* GetBoneTransformationRule(const TCHAR* boneName) {
 		auto it = m_boneTransformMap.find(boneName);
@@ -236,6 +241,9 @@ private:
 
 	bool m_bOutlineColor;
 	DWORD m_outlineColor;
+
+	bool m_bTanColor;
+	DWORD m_tanColor;
 
 	std::vector<BoneRule> m_boneTransforms;
 	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;

@@ -36,6 +36,8 @@ namespace Shared {
 
 	const XXObjectFile* ObjectOverrideRules(char* fileName);
 
+	void OverrideTanColor(DWORD* tanColor,DWORD* unknown);
+
 	/*
 	 * XX file modification
 	 */ 

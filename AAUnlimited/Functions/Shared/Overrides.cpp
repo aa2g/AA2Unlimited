@@ -129,6 +129,14 @@ namespace Shared {
 		loc_dumpTexture = false;
 	}
 
+	void OverrideTanColor(DWORD* tanColor,DWORD* unknown) {
+		if (g_isOverriding == false) return;
+		if (!g_currentChar->m_cardData.HasTanColor()) return;
+		COLORREF color = Shared::g_currentChar->m_cardData.GetTanColor();
+		//colors are sequentially in rgba order in *colors
+		*tanColor = color | 0xFF000000;
+	}
+
 	/**************************/
 	/* Mesh-Texture overrides */
 	/**************************/

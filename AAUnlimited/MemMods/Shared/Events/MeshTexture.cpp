@@ -1107,6 +1107,55 @@ void OverrideObjectInject() {
 	}
 }
 
+void __stdcall OverrideTanColorEvent(DWORD* tanColor, DWORD* unknownColor) {
+	Shared::OverrideTanColor(tanColor,unknownColor);
+}
+
+DWORD OverrideTanColorOriginal;
+void __declspec(naked) OverrideTanColorRedirect() {
+	__asm {
+		push [esp+0x8]
+		push [esp+0x8]
+		call [OverrideTanColorOriginal]
+		add esp, 8
+		mov eax, [esp+0x8]
+		mov edx, [esp+0x4]
+		push eax
+		push edx
+		call OverrideTanColorEvent
+		ret
+	}
+}
+
+void OverrideTanColorInject() {
+	if (General::IsAAEdit) {
+		//func(DWORD* outARGB, DWORD* ???, ...???
+		//function returns the color in [esp+84] as a DWORD, ARGB (A being hi-byte)
+		/*
+		AA2Edit.exe+11B356 - E8 F5AFFBFF           - call AA2Edit.exe+D6350 { returns the tan color }
+		AA2Edit.exe+11B35B - 8B 84 24 84000000     - mov eax,[esp+00000084]
+		*/
+		DWORD address = General::GameBase + 0x11B356;
+		DWORD redirectAddress = (DWORD)(&OverrideTanColorRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0xAF, 0xFB, 0xFF },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideTanColorOriginal);
+	}
+	else if (General::IsAAPlay) {
+		/*
+		AA2Play v12 FP v1.4.0a.exe+12CE66 - E8 D573FBFF           - call "AA2Play v12 FP v1.4.0a.exe"+E4240 { ->AA2Play v12 FP v1.4.0a.exe+E4240 }
+		AA2Play v12 FP v1.4.0a.exe+12CE6B - 8B 84 24 84000000     - mov eax,[esp+00000084]
+		*/
+		DWORD address = General::GameBase + 0x12CE66;
+		DWORD redirectAddress = (DWORD)(&OverrideTanColorRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xD5, 0x73, 0xFB, 0xFF },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideTanColorOriginal);
+	}
+}
+
 
 }
 }

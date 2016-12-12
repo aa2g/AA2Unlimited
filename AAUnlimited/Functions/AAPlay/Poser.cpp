@@ -59,9 +59,12 @@ namespace Poser {
 			CreateDialogParam(General::DllInst,MAKEINTRESOURCE(IDD_PLAY_POSE),
 				NULL,DialogProc,(LPARAM)this);
 		}
+		m_timer = SetTimer(m_dialog,1,2000,NULL);
 		ShowWindow(m_dialog,SW_SHOW);
 	}
 	void PoserWindow::Hide() {
+		KillTimer(m_dialog,m_timer);
+		m_timer = 0;
 		ShowWindow(m_dialog,SW_HIDE);
 	}
 
@@ -74,7 +77,6 @@ namespace Poser {
 			PoserWindow* thisPtr = (PoserWindow*)lparam;
 			SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 			thisPtr->m_dialog = hwndDlg;
-			thisPtr->m_timer = SetTimer(hwndDlg,1,2000,NULL);
 			thisPtr->m_edPose = GetDlgItem(hwndDlg,IDC_PPS_EDPOSE);
 			thisPtr->m_edFrame = GetDlgItem(hwndDlg,IDC_PPS_EDFRAME);
 
@@ -115,6 +117,7 @@ namespace Poser {
 		case WM_TIMER: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 			if (thisPtr == NULL) return FALSE;
+			if (loc_targetChar == NULL) return TRUE;
 			ExtClass::XXFile* skeleton = loc_targetChar->m_xxSkeleton;
 			if (skeleton == NULL) return TRUE;
 

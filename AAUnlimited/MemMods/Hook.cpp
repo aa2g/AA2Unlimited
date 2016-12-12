@@ -217,6 +217,8 @@ void InitializeHooks() {
 
 			MeshTexture::OverrideObjectInject();
 
+			MeshTexture::OverrideTanColorInject();
+
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
 

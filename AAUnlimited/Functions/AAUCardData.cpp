@@ -23,6 +23,7 @@ AAUCardData::AAUCardData()
 	m_hairRedirects.back = 2;
 	m_hairRedirects.extension = 3;
 	m_bOutlineColor = false;
+	m_bTanColor = false;
 	for(int i = 0; i < sizeof(ret_files)/sizeof(ret_files[0]); i++) {
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
@@ -209,6 +210,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			GenArchiveRedirectMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements.\r\n";
 			break;
+		case 'OOvr':
+			m_objectOverrides = ReadData<decltype(m_objectOverrides)>(buffer,size);
+			GenObjectOverrideMap();
+			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements.\r\n";
+			break;
+			break;
 		case 'EtLN':
 			m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_eyeTextures[0].texName << "\r\n";
@@ -252,6 +259,11 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_bOutlineColor = true;
 			m_outlineColor = ReadData<DWORD>(buffer,size);
 			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_outlineColor << "\r\n";
+			break;
+		case 'TnCl':
+			m_bTanColor = true;
+			m_tanColor = ReadData<DWORD>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_tanColor << "\r\n";
 			break;
 		case 'BnTr':
 			m_boneTransforms = ReadData<decltype(m_boneTransforms)>(buffer,size);
@@ -382,6 +394,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
 	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
 	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
+	DUMP_MEMBER_CONTAINER('OOvr',m_objectOverrides);
 	//eye textures
 	DUMP_MEMBER('EtLN', m_eyeTextures[0].texName);
 	DUMP_MEMBER('EtRN', m_eyeTextures[1].texName);
@@ -398,6 +411,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('BnTr',m_boneTransforms);
 	if(m_bOutlineColor) {
 		DUMP_MEMBER('OlCl',m_outlineColor);
+	}
+	if(m_bTanColor) {
+		DUMP_MEMBER('TnCl',m_tanColor);
 	}
 	DUMP_MEMBER_CONTAINER('File',m_savedFiles);
 	DUMP_MEMBER_CONTAINER('HrA0',m_hairs[0]);
@@ -697,6 +713,19 @@ void AAUCardData::GenArchiveRedirectMap() {
 		if (m_archiveRedirectMap.find(it.first) == m_archiveRedirectMap.end()) {
 			m_archiveRedirectMap.emplace(it.first,it.second);
 		}
+	}
+}
+void AAUCardData::GenObjectOverrideMap() {
+	m_objectOverrideMap.clear();
+	for (const auto& it : m_objectOverrides) {
+		char buff[256];
+		size_t n;
+		wcstombs_s(&n,buff,it.first.c_str(),256);
+		std::string strObject = buff;
+		wcstombs_s(&n,buff,it.second.c_str(),256);
+		std::string strFile = buff;
+		XXObjectFile ofile(it.second.c_str());
+		m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
 	}
 }
 void AAUCardData::GenBoneRuleMap() {

@@ -22,5 +22,7 @@ void OverrideBoneManipulationInject();
 
 void OverrideObjectInject();
 
+void OverrideTanColorInject();
+
 }
 }
