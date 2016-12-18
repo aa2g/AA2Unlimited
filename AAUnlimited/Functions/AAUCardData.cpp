@@ -939,6 +939,15 @@ void AAUCardData::SaveOverrideFiles() {
 		}
 	}
 
+	//object overrides
+	for(const auto& orule : m_objectOverrideMap) {
+		std::vector<BYTE> buffer(orule.second.GetFileSize());
+		orule.second.WriteToBuffer(buffer.data());
+		if (buffer.size() > 0) {
+			m_savedFiles.emplace_back(std::make_pair(1,orule.second.GetRelPath()),buffer);
+		}
+	}
+
 	//hair highlight
 	if(m_hairHighlightImage.IsGood()) {
 		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());

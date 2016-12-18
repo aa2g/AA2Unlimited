@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 
+#include "External\AddressRule.h"
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
 #include "General\Buffer.h"
@@ -15,6 +16,9 @@ namespace SaveCard {
 
 
 void __stdcall AddUnlimitData(wchar_t* fileName) {
+	DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
+	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+
 	if(AAEdit::g_AAUnlimitDialog.IsSaveFilesSet()) {
 		AAEdit::g_currChar.m_cardData.SaveOverrideFiles();
 	}
