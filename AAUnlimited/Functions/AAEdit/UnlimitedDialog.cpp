@@ -1697,6 +1697,8 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* labe
 	staticLabel = label;
 	int ret = SendMessage(this->slider,TBM_SETRANGEMIN,TRUE,0);
 	ret = SendMessage(this->slider,TBM_SETRANGEMAX,TRUE,0x10000);
+	ret = SendMessage(this->slider,TBM_SETLINESIZE,0, 0x10000 / 100);
+	ret = SendMessage(this->slider,TBM_SETPAGESIZE,0, 0x10000 / 100);
 }
 
 float UnlimitedDialog::BSDialog::BodySlider::Sld2Val(int sld) {
