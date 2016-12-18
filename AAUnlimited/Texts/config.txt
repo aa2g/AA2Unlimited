@@ -18,6 +18,10 @@ bUseShadowing = true				; when shadowing is enabled, every time a file is opened
 
 bEnableFacecam = true				; when enabled, pressing q locks the camera in the face of the participants during h
 
+bEnableHPosButtonReorder = true		; reorders the position buttons in multiple columns so they dont go out of the window and become unclickable
+
+bUsePoser = true					; enables poser in cloth select screen
+
 fPOVOffsetX = 0.0					;
 fPOVOffsetY = 0.005					; Offsets for the POV focus points
 fPOVOffsetZ = -0.75					;

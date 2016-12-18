@@ -10,6 +10,7 @@
 #include "General\Util.h"
 #include "Functions\Shared\Globals.h"
 #include "Files\PoseMods.h"
+#include "Files\Config.h"
 #include "resource.h"
 #include "config.h"
 
@@ -37,12 +38,14 @@ namespace Poser {
 	void GenFrameMap();
 
 	void StartEvent() {
+		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		GenSliderInfo();
 		GenFrameMap();
 		g_PoserWindow.Init();
 	}
 
 	void EndEvent() {
+		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		loc_frameMap.clear();
 		loc_sliderInfos.clear();
 		loc_targetChar = NULL;
@@ -50,6 +53,7 @@ namespace Poser {
 	}
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
+		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		loc_targetChar = c;
 	}
 

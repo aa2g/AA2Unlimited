@@ -1,5 +1,7 @@
 #include "HButtonMove.h"
 
+#include "Files\Config.h"
+
 namespace HButtonMove {
 
 	
@@ -9,6 +11,7 @@ const DWORD MAX_BUTTONS_PER_ROW = 20;
 const DWORD X_SPACING = 10;
 
 bool IsButtonValid(ExtClass::HGUIButton* btn) {
+	if (btn == NULL) return false;
 	if (btn->m_bInvalid) return false;
 	if (btn->m_posTop == 0 || btn->m_posLeft == 0) return false;
 	return true;
@@ -64,6 +67,7 @@ void MoveButtons(ExtClass::HInfo* info) {
 void PostTick(ExtClass::HInfo* info, bool cont) {
 	//the buttons move themselves back at a position change, so we need
 	//to keep moving them to the right position if that happened
+	if (!g_Config.GetKeyValue(Config::USE_H_POS_BUTTON_MOVE).bVal) return;
 	if (loc_controlButton == NULL || loc_controlButton->m_renderX != loc_controlX) {
 		MoveButtons(info);
 	}
