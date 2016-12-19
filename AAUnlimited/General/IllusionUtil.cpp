@@ -47,7 +47,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	//names we know:
 	//FACE			A00_10_xx_00
 	//SKELETON		A00_00_0x_00h
-	//BODY			A00_00_0x_yy
+	//BODY			A00_zz_0x_yy	zz = cloth slot, x = body size (small,normal,tall), yy = clothing state | note that (yy == 0) => (zz == 0)
 	//HAIR_FRONT	AS00_20_xx_yy (yy is flip)
 	//HAIR_SIDE		AS00_21_xx_yy (yy is flip)
 	//HAIR_BACK		AS00_22_xx_yy (yy is flip)
@@ -74,13 +74,17 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	}
 	else if (props.extraPrefix == '\0') {
 		//other stuff
-		if (props.num2 == 10) return ExtClass::CharacterStruct::FACE;
-		if (props.num2 == 0) {
-			if (props.num3 >= 0 && props.num3 <= 2) {
-				if (props.suffix == 'h') return ExtClass::CharacterStruct::SKELETON;
-				else if (props.suffix == '\0') return ExtClass::CharacterStruct::BODY;
+		if(props.num1 == 0) {
+			//face and body: note the implication above, use to differentiate face from body
+			if (props.num2 == 10 && props.num4 == 0) return ExtClass::CharacterStruct::FACE;
+			if (props.num2 == 0 && props.num4 == 0 && props.suffix == 'h') return ExtClass::CharacterStruct::SKELETON;
+			if (props.num4 == 0 && props.num2 == 0 || props.num4 != 0) {
+				if (props.num3 >= 0 && props.num3 <= 9) {
+					if (props.suffix == '\0') return ExtClass::CharacterStruct::BODY;
+				}
 			}
 		}
+		
 	}
 	return ExtClass::CharacterStruct::INVALID;
 
