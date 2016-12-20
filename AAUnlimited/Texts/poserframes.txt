@@ -1,3 +1,18 @@
+; this file defines what sliders the poser window supports.
+; syntax:
+; - comments: you probably figured that out by now.
+; - a slider definition goes like this:
+; <modifiedFrame> <blank(s)> <X|Y|Z|PITCH|YAW|ROLL> <blank(s)> <description in game>
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+a01_J_Neck_02 X 	Neck X 
+a01_J_Neck_02 Y 	Neck Y 
+a01_J_Neck_02 Z 	Neck Z 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 a01_J_ArmL_01 X		Left Arm X
 a01_J_ArmL_01 Y		Left Arm Y
 a01_J_ArmL_01 Z		Left Arm Z
@@ -6,18 +21,160 @@ a01_J_ArmR_01 X		Right Arm X
 a01_J_ArmR_01 Y		Right Arm Y
 a01_J_ArmR_01 Z		Right Arm Z
 
-a01_J_Neck_02 X 	Neck X 
-a01_J_Neck_02 Y 	Neck Y 
-a01_J_Neck_02 Z 	Neck Z 
+a01_J_UdeL_01 X 	Left Underarm X 
+a01_J_UdeL_01 Y 	Left Underarm Y 
+a01_J_UdeL_01 Z 	Left Underarm Z 
 
-a01_J_FootL_03 X 	Left Foot X 
-a01_J_FootL_03 Y 	Left Foot Y 
-a01_J_FootL_03 Z 	Left Foot Z 
+a01_J_UdeR_01 X 	Right Underarm X 
+a01_J_UdeR_01 Y 	Right Underarm Y 
+a01_J_UdeR_01 Z 	Right Underarm Z 
 
-a01_J_FootR_03 X 	Right Foot X 
-a01_J_FootR_03 Y 	Right Foot Y 
-a01_J_FootR_03 Z 	Right Foot Z 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Left Hand
 
+a01_J_HandL_01 X 	Left Hand X 
+a01_J_HandL_01 Y 	Left Hand Y 
+a01_J_HandL_01 Z 	Left Hand Z 
+
+a01_J_HandL_02 X 	 Left Hand 2 X
+a01_J_HandL_02 Y 	 Left Hand 2 Y
+a01_J_HandL_02 Z 	 Left Hand 2 Z
+
+
+a01_J_HitoL_01 X 	 Left Index Finger 1 X
+a01_J_HitoL_01 Y 	 Left Index Finger 1 Y
+a01_J_HitoL_01 Z 	 Left Index Finger 1 Z
+
+a01_J_HitoL_02 X 	 Left Index Finger 2 X
+a01_J_HitoL_02 Y 	 Left Index Finger 2 Y
+a01_J_HitoL_02 Z 	 Left Index Finger 2 Z
+
+a01_J_HitoL_03 X 	 Left Index Finger 3 X
+a01_J_HitoL_03 Y 	 Left Index Finger 3 Y
+a01_J_HitoL_03 Z 	 Left Index Finger 3 Z
+
+a01_J_NakaL_01 X 	 Left Middle Finger 1 X
+a01_J_NakaL_01 Y 	 Left Middle Finger 1 Y
+a01_J_NakaL_01 Z 	 Left Middle Finger 1 Z
+
+a01_J_NakaL_02 X 	 Left Middle Finger 2 X
+a01_J_NakaL_02 Y 	 Left Middle Finger 2 Y
+a01_J_NakaL_02 Z 	 Left Middle Finger 2 Z
+
+a01_J_NakaL_03 X 	 Left Middle Finger 3 X
+a01_J_NakaL_03 Y 	 Left Middle Finger 3 Y
+a01_J_NakaL_03 Z 	 Left Middle Finger 3 Z
+
+a01_J_KusuriL_01 X 	 Left Ring Finger 1 X
+a01_J_KusuriL_01 Y 	 Left Ring Finger 1 Y
+a01_J_KusuriL_01 Z 	 Left Ring Finger 1 Z
+
+a01_J_KusuriL_02 X 	 Left Ring Finger 2 X
+a01_J_KusuriL_02 Y 	 Left Ring Finger 2 Y
+a01_J_KusuriL_02 Z 	 Left Ring Finger 2 Z
+
+a01_J_KusuriL_03 X 	 Left Ring Finger 3 X
+a01_J_KusuriL_03 Y 	 Left Ring Finger 3 Y
+a01_J_KusuriL_03 Z 	 Left Ring Finger 3 Z
+
+a01_J_KoL_01 X 	 	 Left Little Finger 1 X
+a01_J_KoL_01 Y 		 Left Little Finger 1 Y
+a01_J_KoL_01 Z 		 Left Little Finger 1 Z
+
+a01_J_KoL_02 X 		 Left Little Finger 2 X
+a01_J_KoL_02 Y 		 Left Little Finger 2 Y
+a01_J_KoL_02 Z 		 Left Little Finger 2 Z
+
+a01_J_KoL_03 X 		 Left Little Finger 3 X
+a01_J_KoL_03 Y 		 Left Little Finger 3 Y
+a01_J_KoL_03 Z 		 Left Little Finger 3 Z
+
+
+a01_J_OyaL_01 X 	 Left Thumb 1 X
+a01_J_OyaL_01 Y 	 Left Thumb 1 Y
+a01_J_OyaL_01 Z 	 Left Thumb 1 Z
+
+a01_J_OyaL_02 X 	 Left Thumb 2 X
+a01_J_OyaL_02 Y 	 Left Thumb 2 Y
+a01_J_OyaL_02 Z 	 Left Thumb 2 Z
+
+a01_J_OyaL_03 X 	 Left Thumb 3 X
+a01_J_OyaL_03 Y 	 Left Thumb 3 Y
+a01_J_OyaL_03 Z 	 Left Thumb 3 Z
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; right hand
+
+a01_J_HandR_01 X 	Right Hand X 
+a01_J_HandR_01 Y 	Right Hand Y 
+a01_J_HandR_01 Z 	Right Hand Z 
+
+a01_J_HandR_02 X 	 Right Hand 2 X
+a01_J_HandR_02 Y 	 Right Hand 2 Y
+a01_J_HandR_02 Z 	 Right Hand 2 Z
+
+
+a01_J_HitoR_01 X 	 Right Index Finger 1 X
+a01_J_HitoR_01 Y 	 Right Index Finger 1 Y
+a01_J_HitoR_01 Z 	 Right Index Finger 1 Z
+
+a01_J_HitoR_02 X 	 Right Index Finger 2 X
+a01_J_HitoR_02 Y 	 Right Index Finger 2 Y
+a01_J_HitoR_02 Z 	 Right Index Finger 2 Z
+
+a01_J_HitoR_03 X 	 Right Index Finger 3 X
+a01_J_HitoR_03 Y 	 Right Index Finger 3 Y
+a01_J_HitoR_03 Z 	 Right Index Finger 3 Z
+
+a01_J_NakaR_01 X 	 Right Middle Finger 1 X
+a01_J_NakaR_01 Y 	 Right Middle Finger 1 Y
+a01_J_NakaR_01 Z 	 Right Middle Finger 1 Z
+
+a01_J_NakaR_02 X 	 Right Middle Finger 2 X
+a01_J_NakaR_02 Y 	 Right Middle Finger 2 Y
+a01_J_NakaR_02 Z 	 Right Middle Finger 2 Z
+
+a01_J_NakaR_03 X 	 Right Middle Finger 3 X
+a01_J_NakaR_03 Y 	 Right Middle Finger 3 Y
+a01_J_NakaR_03 Z 	 Right Middle Finger 3 Z
+
+a01_J_KusuriR_01 X 	 Right Ring Finger 1 X
+a01_J_KusuriR_01 Y 	 Right Ring Finger 1 Y
+a01_J_KusuriR_01 Z 	 Right Ring Finger 1 Z
+
+a01_J_KusuriR_02 X 	 Right Ring Finger 2 X
+a01_J_KusuriR_02 Y 	 Right Ring Finger 2 Y
+a01_J_KusuriR_02 Z 	 Right Ring Finger 2 Z
+
+a01_J_KusuriR_03 X 	 Right Ring Finger 3 X
+a01_J_KusuriR_03 Y 	 Right Ring Finger 3 Y
+a01_J_KusuriR_03 Z 	 Right Ring Finger 3 Z
+
+a01_J_KoR_01 X 	 	 Right Little Finger 1 X
+a01_J_KoR_01 Y 		 Right Little Finger 1 Y
+a01_J_KoR_01 Z 		 Right Little Finger 1 Z
+
+a01_J_KoR_02 X 		 Right Little Finger 2 X
+a01_J_KoR_02 Y 		 Right Little Finger 2 Y
+a01_J_KoR_02 Z 		 Right Little Finger 2 Z
+
+a01_J_KoR_03 X 		 Right Little Finger 3 X
+a01_J_KoR_03 Y 		 Right Little Finger 3 Y
+a01_J_KoR_03 Z 		 Right Little Finger 3 Z
+
+
+a01_J_OyaR_01 X 	 Right Thumb 1 X
+a01_J_OyaR_01 Y 	 Right Thumb 1 Y
+a01_J_OyaR_01 Z 	 Right Thumb 1 Z
+
+a01_J_OyaR_02 X 	 Right Thumb 2 X
+a01_J_OyaR_02 Y 	 Right Thumb 2 Y
+a01_J_OyaR_02 Z 	 Right Thumb 2 Z
+
+a01_J_OyaR_03 X 	 Right Thumb 3 X
+a01_J_OyaR_03 Y 	 Right Thumb 3 Y
+a01_J_OyaR_03 Z 	 Right Thumb 3 Z
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 a01_J_Spin_010 X 	Spin X 
 a01_J_Spin_010 Y 	Spin Y 
@@ -27,3 +184,27 @@ a01_J_Kosi_010 X 	Kosi X
 a01_J_Kosi_010 Y 	Kosi Y 
 a01_J_Kosi_010 Z 	Kosi Z 
 
+
+a01_J_FootL_02 X 	Left Foot X
+a01_J_FootL_02 Y 	Left Foot Y
+a01_J_FootL_02 Z 	Left Foot Z
+
+a01_J_FootR_02 X 	Right Foot X
+a01_J_FootR_02 Y 	Right Foot Y
+a01_J_FootR_02 Z 	Right Foot Z
+
+a01_J_UplegL_010 X 	Left Upper Leg X
+a01_J_UplegL_010 Y 	Left Upper Leg Y
+a01_J_UplegL_010 Z 	Left Upper Leg Z
+
+a01_J_UplegR_010 X 	Right Upper Leg X
+a01_J_UplegR_010 Y 	Right Upper Leg Y
+a01_J_UplegR_010 Z 	Right Upper Leg Z
+
+a01_J_LegL_01 X 	Left Lower Leg X
+a01_J_LegL_01 Y 	Left Lower Leg Y
+a01_J_LegL_01 Z 	Left Lower Leg Z
+
+a01_J_LegR_01 X 	Right Lower Leg X
+a01_J_LegR_01 Y 	Right Lower Leg Y
+a01_J_LegR_01 Z 	Right Lower Leg Z
