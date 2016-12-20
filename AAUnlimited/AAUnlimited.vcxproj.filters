@@ -77,6 +77,7 @@
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="Files\PoseMods.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\FrameManipulationTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="Files\PoseMods.h" />
+    <ClInclude Include="MemMods\Shared\Events\FrameManipulationTest.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

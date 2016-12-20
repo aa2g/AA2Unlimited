@@ -631,7 +631,6 @@ bool AAUCardData::RemoveBoneRule(int index) {
 		if (map.size() == 0) {
 			m_boneRuleMap.erase(mapIt);
 		}
-		m_boneRules.erase(vIt);
 	}
 	if(flags & MODIFY_FRAME) {
 		auto mapIt = m_frameRuleMap.find(vIt->first.second.first);
@@ -653,8 +652,8 @@ bool AAUCardData::RemoveBoneRule(int index) {
 		if (map.size() == 0) {
 			m_frameRuleMap.erase(mapIt);
 		}
-		m_boneRules.erase(vIt);
 	}
+	m_boneRules.erase(vIt);
 	return true;
 }
 

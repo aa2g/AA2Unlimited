@@ -200,8 +200,30 @@ namespace Poser {
 				break;
 			}
 			if(match->second.frame != NULL) {
-				
-				(*Shared::D3DXMatrixRotationYawPitchRoll)(&match->second.frame->m_matrix1,match->second.yaw,match->second.pitch,match->second.roll);
+				//note that somehow those frame manipulations dont quite work as expected;
+				//by observation, rotation happens around the base of the bone whos frame got manipulated,
+				//rather than the tip.
+				//so to correct that, we gotta translate back
+
+				ExtClass::Frame* frame = match->second.frame;
+				ExtClass::Frame* origFrame = &frame->m_children[0];
+
+				D3DMATRIX rotMatrix;
+				(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix,match->second.yaw,match->second.pitch,match->second.roll);
+				D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
+				(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
+
+				D3DVECTOR3 translations;
+				translations.x = origFrame->m_matrix5._41 - rotTransMatrix._41;
+				translations.y = origFrame->m_matrix5._42 - rotTransMatrix._42;
+				translations.z = origFrame->m_matrix5._43 - rotTransMatrix._43;
+
+				D3DMATRIX resultMatrix = rotMatrix;
+				resultMatrix._41 += translations.x;
+				resultMatrix._42 += translations.y;
+				resultMatrix._43 += translations.z;
+
+				frame->m_matrix1 = resultMatrix;
 			}
 		}
 	}

@@ -201,6 +201,7 @@ void InitializeHooks() {
 	//shared
 	{
 		using namespace SharedInjections;
+
 		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
 			MeshTexture::OverrideTextureListSizeInject();

@@ -76,6 +76,7 @@
     <ClCompile Include="Functions\OverrideFile.cpp" />
     <ClCompile Include="Functions\Shared\Shadowing.cpp" />
     <ClCompile Include="MemMods\Shared\Events\FileDump.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\FrameManipulationTest.cpp" />
     <ClCompile Include="MemMods\Shared\Events\HairMeshes.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="Functions\OverrideFile.h" />
     <ClInclude Include="MemMods\Shared\Events\FileDump.h" />
+    <ClInclude Include="MemMods\Shared\Events\FrameManipulationTest.h" />
     <ClInclude Include="MemMods\Shared\Events\HairMeshes.h" />
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
