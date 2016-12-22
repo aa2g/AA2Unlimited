@@ -451,7 +451,6 @@ and esp,-08
             <CheatEntry>
               <ID>7</ID>
               <Description>"code for tan stuff?"</Description>
-              <LastState Value="241832042" RealAddress="00387B06"/>
               <VariableType>4 Bytes</VariableType>
               <Address>"AA2Play v12 Fp v1.4.0a.exe"+127B06</Address>
             </CheatEntry>
@@ -470,7 +469,6 @@ and esp,-08
             <CheatEntry>
               <ID>3</ID>
               <Description>"code"</Description>
-              <LastState Value="75 1B 8B 0F" RealAddress="003B23B7"/>
               <ShowAsHex>1</ShowAsHex>
               <VariableType>Array of byte</VariableType>
               <ByteLength>4</ByteLength>
@@ -479,7 +477,6 @@ and esp,-08
             <CheatEntry>
               <ID>4</ID>
               <Description>"tan code?"</Description>
-              <LastState Value="3900899467" RealAddress="003B0E1A"/>
               <VariableType>4 Bytes</VariableType>
               <Address>"AA2Play v12 FP v1.4.0a.exe"+150E1A</Address>
             </CheatEntry>
@@ -792,7 +789,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>27</ID>
           <Description>"Right Mouse Released bool"</Description>
-          <LastState Value="1" RealAddress="01B0EB6B"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -802,7 +798,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>21</ID>
           <Description>"Left Mouse Pressed bool"</Description>
-          <LastState Value="0" RealAddress="01B0EB64"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -812,7 +807,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>24</ID>
           <Description>"Left Mouse Released bool"</Description>
-          <LastState Value="1" RealAddress="01B0EB67"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -822,7 +816,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>25</ID>
           <Description>"Right Mouse Pressed bool"</Description>
-          <LastState Value="0" RealAddress="01B0EB68"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -832,7 +825,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>26</ID>
           <Description>"Right Mouse Helt bool"</Description>
-          <LastState Value="0" RealAddress="01B0EB69"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -842,7 +834,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>23</ID>
           <Description>"Left Mouse Helt bool"</Description>
-          <LastState Value="0" RealAddress="01B0EB65"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+3756BC+aa4</Address>
           <Offsets>
@@ -860,7 +851,6 @@ mov edi,00000003
         <CheatEntry>
           <ID>49</ID>
           <Description>"current music"</Description>
-          <LastState Value="11" RealAddress="0FA78480"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1020,7 +1010,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>18</ID>
           <Description>"change music bool"</Description>
-          <LastState Value="0" RealAddress="0FA78468"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1033,7 +1022,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>46</ID>
           <Description>"H mode bool"</Description>
-          <LastState Value="0" RealAddress="12967728"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1044,7 +1032,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>52</ID>
           <Description>"more bools 1"</Description>
-          <LastState Value="0" RealAddress="0FB71E68"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1056,7 +1043,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>53</ID>
           <Description>"more bools 2"</Description>
-          <LastState Value="0" RealAddress="12C0C301"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1068,7 +1054,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>83</ID>
           <Description>"more bools 3"</Description>
-          <LastState Value="0" RealAddress="12967728"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1079,7 +1064,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>85</ID>
           <Description>"more bools 4"</Description>
-          <LastState Value="0" RealAddress="12C0C301"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1091,7 +1075,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>86</ID>
           <Description>"more bools 5"</Description>
-          <LastState Value="0" RealAddress="12835490"/>
           <VariableType>Byte</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1106,7 +1089,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>50</ID>
           <Description>"H struct"</Description>
-          <LastState Value="00000000" RealAddress="12967738"/>
           <ShowAsHex>1</ShowAsHex>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
@@ -1154,7 +1136,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>47</ID>
           <Description>"change music target"</Description>
-          <LastState Value="4294967295" RealAddress="0FA78474"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E284</Address>
           <Offsets>
@@ -1175,7 +1156,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>134</ID>
           <Description>"Character Struct array"</Description>
-          <LastState Value="0FB734E0" RealAddress="01B0EC24"/>
           <ShowAsHex>1</ShowAsHex>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
@@ -1186,7 +1166,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>135</ID>
           <Description>"Character Struct array end"</Description>
-          <LastState Value="0FB73500" RealAddress="01B0EC28"/>
           <ShowAsHex>1</ShowAsHex>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
@@ -1197,7 +1176,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>96</ID>
           <Description>"Character Struct 0"</Description>
-          <LastState Value="5787020" RealAddress="1286E230"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
           <Offsets>
@@ -1210,7 +1188,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>95</ID>
           <Description>"Character Structs (the 4 is an array)"</Description>
-          <LastState Value="5787020" RealAddress="12928898"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
           <Offsets>
@@ -1223,7 +1200,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>97</ID>
           <Description>"Character Structs 2"</Description>
-          <LastState Value="5787020" RealAddress="129A70E8"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
           <Offsets>
@@ -1236,7 +1212,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>110</ID>
           <Description>"Character Structs 3"</Description>
-          <LastState Value="5787020" RealAddress="12ACE398"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
           <Offsets>
@@ -1249,7 +1224,6 @@ the second one the girl number?
         <CheatEntry>
           <ID>119</ID>
           <Description>"Current Player?"</Description>
-          <LastState Value="1286D2A8" RealAddress="01B0EC40"/>
           <ShowAsHex>1</ShowAsHex>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
@@ -1305,7 +1279,6 @@ then, ecx is the class that contains movement information
         <CheatEntry>
           <ID>93</ID>
           <Description>"Currently Opened Character in Clothing Editor"</Description>
-          <LastState Value="5787020" RealAddress="12BBD5B8"/>
           <VariableType>4 Bytes</VariableType>
           <Address>"AA2Play v12 FP v1.4.0a.exe"+367F48+E288</Address>
           <Offsets>
@@ -1320,7 +1293,6 @@ then, ecx is the class that contains movement information
     <CheatEntry>
       <ID>70</ID>
       <Description>"Pointer to sound play structs"</Description>
-      <LastState Value="0FA77EA8" RealAddress="01B0EBD0"/>
       <ShowAsHex>1</ShowAsHex>
       <VariableType>4 Bytes</VariableType>
       <Address>"AA2Play v12 FP v1.4.0a.exe"+376164</Address>
@@ -1343,7 +1315,6 @@ then, ecx is the class that contains movement information
     <CheatEntry>
       <ID>111</ID>
       <Description>"Pointer to some Interaction struct (the pointer itself)"</Description>
-      <LastState Value="00000000" RealAddress="12C0C2FC"/>
       <ShowAsHex>1</ShowAsHex>
       <VariableType>4 Bytes</VariableType>
       <Address>"AA2Play v12 FP v1.4.0a.exe"+3761CC</Address>
@@ -1415,7 +1386,6 @@ AA2Play v12 FP v1.4.0a.exe+F41F8 - FF 15 1832E600        - call dword ptr ["AA2P
     <CheatEntry>
       <ID>108</ID>
       <Description>"No description"</Description>
-      <LastState Value="00000000" RealAddress="0CDE4EDC"/>
       <ShowAsHex>1</ShowAsHex>
       <VariableType>4 Bytes</VariableType>
       <Address>0CDE4EDC</Address>
@@ -1464,7 +1434,6 @@ mov [ebp+00],eax
     <CheatEntry>
       <ID>120</ID>
       <Description>"Global Zoom Mirror"</Description>
-      <LastState Value="0.5" RealAddress="00608574"/>
       <VariableType>Float</VariableType>
       <Address>"AA2Play v12 FP v1.4.0a.exe"+3A8574</Address>
     </CheatEntry>
@@ -1987,7 +1956,6 @@ sete cl
     <CheatEntry>
       <ID>137</ID>
       <Description>"Pointer"</Description>
-      <LastState Value="66020100" RealAddress="0B0295F8"/>
       <ShowAsHex>1</ShowAsHex>
       <VariableType>4 Bytes</VariableType>
       <Address>B0295F8</Address>
@@ -2067,8 +2035,8 @@ sete cl
         <Element Offset="1588" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Cat7" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1592" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Cat8" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1596" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Cat9" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="1604" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonArray" Description="Start of Button list 1 (array of pointers)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1604" Vartype="Array of byte" Bytesize="10" Description="A_HPosButton Struct" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="1604" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonArray" Description="Start of Button list 1 (array of pointers)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1608" Vartype="4 Bytes" Bytesize="4" Description="End of button list (inclusive)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1612" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1616" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
@@ -2139,8 +2107,8 @@ sete cl
         <Element Offset="1876" Vartype="4 Bytes" Bytesize="4" Description="Button List 9 Position array start" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1880" Vartype="4 Bytes" Bytesize="4" Description="Button List 9 Position array ned (exluding)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1884" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="1888" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1888" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Male Visibility Switch" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="1888" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1892" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1896" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Shoe Visibility Switch" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="1900" Vartype="Pointer" Bytesize="4" ChildStruct="ButtonStruct" Description="Underwear State Switch" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
@@ -2311,18 +2279,19 @@ sete cl
     </Structure>
     <Structure Name="CharacterCurrent" AutoFill="0" AutoCreate="1" DefaultHex="0" AutoDestroy="0" DoNotSaveLocal="0" AutoCreateStructsize="4096">
       <Elements>
-        <Element Offset="0" Vartype="4 Bytes" Bytesize="4" Description="VirtualTable" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
+        <Element Offset="0" Vartype="4 Bytes" Bytesize="4" Description="VirtualTable (+32CD7C=male, +32D25C=female)" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="40" Vartype="Pointer" Bytesize="4" ChildStruct="Character" Description="CharInfo" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="44" Vartype="Pointer" Bytesize="4" ChildStruct="CharacterPosition" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="56" Vartype="4 Bytes" Bytesize="4" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="60" Vartype="4 Bytes" Bytesize="4" Description="Seat" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="64" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="65" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="64" Vartype="Byte" Bytesize="1" Description="bFemale?" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="65" Vartype="Byte" Bytesize="1" Description="Cloth State" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="66" Vartype="Byte" Bytesize="1" Description="Clothes On Bool" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="67" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="68" Vartype="Byte" Bytesize="1" Description="Current Clothes" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="67" Vartype="Byte" Bytesize="1" Description="Current Cloth Slot" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="68" Vartype="Byte" Bytesize="1" Description="Current Clothes (uniform,sports etc)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="69" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="70" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="71" Vartype="Byte" Bytesize="1" Description="???" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="72" Vartype="Pointer" Bytesize="4" ChildStruct="xxFile" Description="A00_00_xx_00 (face)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="76" Vartype="Pointer" Bytesize="4" ChildStruct="xxFile" Description="AS00_xx_00_00 (glasses)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="80" Vartype="Pointer" Bytesize="4" ChildStruct="xxFile" Description="AS_20_xx_00 (front hair) (these are NULL if 0)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
@@ -2529,8 +2498,8 @@ sete cl
         <Element Offset="28" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="32" Vartype="4 Bytes" Bytesize="4" Description="Finish Options, 1 = giver, 2 = reciever, 4 = together, 8 = inside, 10 outside" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="36" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
-        <Element Offset="40" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="40" Vartype="2 Bytes" Bytesize="2" Description="Priority (1 = M, 2 = F)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="40" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="44" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="48" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>
         <Element Offset="52" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Hexadecimal" BackgroundColor="80000005"/>

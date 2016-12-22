@@ -213,9 +213,17 @@ a01_J_UplegL_010 X 	Left Upper Leg X
 a01_J_UplegL_010 Y 	Left Upper Leg Y
 a01_J_UplegL_010 Z 	Left Upper Leg Z
 
+a01_J_HizaL_01 X	a01_J_HizaL_01 X
+a01_J_HizaL_01 Y	a01_J_HizaL_01 Y
+a01_J_HizaL_01 Z	a01_J_HizaL_01 Z
+
 a01_J_UplegR_010 X 	Right Upper Leg X
 a01_J_UplegR_010 Y 	Right Upper Leg Y
 a01_J_UplegR_010 Z 	Right Upper Leg Z
+
+a01_J_HizaR_01 X	a01_J_HizaR_01 X
+a01_J_HizaR_01 Y	a01_J_HizaR_01 Y
+a01_J_HizaR_01 Z	a01_J_HizaR_01 Z
 
 a01_J_LegL_01 X 	Left Lower Leg X
 a01_J_LegL_01 Y 	Left Lower Leg Y
