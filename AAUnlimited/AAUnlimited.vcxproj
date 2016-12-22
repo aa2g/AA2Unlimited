@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
+    <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\AAPlay\Poser.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
+    <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\XXFile.h" />
     <ClInclude Include="Functions\AAPlay\Poser.h" />
     <ClInclude Include="Functions\CharInstData.h" />

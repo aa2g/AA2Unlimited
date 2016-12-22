@@ -13,21 +13,37 @@ a01_J_Neck_02 Z 	Neck Z
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+a01_J_ArmL_02 X		a01_J_ArmL_02 X
+a01_J_ArmL_02 Y		a01_J_ArmL_02 Y
+a01_J_ArmL_02 Z		a01_J_ArmL_02 Z
+
 a01_J_ArmL_01 X		Left Arm X
 a01_J_ArmL_01 Y		Left Arm Y
 a01_J_ArmL_01 Z		Left Arm Z
 
-a01_J_ArmR_01 X		Right Arm X
-a01_J_ArmR_01 Y		Right Arm Y
-a01_J_ArmR_01 Z		Right Arm Z
+a01_J_HijiL_01 X	a01_J_HijiL_01 X
+a01_J_HijiL_01 Y	a01_J_HijiL_01 Y
+a01_J_HijiL_01 Z	a01_J_HijiL_01 Z
 
 a01_J_UdeL_01 X 	Left Underarm X 
 a01_J_UdeL_01 Y 	Left Underarm Y 
 a01_J_UdeL_01 Z 	Left Underarm Z 
 
+a01_J_ArmR_01 X		Right Arm X
+a01_J_ArmR_01 Y		Right Arm Y
+a01_J_ArmR_01 Z		Right Arm Z
+
 a01_J_UdeR_01 X 	Right Underarm X 
 a01_J_UdeR_01 Y 	Right Underarm Y 
 a01_J_UdeR_01 Z 	Right Underarm Z 
+
+a01_J_HijiR_01 X	a01_J_HijiR_01 X
+a01_J_HijiR_01 Y	a01_J_HijiR_01 Y
+a01_J_HijiR_01 Z	a01_J_HijiR_01 Z
+
+a01_J_ArmR_02 X		a01_J_ArmR_02 X
+a01_J_ArmR_02 Y		a01_J_ArmR_02 Y
+a01_J_ArmR_02 Z		a01_J_ArmR_02 Z
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Left Hand
 

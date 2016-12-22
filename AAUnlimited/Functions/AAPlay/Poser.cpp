@@ -11,6 +11,7 @@
 #include "Functions\Shared\Globals.h"
 #include "Files\PoseMods.h"
 #include "Files\Config.h"
+#include "Files\PoseFile.h"
 #include "resource.h"
 #include "config.h"
 
@@ -103,10 +104,6 @@ namespace Poser {
 		case WM_HSCROLL: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 			if (thisPtr == NULL) return FALSE;
-			if (ignoreNextSlider) {
-				ignoreNextSlider = false;
-				//return TRUE;
-			}
 			HWND wnd = (HWND)lparam;
 			if (wnd == NULL) break; //not slider control, but automatic scroll
 			for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
@@ -158,10 +155,6 @@ namespace Poser {
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
-				if (ignoreNextSlider) {
-					ignoreNextSlider = false;
-					return TRUE;
-				}
 				
 				for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
 					if (ed == thisPtr->m_sliders[i].GetEdit()) {
@@ -172,6 +165,67 @@ namespace Poser {
 					}
 				}
 				return TRUE; }
+			case BN_CLICKED: {
+				PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+				if (thisPtr == NULL) return FALSE;
+				int id = LOWORD(wparam);
+				if(id == IDC_PPS_BTNSAVE) {
+					const TCHAR* path = General::SaveFileDialog(NULL);
+					if(path != NULL) {
+						PoseFile saveFile;
+						saveFile.SetPoseInfo(General::GetEditInt(thisPtr->m_edPose),General::GetEditFloat(thisPtr->m_edFrame));
+						for (int i = 0; i < thisPtr->m_sliders.size(); i++) {
+							if (thisPtr->m_sliders[i].GetCurrVal() == 0) continue;
+							PoseFile::FrameMod mod;
+							mod.frameName = std::string(loc_sliderInfos[i].frame.begin(),loc_sliderInfos[i].frame.end());;
+							auto kind = loc_sliderInfos[i].mod;
+							if (kind == SliderInfo::ROLL) mod.modKind = 'z';
+							else if (kind == SliderInfo::YAW) mod.modKind = 'y';
+							else mod.modKind = 'x';
+							mod.value = thisPtr->m_sliders[i].GetCurrVal();
+							saveFile.AddFrameMod(mod);
+						}
+						saveFile.DumpToFile(path);
+					}
+				}
+				else if (id == IDC_PPS_BTNLOAD) {
+					const TCHAR* path = General::OpenFileDialog(NULL);
+					if(path != NULL) {
+						for(auto& elem : thisPtr->m_sliders) {
+							std::wstring num(TEXT("0"));
+							SendMessage(elem.GetEdit(),WM_SETTEXT,0,(LPARAM)num.c_str());
+						}
+						PoseFile openFile(path);
+						std::wstring str;
+						str = std::to_wstring(openFile.GetPose());
+						SendMessage(thisPtr->m_edPose,WM_SETTEXT,0,(LPARAM)str.c_str());
+						str = std::to_wstring(openFile.GetFrame());
+						SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)str.c_str());
+						for(auto elem : openFile.GetMods()) {
+							std::wstring wstrName(elem.frameName.begin(),elem.frameName.end());
+							SliderInfo::Mod modkind = SliderInfo::PITCH;
+							if (elem.modKind == 'x') modkind = SliderInfo::PITCH;
+							else if (elem.modKind == 'y') modkind = SliderInfo::YAW;
+							else if (elem.modKind == 'z') modkind = SliderInfo::ROLL;
+							for(int i = 0; i < loc_sliderInfos.size(); i++) {
+								if(loc_sliderInfos[i].frame == wstrName && loc_sliderInfos[i].mod == modkind) {
+									std::wstring num = std::to_wstring(elem.value);
+									SendMessage(thisPtr->m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)num.c_str());
+									break;
+								}
+							}
+						}
+
+					}
+				}
+				else if (id == IDC_PPS_BTNRESET) {
+					for(int i = 0; i < thisPtr->m_sliders.size(); i++) {
+						static const TCHAR numZero[] = TEXT("0");
+						SendMessage(thisPtr->m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)numZero);
+						thisPtr->ApplySlider(i);
+					}
+				}
+				break; }
 			};
 			break; }
 		}

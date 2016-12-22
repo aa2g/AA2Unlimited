@@ -18,7 +18,7 @@ namespace Loads {
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::SetTargetCharacter(loadCharacter);
-}
+} 
 
 void __stdcall HiPolyLoadEndEvent() {
 	Shared::MeshTextureCharLoadEnd();

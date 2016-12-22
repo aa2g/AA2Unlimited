@@ -61,6 +61,40 @@ const TCHAR* OpenFileDialog(const TCHAR* initialDir) {
 	}
 	return path;
 }
+const TCHAR* SaveFileDialog(const TCHAR* initialDir) {
+	static OPENFILENAME opfn;
+	static bool opfnInit = false;
+	static TCHAR workingDir[512];
+	static TCHAR path[512];
+	if (!opfnInit) {
+		ZeroMemory((void*)(&opfn),sizeof(opfn));
+		opfn.lStructSize = sizeof(opfn);
+		opfn.hwndOwner = NULL;
+		opfn.nFilterIndex = 1;
+		opfn.lpstrFileTitle = NULL;
+		opfn.nMaxFileTitle = 0;
+		opfn.lpstrInitialDir = NULL;
+		opfn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		opfn.lpstrFilter = TEXT("All\0*\0");
+	}
+	opfn.lpstrFile = path;
+	opfn.lpstrFile[0] = '\0';
+	opfn.nMaxFile = 512;
+	if (initialDir != NULL) {
+		opfn.lpstrInitialDir = initialDir;
+	}
+	else {
+		opfn.lpstrInitialDir = NULL;
+	}
+	GetCurrentDirectory(500,workingDir);
+	BOOL ret = GetSaveFileName(&opfn); //changes the working dir cause it likes to troll ppl
+	SetCurrentDirectory(workingDir);
+	if (ret == FALSE) {
+		return NULL;
+	}
+	return path;
+}
+
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD targetChunk) {
 	if (bufferSize < 12) return NULL;
 	DWORD chunkLength = 0, chunkId = 0;

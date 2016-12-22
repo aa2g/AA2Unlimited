@@ -45,6 +45,7 @@ inline float GetRandomFloat(float min, float max) {
 
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.
 const TCHAR* OpenFileDialog(const TCHAR* initialDir);
+const TCHAR* SaveFileDialog(const TCHAR* initialDir);
 
 inline bool DirExists(const TCHAR* dir) {
 	DWORD type = GetFileAttributes(dir);

@@ -7,7 +7,7 @@ namespace AAPlay {
 
 
 CharInstData g_characters[25];
-
+CharInstData g_previewChar;
 
 void InitOnLoad() {
 	for(int i = 0; i < 25; i++) {
@@ -37,6 +37,11 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	g_characters[seat].Reset();
 }
 
+void SetPreviewChar(ExtClass::CharacterStruct* previewChar) {
+	g_previewChar.Reset();
+	g_previewChar.m_char = previewChar;
+	g_previewChar.m_cardData.FromFileBuffer((char*)previewChar->m_charData->m_pngBuffer,previewChar->m_charData->m_pngBufferSize);
+}
 
 
 }

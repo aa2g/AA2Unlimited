@@ -30,7 +30,15 @@ namespace Shared {
 	//AAEdit::g_cardData if we are in AAEdit
 
 	void MeshTextureCharLoadStart(ExtClass::CharacterStruct* loadCharacter) {
-		g_currentChar = &AAPlay::g_characters[loadCharacter->m_seat];
+		//the preview always has seat 0. this means we can identify a preview character
+		//by checking its seat number and then comparing with the character currently in seat 0
+		if(loadCharacter->m_seat == 0 && AAPlay::g_characters[0].m_char != loadCharacter) {
+			AAPlay::SetPreviewChar(loadCharacter);
+			g_currentChar = &AAPlay::g_previewChar;
+		}
+		else {
+			g_currentChar = &AAPlay::g_characters[loadCharacter->m_seat];
+		}
 		g_isOverriding = true;
 	}
 
