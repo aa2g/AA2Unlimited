@@ -6,6 +6,7 @@
 
 #include "Functions\Shared\Overrides.h"
 #include "Functions\AAPlay\Globals.h"
+#include "Functions\AAPlay\Poser.h"
 
 namespace PlayInjections {
 /*
@@ -16,7 +17,8 @@ namespace Loads {
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
-}
+	Poser::SetTargetCharacter(loadCharacter);
+} 
 
 void __stdcall HiPolyLoadEndEvent() {
 	Shared::MeshTextureCharLoadEnd();
@@ -201,10 +203,14 @@ void TransferInInjection() {
 DWORD TransferOutOriginalFunc;
 void __declspec(naked) TransferOutRedirect() {
 	__asm {
-		call [TransferOutOriginalFunc]
-		push [esi]
+		pushad 
+
+		push[esi]
 		call TransferOutEvent
-		ret
+
+		popad
+
+		jmp [TransferOutOriginalFunc]
 	}
 }
 

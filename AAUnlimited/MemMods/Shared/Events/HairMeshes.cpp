@@ -5,6 +5,7 @@
 
 #include "Functions\Shared\Globals.h"
 #include "Functions\AAPlay\Globals.h"
+#include "Functions\AAEdit\Globals.h"
 #include "Files\Config.h"
 #include "MemMods\Hook.h"
 #include "General\ModuleInfo.h"
@@ -36,6 +37,7 @@ bool __stdcall HairLoadAAEdit(BYTE kind, ExtClass::CharacterStruct* character) {
 	static ExtClass::XXFile* savedPtr; //the original hair pointer
 	static std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> savedPointers; //hairs we generated
 	
+	if (!Shared::g_isOverriding) return false;
 	const auto& list = Shared::g_currentChar->m_cardData.GetHairs(kind);
 	auto& data = character->m_charData->m_hair;
 
@@ -102,16 +104,23 @@ bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 	bool repeat = false; //if we need to repeat the function to load more hairs
 						 //for every hair kind
 	for (int kind = 0; kind < 4; kind++) {
-		auto& list = AAPlay::GetInstFromStruct(character)->m_hairs[kind];
-		if(list.size() > 0) {
-			if (currIndex < list.size()) {
+		std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>>* list;
+		if(General::IsAAEdit) {
+			list = &AAEdit::g_currChar.m_hairs[kind];
+		}
+		else {
+			list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+		}
+		
+		if(list->size() > 0) {
+			if (currIndex < list->size()) {
 				//still have to do something
 				repeat = true;
-				character->m_xxHairs[kind] = list[currIndex].second;
+				character->m_xxHairs[kind] = (*list)[currIndex].second;
 			}
 			else {
 				//we're done, clear the list
-				list.clear();
+				list->clear();
 			}
 		}
 	}
@@ -245,8 +254,6 @@ void __declspec(naked) HairLoadRedirectAAPlay() {
 
 
 void HairLoadInject() {
-	//these are different functions. The AAEdit version is loading a certain hair slot only,
-	//while the AAPlay version loads all of them. Therefor, the AAPlay version needs different handling
 	if (General::IsAAEdit) {
 		//stack: retVal, [classStruct+2C], someBool, hairSlot, someBool, whereas [[classStruct+2C]+24] == classStruct
 		/*AA2Edit.exe+119A10 - 6A FF                 - push -01 { 255 }
@@ -325,8 +332,28 @@ void __declspec(naked) XXCleanupRedirect() {
 }
 
 void XXCleanupInjection() {
-
-	if(General::IsAAPlay) {
+	if(General::IsAAEdit) {
+		/*AA2Edit.exe+103180 - 83 EC 40              - sub esp,40 { 64 }
+		AA2Edit.exe+103183 - 53                    - push ebx
+		AA2Edit.exe+103184 - 55                    - push ebp
+		AA2Edit.exe+103185 - 56                    - push esi
+		AA2Edit.exe+103186 - 57                    - push edi
+		*/
+		//...
+		/*AA2Edit.exe+1035AD - B0 01                 - mov al,01 { 1 }
+		AA2Edit.exe+1035AF - 5B                    - pop ebx
+		AA2Edit.exe+1035B0 - 83 C4 40              - add esp,40 { 64 }
+		AA2Edit.exe+1035B3 - C3                    - ret 
+		*/
+		DWORD address = General::GameBase + 0x1035AF;
+		DWORD redirectAddress = (DWORD)(&XXCleanupRedirect);
+		Hook((BYTE*)address,
+			{ 0x5B, 0x83, 0xC4, 0x40, 0xC3 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		XXCleanupFuncStart = General::GameBase + 0x103180;
+	}
+	else if(General::IsAAPlay) {
 		//ecx this call characterStruct, deletes all xx files.
 		//at the end (before the esp), no trace of the this pointer is left, but esp+8 should contain an array
 		//of pointers to xx files for easier deletion (so it should always be there), starting with the face xx.
@@ -354,9 +381,93 @@ void XXCleanupInjection() {
 	
 }
 
+/*
+ * return true to repeat.
+ * return false to end.
+ */
+bool HairRefreshEvent(ExtClass::CharacterStruct* character, BYTE* flags) {
+	enum Flags {
+		SKELETON = 1, FACE = 2, TOUNGE = 4, GLASSES = 8, 
+		FRONT_HAIR = 0x10, BACK_HAIR = 0x20, SIDE_HAIR = 0x40, HAIR_EXTENSION = 0x80
+	};
+	static const Flags hairMap[4] = {FRONT_HAIR, SIDE_HAIR, BACK_HAIR, HAIR_EXTENSION};
+
+	static int currIndex = 0;
+	static ExtClass::XXFile* savedPtr[4]; //the original hair pointer
+	static bool done[4]; //what kinds we are done with
+
+	//get char instance
+	CharInstData* charInst = NULL;
+	if (General::IsAAEdit) {
+		charInst = &AAEdit::g_currChar;
+	}
+	else if (General::IsAAPlay) {
+		charInst = AAPlay::GetInstFromStruct(character);
+	}
+
+	if (currIndex == 0) {
+		for (int i = 0; i < 4; i++) done[i] = Shared::g_currentChar->m_cardData.GetHairs(i).empty();
+	}
+
+	*flags = 0;
+
+	bool repeat = false; //if we need to repeat the function to load more hairs
+						 //for every hair kind
+	for (int kind = 0; kind < 4; kind++) {
+		if (done[kind]) continue; //done with this one
+
+		const auto& list = charInst->m_hairs[kind];
+
+		if (currIndex == 0) {
+			//the first, original hair
+			savedPtr[kind] = character->m_xxHairs[kind];
+		}
+		else {
+			//if this was the last hair, mark us as done, restore state and continue
+			if (currIndex >= list.size()) {
+				done[kind] = true;
+				character->m_xxHairs[kind] = savedPtr[kind];
+				continue;
+			}
+		}
+
+		character->m_xxHairs[kind] = list[currIndex].second;
+		*flags |= hairMap[kind];
+
+		repeat = true;
+	}
+
+	if (repeat) {
+		currIndex++;
+		return true;
+	}
+	else {
+		currIndex = 0;
+		return false;
+	}
+
+
+	return false;
+}
+
+DWORD HairRefreshFuncStart;
 void __declspec(naked) HairRefreshRedirect() {
 	__asm {
+		pop ebx
+		mov esp, ebp
+		pop ebp
 
+		pushad
+		lea eax, [esp+ 0x20 + 4]
+		push eax
+		push esi
+		call HairRefreshEvent
+		test al, al
+		popad
+
+		jz HairRefreshRedirect_end
+		jmp [HairRefreshFuncStart]
+	  HairRefreshRedirect_end:
 		ret 4
 	}
 }
@@ -381,12 +492,13 @@ void HairRefreshInject() {
 		AA2Edit.exe+FA663 - 5D                    - pop ebp
 		AA2Edit.exe+FA664 - C2 0400               - ret 0004 { 4 }
 		*/
-		/*DWORD address = General::GameBase + 0x1F89F0;
+		DWORD address = General::GameBase + 0xFA660;
 		DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
 		Hook((BYTE*)address,
-			{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
-			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
-		NULL);*/
+			{ 0x5B, 0x8B, 0xE5, 0x5D, 0xC2, 0x04, 0x04 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+		NULL);
+		HairRefreshFuncStart = General::GameBase + 0xFA471;
 	}
 	else if(General::IsAAPlay) {
 		/*AA2Play v12 FP v1.4.0a.exe+10B7E0 - 55                    - push ebp
@@ -403,6 +515,13 @@ void HairRefreshInject() {
 		AA2Play v12 FP v1.4.0a.exe+10B9D3 - 5D                    - pop ebp
 		AA2Play v12 FP v1.4.0a.exe+10B9D4 - C2 0400               - ret 0004 { 4 }
 		*/
+		DWORD address = General::GameBase + 0x10B9D0;
+		DWORD redirectAddress = (DWORD)(&HairRefreshRedirect);
+		Hook((BYTE*)address,
+			{ 0x5B, 0x8B, 0xE5, 0x5D, 0xC2, 0x04, 0x04 },						//expected values
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+			NULL);
+		HairRefreshFuncStart = General::GameBase + 0x10B7E0;
 	}
 	
 }

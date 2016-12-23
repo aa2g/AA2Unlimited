@@ -10,7 +10,7 @@ The Game treats these as part of the image, which means cards produced with thes
 if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data, and i asume 
 so will AASnowflake.
 
-Features:
+### Features:
 - H-Ai: When forced by an NPC, saying no means yes. In H-Mode, the Buttons will be greyed out, and the H-Ai will take over.
 - Shadowing: When opening a File, the Game/Maker first searches for the file in a Folder with the name of the archive file 
   (minues the .pp ending). If found, he will use this one instead.
@@ -21,3 +21,6 @@ Features:
   located in AAPlay/data/.
   
 - [technically supports 255 tan slots. However, it seems to crash when you close the game, which is really annoying.]
+
+### Test Builds (more up-to-date but card compatibility is not guaranteed; back up your stuff)
+[MEGA](https://mega.nz/#F!IZs3VY5b!axfi9mlecCwLDdvpvIIbzw)

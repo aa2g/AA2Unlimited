@@ -7,6 +7,7 @@
 
 #include "TextureImage.h"
 #include "OverrideFile.h"
+#include "XXObjectFile.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 
 namespace Shared {
@@ -28,6 +29,9 @@ class AAUCardData
 public:
 	static const DWORD PngChunkId = 'aaUd';
 	static const DWORD PngChunkIdBigEndian = 'dUaa';
+	enum MeshModFlag {
+		MODIFY_FRAME = 1,MODIFY_BONE = 2
+	};
 public:
 	AAUCardData();
 	~AAUCardData();
@@ -56,12 +60,14 @@ public:
 	bool RemoveArchiveOverride(int index);
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
+	bool AddObjectOverride(const TCHAR* object,const TCHAR* file);
+	bool RemoveObjectOverride(int index);
 	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
 	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
 	bool RemoveHair(int index);
 	struct BoneMod;
-	bool AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
+	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
 	bool RemoveBoneRule(int index);
 	void SetSliderValue(int sliderTarget,int sliderIndex,float value);
 
@@ -79,6 +85,7 @@ public:
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
+	typedef std::pair<std::wstring,std::wstring> ObjectOverrideRule;
 	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
 	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 	struct HairPart {
@@ -101,7 +108,8 @@ public:
 			for (int i = 0; i < 9; i++) if (data[i] != rhs.data[i]) return false; return true;
 		}
 	};
-	typedef std::pair<std::pair<std::wstring,std::wstring>,BoneMod> BoneRuleV2;
+	
+	typedef std::pair<std::pair<int,std::pair<std::wstring,std::wstring>>,BoneMod> BoneRuleV2;
 	typedef std::pair<std::pair<int,int>,float> SliderRule; //int is slider index in global array, float is selected value
 
 	//getter functions
@@ -120,6 +128,12 @@ public:
 	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
 		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
+	}
+
+	inline const std::vector<ObjectOverrideRule>& GetObjectOverrideList() const { return m_objectOverrides; }
+	inline const XXObjectFile* GetObjectOverrideFile(const char* objectName) const {
+		auto it = m_objectOverrideMap.find(objectName);
+		return it == m_objectOverrideMap.end() ? NULL : &it->second;
 	}
 
 	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
@@ -145,6 +159,11 @@ public:
 	inline const bool HasOutlineColor() { return m_bOutlineColor; }
 	inline const DWORD SetHasOutlineColor(bool has) { return m_bOutlineColor = has; }
 
+	inline const DWORD GetTanColor() { return m_tanColor; }
+	inline const DWORD SetTanColor(COLORREF color) { return m_tanColor = color; }
+	inline const bool HasTanColor() { return m_bTanColor; }
+	inline const DWORD SetHasTanColor(bool has) { return m_bTanColor = has; }
+
 	inline const std::vector<BoneRule> GetBoneTransformationList() { return m_boneTransforms; }
 	inline const D3DMATRIX* GetBoneTransformationRule(const TCHAR* boneName) {
 		auto it = m_boneTransformMap.find(boneName);
@@ -155,16 +174,32 @@ public:
 
 	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
 
-	inline const std::vector<BoneRuleV2> GetBoneRuleList() { return m_boneRules; }
+	inline const std::vector<BoneRuleV2> GetMeshRuleList() { return m_boneRules; }
 	inline const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName) {
 		auto it = m_boneRuleMap.find(xxFileName);
 		return it == m_boneRuleMap.end() ? NULL : &it->second;
 	}
+	inline const std::map<std::wstring,std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName) {
+		auto it = m_frameRuleMap.find(xxFileName);
+		return it == m_frameRuleMap.end() ? NULL : &it->second;
+	}
 
 	inline const std::vector<SliderRule> GetSliderList() { return m_sliders; }
-	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderRuleMap(int type) {
-		return m_sliderMap[type];
+	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderBoneRuleMap(int type) {
+		return m_boneSliderMap[type];
 	}
+	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderFrameRuleMap(int type) {
+		return m_frameSliderMap[type];
+	}
+	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+		auto it = m_boneSliderMap[model].find(bone);
+		return (it != m_boneSliderMap[model].end()) ? &it->second : NULL;
+	}
+	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model,std::wstring bone) {
+		auto it = m_frameSliderMap[model].find(bone);
+		return (it != m_frameSliderMap[model].end()) ? &it->second : NULL;
+	}
+
 private:
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
@@ -175,6 +210,9 @@ private:
 
 	std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
 	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
+
+	std::vector<ObjectOverrideRule> m_objectOverrides;
+	std::map<std::string,XXObjectFile> m_objectOverrideMap;
 
 	struct {
 		std::wstring texName;
@@ -204,6 +242,9 @@ private:
 	bool m_bOutlineColor;
 	DWORD m_outlineColor;
 
+	bool m_bTanColor;
+	DWORD m_tanColor;
+
 	std::vector<BoneRule> m_boneTransforms;
 	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
 
@@ -213,9 +254,11 @@ private:
 
 	std::vector<BoneRuleV2> m_boneRules;
 	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
+	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_frameRuleMap;
 
 	std::vector<SliderRule> m_sliders;
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_sliderMap[ExtClass::CharacterStruct::N_MODELS];
+	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
+	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
@@ -254,6 +297,7 @@ private:
 	void GenMeshOverrideMap();
 	void GenArchiveOverrideMap();
 	void GenArchiveRedirectMap();
+	void GenObjectOverrideMap();
 	void GenBoneRuleMap();
 	void GenSliderMap();
 };

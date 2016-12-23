@@ -96,6 +96,17 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
 	} m_arDialog;
+	struct OODialog : public Dialog {
+		HWND m_edObject;
+		HWND m_edFile;
+		HWND m_btnApply;
+		HWND m_btnBrowse;
+		HWND m_lbOverrides;
+
+		void Refresh();
+		void RefreshRuleList();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_ooDialog;
 	struct ETDialog : public Dialog {
 		struct {
 			HWND cbActive;
@@ -133,10 +144,17 @@ namespace AAEdit {
 		HWND m_edOutlineColorGreen;
 		HWND m_edOutlineColorBlue;
 
+		HWND m_cbTanColor;
+		HWND m_edTanColorRed;
+		HWND m_edTanColorGreen;
+		HWND m_edTanColorBlue;
+
 		HWND m_bmBtnAdd;
 		HWND m_bmCbXXFile;
 		HWND m_bmCbBone;
 		HWND m_bmList;
+		HWND m_bmRbFrameMod;
+		HWND m_bmRbBoneMod;
 		HWND m_bmEdMatrix[3][3];
 		
 		void LoadData(int listboxId);
@@ -186,7 +204,7 @@ namespace AAEdit {
 	bool m_visible;
 
 	void AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName, 
-			RECT targetRct, INT_PTR (CALLBACK *DialogProc)(HWND,UINT,WPARAM,LPARAM));
+			INT_PTR (CALLBACK *DialogProc)(HWND,UINT,WPARAM,LPARAM));
 	LPARAM GetCurrTabItemData();
 private:
 

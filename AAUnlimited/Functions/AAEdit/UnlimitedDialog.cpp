@@ -5,6 +5,8 @@
 #include <queue>
 #include <set>
 #include <stdio.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "External\ExternalVariables\AAEdit\WindowData.h"
 #include "External\ExternalClasses\TextureStruct.h"
@@ -81,14 +83,14 @@ void UnlimitedDialog::Refresh() {
 }
 
 void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName,
-								RECT rct, INT_PTR(CALLBACK *dialogProc)(HWND, UINT, WPARAM, LPARAM)) {
+								INT_PTR(CALLBACK *dialogProc)(HWND, UINT, WPARAM, LPARAM)) {
 	HWND res = CreateDialogParam(General::DllInst, MAKEINTRESOURCE(resourceName),
 		this->m_tabs, dialogProc, (LPARAM)dialog);
 	if(res == NULL) {
 		int error = GetLastError();
 		LOGPRIO(Logger::Priority::WARN) << "failed to make dialog " << resourceName << ": " << error << "\r\n";
 	}
-	MoveWindow(dialog->m_dialog, rct.left, rct.top, rct.right - rct.left, rct.bottom - rct.top, FALSE);
+
 	TCITEM item;
 	item.mask = TCIF_TEXT | TCIF_PARAM;
 	item.pszText = (LPWSTR)tabName;
@@ -106,37 +108,47 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_tabs = GetDlgItem(hwndDlg, IDC_TABS);
-		
-		RECT rct;
-		GetWindowRect(hwndDlg, &rct);
-		rct.top += 20; rct.right -= 20;
-		rct.left += 10; rct.left -= 10;
-		TabCtrl_AdjustRect(thisPtr->m_tabs, FALSE, &rct);
 
 		int index = 0;
 		thisPtr->AddDialog(IDD_GENERAL,&thisPtr->m_gnDialog,index++,TEXT("General"),
-			rct,GNDialog::DialogProc);
+			GNDialog::DialogProc);
 		thisPtr->AddDialog(IDD_EYETEXTURE, &thisPtr->m_etDialog,index++, TEXT("Eye Textures"),
-			rct, ETDialog::DialogProc);
+			ETDialog::DialogProc);
 		thisPtr->AddDialog(IDD_TANSELECT, &thisPtr->m_tsDialog,index++, TEXT("Tan"),
-			rct, TSDialog::DialogProc);
+			TSDialog::DialogProc);
 		thisPtr->AddDialog(IDD_HAIR, &thisPtr->m_hrDialog,index++, TEXT("Hair"),
-			rct, HRDialog::DialogProc);
+			HRDialog::DialogProc);
 		thisPtr->AddDialog(IDD_MESHOVERRIDE, &thisPtr->m_moDialog,index++, TEXT("Mesh Overrides"),
-			rct, MODialog::DialogProc);
+			MODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEOVERRIDE, &thisPtr->m_aoDialog,index++, TEXT("Archive Overrides"),
-			rct, AODialog::DialogProc);
+			AODialog::DialogProc);
 		thisPtr->AddDialog(IDD_ARCHIVEREDIRECT, &thisPtr->m_arDialog,index++, TEXT("Archive Redirects"),
-			rct, ARDialog::DialogProc);
+			ARDialog::DialogProc);
+		thisPtr->AddDialog(IDD_OBJECTOVERRIDE,&thisPtr->m_ooDialog,index++,TEXT("Object Overrides"),
+			OODialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODY,&thisPtr->m_bdDialog,index++,TEXT("Body"),
-			rct, BDDialog::DialogProc);
+			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
-			rct,BSDialog::DialogProc);
+			BSDialog::DialogProc);
 
-		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
+		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
+		RECT rct;
+		GetClientRect(thisPtr->m_tabs,&rct);
+		TabCtrl_AdjustRect(thisPtr->m_tabs,FALSE,&rct);
+		for(int i = 0; i < count; i++) {
+			TCITEM item;
+			item.mask = TCIF_PARAM;
+			BOOL suc = TabCtrl_GetItem(thisPtr->m_tabs,i,&item);
+			if (suc == FALSE) continue;
+			Dialog* diag = (Dialog*)(item.lParam);
+
+			MoveWindow(diag->m_dialog,rct.left,rct.top,rct.right - rct.left,rct.bottom - rct.top,FALSE);
+		}
 
 		DWORD charDataRule[] { 0x353254, 0x2C, 0};
 		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+
+		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
 
 		thisPtr->Refresh();
 		return TRUE;
@@ -404,6 +416,20 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				return TRUE;
 			}
 			break; }
+		case LBN_DBLCLK: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_AO_LIST) {
+				LRESULT res = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					auto list = AAEdit::g_currChar.m_cardData.GetArchiveOverrideList();
+					auto override = list.at(res);
+					SetWindowText(thisPtr->m_edArchive, override.first.first.c_str());
+					SetWindowText(thisPtr->m_edArchiveFile, override.first.second.c_str());
+					SetWindowText(thisPtr->m_edOverrideFile, override.second.c_str());
+				}
+			}
+
+			break; }
 		}
 		break; }
 	}
@@ -486,6 +512,21 @@ INT_PTR CALLBACK UnlimitedDialog::ARDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				return TRUE;
 			}
 			break; }
+		case LBN_DBLCLK: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_AR_LIST) {
+				LRESULT res = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					auto list = AAEdit::g_currChar.m_cardData.GetArchiveRedirectList();
+					auto override = list.at(res);
+					SetWindowText(thisPtr->m_edArFrom, override.first.first.c_str());
+					SetWindowText(thisPtr->m_edFileFrom, override.first.second.c_str());
+					SetWindowText(thisPtr->m_edArTo, override.second.first.c_str());
+					SetWindowText(thisPtr->m_edFileTo, override.second.second.c_str());
+				}
+			}
+
+			break; }
 		}
 		break; }
 	}
@@ -506,6 +547,98 @@ void UnlimitedDialog::ARDialog::RefreshRuleList() {
 void UnlimitedDialog::ARDialog::Refresh() {
 	RefreshRuleList();
 }
+
+/**************************/
+/* Object Override Dialog */
+/**************************/
+
+INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		OODialog* thisPtr = (OODialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_edFile = GetDlgItem(hwndDlg,IDC_OO_EDFILE);
+		thisPtr->m_edObject = GetDlgItem(hwndDlg,IDC_OO_EDOBJECT);
+		thisPtr->m_btnApply = GetDlgItem(hwndDlg,IDC_OO_BTNAPPLY);
+		thisPtr->m_btnBrowse = GetDlgItem(hwndDlg,IDC_OO_BTNBROWSE);
+		thisPtr->m_lbOverrides = GetDlgItem(hwndDlg,IDC_OO_LIST);
+
+		thisPtr->RefreshRuleList();
+		return TRUE;
+		break; }
+	case WM_VKEYTOITEM: {
+		//DEL-key was pressed while the list box had the focus. our target is to remove
+		//the selected override rule.
+		OODialog* thisPtr = (OODialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			//get current selection text
+			int sel = SendMessage(thisPtr->m_lbOverrides,LB_GETCURSEL,0,0);
+			//remove this rule
+			g_currChar.m_cardData.RemoveObjectOverride(sel);
+			thisPtr->RefreshRuleList();
+			return TRUE;
+		}
+		break; }
+	case WM_COMMAND: {
+		OODialog* thisPtr = (OODialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_OO_BTNBROWSE) {
+				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH,NULL);
+				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH,NULL);
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
+				if (choice != NULL) {
+					if (General::StartsWith(choice,initialPlayDir.c_str())) {
+						const TCHAR* rest = choice + initialPlayDir.size();
+						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
+					}
+					else if (General::StartsWith(choice,initialEditDir.c_str())) {
+						const TCHAR* rest = choice + initialEditDir.size();
+						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
+					}
+				}
+				return TRUE;
+			}
+			else if (identifier == IDC_OO_BTNAPPLY) {
+				//apply button pressed.
+				std::wstring object,file;
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edObject,WM_GETTEXT,1024,(LPARAM)buffer);
+				object = buffer;
+				SendMessage(thisPtr->m_edFile,WM_GETTEXT,1024,(LPARAM)buffer);
+				file = buffer;
+
+				if (AAEdit::g_currChar.m_cardData.AddObjectOverride(object.c_str(),file.c_str())) {
+					thisPtr->RefreshRuleList();
+				}
+				return TRUE;
+			}
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::OODialog::RefreshRuleList() {
+	SendMessage(this->m_lbOverrides,LB_RESETCONTENT,0,0);
+	auto list = AAEdit::g_currChar.m_cardData.GetObjectOverrideList();
+	for (size_t i = 0; i < list.size(); i++) {
+		std::wstring listEntry(TEXT("["));
+		listEntry += list[i].first + TEXT("] -> [");
+		listEntry += list[i].second + TEXT("]");
+		SendMessage(this->m_lbOverrides,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
+	}
+}
+
+void UnlimitedDialog::OODialog::Refresh() {
+	RefreshRuleList();
+}
+
 
 /**********************/
 /* Eye Texture Dialog */
@@ -863,6 +996,11 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_GREEN);
 		thisPtr->m_edOutlineColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_BLUE);
 
+		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg,IDC_BD_CBTANCOLOR);
+		thisPtr->m_edTanColorRed = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_RED);
+		thisPtr->m_edTanColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_GREEN);
+		thisPtr->m_edTanColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_BLUE);
+
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
 		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
 		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg,IDC_BD_BM_CBBONE);
@@ -876,6 +1014,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_bmEdMatrix[2][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR31);
 		thisPtr->m_bmEdMatrix[2][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR32);
 		thisPtr->m_bmEdMatrix[2][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR33);
+		thisPtr->m_bmRbFrameMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME);
+		thisPtr->m_bmRbBoneMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBBONE);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -886,6 +1026,12 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
+
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINREDTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREENTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUETAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
+
+		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
 		return TRUE; }
 	case WM_VKEYTOITEM: {
@@ -915,6 +1061,12 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->Refresh();
 				return TRUE;
 			}
+			else if (identifier == IDC_BD_CBTANCOLOR) {
+				BOOL visible = SendMessage(thisPtr->m_cbTanColor,BM_GETCHECK,0,0) == BST_CHECKED;
+				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
+				thisPtr->Refresh();
+				return TRUE;
+			}
 			else if(identifier == IDC_BD_BM_BTNADD) {
 				thisPtr->ApplyInput();
 				return TRUE;
@@ -938,6 +1090,26 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
 					g_currChar.m_cardData.SetOutlineColor(RGB(red,green,blue));
+				}
+			}
+			else if(ed == thisPtr->m_edTanColorRed
+				     || ed == thisPtr->m_edTanColorGreen
+					 || ed == thisPtr->m_edTanColorBlue)
+			{
+				int newval = General::GetEditInt(ed);
+				if (newval < 0) {
+					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+				}
+				else if (newval > 255) {
+					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+				}
+				else {
+					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
+					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
+					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
+					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
+					using namespace ExtVars::AAEdit;
+					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
 				}
 			}
 			else {
@@ -970,11 +1142,18 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
-	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
+	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 	const auto& rule = vec[listboxId];
 	//combo box with title
-	SendMessage(m_bmCbXXFile,WM_SETTEXT,0,(LPARAM)rule.first.first.c_str());
-	SendMessage(m_bmCbBone,WM_SETTEXT,0,(LPARAM)rule.first.second.c_str());
+	SendMessage(m_bmCbXXFile,WM_SETTEXT,0,(LPARAM)rule.first.second.first.c_str());
+	SendMessage(m_bmCbBone,WM_SETTEXT,0,(LPARAM)rule.first.second.second.c_str());
+	int flags = rule.first.first;
+	if(flags & AAUCardData::MODIFY_BONE) {
+		SendMessage(m_bmRbBoneMod,BM_SETCHECK,BST_CHECKED,0);
+	}
+	if (flags & AAUCardData::MODIFY_FRAME) {
+		SendMessage(m_bmRbFrameMod,BM_SETCHECK,BST_CHECKED,0);
+	}
 	//the matrix
 
 	for(int i = 0; i < 3; i++) {
@@ -991,11 +1170,14 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	SendMessage(m_bmCbXXFile,WM_GETTEXT,128,(LPARAM)xxname);
 	TCHAR bonename[128];
 	SendMessage(m_bmCbBone,WM_GETTEXT,128,(LPARAM)bonename);
+	int flags = 0;
+	if (SendMessage(m_bmRbBoneMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_BONE;
+	if (SendMessage(m_bmRbFrameMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_FRAME;
 	//remove transformation if it allready exists
-	const auto& vec = g_currChar.m_cardData.GetBoneRuleList();
+	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 	unsigned int match;
 	for(match = 0; match < vec.size(); match++) {
-		if (vec[match].first.first == xxname && vec[match].first.second == bonename) break;
+		if (vec[match].first.first == flags && vec[match].first.second.first == xxname && vec[match].first.second.second == bonename) break;
 	}
 	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneRule(match);
 
@@ -1010,7 +1192,7 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		}
 	}
 	//save
-	g_currChar.m_cardData.AddBoneRule(xxname,bonename,mod);
+	g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname,bonename,mod);
 	Refresh();
 
 }
@@ -1033,10 +1215,13 @@ void UnlimitedDialog::BDDialog::Refresh() {
 
 	//listbox
 	SendMessage(this->m_bmList,LB_RESETCONTENT,0,0);
-	const auto& list = AAEdit::g_currChar.m_cardData.GetBoneRuleList();
+	const auto& list = AAEdit::g_currChar.m_cardData.GetMeshRuleList();
 	for (size_t i = 0; i < list.size(); i++) {
 		std::wstring listEntry(TEXT("["));
-		listEntry += list[i].first.first + TEXT("|") + list[i].first.second + TEXT("]");
+		if (list[i].first.first & AAUCardData::MODIFY_BONE) listEntry += TEXT("BONE");
+		else listEntry += TEXT("FRAME");
+		listEntry += TEXT("]");
+		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second + TEXT("]");
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 
@@ -1049,19 +1234,19 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			curr->m_xxBody, curr->m_xxLegs
 		};
 		TCHAR tmpBuff[256];
-		std::queue<ExtClass::Bone*> fileQueue;
+		std::queue<ExtClass::Frame*> fileQueue;
 		for (ExtClass::XXFile* file : xxlist) {
 			if (file == NULL) continue;
-			ExtClass::Bone* root = file->m_root;
+			ExtClass::Frame* root = file->m_root;
 			fileQueue.push(root);
 			while (!fileQueue.empty()) {
-				ExtClass::Bone* bone = fileQueue.front();
+				ExtClass::Frame* bone = fileQueue.front();
 				fileQueue.pop();
 				size_t conv;
 				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
 				SendMessage(m_bmCbBone,CB_ADDSTRING,0,(LPARAM)tmpBuff);
-				for (unsigned int i = 0; i < bone->m_arrSize; i++) {
-					fileQueue.push(bone->m_boneArray + i);
+				for (unsigned int i = 0; i < bone->m_nChildren; i++) {
+					fileQueue.push(bone->m_children + i);
 				}
 			}
 		}
@@ -1121,18 +1306,105 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 2 } },
 				-0.05f, 0.05f
 			},
-			{ TEXT("Hand Length"),
-				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 } },
+			/*{ TEXT("Arm Thickness"),
+				{ { CharacterStruct::SKELETON, 3 },{ CharacterStruct::SKELETON, 4 } },
 				-0.5f, 1.0f
+			},*/
+			{ TEXT("Hand Length"),
+				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 },
+				  { CharacterStruct::SKELETON, 13 },{ CharacterStruct::SKELETON, 14 } },
+				-0.4f, 0.2f
+			},
+			{ TEXT("Foot Length"),
+			{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
+				-0.15f, 0.2f
+			},
+			{ TEXT("Foot Width"),
+				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
+				-0.2f, 0.2f
 			},
 			{ TEXT("Eyebrow Height"),
 				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
 				-0.1f, 0.1f
 			},
 			{ TEXT("Eye Depth"),
-				{ { CharacterStruct::FACE_SLIDERS, 0 } },
+				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
-			}
+			},
+			{ TEXT("Bottom Bone Width"),
+				{ { CharacterStruct::BODY, 0 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Bottom Bone Thickness"),
+				{ { CharacterStruct::BODY, 1 }  },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Bottom Width"),
+				{ { CharacterStruct::SKELETON, 7 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Bottom Thickness"),
+				{ { CharacterStruct::SKELETON, 8 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Lower Bottom Thickness"),
+				{ { CharacterStruct::SKELETON, 9 }, { CharacterStruct::SKELETON, 10 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Lower Bottom Width"),
+				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Thigh Thickness"),
+				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulder Width"),
+				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulder Size"),
+				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulder Height"),
+				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Neck Bone Size"),
+				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Arm Bone Size"),
+				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
+				  { CharacterStruct::BODY, 7 },{ CharacterStruct::BODY, 8 },{ CharacterStruct::BODY, 9 },
+				  { CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Ball Size"),
+				{ { CharacterStruct::SKELETON, 29 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Strapon Length"),
+				{ { CharacterStruct::SKELETON, 30 },{ CharacterStruct::SKELETON, 31 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Strapon Girth"),
+				{ { CharacterStruct::SKELETON, 32 },{ CharacterStruct::SKELETON, 33 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("Glans Size"),
+				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("[split] Ear Width"),
+				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				-0.5f, 1.5f
+			},
+			{ TEXT("[split] Ear Height"),
+				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				-0.5f, 1.5f
+			},
 		};
 		
 		int xpos = 10,ypos = 10;
@@ -1145,7 +1417,13 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				sldVec,sliderIds[i].min,sliderIds[i].max));
 			ypos += 40; //move next one a bit farer down
 		}
-
+		SCROLLINFO si;
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_PAGE | SIF_RANGE;
+		si.nMin = 0;
+		si.nMax = ypos;
+		si.nPage = 200;
+		SetScrollInfo(hwndDlg,SB_VERT,&si,FALSE);
 		
 
 		return TRUE; }
@@ -1165,6 +1443,15 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->ApplySlider(i);
 				break;
 			}
+		}
+		break; }
+	case WM_VSCROLL: {
+		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		HWND wnd = (HWND)lparam;
+		if(wnd == NULL) {
+			General::ScrollWindow(hwndDlg,wparam);
+			return TRUE;
 		}
 		break; }
 	case WM_COMMAND: {
@@ -1193,20 +1480,132 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::BSDialog::ApplySlider(int index) {
+	//make sure slider operations are valid. else, crashes might occur
+	if(ExtVars::AAEdit::GetCurrentCharacter() == NULL || ExtVars::AAEdit::GetCurrentCharacter()->m_xxSkeleton == NULL) {
+		//every character has a skeleton, and the current character is only filled in the editor (previews dont count). therefor,
+		//if neither is true, we are not currently editing a valid model
+		for(int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
+			Shared::g_xxBoneMods[i].clear();
+			Shared::g_xxBoneParents[i].clear();
+			Shared::g_xxMods[i].clear();
+		}
+		return;
+	}
 	bool faceSliderRenew = false;
-	std::set<ExtClass::XXFile*> renewFiles;
+	std::set<ExtClass::CharacterStruct::Models> renewFiles;
 	for (auto& slider : m_sliders[index].sliderData) {
 		g_currChar.m_cardData.SetSliderValue(slider->target,slider->index,m_sliders[index].currVal);
-		auto* xxfile = g_currChar.m_char->GetXXFile(slider->target);
-		renewFiles.insert(xxfile);
+		renewFiles.insert(slider->target);
 		faceSliderRenew = faceSliderRenew || slider->target == ExtClass::CharacterStruct::FACE_SLIDERS;
+
+		//reset targeted matrix in case we 0ed it and the for loops below do not cover it anymore
+		if(m_sliders[index].currVal == slider->GetNeutralValue()) {
+			if(slider->flags & AAUCardData::MODIFY_FRAME) {
+				for (auto& elem : Shared::g_xxMods[slider->target]) {
+					ExtClass::Frame* frame = elem.first;
+					TCHAR buff[256];
+					size_t written;
+					mbstowcs_s(&written,buff,frame->m_name+5,256);
+					std::wstring str(buff);
+					if (str == slider->boneName) {
+						frame->m_matrix1 = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+						frame->m_matrix5 = {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
+						break;
+					}
+				}
+			}
+			if (slider->flags & AAUCardData::MODIFY_BONE) {
+				for (auto& elem : Shared::g_xxBoneParents[slider->target]) {
+					std::string mbBoneName(elem.boneName.begin(),elem.boneName.end());
+					if (elem.boneName == slider->boneName) {
+						for(auto& frameParents : elem.parents) {
+							for(int i = 0; i < frameParents->m_nBones; i++) {
+								ExtClass::Bone* bone = &frameParents->m_bones[i];
+								if(bone->m_name == mbBoneName) {
+									bone->m_matrix = elem.origMatrix;
+									break;
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+
+		}
 	}
 	
 
-	for (ExtClass::XXFile* file : renewFiles) {
-		if (file != NULL) {
-			Shared::XXFileModification(file,true);
+	for (ExtClass::CharacterStruct::Models model : renewFiles) {
+		for(auto& elem : Shared::g_xxMods[model]) {
+			ExtClass::Frame* frame = (ExtClass::Frame*)elem.first;
+			TCHAR buff[256];
+			size_t written;
+			mbstowcs_s(&written,buff,frame->m_name+5,256);
+			std::wstring str(buff);
+			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
+			if(rule != NULL) {
+				D3DMATRIX& mat = elem.second;
+				D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+				D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+				D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+				for(auto& elem : *rule) {
+					Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+				}
+				auto res = General::MatrixFromSRT(scale,rot,trans);
+				frame->m_matrix1 = res;
+				frame->m_matrix5 = res;
+			}
 		}
+		for (auto& elem : Shared::g_xxBoneParents[model]) {
+			auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,elem.boneName);
+			if(rule != NULL) {
+				std::string strBoneName(elem.boneName.begin(), elem.boneName.end());
+				for(auto* frame : elem.parents) {
+					for(int i = 0; i < frame->m_nBones; i++) {
+						ExtClass::Bone* bone = &frame->m_bones[i];
+						if(bone->m_name == strBoneName) {
+							D3DMATRIX& mat = elem.srtMatrix;
+							D3DMATRIX& origMat = elem.origMatrix;
+							D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+							D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+							D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+							for (auto& elem : *rule) {
+								Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+							}
+							auto res = General::MatrixFromSRT(scale,rot,trans);
+							(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
+						}
+					}
+				}
+			}
+		}
+		/*for(auto& elem : Shared::g_xxBoneMods[model]) {
+			for(auto& savedBone : elem.bones) {
+				ExtClass::Bone* bone = savedBone.ptr;
+				if (bone->m_name == NULL) {
+					LOGPRIO(Logger::Priority::WARN) << "bone name is NULL for some reason\r\n";
+					continue;
+				}
+				TCHAR buff[256];
+				size_t written;
+				mbstowcs_s(&written,buff,bone->m_name,256);
+				std::wstring str(buff);
+				auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,str);
+				if (rule != NULL) {
+					D3DMATRIX& mat = elem.srtMatrix;
+					D3DMATRIX& origMat = elem.origMatrix;
+					D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
+					D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
+					D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+					for (auto& elem : *rule) {
+						Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
+					}
+					auto res = General::MatrixFromSRT(scale,rot,trans);
+					(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
+				}
+			}
+		}*/
 	}
 
 	if(faceSliderRenew) {
@@ -1298,6 +1697,8 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* labe
 	staticLabel = label;
 	int ret = SendMessage(this->slider,TBM_SETRANGEMIN,TRUE,0);
 	ret = SendMessage(this->slider,TBM_SETRANGEMAX,TRUE,0x10000);
+	ret = SendMessage(this->slider,TBM_SETLINESIZE,0, 0x10000 / 100);
+	ret = SendMessage(this->slider,TBM_SETPAGESIZE,0, 0x10000 / 100);
 }
 
 float UnlimitedDialog::BSDialog::BodySlider::Sld2Val(int sld) {

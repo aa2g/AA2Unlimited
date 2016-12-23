@@ -7,6 +7,8 @@
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
 #include "Functions\Shared\SpecialOverrides.h"
+#include "Functions\AAPlay\Poser.h"
+#include "Files\XXFile.h"
 
 /*
 * xx file textures are loaded in two steps. First, an array of mesh structs is created, each of which
@@ -677,8 +679,8 @@ void OverrideOutlineColorInject() {
 	}
 }
 
-void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
-	//note that this event fires for the child bones first, then the parent. dont enumerate child bones again.
+void __stdcall OverrideBoneEvent(ExtClass::Frame* bone) {
+	/*//note that this event fires for the child bones first, then the parent. dont enumerate child bones again.
 	if (!Shared::g_isOverriding) return;
 	TCHAR nameBuffer[256];
 	size_t out;
@@ -689,7 +691,33 @@ void __stdcall OverrideBoneEvent(ExtClass::Bone* bone) {
 		//(*Shared::D3DXMatrixMultiply)(&bone->m_matrix1,ret,&bone->m_matrix1);
 		bone->m_matrix1 = *ret;
 		bone->m_matrix5 = *ret;
+	}*/
+	if (strcmp(bone->m_name,"a01_J_UdeR_01") != 0) return;
+	using namespace ExtClass;
+	Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+	memcpy_s(newMatch,sizeof(Frame),bone,sizeof(Frame));
+
+	//change parent and child stuff
+	bone->m_parent = newMatch->m_parent;
+	bone->m_nChildren = 1;
+	bone->m_children = newMatch;
+	newMatch->m_parent = bone;
+	for (int i = 0; i < newMatch->m_nChildren; i++) {
+		newMatch->m_children[i].m_parent = newMatch;
 	}
+
+	//change name
+	int namelength = newMatch->m_nameBufferSize + 5;
+	bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+	bone->m_nameBufferSize = namelength;
+	//strcpy_s(match->m_name,match->m_nameBufferSize,newMatch->m_name);
+	//strcat_s(match->m_name,match->m_nameBufferSize,"_artf");
+	strcpy_s(bone->m_name,bone->m_nameBufferSize,"newname");
+
+	//some values
+	const D3DMATRIX idMatr = { 1.0f,0,0,0, 0,1.0f,0,0, 0,0,1.0f,0, 0,0,0,1.0f };
+	bone->m_matrix1 = idMatr;
+	bone->m_matrix5 = idMatr;
 }
 
 void __declspec(naked) OverrideBoneRedirect() {
@@ -707,6 +735,7 @@ void __declspec(naked) OverrideBoneRedirect() {
 }
 
 void OverrideBoneInject() {
+	//end of function that reads a bone from the xx file
 	if (General::IsAAEdit) {
 		//this is where the function ends that generates a bone struct. this struct is currently in ebx.
 		/*AA2Edit.exe+1E847A - 5F                    - pop edi
@@ -751,7 +780,7 @@ void __stdcall OverrideBoneEventV2(ExtClass::XXFile* xxFile) {
 
 DWORD OverrideBoneOriginalFunctionV2;
 void __declspec(naked) OverrideBoneRedirectV2() {
-	__asm {
+	/*__asm {
 		push [esp+0xC]
 		push [esp+0xC]
 		push [esp+0xC]
@@ -762,10 +791,17 @@ void __declspec(naked) OverrideBoneRedirectV2() {
 		call OverrideBoneEventV2
 		pop eax
 		ret
+	}*/
+	__asm {
+		push[esp+0x4] //esi, the xx file
+		call OverrideBoneEventV2
+
+		jmp [OverrideBoneOriginalFunctionV2]
 	}
 }
 
 void OverrideBoneInjectV2() {
+	//place that inserts animation into an xx file
 	if (General::IsAAEdit) {
 		/*
 		AA2Edit.exe+1EA464 - 51                    - push ecx
@@ -797,6 +833,330 @@ void OverrideBoneInjectV2() {
 	}
 }
 
+void __stdcall OverrideFrameEvent(ExtClass::XXFile* xxFile) {
+	Shared::XXFileModification(xxFile,General::IsAAEdit);
+	if (General::IsAAPlay) Poser::FrameModEvent(xxFile);
+}
+
+void __declspec(naked) OverrideFrameRedirect() {
+	__asm {
+		add esp, 0x20
+		pushad
+		push eax
+		call OverrideFrameEvent
+		popad
+		ret
+	}
+}
+
+void OverrideFrameInject() {
+	if(General::IsAAEdit) {
+		//function that reads an xx file from an xx file (no animations and stuff)
+		/*AA2Edit.exe+1F8B50 - 6A FF                 - push -01 { function that reads an xx file }
+		AA2Edit.exe+1F8B52 - 68 B0BE5500           - push AA2Edit.exe+2BBEB0 { [0824548B] }
+		AA2Edit.exe+1F8B57 - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+		AA2Edit.exe+1F8B5D - 50                    - push eax
+		AA2Edit.exe+1F8B5E - 83 EC 14              - sub esp,14 { 20 }
+		AA2Edit.exe+1F8B61 - A1 A00A5E00           - mov eax,[AA2Edit.exe+340AA0] { [1942D58A] }
+		AA2Edit.exe+1F8B66 - 33 C4                 - xor eax,esp
+		*/
+		//...
+		/*AA2Edit.exe+1F8D1A - 8B 4C 24 10           - mov ecx,[esp+10]
+		AA2Edit.exe+1F8D1E - 33 CC                 - xor ecx,esp
+		AA2Edit.exe+1F8D20 - E8 442F0700           - call AA2Edit.exe+26BC69
+		AA2Edit.exe+1F8D25 - 83 C4 20              - add esp,20 { 32 }
+		AA2Edit.exe+1F8D28 - C3                    - ret
+		AA2Edit.exe+1F8D29 - CC                    - int 3
+		AA2Edit.exe+1F8D2A - CC                    - int 3
+		AA2Edit.exe+1F8D2B - CC                    - int 3
+		AA2Edit.exe+1F8D2C - CC                    - int 3
+		*/
+		DWORD address = General::GameBase + 0x1F8D25;
+		DWORD redirectAddress = (DWORD)(&OverrideFrameRedirect);
+		Hook((BYTE*)address,
+			{ 0x83, 0xC4, 0x20, 
+				0xC3, 
+				0xCC, },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+	else if(General::IsAAPlay) {
+		/*AA2Play v12 FP v1.4.0a.exe+2165D0 - 6A FF                 - push -01 { 255 }
+		AA2Play v12 FP v1.4.0a.exe+2165D2 - 68 D0A4D500           - push "AA2Play v12 FP v1.4.0a.exe"+2DA4D0 { [0824548B] }
+		AA2Play v12 FP v1.4.0a.exe+2165D7 - 64 A1 00000000        - mov eax,fs:[00000000] { 0 }
+		AA2Play v12 FP v1.4.0a.exe+2165DD - 50                    - push eax
+		AA2Play v12 FP v1.4.0a.exe+2165DE - 83 EC 14              - sub esp,14 { 20 }
+		AA2Play v12 FP v1.4.0a.exe+2165E1 - A1 A03ADE00           - mov eax,["AA2Play v12 FP v1.4.0a.exe"+363AA0] { [198] }
+		AA2Play v12 FP v1.4.0a.exe+2165E6 - 33 C4                 - xor eax,esp
+		*/
+		//...
+		/*AA2Play v12 FP v1.4.0a.exe+21679A - 8B 4C 24 10           - mov ecx,[esp+10]
+		AA2Play v12 FP v1.4.0a.exe+21679E - 33 CC                 - xor ecx,esp
+		AA2Play v12 FP v1.4.0a.exe+2167A0 - E8 B4320700           - call "AA2Play v12 FP v1.4.0a.exe"+289A59 { ->AA2Play v12 FP v1.4.0a.exe+289A59 }
+		AA2Play v12 FP v1.4.0a.exe+2167A5 - 83 C4 20              - add esp,20 { 32 }
+		AA2Play v12 FP v1.4.0a.exe+2167A8 - C3                    - ret 
+		AA2Play v12 FP v1.4.0a.exe+2167A9 - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AA - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AB - CC                    - int 3 
+		AA2Play v12 FP v1.4.0a.exe+2167AC - CC                    - int 3 
+		*/
+		DWORD address = General::GameBase + 0x2167A5;
+		DWORD redirectAddress = (DWORD)(&OverrideFrameRedirect);
+		Hook((BYTE*)address,
+			{ 0x83, 0xC4, 0x20,
+				0xC3,
+				0xCC, },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+
+}
+
+void __stdcall OverrideBoneManipulationEvent(ExtClass::Frame* boneFrame) {
+	Shared::XXBoneModification(boneFrame,General::IsAAEdit);
+}
+
+DWORD OverrideBoneManipulationOriginal;
+void __declspec(naked) OverrideBoneManipulationRedirect() {
+	__asm {
+		push [esp+8]
+		push [esp+8]
+		call [OverrideBoneManipulationOriginal]
+		add esp, 8
+
+		push eax
+
+		push ebx
+		call OverrideBoneManipulationEvent
+
+		pop eax
+		ret
+	}
+}
+
+void OverrideBoneManipulationInject() {
+	if (General::IsAAEdit) {
+		/*
+		AA2Edit.exe+1F9792 - 56                    - push esi
+		AA2Edit.exe+1F9793 - 53                    - push ebx{ frame of which the subbones will be set }
+		AA2Edit.exe+1F9794 - 8B C7                 - mov eax,edi
+		AA2Edit.exe+1F9796 - E8 F5080000           - call AA2Edit.exe+1FA090{ changes all bones from this frame }
+		AA2Edit.exe+1F979B - 83 C4 08              - add esp,08 { 8 }
+		*/
+		DWORD address = General::GameBase + 0x1F9796;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneManipulationRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0x08, 00, 00 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneManipulationOriginal);
+	}
+	else if (General::IsAAPlay) {
+		/*
+		AA2Play v12 FP v1.4.0a.exe+217212 - 56                    - push esi
+		AA2Play v12 FP v1.4.0a.exe+217213 - 53                    - push ebx
+		AA2Play v12 FP v1.4.0a.exe+217214 - 8B C7                 - mov eax,edi
+		AA2Play v12 FP v1.4.0a.exe+217216 - E8 F5080000           - call "AA2Play v12 FP v1.4.0a.exe"+217B10 { ->AA2Play v12 FP v1.4.0a.exe+217B10 }
+		AA2Play v12 FP v1.4.0a.exe+21721B - 83 C4 08              - add esp,08 { 8 }
+		*/
+		DWORD address = General::GameBase + 0x217216;
+		DWORD redirectAddress = (DWORD)(&OverrideBoneManipulationRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0x08, 00, 00 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideBoneManipulationOriginal);
+	}
+}
+
+BYTE* loc_overrideObjectOrigFile = NULL;
+DWORD loc_overrideObjectOrigOffset = 0;
+DWORD* loc_overrideObjectOrigOffsetPtr = NULL;
+BYTE* loc_overrideObjectFileBuffer = NULL;
+bool loc_overrideObjectIsOverriding = false;
+int loc_overrideObjectRecursionCount = 0;
+void __stdcall OverrideObjectStart(BYTE** ptrFile, DWORD* offset) {
+	if(loc_overrideObjectIsOverriding) {
+		loc_overrideObjectRecursionCount++;
+	}
+	else {
+		BYTE* objectBuffer = *ptrFile + *offset;
+		DWORD size = *(DWORD*)(objectBuffer);
+		if (size == 0 || size > 256) return;
+		char buffer[256];
+		char* it = (char*)(objectBuffer + 4);
+		for (int i = 0; i < size; i++) buffer[i] = ~it[i];
+		const XXObjectFile* match = Shared::ObjectOverrideRules(buffer);
+		if (match == NULL) return;
+
+		//read through this object so we can skip it
+		DWORD osize = FileFormats::XXFile::ReadObjectLength(objectBuffer);
+		if (osize == 0) return; //error
+
+		loc_overrideObjectOrigFile = *ptrFile;
+		loc_overrideObjectOrigOffset = *offset + osize;
+		loc_overrideObjectOrigOffsetPtr = offset;
+		loc_overrideObjectFileBuffer = new BYTE[match->GetFileSize()];
+		match->WriteToBuffer(loc_overrideObjectFileBuffer);
+		loc_overrideObjectIsOverriding = true;
+
+		*ptrFile = loc_overrideObjectFileBuffer;
+		*offset = 0;
+	}
+	
+}
+
+void __stdcall OverrideObjectEnd() {
+	if (loc_overrideObjectIsOverriding) {
+		loc_overrideObjectRecursionCount--;
+		if(loc_overrideObjectRecursionCount < 0) {
+			//we're done, restore values
+			*loc_overrideObjectOrigOffsetPtr = loc_overrideObjectOrigOffset;
+			loc_overrideObjectIsOverriding = false;
+			loc_overrideObjectRecursionCount = 0;
+			delete[] loc_overrideObjectFileBuffer;
+			loc_overrideObjectFileBuffer = NULL;
+		}
+	}
+}
+
+void __declspec(naked) OverrideObjectRedirectStart() {
+	__asm {
+		pushad
+
+		mov eax, [esp + 4 + 0x20 + 0x14] //pointer to offset (thats the parameter, a pointer to the offset)
+		lea edx, [esp + 4 + 0x20 + 0x10] //pointer to the file (to the parameter on the stack)
+		push eax
+		push edx
+		call OverrideObjectStart
+
+		popad
+
+		mov eax, [esp+ 4 + 0x0C]
+		push [esp]
+		mov [esp+4], ebx
+		
+		ret
+	};
+}
+void __declspec(naked) OverrideObjectRedirectEnd() {
+	__asm {
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
+		pushad
+		call OverrideObjectEnd
+		popad
+
+		ret
+	};
+}
+
+void OverrideObjectInject() {
+	if (General::IsAAEdit) {
+		//reads an object from the file buffer, including its children. [esp+10] is the file, [esp+14] is the pointer to the current offset
+		/*
+		AA2Edit.exe+1E8120 - 8B 44 24 0C           - mov eax,[esp+0C] { creates a bone }
+		AA2Edit.exe+1E8124 - 53                    - push ebx
+		*/
+		//...
+		//
+		/*
+		AA2Edit.exe+1E847A - 5F                    - pop edi
+		AA2Edit.exe+1E847B - 5E                    - pop esi
+		AA2Edit.exe+1E847C - 5D                    - pop ebp
+		AA2Edit.exe+1E847D - 5B                    - pop ebx
+		AA2Edit.exe+1E847E - C3                    - ret
+		AA2Edit.exe+1E847F - CC                    - int 3
+		*/
+		DWORD address = General::GameBase + 0x1E8120;
+		DWORD redirectAddress = (DWORD)(&OverrideObjectRedirectStart);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x44, 0x24, 0x0C, 0x53 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		address = General::GameBase + 0x1E847A;
+		redirectAddress = (DWORD)(&OverrideObjectRedirectEnd);
+		Hook((BYTE*)address,
+		{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3 },
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+	else if (General::IsAAPlay) {
+		/*AA2Play v12 FP v1.4.0a.exe+205520 - 8B 44 24 0C           - mov eax,[esp+0C]
+		AA2Play v12 FP v1.4.0a.exe+205524 - 53                    - push ebx
+		*/
+		//...
+		/*AA2Play v12 FP v1.4.0a.exe+20587A - 5F                    - pop edi
+		AA2Play v12 FP v1.4.0a.exe+20587B - 5E                    - pop esi
+		AA2Play v12 FP v1.4.0a.exe+20587C - 5D                    - pop ebp
+		AA2Play v12 FP v1.4.0a.exe+20587D - 5B                    - pop ebx
+		AA2Play v12 FP v1.4.0a.exe+20587E - C3                    - ret 
+		*/
+		DWORD address = General::GameBase + 0x205520;
+		DWORD redirectAddress = (DWORD)(&OverrideObjectRedirectStart);
+		Hook((BYTE*)address,
+			{ 0x8B, 0x44, 0x24, 0x0C, 0x53 },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		address = General::GameBase + 0x20587A;
+		redirectAddress = (DWORD)(&OverrideObjectRedirectEnd);
+		Hook((BYTE*)address,
+			{ 0x5F, 0x5E, 0x5D, 0x5B, 0xC3 },
+			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+	}
+}
+
+void __stdcall OverrideTanColorEvent(DWORD* tanColor, DWORD* unknownColor) {
+	Shared::OverrideTanColor(tanColor,unknownColor);
+}
+
+DWORD OverrideTanColorOriginal;
+void __declspec(naked) OverrideTanColorRedirect() {
+	__asm {
+		push [esp+0x8]
+		push [esp+0x8]
+		call [OverrideTanColorOriginal]
+		add esp, 8
+		mov eax, [esp+0x8]
+		mov edx, [esp+0x4]
+		push eax
+		push edx
+		call OverrideTanColorEvent
+		ret
+	}
+}
+
+void OverrideTanColorInject() {
+	if (General::IsAAEdit) {
+		//func(DWORD* outARGB, DWORD* ???, ...???
+		//function returns the color in [esp+84] as a DWORD, ARGB (A being hi-byte)
+		/*
+		AA2Edit.exe+11B356 - E8 F5AFFBFF           - call AA2Edit.exe+D6350 { returns the tan color }
+		AA2Edit.exe+11B35B - 8B 84 24 84000000     - mov eax,[esp+00000084]
+		*/
+		DWORD address = General::GameBase + 0x11B356;
+		DWORD redirectAddress = (DWORD)(&OverrideTanColorRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xF5, 0xAF, 0xFB, 0xFF },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideTanColorOriginal);
+	}
+	else if (General::IsAAPlay) {
+		/*
+		AA2Play v12 FP v1.4.0a.exe+12CE66 - E8 D573FBFF           - call "AA2Play v12 FP v1.4.0a.exe"+E4240 { ->AA2Play v12 FP v1.4.0a.exe+E4240 }
+		AA2Play v12 FP v1.4.0a.exe+12CE6B - 8B 84 24 84000000     - mov eax,[esp+00000084]
+		*/
+		DWORD address = General::GameBase + 0x12CE66;
+		DWORD redirectAddress = (DWORD)(&OverrideTanColorRedirect);
+		Hook((BYTE*)address,
+			{ 0xE8, 0xD5, 0x73, 0xFB, 0xFF },
+			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			&OverrideTanColorOriginal);
+	}
+}
+
 
 }
 }
+

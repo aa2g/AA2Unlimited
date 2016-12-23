@@ -5,7 +5,7 @@
 
 #include "Files\Config.h"
 #include "External\ExternalClasses\HClasses\HInfo.h"
-#include "External\ExternalClasses\Bone.h"
+#include "External\ExternalClasses\Frame.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
 #include "Functions\Shared\Globals.h"
@@ -24,11 +24,13 @@
  */
 namespace Facecam {
 
+void RestoreCamera();
+
 
 ExtClass::HInfo* loc_hinfo = NULL;
-ExtClass::Bone* loc_focusBone = NULL;
+ExtClass::Frame* loc_focusBone = NULL;
 D3DVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
-int loc_state = 0; //0 - default, 1 - passive POV, 2 - active POV
+int loc_state = 0; //0 - default, 1 - active POV, 2 - passive POV
 
 ExtClass::CharacterStruct* loc_passiveChar = NULL;
 ExtClass::CharacterStruct* loc_activeChar = NULL;
@@ -41,10 +43,10 @@ bool loc_activeFaceHidden = false;
 
 D3DMATRIX loc_activeKaos[6]; //will hold the original kao matrizes. probably always id-matrix, but just to make sure
 D3DMATRIX loc_passiveKaos[6];
-//shows or hides face, hair and tounge
+//shows or hides face, hair and tongue
 void ShowFace(bool active, bool visible) {
-	ExtClass::CharacterStruct* character = active ? loc_hinfo->m_activeParticipant->m_charPtr 
-												  : loc_hinfo->m_passiveParticipant->m_charPtr;
+	ExtClass::CharacterStruct* character = active ? loc_activeChar
+												  : loc_passiveChar;
 	ExtClass::XXFile* toHide[6] = {character->m_xxFace, character->m_xxTounge,
 								  character->m_xxHairs[0],character->m_xxHairs[1],
 								  character->m_xxHairs[2],character->m_xxHairs[3]}; //alternative, we could scale the neck
@@ -54,11 +56,11 @@ void ShowFace(bool active, bool visible) {
 		//do save search for kao
 		ExtClass::XXFile* it = toHide[i];
 		if (it == NULL) continue; //some of them might not be there (e.g has no side hair)
-		ExtClass::Bone* boneIt = it->m_root; //all_root
-		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
-		boneIt = &boneIt->m_boneArray[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
-		if (boneIt == NULL || boneIt->m_arrSize != 1) continue;
-		boneIt = &boneIt->m_boneArray[0]; //kao
+		ExtClass::Frame* boneIt = it->m_root; //all_root
+		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+		boneIt = &boneIt->m_children[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
+		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+		boneIt = &boneIt->m_children[0]; //kao
 		//backup the matrix if possible
 		static const D3DMATRIX nullMatrix = {0.001f,0,0,0,  0,0.001f,0,0,  0,0,0.001f,0,  0,0,0,1.0f};
 		if(memcmp(&boneIt->m_matrix1, &nullMatrix, sizeof(nullMatrix)) != 0) {
@@ -79,12 +81,12 @@ void ShowFace(bool active, bool visible) {
 D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 	D3DVECTOR3 retVal{ 0,0,0 };
 	//find left and right eye
-	ExtClass::Bone* rightEye,*leftEye;
+	ExtClass::Frame* rightEye,*leftEye;
 	rightEye = character->m_xxFace->FindBone("A00_J_meR2",-1);
 	leftEye = character->m_xxFace->FindBone("A00_J_meL2",-1);
 
 	if (rightEye != NULL && leftEye != NULL) {
-		ExtClass::Bone* it;
+		ExtClass::Frame* it;
 		D3DVECTOR3 rightEyePos {0,0,0};
 		it = rightEye;
 		while(it != NULL) {
@@ -116,24 +118,12 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
 		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
-
-
-		if (loc_hinfo) {
-			static const D3DMATRIX idMatr = {
-				1.0f,0,0,0,
-				0,1.0f,0,0,
-				0,0,1.0f,0,
-				0,0,0,1.0f
-			};
-			loc_hinfo->GetCamera()->m_matrix = idMatr;
-		}
-
+		
+		loc_state = 0;
+		RestoreCamera();
 		loc_activeFaceXX = NULL;
 		loc_passiveFaceXX = NULL;
-		loc_passiveFaceHidden = false;
-		loc_activeFaceHidden = false;
-		loc_state = 0;
-		loc_focusBone = NULL;
+
 		loc_hinfo = NULL;
 		loc_activeChar = NULL;
 		loc_passiveChar = NULL;
@@ -149,23 +139,28 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 		}
 
 		//if 3d model was reloaded
-		if(loc_activeChar->m_xxFace != loc_activeFaceXX) {
+		if (loc_state == 0 && 
+			(loc_activeChar->m_xxFace != loc_activeFaceXX || loc_passiveChar->m_xxFace != loc_passiveFaceXX))
+		{
 			loc_activeFaceXX = loc_activeChar->m_xxFace;
-			if (loc_activeFaceHidden) {
-				ShowFace(true,false);
-			}
-			loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
+			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
+			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
+			RestoreCamera();
+		}
+		if(loc_activeChar->m_xxFace != loc_activeFaceXX &&
+			loc_state == 1) {
+			loc_activeFaceXX = loc_activeChar->m_xxFace;
+			RestoreCamera();
 			loc_activeEyeOffset = FindEyeOffset(loc_activeChar);
 		}
-		if(loc_passiveChar->m_xxFace != loc_passiveFaceXX) {
+		if (loc_passiveChar->m_xxFace != loc_passiveFaceXX &&
+			loc_state == 2) {
 			loc_passiveFaceXX = loc_passiveChar->m_xxFace;
-			if (loc_passiveFaceHidden) {
-				ShowFace(false,false);
-			}
-			loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+			RestoreCamera();
 			loc_passiveEyeOffset = FindEyeOffset(loc_passiveChar);
 		}
-		
+
 
 		if (loc_focusBone != NULL) {
 			//we need to keep all camera parameters at 0 (except for fov of course)
@@ -195,8 +190,31 @@ void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	}
 }
 
+void RestoreCamera()
+{
+	if (loc_hinfo) {
+	//restore the matrix to an identity matrix
+		static const D3DMATRIX idMatr = {
+			1.0f,0,0,0,
+			0,1.0f,0,0,
+			0,0,1.0f,0,
+			0,0,0,1.0f
+		};
+		loc_hinfo->GetCamera()->m_matrix = idMatr;
 
-void AdjustCamera(ExtClass::Bone* bone) {
+		//unbind camera from the bone
+		loc_focusBone = NULL; //all 3d stuff is invalid now, reloaded
+		loc_focusOffset = { 0,0,0 };
+
+		//return both faces to normal
+		loc_activeFaceHidden = false;
+		ShowFace(false, !loc_activeFaceHidden);
+		loc_passiveFaceHidden = false;
+		ShowFace(true, !loc_passiveFaceHidden);
+	}
+}
+
+void AdjustCamera(ExtClass::Frame* bone) {
 
 	ExtClass::CharacterData::Hair baldHaircut = ExtClass::CharacterData::Hair();
 		baldHaircut.frontHair = 0;
@@ -206,44 +224,41 @@ void AdjustCamera(ExtClass::Bone* bone) {
 		baldHaircut.hairExtension = 0;
 		
 	if (loc_hinfo == NULL) return;
-	//make sure the q button was pressed, which means bone is the first bone of participant 2 (or 1 depending on position ._.)
+	//make sure the q or w button was pressed, which means bone is the first bone of participant 2 (or 1 depending on position ._.)
 	//	Q - toggles states
-	//	W - toggles head visibility depending on the state:
-	//		state 1 - passive's POV
-	//		state 2 - active's POV
-	//		state 3 - default camera
+	//	W - returns camera to normal and focuses on the chest
 	if (bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[0]	//if Q was pressed
 			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[0]) { 
 		loc_state++;
 		if (loc_state == 3) {
 			//if we come back to free camera mode, restore the matrix to an identity matrix
 			loc_state = 0;
-			static const D3DMATRIX idMatr = {
-				1.0f,0,0,0,
-				0,1.0f,0,0,
-				0,0,1.0f,0,
-				0,0,0,1.0f
-			};
-			loc_hinfo->GetCamera()->m_matrix = idMatr;
-
+			RestoreCamera();
 		}
 
 		//set bone depending on state
 		ExtClass::CharacterStruct* toFocus;
 		switch(loc_state) {
 		case 1:
-			toFocus = loc_passiveChar;
-			loc_focusOffset = loc_passiveEyeOffset;
-			break;
-		case 2:
 			toFocus = loc_activeChar;
 			loc_focusOffset = loc_activeEyeOffset;
+			//hide active
+			loc_activeFaceHidden = !loc_activeFaceHidden;
+			ShowFace(true, !loc_activeFaceHidden);
+			break;
+		case 2:
+			toFocus = loc_passiveChar;
+			loc_focusOffset = loc_passiveEyeOffset;
+			//hide passive
+			loc_passiveFaceHidden = !loc_passiveFaceHidden;
+			ShowFace(false, !loc_passiveFaceHidden);
+			//return active
+			loc_activeFaceHidden = !loc_activeFaceHidden;
+			ShowFace(true, !loc_activeFaceHidden);
 			break;
 		case 0:
 		default:
 			toFocus = NULL;
-			loc_focusBone = NULL;
-			loc_focusOffset = { 0,0,0 };
 		}
 		if(toFocus != NULL) {
 			loc_focusBone = toFocus->m_bonePtrArray[0];
@@ -253,29 +268,16 @@ void AdjustCamera(ExtClass::Bone* bone) {
 
 
 			loc_hinfo->GetCamera()->m_yRotRad = M_PI; //put this to pi cause its reversed for some reason
+		} else {
+			RestoreCamera();
 		}
 		return;
 	}
-	else if(bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]
-			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {	//if W was pressed
-		//switch face on or off depending on loc_state
-		if(loc_state == 1) {
-			//switch passive
-			loc_passiveFaceHidden = !loc_passiveFaceHidden;
-			ShowFace(false,!loc_passiveFaceHidden);
-		}
-		else if(loc_state == 2) {
-			//switch active
-			loc_activeFaceHidden = !loc_activeFaceHidden;
-			ShowFace(true,!loc_activeFaceHidden);
-		}
-		else {
-			//return both to normal
-			loc_activeFaceHidden = false;
-			ShowFace(false,!loc_activeFaceHidden);
-			loc_passiveFaceHidden = false;
-			ShowFace(true,!loc_passiveFaceHidden);
-		}
+	else if(bone == loc_hinfo->m_passiveParticipant->m_charPtr->m_bonePtrArray[1]	//if W was pressed
+			|| bone == loc_hinfo->m_activeParticipant->m_charPtr->m_bonePtrArray[1]) {
+		//return to default state
+		loc_state = 0;
+		RestoreCamera();
 		
 		return;
 	}

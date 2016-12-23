@@ -187,6 +187,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/AAPlay/Events/PcConversation.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
+#include "MemMods/AAPlay/Events/ClothingDialog.h"
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAEdit/SaveCard.h"
@@ -200,6 +201,7 @@ void InitializeHooks() {
 	//shared
 	{
 		using namespace SharedInjections;
+
 		ArchiveFile::OpenFileInject();
 		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
 			MeshTexture::OverrideTextureListSizeInject();
@@ -210,7 +212,13 @@ void InitializeHooks() {
 			MeshTexture::OverrideFileInject();
 			MeshTexture::OverrideOutlineColorInject();
 			//MeshTexture::OverrideBoneInject();
-			MeshTexture::OverrideBoneInjectV2();
+			//MeshTexture::OverrideBoneInjectV2();
+			MeshTexture::OverrideFrameInject();
+			MeshTexture::OverrideBoneManipulationInject();
+
+			MeshTexture::OverrideObjectInject();
+
+			MeshTexture::OverrideTanColorInject();
 
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
@@ -246,7 +254,8 @@ void InitializeHooks() {
 			TanSlotUnlimit::InsertLoopEnd();
 			TanSlotUnlimit::LoadLowPolyInject();
 		}
-
+		ClothingDialog::InitInjection();
+		ClothingDialog::ExitInjection();
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;
@@ -260,6 +269,7 @@ void InitializeHooks() {
 
 		SaveCard::AddUnlimitDataInject();
 		OpenCard::ReadUnlimitDataInject();
+		OpenCard::PreviewCardInject();
 
 		
 

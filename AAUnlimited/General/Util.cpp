@@ -1,5 +1,6 @@
 #include "Util.h"
 
+#include "Functions\Shared\Globals.h"
 #include <Windows.h>
 
 
@@ -60,6 +61,40 @@ const TCHAR* OpenFileDialog(const TCHAR* initialDir) {
 	}
 	return path;
 }
+const TCHAR* SaveFileDialog(const TCHAR* initialDir) {
+	static OPENFILENAME opfn;
+	static bool opfnInit = false;
+	static TCHAR workingDir[512];
+	static TCHAR path[512];
+	if (!opfnInit) {
+		ZeroMemory((void*)(&opfn),sizeof(opfn));
+		opfn.lStructSize = sizeof(opfn);
+		opfn.hwndOwner = NULL;
+		opfn.nFilterIndex = 1;
+		opfn.lpstrFileTitle = NULL;
+		opfn.nMaxFileTitle = 0;
+		opfn.lpstrInitialDir = NULL;
+		opfn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		opfn.lpstrFilter = TEXT("All\0*\0");
+	}
+	opfn.lpstrFile = path;
+	opfn.lpstrFile[0] = '\0';
+	opfn.nMaxFile = 512;
+	if (initialDir != NULL) {
+		opfn.lpstrInitialDir = initialDir;
+	}
+	else {
+		opfn.lpstrInitialDir = NULL;
+	}
+	GetCurrentDirectory(500,workingDir);
+	BOOL ret = GetSaveFileName(&opfn); //changes the working dir cause it likes to troll ppl
+	SetCurrentDirectory(workingDir);
+	if (ret == FALSE) {
+		return NULL;
+	}
+	return path;
+}
+
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD targetChunk) {
 	if (bufferSize < 12) return NULL;
 	DWORD chunkLength = 0, chunkId = 0;
@@ -108,6 +143,56 @@ namespace {
 	}();
 };
 
+void ScrollWindow(HWND wnd,WPARAM scrollType,DWORD scrollKind) {
+	SCROLLINFO si;
+	// Get all the vertial scroll bar information.
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_ALL;
+	GetScrollInfo(wnd,scrollKind,&si);
+
+	// Save the position for comparison later on.
+	int oldPos = si.nPos;
+	switch (LOWORD(scrollType))
+	{
+	case SB_TOP:
+		si.nPos = si.nMin;
+		break;
+	case SB_BOTTOM:
+		si.nPos = si.nMax;
+		break;
+	case SB_LINEUP:
+		si.nPos -= 1;
+		break;
+	case SB_LINEDOWN:
+		si.nPos += 1;
+		break;
+	case SB_PAGEUP:
+		si.nPos -= si.nPage;
+		break;
+	case SB_PAGEDOWN:
+		si.nPos += si.nPage;
+		break;
+	case SB_THUMBTRACK:
+		si.nPos = si.nTrackPos;
+		break;
+	default:
+		break;
+	}
+
+	// Set the position and then retrieve it.  Due to adjustments
+	// by Windows it may not be the same as the value set.
+	si.fMask = SIF_POS;
+	SetScrollInfo(wnd,scrollKind,&si,TRUE);
+	GetScrollInfo(wnd,scrollKind,&si);
+
+	// If the position has changed, scroll window and update it.
+	if (si.nPos != oldPos)
+	{
+		ScrollWindow(wnd,0,(oldPos - si.nPos),NULL,NULL);
+		UpdateWindow(wnd);
+	}
+}
+
 DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 	DWORD reg = regInit;
 	for (int i = 0; i < len; i++) {
@@ -121,6 +206,25 @@ DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 	}
 	if (invertResult) reg = ~reg;
 	return reg;
+}
+
+D3DMATRIX MatrixFromSRT(D3DVECTOR3 & scales,D3DVECTOR3 & rots,D3DVECTOR3 & trans)
+{
+	D3DMATRIX matr;
+
+	D3DMATRIX matrScale = { scales.x,0,0,0,
+		0,scales.y,0,0,
+		0,0,scales.z,0,
+		0,0,0,1.0f };
+	D3DMATRIX matrRot;
+	(*Shared::D3DXMatrixRotationYawPitchRoll)(&matrRot,rots.y,rots.x,rots.z);
+	D3DMATRIX matrTrans = { 1.0f,0,0,0,
+		0,1.0f,0,0,
+		0,0,1.0f,0,
+		trans.x,trans.y,trans.z,1.0f };
+	(*Shared::D3DXMatrixMultiply)(&matr,&matrScale,&matrRot);
+	(*Shared::D3DXMatrixMultiply)(&matr,&matr,&matrTrans);
+	return matr;
 }
 
 
@@ -138,7 +242,6 @@ std::vector<BYTE> FileToBuffer(const TCHAR* path) {
 	CloseHandle(hFile);
 	return retval;
 }
-
 
 
 

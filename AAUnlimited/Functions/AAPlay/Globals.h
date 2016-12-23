@@ -6,10 +6,12 @@
 namespace AAPlay {
 
 	extern CharInstData g_characters[25]; //characters by their SEAT number, NOT by their internal order
+	extern CharInstData g_previewChar;
 
 	void InitOnLoad();
 	void InitTransferedCharacter(ExtClass::CharacterStruct* character);
 	void RemoveTransferedCharacter(ExtClass::CharacterStruct* character);
+	void SetPreviewChar(ExtClass::CharacterStruct* previewChar);
 
 	inline CharInstData* GetInstFromStruct(ExtClass::CharacterStruct* character) { return &g_characters[character->m_seat]; }
 

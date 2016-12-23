@@ -23,6 +23,7 @@ AAUCardData::AAUCardData()
 	m_hairRedirects.back = 2;
 	m_hairRedirects.extension = 3;
 	m_bOutlineColor = false;
+	m_bTanColor = false;
 	for(int i = 0; i < sizeof(ret_files)/sizeof(ret_files[0]); i++) {
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
@@ -209,6 +210,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			GenArchiveRedirectMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements.\r\n";
 			break;
+		case 'OOvr':
+			m_objectOverrides = ReadData<decltype(m_objectOverrides)>(buffer,size);
+			GenObjectOverrideMap();
+			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements.\r\n";
+			break;
+			break;
 		case 'EtLN':
 			m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_eyeTextures[0].texName << "\r\n";
@@ -252,6 +259,11 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_bOutlineColor = true;
 			m_outlineColor = ReadData<DWORD>(buffer,size);
 			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_outlineColor << "\r\n";
+			break;
+		case 'TnCl':
+			m_bTanColor = true;
+			m_tanColor = ReadData<DWORD>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_tanColor << "\r\n";
 			break;
 		case 'BnTr':
 			m_boneTransforms = ReadData<decltype(m_boneTransforms)>(buffer,size);
@@ -382,6 +394,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
 	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
 	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
+	DUMP_MEMBER_CONTAINER('OOvr',m_objectOverrides);
 	//eye textures
 	DUMP_MEMBER('EtLN', m_eyeTextures[0].texName);
 	DUMP_MEMBER('EtRN', m_eyeTextures[1].texName);
@@ -398,6 +411,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER_CONTAINER('BnTr',m_boneTransforms);
 	if(m_bOutlineColor) {
 		DUMP_MEMBER('OlCl',m_outlineColor);
+	}
+	if(m_bTanColor) {
+		DUMP_MEMBER('TnCl',m_tanColor);
 	}
 	DUMP_MEMBER_CONTAINER('File',m_savedFiles);
 	DUMP_MEMBER_CONTAINER('HrA0',m_hairs[0]);
@@ -497,6 +513,33 @@ bool AAUCardData::RemoveArchiveRedirect(int index) {
 	return true;
 }
 
+bool AAUCardData::AddObjectOverride(const TCHAR * object,const TCHAR * file) {
+	char buff[256];
+	size_t n;
+	wcstombs_s(&n,buff,object,256);
+	std::string strObject = buff;
+	wcstombs_s(&n,buff,file,256);
+	std::string strFile = buff;
+	if (m_objectOverrideMap.find(strObject) != m_objectOverrideMap.end()) return false; //allready contains it
+	XXObjectFile ofile(file);
+	m_objectOverrides.emplace_back(object, file);
+	m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+	return true;
+}
+
+bool AAUCardData::RemoveObjectOverride(int index) {
+	if (index < 0 || (size_t)index >= m_objectOverrides.size()) return false;
+	auto vMatch = m_objectOverrides.begin() + index;
+	char buff[256];
+	size_t n;
+	wcstombs_s(&n,buff,vMatch->first.c_str(),256);
+	auto mapMatch = m_objectOverrideMap.find(buff);
+	m_objectOverrides.erase(vMatch);
+	if (mapMatch != m_objectOverrideMap.end()) m_objectOverrideMap.erase(mapMatch);
+	return true;
+}
+
+
 bool AAUCardData::AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform) {
 	if (m_boneTransformMap.find(boneName) != m_boneTransformMap.end()) return false; //allready contains it
 	m_boneTransforms.emplace_back(boneName,transform);
@@ -512,60 +555,114 @@ bool AAUCardData::RemoveBoneTransformation(int index) {
 	return true;
 }
 
-bool AAUCardData::AddBoneRule(const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
-	m_boneRules.emplace_back(std::pair<std::wstring,std::wstring>(xxFileName,boneName),mod);
-	
-	auto mapIt = m_boneRuleMap.find(xxFileName);
-	if(mapIt != m_boneRuleMap.end()) {
-		auto map2it = mapIt->second.find(boneName);
-		if(map2it != mapIt->second.end()) {
-			//add mod
-			map2it->second.push_back(mod);
+bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
+	m_boneRules.push_back(std::make_pair(std::make_pair(flags, std::pair<std::wstring,std::wstring>(xxFileName,boneName)),mod));
+	if(flags & MODIFY_BONE) {
+		auto mapIt = m_boneRuleMap.find(xxFileName);
+		if (mapIt != m_boneRuleMap.end()) {
+			auto map2it = mapIt->second.find(boneName);
+			if (map2it != mapIt->second.end()) {
+				//add mod
+				map2it->second.push_back(mod);
+			}
+			else {
+				//new map with mod
+				std::vector<BoneMod> vec;
+				vec.push_back(mod);
+				mapIt->second.emplace(boneName,std::move(vec));
+			}
 		}
 		else {
-			//new map with mod
+			std::map<std::wstring,std::vector<BoneMod>> map;
 			std::vector<BoneMod> vec;
 			vec.push_back(mod);
-			mapIt->second.emplace(boneName,std::move(vec));
+			map.emplace(boneName,vec);
+			m_boneRuleMap.emplace(xxFileName,std::move(map));
 		}
 	}
-	else {
-		std::map<std::wstring,std::vector<BoneMod>> map;
-		std::vector<BoneMod> vec;
-		vec.push_back(mod);
-		map.emplace(boneName,vec);
-		m_boneRuleMap.emplace(xxFileName,std::move(map));
+	if(flags & MODIFY_FRAME) {
+		auto mapIt = m_frameRuleMap.find(xxFileName);
+		if (mapIt != m_frameRuleMap.end()) {
+			auto map2it = mapIt->second.find(boneName);
+			if (map2it != mapIt->second.end()) {
+				//add mod
+				map2it->second.push_back(mod);
+			}
+			else {
+				//new map with mod
+				std::vector<BoneMod> vec;
+				vec.push_back(mod);
+				mapIt->second.emplace(boneName,std::move(vec));
+			}
+		}
+		else {
+			std::map<std::wstring,std::vector<BoneMod>> map;
+			std::vector<BoneMod> vec;
+			vec.push_back(mod);
+			map.emplace(boneName,vec);
+			m_frameRuleMap.emplace(xxFileName,std::move(map));
+		}
 	}
+	
 	return true;
 }
 
 bool AAUCardData::RemoveBoneRule(int index) {
 	if (index < 0 || (size_t)index >= m_boneRules.size()) return false;
 	auto vIt = m_boneRules.begin() + index;
-	auto mapIt = m_boneRuleMap.find(vIt->first.first);
-	std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
-	auto map2It = map.find(vIt->first.second);
-	auto& modVec = map2It->second;
-	//remove this mod from the mod vector
-	for(auto it = modVec.begin(); it != modVec.end(); it++) {
-		if(*it == vIt->second) {
-			modVec.erase(it);
-			break;
+	int flags = vIt->first.first;
+	if(flags & MODIFY_BONE) {
+		auto mapIt = m_boneRuleMap.find(vIt->first.second.first);
+		std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
+		auto map2It = map.find(vIt->first.second.second);
+		auto& modVec = map2It->second;
+		//remove this mod from the mod vector
+		for (auto it = modVec.begin(); it != modVec.end(); it++) {
+			if (*it == vIt->second) {
+				modVec.erase(it);
+				break;
+			}
+		}
+		//if vector is empty, remove it from the second map
+		if (modVec.size() == 0) {
+			map.erase(map2It);
+		}
+		//if this map is now empty, remove it from first map
+		if (map.size() == 0) {
+			m_boneRuleMap.erase(mapIt);
 		}
 	}
-	//if vector is empty, remove it from the second map
-	if(modVec.size() == 0) {
-		map.erase(map2It);
-	}
-	//if this map is now empty, remove it from first map
-	if(map.size() == 0) {
-		m_boneRuleMap.erase(mapIt);
+	if(flags & MODIFY_FRAME) {
+		auto mapIt = m_frameRuleMap.find(vIt->first.second.first);
+		std::map<std::wstring,std::vector<BoneMod>>& map = mapIt->second;
+		auto map2It = map.find(vIt->first.second.second);
+		auto& modVec = map2It->second;
+		//remove this mod from the mod vector
+		for (auto it = modVec.begin(); it != modVec.end(); it++) {
+			if (*it == vIt->second) {
+				modVec.erase(it);
+				break;
+			}
+		}
+		//if vector is empty, remove it from the second map
+		if (modVec.size() == 0) {
+			map.erase(map2It);
+		}
+		//if this map is now empty, remove it from first map
+		if (map.size() == 0) {
+			m_frameRuleMap.erase(mapIt);
+		}
 	}
 	m_boneRules.erase(vIt);
 	return true;
 }
 
 void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
+	//save guard
+	if (sliderTarget < 0 || sliderTarget >= ExtClass::CharacterStruct::N_MODELS || Shared::g_sliders[sliderTarget].size() <= sliderIndex) {
+		LOGPRIO(Logger::Priority::WARN) << "invalid slider id (" << sliderTarget << "|" << sliderIndex << ") set\r\n";
+		return;
+	}
 	//add the value to the slider vector, or remove if value is 0 and its contained
 	size_t i;
 	for(i = 0; i < m_sliders.size(); i++) {
@@ -580,7 +677,7 @@ void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
 			break;
 		}
 	}
-	if(i == m_sliders.size()) {
+	if(i == m_sliders.size() && value != Shared::g_sliders[sliderTarget][sliderIndex].GetNeutralValue()) {
 		//didnt find, so we need to add it
 		m_sliders.push_back(std::make_pair(std::make_pair(sliderTarget,sliderIndex),value));
 	}
@@ -617,44 +714,98 @@ void AAUCardData::GenArchiveRedirectMap() {
 		}
 	}
 }
+void AAUCardData::GenObjectOverrideMap() {
+	m_objectOverrideMap.clear();
+	for (const auto& it : m_objectOverrides) {
+		char buff[256];
+		size_t n;
+		wcstombs_s(&n,buff,it.first.c_str(),256);
+		std::string strObject = buff;
+		wcstombs_s(&n,buff,it.second.c_str(),256);
+		std::string strFile = buff;
+		XXObjectFile ofile(it.second.c_str());
+		m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+	}
+}
 void AAUCardData::GenBoneRuleMap() {
 	m_boneRuleMap.clear();
 	for (auto& elem : m_boneRules) {
-		auto m = m_boneRuleMap.find(elem.first.first);
-		if (m != m_boneRuleMap.end()) {
-			std::vector<BoneMod> vec;
-			vec.push_back(elem.second);
-			m->second.emplace(elem.first.second,std::move(vec));
-		}
-		else {
-			std::map<std::wstring,std::vector<BoneMod>> tmp;
-			std::vector<BoneMod> vec;
-			vec.push_back(elem.second);
-			tmp.emplace(elem.first.second,std::move(vec));
+		if(elem.first.first & MODIFY_BONE) {
+			auto m = m_boneRuleMap.find(elem.first.second.first);
+			if (m != m_boneRuleMap.end()) {
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				m->second.emplace(elem.first.second.second,std::move(vec));
+			}
+			else {
+				std::map<std::wstring,std::vector<BoneMod>> tmp;
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				tmp.emplace(elem.first.second.second,std::move(vec));
 
-			m_boneRuleMap.emplace(elem.first.first,std::move(tmp));
+				m_boneRuleMap.emplace(elem.first.second.first,std::move(tmp));
+			}
+		}
+		if (elem.first.first & MODIFY_FRAME) {
+			auto m = m_frameRuleMap.find(elem.first.second.first);
+			if (m != m_frameRuleMap.end()) {
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				m->second.emplace(elem.first.second.second,std::move(vec));
+			}
+			else {
+				std::map<std::wstring,std::vector<BoneMod>> tmp;
+				std::vector<BoneMod> vec;
+				vec.push_back(elem.second);
+				tmp.emplace(elem.first.second.second,std::move(vec));
+
+				m_frameRuleMap.emplace(elem.first.second.first,std::move(tmp));
+			}
 		}
 	}
 }
 void AAUCardData::GenSliderMap() {
-	for(int i = 0; i < ARRAYSIZE(m_sliderMap); i++) {
-		m_sliderMap[i].clear();
+	for(int i = 0; i < ARRAYSIZE(m_boneSliderMap); i++) {
+		m_boneSliderMap[i].clear();
+	}
+	for (int i = 0; i < ARRAYSIZE(m_frameSliderMap); i++) {
+		m_frameSliderMap[i].clear();
 	}
 
 	for(auto elem : m_sliders) {
 		int target = elem.first.first;
-		auto& map = m_sliderMap[target];
-		const Shared::Slider& slider = Shared::g_sliders[target][elem.first.second];
-		auto it = map.find(slider.boneName);
-		if(it != map.end()) {
-			BoneMod mod = slider.GenerateModifier(elem.second);
-			it->second.push_back(std::make_pair(&slider,mod));
+		if(target < 0 || target >= ExtClass::CharacterStruct::N_MODELS || Shared::g_sliders[target].size() <= elem.first.second) {
+			LOGPRIO(Logger::Priority::WARN) << "invalid slider id (" << target << "|" << elem.first.second << ") read; the slider was skipped\r\n";
+			continue;
 		}
-		else {
-			std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
-			BoneMod mod = slider.GenerateModifier(elem.second);
-			vec.push_back(std::make_pair(&slider,mod));
-			map.emplace(slider.boneName,vec);
+		const Shared::Slider& slider = Shared::g_sliders[target][elem.first.second];
+		if(slider.flags & MODIFY_BONE) {
+			auto& map = m_boneSliderMap[target];
+			auto it = map.find(slider.boneName);
+			if (it != map.end()) {
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				it->second.push_back(std::make_pair(&slider,mod));
+			}
+			else {
+				std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				vec.push_back(std::make_pair(&slider,mod));
+				map.emplace(slider.boneName,vec);
+			}
+		}
+		if (slider.flags & MODIFY_FRAME) {
+			auto& map = m_frameSliderMap[target];
+			auto it = map.find(slider.boneName);
+			if (it != map.end()) {
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				it->second.push_back(std::make_pair(&slider,mod));
+			}
+			else {
+				std::vector<std::pair<const Shared::Slider*,BoneMod>> vec;
+				BoneMod mod = slider.GenerateModifier(elem.second);
+				vec.push_back(std::make_pair(&slider,mod));
+				map.emplace(slider.boneName,vec);
+			}
 		}
 	}
 }
@@ -784,6 +935,15 @@ void AAUCardData::SaveOverrideFiles() {
 				location = 1;
 			}
 			m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
+		}
+	}
+
+	//object overrides
+	for(const auto& orule : m_objectOverrideMap) {
+		std::vector<BYTE> buffer(orule.second.GetFileSize());
+		orule.second.WriteToBuffer(buffer.data());
+		if (buffer.size() > 0) {
+			m_savedFiles.emplace_back(std::make_pair(1,orule.second.GetRelPath()),buffer);
 		}
 	}
 

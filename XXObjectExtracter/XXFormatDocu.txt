@@ -1,0 +1,125 @@
+the hongire thing wasnt quite right yo, so here is an atempt to make it right.
+based on hongfire and the aa2 code
+written as pseudo code
+
+
+struct XXFile {
+
+	DWORD version
+	BYTE ??
+	BYTE[17] ??
+
+	Object root
+
+	Rest (dont care for now)
+
+
+}
+
+struct Object {
+	NAME name
+	DWORD childCount
+	FMatrix4x4 trans
+	_if version < 8
+		BYTE[0x10] ??
+	_else
+		BYTE[0x20] ??
+	DWORD meshCount;
+	float[3] mesh min size?
+	float[3] mesh max size?
+	_if version < 8
+		BYTE[0x10]
+	_else
+		BYTE[0x40]
+	_if version >= 6
+		NAME someName
+
+	_if meshCount > 0
+		BYTE meshType
+		MeshInfo[meshCount] meshes
+		WORD someCount
+		DWORD ???
+		DWORD ???
+		_if version >= 6
+			MYSTERYSTRUCT[someCount]
+		_else ???
+		DWORD nBones
+		Bone[nBones] bones
+
+	Object children[childCount]
+
+}
+
+struct MeshInfo {
+	_if version < 8
+		BYTE[0x10]
+	_else
+		BYTE[0x40]
+	DWORD ??
+	DWORD faceCount
+	WORD[faceCount] faces
+	DWORD vertexCount
+	_if version >= 4
+		VERTEX[vertexCount] vertices
+	_else ?????
+	_if version >= 5
+		DWORD[5] outline color and another one
+	_else ?????
+	__if version >= 2
+		BYTE[0x60] ???
+		DWORD ???
+	_else ????
+	_if version >= 3
+		_if version < 6
+			BYTE[0x40] ???
+		_else
+			BYTE[0x100] ???
+	_else ????
+	_if version >= 6
+		BYTE[0x1C] ???
+	_if version >= 8
+		BYTE ???
+		NAME ???
+		DWORD[3] ???
+		DWORD ???
+
+	
+}
+
+struct Bone {
+	NAME name
+	DWORD ??? (bone index?)
+	FMatrix4x4 trans
+}
+
+struct MYSTERYSTRUCT { //70b each, though written into a 0x54 size struct in memory
+	WORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD[3]
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+	DWORD
+}
+
+struct VERTEX {	total size of 70 bytes
+	WORD index
+	float[3]
+	float[3]
+	float[4]
+	DWORD[7]
+}
+
+struct NAME {
+	DWORD length
+	char[length] name	// "encrypted", each chars is ~ed
+}

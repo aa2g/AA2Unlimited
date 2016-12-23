@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <vector>
 
+#include "DirectXStructs.h"
+
 namespace General {
 	
 
@@ -43,6 +45,7 @@ inline float GetRandomFloat(float min, float max) {
 
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.
 const TCHAR* OpenFileDialog(const TCHAR* initialDir);
+const TCHAR* SaveFileDialog(const TCHAR* initialDir);
 
 inline bool DirExists(const TCHAR* dir) {
 	DWORD type = GetFileAttributes(dir);
@@ -101,6 +104,8 @@ inline void MoveWindowRect(HWND wnd, RECT& rct, BOOL redraw) {
 	MoveWindow(wnd,rct.left,rct.top,RectWidth(rct),RectHeight(rct),redraw);
 }
 
+void ScrollWindow(HWND wnd,WPARAM scrollType, DWORD scrollKind = SB_VERT);
+
 /*
  * Keeps Track of the Time it was started, and can be told to return the difference, in seconds,
  * that it is "running" allready. No active time measurement is performed, the time is only polled
@@ -126,6 +131,9 @@ public:
 
 DWORD Crc32(BYTE* data,int len,DWORD regInit = 0xFFFFFFFF,bool invertResult = true);
 
+D3DMATRIX MatrixFromSRT(D3DVECTOR3& scales,D3DVECTOR3& rots,D3DVECTOR3& trans);
+
 std::vector<BYTE> FileToBuffer(const TCHAR* path);
+
 
 }

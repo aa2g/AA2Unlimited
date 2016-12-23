@@ -5,7 +5,7 @@ namespace OpenCard {
 
 
 void ReadUnlimitDataInject();
-
+void PreviewCardInject();
 
 }
 }
