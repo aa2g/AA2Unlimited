@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <string>
 
+#include <config.h>
+
 namespace General {
 
 
@@ -43,5 +45,18 @@ inline std::wstring BuildEditPath(const TCHAR* file) {
 	return retVal;
 }
 
+inline std::wstring BuildOverridePath(const TCHAR* subpath, const TCHAR* file) {
+	std::wstring retVal(AAEditPath);
+	retVal += OVERRIDE_PATH;
+	if (subpath != NULL) retVal += subpath;
+	if (file != NULL) retVal += file;
+	return retVal;
+}
+inline std::wstring BuildOverridePath(const TCHAR* file) {
+	std::wstring retVal(AAEditPath);
+	retVal += OVERRIDE_PATH;
+	if (file != NULL) retVal += file;
+	return retVal;
+}
 
 }

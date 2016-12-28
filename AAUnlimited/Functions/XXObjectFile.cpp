@@ -1,5 +1,8 @@
 #include "XXObjectFile.h"
 
-XXObjectFile::XXObjectFile(const TCHAR* path) : OverrideFile(path, false) {
+#include "config.h"
+
+XXObjectFile::XXObjectFile(const TCHAR* path, PathStart tryPathStarts)
+	: OverrideFile(path,tryPathStarts) {
 
 }

@@ -10,8 +10,14 @@
 class OverrideFile
 {
 public:
+
+	enum PathStart {
+		NONE = 0, AAPLAY = 1,AAEDIT = 2, OVERRIDE = 4
+	};
+
 	OverrideFile();
-	OverrideFile(const TCHAR* fileName, bool absPath = false);
+	//path it relative from editor / play root (version 1) or override path (version 2)
+	OverrideFile(const TCHAR* path, PathStart tryPathStarts);
 	~OverrideFile();
 
 	inline int GetFileSize() const { return m_fileSize; }
@@ -19,16 +25,17 @@ public:
 	inline const std::wstring& GetRelPath() const { return m_relPath; }
 	inline const std::wstring& GetFilePath() const { return m_fullPath; }
 	inline bool IsGood() const { return m_good; }
+	inline PathStart GetPathStart() const { return m_pathStart; }
 
 	bool WriteToBuffer(BYTE* buffer) const;
 protected:
-	OverrideFile(const TCHAR* path, const TCHAR* filename, bool absPath, bool tryAAPlay, bool tryAAEdit);
 	bool m_good;
 	DWORD m_fileSize;
+	PathStart m_pathStart; //0: aaplay root, 1: aaedit, 2: override folder
 
-	std::wstring m_fullPath;
-	std::wstring m_fileName;
-	std::wstring m_relPath;
+	std::wstring m_fullPath; //full, absolute path; can be used to open file
+	std::wstring m_fileName; //only file name
+	std::wstring m_relPath;  //relative path, starting from the override folder
 	std::vector<BYTE> m_cache;
 };
 

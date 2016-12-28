@@ -28,6 +28,7 @@ AAUCardData::AAUCardData()
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
 	}
+	m_version = 1;
 }
 
 
@@ -179,16 +180,18 @@ bool AAUCardData::WriteData_sub(char ** buffer, int * size, int & at, const std:
 	return ret;
 }
 
-
-
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
 	//read members
+
 	while(size > 4) {
 		DWORD identifier = *(DWORD*)(buffer);
 		m_currReadMemberId = identifier;
 		buffer += 4,size -= 4;
 		switch (identifier) {
+		case 'Vers':
+			m_version = ReadData<int>(buffer,size);
+			break;
 		case 'TanS':
 			m_tanSlot = ReadData<BYTE>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "...found TanS, value " << m_tanSlot << "\r\n";
@@ -208,13 +211,13 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		case 'ARdr':
 			m_archiveRedirects = ReadData<decltype(m_archiveRedirects)>(buffer, size);
 			GenArchiveRedirectMap();
-			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements.\r\n";
+			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements\r\n";
 			break;
 		case 'OOvr':
 			m_objectOverrides = ReadData<decltype(m_objectOverrides)>(buffer,size);
 			GenObjectOverrideMap();
-			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements.\r\n";
-			break;
+			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements;"
+				<< m_objectOverrideMap.size() << " were valid\r\n";
 			break;
 		case 'EtLN':
 			m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
@@ -250,11 +253,15 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, value " << m_hairRedirects.full << "\r\n";
 			break;
-		case 'TnRd':
-			m_tanName = ReadData<std::wstring>(buffer,size);
-			SetTan(m_tanName.c_str());
+		case 'TnRd': {
+			auto tanName = ReadData<std::wstring>(buffer,size);
+			SetTan(tanName.c_str());
 			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_tanName << "\r\n";
-			break;
+			break; }
+		case 'HrHl': {
+			auto hairHighlightName = ReadData<decltype(m_hairHighlightName)>(buffer,size);
+			SetHairHighlight(hairHighlightName.c_str());
+			break; }
 		case 'OlCl':
 			m_bOutlineColor = true;
 			m_outlineColor = ReadData<DWORD>(buffer,size);
@@ -388,6 +395,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	at += 4;
 	//now write all member
 
+	//version
+	DUMP_MEMBER('Vers',m_version);
 	//tan-slot
 	DUMP_MEMBER('TanS',m_tanSlot);
 	//overrides
@@ -407,6 +416,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER('HrRd', m_hairRedirects.full);
 	//tans
 	DUMP_MEMBER('TnRd',m_tanName);
+	//hair highlight
+	DUMP_MEMBER('HrHl',m_hairHighlightName);
 	//bone transforms
 	DUMP_MEMBER_CONTAINER('BnTr',m_boneTransforms);
 	if(m_bOutlineColor) {
@@ -455,7 +466,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 
 bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
 	if (m_meshOverrideMap.find(texture) != m_meshOverrideMap.end()) return false;
-	TextureImage img(override);
+	TextureImage img(override, TextureImage::OVERRIDE);
 	if (img.IsGood()) {
 		std::wstring texStr(texture);
 		m_meshOverrides.emplace_back(texStr, std::wstring(override));
@@ -476,7 +487,7 @@ bool AAUCardData::RemoveMeshOverride(int index) {
 
 bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override) {
 	if (m_archiveOverrideMap.find(std::pair<std::wstring,std::wstring>(archive, archivefile)) != m_archiveOverrideMap.end()) return false;
-	OverrideFile img(override);
+	OverrideFile img(override, OverrideFile::OVERRIDE);
 	if (img.IsGood()) {
 		auto toOverride = std::pair<std::wstring, std::wstring>(archive, archivefile);
 		m_archiveOverrides.emplace_back(toOverride, override);
@@ -521,9 +532,11 @@ bool AAUCardData::AddObjectOverride(const TCHAR * object,const TCHAR * file) {
 	wcstombs_s(&n,buff,file,256);
 	std::string strFile = buff;
 	if (m_objectOverrideMap.find(strObject) != m_objectOverrideMap.end()) return false; //allready contains it
-	XXObjectFile ofile(file);
-	m_objectOverrides.emplace_back(object, file);
-	m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+	XXObjectFile ofile(file, XXObjectFile::OVERRIDE);
+	if(ofile.IsGood()) {
+		m_objectOverrides.emplace_back(object,file);
+		m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+	}
 	return true;
 }
 
@@ -691,7 +704,22 @@ void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
 void AAUCardData::GenMeshOverrideMap() {
 	m_meshOverrideMap.clear();
 	for (const auto& it : m_meshOverrides) {
-		TextureImage img(it.second.c_str());
+		std::wstring path;
+		TextureImage::PathStart start;
+		switch(m_version) {
+		case 1:
+			//version 1 mean relative to the old texture path
+			path = VER1_OVERRIDE_IMAGE_PATH + it.second;
+			start = TextureImage::AAEDIT;
+			break;
+		case 2:
+			//relative to override path
+			path = it.second;
+			start = TextureImage::OVERRIDE;
+		default:
+			break;
+		}
+		TextureImage img(path.c_str(), start);
 		if (img.IsGood()) {
 			m_meshOverrideMap.emplace(it.first,std::move(img));
 		}
@@ -700,7 +728,22 @@ void AAUCardData::GenMeshOverrideMap() {
 void AAUCardData::GenArchiveOverrideMap() {
 	m_archiveOverrideMap.clear();
 	for (const auto& it : m_archiveOverrides) {
-		OverrideFile img(it.second.c_str());
+		std::wstring path;
+		OverrideFile::PathStart start;
+		switch (m_version) {
+		case 1:
+			//version 1 mean relative to data root, either play or edit
+			path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
+			start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
+			break;
+		case 2:
+			//relative to override path
+			path = it.second;
+			start = OverrideFile::OVERRIDE;
+		default:
+			break;
+		}
+		OverrideFile img(path.c_str(), start);
 		if (img.IsGood()) {
 			m_archiveOverrideMap.emplace(it.first,std::move(img));
 		}
@@ -721,10 +764,27 @@ void AAUCardData::GenObjectOverrideMap() {
 		size_t n;
 		wcstombs_s(&n,buff,it.first.c_str(),256);
 		std::string strObject = buff;
-		wcstombs_s(&n,buff,it.second.c_str(),256);
-		std::string strFile = buff;
-		XXObjectFile ofile(it.second.c_str());
-		m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+		
+		std::wstring path;
+		XXObjectFile::PathStart start;
+		switch (m_version) {
+		case 1:
+			//version 1 mean relative to data root, either play or edit
+			path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
+			start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
+			break;
+		case 2:
+			//relative to override path
+			path = it.second;
+			start = OverrideFile::OVERRIDE;
+		default:
+			break;
+		}
+
+		XXObjectFile ofile(path.c_str(), start);
+		if(ofile.IsGood()) {
+			m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+		}
 	}
 }
 void AAUCardData::GenBoneRuleMap() {
@@ -863,7 +923,21 @@ bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
 }
 
 bool AAUCardData::SetHairHighlight(const TCHAR* name) {
-	m_hairHighlightImage = TextureImage(General::BuildEditPath(HAIR_HIGHLIGHT_PATH, name).c_str(), true);
+	std::wstring path = HAIR_HIGHLIGHT_PATH; 
+	TextureImage::PathStart start;
+	switch(m_version) {
+	case 1:
+		path = VER1_HAIR_HIGHLIGHT_PATH;
+		start = TextureImage::AAEDIT;
+		break;
+	case 2:
+		path = HAIR_HIGHLIGHT_PATH;
+		start = TextureImage::OVERRIDE;
+	default:
+		break;
+	}
+	path += name;
+	m_hairHighlightImage = TextureImage(path.c_str(), start);
 	if (m_hairHighlightImage.IsGood()) {
 		m_hairHighlightName = name;
 		return true;
@@ -872,12 +946,25 @@ bool AAUCardData::SetHairHighlight(const TCHAR* name) {
 }
 
 bool AAUCardData::SetTan(const TCHAR* name) {
-	std::wstring path = General::BuildEditPath(TAN_PATH, name);
+	std::wstring path;
+	switch(m_version) {
+	case 1:
+		path = VER1_TAN_PATH;
+		break;
+	case 2:
+	default:
+		path = TAN_PATH;
+		break;
+	}
+	path += name;
+	path += TEXT("\\");
 	bool anyGood = false;
 	for (int i = 0; i < 5; i++) {
 		wchar_t iChar = L'0' + i;
-		std::wstring pathi = path + TEXT("\\0") + iChar + TEXT(".bmp"); 
-		m_tanImages[i] = TextureImage(pathi.c_str(), true);
+		std::wstring file = TEXT("0");
+		file += iChar;
+		file += TEXT(".bmp");
+		m_tanImages[i] = TextureImage((path + file).c_str(), TextureImage::OVERRIDE);
 		anyGood = anyGood || m_tanImages[i].IsGood();
 	}
 	if (anyGood) m_tanName = name;
@@ -927,14 +1014,16 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(arule.second.GetFileSize());
 		arule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
-			int location;
-			if(General::StartsWith(arule.second.GetFilePath().c_str(), General::AAPlayPath.c_str())) {
-				location = 0;
+			if (buffer.size() > 0) {
+				int location;
+				if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+					location = 0;
+				}
+				else {
+					location = 1;
+				}
+				m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
 			}
-			else {
-				location = 1;
-			}
-			m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -977,7 +1066,7 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		int basePath = file.first.first;
 		std::wstring fullPath;
 		if (basePath == 0) fullPath = General::BuildPlayPath(file.first.second.c_str());
-		else			   fullPath = General::BuildEditPath(file.first.second.c_str());
+		else				fullPath = General::BuildEditPath(file.first.second.c_str());
 		//check if path has any backdirections (two dots or more)
 		bool suspicious = false;
 		for(unsigned int i = 0; i < fullPath.size()-1; i++) {
@@ -1111,4 +1200,14 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		LOGPRIO(Logger::Priority::WARN) << "failed to extract some files from aau card\r\n";
 	}
 	return success;
+}
+
+void AAUCardData::ConvertToNewVersion() {
+	if(m_version == 1) {
+		std::vector<std::pair<std::wstring,std::wstring>> filesToMove;
+		for(auto& elem : m_archiveOverrideMap) {
+			std::wstring from = elem.second.GetFilePath();
+			
+		}
+	}
 }

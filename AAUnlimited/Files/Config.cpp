@@ -20,7 +20,8 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::INT,		"facelessFemaleSlot", 7),	//FACELESS_SLOT_FEMALE
 	MemberInfo(Config::FLOAT,	"fPOVOffsetX", 0.0f),	//POV_OFFSET_X
 	MemberInfo(Config::FLOAT,	"fPOVOffsetY", 0.0f),	//POV_OFFSET_Y
-	MemberInfo(Config::FLOAT,	"fPOVOffsetZ", 0.0f)	//POV_OFFSET_Z
+	MemberInfo(Config::FLOAT,	"fPOVOffsetZ", 0.0f),	//POV_OFFSET_Z
+	MemberInfo(Config::BOOL,	"bAllowLegacyPaths", false)	//ALLOW_LEGACY_PATHS
 };
 
 Config g_Config;

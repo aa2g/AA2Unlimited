@@ -29,7 +29,7 @@ class TextureImage : public OverrideFile
 {
 public:
 	TextureImage();
-	TextureImage(const TCHAR* fileName, bool absPath = false);
+	TextureImage(const TCHAR* path, PathStart tryPathStarts);
 	~TextureImage();
 
 	inline int GetWidth() const { return m_width; }

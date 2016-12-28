@@ -81,6 +81,8 @@ public:
 	void SaveOverrideFiles();
 	bool DumpSavedOverrideFiles();
 
+	void ConvertToNewVersion();
+
 	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
@@ -201,6 +203,7 @@ public:
 	}
 
 private:
+	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
 	std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
@@ -302,3 +305,31 @@ private:
 	void GenSliderMap();
 };
 
+/*
+Important differences in versions:
+
+OvrT: in version 1, mesh textures were relative to aaedit/data/texture/override (VER1_OVERRIDE_IMAGE_PATH)
+	  in version 2, mesh textures are relative to the override path
+AOvT: in version 1, override files were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
+	  in version 2, override files are relative to the override path 
+OOvr: in version 1, object overrides were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
+	  in version 2, object overrides are relative to the override path 
+TnRd: in version 1, the tan image were relative to data\\texture\\override\\tan\\ (VER1_TAN_PATH TEXT)
+	  in version 2, the file is always relative from the override path
+
+File: in version 1, the integer denotes the root path in which the file is located (aaplay = 0, aaedit = 1).
+	  in version 2, the file is always relative from the override path
+#define 
+#define VER1_HAIR_HIGHLIGHT_PATH TEXT("data\\texture\\override\\hair_highlight\\")
+
+
+
+
+
+
+
+
+
+
+
+*/

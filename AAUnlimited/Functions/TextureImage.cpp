@@ -12,10 +12,12 @@ TextureImage::TextureImage() {
 
 }
 
-TextureImage::TextureImage(const TCHAR* fileName, bool absPath) : OverrideFile(OVERRIDE_IMAGE_PATH, fileName, absPath, false, true) {
+TextureImage::TextureImage(const TCHAR* path,PathStart tryPathStarts)
+	: OverrideFile(path,tryPathStarts) {
 	m_good = false; //we need additional things
 	//find out if its tga or bmp
-	int length = wcslen(fileName);
+	int length = m_fileName.size();
+	const TCHAR* fileName = m_fileName.c_str();
 	if (length > 4) {
 		if (wcscmp(fileName+length - 4, TEXT(".bmp")) == 0) {
 			m_type = BMP;

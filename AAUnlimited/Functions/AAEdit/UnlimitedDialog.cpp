@@ -271,8 +271,7 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_MO_BTNBROWSE) {
-				//TODO: implement browse button. should be put into the aaedit/data/texture/override folder.
-				std::wstring initialDir = General::BuildEditPath(OVERRIDE_IMAGE_PATH, NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
 				if (!General::DirExists(initialDir.c_str())) {
 					CreateDirectory(initialDir.c_str(), NULL);
 				}
@@ -385,15 +384,10 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_AO_BTNBROWSE) {
-				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH, NULL);
-				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH, NULL);
+				std::wstring initialEditDir = General::BuildOverridePath(NULL);
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
-					if (General::StartsWith(choice, initialPlayDir.c_str())) {
-						const TCHAR* rest = choice + initialPlayDir.size();
-						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
-					}
-					else if (General::StartsWith(choice, initialEditDir.c_str())) {
+					if (General::StartsWith(choice, initialEditDir.c_str())) {
 						const TCHAR* rest = choice + initialEditDir.size();
 						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
 					}
@@ -588,15 +582,15 @@ INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_OO_BTNBROWSE) {
-				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_ARCHIVE_PATH,NULL);
-				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_ARCHIVE_PATH,NULL);
+				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_PATH,NULL);
+				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_PATH,NULL);
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
-					if (General::StartsWith(choice,initialPlayDir.c_str())) {
+					/*if (General::StartsWith(choice,initialPlayDir.c_str())) {
 						const TCHAR* rest = choice + initialPlayDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
-					}
-					else if (General::StartsWith(choice,initialEditDir.c_str())) {
+					}*/
+					if (General::StartsWith(choice,initialEditDir.c_str())) {
 						const TCHAR* rest = choice + initialEditDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
 					}
@@ -757,7 +751,7 @@ void UnlimitedDialog::TSDialog::LoadTanList() {
 	SendMessage(m_cbSelect, CB_ADDSTRING, 0, (LPARAM)TEXT("-- None --")); 
 
 	//list all tan directories
-	std::wstring tanDirectory = General::BuildEditPath(TAN_PATH, TEXT("*"));
+	std::wstring tanDirectory = General::BuildOverridePath(TAN_PATH, TEXT("*"));
 	if (!General::DirExists(tanDirectory.c_str())) {
 		CreateDirectory(tanDirectory.c_str(), NULL);
 	}
@@ -854,7 +848,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_HR_BTNBROWSE) {
-				std::wstring initialDir = General::BuildEditPath(HAIR_HIGHLIGHT_PATH, NULL);
+				std::wstring initialDir = General::BuildOverridePath(HAIR_HIGHLIGHT_PATH, NULL);
 				if (!General::DirExists(initialDir.c_str())) {
 					CreateDirectory(initialDir.c_str(), NULL);
 				}

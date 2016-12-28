@@ -46,8 +46,8 @@ namespace {
 ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	//names we know:
 	//FACE			A00_10_xx_00
-	//SKELETON		A00_00_0x_00h
-	//BODY			A00_zz_0x_yy	zz = cloth slot, x = body size (small,normal,tall), yy = clothing state | note that (yy == 0) => (zz == 0)
+	//SKELETON		A00_00_0x_00h | S00_00_0x_00h
+	//BODY			(A|S)00_zz_0x_yy	zz = cloth slot, x = body size (small,normal,tall), yy = clothing state | note that (yy == 0) => (zz == 0)
 	//HAIR_FRONT	AS00_20_xx_yy (yy is flip)
 	//HAIR_SIDE		AS00_21_xx_yy (yy is flip)
 	//HAIR_BACK		AS00_22_xx_yy (yy is flip)

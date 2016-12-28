@@ -1,18 +1,53 @@
 #include "OverrideFile.h"
 
+#include <Shlwapi.h>
+
 #include "General\Util.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
 #include "config.h"
 
+
 OverrideFile::OverrideFile() : m_good(false) {
 }
 
-OverrideFile::OverrideFile(const TCHAR* fileName, bool absPath) : OverrideFile(OVERRIDE_ARCHIVE_PATH, fileName, absPath, true, true) {
+OverrideFile::OverrideFile(const TCHAR* path,PathStart tryPathStarts) : m_good(false), m_pathStart(NONE) {
+	m_fileName = General::FindFileInPath(path);;
+
+	if (tryPathStarts & OVERRIDE) {
+		m_fullPath = General::BuildOverridePath(path);
+		if(General::FileExists(m_fullPath.c_str())) {
+			m_pathStart = OVERRIDE;
+		}
+	}
+	if(tryPathStarts & AAPLAY && m_pathStart != NONE) {
+		m_fullPath = General::BuildPlayPath(path);
+		if (General::FileExists(m_fullPath.c_str())) {
+			m_pathStart = AAPLAY;
+		}
+	}
+	if(tryPathStarts & AAEDIT && m_pathStart != NONE) {
+		m_fullPath = General::BuildEditPath(path);
+		if (General::FileExists(m_fullPath.c_str())) {
+			m_pathStart = AAEDIT;
+		}
+	}
 	
+
+	HANDLE file = CreateFile(m_fullPath.c_str(),FILE_READ_ACCESS,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
+	if (file != INVALID_HANDLE_VALUE && file != NULL) {
+		m_good = true;
+	}
+
+	if (!m_good) return;
+
+	DWORD hi;
+	m_fileSize = ::GetFileSize(file,&hi);
+	CloseHandle(file);
 }
 
-OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPath, bool tryAAPlay, bool tryAAEdit) : OverrideFile() {
+
+/*OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPath, bool tryAAPlay, bool tryAAEdit) : OverrideFile() {
 	m_fileName = fileName;
 
 	HANDLE file = NULL;
@@ -56,7 +91,7 @@ OverrideFile::OverrideFile(const TCHAR* path, const TCHAR* fileName, bool absPat
 	DWORD hi;
 	m_fileSize = ::GetFileSize(file, &hi);
 	CloseHandle(file);
-}
+}*/
 
 OverrideFile::~OverrideFile() {
 	
