@@ -377,7 +377,7 @@ namespace Poser {
 	void PoserWindow::InitBones() {
 		int n = loc_sliderInfos.size();
 		for (int i = 0; i < n; i++) {
-			SendMessageW(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(i).frameName.c_str()));
+			SendMessageW(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(i).descr.c_str()));
 		}
 	}
 
