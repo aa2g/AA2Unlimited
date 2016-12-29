@@ -256,7 +256,7 @@ namespace Poser {
 						SendMessage(thisPtr->m_edPose,WM_SETTEXT,0,(LPARAM)str.c_str());
 						str = std::to_wstring(openFile.GetFrame());
 						SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)str.c_str());
-						SliderInfo* slider;
+						SliderInfo* slider = NULL;
 						for(auto elem : openFile.GetMods()) {
 							auto match = loc_frameMap.find(elem.frameName);
 							if (match != loc_frameMap.end()) {
@@ -270,8 +270,8 @@ namespace Poser {
 								slider->scale.x = elem.matrix[6];
 								slider->scale.y = elem.matrix[7];
 								slider->scale.z = elem.matrix[8];
+								thisPtr->ApplySlider(slider);
 							}
-							thisPtr->ApplySlider(slider);
 						}
 						thisPtr->SyncList();
 					}
