@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <CommCtrl.h>
 
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
@@ -21,33 +22,39 @@ namespace Poser {
 
 	ExtClass::CharacterStruct* loc_targetChar = NULL;
 
+	enum Operation {
+		Translate,
+		Rotate,
+		Scale
+	};
+	
+	struct OperationData {
+		float x, y, z;
+	};
+
 	struct SliderInfo {
-		std::wstring frame;
-		enum Mod {
-			YAW,PITCH,ROLL
-		} mod;
+		std::wstring frameName;
 		std::wstring descr;
+		ExtClass::Frame* xxFrame;
+		enum Operation curOperation;
+		int curAxis;
+		struct OperationData translate, rotate, scale;
 	};
 	std::vector<SliderInfo> loc_sliderInfos;
-	struct MapData {
-		ExtClass::Frame* frame;
-		float yaw,pitch,roll;
-	};
-	std::map<std::string,MapData> loc_frameMap;
+	std::map<std::string,unsigned int> loc_frameMap;
+
+	SliderInfo *loc_curSlider;
 
 	void GenSliderInfo();
-	void GenFrameMap();
 
 	void StartEvent() {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		GenSliderInfo();
-		GenFrameMap();
 		g_PoserWindow.Init();
 	}
 
 	void EndEvent() {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		loc_frameMap.clear();
 		loc_sliderInfos.clear();
 		loc_targetChar = NULL;
 		g_PoserWindow.Hide();
@@ -83,12 +90,21 @@ namespace Poser {
 			SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 			thisPtr->m_dialog = hwndDlg;
 			thisPtr->m_edPose = GetDlgItem(hwndDlg,IDC_PPS_EDPOSE);
-			thisPtr->m_edFrame = GetDlgItem(hwndDlg,IDC_PPS_EDFRAME);
+			thisPtr->m_edFrame = GetDlgItem(hwndDlg, IDC_PPS_EDFRAME);
+			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
+			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
+			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
+			thisPtr->m_sliderMod = GetDlgItem(hwndDlg, IDC_PPS_SLIDERMOD);
 
-			thisPtr->InitSliders();
-			ShowWindow(GetDlgItem(hwndDlg,IDC_PPS_EDEXAMPLE),SW_HIDE);
-			ShowWindow(GetDlgItem(hwndDlg,IDC_PPS_SLDEXAMPLE),SW_HIDE);
-			ShowWindow(GetDlgItem(hwndDlg,IDC_PPS_STEXAMPLE),SW_HIDE);
+			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Translate")));
+			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
+			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Scale")));
+			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("X")));
+			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Y")));
+			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Z")));
+			thisPtr->InitBones();
+
+			SendMessage(thisPtr->m_listBones, LB_SETCURSEL, 0, 0);
 
 			return TRUE;
 			break; }
@@ -106,13 +122,9 @@ namespace Poser {
 			if (thisPtr == NULL) return FALSE;
 			HWND wnd = (HWND)lparam;
 			if (wnd == NULL) break; //not slider control, but automatic scroll
-			for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
-				if (wnd == thisPtr->m_sliders[i].GetSlider()) {
-					ignoreNextSlider = true;
-					thisPtr->m_sliders[i].Sync(false);
-					thisPtr->ApplySlider(i);
-					break;
-				}
+			LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
+			if (res != LB_ERR) {
+					thisPtr->ApplySlider(res);
 			}
 			break; }
 		case WM_TIMER: {
@@ -155,15 +167,12 @@ namespace Poser {
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
-				
-				for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
-					if (ed == thisPtr->m_sliders[i].GetEdit()) {
-						ignoreNextSlider = true;
-						thisPtr->m_sliders[i].Sync(true);
-						thisPtr->ApplySlider(i);
-						break;
-					}
+
+				LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					thisPtr->ApplySlider(res);
 				}
+
 				return TRUE; }
 			case BN_CLICKED: {
 				PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
@@ -174,7 +183,7 @@ namespace Poser {
 					if(path != NULL) {
 						PoseFile saveFile;
 						saveFile.SetPoseInfo(General::GetEditInt(thisPtr->m_edPose),General::GetEditFloat(thisPtr->m_edFrame));
-						for (int i = 0; i < thisPtr->m_sliders.size(); i++) {
+						/*for (int i = 0; i < thisPtr->m_sliders.size(); i++) {
 							if (thisPtr->m_sliders[i].GetCurrVal() == 0) continue;
 							PoseFile::FrameMod mod;
 							mod.frameName = std::string(loc_sliderInfos[i].frame.begin(),loc_sliderInfos[i].frame.end());;
@@ -185,11 +194,11 @@ namespace Poser {
 							mod.value = thisPtr->m_sliders[i].GetCurrVal();
 							saveFile.AddFrameMod(mod);
 						}
-						saveFile.DumpToFile(path);
+						saveFile.DumpToFile(path);*/
 					}
 				}
 				else if (id == IDC_PPS_BTNLOAD) {
-					const TCHAR* path = General::OpenFileDialog(NULL);
+					/*const TCHAR* path = General::OpenFileDialog(NULL);
 					if(path != NULL) {
 						for(auto& elem : thisPtr->m_sliders) {
 							std::wstring num(TEXT("0"));
@@ -216,16 +225,37 @@ namespace Poser {
 							}
 						}
 
-					}
+					}*/
 				}
 				else if (id == IDC_PPS_BTNRESET) {
-					for(int i = 0; i < thisPtr->m_sliders.size(); i++) {
+					/*for(int i = 0; i < thisPtr->m_sliders.size(); i++) {
 						static const TCHAR numZero[] = TEXT("0");
 						SendMessage(thisPtr->m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)numZero);
 						thisPtr->ApplySlider(i);
-					}
+					}*/
 				}
 				break; }
+			case LBN_SELCHANGE: {
+				PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+				if (thisPtr == NULL) return FALSE;
+				int id = LOWORD(wparam);
+				switch (id) {
+				case(IDC_PPS_LISTBONES): {
+					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
+					if (res != LB_ERR) {
+						loc_curSlider = &loc_sliderInfos[res];
+						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_curSlider->curOperation, 0);
+					}
+					break; }
+				case (IDC_PPS_LISTOP): {
+					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+					if (res != LB_ERR) {
+						loc_curSlider->curOperation = Operation(res);
+					}
+					break; }
+				}
+				break; }
+
 			};
 			break; }
 		}
@@ -234,36 +264,33 @@ namespace Poser {
 	}
 
 	void PoserWindow::ApplySlider(int index) {
-		std::wstring str = loc_sliderInfos[index].frame;
-		size_t n;
-		char mbFrame[256];
-		wcstombs_s(&n,mbFrame,str.c_str(),256);
-		auto match = loc_frameMap.find(mbFrame);
-		if(match != loc_frameMap.end()) {
-			switch(loc_sliderInfos[index].mod) {
-			case SliderInfo::YAW:
-				match->second.yaw = m_sliders[index].GetCurrVal();
+		int pos = SendMessage(m_sliderMod, TBM_GETPOS, 0, 0);
+		SliderInfo &slider = loc_sliderInfos[index];
+		ExtClass::Frame *frame = slider.xxFrame;
+		if(frame) {
+			switch(slider.curAxis) {
+			case 0:
+				slider.rotate.x = pos;
 				break;
-			case SliderInfo::PITCH:
-				match->second.pitch = m_sliders[index].GetCurrVal();
+			case 1:
+				slider.rotate.y = pos;
 				break;
-			case SliderInfo::ROLL:
-				match->second.roll = m_sliders[index].GetCurrVal();
+			case 2:
+				slider.rotate.z = pos;
 				break;
 			default:
 				break;
 			}
-			if(match->second.frame != NULL) {
+			if(frame) {
 				//note that somehow those frame manipulations dont quite work as expected;
 				//by observation, rotation happens around the base of the bone whos frame got manipulated,
 				//rather than the tip.
 				//so to correct that, we gotta translate back
 
-				ExtClass::Frame* frame = match->second.frame;
 				ExtClass::Frame* origFrame = &frame->m_children[0];
 
 				D3DMATRIX rotMatrix;
-				(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix,match->second.yaw,match->second.pitch,match->second.roll);
+				(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, slider.rotate.x, slider.rotate.y, slider.rotate.z);
 				D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
 				(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
 
@@ -283,27 +310,11 @@ namespace Poser {
 	}
 
 
-	void PoserWindow::InitSliders() {
-
-		m_sliders.resize(loc_sliderInfos.size());
-		RECT start;
-		GetWindowRect(GetDlgItem(m_dialog,IDC_PPS_STEXAMPLE), &start);
-		int x = start.left,y = start.top;
-		for (int i = 0; i < loc_sliderInfos.size(); i++) {
-			m_sliders[i] = GuiSlider(m_dialog,loc_sliderInfos[i].descr.c_str(),x,y,-M_PI,M_PI);
-			SendMessage(m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)TEXT("0"));
-			m_sliders[i].Sync(true);
-			y += 50;
+	void PoserWindow::InitBones() {
+		int n = loc_sliderInfos.size();
+		for (int i = 0; i < n; i++) {
+			SendMessageW(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(i).frameName.c_str()));
 		}
-
-		SCROLLINFO si;
-		si.cbSize = sizeof(si);
-		si.fMask = SIF_PAGE | SIF_RANGE;
-		si.nMin = 0;
-		si.nMax = y;
-		si.nPage = 200;
-		SetScrollInfo(m_dialog,SB_VERT,&si,FALSE);
-
 	}
 
 
@@ -338,7 +349,7 @@ namespace Poser {
 				bone->m_nChildren = 1;
 				bone->m_children = newMatch;
 				newMatch->m_parent = bone;
-				for (int i = 0; i < newMatch->m_nChildren; i++) {
+				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
 					newMatch->m_children[i].m_parent = newMatch;
 				}
 
@@ -349,7 +360,7 @@ namespace Poser {
 				strcpy_s(bone->m_name,bone->m_nameBufferSize,prefix);
 				strcat_s(bone->m_name,bone->m_nameBufferSize,newMatch->m_name);
 
-				match->second.frame = bone;
+				loc_sliderInfos[match->second].xxFrame = bone;
 			}
 		});
 
@@ -359,7 +370,7 @@ namespace Poser {
 		//its frames matrix2), which it uses to position its mesh. after this, those pointers will point to the artificial matrizes,
 		//so we have to change that as well
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
-			for (int i = 0; i < frame->m_nBones; i++) {
+			for (unsigned int i = 0; i < frame->m_nBones; i++) {
 				Bone* bone = &frame->m_bones[i];
 				Frame* boneFrame = bone->GetFrame();
 				if (boneFrame != NULL && strncmp(boneFrame->m_name,prefix,sizeof(prefix)-1) == 0) {
@@ -379,30 +390,22 @@ namespace Poser {
 			std::string& strDesc = std::get<2>(elem);
 
 			std::wstring wstrFrame(strFrame.begin(), strFrame.end());
-			info.frame = wstrFrame;
+			info.frameName = wstrFrame;
 			std::wstring wstrDescr(strDesc.begin(),strDesc.end());
 			info.descr = wstrDescr;
 			
-			info.mod = (SliderInfo::Mod)iMod;
+			//info.mod = (SliderInfo::Mod)iMod;
+			info.translate = { 0,0,0 };
+			info.rotate = { 0,0,0 };
+			info.scale = { 1,1,1 };
+
+			info.curAxis = 0;
+			info.curOperation = Rotate;
+
+			info.xxFrame = NULL;
 
 			loc_sliderInfos.push_back(info);
-		}
-	}
-
-	void GenFrameMap() {
-		for(auto& elem : loc_sliderInfos) {
-			size_t n;
-			char mbFrame[256];
-			wcstombs_s(&n,mbFrame,elem.frame.c_str(), 256);
-
-			auto match = loc_frameMap.find(mbFrame);
-			if(match == loc_frameMap.end()) {
-				MapData data;
-				data.pitch = data.roll = data.yaw = 0;
-				data.frame = NULL;
-				auto pair = std::make_pair(std::string(mbFrame),data);
-				loc_frameMap.insert(pair);
-			}
+			loc_frameMap.insert(std::make_pair(strFrame, loc_sliderInfos.size() - 1));
 		}
 	}
 

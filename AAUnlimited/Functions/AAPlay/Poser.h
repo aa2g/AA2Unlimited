@@ -20,11 +20,14 @@ namespace Poser {
 		HWND m_dialog;
 		HWND m_edPose;
 		HWND m_edFrame;
+		HWND m_listBones;
+		HWND m_listOperation;
+		HWND m_listAxis;
+		HWND m_sliderMod;
 		UINT_PTR m_timer;
+		int m_curBone;
 
-		std::vector<GuiSlider> m_sliders;
-
-		void InitSliders();
+		void InitBones();
 		void ApplySlider(int i);
 
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
