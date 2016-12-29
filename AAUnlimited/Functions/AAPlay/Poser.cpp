@@ -23,13 +23,13 @@ namespace Poser {
 	ExtClass::CharacterStruct* loc_targetChar = NULL;
 
 	enum Operation {
-		Translate,
 		Rotate,
+		Translate,
 		Scale
 	};
 	
 	struct OperationData {
-		float x, y, z;
+		float x, y, z, min, max;
 	};
 
 	struct SliderInfo {
@@ -39,11 +39,44 @@ namespace Poser {
 		enum Operation curOperation;
 		int curAxis;
 		struct OperationData translate, rotate, scale;
+
+		float* curValue() {
+			OperationData* data = curOperation == Rotate ? &rotate : curOperation == Translate ? &translate : &scale;
+			if (curAxis == 0)
+				return &data->x;
+			else if (curAxis == 1)
+				return &data->y;
+			else
+				return &data->z;
+		}
+
+		void setValue(float newValue) {
+			float* value = curValue();
+			*value = newValue;
+		}
+
+		void fromSlider(int sldVal) {
+			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
+			float val = data.min + (data.max - data.min) / 0x10000 * sldVal;
+			float* value = curValue();
+			*value = val;
+		}
+
+		int toSlider() {
+			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
+			float range = data.max - data.min; //map from [min,max] to [0,0x10000]
+			float val;
+			val = (*curValue()) - data.min;
+			float coeff = 0x10000 / range;
+			return int(coeff * val);
+		}
 	};
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
 
 	SliderInfo *loc_curSlider;
+
+	bool loc_syncing;
 
 	void GenSliderInfo();
 
@@ -94,8 +127,10 @@ namespace Poser {
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
-			thisPtr->m_sliderMod = GetDlgItem(hwndDlg, IDC_PPS_SLIDERMOD);
+			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERMOD);
+			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
 
+			loc_syncing = true;
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Translate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Scale")));
@@ -104,8 +139,19 @@ namespace Poser {
 			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Z")));
 			thisPtr->InitBones();
 
+			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMAX, TRUE, 0x10000);
 			SendMessage(thisPtr->m_listBones, LB_SETCURSEL, 0, 0);
+			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
+			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
+			loc_curSlider = NULL;
+			if (loc_sliderInfos.size()) {
+				loc_curSlider = &loc_sliderInfos[0];
+				thisPtr->SyncList();
+			}
+
+			loc_syncing = false;
 			return TRUE;
 			break; }
 		case WM_VSCROLL: {
@@ -122,10 +168,8 @@ namespace Poser {
 			if (thisPtr == NULL) return FALSE;
 			HWND wnd = (HWND)lparam;
 			if (wnd == NULL) break; //not slider control, but automatic scroll
-			LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
-			if (res != LB_ERR) {
-					thisPtr->ApplySlider(res);
-			}
+			thisPtr->SyncSlider();
+			thisPtr->ApplySlider();
 			break; }
 		case WM_TIMER: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
@@ -143,9 +187,9 @@ namespace Poser {
 			
 			float currFrame = General::GetEditFloat(thisPtr->m_edFrame);
 			if(currFrame != skeleton->m_animFrame) {
-				std::wstring frame;
-				frame = std::to_wstring(skeleton->m_animFrame);
-				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame.c_str());
+				TCHAR frame[16];
+				_snwprintf_s(frame, 16, 15, TEXT("%.1f"), skeleton->m_animFrame);
+				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame);
 			}
 			
 			break; }
@@ -167,10 +211,9 @@ namespace Poser {
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
-
-				LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
-				if (res != LB_ERR) {
-					thisPtr->ApplySlider(res);
+				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
+					thisPtr->SyncEdit();
+					thisPtr->ApplySlider();
 				}
 
 				return TRUE; }
@@ -245,12 +288,22 @@ namespace Poser {
 					if (res != LB_ERR) {
 						loc_curSlider = &loc_sliderInfos[res];
 						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_curSlider->curOperation, 0);
+						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_curSlider->curAxis, 0);
+						thisPtr->SyncList();
 					}
 					break; }
 				case (IDC_PPS_LISTOP): {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
 						loc_curSlider->curOperation = Operation(res);
+						thisPtr->SyncList();
+					}
+					break; }
+				case (IDC_PPS_LISTAXIS): {
+					LRESULT res = SendMessage(thisPtr->m_listAxis, LB_GETCURSEL, 0, 0);
+					if (res != LB_ERR) {
+						loc_curSlider->curAxis = res;
+						thisPtr->SyncList();
 					}
 					break; }
 				}
@@ -263,52 +316,63 @@ namespace Poser {
 		return FALSE;
 	}
 
-	void PoserWindow::ApplySlider(int index) {
-		int pos = SendMessage(m_sliderMod, TBM_GETPOS, 0, 0);
-		SliderInfo &slider = loc_sliderInfos[index];
-		ExtClass::Frame *frame = slider.xxFrame;
-		if(frame) {
-			switch(slider.curAxis) {
-			case 0:
-				slider.rotate.x = pos;
-				break;
-			case 1:
-				slider.rotate.y = pos;
-				break;
-			case 2:
-				slider.rotate.z = pos;
-				break;
-			default:
-				break;
-			}
-			if(frame) {
-				//note that somehow those frame manipulations dont quite work as expected;
-				//by observation, rotation happens around the base of the bone whos frame got manipulated,
-				//rather than the tip.
-				//so to correct that, we gotta translate back
-
-				ExtClass::Frame* origFrame = &frame->m_children[0];
-
-				D3DMATRIX rotMatrix;
-				(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, slider.rotate.x, slider.rotate.y, slider.rotate.z);
-				D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
-				(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
-
-				D3DVECTOR3 translations;
-				translations.x = origFrame->m_matrix5._41 - rotTransMatrix._41;
-				translations.y = origFrame->m_matrix5._42 - rotTransMatrix._42;
-				translations.z = origFrame->m_matrix5._43 - rotTransMatrix._43;
-
-				D3DMATRIX resultMatrix = rotMatrix;
-				resultMatrix._41 += translations.x;
-				resultMatrix._42 += translations.y;
-				resultMatrix._43 += translations.z;
-
-				frame->m_matrix1 = resultMatrix;
-			}
-		}
+	void PoserWindow::SyncEdit() {
+		if (loc_syncing) return;
+		loc_syncing = true;
+		float value = General::GetEditFloat(m_edValue);
+		loc_curSlider->setValue(value);
+		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_curSlider->toSlider());
+		loc_syncing = false;
 	}
 
+	void PoserWindow::SyncList() {
+		loc_syncing = true;
+		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_curSlider->toSlider());
+		TCHAR number[52];
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_curSlider->curValue());
+		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		loc_syncing = false;
+	}
+
+	void PoserWindow::SyncSlider() {
+		if (loc_syncing) return;
+		loc_syncing = true;
+		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
+		loc_curSlider->fromSlider(pos);
+		TCHAR number[52];
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_curSlider->curValue());
+		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		loc_syncing = false;
+	}
+
+	void PoserWindow::ApplySlider() {
+		ExtClass::Frame *frame = loc_curSlider->xxFrame;
+		if(frame) {
+			//note that somehow those frame manipulations dont quite work as expected;
+			//by observation, rotation happens around the base of the bone whos frame got manipulated,
+			//rather than the tip.
+			//so to correct that, we gotta translate back
+
+			ExtClass::Frame* origFrame = &frame->m_children[0];
+
+			D3DMATRIX rotMatrix;
+			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, loc_curSlider->rotate.x, loc_curSlider->rotate.y, loc_curSlider->rotate.z);
+			D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
+			(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
+
+			D3DVECTOR3 translations;
+			translations.x = origFrame->m_matrix5._41 - rotTransMatrix._41;
+			translations.y = origFrame->m_matrix5._42 - rotTransMatrix._42;
+			translations.z = origFrame->m_matrix5._43 - rotTransMatrix._43;
+
+			D3DMATRIX resultMatrix = rotMatrix;
+			resultMatrix._41 += translations.x;
+			resultMatrix._42 += translations.y;
+			resultMatrix._43 += translations.z;
+
+			frame->m_matrix1 = resultMatrix;
+		}
+	}
 
 	void PoserWindow::InitBones() {
 		int n = loc_sliderInfos.size();
@@ -394,9 +458,9 @@ namespace Poser {
 			info.descr = wstrDescr;
 			
 			//info.mod = (SliderInfo::Mod)iMod;
-			info.translate = { 0,0,0 };
-			info.rotate = { 0,0,0 };
-			info.scale = { 1,1,1 };
+			info.translate = { 0,0,0,0,0 };
+			info.rotate = { 0,0,0,(float)(-M_PI),(float)M_PI };
+			info.scale = { 1,1,1,1,1 };
 
 			info.curAxis = 0;
 			info.curOperation = Rotate;
