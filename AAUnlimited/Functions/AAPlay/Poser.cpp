@@ -386,8 +386,7 @@ namespace Poser {
 		for(auto& elem : input) {
 			SliderInfo info;
 			std::string& strFrame = std::get<0>(elem);
-			int iMod = std::get<1>(elem);
-			std::string& strDesc = std::get<2>(elem);
+			std::string& strDesc = std::get<1>(elem);
 
 			std::wstring wstrFrame(strFrame.begin(), strFrame.end());
 			info.frameName = wstrFrame;

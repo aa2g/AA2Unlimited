@@ -10,53 +10,26 @@ PoseMods::PoseMods(std::wstring path) {
 	int line = 0;
 	while(in.good()) {
 		line++;
-		std::string line;
+		std::string line, frameName, frameDesc;
 		std::getline(in,line);
-		const char* it = line.c_str();
 
-		std::string frame;
-		std::string mod;
-		std::string name;
+		auto it = line.cbegin();
+		while (it != line.cend() && isspace(*it)) it++;
+		if (it == line.cend()) continue;
+		if (*it == ';') continue;
 
-		const char* start;
+		auto begin = it;
+		while (it != line.cend() && !isspace(*it)) it++;
+		if (it == line.cend()) continue;
 
-		while (*it && isspace(*it)) it++;
-		if (!*it) continue;
-		if (*it == ';') continue; //line is commented out
+		frameName = std::string(begin, it);
 
-		//frame name
-		start = it;
-		while (*it && !isspace(*it)) frame.push_back(*it++);
-		frame = std::string(start, it);
+		while (it != line.cend() && isspace(*it)) it++;
 
-		while (*it && isspace(*it)) it++;
-		if (!*it) continue;
+		frameDesc = (it != line.cend()) ? std::string(it, line.cend()) : frameName;
 
-		//mod
-		start = it;
-		while (*it && !isspace(*it)) mod.push_back(*it++);
-		mod = std::string(start,it);
-
-		while (*it && isspace(*it)) it++;
-		if (*it) {
-			//name (rest of the line)
-			start = it;
-			name = std::string(start, line.c_str() + line.size());
-		}
-
-		
-
-		int imod = 0;
-		if (mod == "YAW" || mod == "X") imod = 0;
-		else if (mod == "PITCH" || mod == "Y") imod = 1;
-		else if (mod == "ROLL" || mod == "Z") imod = 2;
-		else {
-			LOGPRIO(Logger::Priority::WARN) << "PoseMod file in line " << line << ": unknown mod " << mod << ". The line was ignored.\r\n";
-		}
-
-		auto triple = std::make_tuple(frame,imod,name);
-		m_data.push_back(std::move(triple));
-
+		auto tuple = std::make_tuple(frameName,frameDesc);
+		m_data.push_back(std::move(tuple));
 	}
 }
 
