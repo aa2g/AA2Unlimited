@@ -29,7 +29,7 @@ namespace Poser {
 		int m_curBone;
 
 		void InitBones();
-		void ApplySlider();
+		void ApplySlider(void* slider = NULL);
 		void SyncEdit();
 		void SyncList();
 		void SyncSlider();

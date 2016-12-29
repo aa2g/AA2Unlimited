@@ -12,8 +12,7 @@ public:
 
 	struct FrameMod {
 		std::string frameName;
-		char modKind;
-		float value;
+		float matrix[9];
 	};
 
 	inline int GetPose() { return pose; }

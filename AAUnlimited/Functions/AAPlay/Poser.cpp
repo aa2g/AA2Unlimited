@@ -70,6 +70,12 @@ namespace Poser {
 			float coeff = 0x10000 / range;
 			return int(coeff * val);
 		}
+
+		void reset() {
+			rotate = { 0,0,0,(float)-M_PI,(float)M_PI };
+			translate = { 0,0,0,-2,2 };
+			scale = { 1,1,1,0,2 };
+		}
 	};
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
@@ -226,26 +232,23 @@ namespace Poser {
 					if(path != NULL) {
 						PoseFile saveFile;
 						saveFile.SetPoseInfo(General::GetEditInt(thisPtr->m_edPose),General::GetEditFloat(thisPtr->m_edFrame));
-						/*for (int i = 0; i < thisPtr->m_sliders.size(); i++) {
-							if (thisPtr->m_sliders[i].GetCurrVal() == 0) continue;
-							PoseFile::FrameMod mod;
-							mod.frameName = std::string(loc_sliderInfos[i].frame.begin(),loc_sliderInfos[i].frame.end());;
-							auto kind = loc_sliderInfos[i].mod;
-							if (kind == SliderInfo::ROLL) mod.modKind = 'z';
-							else if (kind == SliderInfo::YAW) mod.modKind = 'y';
-							else mod.modKind = 'x';
-							mod.value = thisPtr->m_sliders[i].GetCurrVal();
+						for (auto it = loc_sliderInfos.cbegin(); it != loc_sliderInfos.cend(); it++) {
+							PoseFile::FrameMod mod = { std::string(it->frameName.cbegin(), it->frameName.cend()),
+								it->rotate.x, it->rotate.y, it->rotate.z,
+								it->translate.x, it->translate.y, it->translate.z,
+								it->scale.x, it->scale.y, it->scale.z
+							};
 							saveFile.AddFrameMod(mod);
 						}
-						saveFile.DumpToFile(path);*/
+						saveFile.DumpToFile(path);
 					}
 				}
 				else if (id == IDC_PPS_BTNLOAD) {
-					/*const TCHAR* path = General::OpenFileDialog(NULL);
+					const TCHAR* path = General::OpenFileDialog(NULL);
 					if(path != NULL) {
-						for(auto& elem : thisPtr->m_sliders) {
-							std::wstring num(TEXT("0"));
-							SendMessage(elem.GetEdit(),WM_SETTEXT,0,(LPARAM)num.c_str());
+						for(SliderInfo& slider: loc_sliderInfos) {
+							slider.reset();
+							thisPtr->ApplySlider(&slider);
 						}
 						PoseFile openFile(path);
 						std::wstring str;
@@ -253,29 +256,32 @@ namespace Poser {
 						SendMessage(thisPtr->m_edPose,WM_SETTEXT,0,(LPARAM)str.c_str());
 						str = std::to_wstring(openFile.GetFrame());
 						SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)str.c_str());
+						SliderInfo* slider;
 						for(auto elem : openFile.GetMods()) {
-							std::wstring wstrName(elem.frameName.begin(),elem.frameName.end());
-							SliderInfo::Mod modkind = SliderInfo::PITCH;
-							if (elem.modKind == 'x') modkind = SliderInfo::PITCH;
-							else if (elem.modKind == 'y') modkind = SliderInfo::YAW;
-							else if (elem.modKind == 'z') modkind = SliderInfo::ROLL;
-							for(int i = 0; i < loc_sliderInfos.size(); i++) {
-								if(loc_sliderInfos[i].frame == wstrName && loc_sliderInfos[i].mod == modkind) {
-									std::wstring num = std::to_wstring(elem.value);
-									SendMessage(thisPtr->m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)num.c_str());
-									break;
-								}
+							auto match = loc_frameMap.find(elem.frameName);
+							if (match != loc_frameMap.end()) {
+								slider = &loc_sliderInfos[match->second];
+								slider->rotate.x = elem.matrix[0];
+								slider->rotate.y = elem.matrix[1];
+								slider->rotate.z = elem.matrix[2];
+								slider->translate.x = elem.matrix[3];
+								slider->translate.y = elem.matrix[4];
+								slider->translate.z = elem.matrix[5];
+								slider->scale.x = elem.matrix[6];
+								slider->scale.y = elem.matrix[7];
+								slider->scale.z = elem.matrix[8];
 							}
+							thisPtr->ApplySlider(slider);
 						}
-
-					}*/
+						thisPtr->SyncList();
+					}
 				}
 				else if (id == IDC_PPS_BTNRESET) {
-					/*for(int i = 0; i < thisPtr->m_sliders.size(); i++) {
-						static const TCHAR numZero[] = TEXT("0");
-						SendMessage(thisPtr->m_sliders[i].GetEdit(),WM_SETTEXT,0,(LPARAM)numZero);
-						thisPtr->ApplySlider(i);
-					}*/
+					for (auto it = loc_sliderInfos.begin(); it != loc_sliderInfos.end(); it++) {
+						it->reset();
+						thisPtr->ApplySlider(&(*it));
+					}
+					thisPtr->SyncList();
 				}
 				break; }
 			case LBN_SELCHANGE: {
@@ -345,8 +351,9 @@ namespace Poser {
 		loc_syncing = false;
 	}
 
-	void PoserWindow::ApplySlider() {
-		ExtClass::Frame *frame = loc_curSlider->xxFrame;
+	void PoserWindow::ApplySlider(void* slider) {
+		SliderInfo* targetSlider = slider == NULL ? loc_curSlider : static_cast<SliderInfo*>(slider);
+		ExtClass::Frame *frame = targetSlider->xxFrame;
 		if(frame) {
 			//note that somehow those frame manipulations dont quite work as expected;
 			//by observation, rotation happens around the base of the bone whos frame got manipulated,
@@ -356,7 +363,7 @@ namespace Poser {
 			ExtClass::Frame* origFrame = &frame->m_children[0];
 
 			D3DMATRIX rotMatrix;
-			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, loc_curSlider->rotate.x, loc_curSlider->rotate.y, loc_curSlider->rotate.z);
+			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.x, targetSlider->rotate.y, targetSlider->rotate.z);
 			D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
 			(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
 
@@ -457,10 +464,7 @@ namespace Poser {
 			std::wstring wstrDescr(strDesc.begin(),strDesc.end());
 			info.descr = wstrDescr;
 			
-			//info.mod = (SliderInfo::Mod)iMod;
-			info.translate = { 0,0,0,0,0 };
-			info.rotate = { 0,0,0,(float)(-M_PI),(float)M_PI };
-			info.scale = { 1,1,1,1,1 };
+			info.reset();
 
 			info.curAxis = 0;
 			info.curOperation = Rotate;
