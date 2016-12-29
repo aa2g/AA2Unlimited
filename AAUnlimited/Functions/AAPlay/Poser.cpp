@@ -127,7 +127,7 @@ namespace Poser {
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
-			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERMOD);
+			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
 			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
 
 			loc_syncing = true;
