@@ -12,7 +12,7 @@ namespace ClothingDialog {
 
 
 void InitEvent() {
-	Poser::StartEvent();
+	Poser::StartEvent(Poser::ClothingScene);
 }
 
 void ExitEvent() {

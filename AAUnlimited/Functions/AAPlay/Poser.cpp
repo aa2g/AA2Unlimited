@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <CommCtrl.h>
+#include <Strsafe.h>
 
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
@@ -20,7 +21,20 @@ namespace Poser {
 
 	PoserWindow g_PoserWindow;
 
-	ExtClass::CharacterStruct* loc_targetChar = NULL;
+	struct FaceInfo {
+		BYTE padding0[0x234];
+		void *blushPointer;
+		BYTE padding1[0x4];
+		int mouth;
+		BYTE padding2[0x18];
+		int eye;
+		BYTE padding3[0x18];
+		int eyebrow;
+		BYTE padding4[0x30];
+		float eyeOpen;
+		BYTE padding5[0x8];
+		float mouthOpen;
+	};
 
 	enum Operation {
 		Rotate,
@@ -80,28 +94,66 @@ namespace Poser {
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
 
-	SliderInfo *loc_curSlider;
+	class PoserCharacter {
+	public:
+		PoserCharacter(ExtClass::CharacterStruct* c) :
+			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap), FaceInfo(nullptr)//, CurrentSlider(&SliderInfos[0])
+		{
+			CurrentSlider = &SliderInfos[0];
+		}
+
+		ExtClass::CharacterStruct* Character;
+		std::vector<SliderInfo> SliderInfos;
+		std::map<std::string, unsigned int> FrameMap;
+		FaceInfo* FaceInfo;
+		SliderInfo *CurrentSlider;
+	};
+
+	std::vector<PoserCharacter*> loc_targetCharacters;
+	PoserCharacter* loc_targetChar;
 
 	bool loc_syncing;
+	Poser::EventType loc_eventType = NoEvent;
 
 	void GenSliderInfo();
 
-	void StartEvent() {
+	void StartEvent(EventType type) {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
+		loc_eventType = ClothingScene;
 		GenSliderInfo();
 		g_PoserWindow.Init();
 	}
 
 	void EndEvent() {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
+		for (auto c : loc_targetCharacters) {
+			delete c;
+		}
+		loc_targetCharacters.clear();
 		loc_sliderInfos.clear();
-		loc_targetChar = NULL;
+		loc_frameMap.clear();
 		g_PoserWindow.Hide();
+		loc_eventType = NoEvent;
 	}
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		loc_targetChar = c;
+		if (loc_eventType == NpcInteraction)
+			EndEvent();
+		if (loc_eventType == NoEvent) {
+			StartEvent(NpcInteraction);
+		}
+		if (loc_eventType == ClothingScene) {
+			PoserCharacter* character = new PoserCharacter(c);
+			loc_targetCharacters.push_back(character);
+			loc_targetChar = character;
+			g_PoserWindow.AddCharacterName(c->m_charData->m_forename);
+		}
+		else if (loc_eventType == NpcInteraction) {
+			PoserCharacter* character = new PoserCharacter(c);
+			loc_targetCharacters.push_back(character);
+			loc_targetChar = character;
+		}
 	}
 
 
@@ -119,6 +171,13 @@ namespace Poser {
 		ShowWindow(m_dialog,SW_HIDE);
 	}
 
+	void PoserWindow::AddCharacterName(const char* name) {
+		SendMessage(m_cmbCharacter, CB_ADDSTRING, 0, LPARAM(name));
+	}
+
+	void PoserWindow::ClearCharacterNames() {
+		SendMessage(m_cmbCharacter, CB_RESETCONTENT, 0, 0);
+	}
 
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 		static bool ignoreNextSlider = false;
@@ -128,13 +187,31 @@ namespace Poser {
 			PoserWindow* thisPtr = (PoserWindow*)lparam;
 			SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 			thisPtr->m_dialog = hwndDlg;
-			thisPtr->m_edPose = GetDlgItem(hwndDlg,IDC_PPS_EDPOSE);
+			thisPtr->m_edPose = GetDlgItem(hwndDlg, IDC_PPS_EDPOSE);
 			thisPtr->m_edFrame = GetDlgItem(hwndDlg, IDC_PPS_EDFRAME);
+			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
+			thisPtr->m_edMouth = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTH);
+			thisPtr->m_edMouthOpen = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTHOPEN);
+			thisPtr->m_edEye = GetDlgItem(hwndDlg, IDC_PPS_EDEYE);
+			thisPtr->m_edEyeOpen = GetDlgItem(hwndDlg, IDC_PPS_EDEYEOPEN);
+			thisPtr->m_edEyebrow = GetDlgItem(hwndDlg, IDC_PPS_EDEYEBROW);
+			thisPtr->m_edBlush = GetDlgItem(hwndDlg, IDC_PPS_EDBLUSH);
+			thisPtr->m_edBlushLines = GetDlgItem(hwndDlg, IDC_PPS_EDBLUSH2);
+			thisPtr->m_spinPose = GetDlgItem(hwndDlg, IDC_PPS_SPINPOSE);
+			thisPtr->m_spinFrame = GetDlgItem(hwndDlg, IDC_PPS_SPINFRAME);
+			thisPtr->m_spinValue = GetDlgItem(hwndDlg, IDC_PPS_SPINVALUE);
+			thisPtr->m_spinMouth = GetDlgItem(hwndDlg, IDC_PPS_SPINMOUTH);
+			thisPtr->m_spinMouthOpen = GetDlgItem(hwndDlg, IDC_PPS_SPINMOUTHOPEN);
+			thisPtr->m_spinEye = GetDlgItem(hwndDlg, IDC_PPS_SPINEYE);
+			thisPtr->m_spinEyeOpen = GetDlgItem(hwndDlg, IDC_PPS_SPINEYEOPEN);
+			thisPtr->m_spinEyebrow = GetDlgItem(hwndDlg, IDC_PPS_SPINEYEBROW);
+			thisPtr->m_spinBlush = GetDlgItem(hwndDlg, IDC_PPS_SPINBLUSH);
+			thisPtr->m_spinBlushLines = GetDlgItem(hwndDlg, IDC_PPS_SPINBLUSH2);
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
-			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
+			thisPtr->m_cmbCharacter = GetDlgItem(hwndDlg, IDC_PPS_CMBCHARACTER);
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
@@ -151,11 +228,14 @@ namespace Poser {
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
-			loc_curSlider = NULL;
-			if (loc_sliderInfos.size()) {
-				loc_curSlider = &loc_sliderInfos[0];
-				thisPtr->SyncList();
-			}
+			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
+			SendMessage(thisPtr->m_spinFrame, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
+			SendMessage(thisPtr->m_spinValue, UDM_SETRANGE, 0, MAKELPARAM(-32767, 32767));
+			SendMessage(thisPtr->m_spinMouth, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
+			SendMessage(thisPtr->m_spinMouthOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
+			SendMessage(thisPtr->m_spinEye, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
+			SendMessage(thisPtr->m_spinEyeOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
+			SendMessage(thisPtr->m_spinEyebrow, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 
 			loc_syncing = false;
 			return TRUE;
@@ -181,7 +261,7 @@ namespace Poser {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 			if (thisPtr == NULL) return FALSE;
 			if (loc_targetChar == NULL) return TRUE;
-			ExtClass::XXFile* skeleton = loc_targetChar->m_xxSkeleton;
+			ExtClass::XXFile* skeleton = loc_targetChar->Character->m_xxSkeleton;
 			if (skeleton == NULL) return TRUE;
 
 			int currPose = General::GetEditInt(thisPtr->m_edPose);
@@ -197,7 +277,18 @@ namespace Poser {
 				_snwprintf_s(frame, 16, 15, TEXT("%.1f"), skeleton->m_animFrame);
 				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame);
 			}
-			
+			TCHAR value[16];
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->mouth);
+			SendMessage(thisPtr->m_edMouth, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->FaceInfo->mouthOpen);
+			SendMessage(thisPtr->m_edMouthOpen, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->eye);
+			SendMessage(thisPtr->m_edEye, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->FaceInfo->eyeOpen);
+			SendMessage(thisPtr->m_edEyeOpen, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->eyebrow);
+			SendMessage(thisPtr->m_edEyebrow, WM_SETTEXT, 0, (LPARAM)value);
+
 			break; }
 		case WM_COMMAND: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
@@ -207,19 +298,40 @@ namespace Poser {
 				HWND ed = (HWND)lparam;
 				if(LOWORD(wparam) == IDC_PPS_EDPOSE) {
 					int val = General::GetEditInt(ed);
-					ExtClass::XXFile* skeleton = loc_targetChar->m_xxSkeleton;
+					ExtClass::XXFile* skeleton = loc_targetChar->Character->m_xxSkeleton;
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_poseNumber = val;
+					skeleton->m_animFrame = 30000.0f; // "fix" for pose change error
 				}
 				else if(LOWORD(wparam) == IDC_PPS_EDFRAME) {
 					float val = General::GetEditFloat(ed);
-					ExtClass::XXFile* skeleton = loc_targetChar->m_xxSkeleton;
+					ExtClass::XXFile* skeleton = loc_targetChar->Character->m_xxSkeleton;
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
 					thisPtr->SyncEdit();
 					thisPtr->ApplySlider();
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDMOUTH) {
+					int val = General::GetEditInt(ed);
+					loc_targetChar->FaceInfo->mouth = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDMOUTHOPEN) {
+					float val = General::GetEditFloat(ed);
+					loc_targetChar->FaceInfo->mouthOpen = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDEYE) {
+					int val = General::GetEditInt(ed);
+					loc_targetChar->FaceInfo->eye = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDEYEOPEN) {
+					float val = General::GetEditFloat(ed);
+					loc_targetChar->FaceInfo->eyeOpen = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDEYEBROW) {
+					int val = General::GetEditInt(ed);
+					loc_targetChar->FaceInfo->eyebrow = val;
 				}
 
 				return TRUE; }
@@ -292,23 +404,23 @@ namespace Poser {
 				case(IDC_PPS_LISTBONES): {
 					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_curSlider = &loc_sliderInfos[res];
-						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_curSlider->curOperation, 0);
-						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_curSlider->curAxis, 0);
+						loc_targetChar->CurrentSlider = &loc_sliderInfos[res];
+						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
+						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
 						thisPtr->SyncList();
 					}
 					break; }
 				case (IDC_PPS_LISTOP): {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_curSlider->curOperation = Operation(res);
+						loc_targetChar->CurrentSlider->curOperation = Operation(res);
 						thisPtr->SyncList();
 					}
 					break; }
 				case (IDC_PPS_LISTAXIS): {
 					LRESULT res = SendMessage(thisPtr->m_listAxis, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_curSlider->curAxis = res;
+						loc_targetChar->CurrentSlider->curAxis = res;
 						thisPtr->SyncList();
 					}
 					break; }
@@ -326,16 +438,16 @@ namespace Poser {
 		if (loc_syncing) return;
 		loc_syncing = true;
 		float value = General::GetEditFloat(m_edValue);
-		loc_curSlider->setValue(value);
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_curSlider->toSlider());
+		loc_targetChar->CurrentSlider->setValue(value);
+		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncList() {
 		loc_syncing = true;
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_curSlider->toSlider());
+		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_curSlider->curValue());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
 		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -344,15 +456,15 @@ namespace Poser {
 		if (loc_syncing) return;
 		loc_syncing = true;
 		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
-		loc_curSlider->fromSlider(pos);
+		loc_targetChar->CurrentSlider->fromSlider(pos);
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_curSlider->curValue());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
 		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
 	void PoserWindow::ApplySlider(void* slider) {
-		SliderInfo* targetSlider = slider == NULL ? loc_curSlider : static_cast<SliderInfo*>(slider);
+		SliderInfo* targetSlider = slider == NULL ? loc_targetChar->CurrentSlider : static_cast<SliderInfo*>(slider);
 		ExtClass::Frame *frame = targetSlider->xxFrame;
 		if(frame) {
 			//note that somehow those frame manipulations dont quite work as expected;
@@ -396,6 +508,8 @@ namespace Poser {
 
 		if (xxFile == NULL) return;
 		if (loc_targetChar == NULL) return;
+		if(loc_targetChar->Character->m_xxFace && !loc_targetChar->FaceInfo)
+			loc_targetChar->FaceInfo = reinterpret_cast<FaceInfo*>(loc_targetChar->Character->m_xxFace);
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		if (model != ExtClass::CharacterStruct::SKELETON) return;
