@@ -236,6 +236,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinEye, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 			SendMessage(thisPtr->m_spinEyeOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			SendMessage(thisPtr->m_spinEyebrow, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
+			thisPtr->SyncList();
 
 			loc_syncing = false;
 			return TRUE;
@@ -254,8 +255,10 @@ namespace Poser {
 			if (thisPtr == NULL) return FALSE;
 			HWND wnd = (HWND)lparam;
 			if (wnd == NULL) break; //not slider control, but automatic scroll
-			thisPtr->SyncSlider();
-			thisPtr->ApplySlider();
+			if (!loc_syncing) {
+				thisPtr->SyncSlider();
+				thisPtr->ApplySlider();
+			}
 			break; }
 		case WM_TIMER: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
@@ -310,8 +313,10 @@ namespace Poser {
 					skeleton->m_animFrame = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
-					thisPtr->SyncEdit();
-					thisPtr->ApplySlider();
+					if (!loc_syncing) {
+						thisPtr->SyncEdit();
+						thisPtr->ApplySlider();
+					}
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTH) {
 					int val = General::GetEditInt(ed);
@@ -344,7 +349,7 @@ namespace Poser {
 					if(path != NULL) {
 						PoseFile saveFile;
 						saveFile.SetPoseInfo(General::GetEditInt(thisPtr->m_edPose),General::GetEditFloat(thisPtr->m_edFrame));
-						for (auto it = loc_sliderInfos.cbegin(); it != loc_sliderInfos.cend(); it++) {
+						for (auto it = loc_targetChar->SliderInfos.cbegin(); it != loc_targetChar->SliderInfos.cend(); it++) {
 							PoseFile::FrameMod mod = { std::string(it->frameName.cbegin(), it->frameName.cend()),
 								it->rotate.x, it->rotate.y, it->rotate.z,
 								it->translate.x, it->translate.y, it->translate.z,
@@ -370,9 +375,9 @@ namespace Poser {
 						SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)str.c_str());
 						SliderInfo* slider = NULL;
 						for(auto elem : openFile.GetMods()) {
-							auto match = loc_frameMap.find(elem.frameName);
-							if (match != loc_frameMap.end()) {
-								slider = &loc_sliderInfos[match->second];
+							auto match = loc_targetChar->FrameMap.find(elem.frameName);
+							if (match != loc_targetChar->FrameMap.end()) {
+								slider = &loc_targetChar->SliderInfos[match->second];
 								slider->rotate.x = elem.matrix[0];
 								slider->rotate.y = elem.matrix[1];
 								slider->rotate.z = elem.matrix[2];
@@ -404,7 +409,7 @@ namespace Poser {
 				case(IDC_PPS_LISTBONES): {
 					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider = &loc_sliderInfos[res];
+						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[res];
 						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
 						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
 						thisPtr->SyncList();
@@ -453,7 +458,6 @@ namespace Poser {
 	}
 
 	void PoserWindow::SyncSlider() {
-		if (loc_syncing) return;
 		loc_syncing = true;
 		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
 		loc_targetChar->CurrentSlider->fromSlider(pos);
@@ -545,7 +549,7 @@ namespace Poser {
 				strcpy_s(bone->m_name,bone->m_nameBufferSize,prefix);
 				strcat_s(bone->m_name,bone->m_nameBufferSize,newMatch->m_name);
 
-				loc_sliderInfos[match->second].xxFrame = bone;
+				loc_targetChar->SliderInfos[match->second].xxFrame = bone;
 			}
 		});
 
