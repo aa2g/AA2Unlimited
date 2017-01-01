@@ -23,10 +23,9 @@ namespace Poser {
 	public:
 		void Init();
 		void Hide();
-		void AddCharacterName(const char *);
-		void ClearCharacterNames();
 	private:
 		HWND m_dialog;
+		HWND m_edCharacter;
 		HWND m_edPose;
 		HWND m_edFrame;
 		HWND m_edValue;
@@ -37,6 +36,7 @@ namespace Poser {
 		HWND m_edEyebrow;
 		HWND m_edBlush;
 		HWND m_edBlushLines;
+		HWND m_spinCharacter;
 		HWND m_spinPose;
 		HWND m_spinFrame;
 		HWND m_spinValue;
@@ -51,7 +51,6 @@ namespace Poser {
 		HWND m_listOperation;
 		HWND m_listAxis;
 		HWND m_sliderValue;
-		HWND m_cmbCharacter;
 		UINT_PTR m_timer;
 		int m_curBone;
 

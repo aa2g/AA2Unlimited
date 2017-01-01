@@ -130,6 +130,7 @@ namespace Poser {
 			delete c;
 		}
 		loc_targetCharacters.clear();
+		loc_targetChar = nullptr;
 		loc_sliderInfos.clear();
 		loc_frameMap.clear();
 		g_PoserWindow.Hide();
@@ -147,13 +148,16 @@ namespace Poser {
 			PoserCharacter* character = new PoserCharacter(c);
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
-			g_PoserWindow.AddCharacterName(c->m_charData->m_forename);
 		}
 		else if (loc_eventType == NpcInteraction) {
 			PoserCharacter* character = new PoserCharacter(c);
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 		}
+	}
+
+	float SliderIncrement(float order, Operation op) {
+		return op == Rotate ? ((float)M_PI * order / 180.0f) : op == Translate ? order / 10.0f : order / 50.0f;
 	}
 
 
@@ -171,14 +175,6 @@ namespace Poser {
 		ShowWindow(m_dialog,SW_HIDE);
 	}
 
-	void PoserWindow::AddCharacterName(const char* name) {
-		SendMessage(m_cmbCharacter, CB_ADDSTRING, 0, LPARAM(name));
-	}
-
-	void PoserWindow::ClearCharacterNames() {
-		SendMessage(m_cmbCharacter, CB_RESETCONTENT, 0, 0);
-	}
-
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 		static bool ignoreNextSlider = false;
 
@@ -188,6 +184,7 @@ namespace Poser {
 			SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 			thisPtr->m_dialog = hwndDlg;
 			thisPtr->m_edPose = GetDlgItem(hwndDlg, IDC_PPS_EDPOSE);
+			thisPtr->m_edCharacter = GetDlgItem(hwndDlg, IDC_PPS_EDCHARACTER);
 			thisPtr->m_edFrame = GetDlgItem(hwndDlg, IDC_PPS_EDFRAME);
 			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
 			thisPtr->m_edMouth = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTH);
@@ -197,6 +194,7 @@ namespace Poser {
 			thisPtr->m_edEyebrow = GetDlgItem(hwndDlg, IDC_PPS_EDEYEBROW);
 			thisPtr->m_edBlush = GetDlgItem(hwndDlg, IDC_PPS_EDBLUSH);
 			thisPtr->m_edBlushLines = GetDlgItem(hwndDlg, IDC_PPS_EDBLUSH2);
+			thisPtr->m_spinCharacter = GetDlgItem(hwndDlg, IDC_PPS_SPINCHARACTER);
 			thisPtr->m_spinPose = GetDlgItem(hwndDlg, IDC_PPS_SPINPOSE);
 			thisPtr->m_spinFrame = GetDlgItem(hwndDlg, IDC_PPS_SPINFRAME);
 			thisPtr->m_spinValue = GetDlgItem(hwndDlg, IDC_PPS_SPINVALUE);
@@ -211,7 +209,6 @@ namespace Poser {
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
-			thisPtr->m_cmbCharacter = GetDlgItem(hwndDlg, IDC_PPS_CMBCHARACTER);
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
@@ -299,7 +296,7 @@ namespace Poser {
 			switch (HIWORD(wparam)) {
 			case EN_CHANGE: {
 				HWND ed = (HWND)lparam;
-				if(LOWORD(wparam) == IDC_PPS_EDPOSE) {
+				if (LOWORD(wparam) == IDC_PPS_EDPOSE) {
 					int val = General::GetEditInt(ed);
 					ExtClass::XXFile* skeleton = loc_targetChar->Character->m_xxSkeleton;
 					if (skeleton == NULL) return TRUE;
@@ -337,6 +334,14 @@ namespace Poser {
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEBROW) {
 					int val = General::GetEditInt(ed);
 					loc_targetChar->FaceInfo->eyebrow = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
+					int val = General::GetEditInt(ed);
+					if (loc_targetCharacters.size() >= val)
+					{
+						loc_targetChar = loc_targetCharacters[val];
+						thisPtr->SyncList();
+					}
 				}
 
 				return TRUE; }
@@ -400,6 +405,38 @@ namespace Poser {
 					}
 					thisPtr->SyncList();
 				}
+				else if (id == IDC_PPS_BTNMODLL10) {
+					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-10.0f, loc_targetChar->CurrentSlider->curOperation);
+					thisPtr->SyncList();
+					thisPtr->ApplySlider();
+				}
+				else if (id == IDC_PPS_BTNMODLL1) {
+					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-1.0f, loc_targetChar->CurrentSlider->curOperation);
+					thisPtr->SyncList();
+					thisPtr->ApplySlider();
+				}
+				else if (id == IDC_PPS_BTNMODZERO) {
+					*loc_targetChar->CurrentSlider->curValue() = 0.0f;
+					thisPtr->SyncList();
+					thisPtr->ApplySlider();
+				}
+				else if (id == IDC_PPS_BTNMODPP1) {
+					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(1.0f, loc_targetChar->CurrentSlider->curOperation);
+					thisPtr->SyncList();
+					thisPtr->ApplySlider();
+				}
+				else if (id == IDC_PPS_BTNMODPP10) {
+					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(10.0f, loc_targetChar->CurrentSlider->curOperation);
+					thisPtr->SyncList();
+					thisPtr->ApplySlider();
+				}
+				else if (id == IDC_PPS_BTNMODFLIP) {
+					if (loc_targetChar->CurrentSlider->curOperation != Scale) {
+						*loc_targetChar->CurrentSlider->curValue() *= -1.0f;
+						thisPtr->SyncList();
+						thisPtr->ApplySlider();
+					}
+				}
 				break; }
 			case LBN_SELCHANGE: {
 				PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -440,7 +477,7 @@ namespace Poser {
 	}
 
 	void PoserWindow::SyncEdit() {
-		if (loc_syncing) return;
+		if (!loc_targetChar) return;
 		loc_syncing = true;
 		float value = General::GetEditFloat(m_edValue);
 		loc_targetChar->CurrentSlider->setValue(value);
@@ -449,6 +486,7 @@ namespace Poser {
 	}
 
 	void PoserWindow::SyncList() {
+		if (!loc_targetChar) return;
 		loc_syncing = true;
 		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
 		TCHAR number[52];
@@ -458,6 +496,7 @@ namespace Poser {
 	}
 
 	void PoserWindow::SyncSlider() {
+		if (!loc_targetChar) return;
 		loc_syncing = true;
 		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
 		loc_targetChar->CurrentSlider->fromSlider(pos);
@@ -478,15 +517,21 @@ namespace Poser {
 
 			ExtClass::Frame* origFrame = &frame->m_children[0];
 
+			D3DMATRIX transMatrix;
+			(*Shared::D3DXMatrixTranslation)(&transMatrix, targetSlider->translate.x, targetSlider->translate.y, targetSlider->translate.z);
 			D3DMATRIX rotMatrix;
-			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.x, targetSlider->rotate.y, targetSlider->rotate.z);
-			D3DMATRIX rotTransMatrix = origFrame->m_matrix5;
-			(*Shared::D3DXMatrixMultiply)(&rotTransMatrix,&rotTransMatrix,&rotMatrix);
+			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.y, targetSlider->rotate.x, targetSlider->rotate.z);
+			D3DMATRIX scaleMatrix;
+			(*Shared::D3DXMatrixScaling)(&scaleMatrix, targetSlider->scale.x, targetSlider->scale.y, targetSlider->scale.z);
+			D3DMATRIX matrix = origFrame->m_matrix5;
+			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &transMatrix);
+			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &rotMatrix);
+			(*Shared::D3DXMatrixMultiply)(&rotMatrix, &scaleMatrix, &rotMatrix);
 
 			D3DVECTOR3 translations;
-			translations.x = origFrame->m_matrix5._41 - rotTransMatrix._41;
-			translations.y = origFrame->m_matrix5._42 - rotTransMatrix._42;
-			translations.z = origFrame->m_matrix5._43 - rotTransMatrix._43;
+			translations.x = origFrame->m_matrix5._41 - matrix._41;
+			translations.y = origFrame->m_matrix5._42 - matrix._42;
+			translations.z = origFrame->m_matrix5._43 - matrix._43;
 
 			D3DMATRIX resultMatrix = rotMatrix;
 			resultMatrix._41 += translations.x;

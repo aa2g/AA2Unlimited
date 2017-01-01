@@ -21,7 +21,9 @@ D3DQUATERNION* (__stdcall *D3DXQuaternionRotationYawPitchRoll)(D3DQUATERNION *pO
 D3DQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DQUATERNION *pOut,D3DQUATERNION *pQ);
 D3DQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DQUATERNION *pOut,const D3DQUATERNION *pQ1,const D3DQUATERNION *pQ2);
 HRESULT(__stdcall *D3DXMatrixDecompose)(D3DVECTOR3 *pOutScale,D3DQUATERNION *pOutRotation,D3DVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
-D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut,const D3DQUATERNION *pQ);
+D3DMATRIX* (__stdcall *D3DXMatrixTranslation)(D3DMATRIX *pOut, float x, float y, float z);
+D3DMATRIX* (__stdcall *D3DXMatrixScaling)(D3DMATRIX *pOut, float sx, float sy, float sz);
+D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut, const D3DQUATERNION *pQ);
 D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
 
 
@@ -66,6 +68,8 @@ void Init() {
 	GETPROC(D3DXQuaternionMultiply);
 	GETPROC(D3DXQuaternionNormalize);
 	GETPROC(D3DXQuaternionRotationYawPitchRoll);
+	GETPROC(D3DXMatrixTranslation);
+	GETPROC(D3DXMatrixScaling);
 	GETPROC(D3DXMatrixRotationQuaternion);
 	GETPROC(D3DXMatrixRotationYawPitchRoll);
 
