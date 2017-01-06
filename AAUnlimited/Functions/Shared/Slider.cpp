@@ -178,6 +178,10 @@ namespace Shared {
 		},
 		{
 			//FACE_SLIDERS
+		},
+		{
+			//SKIRT
+
 		}
 	};
 

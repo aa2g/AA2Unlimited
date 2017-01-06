@@ -13,6 +13,7 @@ OverrideFile::OverrideFile() : m_good(false) {
 
 OverrideFile::OverrideFile(const TCHAR* path,PathStart tryPathStarts) : m_good(false), m_pathStart(NONE) {
 	m_fileName = General::FindFileInPath(path);;
+	m_relPath = path;
 
 	if (tryPathStarts & OVERRIDE) {
 		m_fullPath = General::BuildOverridePath(path);
@@ -20,13 +21,13 @@ OverrideFile::OverrideFile(const TCHAR* path,PathStart tryPathStarts) : m_good(f
 			m_pathStart = OVERRIDE;
 		}
 	}
-	if(tryPathStarts & AAPLAY && m_pathStart != NONE) {
+	if(tryPathStarts & AAPLAY && m_pathStart == NONE) {
 		m_fullPath = General::BuildPlayPath(path);
 		if (General::FileExists(m_fullPath.c_str())) {
 			m_pathStart = AAPLAY;
 		}
 	}
-	if(tryPathStarts & AAEDIT && m_pathStart != NONE) {
+	if(tryPathStarts & AAEDIT && m_pathStart == NONE) {
 		m_fullPath = General::BuildEditPath(path);
 		if (General::FileExists(m_fullPath.c_str())) {
 			m_pathStart = AAEDIT;

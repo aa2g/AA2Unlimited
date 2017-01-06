@@ -53,6 +53,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	//HAIR_BACK		AS00_22_xx_yy (yy is flip)
 	//HAIR_EXT		AS00_23_xx_yy (yy is flip)
 	//FACE_SLIDERS	<empty>
+	//SKIRT			A02_xx_00_yy (xx = slot, yy = body type)
 	if (name == NULL) return ExtClass::CharacterStruct::INVALID;
 	Name props{ name };
 	if (!props.valid) return ExtClass::CharacterStruct::INVALID;
@@ -83,6 +84,9 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 					if (props.suffix == '\0') return ExtClass::CharacterStruct::BODY;
 				}
 			}
+		}
+		else if(props.num1 == 2 && props.num3 == 0) {
+			return ExtClass::CharacterStruct::SKIRT;
 		}
 		
 	}

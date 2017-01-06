@@ -64,7 +64,8 @@ public:
 	}
 
 	Logger& operator<<(const std::wstring& str) {
-		outfile << str.c_str();
+		std::string cstr(str.begin(),str.end());
+		outfile << cstr.c_str();
 		outfile.flush();
 		return *this;
 	}

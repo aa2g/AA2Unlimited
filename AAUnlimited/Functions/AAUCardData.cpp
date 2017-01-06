@@ -183,6 +183,29 @@ bool AAUCardData::WriteData_sub(char ** buffer, int * size, int & at, const std:
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
 	//read members
+	if (size < 4) return;
+
+	{
+		//in version 2 and onwards, the first identifier should be the version id. if it is not,
+		//then the card is older (version 1)
+		DWORD versionId = *(DWORD*)(buffer);
+		m_currReadMemberId = versionId;
+		if(versionId == 'Vers') {
+			buffer += 4,size -= 4;
+			m_version = ReadData<int>(buffer,size);
+		}
+		if(m_version == 1) {
+			if (g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 0) {
+				LOGPRIO(Logger::Priority::INFO) << "a aau card version " << m_version << " was read and ignored due to legacy mode settings.\r\n";
+				this->Reset();
+				return;
+			}
+			else if (g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 2) {
+				//treat as version 2 card
+				m_version = 2;
+			}
+		}
+	}
 
 	while(size > 4) {
 		DWORD identifier = *(DWORD*)(buffer);
@@ -191,6 +214,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		switch (identifier) {
 		case 'Vers':
 			m_version = ReadData<int>(buffer,size);
+			LOGPRIO(Logger::Priority::WARN) << "...found Version value after first chunk, value " << m_version << "\r\n";
 			break;
 		case 'TanS':
 			m_tanSlot = ReadData<BYTE>(buffer, size);
@@ -198,24 +222,20 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			break;
 		case 'OvrT': {
 			m_meshOverrides = ReadData<decltype(m_meshOverrides)>(buffer, size);
-			GenMeshOverrideMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_meshOverrides.size() << " elements; "
 				<< m_meshOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'AOvT': {
 			m_archiveOverrides = ReadData<decltype(m_archiveOverrides)>(buffer, size);
-			GenArchiveOverrideMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_archiveOverrides.size() << " elements; "
 				<< m_archiveOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'ARdr':
 			m_archiveRedirects = ReadData<decltype(m_archiveRedirects)>(buffer, size);
-			GenArchiveRedirectMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements\r\n";
 			break;
 		case 'OOvr':
 			m_objectOverrides = ReadData<decltype(m_objectOverrides)>(buffer,size);
-			GenObjectOverrideMap();
 			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements;"
 				<< m_objectOverrideMap.size() << " were valid\r\n";
 			break;
@@ -321,6 +341,13 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
 	}
 
+
+	if (m_version == 1 && g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 3) {
+		ConvertToNewVersion();
+	}
+	
+	GenAllFileMaps(); //we do this in the end in case conversion or something changed the file paths
+
 	
 }
 
@@ -393,7 +420,7 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	//write chunk id (big endian)
 	ret &= General::BufferAppend(buffer, size, at, (const char*)(&PngChunkIdBigEndian), 4, resize);
 	at += 4;
-	//now write all member
+	//now write all members
 
 	//version
 	DUMP_MEMBER('Vers',m_version);
@@ -870,6 +897,14 @@ void AAUCardData::GenSliderMap() {
 	}
 }
 
+void AAUCardData::GenAllFileMaps() {
+	GenMeshOverrideMap();
+	GenArchiveOverrideMap();
+	GenObjectOverrideMap();
+
+
+}
+
 /***************************/
 /* Setting loose variables */
 /***************************/
@@ -1005,7 +1040,7 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(mrule.second.GetFileSize());
 		mrule.second.WriteToBuffer(buffer.data());
 		if(buffer.size() > 0) {
-			m_savedFiles.emplace_back(std::make_pair(1,mrule.second.GetRelPath()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(2,mrule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -1014,16 +1049,14 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(arule.second.GetFileSize());
 		arule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
-			if (buffer.size() > 0) {
-				int location;
-				if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
-					location = 0;
-				}
-				else {
-					location = 1;
-				}
-				m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
+			int location;
+			if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+				location = 0;
 			}
+			else {
+				location = 1;
+			}
+			m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -1032,7 +1065,7 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(orule.second.GetFileSize());
 		orule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
-			m_savedFiles.emplace_back(std::make_pair(1,orule.second.GetRelPath()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(2,orule.second.GetRelPath()),buffer);
 		}
 	}
 
@@ -1040,7 +1073,7 @@ void AAUCardData::SaveOverrideFiles() {
 	if(m_hairHighlightImage.IsGood()) {
 		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());
 		m_hairHighlightImage.WriteToBuffer(buffer.data());
-		m_savedFiles.emplace_back(std::make_pair(1,m_hairHighlightImage.GetRelPath()),buffer);
+		m_savedFiles.emplace_back(std::make_pair(2,m_hairHighlightImage.GetRelPath()),buffer);
 	}
 
 	//tan
@@ -1048,7 +1081,7 @@ void AAUCardData::SaveOverrideFiles() {
 		if (m_tanImages[i].IsGood()) {
 			std::vector<BYTE> buffer(m_tanImages[i].GetFileSize());
 			m_tanImages[i].WriteToBuffer(buffer.data());
-			m_savedFiles.emplace_back(std::make_pair(1,m_tanImages[i].GetRelPath()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(2,m_tanImages[i].GetRelPath()),buffer);
 		}
 	}
 }
@@ -1065,8 +1098,9 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		auto& file = m_savedFiles[i];
 		int basePath = file.first.first;
 		std::wstring fullPath;
-		if (basePath == 0) fullPath = General::BuildPlayPath(file.first.second.c_str());
-		else				fullPath = General::BuildEditPath(file.first.second.c_str());
+		if      (basePath == 0) fullPath = General::BuildPlayPath(file.first.second.c_str());
+		else if (basePath == 1) fullPath = General::BuildEditPath(file.first.second.c_str());
+		else					fullPath = General::BuildOverridePath(file.first.second.c_str());
 		//check if path has any backdirections (two dots or more)
 		bool suspicious = false;
 		for(unsigned int i = 0; i < fullPath.size()-1; i++) {
@@ -1199,15 +1233,93 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 	if(!success) {
 		LOGPRIO(Logger::Priority::WARN) << "failed to extract some files from aau card\r\n";
 	}
+
 	return success;
 }
 
 void AAUCardData::ConvertToNewVersion() {
 	if(m_version == 1) {
+		std::wstringstream message;
+		bool success = true;
+		int convertState = 0;
+
 		std::vector<std::pair<std::wstring,std::wstring>> filesToMove;
-		for(auto& elem : m_archiveOverrideMap) {
-			std::wstring from = elem.second.GetFilePath();
-			
+
+		/////////////////////////
+		// change all the paths that were relative to some path to a path relative to the override folder
+
+		//if a path allready starts with the override path, truncate it to be relative to that instead
+		//else, move file path into override folder
+		//if inconsitent (both rules applied), conversion failed
+		auto changeFilePaths = [&](TCHAR* start, std::wstring& relPath) {
+			std::wstring path = start + relPath;
+			if (General::StartsWith(path,OVERRIDE_PATH)) {
+				//path starts in override folder; truncate path to fit
+				convertState |= 1;
+				std::wstring& toChange = relPath;
+				std::wstring temp = toChange;
+				toChange = path.substr(wcslen(OVERRIDE_PATH));
+				LOGPRIO(Logger::Priority::INFO) << "truncating path " << temp << " to " << toChange << "\r\n";
+			}
+			else {
+				//path does not match with override folder; move files in there.
+				convertState |= 2;
+				OverrideFile::PathStart start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
+				OverrideFile tmp(path.c_str(),start);
+
+				std::wstring target = General::BuildOverridePath(relPath.c_str());
+				std::wstring fileTarget = tmp.GetFilePath();
+				if (tmp.IsGood() && target != fileTarget) {
+					filesToMove.push_back(std::make_pair(tmp.GetFilePath(),target));
+				}
+			}
+
+			if(convertState == 3) {
+				//both methods - inconsitency
+				if (success) {
+					//first failure
+					success = false;
+					message << TEXT("Inconsitency in referenced paths; conversion could not be completed.\r\n");
+				}
+				message << path << TEXT("\r\n");
+			}
+		};
+
+		//archive overrides; based in VER1_OVERRIDE_ARCHIVE_PATH
+		for(auto& elem : m_archiveOverrides) {
+			changeFilePaths(VER1_OVERRIDE_ARCHIVE_PATH, elem.second);
 		}
+		//mesh texture overrides; based in VER1_OVERRIDE_IMAGE_PATH
+		for (auto& elem : m_meshOverrides) {
+			changeFilePaths(VER1_OVERRIDE_IMAGE_PATH,elem.second);
+		}
+		//object overrides; based in VER1_OVERRIDE_ARCHIVE_PATH as well
+		for (auto& elem : m_objectOverrides) {
+			changeFilePaths(VER1_OVERRIDE_ARCHIVE_PATH,elem.second);
+		}
+
+		if(!success) {
+			message << TEXT("Conversion failed.");
+			MessageBox(NULL,message.str().c_str(),TEXT("Warning"),0);
+			return;
+		}
+		
+		if(filesToMove.size() > 0) {
+			
+			message << filesToMove.size() << TEXT(" files can be moved:\r\n");
+			for (int i = 0; i < min(filesToMove.size(),5); i++) {
+				message << filesToMove[i].first << TEXT(" -> ") << filesToMove[i].second << TEXT("\r\n");
+			}
+			if (filesToMove.size() > 5) message << TEXT("...\r\n");
+			message << TEXT("\r\nDo you want to copy them now?");
+			int res = MessageBox(NULL,message.str().c_str(),TEXT("Conversion - Copy Files"),MB_YESNO);
+			if(res == IDYES) {
+				for(auto& elem : filesToMove) {
+					CopyFile(elem.first.c_str(),elem.second.c_str(),TRUE);
+				}
+			}
+		}
+
+		m_version = 2;
 	}
 }

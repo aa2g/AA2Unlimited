@@ -47,3 +47,10 @@ savedFileUsage = 1					; determines how eye files that were saved into the card 
 bSaveFileAutoRemove = false			; if true, after saved files were successfully extracted, they will be removed from the card
 									; in an attempt to save hard drive space
 bSaveFileBackup = true				; does a backup of a card before saved files are removed
+
+
+legacyMode = 1						; determines how old cards using the old paths are treated.
+									; 0: old cards are treated as non-AAU cards and are ignored
+									; 1: old cards will use the old pathing methods.
+									; 2: old cards will be treated like new cards; paths will be reinterpreted
+									; 3: the game will attempt a conversion

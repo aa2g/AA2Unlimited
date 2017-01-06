@@ -17,7 +17,7 @@ class CharacterStruct
 public:
 	enum Models {
 		FACE,SKELETON,BODY,HAIR_FRONT,HAIR_SIDE,HAIR_BACK,HAIR_EXT,
-		FACE_SLIDERS,
+		FACE_SLIDERS,SKIRT,
 		N_MODELS,
 		INVALID
 	};

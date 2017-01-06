@@ -303,6 +303,8 @@ private:
 	void GenObjectOverrideMap();
 	void GenBoneRuleMap();
 	void GenSliderMap();
+
+	void GenAllFileMaps();
 };
 
 /*
@@ -316,12 +318,11 @@ OOvr: in version 1, object overrides were relative to aaplay or aaedits data fol
 	  in version 2, object overrides are relative to the override path 
 TnRd: in version 1, the tan image were relative to data\\texture\\override\\tan\\ (VER1_TAN_PATH TEXT)
 	  in version 2, the file is always relative from the override path
+HrHl: in version 1, the hair highlight images were relative to data\\texture\\override\\hair_highlight\\ (VER1_HAIR_HIGHLIGHT_PATH)
+	  in version 2, the hair highlight images are relative from the override path
 
 File: in version 1, the integer denotes the root path in which the file is located (aaplay = 0, aaedit = 1).
 	  in version 2, the file is always relative from the override path
-#define 
-#define VER1_HAIR_HIGHLIGHT_PATH TEXT("data\\texture\\override\\hair_highlight\\")
-
 
 
 

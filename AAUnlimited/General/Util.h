@@ -14,7 +14,10 @@ inline bool StartsWith(const TCHAR* str, const TCHAR* prefix) {
 	return !*prefix;
 }
 inline bool StartsWith(const std::wstring& str, const TCHAR* prefix) {
-	return wcscmp(str.c_str(), prefix) == 0;
+	return StartsWith(str.c_str(), prefix);
+}
+inline bool StartsWith(const std::wstring& str, const std::wstring& prefix) {
+	return StartsWith(str.c_str(),prefix.c_str());
 }
 
 inline TCHAR* FindFileInPath(TCHAR* path) {

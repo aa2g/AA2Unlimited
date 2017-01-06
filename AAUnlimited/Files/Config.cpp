@@ -21,7 +21,7 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::FLOAT,	"fPOVOffsetX", 0.0f),	//POV_OFFSET_X
 	MemberInfo(Config::FLOAT,	"fPOVOffsetY", 0.0f),	//POV_OFFSET_Y
 	MemberInfo(Config::FLOAT,	"fPOVOffsetZ", 0.0f),	//POV_OFFSET_Z
-	MemberInfo(Config::BOOL,	"bAllowLegacyPaths", false)	//ALLOW_LEGACY_PATHS
+	MemberInfo(Config::INT,		"legacyMode", 0)	//LEGACY_MODE
 };
 
 Config g_Config;

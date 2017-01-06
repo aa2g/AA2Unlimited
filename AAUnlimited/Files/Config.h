@@ -20,7 +20,7 @@ public:
 
 		POV_OFFSET_X, POV_OFFSET_Y, POV_OFFSET_Z,
 
-		ALLOW_LEGACY_PATHS,
+		LEGACY_MODE,
 
 		num_elements
 	};
