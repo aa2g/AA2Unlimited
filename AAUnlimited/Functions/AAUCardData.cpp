@@ -1249,7 +1249,6 @@ void AAUCardData::ConvertToNewVersion() {
 	if(m_version == 1) {
 		std::wstringstream message;
 		bool success = true;
-		int convertState = 0;
 
 		std::vector<std::pair<std::wstring,std::wstring>> filesToMove;
 
@@ -1263,7 +1262,6 @@ void AAUCardData::ConvertToNewVersion() {
 			std::wstring path = start + relPath;
 			if (General::StartsWith(path,OVERRIDE_PATH)) {
 				//path starts in override folder; truncate path to fit
-				convertState |= 1;
 				std::wstring& toChange = relPath;
 				std::wstring temp = toChange;
 				toChange = path.substr(wcslen(OVERRIDE_PATH));
@@ -1271,7 +1269,6 @@ void AAUCardData::ConvertToNewVersion() {
 			}
 			else {
 				//path does not match with override folder; move files in there.
-				convertState |= 2;
 				OverrideFile::PathStart start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
 				OverrideFile tmp(path.c_str(),start);
 
@@ -1280,16 +1277,6 @@ void AAUCardData::ConvertToNewVersion() {
 				if (tmp.IsGood() && target != fileTarget) {
 					filesToMove.push_back(std::make_pair(tmp.GetFilePath(),target));
 				}
-			}
-
-			if(convertState == 3) {
-				//both methods - inconsitency
-				if (success) {
-					//first failure
-					success = false;
-					message << TEXT("Inconsitency in referenced paths; conversion could not be completed.\r\n");
-				}
-				message << path << TEXT("\r\n");
 			}
 		};
 
