@@ -10,6 +10,7 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bEnableFacecam", false), //USE_H_FACECAM
 	MemberInfo(Config::BOOL,	"bEnableHPosButtonReorder", false), //USE_H_POS_BUTTON_MOVE
 	MemberInfo(Config::BOOL,	"bUsePoser", false), //USE_POSER
+	MemberInfo(Config::BOOL,	"bUsePoserExperimental", false), //USE_POSER_EXPERIMENTAL
 	MemberInfo(Config::BOOL,	"bNoPromptHIsRape", false),	//NO_PROMPT_IS_FORCE
 	MemberInfo(Config::BOOL,	"bHAiOnNoPromptH", false),	//HAI_ON_NO_PROMPT
 	MemberInfo(Config::INT,		"savedEyeTextureUsage", 1),	//SAVED_EYE_TEXTURE_USAGE,	

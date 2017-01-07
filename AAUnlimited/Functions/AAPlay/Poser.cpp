@@ -141,7 +141,7 @@ namespace Poser {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		if (loc_eventType == NpcInteraction)
 			EndEvent();
-		if (loc_eventType == NoEvent) {
+		if (loc_eventType == NoEvent && g_Config.GetKeyValue(Config::USE_POSER_EXPERIMENTAL).bVal) {
 			StartEvent(NpcInteraction);
 		}
 		if (loc_eventType == ClothingScene) {
