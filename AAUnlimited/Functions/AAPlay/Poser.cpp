@@ -231,6 +231,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
+			SendMessage(thisPtr->m_spinCharacter, UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
 			SendMessage(thisPtr->m_spinFrame, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
 			SendMessage(thisPtr->m_spinValue, UDM_SETRANGE, 0, MAKELPARAM(-32767, 32767));
@@ -345,7 +346,7 @@ namespace Poser {
 					int val = General::GetEditInt(ed);
 					if (loc_targetCharacters.size() >= val)
 					{
-						loc_targetChar = loc_targetCharacters[val];
+						loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
 						thisPtr->SyncList();
 					}
 				}
