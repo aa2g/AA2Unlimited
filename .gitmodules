@@ -1,0 +1,3 @@
+[submodule "picojson"]
+	path = AAUnlimited\\3rdparty\\picojson
+	url = https://github.com/geneishouko/picojson.git

@@ -8,6 +8,7 @@
 #include <map>
 #include <CommCtrl.h>
 #include <Strsafe.h>
+#include <fstream>
 
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
@@ -18,23 +19,38 @@
 #include "resource.h"
 #include "config.h"
 
+#include "3rdparty\picojson\picojson.h"
+
 namespace Poser {
 
 	PoserWindow g_PoserWindow;
 
 	struct FaceInfo {
-		BYTE padding0[0x234];
-		void *blushPointer;
-		BYTE padding1[0x4];
-		int mouth;
-		BYTE padding2[0x18];
-		int eye;
-		BYTE padding3[0x18];
-		int eyebrow;
-		BYTE padding4[0x30];
-		float eyeOpen;
-		BYTE padding5[0x8];
-		float mouthOpen;
+		FaceInfo() : xxFace(nullptr) {}
+
+		void SetFace(ExtClass::XXFile* face) {
+			xxFace = face;
+			int base = (int)face;
+			mouth = (int*)(base + 0x23C);
+			mouthOpen = (float*)(base + 0x2B4);
+			eye = (int*)(base + 0x258);
+			eyeOpen = (float*)(base + 0x2A8);
+			eyebrow = (int*)(base + 0x274);
+			void* blushPointer = *((void**)(base + 0x234));
+			blushPointer = *((void**)((int)blushPointer + 0x44 * 0x8 + 0x0C));
+			blushPointer = *((void**)((int)blushPointer + 0x194));
+			blushPointer = *((void**)((int)blushPointer + 0x50));
+			blush = (float*)((int)blushPointer + 0x14);
+			blushLines = (float*)((int)blushPointer + 0x148);
+		}
+		ExtClass::XXFile* xxFace;
+		int* mouth;
+		int* eye;
+		int* eyebrow;
+		float* eyeOpen;
+		float* mouthOpen;
+		float* blush;
+		float* blushLines;
 	};
 
 	enum Operation {
@@ -98,7 +114,7 @@ namespace Poser {
 	class PoserCharacter {
 	public:
 		PoserCharacter(ExtClass::CharacterStruct* c) :
-			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap), FaceInfo(nullptr)//, CurrentSlider(&SliderInfos[0])
+			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap)
 		{
 			CurrentSlider = &SliderInfos[0];
 		}
@@ -106,7 +122,7 @@ namespace Poser {
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
-		FaceInfo* FaceInfo;
+		FaceInfo FaceInfo;
 		SliderInfo *CurrentSlider;
 	};
 
@@ -119,6 +135,10 @@ namespace Poser {
 	bool loc_syncing;
 	Poser::EventType loc_eventType = NoEvent;
 
+	void jsonToPose(PoserCharacter* c, picojson::value json);
+	picojson::value poseToJson(PoserCharacter* c);
+
+	void ApplySlider(void* slider = nullptr);
 	void GenSliderInfo();
 
 	void StartEvent(EventType type) {
@@ -144,11 +164,15 @@ namespace Poser {
 	}
 
 	void EndEvent() {
-		for (auto c : loc_targetCharacters) {
-			delete c;
+		if (loc_queuedCharacters.size() == 2) {
+			for (auto c : loc_queuedCharacters) {
+				delete c;
+			}
 		}
-		for (auto c : loc_queuedCharacters) {
-			delete c;
+		else {
+			for (auto c : loc_targetCharacters) {
+				delete c;
+			}
 		}
 		loc_targetCharacters.clear();
 		loc_queuedCharacters.clear();
@@ -278,7 +302,7 @@ namespace Poser {
 			if (wnd == NULL) break; //not slider control, but automatic scroll
 			if (!loc_syncing) {
 				thisPtr->SyncSlider();
-				thisPtr->ApplySlider();
+				ApplySlider();
 			}
 			break; }
 		case WM_TIMER: {
@@ -302,16 +326,20 @@ namespace Poser {
 				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame);
 			}
 			TCHAR value[16];
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->mouth);
+			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.mouth);
 			SendMessage(thisPtr->m_edMouth, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->FaceInfo->mouthOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.mouthOpen);
 			SendMessage(thisPtr->m_edMouthOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->eye);
+			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.eye);
 			SendMessage(thisPtr->m_edEye, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->FaceInfo->eyeOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.eyeOpen);
 			SendMessage(thisPtr->m_edEyeOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->FaceInfo->eyebrow);
+			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.eyebrow);
 			SendMessage(thisPtr->m_edEyebrow, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.blush);
+			SendMessage(thisPtr->m_edBlush, WM_SETTEXT, 0, (LPARAM)value);
+			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.blushLines);
+			SendMessage(thisPtr->m_edBlushLines, WM_SETTEXT, 0, (LPARAM)value);
 
 			break; }
 		case WM_COMMAND: {
@@ -336,28 +364,36 @@ namespace Poser {
 				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
 					if (!loc_syncing) {
 						thisPtr->SyncEdit();
-						thisPtr->ApplySlider();
+						ApplySlider();
 					}
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTH) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->FaceInfo->mouth = val;
+					*loc_targetChar->FaceInfo.mouth = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTHOPEN) {
 					float val = General::GetEditFloat(ed);
-					loc_targetChar->FaceInfo->mouthOpen = val;
+					*loc_targetChar->FaceInfo.mouthOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYE) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->FaceInfo->eye = val;
+					*loc_targetChar->FaceInfo.eye = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEOPEN) {
 					float val = General::GetEditFloat(ed);
-					loc_targetChar->FaceInfo->eyeOpen = val;
+					*loc_targetChar->FaceInfo.eyeOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEBROW) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->FaceInfo->eyebrow = val;
+					*loc_targetChar->FaceInfo.eyebrow = val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH) {
+					int val = General::GetEditInt(ed);
+					*loc_targetChar->FaceInfo.blush = (float)val;
+				}
+				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH2) {
+					int val = General::GetEditInt(ed);
+					*loc_targetChar->FaceInfo.blushLines = (float)val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
@@ -375,89 +411,52 @@ namespace Poser {
 				if(id == IDC_PPS_BTNSAVE) {
 					const TCHAR* path = General::SaveFileDialog(NULL);
 					if(path != NULL) {
-						PoseFile saveFile;
-						saveFile.SetPoseInfo(General::GetEditInt(thisPtr->m_edPose),General::GetEditFloat(thisPtr->m_edFrame));
-						for (auto it = loc_targetChar->SliderInfos.cbegin(); it != loc_targetChar->SliderInfos.cend(); it++) {
-							PoseFile::FrameMod mod = { std::string(it->frameName.cbegin(), it->frameName.cend()),
-								it->rotate.x, it->rotate.y, it->rotate.z,
-								it->translate.x, it->translate.y, it->translate.z,
-								it->scale.x, it->scale.y, it->scale.z
-							};
-							saveFile.AddFrameMod(mod);
-						}
-						saveFile.DumpToFile(path);
+						thisPtr->SavePose(path);
 					}
 				}
 				else if (id == IDC_PPS_BTNLOAD) {
 					const TCHAR* path = General::OpenFileDialog(NULL);
 					if(path != NULL) {
-						for(SliderInfo& slider: loc_sliderInfos) {
-							slider.reset();
-							thisPtr->ApplySlider(&slider);
-						}
-						PoseFile openFile(path);
-						std::wstring str;
-						str = std::to_wstring(openFile.GetPose());
-						SendMessage(thisPtr->m_edPose,WM_SETTEXT,0,(LPARAM)str.c_str());
-						str = std::to_wstring(openFile.GetFrame());
-						SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)str.c_str());
-						SliderInfo* slider = NULL;
-						for(auto elem : openFile.GetMods()) {
-							auto match = loc_targetChar->FrameMap.find(elem.frameName);
-							if (match != loc_targetChar->FrameMap.end()) {
-								slider = &loc_targetChar->SliderInfos[match->second];
-								slider->rotate.x = elem.matrix[0];
-								slider->rotate.y = elem.matrix[1];
-								slider->rotate.z = elem.matrix[2];
-								slider->translate.x = elem.matrix[3];
-								slider->translate.y = elem.matrix[4];
-								slider->translate.z = elem.matrix[5];
-								slider->scale.x = elem.matrix[6];
-								slider->scale.y = elem.matrix[7];
-								slider->scale.z = elem.matrix[8];
-								thisPtr->ApplySlider(slider);
-							}
-						}
-						thisPtr->SyncList();
+						thisPtr->LoadPose(path);
 					}
 				}
 				else if (id == IDC_PPS_BTNRESET) {
 					for (auto it = loc_sliderInfos.begin(); it != loc_sliderInfos.end(); it++) {
 						it->reset();
-						thisPtr->ApplySlider(&(*it));
+						ApplySlider(&(*it));
 					}
 					thisPtr->SyncList();
 				}
 				else if (id == IDC_PPS_BTNMODLL10) {
 					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-10.0f, loc_targetChar->CurrentSlider->curOperation);
 					thisPtr->SyncList();
-					thisPtr->ApplySlider();
+					ApplySlider();
 				}
 				else if (id == IDC_PPS_BTNMODLL1) {
 					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-1.0f, loc_targetChar->CurrentSlider->curOperation);
 					thisPtr->SyncList();
-					thisPtr->ApplySlider();
+					ApplySlider();
 				}
 				else if (id == IDC_PPS_BTNMODZERO) {
 					*loc_targetChar->CurrentSlider->curValue() = 0.0f;
 					thisPtr->SyncList();
-					thisPtr->ApplySlider();
+					ApplySlider();
 				}
 				else if (id == IDC_PPS_BTNMODPP1) {
 					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(1.0f, loc_targetChar->CurrentSlider->curOperation);
 					thisPtr->SyncList();
-					thisPtr->ApplySlider();
+					ApplySlider();
 				}
 				else if (id == IDC_PPS_BTNMODPP10) {
 					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(10.0f, loc_targetChar->CurrentSlider->curOperation);
 					thisPtr->SyncList();
-					thisPtr->ApplySlider();
+					ApplySlider();
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
 					if (loc_targetChar->CurrentSlider->curOperation != Scale) {
 						*loc_targetChar->CurrentSlider->curValue() *= -1.0f;
 						thisPtr->SyncList();
-						thisPtr->ApplySlider();
+						ApplySlider();
 					}
 				}
 				break; }
@@ -529,7 +528,7 @@ namespace Poser {
 		loc_syncing = false;
 	}
 
-	void PoserWindow::ApplySlider(void* slider) {
+	void ApplySlider(void* slider) {
 		SliderInfo* targetSlider = slider == NULL ? loc_targetChar->CurrentSlider : static_cast<SliderInfo*>(slider);
 		ExtClass::Frame *frame = targetSlider->xxFrame;
 		if(frame) {
@@ -580,8 +579,8 @@ namespace Poser {
 
 		if (xxFile == NULL) return;
 		if (loc_targetChar == NULL) return;
-		if(loc_targetChar->Character->m_xxFace && !loc_targetChar->FaceInfo)
-			loc_targetChar->FaceInfo = reinterpret_cast<FaceInfo*>(loc_targetChar->Character->m_xxFace);
+		if (loc_targetChar->Character->m_xxFace && (loc_targetChar->Character->m_xxFace != loc_targetChar->FaceInfo.xxFace))
+			loc_targetChar->FaceInfo.SetFace(loc_targetChar->Character->m_xxFace);
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		if (model != ExtClass::CharacterStruct::SKELETON) return;
@@ -663,4 +662,135 @@ namespace Poser {
 		}
 	}
 
+	void PoserWindow::LoadPose(const TCHAR* path) {
+		using namespace picojson;
+		value json;
+
+		for (SliderInfo& slider : loc_sliderInfos) {
+			slider.reset();
+			ApplySlider(&slider);
+		}
+
+		std::ifstream in(path);
+		in >> json;
+
+		if (picojson::get_last_error().empty()) {
+			jsonToPose(loc_targetChar, json);
+		}
+		else {
+			PoseFile openFile(path);
+			std::wstring str;
+			str = std::to_wstring(openFile.GetPose());
+			SendMessage(m_edPose, WM_SETTEXT, 0, (LPARAM)str.c_str());
+			str = std::to_wstring(openFile.GetFrame());
+			SendMessage(m_edFrame, WM_SETTEXT, 0, (LPARAM)str.c_str());
+			SliderInfo* slider = NULL;
+			for (auto elem : openFile.GetMods()) {
+				auto match = loc_targetChar->FrameMap.find(elem.frameName);
+				if (match != loc_targetChar->FrameMap.end()) {
+					slider = &loc_targetChar->SliderInfos[match->second];
+					slider->rotate.x = elem.matrix[0];
+					slider->rotate.y = elem.matrix[1];
+					slider->rotate.z = elem.matrix[2];
+					slider->translate.x = elem.matrix[3];
+					slider->translate.y = elem.matrix[4];
+					slider->translate.z = elem.matrix[5];
+					slider->scale.x = elem.matrix[6];
+					slider->scale.y = elem.matrix[7];
+					slider->scale.z = elem.matrix[8];
+					ApplySlider(slider);
+				}
+			}
+		}
+		SyncList();
+	}
+
+	void PoserWindow::SavePose(const TCHAR* path) {
+		std::ofstream out(path);
+		out << poseToJson(loc_targetChar).serialize(true);
+	}
+
+	void jsonToPose(PoserCharacter* c, picojson::value json) {
+		using namespace picojson;
+		
+		if (json.is<object>()) {
+			const object load = json.get<object>();
+			SliderInfo* slider;
+			try {
+				c->Character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
+				c->Character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
+				object sliders = load.at("sliders").get<object>();
+				for (auto s = sliders.cbegin(); s != sliders.cend(); s++) {
+					auto match = c->FrameMap.find((*s).first);
+					if (match != loc_targetChar->FrameMap.end()) {
+						array mods = (*s).second.get<array>();
+						if (mods.size() == 9) {
+							slider = &c->SliderInfos[match->second];
+							slider->rotate.x = (float)mods[0].get<double>();
+							slider->rotate.y = (float)mods[1].get<double>();
+							slider->rotate.z = (float)mods[2].get<double>();
+							slider->translate.x = (float)mods[3].get<double>();
+							slider->translate.y = (float)mods[4].get<double>();
+							slider->translate.z = (float)mods[5].get<double>();
+							slider->scale.x = (float)mods[6].get<double>();
+							slider->scale.y = (float)mods[7].get<double>();
+							slider->scale.z = (float)mods[8].get<double>();
+							ApplySlider(slider);
+						}
+						else {
+							//invalid json data
+						}
+					}
+				}
+				object face = load.at("face").get<object>();
+				*c->FaceInfo.mouth = (int)face.at("mouth").get<double>();
+				*c->FaceInfo.mouthOpen = (float)face.at("mouthopen").get<double>();
+				*c->FaceInfo.eye = (int)face.at("eye").get<double>();
+				*c->FaceInfo.eyeOpen = (float)face.at("eyeopen").get<double>();
+				*c->FaceInfo.eyebrow = (int)face.at("eyebrow").get<double>();
+				*c->FaceInfo.blush = (float)face.at("blush").get<double>();
+				*c->FaceInfo.blushLines = (float)face.at("blushlines").get<double>();
+			}
+			catch (std::out_of_range& e) {
+				//key doesn't exist
+			}
+			catch (std::runtime_error& e) {
+				//invalid json data
+			}
+		}
+
+	}
+
+	picojson::value poseToJson(PoserCharacter* c) {
+		using namespace picojson;
+		object json;
+		json["pose"] = value((double)c->Character->m_xxSkeleton->m_poseNumber);
+		json["frame"] = value((double)c->Character->m_xxSkeleton->m_animFrame);
+		value::object sliders;
+		for (SliderInfo& slider : c->SliderInfos) {
+			value::array values(9);
+			values[0] = value((double)slider.rotate.x);
+			values[1] = value((double)slider.rotate.y);
+			values[2] = value((double)slider.rotate.z);
+			values[3] = value((double)slider.translate.x);
+			values[4] = value((double)slider.translate.y);
+			values[5] = value((double)slider.translate.z);
+			values[6] = value((double)slider.scale.x);
+			values[7] = value((double)slider.scale.y);
+			values[8] = value((double)slider.scale.z);
+			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
+		}
+		json["sliders"] = value(sliders);
+
+		value::object face;
+		face["eye"] = value((double)*c->FaceInfo.eye);
+		face["eyeopen"] = value((double)*c->FaceInfo.eyeOpen);
+		face["eyebrow"] = value((double)*c->FaceInfo.eyebrow);
+		face["mouth"] = value((double)*c->FaceInfo.mouth);
+		face["mouthopen"] = value((double)*c->FaceInfo.mouthOpen);
+		face["blush"] = value((double)*c->FaceInfo.blush);
+		face["blushlines"] = value((double)*c->FaceInfo.blushLines);
+		json["face"] = value(face);
+		return value(json);
+	}
 }

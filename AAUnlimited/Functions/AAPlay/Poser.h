@@ -56,10 +56,11 @@ namespace Poser {
 		int m_curBone;
 
 		void InitBones();
-		void ApplySlider(void* slider = NULL);
 		void SyncEdit();
 		void SyncList();
 		void SyncSlider();
+		void LoadPose(const TCHAR* path);
+		void SavePose(const TCHAR* path);
 
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	};
