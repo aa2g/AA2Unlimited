@@ -11,7 +11,8 @@ namespace Poser {
 		NoEvent,
 		ClothingScene,
 		NpcInteraction,
-		DoubleNpcInteraction
+		DoubleNpcInteraction,
+		HMode
 	};
 
 	void StartEvent(EventType type);

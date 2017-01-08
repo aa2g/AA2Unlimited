@@ -8,6 +8,7 @@
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/HButtonMove.h"
 #include "Functions/AAPlay/Facecam.h"
+#include "Functions/AAPlay/Poser.h"
 
 namespace PlayInjections {
 namespace HPlayInjections {
@@ -23,6 +24,12 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	HAi::PostTick(hInfo,contScene);
 	HButtonMove::PostTick(hInfo,contScene);
 	Facecam::PostTick(hInfo,contScene);
+	if (contScene) {
+		Poser::StartEvent(Poser::HMode);
+	}
+	else {
+		Poser::EndEvent();
+	}
 	return contScene;
 }
 

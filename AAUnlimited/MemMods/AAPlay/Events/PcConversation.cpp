@@ -3,6 +3,7 @@
 #include "General/ModuleInfo.h"
 #include "External/ExternalClasses.h"
 #include "Functions/AAPlay/HAi.h"
+#include "Functions/AAPlay/Poser.h"
 
 namespace PlayInjections {
 /*
@@ -78,6 +79,7 @@ void __stdcall PreTick(ExtClass::MainConversationStruct* param) {
 	default:
 		break;
 	}
+	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall PostTick(ExtClass::MainConversationStruct* param) {

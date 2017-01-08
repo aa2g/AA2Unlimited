@@ -20,8 +20,8 @@ bEnableFacecam = true				; when enabled, pressing q locks the camera in the face
 
 bEnableHPosButtonReorder = true		; reorders the position buttons in multiple columns so they dont go out of the window and become unclickable
 
-bUsePoser = true					; enables poser in cloth select screen
-bUsePoserExperimental = false		; enables experimental uses of poser
+bUseClothesPoser = false			; enables poser in cloth select screen
+bUseDialoguePoser = false			; enables poser in dialogue and sex scenes
 
 fPOVOffsetX = 0.0					;
 fPOVOffsetY = 0.005					; Offsets for the POV focus points

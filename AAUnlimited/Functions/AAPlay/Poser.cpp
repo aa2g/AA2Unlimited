@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 #include <CommCtrl.h>
 #include <Strsafe.h>
@@ -109,7 +110,9 @@ namespace Poser {
 		SliderInfo *CurrentSlider;
 	};
 
+	std::deque<PoserCharacter*> loc_queuedCharacters;
 	std::vector<PoserCharacter*> loc_targetCharacters;
+	bool loc_updateCharacters;
 	PoserCharacter* loc_targetChar;
 	int loc_nextCharSlot = 1;
 
@@ -119,45 +122,59 @@ namespace Poser {
 	void GenSliderInfo();
 
 	void StartEvent(EventType type) {
-		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		if (type == ClothingScene && loc_eventType == NpcInteraction) {
+		if (!g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal && type == ClothingScene) return;
+		if (!g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal
+			&& (type == NpcInteraction || type == HMode )) return;
+		if (type == ClothingScene && loc_eventType != NoEvent) {
 			EndEvent();
 		}
-		loc_eventType = type;
 		GenSliderInfo();
-		g_PoserWindow.Init();
+		if ((type == NpcInteraction || type == HMode) && loc_updateCharacters) {
+			loc_targetCharacters.resize(loc_queuedCharacters.size());
+			int i = 0;
+			for (PoserCharacter* c : loc_queuedCharacters) {
+				loc_targetCharacters[i++] = c;
+			}
+			loc_targetChar = loc_targetCharacters[0];
+			loc_updateCharacters = 0;
+		}
+		if (loc_eventType == NoEvent)
+			g_PoserWindow.Init();
+		loc_eventType = type;
 	}
 
 	void EndEvent() {
-		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
 		for (auto c : loc_targetCharacters) {
 			delete c;
 		}
+		for (auto c : loc_queuedCharacters) {
+			delete c;
+		}
 		loc_targetCharacters.clear();
+		loc_queuedCharacters.clear();
 		loc_targetChar = nullptr;
-		loc_sliderInfos.clear();
-		loc_frameMap.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 		loc_nextCharSlot = 1;
 	}
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
-		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		if (loc_eventType == NoEvent && g_Config.GetKeyValue(Config::USE_POSER_EXPERIMENTAL).bVal) {
-			StartEvent(NpcInteraction);
+		GenSliderInfo();
+		if ((loc_eventType == NoEvent || loc_eventType == NpcInteraction) && g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal) {
+			PoserCharacter* character = new PoserCharacter(c);
+			loc_targetChar = character;
+			loc_queuedCharacters.push_front(character);
+			if (loc_queuedCharacters.size() > 2) {
+				PoserCharacter *c = loc_queuedCharacters.back();
+				delete c;
+				loc_queuedCharacters.pop_back();
+			}
+			loc_updateCharacters = true;
 		}
 		if (loc_eventType == ClothingScene) {
 			PoserCharacter* character = new PoserCharacter(c);
 			loc_targetCharacters.resize(1);
 			loc_targetCharacters[0] = character;
-			loc_targetChar = character;
-		}
-		else if (loc_eventType == NpcInteraction) {
-			loc_nextCharSlot ^= 1;
-			loc_targetCharacters.resize(2);
-			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetCharacters[loc_nextCharSlot] = character;
 			loc_targetChar = character;
 		}
 	}
@@ -344,11 +361,10 @@ namespace Poser {
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
-					if (loc_targetCharacters.size() >= val)
-					{
-						loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
-						thisPtr->SyncList();
-					}
+					loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
+					SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
+					SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
+					thisPtr->SyncList();
 				}
 
 				return TRUE; }
@@ -622,6 +638,7 @@ namespace Poser {
 	}
 
 	void GenSliderInfo() {
+		if (!loc_sliderInfos.empty()) return;
 		PoseMods mods(POSEMOD_FILE_PATH);
 		auto& input = mods.GetInput();
 		for(auto& elem : input) {
