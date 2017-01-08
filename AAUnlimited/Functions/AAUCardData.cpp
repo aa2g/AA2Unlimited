@@ -275,12 +275,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			break;
 		case 'TnRd': {
 			auto tanName = ReadData<std::wstring>(buffer,size);
-			SetTan(tanName.c_str());
+			m_tanName = tanName;
 			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_tanName << "\r\n";
 			break; }
 		case 'HrHl': {
 			auto hairHighlightName = ReadData<decltype(m_hairHighlightName)>(buffer,size);
-			SetHairHighlight(hairHighlightName.c_str());
+			m_hairHighlightName = hairHighlightName;
 			break; }
 		case 'OlCl':
 			m_bOutlineColor = true;
