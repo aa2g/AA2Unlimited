@@ -902,7 +902,10 @@ void AAUCardData::GenAllFileMaps() {
 	GenArchiveOverrideMap();
 	GenObjectOverrideMap();
 
-
+	auto temp = m_tanName; //not sure if this is stricly neccessary, but i do it out of safety
+	SetTan(temp.c_str());
+	temp = m_hairHighlightName;
+	SetHairHighlight(temp.c_str());
 }
 
 /***************************/
@@ -958,7 +961,7 @@ bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
 }
 
 bool AAUCardData::SetHairHighlight(const TCHAR* name) {
-	std::wstring path = HAIR_HIGHLIGHT_PATH; 
+	std::wstring path; 
 	TextureImage::PathStart start;
 	switch(m_version) {
 	case 1:
@@ -982,13 +985,16 @@ bool AAUCardData::SetHairHighlight(const TCHAR* name) {
 
 bool AAUCardData::SetTan(const TCHAR* name) {
 	std::wstring path;
+	TextureImage::PathStart start;
 	switch(m_version) {
 	case 1:
 		path = VER1_TAN_PATH;
+		start = TextureImage::AAEDIT;
 		break;
 	case 2:
 	default:
 		path = TAN_PATH;
+		start = TextureImage::OVERRIDE;
 		break;
 	}
 	path += name;
@@ -999,7 +1005,7 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 		std::wstring file = TEXT("0");
 		file += iChar;
 		file += TEXT(".bmp");
-		m_tanImages[i] = TextureImage((path + file).c_str(), TextureImage::OVERRIDE);
+		m_tanImages[i] = TextureImage((path + file).c_str(), start);
 		anyGood = anyGood || m_tanImages[i].IsGood();
 	}
 	if (anyGood) m_tanName = name;
