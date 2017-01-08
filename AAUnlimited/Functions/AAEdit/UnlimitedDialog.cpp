@@ -1101,7 +1101,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
 					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetTanColor(RGB(blue,green,red));
 					using namespace ExtVars::AAEdit;
 					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
 				}

@@ -22,6 +22,9 @@ void __stdcall AddUnlimitData(wchar_t* fileName) {
 	if(AAEdit::g_AAUnlimitDialog.IsSaveFilesSet()) {
 		AAEdit::g_currChar.m_cardData.SaveOverrideFiles();
 	}
+	else {
+		AAEdit::g_currChar.m_cardData.ClearOverrides();
+	}
 	if(AAEdit::g_AAUnlimitDialog.IsSaveEyesSet()) {
 		auto& eyes = AAEdit::g_currChar.m_char->m_charData->m_eyes;
 		if(eyes.bExtTextureUsed) {

@@ -1324,3 +1324,7 @@ void AAUCardData::ConvertToNewVersion() {
 		m_version = 2;
 	}
 }
+
+void AAUCardData::ClearOverrides(){
+	m_savedFiles.clear();
+}

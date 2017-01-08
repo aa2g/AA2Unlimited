@@ -83,6 +83,8 @@ public:
 
 	void ConvertToNewVersion();
 
+	void ClearOverrides();
+
 	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
