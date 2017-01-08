@@ -15,11 +15,12 @@ PoseFile::PoseFile(std::wstring path) {
 	in >> pose;
 	in >> frame;
 
+	FrameMod mod;
 	while(in.good()) {
-		FrameMod mod;
 		in >> mod.frameName;
-		in >> mod.modKind;
-		in >> mod.value;
+		for (int i = 0; i < 9 && in.good(); i++) {
+			in >> mod.matrix[i];
+		}
 		mods.push_back(mod);
 	}
 }
@@ -28,8 +29,12 @@ void PoseFile::DumpToFile(std::wstring path) {
 	std::ofstream out(path);
 
 	if (!out.good()) return;
-	out << pose << " " << frame << "\r\n";
+	out << pose << " " << frame << std::endl;
 	for(FrameMod& mod : mods) {
-		out << mod.frameName << " " << mod.modKind << " " << mod.value << "\r\n";
+		out << mod.frameName;
+		for (float m : mod.matrix) {
+			out << " " << m;
+		}
+		out << std::endl;;
 	}
 }

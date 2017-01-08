@@ -1046,7 +1046,8 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(mrule.second.GetFileSize());
 		mrule.second.WriteToBuffer(buffer.data());
 		if(buffer.size() > 0) {
-			m_savedFiles.emplace_back(std::make_pair(2,mrule.second.GetRelPath()),buffer);
+			auto path = mrule.second.GetRelPath();
+			m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 		}
 	}
 
@@ -1056,13 +1057,16 @@ void AAUCardData::SaveOverrideFiles() {
 		arule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
 			int location;
+			auto path = arule.second.GetRelPath();
 			if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+				path = path;
 				location = 0;
 			}
 			else {
-				location = 1;
+				path = path;
+				location = 2;
 			}
-			m_savedFiles.emplace_back(std::make_pair(location,arule.second.GetRelPath()),buffer);
+			m_savedFiles.emplace_back(std::make_pair(location,path),buffer);
 		}
 	}
 
@@ -1071,7 +1075,8 @@ void AAUCardData::SaveOverrideFiles() {
 		std::vector<BYTE> buffer(orule.second.GetFileSize());
 		orule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
-			m_savedFiles.emplace_back(std::make_pair(2,orule.second.GetRelPath()),buffer);
+			auto path = orule.second.GetRelPath();
+			m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 		}
 	}
 
@@ -1079,7 +1084,8 @@ void AAUCardData::SaveOverrideFiles() {
 	if(m_hairHighlightImage.IsGood()) {
 		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());
 		m_hairHighlightImage.WriteToBuffer(buffer.data());
-		m_savedFiles.emplace_back(std::make_pair(2,m_hairHighlightImage.GetRelPath()),buffer);
+		auto path = m_hairHighlightImage.GetRelPath();
+		m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 	}
 
 	//tan
@@ -1087,7 +1093,8 @@ void AAUCardData::SaveOverrideFiles() {
 		if (m_tanImages[i].IsGood()) {
 			std::vector<BYTE> buffer(m_tanImages[i].GetFileSize());
 			m_tanImages[i].WriteToBuffer(buffer.data());
-			m_savedFiles.emplace_back(std::make_pair(2,m_tanImages[i].GetRelPath()),buffer);
+			auto path = m_tanImages[i].GetRelPath();
+			m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 		}
 	}
 }
@@ -1182,7 +1189,8 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		for(auto& elem : toExtract) {
 			int i = elem.first;
 			if(m_savedFiles[i].first.first == 0) text << TEXT("AAPlay\\");
-			else								 text << TEXT("AAEdit\\");
+			else if (m_savedFiles[i].first.first == 1) text << TEXT("AAEdit\\");
+			else text << OVERRIDE_PATH;
 			text << m_savedFiles[i].first.second << TEXT("\r\n");
 		}
 		text << TEXT("These files are probably required for the card to work properly.\r\n"

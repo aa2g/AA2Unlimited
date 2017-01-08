@@ -23,6 +23,9 @@ enum PcConversationTypes{
 	PCCONTYPE_PCNPC = 0,
 	PCCONTYPE_NPCPC_GIVEANSWER = 1, //when the npc initiates the conversation, and the pc has to give a yes/no answer
 	PCCONTYPE_NPCPC_NOASNWER = 3, //when the npc initiates the conversation, but no answer is required
+	PCCONTYPE_NPCNPCPC_INTERACTIVE = 4, //when pc interrupts
+	PCCONTYPE_NPCNPCPC_CONTEST = 5, //when the pc selects the contest option
+	PCCONTYPE_NPCNPCPC_NONINTERACTIVE = 6, //after pc or interrupting npc choose the noncontest option
 	PCCONTYPE_FIGHT = 9
 };
 
