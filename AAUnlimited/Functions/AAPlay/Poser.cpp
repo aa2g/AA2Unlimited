@@ -111,6 +111,7 @@ namespace Poser {
 
 	std::vector<PoserCharacter*> loc_targetCharacters;
 	PoserCharacter* loc_targetChar;
+	int loc_nextCharSlot = 1;
 
 	bool loc_syncing;
 	Poser::EventType loc_eventType = NoEvent;
@@ -119,7 +120,10 @@ namespace Poser {
 
 	void StartEvent(EventType type) {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		loc_eventType = ClothingScene;
+		if (type == ClothingScene && loc_eventType == NpcInteraction) {
+			EndEvent();
+		}
+		loc_eventType = type;
 		GenSliderInfo();
 		g_PoserWindow.Init();
 	}
@@ -135,23 +139,25 @@ namespace Poser {
 		loc_frameMap.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
+		loc_nextCharSlot = 1;
 	}
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
 		if (!g_Config.GetKeyValue(Config::USE_POSER).bVal) return;
-		if (loc_eventType == NpcInteraction)
-			EndEvent();
-		if (loc_eventType == NoEvent) {
+		if (loc_eventType == NoEvent && g_Config.GetKeyValue(Config::USE_POSER_EXPERIMENTAL).bVal) {
 			StartEvent(NpcInteraction);
 		}
 		if (loc_eventType == ClothingScene) {
 			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetCharacters.push_back(character);
+			loc_targetCharacters.resize(1);
+			loc_targetCharacters[0] = character;
 			loc_targetChar = character;
 		}
 		else if (loc_eventType == NpcInteraction) {
+			loc_nextCharSlot ^= 1;
+			loc_targetCharacters.resize(2);
 			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetCharacters.push_back(character);
+			loc_targetCharacters[loc_nextCharSlot] = character;
 			loc_targetChar = character;
 		}
 	}
@@ -225,6 +231,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
+			SendMessage(thisPtr->m_spinCharacter, UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
 			SendMessage(thisPtr->m_spinFrame, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
 			SendMessage(thisPtr->m_spinValue, UDM_SETRANGE, 0, MAKELPARAM(-32767, 32767));
@@ -339,7 +346,7 @@ namespace Poser {
 					int val = General::GetEditInt(ed);
 					if (loc_targetCharacters.size() >= val)
 					{
-						loc_targetChar = loc_targetCharacters[val];
+						loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
 						thisPtr->SyncList();
 					}
 				}
