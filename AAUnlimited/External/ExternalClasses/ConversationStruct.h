@@ -7,7 +7,7 @@ namespace ExtClass {
  * These Classes seem to be more complex.
  * First and foremost, the class is huge. Some members are beeing addressed as far as 0x839C from the sub-struct.
  * It contains several subclasses, some maybe overlapping, im not sure, that start at certain offsets.
- * 
+ *
  * Each of these subclasses start with a virtual table, whose second entry is the offset from this class
  * to the sub-struct. there are 13 of these subclasses,
  * at 0, C, 20, 286C, 2874, 287C, 2890, 2894, 289C, 28A4, 28AC, 28B8, 28C4, respectively.
@@ -17,6 +17,8 @@ namespace ExtClass {
  * 1: npc talks to player
  * 3: after h
  * 9: fight
+ *
+ * All of these classes, no matter which, has a ConversationSubStruct that saves vital information.
  */
 
 enum PcConversationTypes{
@@ -34,6 +36,7 @@ enum PcConversationTypes{
 
 
 /*
+* This is the said shared data.
 * Referenced from within the struct; most likely polymorphic or something, as the offset
 * is taken out of the virtual table at [[XYZConversationStruct]+4]
 */
@@ -151,6 +154,21 @@ enum ConversationId {
 	AFTER_H = 101
 };
 
+/*
+ * This one is always present at [[[base+3761CC]+28]+30]
+ */
+
+class PcConversationStruct {
+	BYTE m_unknown[0x2C];
+	BaseConversationStruct* m_currentConversation; //NULL if no converstation is going on
+	BYTE m_unknown2[8];
+	DWORD m_loopMax; //max amount for loop below. smaller max means faster animation.
+	DWORD m_loopCounter; //describes some sort of up-down-wiggle motion that is looped.
+	DWORD m_loopMax2; //alternative max. not sure when its used.
+
+	PcConversationStruct() = delete;
+	~PcConversationStruct() = delete;
+};
 
 
 #pragma pack(pop)
