@@ -15,6 +15,13 @@ ExtClass::CharacterStruct** PlayerCharacterPtr() {
 		ApplyRule(offsets);
 }
 
+ExtClass::PcConversationStruct* PlayerConversationPtr() {
+	//This one is always present at[[[base+3761CC]+28]+30]
+	static const DWORD offsets[]{ 0x3761CC, 0x28, 0x30, 0 };
+		return (ExtClass::PcConversationStruct*)
+			ApplyRule(offsets);
+}
+
 ExtClass::CharacterStruct** ClassMembersArray() {
 	static const DWORD offsets[]{ 0x376164, 0x6C, 0 };
 	return (ExtClass::CharacterStruct**)
