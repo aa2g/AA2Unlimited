@@ -12,6 +12,19 @@ namespace PlayInjections {
 namespace PcConversation {
 
 /********************
+ * Start / End Event
+ ********************/
+
+void __stdcall StartEvent() {
+
+}
+
+void __stdcall EndEvent() {
+
+}
+
+
+/********************
  * General tick Event
  ********************/
 
@@ -194,10 +207,69 @@ void PcAnswerInjection() {
 		NULL);
 }
 
-/*Called for every conversation tick:
-AA2Play v12 FP v1.4.0a.exe+4A237 - 8B 47 2C              - mov eax,[edi+2C]
-AA2Play v12 FP v1.4.0a.exe+4A23A - E8 416C0000           - call "AA2Play v12 FP v1.4.0a.exe"+50E80 { ->AA2Play v12 FP v1.4.0a.exe+50E80 }
-*/
+DWORD OriginalStart;
+void __declspec(naked) StartRedirect() {
+	__asm {
+		pushad
+		call StartEvent
+		popad
+		push [esp+4]
+		call [OriginalStart]
+		ret 4
+	}
+}
+
+void StartInjection() {
+	//this call seems to load a lot about a pc-conversation, including the global main struct. stdcall, 1 stack param
+	/*AA2Play v12 FP v1.4.0a.exe+EB8B1 - 52                    - push edx
+	AA2Play v12 FP v1.4.0a.exe+EB8B2 - E8 59DFF5FF           - call "AA2Play v12 FP v1.4.0a.exe"+49810 { ->AA2Play v12 FP v1.4.0a.exe+49810 }
+	AA2Play v12 FP v1.4.0a.exe+EB8B7 - 84 C0                 - test al,al
+	AA2Play v12 FP v1.4.0a.exe+EB8B9 - 74 8D                 - je "AA2Play v12 FP v1.4.0a.exe"+EB848 { ->AA2Play v12 FP v1.4.0a.exe+EB848 }
+	*/
+	DWORD address = General::GameBase + 0xEB8B2;
+	DWORD redirectAddress = (DWORD)(&StartRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0x59, 0xDF, 0xF5, 0xFF },						//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress},	//redirect to our function
+		&OriginalStart);
+}
+
+void __declspec(naked) EndRedirect() {
+	__asm {
+		pushad
+		call EndEvent
+		popad
+		mov eax, [edi+0x2C]
+		test eax,eax
+		ret
+	}
+}
+
+void EndInjection() {
+	//this function is called from 3 different places and seems to be involved in ending a conversation.
+	/*AA2Play v12 FP v1.4.0a.exe+4AFD0 - 8B 47 2C              - mov eax,[edi+2C]
+	AA2Play v12 FP v1.4.0a.exe+4AFD3 - 85 C0                 - test eax,eax
+	AA2Play v12 FP v1.4.0a.exe+4AFD5 - 74 17                 - je "AA2Play v12 FP v1.4.0a.exe"+4AFEE { ->AA2Play v12 FP v1.4.0a.exe+4AFEE }
+	...
+	AA2Play v12 FP v1.4.0a.exe+4B02E - 75 D0                 - jne "AA2Play v12 FP v1.4.0a.exe"+4B000 { ->AA2Play v12 FP v1.4.0a.exe+4B000 }
+	AA2Play v12 FP v1.4.0a.exe+4B030 - 5E                    - pop esi
+	AA2Play v12 FP v1.4.0a.exe+4B031 - 5D                    - pop ebp
+	AA2Play v12 FP v1.4.0a.exe+4B032 - 5B                    - pop ebx
+	AA2Play v12 FP v1.4.0a.exe+4B033 - C3                    - ret
+	AA2Play v12 FP v1.4.0a.exe+4B034 - CC                    - int 3
+	AA2Play v12 FP v1.4.0a.exe+4B035 - CC                    - int 3
+	*/
+	DWORD address = General::GameBase + 0x4AFD0;
+	DWORD redirectAddress = (DWORD)(&EndRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x47, 0x2C,
+		0x85, 0xC0 },						//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
+
+
 
 
 }

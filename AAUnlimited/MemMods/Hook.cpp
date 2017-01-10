@@ -238,6 +238,8 @@ void InitializeHooks() {
 		HPlayInjections::TickInjection();
 		HPlayInjections::FocusCameraInjection();
 
+		PcConversation::StartInjection();
+		PcConversation::EndInjection();
 		PcConversation::TickInjection();	
 		PcConversation::NpcAnswerInjection();
 		PcConversation::PcAnswerInjection();

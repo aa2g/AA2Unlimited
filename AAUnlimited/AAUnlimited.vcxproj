@@ -84,6 +84,7 @@
     <ClCompile Include="Files\PoseMods.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3rdparty\picojson\picojson.h" />
     <ClInclude Include="External\ExternalClasses\Animation.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
