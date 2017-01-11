@@ -52,6 +52,7 @@ namespace Poser {
 		HWND m_listOperation;
 		HWND m_listAxis;
 		HWND m_sliderValue;
+		HWND m_chkEyeTrack;
 		UINT_PTR m_timer;
 		int m_curBone;
 

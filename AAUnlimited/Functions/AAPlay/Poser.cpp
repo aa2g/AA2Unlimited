@@ -42,6 +42,7 @@ namespace Poser {
 			blushPointer = *((void**)((int)blushPointer + 0x50));
 			blush = (float*)((int)blushPointer + 0x14);
 			blushLines = (float*)((int)blushPointer + 0x148);
+			eyeTracking = (bool*)(base + 0x1CA20);
 		}
 		ExtClass::XXFile* xxFace;
 		int* mouth;
@@ -51,6 +52,7 @@ namespace Poser {
 		float* mouthOpen;
 		float* blush;
 		float* blushLines;
+		bool* eyeTracking;
 	};
 
 	enum Operation {
@@ -256,6 +258,7 @@ namespace Poser {
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
+			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
@@ -281,6 +284,8 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinEye, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 			SendMessage(thisPtr->m_spinEyeOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			SendMessage(thisPtr->m_spinEyebrow, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
+			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
+			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			thisPtr->SyncList();
 
 			loc_syncing = false;
@@ -336,10 +341,11 @@ namespace Poser {
 			SendMessage(thisPtr->m_edEyeOpen, WM_SETTEXT, 0, (LPARAM)value);
 			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.eyebrow);
 			SendMessage(thisPtr->m_edEyebrow, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.blush);
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->FaceInfo.blush * 9.0f));
 			SendMessage(thisPtr->m_edBlush, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.blushLines);
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->FaceInfo.blushLines * 9.0f));
 			SendMessage(thisPtr->m_edBlushLines, WM_SETTEXT, 0, (LPARAM)value);
+			SendMessage(thisPtr->m_chkEyeTrack, BM_SETCHECK, *loc_targetChar->FaceInfo.eyeTracking ? BST_CHECKED : BST_UNCHECKED, 0);
 
 			break; }
 		case WM_COMMAND: {
@@ -389,11 +395,11 @@ namespace Poser {
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.blush = (float)val;
+					*loc_targetChar->FaceInfo.blush = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH2) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.blushLines = (float)val;
+					*loc_targetChar->FaceInfo.blushLines = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
@@ -458,6 +464,10 @@ namespace Poser {
 						thisPtr->SyncList();
 						ApplySlider();
 					}
+				}
+				else if (id == IDC_PPS_CHKEYETRACK) {
+					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
+					*loc_targetChar->FaceInfo.eyeTracking = res == BST_CHECKED;
 				}
 				break; }
 			case LBN_SELCHANGE: {
