@@ -10,6 +10,7 @@
 #include <Strsafe.h>
 #include <fstream>
 
+#include "External\ExternalClasses\Frame.h"
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
 #include "Functions\Shared\Globals.h"
@@ -128,11 +129,8 @@ namespace Poser {
 		SliderInfo *CurrentSlider;
 	};
 
-	std::deque<PoserCharacter*> loc_queuedCharacters;
 	std::vector<PoserCharacter*> loc_targetCharacters;
-	bool loc_updateCharacters;
 	PoserCharacter* loc_targetChar;
-	int loc_nextCharSlot = 1;
 
 	bool loc_syncing;
 	Poser::EventType loc_eventType = NoEvent;
@@ -147,60 +145,36 @@ namespace Poser {
 		if (!g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal && type == ClothingScene) return;
 		if (!g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal
 			&& (type == NpcInteraction || type == HMode )) return;
-		if (type == ClothingScene && loc_eventType != NoEvent) {
+		if (loc_eventType && type != loc_eventType) {
 			EndEvent();
 		}
 		GenSliderInfo();
-		if ((type == NpcInteraction || type == HMode) && loc_updateCharacters) {
-			loc_targetCharacters.resize(loc_queuedCharacters.size());
-			int i = 0;
-			for (PoserCharacter* c : loc_queuedCharacters) {
-				loc_targetCharacters[i++] = c;
-			}
-			loc_targetChar = loc_targetCharacters[0];
-			loc_updateCharacters = 0;
-		}
 		if (loc_eventType == NoEvent)
 			g_PoserWindow.Init();
 		loc_eventType = type;
 	}
 
 	void EndEvent() {
-		if (loc_queuedCharacters.size() == 2) {
-			for (auto c : loc_queuedCharacters) {
-				delete c;
-			}
-		}
-		else {
-			for (auto c : loc_targetCharacters) {
-				delete c;
-			}
+		for (auto c : loc_targetCharacters) {
+			delete c;
 		}
 		loc_targetCharacters.clear();
-		loc_queuedCharacters.clear();
 		loc_targetChar = nullptr;
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
-		loc_nextCharSlot = 1;
 	}
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
 		GenSliderInfo();
-		if ((loc_eventType == NoEvent || loc_eventType == NpcInteraction) && g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal) {
+		if (loc_eventType != ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal) {
+			StartEvent(HMode);
 			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetChar = character;
-			loc_queuedCharacters.push_front(character);
-			if (loc_queuedCharacters.size() > 2) {
-				PoserCharacter *c = loc_queuedCharacters.back();
-				delete c;
-				loc_queuedCharacters.pop_back();
-			}
-			loc_updateCharacters = true;
+			loc_targetCharacters.push_back(character);
+			loc_targetChar = character; // must be set for further meshes loading such as the face
 		}
-		if (loc_eventType == ClothingScene) {
+		else if (loc_eventType == ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
 			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetCharacters.resize(1);
-			loc_targetCharacters[0] = character;
+			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 		}
 	}
