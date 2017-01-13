@@ -1316,6 +1316,7 @@ void AAUCardData::ConvertToNewVersion() {
 			int res = MessageBox(NULL,message.str().c_str(),TEXT("Conversion - Copy Files"),MB_YESNO);
 			if(res == IDYES) {
 				for(auto& elem : filesToMove) {
+					General::CreatePathForFile(elem.second.c_str());
 					CopyFile(elem.first.c_str(),elem.second.c_str(),TRUE);
 				}
 			}

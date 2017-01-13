@@ -50,7 +50,8 @@ public:
 	XXFile* m_xxBody;
 	XXFile* m_xxLegs;
 	BYTE m_unknown6[0x130];
-	Frame** m_bonePtrArray; //first one is neck (focused on q press), second one is spin (focused on w press)
+	Frame** m_bonePtrArray; //note that this is an array of only certain frequently used frames with a fixed position; the bone might be NULL thought.
+							//first one is neck (focused on q press), second one is spin (focused on w press), 10th (0x24 offset) is tears
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
 	BYTE m_unknown7[0xDB8];
 	void* m_somedata;

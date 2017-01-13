@@ -39,7 +39,9 @@ public:
 	float m_someXXCopy; //some value copied from the xx file. usually 1
 	BYTE m_unknown3[0x44];
 	XXFile* m_xxPartOf; //xx file that this frame belongs to
-	BYTE m_unknown4[0x40F4];
+	BYTE m_unknown4[0x9]; //there are several flags here. dont know what they do. some crash if changed.
+	BYTE m_renderFlag; //0: show, 2: dont show?
+	BYTE m_unknown5[0x40EA];
 };
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");
