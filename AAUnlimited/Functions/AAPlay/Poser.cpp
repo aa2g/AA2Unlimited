@@ -11,6 +11,7 @@
 #include <fstream>
 
 #include "External\ExternalClasses\Frame.h"
+#include "External\ExternalClasses\XXFileFace.h"
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
 #include "Functions\Shared\Globals.h"
@@ -25,36 +26,6 @@
 namespace Poser {
 
 	PoserWindow g_PoserWindow;
-
-	struct FaceInfo {
-		FaceInfo() : xxFace(nullptr) {}
-
-		void SetFace(ExtClass::XXFile* face) {
-			xxFace = face;
-			int base = (int)face;
-			mouth = (int*)(base + 0x23C);
-			mouthOpen = (float*)(base + 0x2B4);
-			eye = (int*)(base + 0x258);
-			eyeOpen = (float*)(base + 0x2A8);
-			eyebrow = (int*)(base + 0x274);
-			void* blushPointer = *((void**)(base + 0x234));
-			blushPointer = *((void**)((int)blushPointer + 0x44 * 0x8 + 0x0C));
-			blushPointer = *((void**)((int)blushPointer + 0x194));
-			blushPointer = *((void**)((int)blushPointer + 0x50));
-			blush = (float*)((int)blushPointer + 0x14);
-			blushLines = (float*)((int)blushPointer + 0x148);
-			eyeTracking = (bool*)(base + 0x1CA20);
-		}
-		ExtClass::XXFile* xxFace;
-		int* mouth;
-		int* eye;
-		int* eyebrow;
-		float* eyeOpen;
-		float* mouthOpen;
-		float* blush;
-		float* blushLines;
-		bool* eyeTracking;
-	};
 
 	enum Operation {
 		Rotate,
@@ -117,7 +88,7 @@ namespace Poser {
 	class PoserCharacter {
 	public:
 		PoserCharacter(ExtClass::CharacterStruct* c) :
-			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap)
+			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap), Face(nullptr)
 		{
 			CurrentSlider = &SliderInfos[0];
 		}
@@ -125,7 +96,7 @@ namespace Poser {
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
-		FaceInfo FaceInfo;
+		XXFileFace* Face;
 		SliderInfo *CurrentSlider;
 	};
 
@@ -305,21 +276,21 @@ namespace Poser {
 				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame);
 			}
 			TCHAR value[16];
-			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.mouth);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_mouth);
 			SendMessage(thisPtr->m_edMouth, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.mouthOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->Face->m_mouthOpen);
 			SendMessage(thisPtr->m_edMouthOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.eye);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_eye);
 			SendMessage(thisPtr->m_edEye, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), *loc_targetChar->FaceInfo.eyeOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->Face->m_eyeOpen);
 			SendMessage(thisPtr->m_edEyeOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), *loc_targetChar->FaceInfo.eyebrow);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_eyebrow);
 			SendMessage(thisPtr->m_edEyebrow, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->FaceInfo.blush * 9.0f));
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->Face->GetBlush() * 9.0f));
 			SendMessage(thisPtr->m_edBlush, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->FaceInfo.blushLines * 9.0f));
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->Face->GetBlushLines() * 9.0f));
 			SendMessage(thisPtr->m_edBlushLines, WM_SETTEXT, 0, (LPARAM)value);
-			SendMessage(thisPtr->m_chkEyeTrack, BM_SETCHECK, *loc_targetChar->FaceInfo.eyeTracking ? BST_CHECKED : BST_UNCHECKED, 0);
+			SendMessage(thisPtr->m_chkEyeTrack, BM_SETCHECK, loc_targetChar->Face->m_eyeTracking ? BST_CHECKED : BST_UNCHECKED, 0);
 
 			break; }
 		case WM_COMMAND: {
@@ -349,31 +320,31 @@ namespace Poser {
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTH) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.mouth = val;
+					loc_targetChar->Face->m_mouth = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTHOPEN) {
 					float val = General::GetEditFloat(ed);
-					*loc_targetChar->FaceInfo.mouthOpen = val;
+					loc_targetChar->Face->m_mouthOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYE) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.eye = val;
+					loc_targetChar->Face->m_eye = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEOPEN) {
 					float val = General::GetEditFloat(ed);
-					*loc_targetChar->FaceInfo.eyeOpen = val;
+					loc_targetChar->Face->m_eyeOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEBROW) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.eyebrow = val;
+					loc_targetChar->Face->m_eyebrow = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.blush = (float)val/9.0f;
+					*loc_targetChar->Face->GetBlush() = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH2) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->FaceInfo.blushLines = (float)val/9.0f;
+					*loc_targetChar->Face->GetBlushLines() = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
@@ -441,7 +412,7 @@ namespace Poser {
 				}
 				else if (id == IDC_PPS_CHKEYETRACK) {
 					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
-					*loc_targetChar->FaceInfo.eyeTracking = res == BST_CHECKED;
+					loc_targetChar->Face->m_eyeTracking = res == BST_CHECKED;
 				}
 				break; }
 			case LBN_SELCHANGE: {
@@ -563,8 +534,8 @@ namespace Poser {
 
 		if (xxFile == NULL) return;
 		if (loc_targetChar == NULL) return;
-		if (loc_targetChar->Character->m_xxFace && (loc_targetChar->Character->m_xxFace != loc_targetChar->FaceInfo.xxFace))
-			loc_targetChar->FaceInfo.SetFace(loc_targetChar->Character->m_xxFace);
+		if (loc_targetChar->Character->m_xxFace && ((void*)loc_targetChar->Character->m_xxFace != (void*)loc_targetChar->Face))
+			loc_targetChar->Face = reinterpret_cast<XXFileFace*>(loc_targetChar->Character->m_xxFace);
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		if (model != ExtClass::CharacterStruct::SKELETON) return;
@@ -727,13 +698,13 @@ namespace Poser {
 					}
 				}
 				object face = load.at("face").get<object>();
-				*c->FaceInfo.mouth = (int)face.at("mouth").get<double>();
-				*c->FaceInfo.mouthOpen = (float)face.at("mouthopen").get<double>();
-				*c->FaceInfo.eye = (int)face.at("eye").get<double>();
-				*c->FaceInfo.eyeOpen = (float)face.at("eyeopen").get<double>();
-				*c->FaceInfo.eyebrow = (int)face.at("eyebrow").get<double>();
-				*c->FaceInfo.blush = (float)face.at("blush").get<double>();
-				*c->FaceInfo.blushLines = (float)face.at("blushlines").get<double>();
+				c->Face->m_mouth = (int)face.at("mouth").get<double>();
+				c->Face->m_mouthOpen = (float)face.at("mouthopen").get<double>();
+				c->Face->m_eye = (int)face.at("eye").get<double>();
+				c->Face->m_eyeOpen = (float)face.at("eyeopen").get<double>();
+				c->Face->m_eyebrow = (int)face.at("eyebrow").get<double>();
+				*c->Face->GetBlush() = (float)face.at("blush").get<double>();
+				*c->Face->GetBlushLines() = (float)face.at("blushlines").get<double>();
 			}
 			catch (std::out_of_range& e) {
 				//key doesn't exist
@@ -767,13 +738,13 @@ namespace Poser {
 		json["sliders"] = value(sliders);
 
 		value::object face;
-		face["eye"] = value((double)*c->FaceInfo.eye);
-		face["eyeopen"] = value((double)*c->FaceInfo.eyeOpen);
-		face["eyebrow"] = value((double)*c->FaceInfo.eyebrow);
-		face["mouth"] = value((double)*c->FaceInfo.mouth);
-		face["mouthopen"] = value((double)*c->FaceInfo.mouthOpen);
-		face["blush"] = value((double)*c->FaceInfo.blush);
-		face["blushlines"] = value((double)*c->FaceInfo.blushLines);
+		face["eye"] = value((double)c->Face->m_eye);
+		face["eyeopen"] = value((double)c->Face->m_eyeOpen);
+		face["eyebrow"] = value((double)c->Face->m_eyebrow);
+		face["mouth"] = value((double)c->Face->m_mouth);
+		face["mouthopen"] = value((double)c->Face->m_mouthOpen);
+		face["blush"] = value((double)*c->Face->GetBlush());
+		face["blushlines"] = value((double)*c->Face->GetBlushLines());
 		json["face"] = value(face);
 		return value(json);
 	}
