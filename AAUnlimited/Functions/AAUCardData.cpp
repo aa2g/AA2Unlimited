@@ -28,7 +28,7 @@ AAUCardData::AAUCardData()
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
 	}
-	m_version = 1;
+	m_version = 2;
 }
 
 
