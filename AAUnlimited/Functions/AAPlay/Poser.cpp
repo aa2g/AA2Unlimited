@@ -629,7 +629,7 @@ namespace Poser {
 		std::ifstream in(path);
 		in >> json;
 
-		if (picojson::get_last_error().empty()) {
+		if (picojson::get_last_error().empty() && json.is<object>()) {
 			jsonToPose(loc_targetChar, json);
 		}
 		else {
