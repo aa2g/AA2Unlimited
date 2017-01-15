@@ -82,6 +82,9 @@ namespace Poser {
 			scale = { 1,1,1,0,2 };
 		}
 	};
+	std::map<PoseMods::FrameCategory,std::vector<unsigned int>> loc_sliderCategories; // holds the index of each slider in the main slider vector
+																 // according the the category they reside into
+																 // loc_sliderCategories[category][categoryIndex] = index
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
 
@@ -191,7 +194,6 @@ namespace Poser {
 			thisPtr->m_spinCharacter = GetDlgItem(hwndDlg, IDC_PPS_SPINCHARACTER);
 			thisPtr->m_spinPose = GetDlgItem(hwndDlg, IDC_PPS_SPINPOSE);
 			thisPtr->m_spinFrame = GetDlgItem(hwndDlg, IDC_PPS_SPINFRAME);
-			thisPtr->m_spinValue = GetDlgItem(hwndDlg, IDC_PPS_SPINVALUE);
 			thisPtr->m_spinMouth = GetDlgItem(hwndDlg, IDC_PPS_SPINMOUTH);
 			thisPtr->m_spinMouthOpen = GetDlgItem(hwndDlg, IDC_PPS_SPINMOUTHOPEN);
 			thisPtr->m_spinEye = GetDlgItem(hwndDlg, IDC_PPS_SPINEYE);
@@ -199,6 +201,7 @@ namespace Poser {
 			thisPtr->m_spinEyebrow = GetDlgItem(hwndDlg, IDC_PPS_SPINEYEBROW);
 			thisPtr->m_spinBlush = GetDlgItem(hwndDlg, IDC_PPS_SPINBLUSH);
 			thisPtr->m_spinBlushLines = GetDlgItem(hwndDlg, IDC_PPS_SPINBLUSH2);
+			thisPtr->m_listCategories = GetDlgItem(hwndDlg, IDC_PPS_LISTCATEGORIES);
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
@@ -206,16 +209,25 @@ namespace Poser {
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
 
 			loc_syncing = true;
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Torso"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Arms"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Left Hand"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Right Hand"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Legs"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
+
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Translate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Scale")));
 			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("X")));
 			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Y")));
 			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Z")));
-			thisPtr->InitBones();
 
 			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMIN, TRUE, 0);
 			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_listCategories, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listBones, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
@@ -223,7 +235,6 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinCharacter, UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
 			SendMessage(thisPtr->m_spinFrame, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
-			SendMessage(thisPtr->m_spinValue, UDM_SETRANGE, 0, MAKELPARAM(-32767, 32767));
 			SendMessage(thisPtr->m_spinMouth, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 			SendMessage(thisPtr->m_spinMouthOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			SendMessage(thisPtr->m_spinEye, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
@@ -231,6 +242,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinEyebrow, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
+
 			thisPtr->SyncList();
 
 			loc_syncing = false;
@@ -420,10 +432,15 @@ namespace Poser {
 				if (thisPtr == NULL) return FALSE;
 				int id = LOWORD(wparam);
 				switch (id) {
+				case(IDC_PPS_LISTCATEGORIES): {
+					thisPtr->SyncBones();
+					break; }
 				case(IDC_PPS_LISTBONES): {
+					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
 					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[res];
+						int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
 						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
 						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
 						thisPtr->SyncList();
@@ -451,6 +468,16 @@ namespace Poser {
 		}
 
 		return FALSE;
+	}
+
+	void PoserWindow::SyncBones() {
+		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
+		if (res != LB_ERR) {
+			SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+			for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
+				SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+			}
+		}
 	}
 
 	void PoserWindow::SyncEdit() {
@@ -519,15 +546,6 @@ namespace Poser {
 		}
 	}
 
-	void PoserWindow::InitBones() {
-		int n = loc_sliderInfos.size();
-		for (int i = 0; i < n; i++) {
-			SendMessageW(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(i).descr.c_str()));
-		}
-	}
-
-
-
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		using namespace ExtClass;
 		static const char prefix[]{ "pose_" };
@@ -593,12 +611,14 @@ namespace Poser {
 
 	void GenSliderInfo() {
 		if (!loc_sliderInfos.empty()) return;
+
 		PoseMods mods(POSEMOD_FILE_PATH);
 		auto& input = mods.GetInput();
 		for(auto& elem : input) {
 			SliderInfo info;
-			std::string& strFrame = std::get<0>(elem);
-			std::string& strDesc = std::get<1>(elem);
+			PoseMods::FrameCategory category = std::get<0>(elem);
+			std::string& strFrame = std::get<1>(elem);
+			std::string& strDesc = std::get<2>(elem);
 
 			std::wstring wstrFrame(strFrame.begin(), strFrame.end());
 			info.frameName = wstrFrame;
@@ -613,6 +633,7 @@ namespace Poser {
 			info.xxFrame = NULL;
 
 			loc_sliderInfos.push_back(info);
+			loc_sliderCategories[category].push_back(loc_sliderInfos.size() - 1);
 			loc_frameMap.insert(std::make_pair(strFrame, loc_sliderInfos.size() - 1));
 		}
 	}

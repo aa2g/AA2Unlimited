@@ -40,7 +40,6 @@ namespace Poser {
 		HWND m_spinCharacter;
 		HWND m_spinPose;
 		HWND m_spinFrame;
-		HWND m_spinValue;
 		HWND m_spinMouth;
 		HWND m_spinMouthOpen;
 		HWND m_spinEye;
@@ -48,6 +47,7 @@ namespace Poser {
 		HWND m_spinEyebrow;
 		HWND m_spinBlush;
 		HWND m_spinBlushLines;
+		HWND m_listCategories;
 		HWND m_listBones;
 		HWND m_listOperation;
 		HWND m_listAxis;
@@ -56,7 +56,7 @@ namespace Poser {
 		UINT_PTR m_timer;
 		int m_curBone;
 
-		void InitBones();
+		void SyncBones();
 		void SyncEdit();
 		void SyncList();
 		void SyncSlider();

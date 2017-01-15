@@ -2,75 +2,77 @@
 ; syntax:
 ; - comments: you probably figured that out by now.
 ; - a slider definition goes like this:
-; <modifiedFrame> <blank(s)> <X|Y|Z|PITCH|YAW|ROLL> <blank(s)> <description in game>
+; <frame name> <category> <operations> <axes> <friendly frame name>
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-a01_J_Neck_01 	Neck 1
-a01_J_Neck_02 	Neck 2
-
+; Body
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-a01_J_ArmL_01		Left Arm
-a01_J_ArmL_02		Left Arm Joint
-a01_J_HijiL_01	a01_J_HijiL_01
-a01_J_UdeL_01 	Left Underarm 
-a01_J_ArmR_01		Right Arm
-a01_J_ArmR_02		Right Arm Joint
-a01_J_UdeR_01 	Right Underarm 
-a01_J_HijiR_01	a01_J_HijiR_01
+a01_J_Neck_01		TORSO	SRT XYZ		Neck 1
+a01_J_Neck_02		TORSO	SRT XYZ		Neck 2
+a01_J_Neck_03		TORSO	SRT XYZ		Neck 3
+a01_J_Spin_010		TORSO	SRT XYZ		Waist
+a01_J_Spin_010		TORSO	SRT XYZ		Chest
+a01_J_Kosi_010		TORSO	SRT XYZ		Hip
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Left Hand
+a01_J_ArmL_01		ARMS	SRT XYZ		Left Arm
+a01_J_ArmL_02		ARMS	SRT XYZ		Left Shoulder
+a01_J_UdeL_01		ARMS	SRT XYZ		Left Underarm 
+a01_J_HijiL_01		ARMS	SRT XYZ		Left Elbow
+a01_J_ArmR_01		ARMS	SRT XYZ		Right Arm
+a01_J_ArmR_02		ARMS	SRT XYZ		Right Shoulder
+a01_J_UdeR_01		ARMS	SRT XYZ		Right Underarm 
+a01_J_HijiR_01		ARMS	SRT XYZ		Right Elbow
 
-a01_J_HandL_01   Left Hand
-a01_J_HandL_02 	 Left Hand 2
-a01_J_HitoL_01 	 Left Index Finger 1
-a01_J_HitoL_02 	 Left Index Finger 2
-a01_J_HitoL_03 	 Left Index Finger 3
-a01_J_NakaL_01 	 Left Middle Finger 1
-a01_J_NakaL_02 	 Left Middle Finger 2
-a01_J_NakaL_03 	 Left Middle Finger 3
-a01_J_KusuriL_01 	 Left Ring Finger 1
-a01_J_KusuriL_02 	 Left Ring Finger 2
-a01_J_KusuriL_03 	 Left Ring Finger 3
-a01_J_KoL_01 	 	 Left Little Finger 1
-a01_J_KoL_02 		 Left Little Finger 2
-a01_J_KoL_03 		 Left Little Finger 3
-a01_J_OyaL_01 	 Left Thumb 1
-a01_J_OyaL_02 	 Left Thumb 2
-a01_J_OyaL_03 	 Left Thumb 3
+a01_J_HandL_01		LHAND	SRT XYZ		Hand
+a01_J_HandL_02		LHAND	SRT XYZ		Hand 2
+a01_J_HitoL_01		LHAND	SRT XYZ		Index Finger 1
+a01_J_HitoL_02		LHAND	SRT XYZ		Index Finger 2
+a01_J_HitoL_03		LHAND	SRT XYZ		Index Finger 3
+a01_J_NakaL_01		LHAND	SRT XYZ		Middle Finger 1
+a01_J_NakaL_02		LHAND	SRT XYZ		Middle Finger 2
+a01_J_NakaL_03		LHAND	SRT XYZ		Middle Finger 3
+a01_J_KusuriL_01	LHAND	SRT XYZ		Ring Finger 1
+a01_J_KusuriL_02	LHAND	SRT XYZ		Ring Finger 2
+a01_J_KusuriL_03	LHAND	SRT XYZ		Ring Finger 3
+a01_J_KoL_01		LHAND	SRT XYZ		Little Finger 1
+a01_J_KoL_02		LHAND	SRT XYZ		Little Finger 2
+a01_J_KoL_03		LHAND	SRT XYZ		Little Finger 3
+a01_J_OyaL_01		LHAND	SRT XYZ		Thumb 1
+a01_J_OyaL_02		LHAND	SRT XYZ		Thumb 2
+a01_J_OyaL_03		LHAND	SRT XYZ		Thumb 3
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; right hand
+a01_J_HandR_01		RHAND	SRT XYZ		Hand 
+a01_J_HandR_02		RHAND	SRT XYZ		Hand 2
+a01_J_HitoR_01		RHAND	SRT XYZ		Index Finger 1
+a01_J_HitoR_02		RHAND	SRT XYZ		Index Finger 2
+a01_J_HitoR_03		RHAND	SRT XYZ		Index Finger 3
+a01_J_NakaR_01		RHAND	SRT XYZ		Middle Finger 1
+a01_J_NakaR_02		RHAND	SRT XYZ		Middle Finger 2
+a01_J_NakaR_03		RHAND	SRT XYZ		Middle Finger 3
+a01_J_KusuriR_01	RHAND	SRT XYZ		Ring Finger 1
+a01_J_KusuriR_02	RHAND	SRT XYZ		Ring Finger 2
+a01_J_KusuriR_03	RHAND	SRT XYZ		Ring Finger 3
+a01_J_KoR_01		RHAND	SRT XYZ		Little Finger 1
+a01_J_KoR_02		RHAND	SRT XYZ		Little Finger 2
+a01_J_KoR_03		RHAND	SRT XYZ		Little Finger 3
+a01_J_OyaR_01		RHAND	SRT XYZ		Thumb 1
+a01_J_OyaR_02		RHAND	SRT XYZ		Thumb 2
+a01_J_OyaR_03		RHAND	SRT XYZ		Thumb 3
 
-a01_J_HandR_01 	Right Hand X 
-a01_J_HandR_02 	 Right Hand 2 X
-a01_J_HitoR_01 	 Right Index Finger 1 X
-a01_J_HitoR_02 	 Right Index Finger 2 X
-a01_J_HitoR_03 	 Right Index Finger 3 X
-a01_J_NakaR_01 	 Right Middle Finger 1 X
-a01_J_NakaR_02 	 Right Middle Finger 2 X
-a01_J_NakaR_03 	 Right Middle Finger 3 X
-a01_J_KusuriR_01 	 Right Ring Finger 1 X
-a01_J_KusuriR_02 	 Right Ring Finger 2 X
-a01_J_KusuriR_03 	 Right Ring Finger 3 X
-a01_J_KoR_01 	 	 Right Little Finger 1 X
-a01_J_KoR_02 		 Right Little Finger 2 X
-a01_J_KoR_03 		 Right Little Finger 3 X
-a01_J_OyaR_01 	 Right Thumb 1 X
-a01_J_OyaR_02 	 Right Thumb 2 X
-a01_J_OyaR_03 	 Right Thumb 3 X
+a01_J_UplegL_010	LEGS	SRT XYZ		Left Upper Leg
+a01_J_UplegR_010	LEGS	SRT XYZ		Right Upper Leg
+a01_J_LegL_01		LEGS	SRT XYZ		Left Lower Leg
+a01_J_LegR_01		LEGS	SRT XYZ		Right Lower Leg
+a01_J_HizaL_01		LEGS	SRT XYZ		a01_J_HizaL_01
+a01_J_HizaR_01		LEGS	SRT XYZ		a01_J_HizaR_01
+a01_J_FootL_02		LEGS	SRT XYZ		Left Foot
+a01_J_FootR_02		LEGS	SRT XYZ		Right Foot
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Other
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-a01_J_Spin_010 	Waist
-a01_J_Kosi_010 	Hip
-a01_J_FootL_02 	Left Foot
-a01_J_FootR_02 	Right Foot
-a01_J_UplegL_010 	Left Upper Leg
-a01_J_HizaL_01	a01_J_HizaL_01
-a01_J_UplegR_010 	Right Upper Leg
-a01_J_HizaR_01	a01_J_HizaR_01
-a01_J_LegL_01 	Left Lower Leg
-a01_J_LegR_01 	Right Lower Leg
+a01_N_Zentai_010	OTHER	SRT	XYZ		World
+a01_N_Skeleton_010	OTHER	SRT	XYZ		Skeleton
