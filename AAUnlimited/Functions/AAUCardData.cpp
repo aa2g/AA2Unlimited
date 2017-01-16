@@ -1058,14 +1058,14 @@ void AAUCardData::SaveOverrideFiles() {
 		if (buffer.size() > 0) {
 			int location;
 			auto path = arule.second.GetRelPath();
-			if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
-				path = path;
-				location = 0;
-			}
-			else {
+			//if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+			//	path = path;
+			//	location = 0;
+			//}
+			//else {
 				path = path;
 				location = 2;
-			}
+			//}
 			m_savedFiles.emplace_back(std::make_pair(location,path),buffer);
 		}
 	}
