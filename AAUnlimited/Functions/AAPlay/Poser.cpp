@@ -10,6 +10,7 @@
 #include <Strsafe.h>
 #include <fstream>
 
+#include "External\AddressRule.h"
 #include "External\ExternalClasses\Frame.h"
 #include "External\ExternalClasses\XXFileFace.h"
 #include "General\IllusionUtil.h"
@@ -18,6 +19,8 @@
 #include "Files\PoseMods.h"
 #include "Files\Config.h"
 #include "Files\PoseFile.h"
+#include "Files\PoseFile.h"
+#include "Files\ClothFile.h"
 #include "resource.h"
 #include "config.h"
 
@@ -91,20 +94,24 @@ namespace Poser {
 	class PoserCharacter {
 	public:
 		PoserCharacter(ExtClass::CharacterStruct* c) :
-			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap), Face(nullptr)
+			Character(c), SliderInfos(loc_sliderInfos), FrameMap(loc_frameMap)
 		{
 			CurrentSlider = &SliderInfos[0];
+		}
+
+		inline XXFileFace* GetFace() {
+			return reinterpret_cast<XXFileFace*>(Character->m_xxFace);
 		}
 
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
-		XXFileFace* Face;
 		SliderInfo *CurrentSlider;
 	};
 
 	std::vector<PoserCharacter*> loc_targetCharacters;
 	PoserCharacter* loc_targetChar;
+	PoserCharacter* loc_loadCharacter;
 
 	bool loc_syncing;
 	Poser::EventType loc_eventType = NoEvent;
@@ -116,6 +123,7 @@ namespace Poser {
 	void GenSliderInfo();
 
 	void StartEvent(EventType type) {
+		if (type == loc_eventType) return;
 		if (!g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal && type == ClothingScene) return;
 		if (!g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal
 			&& (type == NpcInteraction || type == HMode )) return;
@@ -134,22 +142,33 @@ namespace Poser {
 		}
 		loc_targetCharacters.clear();
 		loc_targetChar = nullptr;
+		loc_loadCharacter = nullptr;
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 	}
 
-	void SetTargetCharacter(ExtClass::CharacterStruct* c) {
+	void SetTargetCharacter(ExtClass::CharacterStruct* charStruct) {
 		GenSliderInfo();
 		if (loc_eventType != ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal) {
-			StartEvent(HMode);
-			PoserCharacter* character = new PoserCharacter(c);
-			loc_targetCharacters.push_back(character);
-			loc_targetChar = character; // must be set for further meshes loading such as the face
+			if (loc_eventType != NpcInteraction)
+				StartEvent(HMode);
+			loc_loadCharacter = nullptr;
+			for (PoserCharacter* c : loc_targetCharacters) {
+				if (c->Character == charStruct)
+					loc_loadCharacter = c;
+			}
+			if (!loc_loadCharacter) {
+				loc_loadCharacter = new PoserCharacter(charStruct);
+				loc_targetCharacters.push_back(loc_loadCharacter);
+			}
+			if (!loc_targetChar)
+				loc_targetChar = loc_loadCharacter;
 		}
 		else if (loc_eventType == ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
-			PoserCharacter* character = new PoserCharacter(c);
+			PoserCharacter* character = new PoserCharacter(charStruct);
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
+			loc_loadCharacter = character;
 		}
 	}
 
@@ -210,10 +229,12 @@ namespace Poser {
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Torso"));
-			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Arms"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Left Arm"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Right Arm"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Left Hand"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Right Hand"));
-			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Legs"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"LeftLeg"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"RightLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
@@ -288,21 +309,21 @@ namespace Poser {
 				SendMessage(thisPtr->m_edFrame,WM_SETTEXT,0,(LPARAM)frame);
 			}
 			TCHAR value[16];
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_mouth);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->GetFace()->m_mouth);
 			SendMessage(thisPtr->m_edMouth, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->Face->m_mouthOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->GetFace()->m_mouthOpen);
 			SendMessage(thisPtr->m_edMouthOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_eye);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->GetFace()->m_eye);
 			SendMessage(thisPtr->m_edEye, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->Face->m_eyeOpen);
+			StringCbPrintf(value, 15, TEXT("%.0f"), loc_targetChar->GetFace()->m_eyeOpen);
 			SendMessage(thisPtr->m_edEyeOpen, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->Face->m_eyebrow);
+			StringCbPrintf(value, 15, TEXT("%d"), loc_targetChar->GetFace()->m_eyebrow);
 			SendMessage(thisPtr->m_edEyebrow, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->Face->GetBlush() * 9.0f));
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->GetFace()->GetBlush() * 9.0f));
 			SendMessage(thisPtr->m_edBlush, WM_SETTEXT, 0, (LPARAM)value);
-			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->Face->GetBlushLines() * 9.0f));
+			StringCbPrintf(value, 15, TEXT("%d"), (int)(*loc_targetChar->GetFace()->GetBlushLines() * 9.0f));
 			SendMessage(thisPtr->m_edBlushLines, WM_SETTEXT, 0, (LPARAM)value);
-			SendMessage(thisPtr->m_chkEyeTrack, BM_SETCHECK, loc_targetChar->Face->m_eyeTracking ? BST_CHECKED : BST_UNCHECKED, 0);
+			SendMessage(thisPtr->m_chkEyeTrack, BM_SETCHECK, loc_targetChar->GetFace()->m_eyeTracking ? BST_CHECKED : BST_UNCHECKED, 0);
 
 			break; }
 		case WM_COMMAND: {
@@ -332,37 +353,42 @@ namespace Poser {
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTH) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->Face->m_mouth = val;
+					loc_targetChar->GetFace()->m_mouth = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDMOUTHOPEN) {
 					float val = General::GetEditFloat(ed);
-					loc_targetChar->Face->m_mouthOpen = val;
+					loc_targetChar->GetFace()->m_mouthOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYE) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->Face->m_eye = val;
+					loc_targetChar->GetFace()->m_eye = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEOPEN) {
 					float val = General::GetEditFloat(ed);
-					loc_targetChar->Face->m_eyeOpen = val;
+					loc_targetChar->GetFace()->m_eyeOpen = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDEYEBROW) {
 					int val = General::GetEditInt(ed);
-					loc_targetChar->Face->m_eyebrow = val;
+					loc_targetChar->GetFace()->m_eyebrow = val;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->Face->GetBlush() = (float)val/9.0f;
+					*loc_targetChar->GetFace()->GetBlush() = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH2) {
 					int val = General::GetEditInt(ed);
-					*loc_targetChar->Face->GetBlushLines() = (float)val/9.0f;
+					*loc_targetChar->GetFace()->GetBlushLines() = (float)val/9.0f;
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
 					loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
-					SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
-					SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
+					//SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
+					//SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
+					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
+					LRESULT bon = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
+					if (cat != LB_ERR && bon != LB_ERR) {
+						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[loc_sliderCategories[(PoseMods::FrameCategory)cat][bon]];
+					}
 					thisPtr->SyncList();
 				}
 
@@ -384,7 +410,7 @@ namespace Poser {
 					}
 				}
 				else if (id == IDC_PPS_BTNRESET) {
-					for (auto it = loc_sliderInfos.begin(); it != loc_sliderInfos.end(); it++) {
+					for (auto it = loc_targetChar->SliderInfos.begin(); it != loc_targetChar->SliderInfos.end(); it++) {
 						it->reset();
 						ApplySlider(&(*it));
 					}
@@ -424,7 +450,13 @@ namespace Poser {
 				}
 				else if (id == IDC_PPS_CHKEYETRACK) {
 					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
-					loc_targetChar->Face->m_eyeTracking = res == BST_CHECKED;
+					loc_targetChar->GetFace()->m_eyeTracking = res == BST_CHECKED;
+				}
+				else if (id == IDC_PPS_BTNCLOTHES) {
+					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					if (path != NULL) {
+						thisPtr->LoadCloth(General::FileToBuffer(path));
+					}
 				}
 				break; }
 			case LBN_SELCHANGE: {
@@ -551,13 +583,18 @@ namespace Poser {
 		static const char prefix[]{ "pose_" };
 
 		if (xxFile == NULL) return;
-		if (loc_targetChar == NULL) return;
-		if (loc_targetChar->Character->m_xxFace && ((void*)loc_targetChar->Character->m_xxFace != (void*)loc_targetChar->Face))
-			loc_targetChar->Face = reinterpret_cast<XXFileFace*>(loc_targetChar->Character->m_xxFace);
+		if (loc_targetCharacters.size() == 0) return;
+		PoserCharacter* targetChar = nullptr;
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		if (model != ExtClass::CharacterStruct::SKELETON) return;
-
+		targetChar = loc_loadCharacter;
+		if (targetChar->Character->m_xxSkeleton != xxFile) {
+			for (PoserCharacter* c : loc_targetCharacters) {
+				if (c->Character->m_xxSkeleton == xxFile)
+					targetChar = c;
+			}
+		}
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			
@@ -589,7 +626,8 @@ namespace Poser {
 				strcpy_s(bone->m_name,bone->m_nameBufferSize,prefix);
 				strcat_s(bone->m_name,bone->m_nameBufferSize,newMatch->m_name);
 
-				loc_targetChar->SliderInfos[match->second].xxFrame = bone;
+				targetChar->SliderInfos[match->second].xxFrame = bone;
+				ApplySlider(&targetChar->SliderInfos[match->second]);
 			}
 		});
 
@@ -719,13 +757,13 @@ namespace Poser {
 					}
 				}
 				object face = load.at("face").get<object>();
-				c->Face->m_mouth = (int)face.at("mouth").get<double>();
-				c->Face->m_mouthOpen = (float)face.at("mouthopen").get<double>();
-				c->Face->m_eye = (int)face.at("eye").get<double>();
-				c->Face->m_eyeOpen = (float)face.at("eyeopen").get<double>();
-				c->Face->m_eyebrow = (int)face.at("eyebrow").get<double>();
-				*c->Face->GetBlush() = (float)face.at("blush").get<double>();
-				*c->Face->GetBlushLines() = (float)face.at("blushlines").get<double>();
+				c->GetFace()->m_mouth = (int)face.at("mouth").get<double>();
+				c->GetFace()->m_mouthOpen = (float)face.at("mouthopen").get<double>();
+				c->GetFace()->m_eye = (int)face.at("eye").get<double>();
+				c->GetFace()->m_eyeOpen = (float)face.at("eyeopen").get<double>();
+				c->GetFace()->m_eyebrow = (int)face.at("eyebrow").get<double>();
+				*c->GetFace()->GetBlush() = (float)face.at("blush").get<double>();
+				*c->GetFace()->GetBlushLines() = (float)face.at("blushlines").get<double>();
 			}
 			catch (std::out_of_range& e) {
 				//key doesn't exist
@@ -759,14 +797,29 @@ namespace Poser {
 		json["sliders"] = value(sliders);
 
 		value::object face;
-		face["eye"] = value((double)c->Face->m_eye);
-		face["eyeopen"] = value((double)c->Face->m_eyeOpen);
-		face["eyebrow"] = value((double)c->Face->m_eyebrow);
-		face["mouth"] = value((double)c->Face->m_mouth);
-		face["mouthopen"] = value((double)c->Face->m_mouthOpen);
-		face["blush"] = value((double)*c->Face->GetBlush());
-		face["blushlines"] = value((double)*c->Face->GetBlushLines());
+		face["eye"] = value((double)c->GetFace()->m_eye);
+		face["eyeopen"] = value((double)c->GetFace()->m_eyeOpen);
+		face["eyebrow"] = value((double)c->GetFace()->m_eyebrow);
+		face["mouth"] = value((double)c->GetFace()->m_mouth);
+		face["mouthopen"] = value((double)c->GetFace()->m_mouthOpen);
+		face["blush"] = value((double)*c->GetFace()->GetBlush());
+		face["blushlines"] = value((double)*c->GetFace()->GetBlushLines());
 		json["face"] = value(face);
 		return value(json);
+	}
+
+	void PoserWindow::LoadCloth(std::vector<BYTE> &file) {
+		ClothFile load(file);
+		if (!load.IsValid()) return;
+		ExtClass::CharacterData::Clothes* cloth = &loc_targetChar->Character->m_charData->m_clothes[loc_targetChar->Character->m_currClothes];
+		cloth->slot = load.m_slot;
+		cloth->skirtLength = load.m_shortSkirt;
+		cloth->socks = load.m_socksId;
+		cloth->colorTop1 = load.m_colorTop1;
+		cloth->colorTop2 = load.m_colorTop2;
+		cloth->colorTop3 = load.m_colorTop3;
+		cloth->colorTop4 = load.m_colorTop4;
+		cloth->colorBottom1 = load.m_colorBottom1;
+		cloth->colorBottom2 = load.m_colorBottom2;
 	}
 }

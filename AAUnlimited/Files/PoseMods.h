@@ -12,10 +12,12 @@ class PoseMods
 public:
 	enum FrameCategory {
 		Torso,
-		Arms,
+		LeftArm,
+		RightArm,
 		LeftHand,
 		RightHand,
-		Legs,
+		LeftLeg,
+		RightLeg,
 		Skirt,
 		Room,
 		Other

@@ -62,6 +62,7 @@ namespace Poser {
 		void SyncSlider();
 		void LoadPose(const TCHAR* path);
 		void SavePose(const TCHAR* path);
+		void LoadCloth(std::vector<BYTE> &file);
 
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	};

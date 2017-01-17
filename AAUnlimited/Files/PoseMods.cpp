@@ -10,10 +10,12 @@ PoseMods::PoseMods(std::wstring path) {
 	std::ifstream in(path);
 	std::map<std::string, FrameCategory> categoryMap;
 	categoryMap["BODY"]  = Torso;
-	categoryMap["ARMS"]  = Arms;
+	categoryMap["LARM"] = LeftArm;
+	categoryMap["RARM"] = RightArm;
 	categoryMap["LHAND"] = LeftHand;
 	categoryMap["RHAND"] = RightHand;
-	categoryMap["LEGS"]  = Legs;
+	categoryMap["LLEG"] = LeftLeg;
+	categoryMap["RLEG"] = RightLeg;
 	categoryMap["SKIRT"] = Skirt;
 	categoryMap["ROOM"]  = Room;
 	categoryMap["OTHER"] = Other;
