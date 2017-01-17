@@ -4,18 +4,22 @@
 
 #include "MemMods/Hook.h"
 #include "General/ModuleInfo.h"
+#include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 #include "Functions\AAPlay\Poser.h"
 
 namespace PlayInjections {
 namespace ClothingDialog {
 
+	bool g_isClothingDialogue = false;
 
 void InitEvent() {
+	g_isClothingDialogue = true;
 	Poser::StartEvent(Poser::ClothingScene);
 }
 
 void ExitEvent() {
+	g_isClothingDialogue = false;
 	Poser::EndEvent();
 }
 

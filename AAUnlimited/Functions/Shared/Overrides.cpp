@@ -16,6 +16,7 @@
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Slider.h"
 #include "External\ExternalClasses\CharacterStruct.h"
+#include "MemMods\AAPlay\Events\ClothingDialog.h"
 
 namespace Shared {
 
@@ -43,7 +44,7 @@ namespace Shared {
 	}
 
 	void MeshTextureCharLoadEnd() {
-		g_isOverriding = false;
+		if (!PlayInjections::ClothingDialog::g_isClothingDialogue) g_isOverriding = false;
 	}
 
 	/*********************************/
