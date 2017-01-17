@@ -207,6 +207,9 @@ namespace Poser {
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
+			thisPtr->m_chkAlwaysOnTop = GetDlgItem(hwndDlg, IDC_PPS_CHKALWAYSONTOP);
+			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Torso"));
@@ -425,6 +428,11 @@ namespace Poser {
 				else if (id == IDC_PPS_CHKEYETRACK) {
 					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
 					loc_targetChar->Face->m_eyeTracking = res == BST_CHECKED;
+				}
+				else if (id == IDC_PPS_CHKALWAYSONTOP) {
+					LRESULT res = SendMessage(thisPtr->m_chkAlwaysOnTop, BM_GETCHECK, 0, 0);
+					bool isChecked = res == BST_CHECKED;
+					SetWindowPos(thisPtr->m_dialog, isChecked ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 				}
 				break; }
 			case LBN_SELCHANGE: {
