@@ -28,7 +28,7 @@ AAUCardData::AAUCardData()
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
 	}
-	m_version = 2;
+	m_version = 1;
 }
 
 
@@ -354,7 +354,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	Reset();
 	//try to find it at the end first
-	if (size < 8) return false;
+	if (size < 8) {
+		m_version = AAUCardData::CurrentVersion;
+		return false;
+	}
 	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
 	if (aauDataSize < size - 8) {
 		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
@@ -373,6 +376,7 @@ bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 		FromBuffer((char*)chunk, size);
 		return true;
 	}
+	m_version = AAUCardData::CurrentVersion;
 	return false;
 }
 
