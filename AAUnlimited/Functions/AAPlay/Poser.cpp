@@ -815,6 +815,11 @@ namespace Poser {
 		cloth->slot = load.m_slot;
 		cloth->skirtLength = load.m_shortSkirt;
 		cloth->socks = load.m_socksId;
+		cloth->indoorShoes = load.m_shoesIndoorId;
+		cloth->outdoorShoes = load.m_shoesOutdoorId;
+		cloth->isOnePiece = load.m_isOnePiece;
+		cloth->hasUnderwear = load.m_hasUnderwear;
+		cloth->hasSkirt = load.m_hasSkirt;
 		cloth->colorTop1 = load.m_colorTop1;
 		cloth->colorTop2 = load.m_colorTop2;
 		cloth->colorTop3 = load.m_colorTop3;
