@@ -734,6 +734,10 @@ namespace Poser {
 				c->Character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
 				c->Character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
 				object sliders = load.at("sliders").get<object>();
+				for (auto it = loc_targetChar->SliderInfos.begin(); it != loc_targetChar->SliderInfos.end(); it++) {
+					it->reset();
+					ApplySlider(&(*it));
+				}
 				for (auto s = sliders.cbegin(); s != sliders.cend(); s++) {
 					auto match = c->FrameMap.find((*s).first);
 					if (match != loc_targetChar->FrameMap.end()) {
