@@ -756,14 +756,37 @@ namespace Poser {
 						}
 					}
 				}
+			}
+			catch (std::out_of_range& e) {
+				//key doesn't exist
+			}
+			catch (std::runtime_error& e) {
+				//invalid json data
+			}
+
+			try {
 				object face = load.at("face").get<object>();
-				c->GetFace()->m_mouth = (int)face.at("mouth").get<double>();
-				c->GetFace()->m_mouthOpen = (float)face.at("mouthopen").get<double>();
-				c->GetFace()->m_eye = (int)face.at("eye").get<double>();
-				c->GetFace()->m_eyeOpen = (float)face.at("eyeopen").get<double>();
-				c->GetFace()->m_eyebrow = (int)face.at("eyebrow").get<double>();
-				*c->GetFace()->GetBlush() = (float)face.at("blush").get<double>();
-				*c->GetFace()->GetBlushLines() = (float)face.at("blushlines").get<double>();
+				auto it = face.find("mouth");
+				if (it != face.end())
+					c->GetFace()->m_mouth = (int)it->second.get<double>();
+				it = face.find("mouthopen");
+				if (it != face.end())
+					c->GetFace()->m_mouthOpen = (float)it->second.get<double>();
+				it = face.find("eye");
+				if (it != face.end())
+					c->GetFace()->m_eye = (int)it->second.get<double>();
+				it = face.find("eyeopen");
+				if (it != face.end())
+					c->GetFace()->m_eyeOpen = (float)it->second.get<double>();
+				it = face.find("eyebrow");
+				if (it != face.end())
+					c->GetFace()->m_eyebrow = (int)it->second.get<double>();
+				it = face.find("blush");
+				if (it != face.end())
+					*c->GetFace()->GetBlush() = (float)(it->second.get<double>() / 9.0f);
+				it = face.find("blushlines");
+				if (it != face.end())
+					*c->GetFace()->GetBlushLines() = (float)(it->second.get<double>() / 9.0f);
 			}
 			catch (std::out_of_range& e) {
 				//key doesn't exist
