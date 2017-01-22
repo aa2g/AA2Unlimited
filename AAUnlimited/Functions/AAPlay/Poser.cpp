@@ -261,8 +261,8 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinEye, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
 			SendMessage(thisPtr->m_spinEyeOpen, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
 			SendMessage(thisPtr->m_spinEyebrow, UDM_SETRANGE, 0, MAKELPARAM(200, 0)); //fix max
-			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
-			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(9, 0));
+			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
+			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 
 			thisPtr->SyncList();
 
@@ -825,8 +825,8 @@ namespace Poser {
 		face["eyebrow"] = value((double)c->GetFace()->m_eyebrow);
 		face["mouth"] = value((double)c->GetFace()->m_mouth);
 		face["mouthopen"] = value((double)c->GetFace()->m_mouthOpen);
-		face["blush"] = value((double)*c->GetFace()->GetBlush());
-		face["blushlines"] = value((double)*c->GetFace()->GetBlushLines());
+		face["blush"] = value(round((double)(*c->GetFace()->GetBlush() * 9.0f)));
+		face["blushlines"] = value(round((double)(*c->GetFace()->GetBlushLines() * 9.0f)));
 		json["face"] = value(face);
 		return value(json);
 	}
