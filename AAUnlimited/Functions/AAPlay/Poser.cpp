@@ -779,8 +779,12 @@ namespace Poser {
 				if (it != face.end())
 					c->GetFace()->m_eyeOpen = (float)it->second.get<double>();
 				it = face.find("eyebrow");
-				if (it != face.end())
-					c->GetFace()->m_eyebrow = (int)it->second.get<double>();
+				if (it != face.end()) {
+					int eyebrow = c->GetFace()->m_eyebrow;
+					eyebrow = eyebrow - (eyebrow % 7);
+					int newEyebrow = (int)it->second.get<double>() % 7;
+					c->GetFace()->m_eyebrow = eyebrow + newEyebrow;
+				}
 				it = face.find("blush");
 				if (it != face.end())
 					*c->GetFace()->GetBlush() = (float)(it->second.get<double>() / 9.0f);
