@@ -12,6 +12,7 @@
 a01_J_Neck_01		TORSO	SRT XYZ		Neck 1
 a01_J_Neck_02		TORSO	SRT XYZ		Neck 2
 a01_J_Neck_03		TORSO	SRT XYZ		Neck 3
+a01_J_Hip_010		TORSO	SRT XYZ		Center
 a01_J_Spin_010		TORSO	SRT XYZ		Waist
 a01_J_Spin_020		TORSO	SRT XYZ		Chest
 a01_J_Kosi_010		TORSO	SRT XYZ		Hip
