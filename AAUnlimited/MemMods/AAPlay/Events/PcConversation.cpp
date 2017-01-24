@@ -16,11 +16,11 @@ namespace PcConversation {
  ********************/
 
 void __stdcall StartEvent() {
-
+	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall EndEvent() {
-
+	Poser::EndEvent();
 }
 
 
@@ -92,7 +92,6 @@ void __stdcall PreTick(ExtClass::MainConversationStruct* param) {
 	default:
 		break;
 	}
-	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall PostTick(ExtClass::MainConversationStruct* param) {

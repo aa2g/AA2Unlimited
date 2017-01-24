@@ -31,7 +31,7 @@ public:
 	int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24
 	BYTE m_unknown3[2];
 	BYTE m_bClothesOn;
-	BYTE m_unknown4;
+	BYTE m_currClothSlot;
 	BYTE m_currClothes;
 	BYTE m_unknown5[3];
 	XXFile* m_xxFace; //certain pointers to model files. all of these may be NULL if they are not loaded yet or not used
