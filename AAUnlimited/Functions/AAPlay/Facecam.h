@@ -7,5 +7,6 @@ namespace Facecam {
 
 void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
 void AdjustCamera(ExtClass::Frame* bone);
+void Cleanup();
 
 }

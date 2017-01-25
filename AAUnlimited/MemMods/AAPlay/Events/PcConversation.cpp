@@ -4,6 +4,7 @@
 #include "External/ExternalClasses.h"
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/Poser.h"
+#include "Functions/AAPlay/Facecam.h"
 
 namespace PlayInjections {
 /*
@@ -16,7 +17,7 @@ namespace PcConversation {
  ********************/
 
 void __stdcall StartEvent() {
-
+	Facecam::Cleanup();
 }
 
 void __stdcall EndEvent() {

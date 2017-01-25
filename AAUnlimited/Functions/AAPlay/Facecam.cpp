@@ -25,6 +25,7 @@
 namespace Facecam {
 
 void RestoreCamera();
+void Cleanup();
 
 
 ExtClass::HInfo* loc_hinfo = NULL;
@@ -47,35 +48,36 @@ D3DMATRIX loc_passiveKaos[6];
 void ShowFace(bool active, bool visible) {
 	ExtClass::CharacterStruct* character = active ? loc_activeChar
 												  : loc_passiveChar;
-	ExtClass::XXFile* toHide[6] = {character->m_xxFace, character->m_xxTounge,
-								  character->m_xxHairs[0],character->m_xxHairs[1],
-								  character->m_xxHairs[2],character->m_xxHairs[3]}; //alternative, we could scale the neck
-	D3DMATRIX(&kaoBackup)[6] = active ? loc_activeKaos : loc_passiveKaos;
-	for(int i = 0; i < 6; i++) {
-		//all_root->scene_root->kao; we scale kao to 0 or id
-		//do save search for kao
-		ExtClass::XXFile* it = toHide[i];
-		if (it == NULL) continue; //some of them might not be there (e.g has no side hair)
-		ExtClass::Frame* boneIt = it->m_root; //all_root
-		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
-		boneIt = &boneIt->m_children[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
-		if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
-		boneIt = &boneIt->m_children[0]; //kao
-		//backup the matrix if possible
-		static const D3DMATRIX nullMatrix = {0.001f,0,0,0,  0,0.001f,0,0,  0,0,0.001f,0,  0,0,0,1.0f};
-		if(memcmp(&boneIt->m_matrix1, &nullMatrix, sizeof(nullMatrix)) != 0) {
-			//its not a nullmatrix, back up the current one into the array
-			kaoBackup[i] = boneIt->m_matrix1;
-		}
-		//set to 0 matrix or backup depending on visible parameter
-		if(visible) {
-			boneIt->m_matrix1 = kaoBackup[i];
-		}
-		else {
-			boneIt->m_matrix1 = nullMatrix;
+	if (character) {
+		ExtClass::XXFile* toHide[6] = { character->m_xxFace, character->m_xxTounge,
+									  character->m_xxHairs[0],character->m_xxHairs[1],
+									  character->m_xxHairs[2],character->m_xxHairs[3] }; //alternative, we could scale the neck
+		D3DMATRIX(&kaoBackup)[6] = active ? loc_activeKaos : loc_passiveKaos;
+		for (int i = 0; i < 6; i++) {
+			//all_root->scene_root->kao; we scale kao to 0 or id
+			//do save search for kao
+			ExtClass::XXFile* it = toHide[i];
+			if (it == NULL) continue; //some of them might not be there (e.g has no side hair)
+			ExtClass::Frame* boneIt = it->m_root; //all_root
+			if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+			boneIt = &boneIt->m_children[0]; //sene_root (weird notation cause boneIt = boneIt->m_boneArray sends the wrong message)
+			if (boneIt == NULL || boneIt->m_nChildren != 1) continue;
+			boneIt = &boneIt->m_children[0]; //kao
+			//backup the matrix if possible
+			static const D3DMATRIX nullMatrix = { 0.001f,0,0,0,  0,0.001f,0,0,  0,0,0.001f,0,  0,0,0,1.0f };
+			if (memcmp(&boneIt->m_matrix1, &nullMatrix, sizeof(nullMatrix)) != 0) {
+				//its not a nullmatrix, back up the current one into the array
+				kaoBackup[i] = boneIt->m_matrix1;
+			}
+			//set to 0 matrix or backup depending on visible parameter
+			if (visible) {
+				boneIt->m_matrix1 = kaoBackup[i];
+			}
+			else {
+				boneIt->m_matrix1 = nullMatrix;
+			}
 		}
 	}
-
 }
 
 D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
@@ -117,18 +119,8 @@ D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
 	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
 	if (!notEnd) {
-		LOGPRIO(Logger::Priority::INFO) << "Cleaning up...\n";
-		
-		loc_state = 0;
 		RestoreCamera();
-		loc_activeFaceXX = NULL;
-		loc_passiveFaceXX = NULL;
-
-		loc_hinfo = NULL;
-		loc_activeChar = NULL;
-		loc_passiveChar = NULL;
-
-		LOGPRIO(Logger::Priority::INFO) << "Cleaned up!\n";
+		Cleanup();
 	}
 	else {
 		//save active/passive characters at start
@@ -287,4 +279,13 @@ void AdjustCamera(ExtClass::Frame* bone) {
 	}
 }
 
+void Cleanup() {
+	loc_state = 0;
+	loc_activeFaceXX = NULL;
+	loc_passiveFaceXX = NULL;
+
+	loc_hinfo = NULL;
+	loc_activeChar = NULL;
+	loc_passiveChar = NULL;
+}
 }
