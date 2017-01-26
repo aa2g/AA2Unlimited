@@ -464,7 +464,8 @@ namespace Poser {
 				else if (id == IDC_PPS_CHKALWAYSONTOP) {
 					LRESULT res = SendMessage(thisPtr->m_chkAlwaysOnTop, BM_GETCHECK, 0, 0);
 					bool isChecked = res == BST_CHECKED;
-					SetWindowPos(thisPtr->m_dialog, isChecked ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+					const static DWORD rule[]{ 0x368274 };
+					SetParent(thisPtr->m_dialog, isChecked ? *(HWND*)ExtVars::ApplyRule(rule) : NULL);
 				}
 				break; }
 			case LBN_SELCHANGE: {
