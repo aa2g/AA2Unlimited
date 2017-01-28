@@ -16,6 +16,7 @@ PoseMods::PoseMods(std::wstring path) {
 	categoryMap["RHAND"] = RightHand;
 	categoryMap["LLEG"] = LeftLeg;
 	categoryMap["RLEG"] = RightLeg;
+	categoryMap["BREAST"] = Breasts;
 	categoryMap["SKIRT"] = Skirt;
 	categoryMap["ROOM"]  = Room;
 	categoryMap["OTHER"] = Other;

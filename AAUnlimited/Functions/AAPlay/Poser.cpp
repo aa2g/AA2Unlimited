@@ -238,6 +238,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Right Hand"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"LeftLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"RightLeg"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Breasts"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
@@ -596,14 +597,19 @@ namespace Poser {
 		PoserCharacter* targetChar = nullptr;
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
-		if (model != ExtClass::CharacterStruct::SKELETON) return;
 		targetChar = loc_loadCharacter;
-		if (targetChar->Character->m_xxSkeleton != xxFile) {
-			for (PoserCharacter* c : loc_targetCharacters) {
-				if (c->Character->m_xxSkeleton == xxFile)
-					targetChar = c;
+		if (model == ExtClass::CharacterStruct::SKELETON) {
+			if (targetChar->Character->m_xxSkeleton != xxFile) {
+				for (PoserCharacter* c : loc_targetCharacters) {
+					if (c->Character->m_xxSkeleton == xxFile)
+						targetChar = c;
+				}
 			}
 		}
+		else if (model != ExtClass::CharacterStruct::SKIRT)
+			// The skirt XXFile isn't defined in the character struct at this moment
+			// We suppose the skeleton is already loaded and targetChar points to the correct char
+			return;
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			
