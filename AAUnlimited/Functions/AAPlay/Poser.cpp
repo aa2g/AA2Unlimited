@@ -606,10 +606,14 @@ namespace Poser {
 				}
 			}
 		}
+		else
+			return;
+		/*
 		else if (model != ExtClass::CharacterStruct::SKIRT)
 			// The skirt XXFile isn't defined in the character struct at this moment
 			// We suppose the skeleton is already loaded and targetChar points to the correct char
 			return;
+		*/
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			
