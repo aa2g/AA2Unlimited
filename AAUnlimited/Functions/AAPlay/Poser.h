@@ -53,6 +53,9 @@ namespace Poser {
 		HWND m_listAxis;
 		HWND m_sliderValue;
 		HWND m_chkEyeTrack;
+		HWND m_chkTears;
+		HWND m_chkDimEyes;
+		HWND m_chkTongueJuice;
 		HWND m_chkAlwaysOnTop;
 		UINT_PTR m_timer;
 		int m_curBone;

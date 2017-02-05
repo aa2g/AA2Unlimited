@@ -103,6 +103,30 @@ namespace Poser {
 			return reinterpret_cast<XXFileFace*>(Character->m_xxFace);
 		}
 
+		void SetHidden(const char* name, bool hidden) {
+			ExtClass::Frame** frame = Character->m_bonePtrArray;
+			while (frame < Character->m_bonePtrArrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, name)) {
+						(*frame)->m_renderFlag = hidden ? 2 : 0;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void SetTears(bool show) {
+			SetHidden("A00_O_namida", !show);
+		}
+
+		void SetDimEyes(bool dim) {
+			SetHidden("A00_O_mehi", dim);
+		}
+
+		void SetTongueJuice(bool show) {
+			SetHidden("A00_O_kutisiru", !show);
+		}
+
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
@@ -227,6 +251,9 @@ namespace Poser {
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
 			thisPtr->m_chkAlwaysOnTop = GetDlgItem(hwndDlg, IDC_PPS_CHKALWAYSONTOP);
+			thisPtr->m_chkTears = GetDlgItem(hwndDlg, IDC_PPS_CHKTEARS);
+			thisPtr->m_chkDimEyes = GetDlgItem(hwndDlg, IDC_PPS_CHKDIMEYES);
+			thisPtr->m_chkTongueJuice = GetDlgItem(hwndDlg, IDC_PPS_CHKTONGUEJUICE);
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
@@ -455,6 +482,18 @@ namespace Poser {
 				else if (id == IDC_PPS_CHKEYETRACK) {
 					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
 					loc_targetChar->GetFace()->m_eyeTracking = res == BST_CHECKED;
+				}
+				else if (id == IDC_PPS_CHKTEARS) {
+					LRESULT res = SendMessage(thisPtr->m_chkTears, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetTears(res == BST_CHECKED);
+				}
+				else if (id == IDC_PPS_CHKTONGUEJUICE) {
+					LRESULT res = SendMessage(thisPtr->m_chkTongueJuice, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetTongueJuice(res == BST_CHECKED);
+				}
+				else if (id == IDC_PPS_CHKDIMEYES) {
+					LRESULT res = SendMessage(thisPtr->m_chkDimEyes, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetDimEyes(res == BST_CHECKED);
 				}
 				else if (id == IDC_PPS_BTNCLOTHES) {
 					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
