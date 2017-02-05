@@ -13,7 +13,6 @@ namespace Shared {
 	* Override rules are taken from this card.
 	*/
 	extern CharInstData* g_currentChar;
-	extern bool g_isOverriding;
 	
 
 	bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer);

@@ -79,6 +79,7 @@
     <ClCompile Include="Files\PoseMods.cpp" />
     <ClCompile Include="MemMods\Shared\Events\FrameManipulationTest.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
+    <ClCompile Include="Functions\AAPlay\GameState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="MemMods\Shared\Events\FrameManipulationTest.h" />
     <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="3rdparty\picojson\picojson.h" />
+    <ClInclude Include="Functions\AAPlay\GameState.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

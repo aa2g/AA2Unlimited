@@ -7,19 +7,18 @@
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 #include "Functions\AAPlay\Poser.h"
+#include "Functions\AAPlay\GameState.h"
 
 namespace PlayInjections {
 namespace ClothingDialog {
 
-	bool g_isClothingDialogue = false;
-
 void InitEvent() {
-	g_isClothingDialogue = true;
+	Shared::GameState::setIsClothesScreen(true);
 	Poser::StartEvent(Poser::ClothingScene);
 }
 
 void ExitEvent() {
-	g_isClothingDialogue = false;
+	Shared::GameState::setIsClothesScreen(false);
 	Poser::EndEvent();
 }
 

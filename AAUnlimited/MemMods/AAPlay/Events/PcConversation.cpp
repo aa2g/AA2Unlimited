@@ -5,6 +5,7 @@
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/Poser.h"
 #include "Functions/AAPlay/Facecam.h"
+#include "Functions/AAPlay/GameState.h"
 
 namespace PlayInjections {
 /*
@@ -17,11 +18,12 @@ namespace PcConversation {
  ********************/
 
 void __stdcall StartEvent() {
+	Shared::GameState::setIsPcConversation(true);
 	Facecam::Cleanup();
 }
 
 void __stdcall EndEvent() {
-
+	Shared::GameState::setIsPcConversation(false);
 }
 
 
@@ -41,7 +43,6 @@ void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
  * NPC -> PC interactive conversation tick event
  *******************/
 void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	
 }
 
 void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {

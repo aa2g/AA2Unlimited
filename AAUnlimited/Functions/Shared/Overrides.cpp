@@ -17,12 +17,12 @@
 #include "Functions\Shared\Slider.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "MemMods\AAPlay\Events\ClothingDialog.h"
+#include "Functions\AAPlay\GameState.h"
 
 namespace Shared {
 
 
 	CharInstData* g_currentChar = &AAEdit::g_currChar;
-	bool g_isOverriding = false;
 
 	/********************/
 	/* Poly Load Events */
@@ -40,11 +40,11 @@ namespace Shared {
 		else {
 			g_currentChar = &AAPlay::g_characters[loadCharacter->m_seat];
 		}
-		g_isOverriding = true;
+		Shared::GameState::setIsOverriding(true);
 	}
 
 	void MeshTextureCharLoadEnd() {
-		if (!PlayInjections::ClothingDialog::g_isClothingDialogue) g_isOverriding = false;
+		if (!Shared::GameState::getIsClothesScreen()) Shared::GameState::setIsOverriding(false);
 	}
 
 	/*********************************/
@@ -139,7 +139,7 @@ namespace Shared {
 	}
 
 	void OverrideTanColor(DWORD* tanColor,DWORD* unknown) {
-		if (g_isOverriding == false) return;
+		if (!Shared::GameState::getIsOverriding()) return;
 		if (!g_currentChar->m_cardData.HasTanColor()) return;
 		COLORREF color = Shared::g_currentChar->m_cardData.GetTanColor();
 		//colors are sequentially in rgba order in *colors
@@ -172,7 +172,7 @@ namespace Shared {
 	void XXFileModification(ExtClass::XXFile* xxFile, bool saveMods) {
 		using namespace ExtClass;
 		if (xxFile == NULL) return;
-		if (!g_isOverriding) return;
+		if (!Shared::GameState::getIsOverriding()) return;
 
 		static const char prefix[] {"artf_"};
 
@@ -404,7 +404,7 @@ namespace Shared {
 	std::vector<Loc_BoneSaveData> g_xxBoneMods[ExtClass::CharacterStruct::N_MODELS];
 	void XXBoneModification(ExtClass::Frame* boneParent,bool saveMods) {
 		using namespace ExtClass;
-		if (!g_isOverriding) return;
+		if (!Shared::GameState::getIsOverriding()) return;
 
 		static const char prefix[]{ "artf_" };
 		ExtClass::XXFile* xxFile = boneParent->m_xxPartOf;
@@ -543,7 +543,7 @@ namespace Shared {
 
 
 	void XXFileModification_BackupCopy(ExtClass::XXFile* xxFile,bool backup) {
-		if (!g_isOverriding) return;
+		if (!Shared::GameState::getIsOverriding()) return;
 		static struct Backups {
 			ExtClass::XXFile* oldFile;
 			std::map<void*,D3DMATRIX> matrixMap;

@@ -23,6 +23,7 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
+    <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="Functions\AAPlay\Poser.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\XXFile.h" />
+    <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="Functions\AAPlay\Poser.h" />
     <ClInclude Include="Functions\CharInstData.h" />
     <ClInclude Include="External\ExternalClasses\Frame.h" />
