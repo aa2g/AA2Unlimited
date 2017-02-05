@@ -19,11 +19,13 @@ namespace PcConversation {
 
 void __stdcall StartEvent() {
 	Shared::GameState::setIsPcConversation(true);
+	Poser::StartEvent(Poser::NpcInteraction);
 	Facecam::Cleanup();
 }
 
 void __stdcall EndEvent() {
 	Shared::GameState::setIsPcConversation(false);
+	Poser::EndEvent();
 }
 
 
@@ -94,7 +96,6 @@ void __stdcall PreTick(ExtClass::MainConversationStruct* param) {
 	default:
 		break;
 	}
-	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall PostTick(ExtClass::MainConversationStruct* param) {

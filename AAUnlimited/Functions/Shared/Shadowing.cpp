@@ -46,7 +46,7 @@ bool OpenShadowedFile(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** 
 			do {
 				StringCbPrintf(strArchivePath + length, 512 - length, TEXT("%s\\%s\\%s"), ffd.cFileName, strArchiveName, file);
 				hFile = CreateFile(strArchivePath, FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-				if (hFile > 0)
+				if (hFile != NULL && hFile != INVALID_HANDLE_VALUE)
 					break;
 			} while (FindNextFile(hDirectory, &ffd) != 0);
 		}

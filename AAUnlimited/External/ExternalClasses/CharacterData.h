@@ -183,7 +183,12 @@ public:
 		DWORD slot;
 		BYTE skirtLength;
 		BYTE socks;
-		BYTE unknown13[6];
+		BYTE indoorShoes;
+		BYTE outdoorShoes;
+		BYTE isOnePiece;
+		BYTE hasUnderwear;
+		BYTE hasSkirt;
+		BYTE unknown13;
 		DWORD colorTop1;
 		DWORD colorTop2;
 		DWORD colorTop3;

@@ -40,7 +40,6 @@ namespace Poser {
 		HWND m_spinCharacter;
 		HWND m_spinPose;
 		HWND m_spinFrame;
-		HWND m_spinValue;
 		HWND m_spinMouth;
 		HWND m_spinMouthOpen;
 		HWND m_spinEye;
@@ -48,19 +47,23 @@ namespace Poser {
 		HWND m_spinEyebrow;
 		HWND m_spinBlush;
 		HWND m_spinBlushLines;
+		HWND m_listCategories;
 		HWND m_listBones;
 		HWND m_listOperation;
 		HWND m_listAxis;
 		HWND m_sliderValue;
+		HWND m_chkEyeTrack;
+		HWND m_chkAlwaysOnTop;
 		UINT_PTR m_timer;
 		int m_curBone;
 
-		void InitBones();
+		void SyncBones();
 		void SyncEdit();
 		void SyncList();
 		void SyncSlider();
 		void LoadPose(const TCHAR* path);
 		void SavePose(const TCHAR* path);
+		void LoadCloth(std::vector<BYTE> &file);
 
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	};
