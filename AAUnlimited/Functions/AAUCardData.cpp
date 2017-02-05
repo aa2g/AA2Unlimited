@@ -354,7 +354,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	Reset();
 	//try to find it at the end first
-	if (size < 8) return false;
+	if (size < 8) {
+		m_version = AAUCardData::CurrentVersion;
+		return false;
+	}
 	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
 	if (aauDataSize < size - 8) {
 		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
@@ -373,6 +376,7 @@ bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 		FromBuffer((char*)chunk, size);
 		return true;
 	}
+	m_version = AAUCardData::CurrentVersion;
 	return false;
 }
 
@@ -1058,14 +1062,14 @@ void AAUCardData::SaveOverrideFiles() {
 		if (buffer.size() > 0) {
 			int location;
 			auto path = arule.second.GetRelPath();
-			if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
-				path = path;
-				location = 0;
-			}
-			else {
+			//if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+			//	path = path;
+			//	location = 0;
+			//}
+			//else {
 				path = path;
 				location = 2;
-			}
+			//}
 			m_savedFiles.emplace_back(std::make_pair(location,path),buffer);
 		}
 	}

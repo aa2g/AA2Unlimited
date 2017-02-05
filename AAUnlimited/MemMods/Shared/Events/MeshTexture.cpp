@@ -9,6 +9,7 @@
 #include "Functions\Shared\SpecialOverrides.h"
 #include "Functions\AAPlay\Poser.h"
 #include "Files\XXFile.h"
+#include "Functions\AAPlay\GameState.h"
 
 /*
 * xx file textures are loaded in two steps. First, an array of mesh structs is created, each of which
@@ -631,7 +632,7 @@ void OverrideFileInject() {
 }
 
 void __stdcall OverrideOutlineColorFunc(float* colors) {
-	if (!Shared::g_isOverriding) return;
+	if (!Shared::GameState::getIsOverriding()) return;
 	if (!Shared::g_currentChar->m_cardData.HasOutlineColor()) return;
 	COLORREF color = Shared::g_currentChar->m_cardData.GetOutlineColor();
 	//colors are sequentially in rgba order in *colors

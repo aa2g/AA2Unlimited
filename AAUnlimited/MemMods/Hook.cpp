@@ -194,6 +194,8 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/AAEdit/OpenCard.h"
 #include "MemMods/AAEdit/Dialog.h"
 
+#include "Functions/AAPlay/GameState.h"
+
 void InitializeHooks() {
 	ExtVars::InitializeExtVars();
 	Shared::Init();
@@ -223,7 +225,7 @@ void InitializeHooks() {
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
 
-			Shared::g_isOverriding = General::IsAAEdit; //always override in aaedit
+			Shared::GameState::setIsOverriding(General::IsAAEdit); //always override in aaedit
 		}
 		EyeTexture::EyeTextureInject();
 
