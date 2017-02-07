@@ -80,6 +80,14 @@
     <ClCompile Include="MemMods\Shared\Events\FrameManipulationTest.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Thread.cpp" />
+    <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
+    <ClCompile Include="Functions\Shared\TriggerEventDistributor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -157,6 +165,13 @@
     <ClInclude Include="3rdparty\picojson\picojson.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="Files\ClothFile.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Value.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Event.h" />
+    <ClInclude Include="Functions\Shared\TriggerEventDistributor.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

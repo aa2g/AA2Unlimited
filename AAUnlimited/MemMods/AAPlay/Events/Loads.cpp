@@ -8,20 +8,38 @@
 #include "Functions\AAPlay\Globals.h"
 #include "Functions\AAPlay\Poser.h"
 
+#include "Functions\Shared\TriggerEventDistributor.h"
+
+using namespace Shared::Triggers;
+
 namespace PlayInjections {
 /*
  * Events for the Loading of stuff, such as hi-poly models, lo-poly models etc
  */
 namespace Loads {
 
+namespace {
+	int loc_hiPolyLoaded;
+}
+
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::SetTargetCharacter(loadCharacter);
+	//throw high poly event
+	HiPolyInitData data;
+	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+	loc_hiPolyLoaded = data.card;
+	ThrowEvent(&data);
+	
 } 
 
 void __stdcall HiPolyLoadEndEvent() {
 	Shared::MeshTextureCharLoadEnd();
+	//throw high poly end event
+	HiPolyEndData data;
+	data.card = loc_hiPolyLoaded;
+	ThrowEvent(&data);
 }
 
 void __stdcall SaveLoadEvent() {

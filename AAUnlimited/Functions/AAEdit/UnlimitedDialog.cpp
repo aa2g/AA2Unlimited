@@ -1,5 +1,10 @@
 #include "UnlimitedDialog.h"
 
+/*
+ * TODO: break up this file. every single tab is defined in this file. its impossible to read if you dont know what youre searching for,
+ * and even then its pretty spaghetti
+ */
+
 #include <Windows.h>
 #include <CommCtrl.h>
 #include <queue>
@@ -18,6 +23,8 @@
 #include "Functions\AAEdit\Globals.h"
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
+#include "Functions\Shared\Triggers\Triggers.h"
+#include "Functions\Shared\Triggers\Expressions.h"
 #include "Files\Logger.h"
 #include "resource.h"
 #include "config.h"
@@ -130,6 +137,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
 			BSDialog::DialogProc);
+		thisPtr->AddDialog(IDD_TRIGGERS,&thisPtr->m_trDialog,index++,TEXT("Triggers"),
+			TRDialog::DialogProc);
 
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
@@ -208,20 +217,71 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_cbSaveFiles = GetDlgItem(hwndDlg,IDC_GN_CBSAVEFILES);
 		thisPtr->m_cbSaveEyeTexture = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYETEX);
 		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
+		thisPtr->m_lbAAuSets = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS);
+		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
+		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 
 		return TRUE;
 		break; }
+	case WM_VKEYTOITEM: {
+		//DEL-key was pressed while the list box had the focus
+		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			//get current selection text
+			int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
+			//remove this rule
+			g_currChar.m_cardData.RemoveAAUDataSet(sel);
+			thisPtr->RefreshAAuSetList();
+			return TRUE;
+		}
+		break; }
+	
 	case WM_COMMAND: {
 		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
-		
+		switch(HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if(identifier == IDC_GN_BTNAAUSETADD) {
+				TCHAR buf[256];
+				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
+				g_currChar.m_cardData.AddAAUDataSet(buf);
+				thisPtr->RefreshAAuSetList();
+				return TRUE;
+			}
+			break; }
+		case LBN_SELCHANGE: {
+			GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+			HWND wnd = (HWND)lparam;
+			if (wnd == thisPtr->m_lbAAuSets) {
+				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel);
+					using namespace ExtVars::AAEdit;
+					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);
+				}
+				return TRUE;
+			}
+			break; }
+		}
 		break; }
 	}
 	return FALSE;
 }
 
-void UnlimitedDialog::GNDialog::Refresh() {
-
+void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
+	SendMessage(this->m_lbAAuSets,LB_RESETCONTENT,0,0);
+	auto list = AAEdit::g_currChar.m_cardData.GetAAUSetDataList();
+	for (size_t i = 0; i < list.size(); i++) {
+		SendMessage(this->m_lbAAuSets,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
+	}
+	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
 }
+
+void UnlimitedDialog::GNDialog::Refresh() {
+	RefreshAAuSetList();
+}
+
+
 
 /************************/
 /* Mesh Override Dialog */
@@ -1744,6 +1804,8 @@ void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	SendMessage(edit,WM_SETTEXT,0,(LPARAM)buffer);
 	Sync(true);
 }
+
+
 
 UnlimitedDialog g_AAUnlimitDialog;
 

@@ -1,6 +1,9 @@
 #include "Globals.h"
 
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Functions\Shared\TriggerEventDistributor.h"
+
+using namespace Shared::Triggers;
 
 namespace AAPlay {
 
@@ -23,7 +26,10 @@ void InitOnLoad() {
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].m_cardData.FromFileBuffer((char*)it->m_charData->m_pngBuffer,it->m_charData->m_pngBufferSize);
-		
+		//throw init event
+		CardInitializeData data;
+		data.card = seat;
+		ThrowEvent(&data);
 	}
 }
 
@@ -31,9 +37,18 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
 	g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	//throw init event
+	CardInitializeData data;
+	data.card = seat;
+	ThrowEvent(&data);
 }
 void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
+	//throw destroy event
+	CardDestroyData data;
+	data.card = seat;
+	ThrowEvent(&data);
+	//destroy
 	g_characters[seat].Reset();
 }
 

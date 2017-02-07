@@ -12,18 +12,17 @@
 #include "General\Util.h"
 #include "Files\Logger.h"
 #include "Files\Config.h"
+#include "Functions\Shared\TriggerEventDistributor.h"
 
 const AAUCardData AAUCardData::g_defaultValues;
 
 AAUCardData::AAUCardData()
 {
 	m_tanSlot = 0;
-	m_hairRedirects.front = 0;
-	m_hairRedirects.side = 1;
-	m_hairRedirects.back = 2;
-	m_hairRedirects.extension = 3;
-	m_bOutlineColor = false;
-	m_bTanColor = false;
+
+	m_currAAUSet = 0;
+	m_aauSets.resize(1);
+	
 	for(int i = 0; i < sizeof(ret_files)/sizeof(ret_files[0]); i++) {
 		ret_files[i].fileEnd = 0;
 		ret_files[i].fileStart = 0;
@@ -31,10 +30,16 @@ AAUCardData::AAUCardData()
 	m_version = 1;
 }
 
+AAUCardData::AAUDataSet::AAUDataSet() {
+	m_bOutlineColor = false;
+	m_bTanColor = false;
+	m_name = TEXT("(default)");
+}
+
 
 AAUCardData::~AAUCardData()
 {
-
+	
 }
 
 void AAUCardData::Reset() {
@@ -123,6 +128,93 @@ std::map<T, U> AAUCardData::ReadData_sub(char *& buffer, int & size, std::map<T,
 	return retVal;
 }
 
+Shared::Triggers::Trigger AAUCardData::ReadData_sub(char *& buffer,int & size,Shared::Triggers::Trigger *)
+{
+	using namespace Shared::Triggers;
+	Trigger retVal;
+	retVal.name = ReadData<std::wstring>(buffer,size);
+	retVal.events = ReadData<decltype(retVal.events)>(buffer,size);
+	retVal.vars = ReadData<decltype(retVal.vars)>(buffer,size);
+	retVal.actions = ReadData<decltype(retVal.actions)>(buffer,size);
+	return retVal;
+}
+
+Shared::Triggers::ParameterisedEvent AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedEvent*)
+{
+	using namespace Shared::Triggers;
+	ParameterisedEvent retVal;
+	int id = ReadData<int>(buffer,size);
+	retVal.event = Event::FromId(id);
+	retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
+	return retVal;
+}
+
+Shared::Triggers::ParameterisedAction AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedAction*)
+{
+	using namespace Shared::Triggers;
+	ParameterisedAction retVal;
+	int id = ReadData<int>(buffer,size);
+	retVal.action = Action::FromId(id);
+	retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
+	return retVal;
+}
+Shared::Triggers::ParameterisedExpression AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedExpression*)
+{
+	using namespace Shared::Triggers;
+	ParameterisedExpression retVal;
+	Types type = ReadData<Types>(buffer,size);
+	int id = ReadData<int>(buffer,size);
+	retVal.expression = Expression::FromId(type,id);
+	if(id == 1) {
+		//constant
+		retVal.constant = ReadData<decltype(retVal.constant)>(buffer,size);
+	}
+	else if(id == 2) {
+		//variable
+		retVal.varName = ReadData<decltype(retVal.varName)>(buffer,size);
+	}
+	else {
+		//function
+		retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
+	}
+	
+	
+	return retVal;
+}
+Shared::Triggers::Variable AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::Variable*)
+{
+	using namespace Shared::Triggers;
+	Variable retVal;
+	retVal.type = ReadData<Types>(buffer,size);
+	retVal.name = ReadData<std::wstring>(buffer,size);
+	retVal.defaultValue = ReadData<decltype(retVal.defaultValue)>(buffer,size);
+	return retVal;
+}
+
+Shared::Triggers::Value AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::Value*)
+{
+	using namespace Shared::Triggers;
+	Value retVal;
+	retVal.type = ReadData<Types>(buffer,size);
+	switch(retVal.type) {
+	case TYPE_INT:
+		retVal.iVal = ReadData<int>(buffer,size);
+		break;
+	case TYPE_BOOL:
+		retVal.bVal = ReadData<bool>(buffer,size);
+		break;
+	case TYPE_FLOAT:
+		retVal.fVal = ReadData<float>(buffer,size);
+		break;
+	case TYPE_STRING:
+		retVal.strVal = new std::wstring(ReadData<std::wstring>(buffer,size));
+		break;
+	default:
+		break;
+	}
+	return retVal;
+}
+
 /***************************/
 /* Generic Write functions */
 /***************************/
@@ -180,6 +272,78 @@ bool AAUCardData::WriteData_sub(char ** buffer, int * size, int & at, const std:
 	return ret;
 }
 
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Trigger& data,bool resize,Shared::Triggers::Trigger*) 
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.name,resize);
+	ret &= WriteData(buffer,size,at,data.events,resize);
+	ret &= WriteData(buffer,size,at,data.vars,resize);
+	ret &= WriteData(buffer,size,at,data.actions,resize);
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedEvent& data,bool resize,Shared::Triggers::ParameterisedEvent*)
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.event->id,resize);
+	ret &= WriteData(buffer,size,at,data.actualParameters,resize);
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedAction& data,bool resize,Shared::Triggers::ParameterisedAction*)
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.action->id,resize);
+	ret &= WriteData(buffer,size,at,data.actualParameters,resize);
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedExpression& data,bool resize,Shared::Triggers::ParameterisedExpression*)
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.expression->returnType,resize);
+	ret &= WriteData(buffer,size,at,data.expression->id,resize);
+	if(data.expression->id == 1) {
+		ret &= WriteData(buffer,size,at,data.constant,resize);
+	}
+	else if(data.expression->id == 2) {
+		ret &= WriteData(buffer,size,at,data.varName,resize);
+	}
+	else {
+		ret &= WriteData(buffer,size,at,data.actualParameters,resize);
+	}
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Variable& data,bool resize,Shared::Triggers::Variable*)
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.type,resize);
+	ret &= WriteData(buffer,size,at,data.name,resize);
+	ret &= WriteData(buffer,size,at,data.defaultValue,resize);
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Value& data,bool resize,Shared::Triggers::Value*)
+{
+	using namespace Shared::Triggers;
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.type,resize);
+
+	switch (data.type) {
+	case TYPE_INT:
+		ret &= WriteData(buffer,size,at,data.iVal,resize);
+		break;
+	case TYPE_BOOL:
+		ret &= WriteData(buffer,size,at,data.bVal,resize);
+		break;
+	case TYPE_FLOAT:
+		ret &= WriteData(buffer,size,at,data.fVal,resize);
+		break;
+	case TYPE_STRING:
+		ret &= WriteData(buffer,size,at,data.strVal,resize);
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
 	//read members
@@ -207,6 +371,11 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		}
 	}
 
+	m_currAAUSet = 0;
+	m_aauSets.clear();
+	m_aauSets.resize(1);
+	m_aauSets[0].m_name = TEXT("(default)");
+
 	while(size > 4) {
 		DWORD identifier = *(DWORD*)(buffer);
 		m_currReadMemberId = identifier;
@@ -220,108 +389,118 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_tanSlot = ReadData<BYTE>(buffer, size);
 			LOGPRIO(Logger::Priority::SPAM) << "...found TanS, value " << m_tanSlot << "\r\n";
 			break;
+		case 'AUSS': {
+			//aau data set start; name, but also indicates that the following chunks write to this set
+			std::wstring name = ReadData<std::wstring>(buffer,size);
+			if(name != TEXT("(default)")) {
+				m_currAAUSet++;
+				m_aauSets.resize(m_aauSets.size()+1);
+				m_aauSets[m_currAAUSet].m_name = name;
+			}
+			LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << name << "r\n";
+			break; }
 		case 'OvrT': {
-			m_meshOverrides = ReadData<decltype(m_meshOverrides)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_meshOverrides.size() << " elements; "
-				<< m_meshOverrideMap.size() << " were valid\r\n";
+			m_aauSets[m_currAAUSet].m_meshOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_meshOverrides)>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_aauSets[m_currAAUSet].m_meshOverrides.size() << " elements; "
+				<< m_aauSets[m_currAAUSet].m_meshOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'AOvT': {
-			m_archiveOverrides = ReadData<decltype(m_archiveOverrides)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_archiveOverrides.size() << " elements; "
-				<< m_archiveOverrideMap.size() << " were valid\r\n";
+			m_aauSets[m_currAAUSet].m_archiveOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveOverrides)>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_aauSets[m_currAAUSet].m_archiveOverrides.size() << " elements; "
+				<< m_aauSets[m_currAAUSet].m_archiveOverrideMap.size() << " were valid\r\n";
 			break; }
 		case 'ARdr':
-			m_archiveRedirects = ReadData<decltype(m_archiveRedirects)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_archiveRedirects.size() << " elements\r\n";
+			m_aauSets[m_currAAUSet].m_archiveRedirects = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveRedirects)>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_aauSets[m_currAAUSet].m_archiveRedirects.size() << " elements\r\n";
 			break;
 		case 'OOvr':
-			m_objectOverrides = ReadData<decltype(m_objectOverrides)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_objectOverrides.size() << " elements;"
-				<< m_objectOverrideMap.size() << " were valid\r\n";
+			m_aauSets[m_currAAUSet].m_objectOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_objectOverrides)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_aauSets[m_currAAUSet].m_objectOverrides.size() << " elements;"
+				<< m_aauSets[m_currAAUSet].m_objectOverrideMap.size() << " were valid\r\n";
 			break;
 		case 'EtLN':
-			m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_eyeTextures[0].texName << "\r\n";
+			m_aauSets[m_currAAUSet].m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texName << "\r\n";
 			break;
 		case 'EtRN':
-			m_eyeTextures[1].texName = ReadData<std::wstring>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_eyeTextures[1].texName << "\r\n";
+			m_aauSets[m_currAAUSet].m_eyeTextures[1].texName = ReadData<std::wstring>(buffer, size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texName << "\r\n";
 			break;
 		case 'EtLF':
 			ret_files[0].fileStart = buffer-4; //before the chunk
-			m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
 			ret_files[0].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_eyeTextures[0].texFile.size() << "\r\n";
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile.size() << "\r\n";
 			break;
 		case 'EtRF':
 			ret_files[1].fileStart = buffer-4; //before the chunk
-			m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
+			m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
 			ret_files[1].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_eyeTextures[1].texFile.size() << "\r\n";
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile.size() << "\r\n";
 			break;
 		case 'EhXN':
-			m_eyeHighlightName = ReadData<decltype(m_eyeHighlightName)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_eyeHighlightName << "\r\n";
+			m_aauSets[m_currAAUSet].m_eyeHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightName)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_aauSets[m_currAAUSet].m_eyeHighlightName << "\r\n";
 			break;
 		case 'EhXF':
 			ret_files[2].fileStart = buffer-4; //before the chunk
-			m_eyeHighlightFile = ReadData<decltype(m_eyeHighlightFile)>(buffer,size);
+			m_aauSets[m_currAAUSet].m_eyeHighlightFile = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightFile)>(buffer,size);
 			ret_files[2].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_eyeHighlightFile.size() << "\r\n";
+			LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_aauSets[m_currAAUSet].m_eyeHighlightFile.size() << "\r\n";
 			break;
 		case 'HrRd':
-			m_hairRedirects.full = ReadData<DWORD>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, value " << m_hairRedirects.full << "\r\n";
+			buffer += 4,size -= 4;
+			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, but hair redirects are not supported anymore.\r\n";
 			break;
 		case 'TnRd': {
 			auto tanName = ReadData<std::wstring>(buffer,size);
-			m_tanName = tanName;
-			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_tanName << "\r\n";
+			m_aauSets[m_currAAUSet].m_tanName = tanName;
+			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_aauSets[m_currAAUSet].m_tanName << "\r\n";
 			break; }
 		case 'HrHl': {
-			auto hairHighlightName = ReadData<decltype(m_hairHighlightName)>(buffer,size);
-			m_hairHighlightName = hairHighlightName;
+			auto hairHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_hairHighlightName)>(buffer,size);
+			m_aauSets[m_currAAUSet].m_hairHighlightName = hairHighlightName;
 			break; }
 		case 'OlCl':
-			m_bOutlineColor = true;
-			m_outlineColor = ReadData<DWORD>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_outlineColor << "\r\n";
+			m_aauSets[m_currAAUSet].m_bOutlineColor = true;
+			m_aauSets[m_currAAUSet].m_outlineColor = ReadData<DWORD>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_aauSets[m_currAAUSet].m_outlineColor << "\r\n";
 			break;
 		case 'TnCl':
-			m_bTanColor = true;
-			m_tanColor = ReadData<DWORD>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_tanColor << "\r\n";
+			m_aauSets[m_currAAUSet].m_bTanColor = true;
+			m_aauSets[m_currAAUSet].m_tanColor = ReadData<DWORD>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_aauSets[m_currAAUSet].m_tanColor << "\r\n";
 			break;
 		case 'BnTr':
-			m_boneTransforms = ReadData<decltype(m_boneTransforms)>(buffer,size);
-			for (const auto& it : m_boneTransforms) {
-				if (m_boneTransformMap.find(it.first) == m_boneTransformMap.end()) {
-					m_boneTransformMap.emplace(it.first,it.second);
+			m_aauSets[m_currAAUSet].m_boneTransforms = ReadData<decltype(m_aauSets[m_currAAUSet].m_boneTransforms)>(buffer,size);
+			for (const auto& it : m_aauSets[m_currAAUSet].m_boneTransforms) {
+				if (m_aauSets[m_currAAUSet].m_boneTransformMap.find(it.first) == m_aauSets[m_currAAUSet].m_boneTransformMap.end()) {
+					m_aauSets[m_currAAUSet].m_boneTransformMap.emplace(it.first,it.second);
 				}
 			}
-			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_boneTransformMap.size() << " elements.\r\n";
+			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_aauSets[m_currAAUSet].m_boneTransformMap.size() << " elements.\r\n";
+			break;
+		case 'HrA0':
+			m_aauSets[m_currAAUSet].m_hairs[0] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA0, loaded " << m_aauSets[m_currAAUSet].m_hairs[0].size() << " elements\r\n";
+			break;
+		case 'HrA1':
+			m_aauSets[m_currAAUSet].m_hairs[1] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA1, loaded " << m_aauSets[m_currAAUSet].m_hairs[1].size() << " elements\r\n";
+			break;
+		case 'HrA2':
+			m_aauSets[m_currAAUSet].m_hairs[2] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA2, loaded " << m_aauSets[m_currAAUSet].m_hairs[2].size() << " elements\r\n";
+			break;
+		case 'HrA3':
+			m_aauSets[m_currAAUSet].m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_aauSets[m_currAAUSet].m_hairs[3].size() << " elements\r\n";
 			break;
 		case 'File':
 			ret_files[3].fileStart = buffer-4; //before the 'File'
 			m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer,size);
 			ret_files[3].fileEnd = buffer;
 			LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
-			break;
-		case 'HrA0':
-			m_hairs[0] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA0, loaded " << m_hairs[0].size() << " elements\r\n";
-			break;
-		case 'HrA1':
-			m_hairs[1] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA1, loaded " << m_hairs[1].size() << " elements\r\n";
-			break;
-		case 'HrA2':
-			m_hairs[2] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA2, loaded " << m_hairs[2].size() << " elements\r\n";
-			break;
-		case 'HrA3':
-			m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_hairs[3].size() << " elements\r\n";
 			break;
 		case 'BnT2':
 			m_boneRules = ReadData<decltype(m_boneRules)>(buffer,size);
@@ -333,9 +512,15 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			GenSliderMap();
 			LOGPRIO(Logger::Priority::SPAM) << "found Slds, loaded " << m_sliders.size() << " elements\r\n";
 			break;
+		case 'Trgs':
+			m_triggers = ReadData<decltype(m_triggers)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found Trgs, loaded " << m_triggers.size() << " elements\r\n";
+			break;
 		}
 		
 	}
+
+	m_currAAUSet = 0;
 
 	if (size != 0) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
@@ -348,6 +533,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	
 	GenAllFileMaps(); //we do this in the end in case conversion or something changed the file paths
 
+	//initialize triggers
+	for(auto& trg : m_triggers) {
+		trg.Initialize();
+	}
 	
 }
 
@@ -411,6 +600,23 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 		} else { \
 			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
 		}
+	#define DUMP_MEMBER_AAUSET(id,x) \
+		if(m_aauSets[i].x != g_defaultValues.m_aauSets[0]. x) { \
+			DWORD varId = id; \
+			ret &= WriteData(buffer,size,at,varId,resize); \
+			ret &= WriteData(buffer,size,at,m_aauSets[i].x,resize);\
+		} else { \
+			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
+		}
+	#define DUMP_MEMBER_CONTAINER_AAUSET(id,x) \
+		if(!m_aauSets[i].x.empty()) { \
+			DWORD varId = id; \
+			ret &= WriteData(buffer,size,at,varId,resize); \
+			ret &= WriteData(buffer,size,at,m_aauSets[i].x,resize);\
+		} else { \
+			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
+		}
+
 
 	if (pngChunks) {
 		//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder
@@ -426,38 +632,44 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	DUMP_MEMBER('Vers',m_version);
 	//tan-slot
 	DUMP_MEMBER('TanS',m_tanSlot);
-	//overrides
-	DUMP_MEMBER_CONTAINER('OvrT',m_meshOverrides);
-	DUMP_MEMBER_CONTAINER('AOvT', m_archiveOverrides);
-	DUMP_MEMBER_CONTAINER('ARdr', m_archiveRedirects);
-	DUMP_MEMBER_CONTAINER('OOvr',m_objectOverrides);
-	//eye textures
-	DUMP_MEMBER('EtLN', m_eyeTextures[0].texName);
-	DUMP_MEMBER('EtRN', m_eyeTextures[1].texName);
-	DUMP_MEMBER_CONTAINER('EtLF', m_eyeTextures[0].texFile);
-	DUMP_MEMBER_CONTAINER('EtRF', m_eyeTextures[1].texFile);
-	//highlight texture
-	DUMP_MEMBER('EhXN',m_eyeHighlightName);
-	DUMP_MEMBER_CONTAINER('EhXF',m_eyeHighlightFile);
-	//hair redirect
-	DUMP_MEMBER('HrRd', m_hairRedirects.full);
-	//tans
-	DUMP_MEMBER('TnRd',m_tanName);
-	//hair highlight
-	DUMP_MEMBER('HrHl',m_hairHighlightName);
-	//bone transforms
-	DUMP_MEMBER_CONTAINER('BnTr',m_boneTransforms);
-	if(m_bOutlineColor) {
-		DUMP_MEMBER('OlCl',m_outlineColor);
+	//dump aau sets
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		DUMP_MEMBER_AAUSET('AUSS',m_name);
+		//overrides
+		DUMP_MEMBER_CONTAINER_AAUSET('OvrT',m_meshOverrides);
+		DUMP_MEMBER_CONTAINER_AAUSET('AOvT',m_archiveOverrides);
+		DUMP_MEMBER_CONTAINER_AAUSET('ARdr',m_archiveRedirects);
+		DUMP_MEMBER_CONTAINER_AAUSET('OOvr',m_objectOverrides);
+		//eye textures
+		DUMP_MEMBER_AAUSET('EtLN',m_eyeTextures[0].texName);
+		DUMP_MEMBER_AAUSET('EtRN',m_eyeTextures[1].texName);
+		DUMP_MEMBER_CONTAINER_AAUSET('EtLF',m_eyeTextures[0].texFile);
+		DUMP_MEMBER_CONTAINER_AAUSET('EtRF',m_eyeTextures[1].texFile);
+		//highlight texture
+		DUMP_MEMBER_AAUSET('EhXN',m_eyeHighlightName);
+		DUMP_MEMBER_CONTAINER_AAUSET('EhXF',m_eyeHighlightFile);
+		//tans
+		DUMP_MEMBER_AAUSET('TnRd',m_tanName);
+		//hair highlight
+		DUMP_MEMBER_AAUSET('HrHl',m_hairHighlightName);
+		//bone transforms
+		DUMP_MEMBER_CONTAINER_AAUSET('BnTr',m_boneTransforms);
+		if (m_aauSets[i].m_bOutlineColor) {
+			DUMP_MEMBER_AAUSET('OlCl',m_outlineColor);
+		}
+		if (m_aauSets[i].m_bTanColor) {
+			DUMP_MEMBER_AAUSET('TnCl',m_tanColor);
+		}
+
+		DUMP_MEMBER_CONTAINER_AAUSET('HrA0',m_hairs[0]);
+		DUMP_MEMBER_CONTAINER_AAUSET('HrA1',m_hairs[1]);
+		DUMP_MEMBER_CONTAINER_AAUSET('HrA2',m_hairs[2]);
+		DUMP_MEMBER_CONTAINER_AAUSET('HrA3',m_hairs[3]);
 	}
-	if(m_bTanColor) {
-		DUMP_MEMBER('TnCl',m_tanColor);
-	}
+	
+	DUMP_MEMBER_CONTAINER('Trgs',m_triggers);
+
 	DUMP_MEMBER_CONTAINER('File',m_savedFiles);
-	DUMP_MEMBER_CONTAINER('HrA0',m_hairs[0]);
-	DUMP_MEMBER_CONTAINER('HrA1',m_hairs[1]);
-	DUMP_MEMBER_CONTAINER('HrA2',m_hairs[2]);
-	DUMP_MEMBER_CONTAINER('HrA3',m_hairs[3]);
 	DUMP_MEMBER_CONTAINER('BnT2',m_boneRules);
 	DUMP_MEMBER_CONTAINER('Slds',m_sliders);
 
@@ -481,7 +693,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 
 	//undefine macros again
 	#undef DUMP_MEMBER_CONTAINER
-	#undef DUMP_NUMBER
+	#undef DUMP_MEMBER
+	#undef DUMP_MEMBER_CONTAINER_AAUSET
+	#undef DUMP_MEMBER_AAUSET
 
 	
 	
@@ -492,44 +706,44 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 /*****************************/
 
 bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
-	if (m_meshOverrideMap.find(texture) != m_meshOverrideMap.end()) return false;
+	if (m_aauSets[m_currAAUSet].m_meshOverrideMap.find(texture) != m_aauSets[m_currAAUSet].m_meshOverrideMap.end()) return false;
 	TextureImage img(override, TextureImage::OVERRIDE);
 	if (img.IsGood()) {
 		std::wstring texStr(texture);
-		m_meshOverrides.emplace_back(texStr, std::wstring(override));
-		m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
+		m_aauSets[m_currAAUSet].m_meshOverrides.emplace_back(texStr, std::wstring(override));
+		m_aauSets[m_currAAUSet].m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
 	}
 	return false;
 }
 
 bool AAUCardData::RemoveMeshOverride(int index) {
-	if (index < 0 || (size_t)index >= m_meshOverrides.size()) return false;
-	auto vMatch = m_meshOverrides.begin() + index;
-	auto mapMatch = m_meshOverrideMap.find(vMatch->first);
-	m_meshOverrides.erase(vMatch);
-	if(mapMatch != m_meshOverrideMap.end()) m_meshOverrideMap.erase(mapMatch);
+	if (index < 0 || (size_t)index >= m_aauSets[m_currAAUSet].m_meshOverrides.size()) return false;
+	auto vMatch = m_aauSets[m_currAAUSet].m_meshOverrides.begin() + index;
+	auto mapMatch = m_aauSets[m_currAAUSet].m_meshOverrideMap.find(vMatch->first);
+	m_aauSets[m_currAAUSet].m_meshOverrides.erase(vMatch);
+	if(mapMatch != m_aauSets[m_currAAUSet].m_meshOverrideMap.end()) m_aauSets[m_currAAUSet].m_meshOverrideMap.erase(mapMatch);
 	return true;
 }
 
 bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override) {
-	if (m_archiveOverrideMap.find(std::pair<std::wstring,std::wstring>(archive, archivefile)) != m_archiveOverrideMap.end()) return false;
+	if (m_aauSets[m_currAAUSet].m_archiveOverrideMap.find(std::pair<std::wstring,std::wstring>(archive, archivefile)) != m_aauSets[m_currAAUSet].m_archiveOverrideMap.end()) return false;
 	OverrideFile img(override, OverrideFile::OVERRIDE);
 	if (img.IsGood()) {
 		auto toOverride = std::pair<std::wstring, std::wstring>(archive, archivefile);
-		m_archiveOverrides.emplace_back(toOverride, override);
-		m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
+		m_aauSets[m_currAAUSet].m_archiveOverrides.emplace_back(toOverride, override);
+		m_aauSets[m_currAAUSet].m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
 		return true;
 	}
 	return false;
 }
 
 bool AAUCardData::RemoveArchiveOverride(int index) {
-	if (index < 0 || (size_t)index >= m_archiveOverrides.size()) return false;
-	auto vMatch = m_archiveOverrides.begin() + index;
-	auto mapMatch = m_archiveOverrideMap.find(vMatch->first);
-	m_archiveOverrides.erase(vMatch);
-	if (mapMatch != m_archiveOverrideMap.end()) m_archiveOverrideMap.erase(mapMatch);
+	if (index < 0 || (size_t)index >= m_aauSets[m_currAAUSet].m_archiveOverrides.size()) return false;
+	auto vMatch = m_aauSets[m_currAAUSet].m_archiveOverrides.begin() + index;
+	auto mapMatch = m_aauSets[m_currAAUSet].m_archiveOverrideMap.find(vMatch->first);
+	m_aauSets[m_currAAUSet].m_archiveOverrides.erase(vMatch);
+	if (mapMatch != m_aauSets[m_currAAUSet].m_archiveOverrideMap.end()) m_aauSets[m_currAAUSet].m_archiveOverrideMap.erase(mapMatch);
 	return true;
 }
 
@@ -537,17 +751,17 @@ bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivef
 	//here i should check if the archive is valid, but meh
 	auto left = std::pair<std::wstring, std::wstring>(archive, archivefile);
 	auto right = std::pair<std::wstring, std::wstring>(redirectarchive, redirectfile);
-	if (m_archiveRedirectMap.find(left) != m_archiveRedirectMap.end()) return false; //allready contains it
-	m_archiveRedirects.emplace_back(left, right);
-	m_archiveRedirectMap.insert(std::make_pair(left, right));
+	if (m_aauSets[m_currAAUSet].m_archiveRedirectMap.find(left) != m_aauSets[m_currAAUSet].m_archiveRedirectMap.end()) return false; //allready contains it
+	m_aauSets[m_currAAUSet].m_archiveRedirects.emplace_back(left, right);
+	m_aauSets[m_currAAUSet].m_archiveRedirectMap.insert(std::make_pair(left, right));
 	return true;
 }
 bool AAUCardData::RemoveArchiveRedirect(int index) {
-	if (index < 0 || (size_t)index >= m_archiveRedirects.size()) return false;
-	auto vMatch = m_archiveRedirects.begin() + index;
-	auto mapMatch = m_archiveRedirectMap.find(vMatch->first);
-	m_archiveRedirects.erase(vMatch);
-	if (mapMatch != m_archiveRedirectMap.end()) m_archiveRedirectMap.erase(mapMatch);
+	if (index < 0 || (size_t)index >= m_aauSets[m_currAAUSet].m_archiveRedirects.size()) return false;
+	auto vMatch = m_aauSets[m_currAAUSet].m_archiveRedirects.begin() + index;
+	auto mapMatch = m_aauSets[m_currAAUSet].m_archiveRedirectMap.find(vMatch->first);
+	m_aauSets[m_currAAUSet].m_archiveRedirects.erase(vMatch);
+	if (mapMatch != m_aauSets[m_currAAUSet].m_archiveRedirectMap.end()) m_aauSets[m_currAAUSet].m_archiveRedirectMap.erase(mapMatch);
 	return true;
 }
 
@@ -558,41 +772,61 @@ bool AAUCardData::AddObjectOverride(const TCHAR * object,const TCHAR * file) {
 	std::string strObject = buff;
 	wcstombs_s(&n,buff,file,256);
 	std::string strFile = buff;
-	if (m_objectOverrideMap.find(strObject) != m_objectOverrideMap.end()) return false; //allready contains it
+	if (m_aauSets[m_currAAUSet].m_objectOverrideMap.find(strObject) != m_aauSets[m_currAAUSet].m_objectOverrideMap.end()) return false; //allready contains it
 	XXObjectFile ofile(file, XXObjectFile::OVERRIDE);
 	if(ofile.IsGood()) {
-		m_objectOverrides.emplace_back(object,file);
-		m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+		m_aauSets[m_currAAUSet].m_objectOverrides.emplace_back(object,file);
+		m_aauSets[m_currAAUSet].m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
 	}
 	return true;
 }
 
 bool AAUCardData::RemoveObjectOverride(int index) {
-	if (index < 0 || (size_t)index >= m_objectOverrides.size()) return false;
-	auto vMatch = m_objectOverrides.begin() + index;
+	if (index < 0 || (size_t)index >= m_aauSets[m_currAAUSet].m_objectOverrides.size()) return false;
+	auto vMatch = m_aauSets[m_currAAUSet].m_objectOverrides.begin() + index;
 	char buff[256];
 	size_t n;
 	wcstombs_s(&n,buff,vMatch->first.c_str(),256);
-	auto mapMatch = m_objectOverrideMap.find(buff);
-	m_objectOverrides.erase(vMatch);
-	if (mapMatch != m_objectOverrideMap.end()) m_objectOverrideMap.erase(mapMatch);
+	auto mapMatch = m_aauSets[m_currAAUSet].m_objectOverrideMap.find(buff);
+	m_aauSets[m_currAAUSet].m_objectOverrides.erase(vMatch);
+	if (mapMatch != m_aauSets[m_currAAUSet].m_objectOverrideMap.end()) m_aauSets[m_currAAUSet].m_objectOverrideMap.erase(mapMatch);
 	return true;
 }
 
 
 bool AAUCardData::AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform) {
-	if (m_boneTransformMap.find(boneName) != m_boneTransformMap.end()) return false; //allready contains it
-	m_boneTransforms.emplace_back(boneName,transform);
-	m_boneTransformMap.insert(std::make_pair(boneName,transform));
+	if (m_aauSets[m_currAAUSet].m_boneTransformMap.find(boneName) != m_aauSets[m_currAAUSet].m_boneTransformMap.end()) return false; //allready contains it
+	m_aauSets[m_currAAUSet].m_boneTransforms.emplace_back(boneName,transform);
+	m_aauSets[m_currAAUSet].m_boneTransformMap.insert(std::make_pair(boneName,transform));
 	return true;
 }
 bool AAUCardData::RemoveBoneTransformation(int index) {
-	if (index < 0 || (size_t)index >= m_boneTransforms.size()) return false;
-	auto vMatch = m_boneTransforms.begin() + index;
-	auto mapMatch = m_boneTransformMap.find(vMatch->first);
-	m_boneTransforms.erase(vMatch);
-	if (mapMatch != m_boneTransformMap.end()) m_boneTransformMap.erase(mapMatch);
+	if (index < 0 || (size_t)index >= m_aauSets[m_currAAUSet].m_boneTransforms.size()) return false;
+	auto vMatch = m_aauSets[m_currAAUSet].m_boneTransforms.begin() + index;
+	auto mapMatch = m_aauSets[m_currAAUSet].m_boneTransformMap.find(vMatch->first);
+	m_aauSets[m_currAAUSet].m_boneTransforms.erase(vMatch);
+	if (mapMatch != m_aauSets[m_currAAUSet].m_boneTransformMap.end()) m_aauSets[m_currAAUSet].m_boneTransformMap.erase(mapMatch);
 	return true;
+}
+
+bool AAUCardData::AddAAUDataSet(const TCHAR* name) {
+	for(auto& elem : m_aauSets) {
+		if (elem.m_name == name) return false;
+	}
+	m_aauSets.resize(m_aauSets.size() + 1);
+	m_aauSets[m_aauSets.size()-1].m_name = name;
+	return true;
+}
+bool AAUCardData::RemoveAAUDataSet(int index) {
+	if (index >= m_aauSets.size()) return false;
+	if (index == 0) return false;
+	m_aauSets.erase(m_aauSets.begin() + index);
+	if (index == m_currAAUSet) m_currAAUSet = 0;
+	return true;
+}
+void AAUCardData::SwitchActiveAAUDataSet(int newSet) {
+	if (newSet >= m_aauSets.size()) return;
+	m_currAAUSet = newSet;
 }
 
 bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {
@@ -729,88 +963,96 @@ void AAUCardData::SetSliderValue(int sliderTarget,int sliderIndex,float value) {
 /****************************/
 
 void AAUCardData::GenMeshOverrideMap() {
-	m_meshOverrideMap.clear();
-	for (const auto& it : m_meshOverrides) {
-		std::wstring path;
-		TextureImage::PathStart start;
-		switch(m_version) {
-		case 1:
-			//version 1 mean relative to the old texture path
-			path = VER1_OVERRIDE_IMAGE_PATH + it.second;
-			start = TextureImage::AAEDIT;
-			break;
-		case 2:
-			//relative to override path
-			path = it.second;
-			start = TextureImage::OVERRIDE;
-		default:
-			break;
-		}
-		TextureImage img(path.c_str(), start);
-		if (img.IsGood()) {
-			m_meshOverrideMap.emplace(it.first,std::move(img));
+	for(int i = 0; i < m_aauSets.size(); i++) {
+		m_aauSets[i].m_meshOverrideMap.clear();
+		for (const auto& it : m_aauSets[i].m_meshOverrides) {
+			std::wstring path;
+			TextureImage::PathStart start;
+			switch (m_version) {
+			case 1:
+				//version 1 mean relative to the old texture path
+				path = VER1_OVERRIDE_IMAGE_PATH + it.second;
+				start = TextureImage::AAEDIT;
+				break;
+			case 2:
+				//relative to override path
+				path = it.second;
+				start = TextureImage::OVERRIDE;
+			default:
+				break;
+			}
+			TextureImage img(path.c_str(),start);
+			if (img.IsGood()) {
+				m_aauSets[i].m_meshOverrideMap.emplace(it.first,std::move(img));
+			}
 		}
 	}
 }
 void AAUCardData::GenArchiveOverrideMap() {
-	m_archiveOverrideMap.clear();
-	for (const auto& it : m_archiveOverrides) {
-		std::wstring path;
-		OverrideFile::PathStart start;
-		switch (m_version) {
-		case 1:
-			//version 1 mean relative to data root, either play or edit
-			path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
-			start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
-			break;
-		case 2:
-			//relative to override path
-			path = it.second;
-			start = OverrideFile::OVERRIDE;
-		default:
-			break;
-		}
-		OverrideFile img(path.c_str(), start);
-		if (img.IsGood()) {
-			m_archiveOverrideMap.emplace(it.first,std::move(img));
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		m_aauSets[i].m_archiveOverrideMap.clear();
+		for (const auto& it : m_aauSets[i].m_archiveOverrides) {
+			std::wstring path;
+			OverrideFile::PathStart start;
+			switch (m_version) {
+			case 1:
+				//version 1 mean relative to data root, either play or edit
+				path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
+				start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
+				break;
+			case 2:
+				//relative to override path
+				path = it.second;
+				start = OverrideFile::OVERRIDE;
+			default:
+				break;
+			}
+			OverrideFile img(path.c_str(), start);
+			if (img.IsGood()) {
+				m_aauSets[i].m_archiveOverrideMap.emplace(it.first,std::move(img));
+			}
 		}
 	}
 }
 void AAUCardData::GenArchiveRedirectMap() {
-	m_archiveRedirectMap.clear();
-	for (const auto& it : m_archiveRedirects) {
-		if (m_archiveRedirectMap.find(it.first) == m_archiveRedirectMap.end()) {
-			m_archiveRedirectMap.emplace(it.first,it.second);
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		m_aauSets[i].m_archiveRedirectMap.clear();
+		for (const auto& it : m_aauSets[i].m_archiveRedirects) {
+			if (m_aauSets[i].m_archiveRedirectMap.find(it.first) == m_aauSets[i].m_archiveRedirectMap.end()) {
+				m_aauSets[i].m_archiveRedirectMap.emplace(it.first,it.second);
+			}
 		}
 	}
 }
 void AAUCardData::GenObjectOverrideMap() {
-	m_objectOverrideMap.clear();
-	for (const auto& it : m_objectOverrides) {
-		char buff[256];
-		size_t n;
-		wcstombs_s(&n,buff,it.first.c_str(),256);
-		std::string strObject = buff;
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		m_aauSets[i].m_objectOverrideMap.clear();
+		for (const auto& it : m_aauSets[i].m_objectOverrides) {
+			char buff[256];
+			size_t n;
+			wcstombs_s(&n,buff,it.first.c_str(),256);
+			std::string strObject = buff;
 		
-		std::wstring path;
-		XXObjectFile::PathStart start;
-		switch (m_version) {
-		case 1:
-			//version 1 mean relative to data root, either play or edit
-			path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
-			start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
-			break;
-		case 2:
-			//relative to override path
-			path = it.second;
-			start = OverrideFile::OVERRIDE;
-		default:
-			break;
-		}
+			std::wstring path;
+			XXObjectFile::PathStart start;
+			switch (m_version) {
+			case 1:
+				//version 1 mean relative to data root, either play or edit
+				path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
+				start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
+				break;
+			case 2:
+				//relative to override path
+				path = it.second;
+				start = OverrideFile::OVERRIDE;
+			default:
+				break;
+			}
 
-		XXObjectFile ofile(path.c_str(), start);
-		if(ofile.IsGood()) {
-			m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+			XXObjectFile ofile(path.c_str(), start);
+			if(ofile.IsGood()) {
+				m_aauSets[i].m_objectOverrideMap.insert(std::make_pair(strObject,std::move(ofile)));
+			}
 		}
 	}
 }
@@ -902,10 +1144,15 @@ void AAUCardData::GenAllFileMaps() {
 	GenArchiveOverrideMap();
 	GenObjectOverrideMap();
 
-	auto temp = m_tanName; //not sure if this is stricly neccessary, but i do it out of safety
-	SetTan(temp.c_str());
-	temp = m_hairHighlightName;
-	SetHairHighlight(temp.c_str());
+	int tmp = m_currAAUSet;
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		m_currAAUSet = i;
+		auto temp = m_aauSets[m_currAAUSet].m_tanName; //not sure if this is stricly neccessary, but i do it out of safety
+		SetTan(temp.c_str());
+		temp = m_aauSets[m_currAAUSet].m_hairHighlightName;
+		SetHairHighlight(temp.c_str());
+	}
+	m_currAAUSet = tmp;
 }
 
 /***************************/
@@ -915,8 +1162,8 @@ void AAUCardData::GenAllFileMaps() {
 bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) {
 	int other = leftright == 0 ? 1 : 0;
 	if (texName == NULL) {
-		m_eyeTextures[leftright].texName = TEXT("");
-		m_eyeTextures[leftright].texFile.clear();
+		m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texName = TEXT("");
+		m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texFile.clear();
 		return true;
 	}
 	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), texName);
@@ -924,37 +1171,37 @@ bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) 
 	if (file == INVALID_HANDLE_VALUE || file == NULL) {
 		return false;
 	}
-	if (save && m_eyeTextures[other].texName != m_eyeTextures[leftright].texName) {
+	if (save && m_aauSets[m_currAAUSet].m_eyeTextures[other].texName != m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texName) {
 		DWORD lo, hi;
 		lo = GetFileSize(file, &hi);
-		m_eyeTextures[leftright].texFile.resize(lo);
-		ReadFile(file, m_eyeTextures[leftright].texFile.data(), lo, &hi, NULL);
+		m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texFile.resize(lo);
+		ReadFile(file,m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texFile.data(), lo, &hi, NULL);
 	}
-	m_eyeTextures[leftright].texName = texName;
+	m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texName = texName;
 	CloseHandle(file);
 	return true;
 }
 
 bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
 	if (texName == NULL) {
-		m_eyeHighlightName = TEXT("");
-		m_eyeHighlightFile.clear();
+		m_aauSets[m_currAAUSet].m_eyeHighlightName = TEXT("");
+		m_aauSets[m_currAAUSet].m_eyeHighlightFile.clear();
 		return true;
 	}
-	if(m_eyeHighlightFile.size() > 0) {
-		m_eyeHighlightFile.clear();
+	if(m_aauSets[m_currAAUSet].m_eyeHighlightFile.size() > 0) {
+		m_aauSets[m_currAAUSet].m_eyeHighlightFile.clear();
 	}
 	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"),texName);
 	HANDLE file = CreateFile(fullPath.c_str(),FILE_READ_ACCESS,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
 	if (file == INVALID_HANDLE_VALUE || file == NULL) {
 		return false;
 	}
-	m_eyeHighlightName = texName;
+	m_aauSets[m_currAAUSet].m_eyeHighlightName = texName;
 	
 	DWORD lo,hi;
 	lo = GetFileSize(file,&hi);
-	m_eyeHighlightFile.resize(lo);
-	ReadFile(file,m_eyeHighlightFile.data(),lo,&hi,NULL);
+	m_aauSets[m_currAAUSet].m_eyeHighlightFile.resize(lo);
+	ReadFile(file,m_aauSets[m_currAAUSet].m_eyeHighlightFile.data(),lo,&hi,NULL);
 
 	CloseHandle(file);
 	return true;
@@ -975,9 +1222,9 @@ bool AAUCardData::SetHairHighlight(const TCHAR* name) {
 		break;
 	}
 	path += name;
-	m_hairHighlightImage = TextureImage(path.c_str(), start);
-	if (m_hairHighlightImage.IsGood()) {
-		m_hairHighlightName = name;
+	m_aauSets[m_currAAUSet].m_hairHighlightImage = TextureImage(path.c_str(), start);
+	if (m_aauSets[m_currAAUSet].m_hairHighlightImage.IsGood()) {
+		m_aauSets[m_currAAUSet].m_hairHighlightName = name;
 		return true;
 	}
 	return false;
@@ -1005,15 +1252,15 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 		std::wstring file = TEXT("0");
 		file += iChar;
 		file += TEXT(".bmp");
-		m_tanImages[i] = TextureImage((path + file).c_str(), start);
-		anyGood = anyGood || m_tanImages[i].IsGood();
+		m_aauSets[m_currAAUSet].m_tanImages[i] = TextureImage((path + file).c_str(), start);
+		anyGood = anyGood || m_aauSets[m_currAAUSet].m_tanImages[i].IsGood();
 	}
-	if (anyGood) m_tanName = name;
+	if (anyGood) m_aauSets[m_currAAUSet].m_tanName = name;
 	return anyGood;
 }
 
 bool AAUCardData::AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip) {
-	m_hairs[kind].push_back({ kind,slot,flip,adjustment });
+	m_aauSets[m_currAAUSet].m_hairs[kind].push_back({ kind,slot,flip,adjustment });
 	return true;
 }
 
@@ -1021,15 +1268,15 @@ bool AAUCardData::AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip) {
 bool AAUCardData::RemoveHair(int index) {
 	int kind;
 	for(kind = 0; kind < 4; kind++) {
-		if(index < 0 || (size_t)index < m_hairs[kind].size()) {
+		if(index < 0 || (size_t)index < m_aauSets[m_currAAUSet].m_hairs[kind].size()) {
 			break;
 		}
-		index -= m_hairs[kind].size();
+		index -= m_aauSets[m_currAAUSet].m_hairs[kind].size();
 	}
 	if (kind >= 4) return false;
 
-	auto vMatch = m_hairs[kind].begin() + index;
-	m_hairs[kind].erase(vMatch);
+	auto vMatch = m_aauSets[m_currAAUSet].m_hairs[kind].begin() + index;
+	m_aauSets[m_currAAUSet].m_hairs[kind].erase(vMatch);
 	return true; 
 }
 
@@ -1042,7 +1289,7 @@ void AAUCardData::SaveOverrideFiles() {
 
 	//general overrides first:
 	//mesh overrides:
-	for(const auto& mrule : m_meshOverrideMap) {
+	for(const auto& mrule : m_aauSets[m_currAAUSet].m_meshOverrideMap) {
 		std::vector<BYTE> buffer(mrule.second.GetFileSize());
 		mrule.second.WriteToBuffer(buffer.data());
 		if(buffer.size() > 0) {
@@ -1052,7 +1299,7 @@ void AAUCardData::SaveOverrideFiles() {
 	}
 
 	//archive overrides
-	for(const auto& arule : m_archiveOverrideMap) {
+	for(const auto& arule : m_aauSets[m_currAAUSet].m_archiveOverrideMap) {
 		std::vector<BYTE> buffer(arule.second.GetFileSize());
 		arule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
@@ -1071,7 +1318,7 @@ void AAUCardData::SaveOverrideFiles() {
 	}
 
 	//object overrides
-	for(const auto& orule : m_objectOverrideMap) {
+	for(const auto& orule : m_aauSets[m_currAAUSet].m_objectOverrideMap) {
 		std::vector<BYTE> buffer(orule.second.GetFileSize());
 		orule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
@@ -1081,19 +1328,19 @@ void AAUCardData::SaveOverrideFiles() {
 	}
 
 	//hair highlight
-	if(m_hairHighlightImage.IsGood()) {
-		std::vector<BYTE> buffer(m_hairHighlightImage.GetFileSize());
-		m_hairHighlightImage.WriteToBuffer(buffer.data());
-		auto path = m_hairHighlightImage.GetRelPath();
+	if(m_aauSets[m_currAAUSet].m_hairHighlightImage.IsGood()) {
+		std::vector<BYTE> buffer(m_aauSets[m_currAAUSet].m_hairHighlightImage.GetFileSize());
+		m_aauSets[m_currAAUSet].m_hairHighlightImage.WriteToBuffer(buffer.data());
+		auto path = m_aauSets[m_currAAUSet].m_hairHighlightImage.GetRelPath();
 		m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 	}
 
 	//tan
 	for (int i = 0; i < 5; i++) {
-		if (m_tanImages[i].IsGood()) {
-			std::vector<BYTE> buffer(m_tanImages[i].GetFileSize());
-			m_tanImages[i].WriteToBuffer(buffer.data());
-			auto path = m_tanImages[i].GetRelPath();
+		if (m_aauSets[m_currAAUSet].m_tanImages[i].IsGood()) {
+			std::vector<BYTE> buffer(m_aauSets[m_currAAUSet].m_tanImages[i].GetFileSize());
+			m_aauSets[m_currAAUSet].m_tanImages[i].WriteToBuffer(buffer.data());
+			auto path = m_aauSets[m_currAAUSet].m_tanImages[i].GetRelPath();
 			m_savedFiles.emplace_back(std::make_pair(2,path),buffer);
 		}
 	}
@@ -1139,10 +1386,10 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 	//eye textures/highlights
 	std::pair<std::wstring,std::vector<BYTE>*> eyeStuff[3];
 	for (int i = 0; i < 2; i++) {
-		if (m_eyeTextures[i].texName.size() > 0 && m_eyeTextures[i].texFile.size() > 0) {
+		if (m_aauSets[m_currAAUSet].m_eyeTextures[i].texName.size() > 0 && m_aauSets[m_currAAUSet].m_eyeTextures[i].texFile.size() > 0) {
 			//make sure texture has no folders in it first
 			bool validFileName = true;
-			for (wchar_t c : m_eyeTextures[i].texName) {
+			for (wchar_t c : m_aauSets[m_currAAUSet].m_eyeTextures[i].texName) {
 				if (c == L'\\') {
 					validFileName = false;
 				}
@@ -1150,32 +1397,32 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 			if (!validFileName) {
 				std::wstringstream warningMessage;
 				warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
-				warningMessage << m_eyeTextures[i].texName << TEXT("This cards files will not be extracted. Blame the guy who made the card");
+				warningMessage << m_aauSets[m_currAAUSet].m_eyeTextures[i].texName << TEXT("This cards files will not be extracted. Blame the guy who made the card");
 				MessageBox(NULL,warningMessage.str().c_str(),TEXT("Warning"),MB_ICONWARNING);
 				return false;
 			}
-			std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"),m_eyeTextures[i].texName.c_str());
+			std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"),m_aauSets[m_currAAUSet].m_eyeTextures[i].texName.c_str());
 			if (!General::FileExists(fullPath.c_str())) {
-				eyeStuff[i] = make_pair(fullPath, &m_eyeTextures[i].texFile);
+				eyeStuff[i] = make_pair(fullPath, &m_aauSets[m_currAAUSet].m_eyeTextures[i].texFile);
 			}
 		}
 	}
 	//eye highlight
-	if (m_eyeHighlightName.size() > 0 && m_eyeHighlightFile.size() > 0) {
+	if (m_aauSets[m_currAAUSet].m_eyeHighlightName.size() > 0 && m_aauSets[m_currAAUSet].m_eyeHighlightFile.size() > 0) {
 		//make sure texture has no folders in it first
 		bool validFileName = true;
-		for (wchar_t c : m_eyeHighlightName) {
+		for (wchar_t c : m_aauSets[m_currAAUSet].m_eyeHighlightName) {
 			if (c == L'\\') {
 				validFileName = false;
 			}
 		}
 		if (!validFileName) {
-			LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_eyeHighlightName << " contains paths in "
+			LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_aauSets[m_currAAUSet].m_eyeHighlightName << " contains paths in "
 				"file name and was not extracted for safety purposes.\r\n";
 		}
-		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"),m_eyeHighlightName.c_str());
+		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"),m_aauSets[m_currAAUSet].m_eyeHighlightName.c_str());
 		if (!General::FileExists(fullPath.c_str())) {
-			eyeStuff[2] = make_pair(fullPath,&m_eyeHighlightFile);
+			eyeStuff[2] = make_pair(fullPath,&m_aauSets[m_currAAUSet].m_eyeHighlightFile);
 		}
 	}
 
@@ -1287,15 +1534,15 @@ void AAUCardData::ConvertToNewVersion() {
 		};
 
 		//archive overrides; based in VER1_OVERRIDE_ARCHIVE_PATH
-		for(auto& elem : m_archiveOverrides) {
+		for(auto& elem : m_aauSets[m_currAAUSet].m_archiveOverrides) {
 			changeFilePaths(VER1_OVERRIDE_ARCHIVE_PATH, elem.second);
 		}
 		//mesh texture overrides; based in VER1_OVERRIDE_IMAGE_PATH
-		for (auto& elem : m_meshOverrides) {
+		for (auto& elem : m_aauSets[m_currAAUSet].m_meshOverrides) {
 			changeFilePaths(VER1_OVERRIDE_IMAGE_PATH,elem.second);
 		}
 		//object overrides; based in VER1_OVERRIDE_ARCHIVE_PATH as well
-		for (auto& elem : m_objectOverrides) {
+		for (auto& elem : m_aauSets[m_currAAUSet].m_objectOverrides) {
 			changeFilePaths(VER1_OVERRIDE_ARCHIVE_PATH,elem.second);
 		}
 

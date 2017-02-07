@@ -24,6 +24,7 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
+    <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
     <ClCompile Include="Functions\AAPlay\Poser.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
@@ -39,6 +40,13 @@
     <ClCompile Include="Functions\Shared\Slider.cpp" />
     <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
+    <ClCompile Include="Functions\Shared\TriggerEventDistributor.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Thread.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
     <ClCompile Include="Functions\XXObjectFile.cpp" />
     <ClCompile Include="General\GuiSlider.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
@@ -111,6 +119,13 @@
     <ClInclude Include="Functions\Shared\Slider.h" />
     <ClInclude Include="Functions\Shared\SpecialOverrides.h" />
     <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
+    <ClInclude Include="Functions\Shared\TriggerEventDistributor.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Event.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Value.h" />
     <ClInclude Include="Functions\XXObjectFile.h" />
     <ClInclude Include="General\DirectXStructs.h" />
     <ClInclude Include="General\GuiSlider.h" />

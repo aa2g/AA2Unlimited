@@ -11,17 +11,19 @@ namespace AAEdit {
 namespace {
 //offsets of the classes
 	enum RedrawClassOffset {
-		SYSTEM = 0, FIGURE = 0, CHEST = 0, BODYCOLOR = 0x240, FACE = 0, EYES = 0x114, EYECOLOR = 0,
+		BAR = 0,
+		SYSTEM = 0, FIGURE = 0xD8, CHEST = 0, BODYCOLOR = 0x240, FACE = 0, EYES = 0x114, EYECOLOR = 0,
 		EYEBROWS = 0, FACEDETAILS = 0x19C, HAIR = 0x5C4, HAIRCOLOR = 0, CHARACTER = 0, PERSONALITY = 0, TRAITS = 0
 	};
-	RedrawClassOffset loc_offsetTable[15] = { 
+	RedrawClassOffset loc_offsetTable[16] = { 
+		BAR,
 		SYSTEM, FIGURE, CHEST, BODYCOLOR, FACE, EYES, EYECOLOR, 
 		EYEBROWS, FACEDETAILS, HAIR, HAIRCOLOR, CHARACTER, PERSONALITY, TRAITS
 	};
 }
 
 void RedrawBodyPart(Category cat, RedrawId redraw) {
-	int windowIndex = cat-1;
+	int windowIndex = cat;
 	RedrawClassOffset offset = loc_offsetTable[windowIndex];
 	if (offset == 0) return;
 	

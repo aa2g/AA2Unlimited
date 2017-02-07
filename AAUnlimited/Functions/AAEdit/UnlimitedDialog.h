@@ -1,13 +1,18 @@
 #pragma once
 
 #include <Windows.h>
+#include <CommCtrl.h>
 #include <vector>
 
 #include "Functions\AAUCardData.h"
 #include "External\ExternalClasses\XXFile.h"
+#include "Functions\Shared\Triggers\Triggers.h"
 #include "Functions\Shared\Slider.h"
 
 namespace AAEdit {
+
+	struct loc_AddData;
+	struct loc_AddVariableData;
 
 /*
  * The little dialog that shows up in the editor to select stuff.
@@ -58,8 +63,12 @@ namespace AAEdit {
 		HWND m_cbSaveFiles;
 		HWND m_cbSaveEyeTexture;
 		HWND m_cbSaveEyeHighlight;
+		HWND m_lbAAuSets;
+		HWND m_edAAuSetName;
+		HWND m_btnAAuSetAdd;
 
 		void Refresh();
+		void RefreshAAuSetList();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_gnDialog;
 	struct MODialog : public Dialog {
@@ -196,6 +205,44 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_bsDialog;
+	friend AAEdit::loc_AddData;
+	friend AAEdit::loc_AddVariableData;
+	struct TRDialog : public Dialog {
+		HWND m_lbTriggers;
+		HWND m_tvTrigger;
+
+		HTREEITEM m_tiEvents;
+		HTREEITEM m_tiVariables;
+		HTREEITEM m_tiActions;
+		int m_currentTriggerIndex;
+		Shared::Triggers::Trigger* m_currentTrigger = NULL;
+		std::vector<HTREEITEM> m_events;
+		std::vector<HTREEITEM> m_variables;
+		std::vector<HTREEITEM> m_actions;
+
+		void SetCurrentTrigger(int index);
+		void AddTriggerAction(const Shared::Triggers::ParameterisedAction& action,int insertAfter);
+		int GetSelectedAction();
+		void AddTriggerEvent(const Shared::Triggers::ParameterisedEvent& event,int insertAfter);
+		int GetSelectedEvent();
+		void AddTriggerVariable(const Shared::Triggers::Variable& var,int insertAfter);
+		int GetSelectedVariable();
+
+		std::wstring EVANameToString(const std::wstring& name,const std::vector<Shared::Triggers::ParameterisedExpression>& actualParameters);
+		std::wstring ExpressionToString(const Shared::Triggers::ParameterisedExpression& param);
+
+		void InitializeTriggers();
+		void DoAddAction();
+		void DoAddVariable();
+		void DoAddEvent();
+		static INT_PTR CALLBACK AddActionDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+		static INT_PTR CALLBACK AddVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+
+		void RefreshTriggerList();
+		void RefreshTriggerActions();
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_trDialog;
 
 
 	HWND m_dialog;
