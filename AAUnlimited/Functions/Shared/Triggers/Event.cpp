@@ -29,8 +29,11 @@ namespace Triggers {
 		{ HI_POLY_END, TEXT("Hi Poly Model Destroyed"),
 			TEXT("Before the Characters High Poly Model will be unloaded"),
 			{}
+		},
+		{ PERIOD_ENDS, TEXT("A Period Ends"),
+			TEXT("After a period ends, including lessions themselves"),
+			{}
 		}
-	
 	
 	};
 
@@ -52,6 +55,10 @@ namespace Triggers {
 
 	void HiPolyEndData::SetThreadStorage(Thread* thread) const {
 		thread->localStorage.triggeringCard = card;
+	}
+
+	void PeriodEndsData::SetThreadStorage(Thread* thread) const {
+		thread->globalStorage.period = currentPeriod;
 	}
 }
 }

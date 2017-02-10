@@ -51,6 +51,9 @@
     <ClCompile Include="General\GuiSlider.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
@@ -131,6 +134,9 @@
     <ClInclude Include="General\GuiSlider.h" />
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalVariables.h" />

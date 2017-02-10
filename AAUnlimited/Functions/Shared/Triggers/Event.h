@@ -26,7 +26,11 @@ namespace Triggers {
 	enum Events {
 		INVALID = 0,
 		CLOTHES_CHANGED, CARD_INITIALIZED, CARD_DESTROYED,
-		HI_POLY_INIT, HI_POLY_END, N_EVENTS
+		HI_POLY_INIT, HI_POLY_END, 
+		
+		PERIOD_ENDS,
+		
+		N_EVENTS
 	};
 
 	extern std::vector<Event> g_Events;
@@ -82,6 +86,10 @@ namespace Triggers {
 
 	EDC_DECLARE(HiPolyEndData,HI_POLY_END)
 		int card;
+	EDC_END
+
+	EDC_DECLARE(PeriodEndsData,HI_POLY_END)
+		int currentPeriod;
 	EDC_END
 
 

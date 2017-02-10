@@ -226,6 +226,7 @@ void UnlimitedDialog::TRDialog::SetCurrentTrigger(int index) {
 	
 }
 
+//returns index of selected action in array, or -1 if no event is selected
 int UnlimitedDialog::TRDialog::GetSelectedAction() {
 	HTREEITEM tv = TreeView_GetSelection(m_tvTrigger);
 	int i;
@@ -293,6 +294,7 @@ void UnlimitedDialog::TRDialog::AddTriggerEvent(const Shared::Triggers::Paramete
 	m_events.insert(m_events.begin() + (insertAfter+1),ti);
 }
 
+//returns index of selected event in array, or -1 if no event is selected
 int UnlimitedDialog::TRDialog::GetSelectedEvent() {
 	HTREEITEM tv = TreeView_GetSelection(m_tvTrigger);
 	int i;
@@ -336,6 +338,7 @@ void UnlimitedDialog::TRDialog::AddTriggerVariable(const Shared::Triggers::Varia
 	m_variables.insert(m_variables.begin() + (insertAfter+1),ti);
 }
 
+//returns index of selected variable in array, or -1 if no event is selected
 int UnlimitedDialog::TRDialog::GetSelectedVariable() {
 	HTREEITEM tv = TreeView_GetSelection(m_tvTrigger);
 	int i;
@@ -373,7 +376,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		//DEL-key was pressed while the list box had the focus
 		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		if (LOWORD(wparam) == VK_DELETE) {
-
+			
+			
 		}
 		break; }
 
@@ -451,6 +455,32 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 								SendMessage(thisPtr->m_lbTriggers,LB_DELETESTRING,sel,0); //wierd workaround
 								SendMessage(thisPtr->m_lbTriggers,LB_INSERTSTRING,sel,(LPARAM)newName.c_str());
 							}
+						}
+					}
+					break; }
+				case ID_TRM_DELETESELECTION: {
+					if(thisPtr->m_currentTrigger != NULL) {
+						int sel;
+						if((sel = thisPtr->GetSelectedEvent()) != -1) {
+							HTREEITEM item = thisPtr->m_events[sel];
+							SendMessage(thisPtr->m_tvTrigger,TVM_DELETEITEM,0,(LPARAM)item);
+							thisPtr->m_currentTrigger->events.erase(thisPtr->m_currentTrigger->events.begin() + sel);
+							thisPtr->m_events.erase(thisPtr->m_events.begin() + sel);
+							return TRUE;
+						}
+						else if ((sel = thisPtr->GetSelectedVariable()) != -1) {
+							HTREEITEM item = thisPtr->m_variables[sel];
+							SendMessage(thisPtr->m_tvTrigger,TVM_DELETEITEM,0,(LPARAM)item);
+							thisPtr->m_currentTrigger->vars.erase(thisPtr->m_currentTrigger->vars.begin() + sel);
+							thisPtr->m_variables.erase(thisPtr->m_variables.begin() + sel);
+							return TRUE;
+						}
+						else if ((sel = thisPtr->GetSelectedAction()) != -1) {
+							HTREEITEM item = thisPtr->m_actions[sel];
+							SendMessage(thisPtr->m_tvTrigger,TVM_DELETEITEM,0,(LPARAM)item);
+							thisPtr->m_currentTrigger->actions.erase(thisPtr->m_currentTrigger->actions.begin() + sel);
+							thisPtr->m_actions.erase(thisPtr->m_actions.begin() + sel);
+							return TRUE;
 						}
 					}
 					break; }

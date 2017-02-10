@@ -40,7 +40,7 @@ public:
 	 * This storage only exists once and stores event-specific data
 	 */
 	static struct GlobalStorage {
-
+		int period;
 
 	} globalStorage;
 

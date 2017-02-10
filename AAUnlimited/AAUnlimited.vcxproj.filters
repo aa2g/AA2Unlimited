@@ -88,6 +88,9 @@
     <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
     <ClCompile Include="Functions\Shared\TriggerEventDistributor.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -172,6 +175,9 @@
     <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
     <ClInclude Include="Functions\Shared\Triggers\Event.h" />
     <ClInclude Include="Functions\Shared\TriggerEventDistributor.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
