@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 
+#include "CharacterRelation.h"
 #include "External\AddressRule.h"
 #include "Frame.h"
 #include "CharacterData.h"
@@ -55,13 +56,22 @@ public:
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
 	BYTE m_unknown7[0xDB8];
 	void* m_somedata;
-	BYTE m_unknown8[0x1C];
+	BYTE m_unknown8[4];
+	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
+	BYTE m_unknown9[0x14];
 	XXFile* m_xxSkirt;
-	BYTE m_unknown9[0x18];
+	BYTE m_unknown10[0x18];
+
 
 public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
+
+	inline IllusionArray<CharacterRelation>* GetRelations() {
+		BYTE* ptr = (BYTE*)m_moreData;
+		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A18);
+	}
+	
 
 	inline XXFile* GetXXFile(Models target) {
 		switch (target) {

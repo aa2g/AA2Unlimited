@@ -6,6 +6,10 @@
 namespace Shared {
 namespace Triggers {
 
+
+Thread::GlobalStorage Thread::globalStorage;
+
+
 void Thread::ExecuteTrigger(Trigger* trg) {
 	if (trg == NULL) return;
 	if (!trg->IsInitalized()) trg->Initialize();

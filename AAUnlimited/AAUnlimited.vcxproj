@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
@@ -99,6 +100,8 @@
     <ClInclude Include="3rdparty\picojson\picojson.h" />
     <ClInclude Include="External\ExternalClasses\Animation.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
+    <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />

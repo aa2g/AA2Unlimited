@@ -91,6 +91,7 @@
     <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -178,6 +179,8 @@
     <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
     <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
+    <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
