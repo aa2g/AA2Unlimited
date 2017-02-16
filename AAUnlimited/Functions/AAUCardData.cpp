@@ -1139,7 +1139,8 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 			MessageBox(NULL,warningMessage.str().c_str(),TEXT("Warning"),MB_ICONWARNING);
 			return false;
 		}
-		if (!General::FileExists(fullPath.c_str())) toExtract.emplace_back(i, std::move(fullPath));
+		if (!General::FileExists(fullPath.c_str()))
+			toExtract.emplace_back(i, std::move(fullPath));
 	}
 	//eye textures/highlights
 	std::pair<std::wstring,std::vector<BYTE>*> eyeStuff[3];
@@ -1285,7 +1286,7 @@ void AAUCardData::ConvertToNewVersion() {
 
 				std::wstring target = General::BuildOverridePath(relPath.c_str());
 				std::wstring fileTarget = tmp.GetFilePath();
-				if (tmp.IsGood() && target != fileTarget) {
+				if (tmp.IsGood() && target != fileTarget && !General::FileExists(target.c_str())) {
 					filesToMove.push_back(std::make_pair(tmp.GetFilePath(),target));
 				}
 			}
