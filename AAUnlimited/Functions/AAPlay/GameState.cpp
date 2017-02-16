@@ -13,6 +13,7 @@ struct GameStateStruct {
 		m_isPcConversation = false;
 		m_isOverriding = false;
 		m_isMenuMode = false;
+		m_isHighPolyLoaded = false;
 	}
 
 	//Game state indicators
@@ -20,6 +21,9 @@ struct GameStateStruct {
 	bool m_isPcConversation;	//true if PC is in conversation mode
 	bool m_isOverriding;		//true if overrides need to be applied
 	bool m_isMenuMode;			//true if in menu mode(settings, roster, save/load, etc)
+
+	//TODO: it's a band-aid solution for managing isOverriding. Either remove the flag if a better one is implemented or remove the comment if there are other uses found for it.
+	bool m_isHighPolyLoaded;	//true if there's a high poly model currently on screen
 } loc_gameState;
 
 void Shared::GameState::reset() {
@@ -62,4 +66,14 @@ void Shared::GameState::updateIsOverriding()
 		Shared::GameState::getIsClothesScreen() ||
 		Shared::GameState::getIsPcConversation()
 	);
+}
+
+void Shared::GameState::setIsHighPolyLoaded(bool value)
+{
+	loc_gameState.m_isHighPolyLoaded = value;
+}
+
+bool Shared::GameState::getIsHighPolyLoaded()
+{
+	return loc_gameState.m_isHighPolyLoaded;
 }

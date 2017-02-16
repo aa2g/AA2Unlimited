@@ -100,7 +100,7 @@ bool __stdcall HairLoadAAEdit(BYTE kind, ExtClass::CharacterStruct* character) {
 */
 bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 	static int currIndex = 0;
-
+	
 	bool repeat = false; //if we need to repeat the function to load more hairs
 						 //for every hair kind
 	for (int kind = 0; kind < 4; kind++) {
@@ -130,7 +130,12 @@ bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 		return true;
 	}
 	else {
-		
+
+		if (Shared::GameState::getIsHighPolyLoaded()) {
+			Shared::GameState::setIsOverriding(false);
+			Shared::GameState::setIsHighPolyLoaded(false);
+		}
+
 		currIndex = 0;
 		return false;
 	}
