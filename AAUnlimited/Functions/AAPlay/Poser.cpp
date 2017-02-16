@@ -305,7 +305,7 @@ namespace Poser {
 			loc_syncing = false;
 
 			//register hotkeys
-			auto hotKeysSuccess = RegisterHotKey(
+			if (g_Config.GetKeyValue(Config::USE_POSER_HOTKEYS).bVal) RegisterHotKey(
 				hwndDlg,
 				hkTranslate,
 				MOD_NOREPEAT,
