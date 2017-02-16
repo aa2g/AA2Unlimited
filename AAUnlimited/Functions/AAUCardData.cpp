@@ -902,6 +902,7 @@ void AAUCardData::GenSliderMap() {
 }
 
 void AAUCardData::GenAllFileMaps() {
+	GenArchiveRedirectMap();
 	GenMeshOverrideMap();
 	GenArchiveOverrideMap();
 	GenObjectOverrideMap();
