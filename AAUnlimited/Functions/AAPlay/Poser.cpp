@@ -218,6 +218,11 @@ namespace Poser {
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 		static bool ignoreNextSlider = false;
 
+		//set hotkeys		
+		auto hkTranslate = g_Config.GetKeyValue(Config::HKEY_POSER_TRANSLATE).bVal;	//W
+		auto hkRotate = g_Config.GetKeyValue(Config::HKEY_POSER_ROTATE).bVal;	//E
+		auto hkScale = g_Config.GetKeyValue(Config::HKEY_POSER_SCALE).bVal;	//R
+
 		switch (msg) {
 		case WM_INITDIALOG: {
 			PoserWindow* thisPtr = (PoserWindow*)lparam;
@@ -298,6 +303,24 @@ namespace Poser {
 			thisPtr->SyncList();
 
 			loc_syncing = false;
+
+			//register hotkeys
+			auto hotKeysSuccess = RegisterHotKey(
+				hwndDlg,
+				hkTranslate,
+				MOD_NOREPEAT,
+				hkTranslate) &&
+			RegisterHotKey(
+				hwndDlg,
+				hkRotate,
+				MOD_NOREPEAT,
+				hkRotate) &&
+			RegisterHotKey(
+				hwndDlg,
+				hkScale,
+				MOD_NOREPEAT,
+				hkScale);
+
 			return TRUE;
 			break; }
 		case WM_VSCROLL: {
@@ -546,7 +569,37 @@ namespace Poser {
 
 			};
 			break; }
+		case WM_HOTKEY: {
+			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			SetWindowText(hwndDlg, (LPWSTR)wparam);
+			if (thisPtr == NULL) return FALSE;
+			int id = wparam;
+			if (id == hkTranslate) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Translate, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
+			else if (id == hkRotate) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Rotate, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
+			else if (id == hkScale) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Scale, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
 		}
+}
 
 		return FALSE;
 	}
