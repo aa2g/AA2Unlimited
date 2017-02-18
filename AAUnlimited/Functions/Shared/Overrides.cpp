@@ -40,11 +40,13 @@ namespace Shared {
 		else {
 			g_currentChar = &AAPlay::g_characters[loadCharacter->m_seat];
 		}
+
+		Shared::GameState::setIsHighPolyLoaded(false);	//not yet loaded
 		Shared::GameState::setIsOverriding(true);
 	}
 
 	void MeshTextureCharLoadEnd() {
-		if (!Shared::GameState::getIsClothesScreen()) Shared::GameState::setIsOverriding(false);
+		Shared::GameState::setIsHighPolyLoaded(true);
 	}
 
 	/*********************************/

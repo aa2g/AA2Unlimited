@@ -22,6 +22,9 @@ public:
 
 		LEGACY_MODE,
 
+		USE_POSER_HOTKEYS,
+		HKEY_POSER_TRANSLATE, HKEY_POSER_ROTATE, HKEY_POSER_SCALE,
+
 		num_elements
 	};
 	union MemberData {
@@ -45,7 +48,7 @@ public:
 private:
 	//map Member -> datatype, name, default value
 	enum MemberType {
-		BOOL, INT, FLOAT, STRING
+		BOOL, INT, FLOAT, STRING, UINT
 	};
 	struct MemberInfo {
 		MemberType type;

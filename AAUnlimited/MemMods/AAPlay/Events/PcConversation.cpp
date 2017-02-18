@@ -4,7 +4,6 @@
 #include "External/ExternalClasses.h"
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/Poser.h"
-#include "Functions/AAPlay/Facecam.h"
 #include "Functions/AAPlay/GameState.h"
 
 namespace PlayInjections {
@@ -20,7 +19,6 @@ namespace PcConversation {
 void __stdcall StartEvent() {
 	Shared::GameState::setIsPcConversation(true);
 	Poser::StartEvent(Poser::NpcInteraction);
-	Facecam::Cleanup();
 }
 
 void __stdcall EndEvent() {
