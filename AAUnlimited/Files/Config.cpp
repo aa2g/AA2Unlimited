@@ -22,7 +22,11 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::FLOAT,	"fPOVOffsetX", 0.0f),	//POV_OFFSET_X
 	MemberInfo(Config::FLOAT,	"fPOVOffsetY", 0.0f),	//POV_OFFSET_Y
 	MemberInfo(Config::FLOAT,	"fPOVOffsetZ", 0.0f),	//POV_OFFSET_Z
-	MemberInfo(Config::INT,		"legacyMode", 0)	//LEGACY_MODE
+	MemberInfo(Config::INT,		"legacyMode", 0),	//LEGACY_MODE
+	MemberInfo(Config::BOOL,		"bPoserHotkeys", false),	//USE_POSER_HOTKEYS
+	MemberInfo(Config::INT,		"hkPoserTranslate", 0x57),	//HKEY_POSER_TRANSLATE
+	MemberInfo(Config::INT,		"hkPoserRotate", 0x45),	//HKEY_POSER_ROTATE
+	MemberInfo(Config::INT,		"hkPoserScale", 0x52)	//HKEY_POSER_SCALE
 };
 
 Config g_Config;

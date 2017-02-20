@@ -17,6 +17,9 @@ namespace Shared {
 		bool getIsOverriding();
 		void updateIsOverriding();
 
+		void setIsHighPolyLoaded(bool value);
+		bool getIsHighPolyLoaded();
+
 		inline ExtClass::CharacterStruct ** getPlayerCharacter()
 		{
 			return ExtVars::AAPlay::PlayerCharacterPtr();
