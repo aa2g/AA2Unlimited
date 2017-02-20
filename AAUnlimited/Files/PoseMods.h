@@ -18,6 +18,7 @@ public:
 		RightHand,
 		LeftLeg,
 		RightLeg,
+		Breasts,
 		Skirt,
 		Room,
 		Other

@@ -4,6 +4,7 @@
 #include "External/ExternalClasses.h"
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/Poser.h"
+#include "Functions/AAPlay/GameState.h"
 
 namespace PlayInjections {
 /*
@@ -16,10 +17,12 @@ namespace PcConversation {
  ********************/
 
 void __stdcall StartEvent() {
+	Shared::GameState::setIsPcConversation(true);
 	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall EndEvent() {
+	Shared::GameState::setIsPcConversation(false);
 	Poser::EndEvent();
 }
 
@@ -40,7 +43,6 @@ void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
  * NPC -> PC interactive conversation tick event
  *******************/
 void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	
 }
 
 void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {

@@ -57,7 +57,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	if (name == NULL) return ExtClass::CharacterStruct::INVALID;
 	Name props{ name };
 	if (!props.valid) return ExtClass::CharacterStruct::INVALID;
-	if (props.num1 != 0) return ExtClass::CharacterStruct::INVALID;
+	//if (props.num1 != 0) return ExtClass::CharacterStruct::INVALID;
 	if (props.extraPrefix == 'S') {
 		//hairs
 		switch (props.num2) {

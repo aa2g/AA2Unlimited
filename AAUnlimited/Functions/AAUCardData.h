@@ -32,6 +32,7 @@ public:
 	enum MeshModFlag {
 		MODIFY_FRAME = 1,MODIFY_BONE = 2
 	};
+	static const int CurrentVersion = 2;
 public:
 	AAUCardData();
 	~AAUCardData();

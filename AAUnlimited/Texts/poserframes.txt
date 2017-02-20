@@ -19,11 +19,13 @@ a01_J_Kosi_010		TORSO	SRT XYZ		Hip
 a01_J_KataL_01		TORSO	SRT XYZ		Left Shoulder
 a01_J_KataR_01		TORSO	SRT XYZ		Right Shoulder
 
+a01_J_ArmL_00		LARM	SRT XYZ		Anchor
 a01_J_ArmL_01		LARM	SRT XYZ		Arm
 a01_J_ArmL_02		LARM	SRT XYZ		Shoulder
 a01_J_UdeL_01		LARM	SRT XYZ		Underarm 
 a01_J_HijiL_01		LARM	SRT XYZ		Elbow
 
+a01_J_ArmR_00		RARM	SRT XYZ		Anchor
 a01_J_ArmR_01		RARM	SRT XYZ		Arm
 a01_J_ArmR_02		RARM	SRT XYZ		Shoulder
 a01_J_UdeR_01		RARM	SRT XYZ		Underarm 
@@ -67,13 +69,18 @@ a01_J_OyaR_03		RHAND	SRT XYZ		Thumb 3
 
 a01_J_UplegL_010	LLEG	SRT XYZ		Left Upper Leg
 a01_J_LegL_01		LLEG	SRT XYZ		Left Lower Leg
-a01_J_HizaL_01		LLEG	SRT XYZ		a01_J_HizaL_01
+a01_J_HizaL_01		LLEG	SRT XYZ		Left Knee
 a01_J_FootL_02		LLEG	SRT XYZ		Left Foot
 
 a01_J_UplegR_010	RLEG	SRT XYZ		Right Upper Leg
 a01_J_LegR_01		RLEG	SRT XYZ		Right Lower Leg
-a01_J_HizaR_01		RLEG	SRT XYZ		a01_J_HizaR_01
+a01_J_HizaR_01		RLEG	SRT XYZ		Right Knee
 a01_J_FootR_02		RLEG	SRT XYZ		Right Foot
+
+a01_J_MuneR_01		BREAST	SRT XYZ		Right Breast 1
+a01_J_MuneR_02		BREAST	SRT XYZ		Right Breast 2
+a01_J_MuneL_01		BREAST	SRT XYZ		Left Breast 1
+a01_J_MuneL_02		BREAST	SRT XYZ		Left Breast 2
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Other
@@ -81,3 +88,60 @@ a01_J_FootR_02		RLEG	SRT XYZ		Right Foot
 
 a01_N_Zentai_010	OTHER	SRT	XYZ		World
 a01_N_Skeleton_010	OTHER	SRT	XYZ		Skeleton
+
+a01_J_SK_F_01		SKIRT	SRT	XYZ		SK_F_01
+a01_J_SK_F_02		SKIRT	SRT	XYZ		SK_F_02
+a01_J_SK_F_03		SKIRT	SRT	XYZ		SK_F_03
+a01_J_SK_F_04		SKIRT	SRT	XYZ		SK_F_04
+a01_J_SK_FR_01		SKIRT	SRT	XYZ		SK_FR_01
+a01_J_SK_FR_02		SKIRT	SRT	XYZ		SK_FR_02
+a01_J_SK_FR_03		SKIRT	SRT	XYZ		SK_FR_03
+a01_J_SK_FR_04		SKIRT	SRT	XYZ		SK_FR_04
+a01_J_SK_FL_01		SKIRT	SRT	XYZ		SK_FL_01
+a01_J_SK_FL_02		SKIRT	SRT	XYZ		SK_FL_02
+a01_J_SK_FL_03		SKIRT	SRT	XYZ		SK_FL_03
+a01_J_SK_FL_04		SKIRT	SRT	XYZ		SK_FL_04
+a01_J_SK_SR_01		SKIRT	SRT	XYZ		SK_SR_01
+a01_J_SK_SR_02		SKIRT	SRT	XYZ		SK_SR_02
+a01_J_SK_SR_03		SKIRT	SRT	XYZ		SK_SR_03
+a01_J_SK_SR_04		SKIRT	SRT	XYZ		SK_SR_04
+a01_J_SK_SL_01		SKIRT	SRT	XYZ		SK_SL_01
+a01_J_SK_SL_02		SKIRT	SRT	XYZ		SK_SL_02
+a01_J_SK_SL_03		SKIRT	SRT	XYZ		SK_SL_03
+a01_J_SK_SL_04		SKIRT	SRT	XYZ		SK_SL_04
+a01_J_SK_U_01		SKIRT	SRT	XYZ		SK_U_01
+a01_J_SK_U_02		SKIRT	SRT	XYZ		SK_U_02
+a01_J_SK_U_03		SKIRT	SRT	XYZ		SK_U_03
+a01_J_SK_U_04		SKIRT	SRT	XYZ		SK_U_04
+a01_J_SK_UR_01		SKIRT	SRT	XYZ		SK_UR_01
+a01_J_SK_UR_02		SKIRT	SRT	XYZ		SK_UR_02
+a01_J_SK_UR_03		SKIRT	SRT	XYZ		SK_UR_03
+a01_J_SK_UR_04		SKIRT	SRT	XYZ		SK_UR_04
+a01_J_SK_UL_01		SKIRT	SRT	XYZ		SK_UL_01
+a01_J_SK_UL_02		SKIRT	SRT	XYZ		SK_UL_02
+a01_J_SK_UL_03		SKIRT	SRT	XYZ		SK_UL_03
+a01_J_SK_UL_04		SKIRT	SRT	XYZ		SK_UL_04
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Props
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+AS00_N_Prop0		ROOM	T	XYZ		Prop0(Position)
+AS00_N_Prop0B		ROOM	SR	XYZ		Prop0(Orientation)
+AS00_N_Prop1		ROOM	T	XYZ		Prop1(Position)
+AS00_N_Prop1B		ROOM	SR	XYZ		Prop1(Orientation)
+AS00_N_Prop2		ROOM	T	XYZ		Prop2(Position)
+AS00_N_Prop2B		ROOM	SR	XYZ		Prop2(Orientation)
+AS00_N_Prop3		ROOM	T	XYZ		Prop3(Position)
+AS00_N_Prop3B		ROOM	SR	XYZ		Prop3(Orientation)
+AS00_N_Prop4		ROOM	T	XYZ		Prop4(Position)
+AS00_N_Prop4B		ROOM	SR	XYZ		Prop4(Orientation)
+AS00_N_Prop5		ROOM	T	XYZ		Prop5(Position)
+AS00_N_Prop5B		ROOM	SR	XYZ		Prop5(Orientation)
+AS00_N_Prop6		ROOM	T	XYZ		Prop6(Position)
+AS00_N_Prop6B		ROOM	SR	XYZ		Prop6(Orientation)
+AS00_N_Prop7		ROOM	T	XYZ		Prop7(Position)
+AS00_N_Prop7B		ROOM	SR	XYZ		Prop7(Orientation)
+AS00_N_Prop8		ROOM	T	XYZ		Prop8(Position)
+AS00_N_Prop8B		ROOM	SR	XYZ		Prop8(Orientation)
+AS00_N_Prop9		ROOM	T	XYZ		Prop9(Position)
+AS00_N_Prop9B		ROOM	SR	XYZ		Prop9(Orientation)

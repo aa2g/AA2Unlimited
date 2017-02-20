@@ -103,6 +103,30 @@ namespace Poser {
 			return reinterpret_cast<XXFileFace*>(Character->m_xxFace);
 		}
 
+		void SetHidden(const char* name, bool hidden) {
+			ExtClass::Frame** frame = Character->m_bonePtrArray;
+			while (frame < Character->m_bonePtrArrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, name)) {
+						(*frame)->m_renderFlag = hidden ? 2 : 0;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void SetTears(bool show) {
+			SetHidden("A00_O_namida", !show);
+		}
+
+		void SetDimEyes(bool dim) {
+			SetHidden("A00_O_mehi", dim);
+		}
+
+		void SetTongueJuice(bool show) {
+			SetHidden("A00_O_kutisiru", !show);
+		}
+
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
@@ -194,6 +218,11 @@ namespace Poser {
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 		static bool ignoreNextSlider = false;
 
+		//set hotkeys		
+		auto hkTranslate = g_Config.GetKeyValue(Config::HKEY_POSER_TRANSLATE).bVal;	//W
+		auto hkRotate = g_Config.GetKeyValue(Config::HKEY_POSER_ROTATE).bVal;	//E
+		auto hkScale = g_Config.GetKeyValue(Config::HKEY_POSER_SCALE).bVal;	//R
+
 		switch (msg) {
 		case WM_INITDIALOG: {
 			PoserWindow* thisPtr = (PoserWindow*)lparam;
@@ -226,6 +255,12 @@ namespace Poser {
 			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
 			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
+			thisPtr->m_chkAlwaysOnTop = GetDlgItem(hwndDlg, IDC_PPS_CHKALWAYSONTOP);
+			thisPtr->m_chkTears = GetDlgItem(hwndDlg, IDC_PPS_CHKTEARS);
+			thisPtr->m_chkDimEyes = GetDlgItem(hwndDlg, IDC_PPS_CHKDIMEYES);
+			thisPtr->m_chkTongueJuice = GetDlgItem(hwndDlg, IDC_PPS_CHKTONGUEJUICE);
+			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
 
 			loc_syncing = true;
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Torso"));
@@ -235,6 +270,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Right Hand"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"LeftLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"RightLeg"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Breasts"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
@@ -267,6 +303,24 @@ namespace Poser {
 			thisPtr->SyncList();
 
 			loc_syncing = false;
+
+			//register hotkeys
+			if (g_Config.GetKeyValue(Config::USE_POSER_HOTKEYS).bVal) RegisterHotKey(
+				hwndDlg,
+				hkTranslate,
+				MOD_NOREPEAT,
+				hkTranslate) &&
+			RegisterHotKey(
+				hwndDlg,
+				hkRotate,
+				MOD_NOREPEAT,
+				hkRotate) &&
+			RegisterHotKey(
+				hwndDlg,
+				hkScale,
+				MOD_NOREPEAT,
+				hkScale);
+
 			return TRUE;
 			break; }
 		case WM_VSCROLL: {
@@ -452,11 +506,29 @@ namespace Poser {
 					LRESULT res = SendMessage(thisPtr->m_chkEyeTrack, BM_GETCHECK, 0, 0);
 					loc_targetChar->GetFace()->m_eyeTracking = res == BST_CHECKED;
 				}
+				else if (id == IDC_PPS_CHKTEARS) {
+					LRESULT res = SendMessage(thisPtr->m_chkTears, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetTears(res == BST_CHECKED);
+				}
+				else if (id == IDC_PPS_CHKTONGUEJUICE) {
+					LRESULT res = SendMessage(thisPtr->m_chkTongueJuice, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetTongueJuice(res == BST_CHECKED);
+				}
+				else if (id == IDC_PPS_CHKDIMEYES) {
+					LRESULT res = SendMessage(thisPtr->m_chkDimEyes, BM_GETCHECK, 0, 0);
+					loc_targetChar->SetDimEyes(res == BST_CHECKED);
+				}
 				else if (id == IDC_PPS_BTNCLOTHES) {
 					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
 					if (path != NULL) {
 						thisPtr->LoadCloth(General::FileToBuffer(path));
 					}
+				}
+				else if (id == IDC_PPS_CHKALWAYSONTOP) {
+					LRESULT res = SendMessage(thisPtr->m_chkAlwaysOnTop, BM_GETCHECK, 0, 0);
+					bool isChecked = res == BST_CHECKED;
+					const static DWORD rule[]{ 0x368274 };
+					SetParent(thisPtr->m_dialog, isChecked ? *(HWND*)ExtVars::ApplyRule(rule) : NULL);
 				}
 				break; }
 			case LBN_SELCHANGE: {
@@ -497,7 +569,37 @@ namespace Poser {
 
 			};
 			break; }
+		case WM_HOTKEY: {
+			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			SetWindowText(hwndDlg, (LPWSTR)wparam);
+			if (thisPtr == NULL) return FALSE;
+			int id = wparam;
+			if (id == hkTranslate) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Translate, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
+			else if (id == hkRotate) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Rotate, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
+			else if (id == hkScale) {
+				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Scale, 0);
+				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					thisPtr->SyncList();
+				}
+			}
 		}
+}
 
 		return FALSE;
 	}
@@ -587,14 +689,23 @@ namespace Poser {
 		PoserCharacter* targetChar = nullptr;
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
-		if (model != ExtClass::CharacterStruct::SKELETON) return;
 		targetChar = loc_loadCharacter;
-		if (targetChar->Character->m_xxSkeleton != xxFile) {
-			for (PoserCharacter* c : loc_targetCharacters) {
-				if (c->Character->m_xxSkeleton == xxFile)
-					targetChar = c;
+		if (model == ExtClass::CharacterStruct::SKELETON) {
+			if (targetChar->Character->m_xxSkeleton != xxFile) {
+				for (PoserCharacter* c : loc_targetCharacters) {
+					if (c->Character->m_xxSkeleton == xxFile)
+						targetChar = c;
+				}
 			}
 		}
+		else
+			return;
+		/*
+		else if (model != ExtClass::CharacterStruct::SKIRT)
+			// The skirt XXFile isn't defined in the character struct at this moment
+			// We suppose the skeleton is already loaded and targetChar points to the correct char
+			return;
+		*/
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			

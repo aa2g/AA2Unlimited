@@ -7,6 +7,7 @@
 #include "Functions\Shared\Overrides.h"
 #include "Functions\AAPlay\Globals.h"
 #include "Functions\AAPlay\Poser.h"
+#include "Functions/AAPlay/Facecam.h"
 
 namespace PlayInjections {
 /*
@@ -26,6 +27,7 @@ void __stdcall HiPolyLoadEndEvent() {
 
 void __stdcall SaveLoadEvent() {
 	AAPlay::InitOnLoad();
+	Facecam::Cleanup();
 }
 
 void __stdcall TransferInEvent(ExtClass::CharacterStruct* character) {

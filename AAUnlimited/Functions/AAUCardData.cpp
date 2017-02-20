@@ -354,7 +354,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 	Reset();
 	//try to find it at the end first
-	if (size < 8) return false;
+	if (size < 8) {
+		m_version = AAUCardData::CurrentVersion;
+		return false;
+	}
 	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
 	if (aauDataSize < size - 8) {
 		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
@@ -373,6 +376,7 @@ bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
 		FromBuffer((char*)chunk, size);
 		return true;
 	}
+	m_version = AAUCardData::CurrentVersion;
 	return false;
 }
 
@@ -898,6 +902,7 @@ void AAUCardData::GenSliderMap() {
 }
 
 void AAUCardData::GenAllFileMaps() {
+	GenArchiveRedirectMap();
 	GenMeshOverrideMap();
 	GenArchiveOverrideMap();
 	GenObjectOverrideMap();
@@ -1058,14 +1063,14 @@ void AAUCardData::SaveOverrideFiles() {
 		if (buffer.size() > 0) {
 			int location;
 			auto path = arule.second.GetRelPath();
-			if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
-				path = path;
-				location = 0;
-			}
-			else {
+			//if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
+			//	path = path;
+			//	location = 0;
+			//}
+			//else {
 				path = path;
 				location = 2;
-			}
+			//}
 			m_savedFiles.emplace_back(std::make_pair(location,path),buffer);
 		}
 	}
@@ -1134,7 +1139,8 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 			MessageBox(NULL,warningMessage.str().c_str(),TEXT("Warning"),MB_ICONWARNING);
 			return false;
 		}
-		if (!General::FileExists(fullPath.c_str())) toExtract.emplace_back(i, std::move(fullPath));
+		if (!General::FileExists(fullPath.c_str()))
+			toExtract.emplace_back(i, std::move(fullPath));
 	}
 	//eye textures/highlights
 	std::pair<std::wstring,std::vector<BYTE>*> eyeStuff[3];
@@ -1280,7 +1286,7 @@ void AAUCardData::ConvertToNewVersion() {
 
 				std::wstring target = General::BuildOverridePath(relPath.c_str());
 				std::wstring fileTarget = tmp.GetFilePath();
-				if (tmp.IsGood() && target != fileTarget) {
+				if (tmp.IsGood() && target != fileTarget && !General::FileExists(target.c_str())) {
 					filesToMove.push_back(std::make_pair(tmp.GetFilePath(),target));
 				}
 			}
