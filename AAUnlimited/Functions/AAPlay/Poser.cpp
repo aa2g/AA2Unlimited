@@ -9,6 +9,7 @@
 #include <CommCtrl.h>
 #include <Strsafe.h>
 #include <fstream>
+#include <Commctrl.h>
 
 #include "External\AddressRule.h"
 #include "External\ExternalClasses\Frame.h"
@@ -28,6 +29,10 @@
 
 namespace Poser {
 
+#define X 0
+#define Y 1
+#define Z 2
+
 	PoserWindow g_PoserWindow;
 
 	enum Operation {
@@ -44,39 +49,67 @@ namespace Poser {
 		std::wstring frameName;
 		std::wstring descr;
 		ExtClass::Frame* xxFrame;
-		enum Operation curOperation;
-		int curAxis;
+		Operation currentOperation;
 		struct OperationData translate, rotate, scale;
 
-		float* curValue() {
-			OperationData* data = curOperation == Rotate ? &rotate : curOperation == Translate ? &translate : &scale;
-			if (curAxis == 0)
-				return &data->x;
-			else if (curAxis == 1)
-				return &data->y;
-			else
-				return &data->z;
+		void setCurrentOperation(Operation operation) {
+			currentOperation = operation;
 		}
 
-		void setValue(float newValue) {
-			float* value = curValue();
-			*value = newValue;
+		inline OperationData* getCurrentOperation() {
+			return currentOperation == Rotate ? &rotate : currentOperation == Translate ? &translate : &scale;
 		}
 
-		void fromSlider(int sldVal) {
-			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
-			float val = data.min + (data.max - data.min) / 0x10000 * sldVal;
-			float* value = curValue();
-			*value = val;
+		float* curValueX() {
+			return &getCurrentOperation()->x;
 		}
 
-		int toSlider() {
-			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
-			float range = data.max - data.min; //map from [min,max] to [0,0x10000]
-			float val;
-			val = (*curValue()) - data.min;
+		float* curValueY() {
+			return &getCurrentOperation()->y;
+		}
+
+		float* curValueZ() {
+			return &getCurrentOperation()->z;
+		}
+
+		void setValue(float newValueX, float newValueY, float newValueZ) {
+			*curValueX() = newValueX;
+			*curValueY() = newValueY;
+			*curValueZ() = newValueZ;
+		}
+
+		float fromSlider(int sldVal) {
+			return getCurrentOperation()->min + (getCurrentOperation()->max - getCurrentOperation()->min) / 0x10000 * sldVal;
+		}
+
+		void fromSliderX(int sldVal) {
+			*curValueX() = fromSlider(sldVal);
+		}
+
+		void fromSliderY(int sldVal) {
+			*curValueY() = fromSlider(sldVal);
+		}
+
+		void fromSliderZ(int sldVal) {
+			*curValueZ() = fromSlider(sldVal);
+		}
+
+		int toSlider(float value) {
+			float range = getCurrentOperation()->max - getCurrentOperation()->min; //map from [min,max] to [0,0x10000]
 			float coeff = 0x10000 / range;
-			return int(coeff * val);
+			return int(coeff * (value - getCurrentOperation()->min));
+		}
+
+		int toSliderX() {
+			return toSlider(*curValueX());
+		}
+
+		int toSliderY() {
+			return toSlider(*curValueY());
+		}
+
+		int toSliderZ() {
+			return toSlider(*curValueZ());
 		}
 
 		void reset() {
@@ -184,6 +217,7 @@ namespace Poser {
 			if (!loc_loadCharacter) {
 				loc_loadCharacter = new PoserCharacter(charStruct);
 				loc_targetCharacters.push_back(loc_loadCharacter);
+				g_PoserWindow.NewCharacter(loc_targetCharacters.size() - 1);
 			}
 			if (!loc_targetChar)
 				loc_targetChar = loc_loadCharacter;
@@ -193,6 +227,7 @@ namespace Poser {
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 			loc_loadCharacter = character;
+			g_PoserWindow.NewCharacter(0);
 		}
 	}
 
@@ -226,7 +261,9 @@ namespace Poser {
 			thisPtr->m_edPose = GetDlgItem(hwndDlg, IDC_PPS_EDPOSE);
 			thisPtr->m_edCharacter = GetDlgItem(hwndDlg, IDC_PPS_EDCHARACTER);
 			thisPtr->m_edFrame = GetDlgItem(hwndDlg, IDC_PPS_EDFRAME);
-			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
+			thisPtr->m_edValueX = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEX);
+			thisPtr->m_edValueY = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEY);
+			thisPtr->m_edValueZ = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEZ);
 			thisPtr->m_edMouth = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTH);
 			thisPtr->m_edMouthOpen = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTHOPEN);
 			thisPtr->m_edEye = GetDlgItem(hwndDlg, IDC_PPS_EDEYE);
@@ -247,13 +284,16 @@ namespace Poser {
 			thisPtr->m_listCategories = GetDlgItem(hwndDlg, IDC_PPS_LISTCATEGORIES);
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
-			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
-			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
+			thisPtr->m_sliderValueX = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEX);
+			thisPtr->m_sliderValueY = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEY);
+			thisPtr->m_sliderValueZ = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEZ);
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
 			thisPtr->m_chkAlwaysOnTop = GetDlgItem(hwndDlg, IDC_PPS_CHKALWAYSONTOP);
 			thisPtr->m_chkTears = GetDlgItem(hwndDlg, IDC_PPS_CHKTEARS);
 			thisPtr->m_chkDimEyes = GetDlgItem(hwndDlg, IDC_PPS_CHKDIMEYES);
 			thisPtr->m_chkTongueJuice = GetDlgItem(hwndDlg, IDC_PPS_CHKTONGUEJUICE);
+			thisPtr->m_tabModifiers = GetDlgItem(hwndDlg, IDC_PPS_TABMODIFIERS);
+			thisPtr->m_tabShowHide = GetDlgItem(hwndDlg, IDC_PPS_TABSHOWHIDE);
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
@@ -273,16 +313,16 @@ namespace Poser {
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Translate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Scale")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("X")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Y")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Z")));
 
-			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMIN, TRUE, 0);
-			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueX, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueX, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueY, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueY, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueZ, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueZ, TBM_SETRANGEMAX, TRUE, 0x10000);
 			SendMessage(thisPtr->m_listCategories, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listBones, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
-			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
 			SendMessage(thisPtr->m_spinCharacter, UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
@@ -295,6 +335,19 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 
+			TCITEM tab;
+#define makeTab(data,text) tab.mask = TCIF_TEXT | TCIF_PARAM; tab.pszText = L#text; tab.lParam = data;
+			makeTab(1, x1);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 0, (LPARAM)(LPTCITEM)&tab);
+			makeTab(10, x10);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 1, (LPARAM)(LPTCITEM)&tab);
+			makeTab(100, x100);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 2, (LPARAM)(LPTCITEM)&tab);
+			makeTab(1, Show);
+			SendMessage(thisPtr->m_tabShowHide, TCM_INSERTITEM, 0, (LPARAM)(LPTCITEM)&tab);
+			makeTab(0, Hide);
+			SendMessage(thisPtr->m_tabShowHide, TCM_INSERTITEM, 1, (LPARAM)(LPTCITEM)&tab);
+#undef makeTab
 			thisPtr->SyncList();
 
 			loc_syncing = false;
@@ -376,7 +429,7 @@ namespace Poser {
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
-				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
+				else if (LOWORD(wparam) == IDC_PPS_EDVALUEX || LOWORD(wparam) == IDC_PPS_EDVALUEY || LOWORD(wparam) == IDC_PPS_EDVALUEZ) {
 					if (!loc_syncing) {
 						thisPtr->SyncEdit();
 						ApplySlider();
@@ -447,34 +500,36 @@ namespace Poser {
 					}
 					thisPtr->SyncList();
 				}
-				else if (id == IDC_PPS_BTNMODLL10) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-10.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLX) {
+					thisPtr->ApplyIncrement(X, -1);
 				}
-				else if (id == IDC_PPS_BTNMODLL1) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-1.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLY) {
+					thisPtr->ApplyIncrement(Y, -1);
 				}
-				else if (id == IDC_PPS_BTNMODZERO) {
-					*loc_targetChar->CurrentSlider->curValue() = 0.0f;
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLZ) {
+					thisPtr->ApplyIncrement(Z, -1);
 				}
-				else if (id == IDC_PPS_BTNMODPP1) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(1.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODZEROX) {
+					thisPtr->ApplyIncrement(X, 0);
 				}
-				else if (id == IDC_PPS_BTNMODPP10) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(10.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODZEROY) {
+					thisPtr->ApplyIncrement(Y, 0);
+				}
+				else if (id == IDC_PPS_BTNMODZEROZ) {
+					thisPtr->ApplyIncrement(Z, 0);
+				}
+				else if (id == IDC_PPS_BTNMODPPX) {
+					thisPtr->ApplyIncrement(X, 1);
+				}
+				else if (id == IDC_PPS_BTNMODPPY) {
+					thisPtr->ApplyIncrement(Y, 1);
+				}
+				else if (id == IDC_PPS_BTNMODPPZ) {
+					thisPtr->ApplyIncrement(Z, 1);
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
-					if (loc_targetChar->CurrentSlider->curOperation != Scale) {
-						*loc_targetChar->CurrentSlider->curValue() *= -1.0f;
+					if (loc_targetChar->CurrentSlider->currentOperation != Scale) {
+						*loc_targetChar->CurrentSlider->curValueX() *= -1.0f;
 						thisPtr->SyncList();
 						ApplySlider();
 					}
@@ -517,27 +572,12 @@ namespace Poser {
 					thisPtr->SyncBones();
 					break; }
 				case(IDC_PPS_LISTBONES): {
-					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
-					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
-					if (res != LB_ERR) {
-						int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
-						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
-						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
-						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
-						thisPtr->SyncList();
-					}
+					thisPtr->SyncOperation();
 					break; }
 				case (IDC_PPS_LISTOP): {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider->curOperation = Operation(res);
-						thisPtr->SyncList();
-					}
-					break; }
-				case (IDC_PPS_LISTAXIS): {
-					LRESULT res = SendMessage(thisPtr->m_listAxis, LB_GETCURSEL, 0, 0);
-					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider->curAxis = res;
+						loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
 						thisPtr->SyncList();
 					}
 					break; }
@@ -551,6 +591,38 @@ namespace Poser {
 		return FALSE;
 	}
 
+	void PoserWindow::NewCharacter(int index) {
+		if (loc_sliderCategories[PoseMods::Other].size()) {
+			PoserCharacter* c = loc_targetCharacters.at(index);
+			c->CurrentSlider = &c->SliderInfos.at(loc_sliderCategories[PoseMods::Other].front());
+			if (c == loc_targetChar) {
+				SendMessage(m_listCategories, LB_SETCURSEL, PoseMods::Other, 0);
+				SyncBones();
+				SendMessage(m_listBones, LB_SETCURSEL, 0, 0);
+				SyncOperation();
+				SyncList();
+			}
+		}
+	}
+
+	void PoserWindow::ApplyIncrement(int axis, int sign) {
+		float* value = loc_targetChar->CurrentSlider->curValueX();
+		if (sign != 0) {
+			TCITEM tab;
+			TCHAR text[10];
+			tab.mask = TCIF_PARAM | TCIF_TEXT;
+			tab.pszText = text;
+			int index = TabCtrl_GetCurSel(m_tabModifiers);
+			TabCtrl_GetItem(m_tabModifiers, index, &tab);
+			value[axis] += SliderIncrement(float(sign * (int)tab.lParam), loc_targetChar->CurrentSlider->currentOperation);
+		}
+		else {
+			value[axis] = loc_targetChar->CurrentSlider->currentOperation == Scale ? 1.0f : 0.0f;
+		}
+		SyncList();
+		ApplySlider();
+	}
+
 	void PoserWindow::SyncBones() {
 		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
 		if (res != LB_ERR) {
@@ -561,33 +633,59 @@ namespace Poser {
 		}
 	}
 
+	void PoserWindow::SyncOperation() {
+		LRESULT cat = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
+		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+		if (res != LB_ERR) {
+			int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+			loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
+			SendMessage(m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->currentOperation, 0);
+			SyncList();
+		}
+	}
+
 	void PoserWindow::SyncEdit() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		float value = General::GetEditFloat(m_edValue);
-		loc_targetChar->CurrentSlider->setValue(value);
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
+		float valueX = General::GetEditFloat(m_edValueX);
+		float valueY = General::GetEditFloat(m_edValueY);
+		float valueZ = General::GetEditFloat(m_edValueZ);
+		loc_targetChar->CurrentSlider->setValue(valueX, valueY, valueZ);
+		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderX());
+		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderY());
+		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderZ());
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncList() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
+		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderX());
+		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderY());
+		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderZ());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
-		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueX());
+		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueY());
+		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueZ());
+		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncSlider() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
-		loc_targetChar->CurrentSlider->fromSlider(pos);
+		loc_targetChar->CurrentSlider->fromSliderX(SendMessage(m_sliderValueX, TBM_GETPOS, 0, 0));
+		loc_targetChar->CurrentSlider->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
+		loc_targetChar->CurrentSlider->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
-		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueX());
+		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueY());
+		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueZ());
+		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
@@ -723,10 +821,8 @@ namespace Poser {
 			
 			info.reset();
 
-			info.curAxis = 0;
-			info.curOperation = Rotate;
-
 			info.xxFrame = NULL;
+			info.setCurrentOperation(Rotate);
 
 			loc_sliderInfos.push_back(info);
 			loc_sliderCategories[category].push_back(loc_sliderInfos.size() - 1);
