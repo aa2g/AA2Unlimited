@@ -164,6 +164,7 @@ namespace Poser {
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
 		SliderInfo *CurrentSlider;
+		std::map<PoseMods::FrameCategory, int> CategoryCurrentSlider;
 	};
 
 	std::vector<PoserCharacter*> loc_targetCharacters;
@@ -593,6 +594,7 @@ namespace Poser {
 				switch (id) {
 				case(IDC_PPS_LISTCATEGORIES): {
 					thisPtr->SyncBones();
+					thisPtr->SyncOperation();
 					break; }
 				case(IDC_PPS_LISTBONES): {
 					thisPtr->SyncOperation();
@@ -618,7 +620,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Translate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -626,7 +628,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Rotate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -634,7 +636,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Scale, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -683,6 +685,7 @@ namespace Poser {
 			for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
 				SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
 			}
+			SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
 		}
 	}
 
@@ -690,6 +693,7 @@ namespace Poser {
 		LRESULT cat = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
 		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 		if (res != LB_ERR) {
+			loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
 			int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
 			loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
 			SendMessage(m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->currentOperation, 0);
