@@ -16,6 +16,9 @@ public:
 	inline int GetSize() {
 		return m_end - m_start;
 	}
+	inline T& operator[](int index) {
+		return *(m_start + index);
+	}
 };
 
 #pragma pack(pop)

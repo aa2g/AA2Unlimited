@@ -38,11 +38,24 @@ Value::Value(const std::wstring& wStr) {
 	type = TYPE_STRING;
 	strVal = new std::wstring(wStr);
 }
+Value::Value(const wchar_t* str) {
+	type = TYPE_STRING;
+	strVal = new std::wstring(str);
+}
+Value::Value(const char* str) {
+	type = TYPE_STRING;
+	strVal = new std::wstring(str, str+strlen(str));
+}
 
 Value::~Value() {
 	switch (type) {
 	case TYPE_STRING:
-		delete[] strVal;
+		delete strVal;
+	case TYPE_INT:
+	case TYPE_FLOAT:
+	case TYPE_BOOL:
+	case TYPE_INVALID:
+		break;
 	default:
 		LOGPRIO(Logger::Priority::WARN) << "unrecognized Value type " << type << "\r\n";
 		break;

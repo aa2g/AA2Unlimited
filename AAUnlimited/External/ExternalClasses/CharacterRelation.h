@@ -17,7 +17,7 @@ public:
 	int m_likePoints;
 	int m_dislikePoints;
 	int m_hatePoints;
-	BYTE m_unknown[4];
+	float m_unknown;
 	IllusionArray<DWORD> m_actionBacklog;		//between 0 and 4, 0 = love, 1 = like, 2 = dislike, 3 = hate
 	BYTE m_unknown2[4];
 	int m_loveCount;
@@ -28,7 +28,7 @@ public:
 	int m_like;
 	int m_dislike;
 	int m_hate;
-	BYTE m_unknown3[10];
+	BYTE m_unknown3[0x10];
 	int m_poin;			//i have no idea what this is. aa2trainer calls it poin.
 
 public:
@@ -36,6 +36,8 @@ public:
 	~CharacterRelation() = delete;
 
 };
+
+static_assert(sizeof(CharacterRelation) == 0x58,"Character Relation should be 0x58 bytes in size");
 
 
 #pragma pack(pop)

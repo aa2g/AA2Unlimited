@@ -12,6 +12,7 @@
 namespace AAEdit {
 
 	struct loc_AddData;
+	struct loc_AddActionData;
 	struct loc_AddVariableData;
 
 /*
@@ -206,6 +207,7 @@ namespace AAEdit {
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_bsDialog;
 	friend AAEdit::loc_AddData;
+	friend AAEdit::loc_AddActionData;
 	friend AAEdit::loc_AddVariableData;
 	struct TRDialog : public Dialog {
 		HWND m_lbTriggers;
@@ -218,15 +220,34 @@ namespace AAEdit {
 		Shared::Triggers::Trigger* m_currentTrigger = NULL;
 		std::vector<HTREEITEM> m_events;
 		std::vector<HTREEITEM> m_variables;
-		std::vector<HTREEITEM> m_actions;
+		struct ActionTreeItem {
+			HTREEITEM tree;
+			std::vector<ActionTreeItem*> subactions;
+			HTREEITEM subActionLabel; //some actions may have a subaction label for easier adding
+			ActionTreeItem* parent;
+			inline ~ActionTreeItem() {
+				for (auto* item : subactions) delete item;
+			}
+		};
+		std::vector<ActionTreeItem*> m_actions;
 
 		void SetCurrentTrigger(int index);
-		void AddTriggerAction(const Shared::Triggers::ParameterisedAction& action,int insertAfter);
-		int GetSelectedAction();
+		void AddTriggerAction(const Shared::Triggers::ParameterisedAction& action);
+		struct SelectedAction_Data {
+			//so that cardActions[cardActionsInt] is the selected action
+			std::vector<Shared::Triggers::Trigger::GUIAction*>* cardActions = NULL;
+			int cardActionsInt = -1;
+			std::vector<ActionTreeItem*>* guiActions = NULL;
+			bool isSubLabel = false;
+
+			operator bool() { return cardActionsInt != -1; }
+		};
+		SelectedAction_Data GetSelectedAction();
 		void AddTriggerEvent(const Shared::Triggers::ParameterisedEvent& event,int insertAfter);
 		int GetSelectedEvent();
 		void AddTriggerVariable(const Shared::Triggers::Variable& var,int insertAfter);
 		int GetSelectedVariable();
+		HTREEITEM GenerateActionSubLabel(HTREEITEM parent, int actionId);
 
 		std::wstring EVANameToString(const std::wstring& name,const std::vector<Shared::Triggers::ParameterisedExpression>& actualParameters);
 		std::wstring ExpressionToString(const Shared::Triggers::ParameterisedExpression& param);

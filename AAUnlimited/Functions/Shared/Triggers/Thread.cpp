@@ -43,55 +43,45 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 }
 
 bool Thread::ExecuteAction(ParameterisedAction& action) {
-	//make sure parameters and actual parameters are correct
-	if (action.actualParameters.size() != action.action->parameters.size()) {
-		LOGPRIO(Logger::Priority::WARN) << "Thread Execution error; parameter missmatch in trigger " <<  execTrigger->name << "\r\n";
-		return false;
-	}
-	for (int j = 0; j < action.actualParameters.size(); j++) {
-		if (action.actualParameters[j].expression->returnType != action.action->parameters[j]) {
-			LOGPRIO(Logger::Priority::WARN) << "Thread Execution error; parameter missmatch in trigger " <<  execTrigger->name << "\r\n";
+	if(action.action->id == ACTION_SETVAR) {
+		//handle these specially
+		VariableInstance* var = &localStorage.vars[action.actualParameters[0].varId];
+		Value val = EvaluateExpression(action.actualParameters[1]);
+		if(val.type == TYPE_INVALID) {
 			return false;
 		}
+		var->currValue = val;
 	}
-	//evaluate parameters
-	std::vector<Value> values;
-	values.resize(action.actualParameters.size());
-	for (int j = 0; j < action.actualParameters.size(); j++) {
-		auto& param = action.actualParameters[j];
-		values[j] = EvaluateExpression(param);
-		if (values[j].type == TYPE_INVALID) {
-			return false;
+	else {
+		//evaluate parameters
+		std::vector<Value> values;
+		values.resize(action.actualParameters.size());
+		for (int j = 0; j < action.actualParameters.size(); j++) {
+			auto& param = action.actualParameters[j];
+			values[j] = EvaluateExpression(param);
+			if (values[j].type == TYPE_INVALID) {
+				return false;
+			}
 		}
+		//execute function
+		(this->*(action.action->func)) (values);
 	}
-	//execute function
-	(this->*(action.action->func)) (values);
+	
 	return true;
 }
 
 Value Thread::EvaluateExpression(ParameterisedExpression& expr) {
 	executeCount++;
-	if(expr.expression->id == 1) {
+	if(expr.expression->id == EXPR_CONSTANT) {
 		//constant
 		return expr.constant;
 	}
-	else if (expr.expression->id == 2) {
+	else if (expr.expression->id == EXPR_VAR) {
 		//variable
 		VariableInstance* var = &localStorage.vars[expr.varId];
 		return var->currValue;
 	}
 	else {
-		//make sure parameters and actual parameters are correct
-		if (expr.actualParameters.size() != expr.expression->parameters.size()) {
-			LOGPRIO(Logger::Priority::WARN) << "Thread Execution error; parameter missmatch in trigger " <<  execTrigger->name << "\r\n";
-			return Value();
-		}
-		for (int j = 0; j < expr.actualParameters.size(); j++) {
-			if (expr.actualParameters[j].expression->returnType != expr.expression->parameters[j]) {
-				LOGPRIO(Logger::Priority::WARN) << "Thread Execution error; parameter missmatch in trigger " <<  execTrigger->name << "\r\n";
-				return Value();
-			}
-		}
 		if(expr.expression->returnType == TYPE_BOOL && (expr.expression->id == 3 || expr.expression->id == 4)) {
 			//short circut evaluation required
 			if(expr.expression->id == 3) {

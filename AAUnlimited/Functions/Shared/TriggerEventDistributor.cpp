@@ -8,11 +8,9 @@ namespace Shared {
 
 namespace Triggers {
 
-namespace STUPIDTEMPNAMEREMOVEMEAFTERDEBUGGINGPLSVS2015ISJUSTDUMBASHELL {
+namespace {
 	std::vector<Trigger*> loc_triggers[N_EVENTS];
 }
-
-using namespace STUPIDTEMPNAMEREMOVEMEAFTERDEBUGGINGPLSVS2015ISJUSTDUMBASHELL;
 
 void RegisterTrigger(Triggers::Trigger* trg) {
 	for(auto& elem : trg->events) {

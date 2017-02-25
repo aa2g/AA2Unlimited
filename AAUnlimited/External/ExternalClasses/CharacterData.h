@@ -45,7 +45,7 @@ public:
 	char m_description[260];
 	BYTE m_unknown3[0xFC];
 	BYTE m_bPersonality;
-	BYTE m_unknown4;
+	BYTE m_club; //0 based index - Running, swimming, outdoorball, indoorball, fighting, music, jap, random
 	BYTE m_padding1;
 	BYTE m_unknown5;
 	struct Figure {

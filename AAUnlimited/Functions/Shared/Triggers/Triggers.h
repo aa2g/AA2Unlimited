@@ -41,13 +41,29 @@ namespace Triggers {
 		std::wstring name;
 		std::vector<ParameterisedEvent> events;
 		std::vector<Variable> vars;
+		struct GUIAction {
+			ParameterisedAction action;
+			std::vector<GUIAction*> subactions; 
+			GUIAction* parent;
+
+			//overload these to keep parent consitent
+			GUIAction() = default;
+			~GUIAction();
+			GUIAction(const GUIAction& rhs);
+			GUIAction(GUIAction&& rhs);
+			GUIAction& operator=(const GUIAction& rhs);
+			GUIAction& operator==(GUIAction&& rhs);
+			void FixParents();
+		};
+		std::vector<GUIAction*> guiActions; //a hirachical version of  the actions used in the gui view
+
 		std::vector<ParameterisedAction> actions;
 
 		void Initialize();	//has to be called on an instance before a thread can execute it
 
 		static const int INSERT_START = -1;
 		static const int INSERT_END = -2;
-		void InsertAction(const ParameterisedAction& action, int insertAfter);
+		//void InsertAction(const ParameterisedAction& action, GUIAction* insertAfter); currently handled manually by the gui
 		void InsertVariable(const Variable& var,int insertAfter);
 		void InsertEvent(const ParameterisedEvent& event,int insertAfter);
 
@@ -61,6 +77,18 @@ namespace Triggers {
 	private:
 		bool broken;
 		bool bInitialized;
+
+		struct AddActionsFromGuiActions_State {
+			int ifStartJump = -1;
+			int ifEndJump = -1;
+			std::vector<std::pair<int,int>> elseIfLabels;
+			int elseJump = -1;
+			inline void ResetITEState() { ifStartJump = ifEndJump = elseJump = -1; elseIfLabels.clear(); }
+
+			std::vector<int>* loopBreaks = NULL;
+			std::vector<int>* loopContinues = NULL;
+		};
+		void AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions,AddActionsFromGuiActions_State state);
 	};
 	
 

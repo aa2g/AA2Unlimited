@@ -22,5 +22,6 @@ public:
 	std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> m_hairs[4];
 
 	void Reset();
+	inline bool IsValid() { return m_char != NULL; }
 };
 

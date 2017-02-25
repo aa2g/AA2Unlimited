@@ -45,6 +45,8 @@
     <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\InfoData.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\NamedConstant.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Thread.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\XXFile.h" />
+    <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />
     <ClInclude Include="Functions\AAPlay\Poser.h" />
     <ClInclude Include="Functions\CharInstData.h" />
     <ClInclude Include="External\ExternalClasses\Frame.h" />
@@ -129,6 +132,8 @@
     <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
     <ClInclude Include="Functions\Shared\Triggers\Event.h" />
     <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\InfoData.h" />
+    <ClInclude Include="Functions\Shared\Triggers\NamedConstant.h" />
     <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
     <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />
     <ClInclude Include="Functions\Shared\Triggers\Value.h" />

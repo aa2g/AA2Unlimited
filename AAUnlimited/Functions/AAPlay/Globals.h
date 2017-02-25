@@ -16,4 +16,6 @@ namespace AAPlay {
 	inline CharInstData* GetInstFromStruct(ExtClass::CharacterStruct* character) { return &g_characters[character->m_seat]; }
 	inline int GetSeatFromStruct(ExtClass::CharacterStruct* character) { return character->m_seat; }
 
+
+	void ApplyRelationshipPoints(ExtClass::CharacterStruct* characterFrom,ExtClass::CharacterRelation* relation);
 }

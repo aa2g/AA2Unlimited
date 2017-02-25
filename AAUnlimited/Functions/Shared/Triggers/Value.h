@@ -37,6 +37,8 @@ public:
 	Value(float fval);
 	Value(bool bVal);
 	Value(const std::wstring& wStr);
+	Value(const wchar_t* str);
+	Value(const char* str);
 	~Value();
 	Value(const Value& rhs);
 	Value(Value&& rhs);

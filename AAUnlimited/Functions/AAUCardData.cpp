@@ -69,6 +69,11 @@ T AAUCardData::ReadData_sub(char*& buffer,int& size,T*) {
 	return retVal;
 }
 
+template<typename T>
+T* AAUCardData::ReadData_sub(char*& buffer,int& size,T**) {
+	return new T(ReadData<T>(buffer,size));
+}
+
 //read for string
 std::wstring AAUCardData::ReadData_sub(char*& buffer,int& size,std::wstring*) {
 	DWORD length = ReadData<DWORD>(buffer,size);
@@ -135,7 +140,7 @@ Shared::Triggers::Trigger AAUCardData::ReadData_sub(char *& buffer,int & size,Sh
 	retVal.name = ReadData<std::wstring>(buffer,size);
 	retVal.events = ReadData<decltype(retVal.events)>(buffer,size);
 	retVal.vars = ReadData<decltype(retVal.vars)>(buffer,size);
-	retVal.actions = ReadData<decltype(retVal.actions)>(buffer,size);
+	retVal.guiActions = ReadData<decltype(retVal.guiActions)>(buffer,size);
 	return retVal;
 }
 
@@ -156,6 +161,19 @@ Shared::Triggers::ParameterisedAction AAUCardData::ReadData_sub(char*& buffer,in
 	int id = ReadData<int>(buffer,size);
 	retVal.action = Action::FromId(id);
 	retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
+	return retVal;
+}
+Shared::Triggers::Trigger::GUIAction AAUCardData::ReadData_sub(char *& buffer,int & size,Shared::Triggers::Trigger::GUIAction *)
+{
+	using namespace Shared::Triggers;
+	Trigger::GUIAction retVal;
+	retVal.parent = NULL;
+	retVal.action = ReadData<decltype(retVal.action)>(buffer,size);
+
+	retVal.subactions = ReadData<decltype(retVal.subactions)>(buffer,size);
+	for(auto* elem : retVal.subactions) {
+		elem->parent = &retVal;
+	}
 	return retVal;
 }
 Shared::Triggers::ParameterisedExpression AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedExpression*)
@@ -231,6 +249,21 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T& data,bo
 	at += sizeof(data);
 	return ret;
 }
+
+template<typename T>
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T* data,bool resize,T**) {
+	bool ret = true;
+	if (data == NULL) return true;
+	ret &= WriteData(buffer,size,at,*data,resize);
+}
+
+template<typename T>
+bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, T* data,bool resize,T**) {
+	bool ret = true;
+	if (data == NULL) return true;
+	ret &= WriteData(buffer,size,at,*data,resize);
+}
+
 //for string
 bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*) {
 	bool ret = true;
@@ -278,7 +311,7 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Tr
 	ret &= WriteData(buffer,size,at,data.name,resize);
 	ret &= WriteData(buffer,size,at,data.events,resize);
 	ret &= WriteData(buffer,size,at,data.vars,resize);
-	ret &= WriteData(buffer,size,at,data.actions,resize);
+	ret &= WriteData(buffer,size,at,data.guiActions,resize);
 	return ret;
 }
 bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedEvent& data,bool resize,Shared::Triggers::ParameterisedEvent*)
@@ -293,6 +326,13 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Tr
 	bool ret = true;
 	ret &= WriteData(buffer,size,at,data.action->id,resize);
 	ret &= WriteData(buffer,size,at,data.actualParameters,resize);
+	return ret;
+}
+bool AAUCardData::WriteData_sub(char ** buffer,int * size,int & at,const Shared::Triggers::Trigger::GUIAction & data,bool resize,Shared::Triggers::Trigger::GUIAction *)
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.action,resize);
+	ret &= WriteData(buffer,size,at,data.subactions,resize);
 	return ret;
 }
 bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedExpression& data,bool resize,Shared::Triggers::ParameterisedExpression*)
@@ -530,6 +570,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	if (m_version == 1 && g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 3) {
 		ConvertToNewVersion();
 	}
+	m_version = 2;
 	
 	GenAllFileMaps(); //we do this in the end in case conversion or something changed the file paths
 
