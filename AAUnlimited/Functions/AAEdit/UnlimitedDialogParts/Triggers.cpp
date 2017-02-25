@@ -283,7 +283,7 @@ UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSel
 	std::queue<LoopData> actionQueue;
 	actionQueue.push({ m_currentTrigger->guiActions, m_actions });
 	while (!actionQueue.empty()) {
-		auto& elem = actionQueue.back();
+		auto elem = actionQueue.back();
 		actionQueue.pop();
 
 		for (int i = 0; i < elem.guiActions.size(); i++) {
@@ -299,8 +299,14 @@ UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSel
 				retVal.cardActions = &elem.cardActions;
 				retVal.guiActions = &elem.guiActions;
 				retVal.cardActionsInt = i;
-				retVal.isSubLabel = true;
+				retVal.isSubLabel = true; 
 				break;
+			}
+			//abort if found
+			if (retVal.cardActionsInt != -1) break;
+			//add subactions to queue
+			if(elem.cardActions[i]->subactions.size() > 0) {
+				actionQueue.push({ elem.cardActions[i]->subactions, elem.guiActions[i]->subactions });
 			}
 		}
 	}
