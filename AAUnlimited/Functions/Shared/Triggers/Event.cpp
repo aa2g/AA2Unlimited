@@ -16,7 +16,7 @@ namespace Triggers {
 
 	std::vector<Event> g_Events = {
 		{ CLOTHES_CHANGED, EVENTCAT_CHARACTION, TEXT("Clothes Changed"), TEXT("Clothes Changed"),
-			TEXT("Whenever a character changes clothes, either in the changing room or by entering the next period."), 
+			TEXT("Whenever a character changes clothes, either in the changing room or by entering the next period. (Not yet implemented)"), 
 			{}
 		},
 		{ CARD_INITIALIZED, EVENTCAT_CARD, TEXT("Card Initialized"), TEXT("Card Initialized"),
@@ -45,14 +45,14 @@ namespace Triggers {
 			{}
 		},
 		{ NPC_RESPONSE, EVENTCAT_CONVERSATION, TEXT("Npc Answers in a Conversation"), TEXT("Npc Answers in a Conversation"),
-			TEXT("Whenever a NPC made a yes/no decision."),
+			TEXT("Whenever a NPC made a yes/no decision, no matter if towards the PC or another NPC. Triggering Card is the NPC that gives the Answer."),
 			{}
 		}
 		
 	
 	};
 
-	void ClothesChangedData::SetThreadStorage(Thread* thread) const {
+	/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {
 		thread->localStorage.triggeringCard = card;
 	}
 
@@ -82,6 +82,6 @@ namespace Triggers {
 
 	void NpcResponseData::SetThreadStorage(Thread* thread) const {
 		
-	}
+	}*/
 }
 }

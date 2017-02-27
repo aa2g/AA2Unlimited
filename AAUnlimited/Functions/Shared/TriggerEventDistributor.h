@@ -11,7 +11,7 @@ void RegisterTrigger(Triggers::Trigger* trg);
 
 void UnregisterTrigger(Triggers::Trigger* trg);
 
-void ThrowEvent(const Triggers::EventData* data);
+void ThrowEvent(Triggers::EventData* data);
 
 }
 

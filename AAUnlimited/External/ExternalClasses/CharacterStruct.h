@@ -5,6 +5,7 @@
 #include "External\AddressRule.h"
 #include "Frame.h"
 #include "CharacterData.h"
+#include "CharacterActivity.h"
 #include "XXFile.h"
 namespace ExtClass {
 
@@ -58,7 +59,8 @@ public:
 	void* m_somedata;
 	BYTE m_unknown8[4];
 	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
-	BYTE m_unknown9[0x14];
+	void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
+	BYTE m_unknown9[0x10];
 	XXFile* m_xxSkirt;
 	BYTE m_unknown10[0x1C];
 
@@ -72,6 +74,11 @@ public:
 		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A18);
 	}
 	
+	inline CharacterActivity* GetActivity() {
+		if (m_moreData2 == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_moreData2)+0x18;
+		return *(CharacterActivity**)(ptr);
+	}
 
 	inline XXFile* GetXXFile(Models target) {
 		switch (target) {

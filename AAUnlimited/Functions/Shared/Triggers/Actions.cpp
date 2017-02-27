@@ -34,6 +34,14 @@ void Thread::ConditionalEndExecution(std::vector<Value>& params) {
 	}
 }
 
+//event response
+
+//bool newAnswer
+void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return;
+	((NpcResponseData*)eventData)->changedResponse = params[0].bVal;
+}
+
 namespace {
 	void SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
 		if (pointKind < 0 || pointKind > 3) return;
@@ -175,7 +183,8 @@ std::wstring g_ActionCategories[ACTIONCAT_N] = {
 	TEXT("General"),
 	TEXT("Card Modification"),
 	TEXT("Flow Control"),
-	TEXT("Character Modification")
+	TEXT("Character Modification"),
+	TEXT("Event Response")
 };
 
 
@@ -279,7 +288,7 @@ std::vector<Action> g_Actions = {
 		&Thread::AddCardHatePoints
 	},
 	{
-		15, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Points"), TEXT("Add %p %p points for character %p towards %p"),
+		16, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Points"), TEXT("Add %p %p points for character %p towards %p"),
 		TEXT("Adds a certain amount of points. Point type is between 0 or 3, or use one of the named constants. "
 		"30 hate points become one hate interaction. A character can have up to 30 interactions "
 		"in total; after that, earlier interactions will be replaced."),
@@ -287,12 +296,17 @@ std::vector<Action> g_Actions = {
 		&Thread::AddCardPoints
 	},
 	{
-		16, ACTIONCAT_FLOW_CONTROL, TEXT("Conditional End Execution"), TEXT("End Execution If %p"),
+		17, ACTIONCAT_FLOW_CONTROL, TEXT("Conditional End Execution"), TEXT("End Execution If %p"),
 		TEXT("ends execution of this thread if the given condition evaluates to true."),
 		{ TYPE_BOOL },
 		&Thread::ConditionalEndExecution
 	},
-
+	{
+		18, ACTIONCAT_EVENT, TEXT("Set Npc Response Answer"), TEXT("Set Npc Response Answer to %p"),
+		TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
+		{ TYPE_BOOL },
+		&Thread::SetNpcResponseAnswer
+	},
 
 };
 

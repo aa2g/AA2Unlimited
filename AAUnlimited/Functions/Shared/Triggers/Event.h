@@ -74,46 +74,48 @@ namespace Triggers {
 	protected:
 		int id;
 	public:
+		int card;
 		inline int GetId() const { return id; }
-		virtual void SetThreadStorage(Thread* thread) const = 0;
 	};
 
 #define EDC_DECLARE(name,enumname) class name : public EventData { \
 											public: \
-												inline name() { id = enumname; } \
-												void SetThreadStorage(Thread* thread) const;
+												inline name() { id = enumname; } 
 #define EDC_END };
 
 	EDC_DECLARE(ClothesChangedData,CLOTHES_CHANGED)
-		int card;
+		
 	EDC_END
 
 	EDC_DECLARE(CardInitializeData,CARD_INITIALIZED)
-		int card;
+		
 	EDC_END
 
 	EDC_DECLARE(CardDestroyData,CARD_DESTROYED)
-		int card;
+		
 	EDC_END
 
 	EDC_DECLARE(CardAddedData,CARD_ADDED)
-		int card;
+		
 	EDC_END
 
 	EDC_DECLARE(HiPolyInitData,HI_POLY_INIT)
-		int card;
+		
 	EDC_END
 
 	EDC_DECLARE(HiPolyEndData,HI_POLY_END)
-		int card;
+		
 	EDC_END
 
-	EDC_DECLARE(PeriodEndsData,HI_POLY_END)
+	EDC_DECLARE(PeriodEndsData,PERIOD_ENDS)
 		int currentPeriod;
 	EDC_END
 
 	EDC_DECLARE(NpcResponseData,NPC_RESPONSE)
-		
+		int answeredTowards;
+		int conversationId;
+		bool originalResponse;
+		bool changedResponse;
 	EDC_END
 
 

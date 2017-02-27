@@ -4,6 +4,7 @@
 #include "Expressions.h"
 #include "Actions.h"
 #include "Triggers.h"
+#include "Event.h"
 
 #include <vector>
 
@@ -33,8 +34,9 @@ public:
 
 	struct LocalStorage {
 		std::vector<VariableInstance> vars;		//variables for this trigger
-		int triggeringCard;						//the card whose trigger got fired
 	} localStorage;
+
+	EventData* eventData;
 
 	/*
 	 * This storage only exists once and stores event-specific data
@@ -61,6 +63,9 @@ public:
 	void AddCardDislikePoints(std::vector<Value>& params);
 	void AddCardHatePoints(std::vector<Value>& params);
 	void AddCardPoints(std::vector<Value>& params);
+
+	//event response
+	void SetNpcResponseAnswer(std::vector<Value>& params);
 
 	///////////////////////
 	// Expressions
@@ -94,6 +99,11 @@ public:
 	//basic string stuff
 	Value SubString(std::vector<Value>& params); //string(string, int, int)
 
+	//Event Respone
+	//NPC_RESPONSE
+	Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
+	Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()
+	Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 
 private:
 	Value EvaluateExpression(ParameterisedExpression& expr);

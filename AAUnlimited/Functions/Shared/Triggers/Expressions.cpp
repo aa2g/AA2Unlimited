@@ -38,7 +38,7 @@ Value Thread::MultiplyIntegers(std::vector<Value>& params) {
 }
 
 Value Thread::GetTriggeringCard(std::vector<Value>&) {
-	return this->localStorage.triggeringCard;
+	return this->eventData->card;
 }
 
 //int ()
@@ -117,6 +117,29 @@ Value Thread::GetCardSecondName(std::vector<Value>& params) {
 
 	return Value(cardInst->m_char->m_charData->m_surname);
 }
+
+/*
+ * Event Response
+ */
+
+//bool()
+Value Thread::GetNpcResponseOriginalAnswer(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return false;
+	return ((NpcResponseData*)eventData)->originalResponse;
+}
+
+//bool()
+Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return false;
+	return ((NpcResponseData*)eventData)->changedResponse;
+}
+
+//int()
+Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return 0;
+	return ((NpcResponseData*)eventData)->answeredTowards;
+}
+
 
 std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 	TEXT("General"),
@@ -204,7 +227,8 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			9, EXPRCAT_EVENT,
-			TEXT("Triggering Card"), TEXT("Get Triggering Card"), TEXT("The card that triggered the event that caused the trigger to run"),
+			TEXT("Triggering Card"), TEXT("Get Triggering Card"), TEXT("The card that triggered the event that caused the trigger to run. "
+			"Used by many events."),
 			{  }, (TYPE_INT),
 			&Thread::GetTriggeringCard
 		},
@@ -212,7 +236,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			10, EXPRCAT_EVENT,
 			TEXT("This Card"), TEXT("Get This Card"), TEXT("The card to whom this trigger belongs to"),
 			{}, (TYPE_INT),
-			&Thread::GetTriggeringCard
+			&Thread::GetThisCard
 		}
 	},
 
@@ -294,6 +318,21 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Not Equal"), TEXT("%p != %p"), TEXT("Not Equal"),
 			{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 			&Thread::NotEqualsIntegers
+		},
+		{
+			14, EXPRCAT_EVENT,
+			TEXT("Npc Original Answer"), TEXT("Get Npc Original Answer"), 
+			TEXT("If executed in a trigger with the Npc Answers Event, this is the original Answer the NPC made"),
+			{ }, (TYPE_BOOL),
+			&Thread::GetNpcResponseOriginalAnswer
+		},
+		{
+			15, EXPRCAT_EVENT,
+			TEXT("Npc Current Answer"), TEXT("Get Npc Current Answer"),
+			TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
+			"using the Set Npc Response Answer Action"),
+			{ }, (TYPE_BOOL),
+			&Thread::GetNpcResponseCurrentAnswer
 		}
 				
 	},

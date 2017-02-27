@@ -26,6 +26,7 @@ public:
 
 enum NamedConstantCategories {
 	NCONSTCAT_RELATIONSHIP,
+	NCONSTCAT_CONVERSATIONS,
 	NCONSTCAT_N
 };
 

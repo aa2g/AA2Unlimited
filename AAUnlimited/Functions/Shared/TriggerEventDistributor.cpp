@@ -32,10 +32,10 @@ void UnregisterTrigger(Triggers::Trigger* trg) {
 }
 
 
-void ThrowEvent(const EventData* data) {
+void ThrowEvent(EventData* data) {
 	for(auto& trigger : loc_triggers[data->GetId()-1]) {
 		Thread thread;
-		data->SetThreadStorage(&thread);
+		thread.eventData = data;
 		thread.ExecuteTrigger(trigger);
 	}
 }
