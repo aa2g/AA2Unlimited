@@ -5,6 +5,7 @@
 
 #include "Files\Logger.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
+#include "Thread.h"
 
 namespace Shared {
 namespace Triggers {
@@ -183,10 +184,21 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 	}
 }
 
-void Trigger::Initialize() {
+void Trigger::Initialize(std::vector<Variable>* globals,std::vector<Value>* values, int owningCard) {
+	globalVars = globals;
+	globalValues = values;
+	this->owningCard = owningCard;
+
+	//check for global consistency
+	if((globalVars == NULL) ^ (globalValues == NULL)) {
+		broken = true;
+	}
+	else if(globalVars != NULL && globalVars->size() != globalValues->size()) {
+		broken = true;
+	}
+
 	AddActionsFromGuiActions_State initState;
 	AddActionsFromGuiActions(guiActions,initState);
-
 
 	//all expressions that reference variables must be adjusted to their id
 	//first, gather all expressions
@@ -208,13 +220,26 @@ void Trigger::Initialize() {
 	while(!exprQueue.empty()) {
 		ParameterisedExpression* expr = exprQueue.front();
 		exprQueue.pop();
+
 		//if they reference vars, set their id
 		if(expr->expression->id == 2) {
 			int varIndex = -1;
-			for (int i = 0; i < vars.size(); i++) {
-				if (vars[i].name == expr->varName) {
-					varIndex = i;
-					break;
+			//search in globals
+			if(globalVars != NULL) {
+				for(int i = 0; i < globalVars->size(); i++) {
+					if((*globalVars)[i].name == expr->varName) {
+						varIndex = i | GLOBAL_VAR_FLAG;
+						break;
+					}
+				}
+			}
+			if(varIndex == -1) {
+				//search in locals
+				for (int i = 0; i < vars.size(); i++) {
+					if (vars[i].name == expr->varName) {
+						varIndex = i;
+						break;
+					}
 				}
 			}
 			if(varIndex != -1) {
@@ -335,10 +360,13 @@ void Trigger::Initialize() {
 		}
 	}
 
+	
+
 	RegisterTrigger(this);
 	
 	bInitialized = true;
 }
+
 
 Trigger::~Trigger() {
 	if(bInitialized) {

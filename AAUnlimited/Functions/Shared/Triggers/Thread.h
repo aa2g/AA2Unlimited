@@ -64,8 +64,14 @@ public:
 	void AddCardHatePoints(std::vector<Value>& params);
 	void AddCardPoints(std::vector<Value>& params);
 
+	void NpcMoveRoom(std::vector<Value>& params);
+	void NpcActionNoTarget(std::vector<Value>& params);
+	void NpcTalkTo(std::vector<Value>& params);
+	void NpcTalkToAbout(std::vector<Value>& params);
+
 	//event response
 	void SetNpcResponseAnswer(std::vector<Value>& params);
+	void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
 	///////////////////////
 	// Expressions
@@ -104,6 +110,23 @@ public:
 	Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
 	Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()
 	Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
+	Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
+	Value GetNpcResponseOriginalPercent(std::vector<Value>& params);	//int()
+	Value GetNpcResponseCurrentPercent(std::vector<Value>& params);	//int()
+
+	//NPC_WALK_TO_ROOM
+	Value GetNpcRoomTarget(std::vector<Value>& params);
+
+	//NPC_WANT_ACTION_NOTARGET
+	Value GetNpcActionId(std::vector<Value>& params);
+
+	//NPC_WANT_TALK_WITH
+	Value GetNpcTalkTarget(std::vector<Value>& params);
+
+	//NPC_WANT_TALK_WITH_ABOUT
+	Value GetNpcTalkAbout(std::vector<Value>& params);
+
+
 
 private:
 	Value EvaluateExpression(ParameterisedExpression& expr);

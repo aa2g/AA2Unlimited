@@ -140,6 +140,74 @@ Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
 	return ((NpcResponseData*)eventData)->answeredTowards;
 }
 
+//int()
+Value Thread::GetNpcResponseConversation(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return 0;
+	return ((NpcResponseData*)eventData)->conversationId;
+}
+
+//int()
+Value Thread::GetNpcResponseOriginalPercent(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return 0;
+	return ((NpcResponseData*)eventData)->originalChance;
+}
+
+//int()
+Value Thread::GetNpcResponseCurrentPercent(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return 0;
+	return ((NpcResponseData*)eventData)->changedChance;
+}
+
+//NPC_WALK_TO_ROOM
+//int()
+Value Thread::GetNpcRoomTarget(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return 0;
+	return ((NpcResponseData*)eventData)->changedChance;
+}
+
+//int()
+Value Thread::GetNpcActionId(std::vector<Value>& params) {
+	switch(this->eventData->GetId()) {
+	case NPC_WANT_ACTION_NOTARGET:
+		return ((NpcWantActionNoTargetData*)eventData)->action;
+	case NPC_WANT_TALK_WITH:
+		return ((NpcWantTalkWithData*)eventData)->action;
+	case NPC_WANT_TALK_WITH_ABOUT:
+		return ((NpcWantTalkWithAboutData*)eventData)->action;
+		break;
+	default:
+		return 0;
+		break;
+	}
+}
+
+
+//int()
+Value Thread::GetNpcTalkTarget(std::vector<Value>& params) {
+	switch (this->eventData->GetId()) {
+	case NPC_WANT_TALK_WITH:
+		return ((NpcWantTalkWithData*)eventData)->conversationTarget;
+	case NPC_WANT_TALK_WITH_ABOUT:
+		return ((NpcWantTalkWithAboutData*)eventData)->conversationTarget;
+		break;
+	default:
+		return 0;
+		break;
+	}
+}
+
+
+//int()
+Value Thread::GetNpcTalkAbout(std::vector<Value>& params) {
+	switch (this->eventData->GetId()) {
+	case NPC_WANT_TALK_WITH_ABOUT:
+		return ((NpcWantTalkWithAboutData*)eventData)->conversationAbout;
+		break;
+	default:
+		return 0;
+		break;
+	}
+}
 
 std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 	TEXT("General"),
@@ -176,8 +244,8 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			NULL
 		},
 	},
-	{
-		{ //INT
+	{ //INT
+		{ 
 			EXPR_CONSTANT, EXPRCAT_GENERAL,
 			TEXT("Constant"), TEXT("Constant"), TEXT("An arbitrary constant to input"),
 			{ }, (TYPE_INT),
@@ -237,7 +305,44 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("This Card"), TEXT("Get This Card"), TEXT("The card to whom this trigger belongs to"),
 			{}, (TYPE_INT),
 			&Thread::GetThisCard
-		}
+		},
+		{
+			11, EXPRCAT_EVENT,
+			TEXT("Answered Character"), TEXT("Get Answer Target"), TEXT("In a NPC Answered event, the character the NPC answered to"),
+			{}, (TYPE_INT),
+			&Thread::GetNpcResponseTarget
+		},
+		{
+			12, EXPRCAT_EVENT,
+			TEXT("Answered Conversation"), TEXT("Get Answered Conversation"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+			{}, (TYPE_INT),
+			&Thread::GetNpcResponseConversation
+		},
+		{
+			13, EXPRCAT_EVENT,
+			TEXT("Npc Room Target"), TEXT("Get Npc Room Target"), TEXT("Room that the Npc Walks to in a Npc Walks to Room event."),
+			{}, (TYPE_INT),
+			&Thread::GetNpcRoomTarget
+		},
+		{
+			14, EXPRCAT_EVENT,
+			TEXT("Npc Action Id"), TEXT("Get Action Id"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
+			"id in in targeted actions"),
+			{}, (TYPE_INT),
+			&Thread::GetNpcActionId
+		},
+		{
+			15, EXPRCAT_EVENT,
+			TEXT("Npc Talk Target"), TEXT("Npc Talk Target"), TEXT("In a Npc Talk With, or Npc Talk With About event, this is the character the Npc talks with."),
+			{}, (TYPE_INT),
+			&Thread::GetNpcTalkTarget
+		},
+		{
+			16, EXPRCAT_EVENT,
+			TEXT("Npc Talk About"), TEXT("Npc Talk About"), TEXT("In a Npc Talk With About event, this is the character the Npc talks about."),
+			{}, (TYPE_INT),
+			&Thread::GetNpcTalkAbout
+		},
 	},
 
 	{ //BOOL
@@ -333,6 +438,21 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			"using the Set Npc Response Answer Action"),
 			{ }, (TYPE_BOOL),
 			&Thread::GetNpcResponseCurrentAnswer
+		},
+		{
+			16, EXPRCAT_EVENT,
+			TEXT("Npc Original Answer Chance"), TEXT("Get Npc Original Answer Percent"),
+			TEXT("If executed in a trigger with the Npc Answers Event, this is success Chance that the Interaction had in Percent"),
+			{}, (TYPE_BOOL),
+			&Thread::GetNpcResponseOriginalPercent
+		},
+		{
+			17, EXPRCAT_EVENT,
+			TEXT("Npc Current Answer Chance"), TEXT("Get Npc Current Answer Percent"),
+			TEXT("If executed in a trigger with the Npc Answers Event, this is the current Interaction Percent, modified by this or previously executed Triggers. "
+			"using the Set Npc Response Percent Action"),
+			{}, (TYPE_BOOL),
+			&Thread::GetNpcResponseCurrentPercent
 		}
 				
 	},

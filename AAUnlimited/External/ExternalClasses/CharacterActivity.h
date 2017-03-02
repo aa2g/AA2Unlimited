@@ -25,7 +25,8 @@ public:
 	DWORD m_currRoomTarget; //similarily, set when getting the command to walk to a room
 	DWORD m_unknown6;
 	DWORD m_lastConversationSuccess; //(3=trumpet, 2 = nice, 1 = normal)
-	BYTE m_unknown7[8];
+	BYTE m_unknown7[4];
+	DWORD m_lastConversationAnswerPercent;
 	DWORD m_lastConversationAnswer;
 	BYTE m_unknown8[0x3C];
 	DWORD m_idleAnimationProgress;

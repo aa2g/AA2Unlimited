@@ -59,7 +59,11 @@ namespace Triggers {
 
 		std::vector<ParameterisedAction> actions;
 
-		void Initialize();	//has to be called on an instance before a thread can execute it
+		std::vector<Variable>* globalVars;
+		std::vector<Value>* globalValues;
+		int owningCard;
+
+		void Initialize(std::vector<Variable>* globals,std::vector<Value>* values, int owningCard);	//has to be called on an instance before a thread can execute it
 
 		static const int INSERT_START = -1;
 		static const int INSERT_END = -2;

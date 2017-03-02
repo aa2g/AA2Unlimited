@@ -33,6 +33,7 @@ public:
 	};
 
 	Value();
+	Value(Types type); //default value
 	Value(int ival);
 	Value(float fval);
 	Value(bool bVal);

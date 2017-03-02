@@ -47,9 +47,23 @@ namespace Triggers {
 		{ NPC_RESPONSE, EVENTCAT_CONVERSATION, TEXT("Npc Answers in a Conversation"), TEXT("Npc Answers in a Conversation"),
 			TEXT("Whenever a NPC made a yes/no decision, no matter if towards the PC or another NPC. Triggering Card is the NPC that gives the Answer."),
 			{}
+		},
+		{ NPC_WALK_TO_ROOM, EVENTCAT_CONVERSATION, TEXT("Npc Starts Walking to a Room"), TEXT("Npc Starts Walking to a Room"),
+			TEXT("Whenever a NPC decides to walk towards a room."),
+			{}
+		},
+		{ NPC_WANT_ACTION_NOTARGET, EVENTCAT_CONVERSATION, TEXT("Npc Wants to do something with no Target"), TEXT("Npc Wants to do something with no Target"),
+			TEXT("Whenever a NPC decides to do an action that does not require another Npc."),
+			{}
+		},
+		{ NPC_WANT_TALK_WITH, EVENTCAT_CONVERSATION, TEXT("Npc Wants to Talk With Someone"), TEXT("Npc Wants to Talk With Someone"),
+			TEXT("Whenever a NPC decides to talk to someone."),
+			{}
+		},
+		{ NPC_WANT_TALK_WITH_ABOUT, EVENTCAT_CONVERSATION, TEXT("Npc Wants to Talk With Someone About Someone"), TEXT("Npc Wants to Talk With Someone About Someone"),
+			TEXT("Whenever a NPC decides to talk to someone about someone else, such as spreading rumors or asking for opinion about someone."),
+			{}
 		}
-		
-	
 	};
 
 	/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {

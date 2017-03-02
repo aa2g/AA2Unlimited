@@ -108,8 +108,20 @@ std::wstring UnlimitedDialog::TRDialog::ExpressionToString(const ParameterisedEx
 		}
 		return retVal;
 	}
+	else if (param.expression->id == EXPR_NAMEDCONSTANT) {
+		if (param.namedConstant == NULL) return TEXT("error");
+		return param.namedConstant->name;
+	}
 	else if (param.expression->id == EXPR_VAR) {
 		//variable
+		//find in global vars
+		auto& list = g_currChar.m_cardData.GetGlobalVariables();
+		for(auto& var : list) {
+			if(var.name == param.varName) {
+				return var.name;
+			}
+		}
+		//find in local vars
 		if(m_currentTrigger == NULL) {
 			return TEXT("Error");
 		}
@@ -518,7 +530,11 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		switch (HIWORD(wparam)) {
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
-
+			switch(identifier) {
+			case IDC_TR_BTNGLOBALS: {
+				int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_GLOBALVARLIST),hwndDlg,&AddGlobalVariableDialogProc,(LPARAM)thisPtr);
+				break; }
+			}
 			break; }
 		case LBN_SELCHANGE: {
 			HWND wnd = (HWND)lparam;
@@ -725,6 +741,83 @@ void UnlimitedDialog::TRDialog::InitializeTriggers() {
 	m_tiActions = TreeView_InsertItem(m_tvTrigger,&telem);
 }
 
+/******************************/
+/* Add Global Variable dialog */
+/******************************/
+
+INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		TRDialog* thisPtr = (TRDialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+
+		HWND lb = GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST);
+		//put current global vars into lb
+		auto& list = g_currChar.m_cardData.GetGlobalVariables();
+		for(int i = 0; i < list.size(); i++) {
+			auto& elem = list[i];
+			std::wstring str = g_Types[elem.type].name + TEXT(" ") + elem.name;
+			str += TEXT(" = ");
+			str += thisPtr->ExpressionToString(elem.defaultValue);
+			int ret = SendMessage(lb,LB_ADDSTRING,0,(LPARAM)str.c_str());
+
+		}
+		
+		
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		DWORD identifier = LOWORD(wparam);
+		DWORD notification = HIWORD(wparam);
+		HWND wnd = (HWND)lparam;
+		TRDialog* thisPtr = (TRDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		switch (identifier) {
+		case IDOK:
+			EndDialog(hwndDlg,1);
+			break;
+		case IDC_TR_GV_BTNADD:
+			if(notification == BN_CLICKED) {
+				loc_AddVariableData data;
+				data.thisPtr = thisPtr;
+				data.var.defaultValue.expression = NULL;
+				data.onlyConstantInit = true;
+				data.var.type = TYPE_INVALID;
+				int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDVARIABLE),hwndDlg,&AddVariableDialogProc,(LPARAM)&data);
+				if(result == 1) {
+					auto& list = g_currChar.m_cardData.GetGlobalVariables();
+					list.push_back(data.var);
+					std::wstring str = g_Types[data.var.type].name + TEXT(" ") + data.var.name;
+					str += TEXT(" = ");
+					str += thisPtr->ExpressionToString(data.var.defaultValue);
+					int ret = SendMessage(GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST),LB_ADDSTRING,0,(LPARAM)str.c_str());
+				}
+				return TRUE;
+			}
+			break;
+		case IDC_TR_GV_BTNEDIT:
+			if (notification == BN_CLICKED) {
+
+			}
+			break;
+		case IDC_TR_GV_BTNDELETE:
+			if (notification == BN_CLICKED) {
+				int sel = SendMessage(GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST),LB_GETCURSEL,0,0);
+				if(sel != LB_ERR) {
+					auto& list = g_currChar.m_cardData.GetGlobalVariables();
+					list.erase(list.begin() + sel);
+					SendMessage(GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST),LB_DELETESTRING,sel,0);
+				}
+				return TRUE;
+			}
+			break;
+		}
+
+		break; }
+	}
+	return FALSE;
+}
+
 /*********************************/
 /* Add Action (and event) dialog */
 /*********************************/
@@ -817,6 +910,13 @@ void loc_SelectVariableData::InitializeComboBox(HWND box) {
 		auto& var = thisPtr->m_currentTrigger->vars[i];
 		int index = SendMessage(box,CB_ADDSTRING,0,(LPARAM)var.name.c_str());
 		SendMessage(box,CB_SETITEMDATA,index,i);
+	}
+	//globals get a flag set
+	auto& list = g_currChar.m_cardData.GetGlobalVariables();
+	for(int i = 0; i < list.size(); i++) {
+		auto& var = list[i];
+		int index = SendMessage(box,CB_ADDSTRING,0,(LPARAM)var.name.c_str());
+		SendMessage(box,CB_SETITEMDATA,index,i | GLOBAL_VAR_FLAG);
 	}
 
 	if (variable.expression != NULL) {
@@ -941,7 +1041,8 @@ void loc_AddExpressionData::InitializeComboBox(HWND box) {
 		SendMessage(box,CB_SETITEMDATA,index,i);
 	}
 	if (expression.expression != NULL) {
-		int ret = SendMessage(box,CB_SELECTSTRING,-1, (LPARAM)expression.expression->name.c_str());
+		std::wstring entryName = g_ExpressionCategories[expression.expression->category] + TEXT(" - ") + expression.expression->name;
+		int ret = SendMessage(box,CB_SELECTSTRING,-1, (LPARAM)entryName.c_str());
 		if (ret != CB_ERR) {
 			DrawName(box,NULL,this);
 		}
@@ -1083,11 +1184,6 @@ static void SelectFromComboBox(HWND dlg, int index, loc_AddData* data) {
 		descr = &elem.description;
 		adata->action.action = &elem;
 	}
-	else if(data->type == loc_AddData::VARIABLE) {
-		loc_SelectVariableData* edata = (loc_SelectVariableData*)data;
-		const Variable* var = &edata->thisPtr->m_currentTrigger->vars[index];
-		edata->variable.expression = &g_Expressions[var->type][1];
-	}
 	if(data->type == loc_AddData::EXPRESSION && data->GetId() == EXPR_CONSTANT) {
 		loc_AddExpressionData* edata = (loc_AddExpressionData*)data;
 		//constant
@@ -1175,9 +1271,20 @@ static void SelectFromComboBox(HWND dlg, int index, loc_AddData* data) {
 		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
 		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
 
-		edata->valid.resize(2);
-		const Variable* var = &edata->thisPtr->m_currentTrigger->vars[index];
+		
+		const Variable* var;
+		if(index & GLOBAL_VAR_FLAG) {
+			//global variable
+			index &= ~GLOBAL_VAR_FLAG;
+			var = &g_currChar.m_cardData.GetGlobalVariables()[index];
+		}
+		else {
+			//local variable
+			var = &edata->thisPtr->m_currentTrigger->vars[index];
+		}
+		edata->variable.expression = &g_Expressions[var->type][1];
 		edata->variable.varName = var->name;
+		edata->valid.resize(2);
 		edata->valid[0] = true;
 		//invalidate expression if type doesnt fit
 		if(edata->valid[1] && edata->variable.actualParameters[1].expression->returnType != var->type) {
@@ -1248,7 +1355,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDl
 		data->InitializeComboBox(cb);
 		int sel = SendMessage(cb,CB_GETCURSEL,0,0);
 		if(sel != CB_ERR) {
-			SelectFromComboBox(hwndDlg,sel,data);
+			int index = SendMessage(cb,CB_GETITEMDATA,sel,0);
+			SelectFromComboBox(hwndDlg,index,data);
 		}
 		if(!data->allowChange) {
 			EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AA_CBSELECTION),FALSE);
@@ -1412,11 +1520,6 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDl
 /* Add Variable Dialog */
 /***********************/
 
-struct loc_AddVariableData {
-	UnlimitedDialog::TRDialog* thisPtr;
-	Variable var;
-};
-
 void UnlimitedDialog::TRDialog::DoAddVariable() {
 	loc_AddVariableData data;
 	data.thisPtr = this;
@@ -1503,6 +1606,10 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 					loc_AddExpressionData edata;
 					edata.retType = data->var.type;
 					edata.thisPtr = data->thisPtr;
+					if(data->onlyConstantInit) {
+						edata.allowChange = false;
+						edata.expression = ParameterisedExpression(data->var.type,Value(data->var.type));
+					}
 
 					//check if this expression allready is valid to initialize the window accordingly
 					if (data->var.defaultValue.expression != NULL) {

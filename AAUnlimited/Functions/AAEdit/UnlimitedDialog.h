@@ -258,6 +258,7 @@ namespace AAEdit {
 		void DoAddEvent();
 		static INT_PTR CALLBACK AddActionDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 		static INT_PTR CALLBACK AddVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+		static INT_PTR CALLBACK AddGlobalVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 
 		void RefreshTriggerList();
 		void RefreshTriggerActions();

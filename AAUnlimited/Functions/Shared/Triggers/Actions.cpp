@@ -34,12 +34,91 @@ void Thread::ConditionalEndExecution(std::vector<Value>& params) {
 	}
 }
 
+//int card, int roomId
+void Thread::NpcMoveRoom(std::vector<Value>& params) {
+	int cardSeat = params[0].iVal;
+	int roomId = params[1].iVal;
+	CharInstData* card = &AAPlay::g_characters[cardSeat];
+	if (!card->IsValid()) return;
+
+	card->m_forceAction.conversationId = 0;
+	card->m_forceAction.movementType = 2;
+	card->m_forceAction.roomTarget = roomId;
+	card->m_forceAction.target1 = NULL;
+	card->m_forceAction.target2 = NULL;
+	card->m_forceAction.unknown = -1;
+	card->m_forceAction.unknown2 = 1;
+}
+
+//int card, int actionId
+void Thread::NpcActionNoTarget(std::vector<Value>& params) {
+	int cardSeat = params[0].iVal;
+	int actionId = params[1].iVal;
+	CharInstData* card = &AAPlay::g_characters[cardSeat];
+	if (!card->IsValid()) return;
+
+	card->m_forceAction.conversationId = actionId;
+	card->m_forceAction.movementType = 3;
+	card->m_forceAction.roomTarget = -1;
+	card->m_forceAction.target1 = NULL;
+	card->m_forceAction.target2 = NULL;
+	card->m_forceAction.unknown = -1;
+	card->m_forceAction.unknown2 = 1;
+}
+
+//int card, int conversationId, int talkTo
+void Thread::NpcTalkTo(std::vector<Value>& params) {
+	int cardSeat = params[0].iVal;
+	int actionId = params[1].iVal;
+	int cardTarget = params[2].iVal;
+	CharInstData* card = &AAPlay::g_characters[cardSeat];
+	if (!card->IsValid()) return;
+	CharInstData* target = &AAPlay::g_characters[cardTarget];
+	if (!card->IsValid()) return;
+
+	card->m_forceAction.conversationId = actionId;
+	card->m_forceAction.movementType = 3;
+	card->m_forceAction.roomTarget = -1;
+	card->m_forceAction.target1 = target->m_char->GetActivity();
+	card->m_forceAction.target2 = NULL;
+	card->m_forceAction.unknown = -1;
+	card->m_forceAction.unknown2 = 1;
+}
+
+//int card, int conversationId, int talkTo, int talkAbout
+void Thread::NpcTalkToAbout(std::vector<Value>& params) {
+	int cardSeat = params[0].iVal;
+	int actionId = params[1].iVal;
+	int cardTarget = params[2].iVal;
+	int cardAbout = params[3].iVal;
+	CharInstData* card = &AAPlay::g_characters[cardSeat];
+	if (!card->IsValid()) return;
+	CharInstData* target = &AAPlay::g_characters[cardTarget];
+	if (!card->IsValid()) return;
+	CharInstData* about = &AAPlay::g_characters[cardAbout];
+	if (!card->IsValid()) return;
+
+	card->m_forceAction.conversationId = actionId;
+	card->m_forceAction.movementType = 3;
+	card->m_forceAction.roomTarget = -1;
+	card->m_forceAction.target1 = target->m_char->GetActivity();
+	card->m_forceAction.target2 = about->m_char->GetActivity();
+	card->m_forceAction.unknown = -1;
+	card->m_forceAction.unknown2 = 1;
+}
+
 //event response
 
 //bool newAnswer
 void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
 	if (this->eventData->GetId() != NPC_RESPONSE) return;
 	((NpcResponseData*)eventData)->changedResponse = params[0].bVal;
+}
+
+//int percent
+void Thread::SetNpcResponsePercent(std::vector<Value>& params) {
+	if (this->eventData->GetId() != NPC_RESPONSE) return;
+	((NpcResponseData*)eventData)->changedChance = params[0].iVal;
 }
 
 namespace {
@@ -184,7 +263,8 @@ std::wstring g_ActionCategories[ACTIONCAT_N] = {
 	TEXT("Card Modification"),
 	TEXT("Flow Control"),
 	TEXT("Character Modification"),
-	TEXT("Event Response")
+	TEXT("Event Response"),
+	TEXT("Npc Action")
 };
 
 
@@ -218,7 +298,7 @@ std::vector<Action> g_Actions = {
 		&Thread::ShouldNotBeImplemented
 	},
 	{
-		ACTION_CONDJUMP, ACTIONCAT_FLOW_CONTROL, TEXT("Conditional Jump"), TEXT("Jump %p Actions if %p"),
+	ACTION_CONDJUMP,ACTIONCAT_FLOW_CONTROL,TEXT("Conditional Jump"),TEXT("Jump %p Actions if %p"),
 		TEXT("Skips additional actions if the given condition is true. May skip negative amounts to go back."),
 		{ TYPE_INT, TYPE_BOOL },
 		&Thread::ConditionalJump
@@ -307,7 +387,46 @@ std::vector<Action> g_Actions = {
 		{ TYPE_BOOL },
 		&Thread::SetNpcResponseAnswer
 	},
-
+	{
+		19, ACTIONCAT_EVENT, TEXT("Set Npc Response Percent"), TEXT("Set Npc Response Percent to %p"),
+		TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
+		"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI."),
+		{ TYPE_INT },
+		&Thread::SetNpcResponsePercent
+	},
+	{
+		20, ACTIONCAT_NPCACTION, TEXT("Make Npc Move to Room"), TEXT("Make Npc %p move to room %p"),
+		TEXT("If the target character is controlled by the Computer, this Action makes them walk to the specified Room. "
+		"If the Character is allready walking somewhere, it will do this instead. "
+		"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::NpcMoveRoom
+	},
+	{
+		21, ACTIONCAT_NPCACTION, TEXT("Make Npc do Action with no Target"), TEXT("Make Npc %p do %p"),
+		TEXT("If the target character is controlled by the Computer, this Action makes them do an Action that does not require another character to execute. "
+		"If the Character is allready walking somewhere, it will do this instead. "
+		"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::NpcActionNoTarget
+	},
+	{
+		22, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character"), TEXT("Make Npc %p converse %p with %p"),
+		TEXT("If the target character is controlled by the Computer, this Action makes them walk to and start the given conversation with the target. "
+		"If the Character is allready walking somewhere, it will do this instead. "
+		"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
+		{ TYPE_INT, TYPE_INT, TYPE_INT },
+		&Thread::NpcTalkTo
+	},
+	{
+		23, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character about someone"), TEXT("Make Npc %p converse %p with %p about %p"),
+		TEXT("If the target character is controlled by the Computer, this Action makes them walk to and start the given conversation with the target about "
+		"another character in class, such as asking for their opinion or spreading bad rumors. "
+		"If the Character is allready walking somewhere, it will do this instead. "
+		"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
+		{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
+		&Thread::NpcTalkToAbout
+	},
 };
 
 

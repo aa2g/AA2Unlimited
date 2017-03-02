@@ -181,8 +181,10 @@ public:
 	const std::vector<HairPart>&				GetHairs(BYTE kind);
 	//aausetdata end
 
-	std::vector<Shared::Triggers::Trigger>& GetTriggers();
-
+	std::vector<Shared::Triggers::Trigger>&		GetTriggers();
+	std::vector<Shared::Triggers::Variable>&	GetGlobalVariables();
+	std::vector<Shared::Triggers::Value>&		GetGlobalVarValues();
+		
 	const std::vector<BoneRuleV2>				GetMeshRuleList();
 	const std::map<std::wstring,std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName);
 	const std::map<std::wstring,std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName);
@@ -246,6 +248,8 @@ private:
 	std::vector<AAUDataSet> m_aauSets;
 	int m_currAAUSet;
 
+	std::vector<Shared::Triggers::Variable> m_globalVars;
+	std::vector<Shared::Triggers::Value> m_globalVarValues;
 	std::vector<Shared::Triggers::Trigger> m_triggers;
 
 	std::vector<SavedFile> m_savedFiles;
@@ -394,6 +398,10 @@ inline bool AAUCardData::HasFilesSaved() { return m_savedFiles.size() > 0; }
 inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind) { return m_aauSets[m_currAAUSet].m_hairs[kind]; }
 
 inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { return m_triggers; }
+
+inline std::vector<Shared::Triggers::Variable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
+
+inline std::vector<Shared::Triggers::Value>& AAUCardData::GetGlobalVarValues() { return m_globalVarValues; }
 
 inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_boneRules; }
 inline const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {

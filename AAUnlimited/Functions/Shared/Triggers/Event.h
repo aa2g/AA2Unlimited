@@ -42,7 +42,7 @@ namespace Triggers {
 		CARD_ADDED,
 		PERIOD_ENDS,
 		NPC_RESPONSE,
-
+		NPC_WALK_TO_ROOM, NPC_WANT_ACTION_NOTARGET, NPC_WANT_TALK_WITH, NPC_WANT_TALK_WITH_ABOUT,
 		
 		
 		N_EVENTS
@@ -116,7 +116,30 @@ namespace Triggers {
 		int conversationId;
 		bool originalResponse;
 		bool changedResponse;
+		int originalChance;
+		int changedChance;
 	EDC_END
+
+	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
+		int targetRoom;
+	EDC_END
+
+	EDC_DECLARE(NpcWantActionNoTargetData,NPC_WANT_ACTION_NOTARGET)
+		int action;
+	EDC_END
+
+	EDC_DECLARE(NpcWantTalkWithData,NPC_WANT_TALK_WITH)
+		int action;
+		int conversationTarget;
+	EDC_END
+
+	EDC_DECLARE(NpcWantTalkWithAboutData,NPC_WANT_TALK_WITH_ABOUT)
+		int action;
+		int conversationTarget;
+		int conversationAbout;
+	EDC_END
+
+
 
 
 #undef EDC_DECLARE

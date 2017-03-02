@@ -21,7 +21,25 @@ Type g_Types[N_TYPES] = {
 Value::Value() : type(TYPE_INVALID) {
 
 }
-
+Value::Value(Types type) {
+	type = type;
+	switch(type) {
+	case TYPE_INT:
+		iVal = 0;
+		break;
+	case TYPE_BOOL:
+		bVal = false;
+		break;
+	case TYPE_FLOAT:
+		fVal = 0;
+		break;
+	case TYPE_STRING:
+		strVal = new std::wstring(TEXT("(default)"));
+		break;
+	default:
+		break;
+	}
+}
 Value::Value(int ival) {
 	type = TYPE_INT;
 	iVal = ival;

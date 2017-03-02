@@ -27,6 +27,11 @@ void InitOnLoad() {
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].m_cardData.FromFileBuffer((char*)it->m_charData->m_pngBuffer,it->m_charData->m_pngBufferSize);
+		//initialize triggers
+		auto& aauData = g_characters[seat].m_cardData;
+		for (auto& trg : aauData.GetTriggers()) {
+			trg.Initialize(&aauData.GetGlobalVariables(),&aauData.GetGlobalVarValues(), seat);
+		}
 		//throw init event
 		CardInitializeData data;
 		data.card = seat;
@@ -38,6 +43,11 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
 	g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	//initialize triggers
+	auto& aauData = g_characters[seat].m_cardData;
+	for (auto& trg : aauData.GetTriggers()) {
+		trg.Initialize(&aauData.GetGlobalVariables(),&aauData.GetGlobalVarValues(),seat);
+	}
 	//throw init event
 	CardInitializeData data;
 	data.card = seat;

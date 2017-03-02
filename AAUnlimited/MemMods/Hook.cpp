@@ -261,6 +261,8 @@ void InitializeHooks() {
 		ClothingDialog::ExitInjection();
 
 		NpcActions::NpcAnswerInjection();
+		NpcActions::NpcMovingActionInjection();
+		NpcActions::NpcMovingActionPlanInjection();
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;

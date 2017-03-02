@@ -56,6 +56,8 @@ enum Expressions {
 	EXPR_BOOL_NOT = 11
 };
 
+static const int GLOBAL_VAR_FLAG = 0x40000000;
+
 extern std::wstring g_ExpressionCategories[EXPRCAT_N];
 extern std::vector<Expression> g_Expressions[N_TYPES];
 
@@ -67,7 +69,7 @@ public:
 	std::wstring varName; //used when expression is 2 (variable)
 	const NamedConstant* namedConstant; //used when expression is 3 (named constant)
 
-	int varId; //set at trigger initialisation and used by thread for variable addressing
+	int varId; //set at trigger initialisation and used by thread for variable addressing. negative means globals
 
 	inline ParameterisedExpression() : expression(NULL), varId(0), namedConstant(NULL) {}
 	ParameterisedExpression(Types type, DWORD exprId, const std::vector<ParameterisedExpression>& params);

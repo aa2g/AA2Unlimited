@@ -183,13 +183,17 @@ Shared::Triggers::ParameterisedExpression AAUCardData::ReadData_sub(char*& buffe
 	Types type = ReadData<Types>(buffer,size);
 	int id = ReadData<int>(buffer,size);
 	retVal.expression = Expression::FromId(type,id);
-	if(id == 1) {
+	if(id == EXPR_CONSTANT) {
 		//constant
 		retVal.constant = ReadData<decltype(retVal.constant)>(buffer,size);
 	}
-	else if(id == 2) {
+	else if(id == EXPR_VAR) {
 		//variable
 		retVal.varName = ReadData<decltype(retVal.varName)>(buffer,size);
+	}
+	else if(id == EXPR_NAMEDCONSTANT) {
+		int id = ReadData<int>(buffer,size);
+		retVal.namedConstant = NamedConstant::FromId(retVal.expression->returnType, id);
 	}
 	else {
 		//function
@@ -255,6 +259,7 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T* data,bo
 	bool ret = true;
 	if (data == NULL) return true;
 	ret &= WriteData(buffer,size,at,*data,resize);
+	return ret;
 }
 
 template<typename T>
@@ -262,6 +267,7 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, T* data,bool re
 	bool ret = true;
 	if (data == NULL) return true;
 	ret &= WriteData(buffer,size,at,*data,resize);
+	return ret;
 }
 
 //for string
@@ -340,11 +346,14 @@ bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Tr
 	bool ret = true;
 	ret &= WriteData(buffer,size,at,data.expression->returnType,resize);
 	ret &= WriteData(buffer,size,at,data.expression->id,resize);
-	if(data.expression->id == 1) {
+	if(data.expression->id == Shared::Triggers::EXPR_CONSTANT) {
 		ret &= WriteData(buffer,size,at,data.constant,resize);
 	}
-	else if(data.expression->id == 2) {
+	else if(data.expression->id == Shared::Triggers::EXPR_VAR) {
 		ret &= WriteData(buffer,size,at,data.varName,resize);
+	}
+	else if(data.expression->id == Shared::Triggers::EXPR_NAMEDCONSTANT) {
+		ret &= WriteData(buffer,size,at,data.namedConstant->id,resize);
 	}
 	else {
 		ret &= WriteData(buffer,size,at,data.actualParameters,resize);
@@ -556,6 +565,14 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_triggers = ReadData<decltype(m_triggers)>(buffer,size);
 			LOGPRIO(Logger::Priority::SPAM) << "found Trgs, loaded " << m_triggers.size() << " elements\r\n";
 			break;
+		case 'TrGv':
+			m_globalVars = ReadData<decltype(m_globalVars)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found TrGv, loaded " << m_globalVars.size() << " elements\r\n";
+			break;
+		case 'TrGV':
+			m_globalVarValues = ReadData<decltype(m_globalVarValues)>(buffer,size);
+			LOGPRIO(Logger::Priority::SPAM) << "found TrGV, loaded " << m_globalVarValues.size() << " elements\r\n";
+			break;
 		}
 		
 	}
@@ -573,11 +590,6 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	m_version = 2;
 	
 	GenAllFileMaps(); //we do this in the end in case conversion or something changed the file paths
-
-	//initialize triggers
-	for(auto& trg : m_triggers) {
-		trg.Initialize();
-	}
 	
 }
 
@@ -708,6 +720,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA3',m_hairs[3]);
 	}
 	
+	DUMP_MEMBER_CONTAINER('TrGv',m_globalVars);
+	DUMP_MEMBER_CONTAINER('TrGV',m_globalVarValues);
 	DUMP_MEMBER_CONTAINER('Trgs',m_triggers);
 
 	DUMP_MEMBER_CONTAINER('File',m_savedFiles);

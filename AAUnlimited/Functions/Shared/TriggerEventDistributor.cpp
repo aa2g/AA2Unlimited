@@ -8,9 +8,11 @@ namespace Shared {
 
 namespace Triggers {
 
-namespace {
+namespace STUPIDNAME {
 	std::vector<Trigger*> loc_triggers[N_EVENTS];
 }
+
+using namespace STUPIDNAME;
 
 void RegisterTrigger(Triggers::Trigger* trg) {
 	for(auto& elem : trg->events) {

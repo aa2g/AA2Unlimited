@@ -91,5 +91,10 @@ struct loc_AddExpressionData : public loc_AddData {
 };
 
 
+struct loc_AddVariableData {
+	UnlimitedDialog::TRDialog* thisPtr;
+	Variable var;
+	bool onlyConstantInit = false;
+};
 
 }

@@ -36,6 +36,7 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	data.originalResponse = originalReturn;
 	data.changedResponse = data.originalResponse;
 	data.conversationId = answerChar->m_currConversationId;
+	data.originalChance = answerChar->m_lastConversationAnswerPercent;
 	ThrowEvent(&data);
 	return data.changedResponse;
 }
@@ -95,9 +96,157 @@ void NpcAnswerInjection() {
 		&loc_NpcAnswerOriginalFunction);
 }
 
+void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionParamStruct* params) {
+
+	ExtClass::CharacterStruct* user = NULL;
+	for(int i = 0; i < 25; i++) {
+		ExtClass::CharacterStruct* it = AAPlay::g_characters[i].m_char;
+		if(it != NULL) {
+			if(it->m_moreUnknownData == moreUnknownData) {
+				user = it;
+				break;
+			}
+		}
+	}
+	if (user == NULL) return;
+
+	using namespace Shared::Triggers;
+
+	switch(params->movementType) {
+	case 2: {
+		//walk somewhere
+		NpcWalkToRoomData data;
+		data.card = AAPlay::GetSeatFromStruct(user);
+		data.targetRoom = params->roomTarget;
+		ThrowEvent(&data);
+		break; }
+	case 3: {
+		//talk to someone
+		if(params->target1 == NULL) {
+			NpcWantActionNoTargetData data;
+			data.card = AAPlay::GetSeatFromStruct(user);
+			data.action = params->conversationId;
+			ThrowEvent(&data);
+		}
+		else if(params->target2 == NULL) {
+			NpcWantTalkWithData data;
+			data.card = AAPlay::GetSeatFromStruct(user);
+			data.action = params->conversationId;
+			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+			ThrowEvent(&data);
+		}
+		else {
+			NpcWantTalkWithAboutData data;
+			data.card = AAPlay::GetSeatFromStruct(user);
+			data.action = params->conversationId;
+			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+			data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
+			ThrowEvent(&data);
+		}
+		break; }
+	default:
+		break;
+	}
+
+
+}
+
+DWORD loc_NpcMovingActionFuncion;
+void __declspec(naked) NpcMovingActionRedirect() {
+	__asm {
+		pushad
+		push edi
+		push esi
+		call NpcMovingActionEvent
+		popad
+		call [loc_NpcMovingActionFuncion]
+		ret
+	}
+}
+
+void NpcMovingActionInjection() {
+	//when an npc decides to do something that causes him to walks
+	//esi is pointer to a specific struct from the acting person, the struct at offset F60
+	//not sure what esi is, but edi points to the new conversation type (as well as other information)
+	//+C is where esi points and is the conversation id
+	//+10 seems to be walk type (2=talk, 3=walk etc)
+	//+1C is a pointer to a charachterStructs activity data, as is 20 (similarities to NpcAnswer creep up) (these are NULL sometimes, tho)
+	/*AA2Play v12 FP v1.4.0a.exe+117D25 - 8D 7C 24 0C           - lea edi,[esp+0C]
+	AA2Play v12 FP v1.4.0a.exe+117D29 - 8B F3                 - mov esi,ebx
+	AA2Play v12 FP v1.4.0a.exe+117D2B - E8 10000000           - call "AA2Play v12 FP v1.4.0a.exe"+117D40{ ->AA2Play v12 FP v1.4.0a.exe+117D40 }*/
+
+	DWORD address = General::GameBase + 0x117D2B;
+	DWORD redirectAddress = (DWORD)(&NpcMovingActionRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0x10, 0x00, 0x00, 0x00 },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },		//redirect to our function
+		(DWORD*)(&loc_NpcMovingActionFuncion));						//save old function to call in our redirect function
+}
+
+bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
+	//where unknownStruct is [m_moreUnknownData + 0x1C]
+	if (success) return success;
+
+	ExtClass::CharacterStruct* user = NULL;
+	for (int i = 0; i < 25; i++) {
+		ExtClass::CharacterStruct* it = AAPlay::g_characters[i].m_char;
+		if (it != NULL) {
+			if (it->m_moreUnknownData != NULL) {
+				if(*(void**)((BYTE*)(it->m_moreUnknownData) + 0x1C) == unknownStruct) {
+					user = it;
+					break;
+				}
+			}
+		}
+	}
+	if (user == NULL) return success;
+
+	//apply a forced action if queued
+	auto* inst = AAPlay::GetInstFromStruct(user);
+	if(inst->m_forceAction.conversationId != -1) {
+		//got a forced struct
+		*params = inst->m_forceAction;
+		inst->m_forceAction.conversationId = -1;
+		return true;
+	}
+	return false;
+}
+
+DWORD loc_NpcMovingActionPlan;
+void __declspec(naked) NpcMovingActionPlanRedirect() {
+	__asm {
+		call [loc_NpcMovingActionPlan]
+		push eax
+		push edi
+		push esi
+		call NpcMovingActionPlanEvent
+		ret
+	}
+}
+
+void NpcMovingActionPlanInjection() {
+	//no stack param, esi = some struct (unknown data + 1C), edi = param struct, same as above
+	//AA2Play v12 FP v1.4.0a.exe+117CFE - E8 ED8B0700           - call "AA2Play v12 FP v1.4.0a.exe"+1908F0 { ->AA2Play v12 FP v1.4.0a.exe+1908F0 }
+	//return al == 1 and fills params if an action was performed
+	DWORD address = General::GameBase + 0x117CFE;
+	DWORD redirectAddress = (DWORD)(&NpcMovingActionPlanRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0xED, 0x8B, 0x07, 0x00 },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },		//redirect to our function
+		(DWORD*)(&loc_NpcMovingActionPlan));
+}
+
 }
 }
 
 
+
+
+//some sort of npc ai tick
+//AA2Play v12 FP v1.4.0a.exe+16E210 - A1 CC610001           - mov eax,["AA2Play v12 FP v1.4.0a.exe"+3761CC] { [13D02008] }
+
+
+//changes npc walking type to "talk to someone"
+//AA2Play v12 FP v1.4.0a.exe+172089 - C7 40 3C 03000000     - mov [eax+3C],00000003 { 3 }
 
 //16F0D7 changes clothes for npcs

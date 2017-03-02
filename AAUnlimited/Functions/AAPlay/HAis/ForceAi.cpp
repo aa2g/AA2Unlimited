@@ -305,7 +305,7 @@ ForceAi::State ForceAi::states[] = {
 			thisPtr->PickRandomPrefPosition(info, true, true, 1);
 			thisPtr->StartTimerRandom(0, 20.0f, 20.0f);
 			if (state->m_customValue == 0) {
-				thisPtr->SetRepeatParams(1, 1.0f, 0.8f);
+				thisPtr->SetRepeatParams(1, 1.0f, 0.1f);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {

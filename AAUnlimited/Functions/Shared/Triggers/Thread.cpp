@@ -12,13 +12,14 @@ Thread::GlobalStorage Thread::globalStorage;
 
 void Thread::ExecuteTrigger(Trigger* trg) {
 	if (trg == NULL) return;
-	if (!trg->IsInitalized()) trg->Initialize();
+	if (!trg->IsInitalized()) trg->Initialize(NULL,NULL,-1);
 	if (trg->IsBroken()) return;
 	executeCount = 0;
 	maxExecuteCount = 1000;
 	execTrigger = trg;
 	execStarted = true;
 	execFinished = false;
+	thisCard = trg->owningCard;
 
 	//initialize variables
 	localStorage.vars.resize(trg->vars.size());
@@ -45,12 +46,19 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 bool Thread::ExecuteAction(ParameterisedAction& action) {
 	if(action.action->id == ACTION_SETVAR) {
 		//handle these specially
-		VariableInstance* var = &localStorage.vars[action.actualParameters[0].varId];
-		Value val = EvaluateExpression(action.actualParameters[1]);
-		if(val.type == TYPE_INVALID) {
-			return false;
+		int varId = action.actualParameters[0].varId;
+		if(varId & GLOBAL_VAR_FLAG) {
+			Value val = EvaluateExpression(action.actualParameters[1]);
+			(*this->execTrigger->globalValues)[varId & ~GLOBAL_VAR_FLAG] = val;
 		}
-		var->currValue = val;
+		else {
+			VariableInstance* var = &localStorage.vars[varId];
+			Value val = EvaluateExpression(action.actualParameters[1]);
+			if (val.type == TYPE_INVALID) {
+				return false;
+			}
+			var->currValue = val;
+		}	
 	}
 	else {
 		//evaluate parameters
@@ -78,8 +86,16 @@ Value Thread::EvaluateExpression(ParameterisedExpression& expr) {
 	}
 	else if (expr.expression->id == EXPR_VAR) {
 		//variable
-		VariableInstance* var = &localStorage.vars[expr.varId];
-		return var->currValue;
+		if(expr.varId & GLOBAL_VAR_FLAG) {
+			return (*this->execTrigger->globalValues)[expr.varId & ~GLOBAL_VAR_FLAG];
+		}
+		else {
+			VariableInstance* var = &localStorage.vars[expr.varId];
+			return var->currValue;
+		}
+	}
+	else if (expr.expression->id == EXPR_NAMEDCONSTANT) {
+		return expr.namedConstant->val;
 	}
 	else {
 		if(expr.expression->returnType == TYPE_BOOL && (expr.expression->id == 3 || expr.expression->id == 4)) {

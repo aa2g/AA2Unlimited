@@ -57,12 +57,13 @@ public:
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
 	BYTE m_unknown7[0xDB4];
 	void* m_somedata;
-	BYTE m_unknown8[4];
+	void* m_moreUnknownData;
 	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
+	BYTE m_unknown9[0xC];
 	void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
-	BYTE m_unknown9[0x10];
+	BYTE m_unknown10[0x4];
 	XXFile* m_xxSkirt;
-	BYTE m_unknown10[0x1C];
+	BYTE m_unknown11[0x1C];
 
 
 public:
