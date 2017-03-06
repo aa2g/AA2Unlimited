@@ -56,7 +56,11 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 	//SKIRT			A02_xx_00_yy (xx = slot, yy = body type)
 	if (name == NULL) return ExtClass::CharacterStruct::INVALID;
 	Name props{ name };
-	if (!props.valid) return ExtClass::CharacterStruct::INVALID;
+	if (!props.valid) {
+		if (strstr(name, "MP_"))
+			return ExtClass::CharacterStruct::H3DROOM;
+		else return ExtClass::CharacterStruct::INVALID;
+	}
 	//if (props.num1 != 0) return ExtClass::CharacterStruct::INVALID;
 	if (props.extraPrefix == 'S') {
 		//hairs
@@ -69,6 +73,8 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 			return ExtClass::CharacterStruct::HAIR_BACK;
 		case 23:
 			return ExtClass::CharacterStruct::HAIR_EXT;
+		case 30:
+			return ExtClass::CharacterStruct::GLASSES;
 		default:
 			return ExtClass::CharacterStruct::INVALID;
 		}
@@ -78,6 +84,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 		if(props.num1 == 0) {
 			//face and body: note the implication above, use to differentiate face from body
 			if (props.num2 == 10 && props.num4 == 0) return ExtClass::CharacterStruct::FACE;
+			if (props.num2 == 11 && props.num4 == 0) return ExtClass::CharacterStruct::TONGUE;
 			if (props.num2 == 0 && props.num4 == 0 && props.suffix == 'h') return ExtClass::CharacterStruct::SKELETON;
 			if (props.num4 == 0 && props.num2 == 0 || props.num4 != 0) {
 				if (props.num3 >= 0 && props.num3 <= 9) {
@@ -88,7 +95,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 		else if(props.num1 == 2 && props.num3 == 0) {
 			return ExtClass::CharacterStruct::SKIRT;
 		}
-		
+
 	}
 	return ExtClass::CharacterStruct::INVALID;
 

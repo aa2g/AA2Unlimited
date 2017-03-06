@@ -19,6 +19,7 @@ public:
 		LeftLeg,
 		RightLeg,
 		Breasts,
+		Face,
 		Skirt,
 		Room,
 		Other
