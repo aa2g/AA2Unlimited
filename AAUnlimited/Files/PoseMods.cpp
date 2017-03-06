@@ -21,6 +21,7 @@ PoseMods::PoseMods(std::wstring path) {
 	categoryMap["SKIRT"] = Skirt;
 	//categoryMap["ROOM"]  = Room;
 	categoryMap["OTHER"] = Other;
+	categoryMap["PROP"] = Prop;
 	while(in.good()) {
 		std::string line, categoryName, frameName, frameDesc, operations, axes;
 		FrameCategory category = Other;
