@@ -17,6 +17,7 @@
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
 #include "Functions\Shared\Globals.h"
+#include "Functions\AAPlay\GameState.h"
 #include "Files\PoseMods.h"
 #include "Files\Config.h"
 #include "Files\PoseFile.h"
@@ -34,6 +35,9 @@ namespace Poser {
 #define Z 2
 
 	PoserWindow g_PoserWindow;
+
+	bool GetIsHiddenFrame(ExtClass::Frame* frame);
+	void SetHiddenFrame(ExtClass::Frame* frame, bool hidden);
 
 	enum Operation {
 		Rotate,
@@ -123,6 +127,7 @@ namespace Poser {
 																 // loc_sliderCategories[category][categoryIndex] = index
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
+	std::map<std::string, SliderInfo> loc_sliderInfosRoom;
 
 	class PoserCharacter {
 	public:
@@ -141,7 +146,7 @@ namespace Poser {
 			while (frame < Character->m_bonePtrArrayEnd) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, name)) {
-						(*frame)->m_renderFlag = hidden ? 2 : 0;
+						SetHiddenFrame(*frame, hidden);
 					}
 				}
 				frame++;
@@ -158,6 +163,7 @@ namespace Poser {
 
 		void SetTongueJuice(bool show) {
 			SetHidden("A00_O_kutisiru", !show);
+			SetHidden("A00_O_sitasiru", !show);
 		}
 
 		ExtClass::CharacterStruct* Character;
@@ -179,6 +185,23 @@ namespace Poser {
 
 	void ApplySlider(void* slider = nullptr);
 	void GenSliderInfo();
+	PoseMods::FrameCategory loc_currentCategory;
+	std::string loc_currentRoomFrame;
+	SliderInfo* CurrentSlider() {
+		if (loc_currentCategory != PoseMods::FrameCategory::Room) {
+			return loc_targetChar->CurrentSlider;
+		}
+		else
+			return &loc_sliderInfosRoom[loc_currentRoomFrame];
+	}
+
+	bool GetIsHiddenFrame(ExtClass::Frame* frame) {
+		return frame->m_renderFlag == 2;
+	}
+
+	void SetHiddenFrame(ExtClass::Frame* frame, bool hidden) {
+		frame->m_renderFlag = hidden ? 2 : 0;
+	}
 
 	void StartEvent(EventType type) {
 		if (type == loc_eventType) return;
@@ -201,6 +224,7 @@ namespace Poser {
 		loc_targetCharacters.clear();
 		loc_targetChar = nullptr;
 		loc_loadCharacter = nullptr;
+		loc_sliderInfosRoom.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 	}
@@ -312,6 +336,7 @@ namespace Poser {
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"LeftLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"RightLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Breasts"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Face"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
@@ -490,12 +515,14 @@ namespace Poser {
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
 					loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
-					//SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
-					//SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
+					//SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, CurrentSlider()->curOperation, 0);
+					//SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, CurrentSlider()->curAxis, 0);
 					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
 					LRESULT bon = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
 					if (cat != LB_ERR && bon != LB_ERR) {
-						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[loc_sliderCategories[(PoseMods::FrameCategory)cat][bon]];
+						if (!loc_sliderCategories[(PoseMods::FrameCategory)cat].empty()) {
+							loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[loc_sliderCategories[(PoseMods::FrameCategory)cat][bon]];
+						}
 					}
 					thisPtr->SyncList();
 				}
@@ -552,8 +579,8 @@ namespace Poser {
 					thisPtr->ApplyIncrement(Z, 1);
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
-					if (loc_targetChar->CurrentSlider->currentOperation != Scale) {
-						*loc_targetChar->CurrentSlider->curValueX() *= -1.0f;
+					if (CurrentSlider()->currentOperation != Scale) {
+						*CurrentSlider()->curValueX() *= -1.0f;
 						thisPtr->SyncList();
 						ApplySlider();
 					}
@@ -602,14 +629,24 @@ namespace Poser {
 				case (IDC_PPS_LISTOP): {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
+						CurrentSlider()->setCurrentOperation(Operation(res));
 						thisPtr->SyncList();
 					}
 					break; }
 				}
 				break; }
-
 			};
+			break; }
+		case WM_NOTIFY: {
+			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			NMHDR* param = (NMHDR*)(lparam);
+			DWORD code = param->code;
+			if (code == TCN_SELCHANGE && LOWORD(wparam) == IDC_PPS_TABSHOWHIDE) {
+				int idx = TabCtrl_GetCurSel(thisPtr->m_tabShowHide);
+				ExtClass::Frame* frame = CurrentSlider()->xxFrame;
+				if (frame)
+					SetHiddenFrame(frame, idx != 0);
+			}
 			break; }
 		case WM_HOTKEY: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -620,7 +657,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Translate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -628,7 +665,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Rotate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -636,12 +673,12 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Scale, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->setCurrentOperation(Operation(res));
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
+			break; }
 		}
-}
 
 		return FALSE;
 	}
@@ -661,7 +698,7 @@ namespace Poser {
 	}
 
 	void PoserWindow::ApplyIncrement(int axis, int sign) {
-		float* value = loc_targetChar->CurrentSlider->curValueX();
+		float* value = CurrentSlider()->curValueX();
 		if (sign != 0) {
 			TCITEM tab;
 			TCHAR text[10];
@@ -669,10 +706,10 @@ namespace Poser {
 			tab.pszText = text;
 			int index = TabCtrl_GetCurSel(m_tabModifiers);
 			TabCtrl_GetItem(m_tabModifiers, index, &tab);
-			value[axis] += SliderIncrement(float(sign * (int)tab.lParam), loc_targetChar->CurrentSlider->currentOperation);
+			value[axis] += SliderIncrement(float(sign * (int)tab.lParam), CurrentSlider()->currentOperation);
 		}
 		else {
-			value[axis] = loc_targetChar->CurrentSlider->currentOperation == Scale ? 1.0f : 0.0f;
+			value[axis] = CurrentSlider()->currentOperation == Scale ? 1.0f : 0.0f;
 		}
 		SyncList();
 		ApplySlider();
@@ -680,12 +717,23 @@ namespace Poser {
 
 	void PoserWindow::SyncBones() {
 		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
+		loc_currentCategory = PoseMods::FrameCategory(res);
 		if (res != LB_ERR) {
-			SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
-			for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
-				SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+			if ((PoseMods::FrameCategory)res != PoseMods::FrameCategory::Room) {
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
 			}
-			SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
+			else {
+				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s = loc_sliderInfosRoom.begin(); s != loc_sliderInfosRoom.end(); s++) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
 		}
 	}
 
@@ -693,10 +741,27 @@ namespace Poser {
 		LRESULT cat = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
 		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 		if (res != LB_ERR) {
-			loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
-			int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
-			loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
-			SendMessage(m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->currentOperation, 0);
+			SliderInfo* slider = nullptr;
+			if ((PoseMods::FrameCategory)cat != PoseMods::FrameCategory::Room) {
+				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
+				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
+				slider = CurrentSlider();
+			}
+			else {
+				WCHAR name[255];
+				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
+				loc_currentRoomFrame = General::CastToString(std::wstring(name));
+				auto match = loc_sliderInfosRoom.find(General::CastToString(std::wstring(name)));
+				if (match != loc_sliderInfosRoom.end()) {
+					slider = &match->second;
+				}
+			}
+			if (slider) {
+				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
+				if (slider->xxFrame)
+					TabCtrl_SetCurSel(m_tabShowHide, GetIsHiddenFrame(slider->xxFrame) ? 1 : 0);
+			}
 			SyncList();
 		}
 	}
@@ -707,25 +772,25 @@ namespace Poser {
 		float valueX = General::GetEditFloat(m_edValueX);
 		float valueY = General::GetEditFloat(m_edValueY);
 		float valueZ = General::GetEditFloat(m_edValueZ);
-		loc_targetChar->CurrentSlider->setValue(valueX, valueY, valueZ);
-		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderX());
-		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderY());
-		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderZ());
+		CurrentSlider()->setValue(valueX, valueY, valueZ);
+		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, CurrentSlider()->toSliderX());
+		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
+		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncList() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderX());
-		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderY());
-		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSliderZ());
+		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, CurrentSlider()->toSliderX());
+		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
+		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueX());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -733,21 +798,21 @@ namespace Poser {
 	void PoserWindow::SyncSlider() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		loc_targetChar->CurrentSlider->fromSliderX(SendMessage(m_sliderValueX, TBM_GETPOS, 0, 0));
-		loc_targetChar->CurrentSlider->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
-		loc_targetChar->CurrentSlider->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
+		CurrentSlider()->fromSliderX(SendMessage(m_sliderValueX, TBM_GETPOS, 0, 0));
+		CurrentSlider()->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
+		CurrentSlider()->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueX());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
 	void ApplySlider(void* slider) {
-		SliderInfo* targetSlider = slider == NULL ? loc_targetChar->CurrentSlider : static_cast<SliderInfo*>(slider);
+		SliderInfo* targetSlider = slider == NULL ? CurrentSlider() : static_cast<SliderInfo*>(slider);
 		ExtClass::Frame *frame = targetSlider->xxFrame;
 		if(frame) {
 			//note that somehow those frame manipulations dont quite work as expected;
@@ -799,6 +864,51 @@ namespace Poser {
 						targetChar = c;
 				}
 			}
+		}
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE || model == ExtClass::CharacterStruct::GLASSES) {
+			targetChar = loc_loadCharacter;
+		}
+		else if (model == ExtClass::CharacterStruct::H3DROOM) {
+			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
+
+				//make copy of the bone first
+				Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+				memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+
+				//turn match into a copy of the root for now, since there are a lot of members i dont know
+				memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+
+				//change parent and child stuff
+				bone->m_parent = newMatch->m_parent;
+				bone->m_nChildren = 1;
+				bone->m_children = newMatch;
+				newMatch->m_parent = bone;
+				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+					newMatch->m_children[i].m_parent = newMatch;
+				}
+
+				//change name
+				int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
+				bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+				bone->m_nameBufferSize = namelength;
+				strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
+				strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+
+				auto match = loc_sliderInfosRoom.find(bone->m_name);
+				if (match != loc_sliderInfosRoom.end()) {
+					match->second.xxFrame = bone;
+					ApplySlider(&match->second);
+				}
+				else {
+					SliderInfo slider;
+					slider.descr = std::wstring(bone->m_name, bone->m_name + bone->m_nameBufferSize - 1);
+					slider.frameName = slider.descr;
+					slider.reset();
+					slider.xxFrame = bone;
+					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
+					ApplySlider(&slider);
+				}
+			});
 		}
 		else
 			return;

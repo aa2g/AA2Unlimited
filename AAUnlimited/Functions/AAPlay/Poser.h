@@ -60,6 +60,7 @@ namespace Poser {
 		HWND m_chkTears;
 		HWND m_chkDimEyes;
 		HWND m_chkTongueJuice;
+		HWND m_chkGlasses;
 		HWND m_chkAlwaysOnTop;
 		HWND m_tabModifiers;
 		HWND m_tabShowHide;

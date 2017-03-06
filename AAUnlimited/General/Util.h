@@ -20,6 +20,22 @@ inline bool StartsWith(const std::wstring& str, const std::wstring& prefix) {
 	return StartsWith(str.c_str(),prefix.c_str());
 }
 
+inline std::wstring CastToWString(const std::string& str) {
+	return std::wstring(str.begin(), str.end());
+}
+
+inline std::wstring CastToWStringN(const char* str, size_t count) {
+	return std::wstring(str, str + count - 1);
+}
+
+inline std::string CastToString(const std::wstring& str) {
+	return std::string(str.begin(), str.end());
+}
+
+inline std::string CastToStringN(const WCHAR* str, size_t count) {
+	return std::string(str, str + count - 1);
+}
+
 inline TCHAR* FindFileInPath(TCHAR* path) {
 	TCHAR* lastSlash = path;
 	while (*path) {
