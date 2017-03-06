@@ -22,7 +22,8 @@ public:
 		Face,
 		Skirt,
 		Room,
-		Other
+		Other,
+		Prop
 	};
 	PoseMods(std::wstring path);
 	~PoseMods();
