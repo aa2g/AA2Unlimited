@@ -11,6 +11,7 @@
 
 #define HAIR_HIGHLIGHT_PATH TEXT("hair_highlights\\")
 #define TAN_PATH TEXT("tan\\")
+#define MODULE_PATH TEXT("module\\")
 
 #define CURRENT_VERSION 2
 #define VER1_OVERRIDE_IMAGE_PATH TEXT("data\\texture\\override\\")

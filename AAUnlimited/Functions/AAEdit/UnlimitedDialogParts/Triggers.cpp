@@ -4,7 +4,11 @@
 #include <CommCtrl.h>
 #include <queue>
 
+#pragma comment(lib, "comctl32.lib")
+
 #include "resource.h"
+#include "Files\ModuleFile.h"
+#include "Functions\Serialize.h"
 #include "General\Util.h"
 #include "Functions\AAEdit\Globals.h"
 #include "Functions\Shared\Triggers\Value.h"
@@ -23,6 +27,7 @@ using namespace Shared::Triggers;
 /****************/
 
 INT_PTR CALLBACK GetNamePopupProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+INT_PTR CALLBACK ExportModuleDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 
 std::wstring GetNameFromPopup(HWND parent, std::wstring initValue) {
 	int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ENTERNAME),parent,&GetNamePopupProc,(LPARAM)&initValue);
@@ -248,7 +253,7 @@ void UnlimitedDialog::TRDialog::SetCurrentTrigger(int index) {
 	
 	while(!guiActionQueue.empty()) {
 		//each element represents a plain of actions, both its card and its gui parts, and their parents
-		auto& queueElem = guiActionQueue.back();
+		auto queueElem = guiActionQueue.front();
 		guiActionQueue.pop();
 
 		std::vector<Trigger::GUIAction*>& actions = queueElem.cardActions;
@@ -282,8 +287,7 @@ void UnlimitedDialog::TRDialog::SetCurrentTrigger(int index) {
 }
 
 //returns index of selected action in array, or -1 if no event is selected
-UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSelectedAction() {
-	HTREEITEM tvSel = TreeView_GetSelection(m_tvTrigger);
+UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSelectedAction(HTREEITEM tvSel) {
 	//find selected action, if action is selected
 	struct LoopData {
 		std::vector<Trigger::GUIAction*>& cardActions;
@@ -295,7 +299,7 @@ UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSel
 	std::queue<LoopData> actionQueue;
 	actionQueue.push({ m_currentTrigger->guiActions, m_actions });
 	while (!actionQueue.empty()) {
-		auto elem = actionQueue.back();
+		auto elem = actionQueue.front();
 		actionQueue.pop();
 
 		for (int i = 0; i < elem.guiActions.size(); i++) {
@@ -307,22 +311,26 @@ UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSel
 				retVal.isSubLabel = false;
 				break;
 			}
-			else if(elem.guiActions[i]->subActionLabel == tvSel) {
+			else if (elem.guiActions[i]->subActionLabel == tvSel) {
 				retVal.cardActions = &elem.cardActions;
 				retVal.guiActions = &elem.guiActions;
 				retVal.cardActionsInt = i;
-				retVal.isSubLabel = true; 
+				retVal.isSubLabel = true;
 				break;
 			}
 			//abort if found
 			if (retVal.cardActionsInt != -1) break;
 			//add subactions to queue
-			if(elem.cardActions[i]->subactions.size() > 0) {
+			if (elem.cardActions[i]->subactions.size() > 0) {
 				actionQueue.push({ elem.cardActions[i]->subactions, elem.guiActions[i]->subactions });
 			}
 		}
 	}
 	return retVal;
+}
+UnlimitedDialog::TRDialog::SelectedAction_Data UnlimitedDialog::TRDialog::GetSelectedAction() {
+	HTREEITEM tvSel = TreeView_GetSelection(m_tvTrigger);
+	return GetSelectedAction(tvSel);
 }
 
 HTREEITEM UnlimitedDialog::TRDialog::GenerateActionSubLabel(HTREEITEM parent, int actionId) {
@@ -350,8 +358,8 @@ HTREEITEM UnlimitedDialog::TRDialog::GenerateActionSubLabel(HTREEITEM parent, in
 	return NULL;
 }
 
-void UnlimitedDialog::TRDialog::AddTriggerAction(const ParameterisedAction& action) {
-	if (m_currentTrigger == NULL) return;
+UnlimitedDialog::TRDialog::ActionTreeItem* UnlimitedDialog::TRDialog::AddTriggerAction(const ParameterisedAction& action) {
+	if (m_currentTrigger == NULL) return NULL;
 	
 	SelectedAction_Data sel = GetSelectedAction();
 
@@ -410,7 +418,50 @@ void UnlimitedDialog::TRDialog::AddTriggerAction(const ParameterisedAction& acti
 		newCardAction->action = action;
 		(*sel.cardActions)[sel.cardActionsInt]->subactions.insert((*sel.cardActions)[sel.cardActionsInt]->subactions.begin(),newCardAction);
 	}
+	return tItem;
+}
+
+void UnlimitedDialog::TRDialog::AddTriggerGuiActions(std::vector<Shared::Triggers::Trigger::GUIAction*> actions) {
+
+	//save starting selection
+
+	SelectedAction_Data actionSel = GetSelectedAction();
+	HTREEITEM startSel;
+	if(actionSel.cardActionsInt != -1) {
+		startSel = TreeView_GetSelection(m_tvTrigger);
+	}
+	else {
+		startSel = m_tiActions;
+	}
 	
+
+	struct LoopData {
+		HTREEITEM after;
+		std::vector<Trigger::GUIAction*>& actions;
+	};
+	std::queue<LoopData> guiActionQueue;
+	guiActionQueue.push({ startSel, actions });
+
+	while (!guiActionQueue.empty()) {
+		auto queueElem = guiActionQueue.front();
+		guiActionQueue.pop();
+		std::vector<Trigger::GUIAction*>& actions = queueElem.actions;
+		HTREEITEM insertAfter = queueElem.after;
+		TreeView_SelectItem(m_tvTrigger,insertAfter);
+		
+		for (auto& elem : actions) {
+			ActionTreeItem* newItem = AddTriggerAction(elem->action);
+			TreeView_SelectItem(m_tvTrigger,newItem->tree);
+			//add subactions to the queue if applicable
+			if(elem->subactions.size()) {
+				guiActionQueue.push({ newItem->subActionLabel, elem->subactions });
+			}
+			
+		}
+	}
+
+	//restore selection afterwards
+	TreeView_SelectItem(m_tvTrigger,startSel);
 }
 
 void UnlimitedDialog::TRDialog::AddTriggerEvent(const Shared::Triggers::ParameterisedEvent& event,int insertAfter) {
@@ -512,6 +563,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_lbTriggers = GetDlgItem(hwndDlg,IDC_TR_LBTRIGGERLIST);
 		thisPtr->m_tvTrigger = GetDlgItem(hwndDlg,IDC_TR_TVTRIGGER);
+		MakeTreeViewMultiselect(thisPtr->m_tvTrigger);
 
 		thisPtr->Refresh();
 		return TRUE;
@@ -606,6 +658,108 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						}
 					}
 					break; }
+				case ID_TRM_COPYSEL: {
+					int nSel = SendMessage(thisPtr->m_lbTriggers, LB_GETSELCOUNT,0,0);
+					if(nSel > 0) {
+						std::vector<int> itemBuffer(nSel);
+						SendMessage(thisPtr->m_lbTriggers,LB_GETSELITEMS,nSel,(LPARAM)itemBuffer.data());
+						std::vector<Trigger*> triggers;
+						for (int item : itemBuffer) triggers.push_back(&g_currChar.m_cardData.GetTriggers()[item]);
+						char* buffer = NULL;
+						int size = 0;
+						int at = 0;
+						Serialize::WriteData(&buffer,&size,at,triggers,true);
+						if (buffer != NULL) {
+							std::wstring stringVersion = Serialize::WStringFromBuffer(buffer,at);
+							OpenClipboard(hwndDlg);
+							HGLOBAL globalMem = (wchar_t*)GlobalAlloc(GMEM_MOVEABLE,stringVersion.size()*2 + 2);
+							wchar_t* lockedMem = (wchar_t*)GlobalLock(globalMem);
+							memcpy(lockedMem,stringVersion.c_str(),stringVersion.size()*2 + 2);
+							GlobalUnlock(globalMem);
+							SetClipboardData(CF_UNICODETEXT,globalMem);
+							CloseClipboard();
+						}
+						delete[] buffer;
+					}
+					break; }
+				case ID_TRM_PASTE: {
+					if (thisPtr->m_currentTrigger != NULL) {
+						thisPtr->SetCurrentTrigger(-1);
+					}
+					OpenClipboard(hwndDlg);
+					HANDLE h = GetClipboardData(CF_UNICODETEXT);
+					if (h == NULL) {
+						CloseClipboard();
+						break;
+					}
+					int memSize = GlobalSize(h);
+					int strLength = 0;
+					bool valid = false;
+					wchar_t* ptr = (wchar_t*)GlobalLock(h);
+					if (ptr != NULL) {
+						for (int i = 0; i < memSize/2; i++) {
+							if (ptr[i] == L'\0') {
+								valid = true;
+								break;
+							}
+							strLength++;
+						}
+					}
+					if (valid) {
+						char* buffer = Serialize::BufferFromWString(ptr,strLength);
+						if (buffer != NULL) {
+							char* tmpBuffer = buffer;
+							int tmpLength = strLength;
+							try {
+								std::vector<Trigger*> actions = Serialize::ReadData<decltype(actions)>(tmpBuffer,tmpLength);
+								auto& trigList = g_currChar.m_cardData.GetTriggers();
+								for (Trigger* action : actions) {
+									trigList.push_back(*action);
+									delete action;
+								}
+								thisPtr->RefreshTriggerList();
+							}
+							catch (Serialize::InsufficientBufferException e) {
+
+							}
+							catch (std::exception e) {
+
+							}
+
+						}
+						delete[] buffer;
+					}
+					GlobalUnlock(h);
+					CloseClipboard();
+					
+					break; }
+				case ID_TRM_EXPORT: {
+					
+					int selCount = SendMessage(thisPtr->m_lbTriggers,LB_GETSELCOUNT,0,0);
+					if(selCount > 0) {
+						loc_ModuleInfo info;
+						int* selBuffer = new int[selCount];
+						SendMessage(thisPtr->m_lbTriggers,LB_GETSELITEMS,selCount,(LPARAM)selBuffer);
+						auto& triggers = g_currChar.m_cardData.GetTriggers();
+						for(int i = 0; i < selCount; i++) {
+							info.saveTriggers.push_back(triggers[selBuffer[i]].name);
+						}
+						
+						
+						int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_EXPORT),hwndDlg,&ExportModuleDialogProc,(LPARAM)&info);
+						if (result == 1 && info.name.size() > 0) {
+							std::wstring path = General::BuildOverridePath(MODULE_PATH, info.name.c_str());
+							std::vector<Trigger*> trigs;
+							for(int i = 0; i < selCount; i++) {
+								trigs.push_back(&triggers[selBuffer[i]]);
+							}
+							ModuleFile file(info.name,info.description,trigs);
+							file.WriteToFile(path.c_str());
+						}
+
+						delete[] selBuffer;
+					}
+					break; }
 				default:
 					break;
 				}
@@ -664,21 +818,138 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						return TRUE;
 					}
 					else if (SelectedAction_Data selData = thisPtr->GetSelectedAction()) {
-						if (selData.isSubLabel) break;
-						HTREEITEM item = (*selData.guiActions)[selData.cardActionsInt]->tree;
-						SendMessage(thisPtr->m_tvTrigger,TVM_DELETEITEM,0,(LPARAM)item);
-						delete (*selData.guiActions)[selData.cardActionsInt];
-						delete (*selData.cardActions)[selData.cardActionsInt];
-						selData.guiActions->erase(selData.guiActions->begin() + selData.cardActionsInt);
-						selData.cardActions->erase(selData.cardActions->begin() + selData.cardActionsInt);
+						std::vector<HTREEITEM>* multiSel = (std::vector<HTREEITEM>*)SendMessage(thisPtr->m_tvTrigger,TVM_GETMULTISEL,0,0);
+						if(multiSel != NULL) {
+							std::vector<HTREEITEM> copy = *multiSel;
+							for(HTREEITEM item : copy) {
+								selData = thisPtr->GetSelectedAction(item);
+								if (selData.isSubLabel) break;
+								HTREEITEM item = (*selData.guiActions)[selData.cardActionsInt]->tree;
+								SendMessage(thisPtr->m_tvTrigger,TVM_DELETEITEM,0,(LPARAM)item);
+								delete (*selData.guiActions)[selData.cardActionsInt];
+								delete (*selData.cardActions)[selData.cardActionsInt];
+								selData.guiActions->erase(selData.guiActions->begin() + selData.cardActionsInt);
+								selData.cardActions->erase(selData.cardActions->begin() + selData.cardActionsInt);
+
+							}
+							
+						}						
 						return TRUE;
 					}
+				}
+				break; }
+			case ID_TRM_COPYSEL: {
+				if (thisPtr->m_currentTrigger != NULL) {
+					std::vector<Trigger::GUIAction*> actions;
+					std::vector<HTREEITEM>* sel = (std::vector<HTREEITEM>*)SendMessage(thisPtr->m_tvTrigger,TVM_GETMULTISEL,0,0);
+					for(auto item : *sel) {
+						if (SelectedAction_Data selData = thisPtr->GetSelectedAction(item)) {
+							actions.push_back((*selData.cardActions)[selData.cardActionsInt]);
+						}
+					}
+					char* buffer = NULL;
+					int size = 0;
+					int at = 0;
+					Serialize::WriteData(&buffer,&size,at,actions,true);
+					if (buffer != NULL) {
+						std::wstring stringVersion = Serialize::WStringFromBuffer(buffer,at);
+						OpenClipboard(hwndDlg);
+						HGLOBAL globalMem = (wchar_t*)GlobalAlloc(GMEM_MOVEABLE,stringVersion.size()*2 + 2);
+						wchar_t* lockedMem = (wchar_t*)GlobalLock(globalMem);
+						memcpy(lockedMem,stringVersion.c_str(),stringVersion.size()*2 + 2);
+						GlobalUnlock(globalMem);
+						SetClipboardData(CF_UNICODETEXT,globalMem);
+						CloseClipboard();
+					}
+					delete[] buffer;
+				}
+				break; }
+			case ID_TRM_PASTE: {
+				if (thisPtr->m_currentTrigger != NULL) {
+					OpenClipboard(hwndDlg);
+					HANDLE h = GetClipboardData(CF_UNICODETEXT);
+					if(h == NULL) {
+						CloseClipboard();
+						break;
+					}
+					int memSize = GlobalSize(h);
+					int strLength = 0;
+					bool valid = false;
+					wchar_t* ptr = (wchar_t*)GlobalLock(h);
+					if (ptr != NULL) {
+						for(int i = 0; i < memSize/2; i++) {
+							if(ptr[i] == L'\0') {
+								valid = true;
+								break;
+							}
+							strLength++;
+						}
+					}
+					if(valid) {
+						char* buffer = Serialize::BufferFromWString(ptr,strLength);
+						if(buffer != NULL) {
+							char* tmpBuffer = buffer;
+							int tmpLength = strLength;
+							try {
+								std::vector<Trigger::GUIAction*> actions = Serialize::ReadData<decltype(actions)>(tmpBuffer,tmpLength);
+								thisPtr->AddTriggerGuiActions(actions);
+								for (Trigger::GUIAction* action : actions) delete action;
+							}
+							catch(Serialize::InsufficientBufferException e) {
+
+							}
+							catch(std::exception e) {
+
+							}
+
+						}
+						delete[] buffer;
+					}
+					GlobalUnlock(h);
+					CloseClipboard();
 				}
 				break; }
 			default:
 				break;
 			}
 			DestroyMenu(menu);
+		}
+		else if(info->code == NM_DBLCLK && info->hwndFrom == thisPtr->m_tvTrigger) {
+			SelectedAction_Data sel = thisPtr->GetSelectedAction();
+			if(sel) {
+				loc_AddActionData data;
+				data.thisPtr = thisPtr;
+				data.action = (*sel.cardActions)[sel.cardActionsInt]->action;
+				data.valid.resize(data.action.actualParameters.size());
+				for (int i = 0; i < data.valid.size(); i++) data.valid[i] = true;
+				int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDACTION),hwndDlg,&AddActionDialogProc,(LPARAM)&data);
+				if (result == 1) {
+					if (thisPtr->m_currentTrigger) {
+						(*sel.cardActions)[sel.cardActionsInt]->action = data.action;
+						std::wstring str = thisPtr->EVANameToString(data.action.action->interactiveName,data.action.actualParameters);
+						TVITEM item;
+						item.mask = TVIF_STATE;
+						item.hItem = (*sel.guiActions)[sel.cardActionsInt]->tree;
+						item.pszText = (LPWSTR)str.c_str();
+						TreeView_SetItem(thisPtr->m_tvTrigger,&item);
+					}
+				}
+			}
+		}
+		else if(info->code == TVN_MULTISELCHANGED && info->hwndFrom == thisPtr->m_tvTrigger) {
+			NMTVMULTI* minfo = (NMTVMULTI*)info;
+			if(minfo->selectBoth) {
+				//check if old and new item can be selected together
+				HTREEITEM p1 = TreeView_GetParent(thisPtr->m_tvTrigger,minfo->oldItem);
+				HTREEITEM p2 = TreeView_GetParent(thisPtr->m_tvTrigger,minfo->newItem);
+				if(p1 == p2) {
+					minfo->selectBoth = true;
+					return TRUE;
+				}
+				minfo->selectBoth = false;
+				return TRUE;
+			}
+			return TRUE;
 		}
 		break; }
 	}
@@ -786,7 +1057,9 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 				int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDVARIABLE),hwndDlg,&AddVariableDialogProc,(LPARAM)&data);
 				if(result == 1) {
 					auto& list = g_currChar.m_cardData.GetGlobalVariables();
+					auto& valList = g_currChar.m_cardData.GetGlobalVarValues();
 					list.push_back(data.var);
+					valList.push_back(data.var.defaultValue.constant);
 					std::wstring str = g_Types[data.var.type].name + TEXT(" ") + data.var.name;
 					str += TEXT(" = ");
 					str += thisPtr->ExpressionToString(data.var.defaultValue);
@@ -806,6 +1079,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 				if(sel != LB_ERR) {
 					auto& list = g_currChar.m_cardData.GetGlobalVariables();
 					list.erase(list.begin() + sel);
+					auto& varList = g_currChar.m_cardData.GetGlobalVarValues();
+					varList.erase(varList.begin() + sel);
 					SendMessage(GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST),LB_DELETESTRING,sel,0);
 				}
 				return TRUE;
@@ -825,7 +1100,6 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 
 struct loc_AddData;
 static void DrawName(HWND wnd,DRAWITEMSTRUCT* dis,loc_AddData* data);
-static void SelectFromComboBox(HWND dlg,int index,loc_AddData* data);
 
 /*
 * The add dialog gets one of these structs,
@@ -891,6 +1165,56 @@ bool loc_AddData::PromptAddParameter(HWND parentDialog, int i, Types retType) {
 	}
 }
 
+void loc_AddData::SelectFromComboBox(HWND dlg,int index,const std::wstring* name,const std::wstring* descr) {
+	//Regular entry with name and description
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),TRUE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),TRUE);
+	auto& oldActualParams = GetActualParameters();
+	auto& newParams = GetParameters();
+	//clear parameters that can not be reused
+	for (int i = 0; i < min(oldActualParams.size(),newParams.size()); i++) {
+		if (!valid[i] || newParams[i] != oldActualParams[i].expression->returnType) {
+			oldActualParams[i].actualParameters.clear();
+			oldActualParams[i].expression = NULL;
+			valid[i] = false;
+		}
+	}
+	oldActualParams.resize(newParams.size());
+	valid.resize(newParams.size());
+	parts.clear();
+
+	if (descr != NULL) {
+		HWND stDescr = GetDlgItem(dlg,IDC_TR_AA_STDESCR);
+		SendMessage(stDescr,WM_SETTEXT,0,(LPARAM)descr->c_str());
+	}
+
+	if (name != NULL) {
+		HWND stName = GetDlgItem(dlg,IDC_TR_AA_STNAME);
+		//split string at whitespaces
+		int last = 0,i = 1;
+		for (i = 1; i < name->size(); i++) {
+			if (isspace((*name)[i]) && i != last) {
+				std::wstring part = name->substr(last,i-last);
+				parts.push_back(std::move(part));
+				last = i+1;
+			}
+		}
+		std::wstring part = name->substr(last,i-last);
+		parts.push_back(std::move(part));
+		last = i+1;
+
+		DrawName(stName,NULL,this);
+
+		bool valid = true;
+		for (bool v : this->valid) {
+			if (!v) { valid = false; break; }
+		}
+		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),valid);
+	}
+}
+
 loc_SelectVariableData::loc_SelectVariableData() {
 	type = loc_AddData::VARIABLE;
 	retType = TYPE_INVALID;
@@ -926,6 +1250,36 @@ void loc_SelectVariableData::InitializeComboBox(HWND box) {
 		}
 	}
 }
+void loc_SelectVariableData::SelectFromComboBox(HWND dlg,int index) {
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
+	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
+
+
+	const Variable* var;
+	if (index & GLOBAL_VAR_FLAG) {
+		//global variable
+		index &= ~GLOBAL_VAR_FLAG;
+		var = &g_currChar.m_cardData.GetGlobalVariables()[index];
+	}
+	else {
+		//local variable
+		var = &thisPtr->m_currentTrigger->vars[index];
+	}
+	variable.expression = &g_Expressions[var->type][1];
+	variable.varName = var->name;
+	valid.resize(2);
+	valid[0] = true;
+	//invalidate expression if type doesnt fit
+	if (valid[1] && variable.actualParameters[1].expression->returnType != var->type) {
+		valid[1] = false;
+	}
+
+	EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),TRUE);
+
+	
+}
 std::wstring loc_SelectVariableData::GetParamString(int paramN,bool* retValid) {
 	if (retValid) *retValid = valid[paramN];
 	return thisPtr->ExpressionToString(variable.actualParameters[paramN]);
@@ -953,10 +1307,83 @@ void loc_AddActionData::InitializeComboBox(HWND box) {
 		SendMessage(box,CB_SETITEMDATA,index,i);
 	}
 	if(action.action != NULL) {
-		int ret = SendMessage(box,CB_SELECTSTRING,-1,(LPARAM)action.action->name.c_str());
+		std::wstring entryName = g_ActionCategories[action.action->category] + TEXT(" - ") + action.action->name;
+		int ret = SendMessage(box,CB_SELECTSTRING,-1,(LPARAM)entryName.c_str());
 		if(ret != CB_ERR) {
 			DrawName(box,NULL,this);
 		}
+	}
+}
+void loc_AddActionData::SelectFromComboBox(HWND dlg,int index) {
+	const std::wstring* name = NULL,*descr = NULL;
+	const auto& elem = g_Actions[index];
+	name = &elem.interactiveName;
+	descr = &elem.description;
+	action.action = &elem;
+
+	if(GetId() == ACTION_SETVAR) {
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),TRUE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),TRUE);
+		auto& oldActualParams = GetActualParameters();
+		
+		//check for variable parameters
+		Types type = TYPE_INVALID;
+		if(oldActualParams.size() >= 1) {
+			if(valid[0] && oldActualParams[0].expression->id == EXPR_VAR) {
+				type = oldActualParams[0].expression->returnType;
+			}
+			else {
+				valid[0] = false;
+				oldActualParams[0].expression = NULL;
+			}
+			
+		}
+		if(oldActualParams.size() >= 2 && type != TYPE_INVALID) {
+			//second parameter must be expression of variable type
+			if(!valid[1] || oldActualParams[1].expression->returnType != type) {
+				valid[1] = false;
+				oldActualParams[1].expression = NULL;
+			}
+		}
+		
+
+		oldActualParams.resize(2);
+		valid.resize(2);
+		parts.clear();
+
+		if (descr != NULL) {
+			HWND stDescr = GetDlgItem(dlg,IDC_TR_AA_STDESCR);
+			SendMessage(stDescr,WM_SETTEXT,0,(LPARAM)descr->c_str());
+		}
+
+		if (name != NULL) {
+			HWND stName = GetDlgItem(dlg,IDC_TR_AA_STNAME);
+			//split string at whitespaces
+			int last = 0,i = 1;
+			for (i = 1; i < name->size(); i++) {
+				if (isspace((*name)[i]) && i != last) {
+					std::wstring part = name->substr(last,i-last);
+					parts.push_back(std::move(part));
+					last = i+1;
+				}
+			}
+			std::wstring part = name->substr(last,i-last);
+			parts.push_back(std::move(part));
+			last = i+1;
+
+			DrawName(stName,NULL,this);
+
+			bool valid = true;
+			for (bool v : this->valid) {
+				if (!v) { valid = false; break; }
+			}
+			EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),valid);
+		}
+	}
+	else {
+		loc_AddData::SelectFromComboBox(dlg,index,name,descr);
 	}
 }
 std::wstring loc_AddActionData::GetParamString(int paramN, bool* retValid) {
@@ -1014,6 +1441,15 @@ void loc_AddEventData::InitializeComboBox(HWND box) {
 		}
 	}
 }
+void loc_AddEventData::SelectFromComboBox(HWND dlg,int index) {
+	const std::wstring* name = NULL,*descr = NULL;
+	const auto& elem = g_Events[index];
+	name = &elem.interactiveName;
+	descr = &elem.description;
+	event.event = &elem;
+
+	loc_AddData::SelectFromComboBox(dlg,index,name,descr);
+}
 std::wstring loc_AddEventData::GetParamString(int paramN,bool* retValid) {
 	if (retValid) *retValid = valid[paramN];
 	return thisPtr->ExpressionToString(event.actualParameters[paramN]);
@@ -1046,6 +1482,93 @@ void loc_AddExpressionData::InitializeComboBox(HWND box) {
 		if (ret != CB_ERR) {
 			DrawName(box,NULL,this);
 		}
+	}
+}
+void loc_AddExpressionData::SelectFromComboBox(HWND dlg,int index) {
+	const std::wstring* name = NULL,*descr = NULL;
+	const auto& elem = g_Expressions[retType][index];
+	name = &elem.interactiveName;
+	descr = &elem.description;
+	expression.expression = &elem;
+
+	if (GetId() == EXPR_CONSTANT) {
+		//constant
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),TRUE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
+		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),false);
+
+		//insert constant from data if applicable
+		HWND cb = GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT);
+		switch (expression.constant.type) {
+		case TYPE_INT:
+			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(expression.constant.iVal).c_str());
+			break;
+		case TYPE_FLOAT:
+			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(expression.constant.fVal).c_str());
+			break;
+		case TYPE_BOOL:
+			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(expression.constant.bVal).c_str());
+			break;
+		case TYPE_STRING:
+			SendMessage(cb,WM_SETTEXT,0,(LPARAM)expression.constant.strVal);
+			break;
+		default:
+			break;
+		}
+	}
+	else if (GetId() == EXPR_VAR) {
+		//variable
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),TRUE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
+		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),FALSE);
+
+
+		HWND cb = GetDlgItem(dlg,IDC_TR_AA_CBVAR);
+		SendMessage(cb,CB_RESETCONTENT,0,0);
+		Types type = expression.expression->returnType;
+		for (auto& elem : thisPtr->m_currentTrigger->vars) {
+			if (elem.type == type) {
+				SendMessage(cb,CB_ADDSTRING,0,(LPARAM)elem.name.c_str());
+			}
+		}
+		//try to use old name if possible
+		Variable* oldVar = thisPtr->m_currentTrigger->FindVar(expression.varName);
+		if (oldVar) {
+			int ret = SendMessage(cb,CB_SELECTSTRING,-1,(LPARAM)oldVar->name.c_str());
+		}
+
+	}
+	else if (GetId() == EXPR_NAMEDCONSTANT) {
+		//named constant
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),TRUE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
+		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
+		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),FALSE);
+
+
+		HWND cb = GetDlgItem(dlg,IDC_TR_AA_CBVAR);
+		SendMessage(cb,CB_RESETCONTENT,0,0);
+		Types type = expression.expression->returnType;
+		for (auto& elem : g_NamedConstants[type]) {
+			std::wstring entryName;
+			entryName += g_NamedConstantCategories[elem.category] + TEXT(" - ");
+			entryName += elem.name;
+			int i = SendMessage(cb,CB_ADDSTRING,0,(LPARAM)entryName.c_str());
+			SendMessage(cb,CB_SETITEMDATA,i,elem.id);
+		}
+		//try to use old name if possible
+		const NamedConstant* oldConstant = expression.namedConstant;
+		if (oldConstant != NULL) {
+			int ret = SendMessage(cb,CB_SELECTSTRING,-1,(LPARAM)oldConstant->name.c_str());
+		}
+	}
+	else {
+		loc_AddData::SelectFromComboBox(dlg,index,name,descr);
 	}
 }
 std::wstring loc_AddExpressionData::GetParamString(int paramN,bool* retValid) {
@@ -1158,193 +1681,6 @@ static void DrawName(HWND wnd,DRAWITEMSTRUCT* dis,loc_AddData* data) {
 	if (!dis) ReleaseDC(wnd,dc);
 }
 
-//TODO: split up into virtual functions
-static void SelectFromComboBox(HWND dlg, int index, loc_AddData* data) {
-	const std::wstring* name = NULL,*descr = NULL;
-
-	//set to selected event/action/expression
-	if (data->type == loc_AddData::EVENT) {
-		loc_AddEventData* edata = (loc_AddEventData*)data;
-		const auto& elem = g_Events[index];
-		name = &elem.interactiveName;
-		descr = &elem.description;
-		edata->event.event = &elem;
-	}
-	else if (data->type == loc_AddData::EXPRESSION) {
-		loc_AddExpressionData* edata = (loc_AddExpressionData*)data;
-		const auto& elem = g_Expressions[edata->retType][index];
-		name = &elem.interactiveName;
-		descr = &elem.description;
-		edata->expression.expression = &elem;
-	}
-	else if (data->type == loc_AddData::ACTION) {
-		loc_AddActionData* adata = (loc_AddActionData*)data;
-		const auto& elem = g_Actions[index];
-		name = &elem.interactiveName;
-		descr = &elem.description;
-		adata->action.action = &elem;
-	}
-	if(data->type == loc_AddData::EXPRESSION && data->GetId() == EXPR_CONSTANT) {
-		loc_AddExpressionData* edata = (loc_AddExpressionData*)data;
-		//constant
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),TRUE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
-		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),false);
-
-		//insert constant from data if applicable
-		HWND cb = GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT);
-		switch(edata->expression.constant.type) {
-		case TYPE_INT:
-			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(edata->expression.constant.iVal).c_str());
-			break;
-		case TYPE_FLOAT:
-			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(edata->expression.constant.fVal).c_str());
-			break;
-		case TYPE_BOOL:
-			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(edata->expression.constant.bVal).c_str());
-			break;
-		case TYPE_STRING:
-			SendMessage(cb,WM_SETTEXT,0,(LPARAM)edata->expression.constant.strVal);
-			break;
-		default:
-			break;
-		}
-	}
-	else if(data->type == loc_AddData::EXPRESSION && data->GetId() == EXPR_VAR) {
-		loc_AddExpressionData* edata = (loc_AddExpressionData*)data;
-		//variable
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),TRUE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
-		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),FALSE);
-
-		
-		HWND cb = GetDlgItem(dlg,IDC_TR_AA_CBVAR);
-		SendMessage(cb,CB_RESETCONTENT,0,0);
-		Types type = edata->expression.expression->returnType;
-		for (auto& elem : data->thisPtr->m_currentTrigger->vars) {
-			if(elem.type == type) {
-				SendMessage(cb,CB_ADDSTRING,0,(LPARAM)elem.name.c_str());
-			}
-		}
-		//try to use old name if possible
-		Variable* oldVar = data->thisPtr->m_currentTrigger->FindVar(edata->expression.varName);
-		if (oldVar) {
-			int ret = SendMessage(cb,CB_SELECTSTRING,-1,(LPARAM)oldVar->name.c_str());
-		}
-		
-	}
-	else if (data->type == loc_AddData::EXPRESSION && data->GetId() == EXPR_NAMEDCONSTANT) {
-		loc_AddExpressionData* edata = (loc_AddExpressionData*)data;
-		//named constant
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),TRUE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
-		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),FALSE);
-
-
-		HWND cb = GetDlgItem(dlg,IDC_TR_AA_CBVAR);
-		SendMessage(cb,CB_RESETCONTENT,0,0);
-		Types type = edata->expression.expression->returnType;
-		for (auto& elem : g_NamedConstants[type]) {	
-			std::wstring entryName;
-			entryName += g_NamedConstantCategories[elem.category] + TEXT(" - ");
-			entryName += elem.name;
-			int i = SendMessage(cb,CB_ADDSTRING,0,(LPARAM)entryName.c_str());
-			SendMessage(cb,CB_SETITEMDATA,i,elem.id);
-		}
-		//try to use old name if possible
-		const NamedConstant* oldConstant = edata->expression.namedConstant;
-		if (oldConstant != NULL) {
-			int ret = SendMessage(cb,CB_SELECTSTRING,-1,(LPARAM)oldConstant->name.c_str());
-		}
-	}
-	else if(data->type == loc_AddData::VARIABLE) {
-		loc_SelectVariableData* edata = (loc_SelectVariableData*)data;
-		//variable
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
-
-		
-		const Variable* var;
-		if(index & GLOBAL_VAR_FLAG) {
-			//global variable
-			index &= ~GLOBAL_VAR_FLAG;
-			var = &g_currChar.m_cardData.GetGlobalVariables()[index];
-		}
-		else {
-			//local variable
-			var = &edata->thisPtr->m_currentTrigger->vars[index];
-		}
-		edata->variable.expression = &g_Expressions[var->type][1];
-		edata->variable.varName = var->name;
-		edata->valid.resize(2);
-		edata->valid[0] = true;
-		//invalidate expression if type doesnt fit
-		if(edata->valid[1] && edata->variable.actualParameters[1].expression->returnType != var->type) {
-			edata->valid[1] = false;
-		}
-
-		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),TRUE);
-
-	}
-	else {
-		//Regular entry with name and description
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_CBVAR),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_EDCONSTANT),FALSE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),TRUE);
-		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),TRUE);
-		auto& oldActualParams = data->GetActualParameters();
-		auto& newParams = data->GetParameters();
-		//clear parameters that can not be reused
-		for (int i = 0; i < min(oldActualParams.size(),newParams.size()); i++) {
-			if (!data->valid[i] || newParams[i] != oldActualParams[i].expression->returnType) {
-				oldActualParams[i].actualParameters.clear();
-				oldActualParams[i].expression = NULL;
-			}
-		}
-		oldActualParams.resize(newParams.size());
-		data->valid.resize(newParams.size());
-		data->parts.clear();
-
-		if (descr != NULL) {
-			HWND stDescr = GetDlgItem(dlg,IDC_TR_AA_STDESCR);
-			SendMessage(stDescr,WM_SETTEXT,0,(LPARAM)descr->c_str());
-		}
-
-		if (name != NULL) {
-			HWND stName = GetDlgItem(dlg,IDC_TR_AA_STNAME);
-			//split string at whitespaces
-			int last = 0,i = 1;
-			for (i = 1; i < name->size(); i++) {
-				if (isspace((*name)[i]) && i != last) {
-					std::wstring part = name->substr(last,i-last);
-					data->parts.push_back(std::move(part));
-					last = i+1;
-				}
-			}
-			std::wstring part = name->substr(last,i-last);
-			data->parts.push_back(std::move(part));
-			last = i+1;
-
-			DrawName(stName,NULL,data);
-
-			bool valid = true;
-			for (bool v : data->valid) {
-				if (!v) { valid = false; break; }
-			}
-			EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),valid);
-		}
-	}
-	
-}
-
 INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 	switch (msg) {
 	case WM_INITDIALOG: {
@@ -1356,7 +1692,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDl
 		int sel = SendMessage(cb,CB_GETCURSEL,0,0);
 		if(sel != CB_ERR) {
 			int index = SendMessage(cb,CB_GETITEMDATA,sel,0);
-			SelectFromComboBox(hwndDlg,index,data);
+			data->SelectFromComboBox(hwndDlg,index);
 		}
 		if(!data->allowChange) {
 			EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AA_CBSELECTION),FALSE);
@@ -1432,7 +1768,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDl
 				if (index != CB_ERR) {
 					loc_AddData* data = (loc_AddData*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 					index = SendMessage(wnd,CB_GETITEMDATA,index,0);
-					SelectFromComboBox(hwndDlg, index,data);
+					data->SelectFromComboBox(hwndDlg, index);
 
 					return TRUE;
 				}
@@ -1637,5 +1973,135 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 	}
 	return FALSE;
 }
+
+
+
+INT_PTR CALLBACK ExportModuleDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		//initialize dialog members from the loaded dialog
+		loc_ModuleInfo* data = (loc_ModuleInfo*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_EDNAME),WM_SETTEXT,0,(LPARAM)data->name.c_str());
+		SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_EDDESCR),WM_SETTEXT,0,(LPARAM)data->description.c_str());
+		for(std::wstring& str : data->saveTriggers) {
+			SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_LBTRIGLIST),LB_ADDSTRING,0,(LPARAM)str.c_str());
+		}
+
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		loc_ModuleInfo* data = (loc_ModuleInfo*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		DWORD identifier = LOWORD(wparam);
+		DWORD notification = HIWORD(wparam);
+		HWND wnd = (HWND)lparam;
+		switch (identifier) {
+		case IDOK:
+			if (notification == BN_CLICKED) {
+				EndDialog(hwndDlg,1);
+				return TRUE;
+			}
+			break;
+		case IDCANCEL:
+			if (notification == BN_CLICKED) {
+				EndDialog(hwndDlg,0);
+				return TRUE;
+			}
+			break;
+		case IDC_TR_EX_EDNAME: {
+			if(notification == EN_CHANGE) {
+				data->name = General::GetEditString(wnd);
+			}
+			break; }
+		case IDC_TR_EX_EDDESCR: {
+			if (notification == EN_CHANGE) {
+				data->description = General::GetEditString(wnd);
+			}
+			break; }
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+
+/********************/
+/* Multiselect tree */
+/********************/
+
+LRESULT CALLBACK TreeViewMultiselect(HWND hwnd,UINT msg,WPARAM wparam,LPARAM lparam,UINT_PTR uIdSubclass,DWORD_PTR dwRefData) {
+	switch(msg) {
+	case WM_DESTROY: {
+		TreeViewMultiselectData* data = (TreeViewMultiselectData*)dwRefData;
+		delete data;
+		break; }
+	case WM_PAINT: {
+		TreeViewMultiselectData* data = (TreeViewMultiselectData*)dwRefData;
+		if (data->supressPaint) return TRUE;
+		break; }
+	case TVM_GETMULTISEL:
+		return (LRESULT)&((TreeViewMultiselectData*)dwRefData)->selection;
+		break;
+	case TVM_DELETEITEM: {
+		HTREEITEM item = (HTREEITEM)lparam;
+		TreeViewMultiselectData* data = (TreeViewMultiselectData*)dwRefData;
+		for (int i = 0; i < data->selection.size(); i++) {
+			HTREEITEM sel = data->selection[i];
+			if(sel == item) {
+				data->selection.erase(data->selection.begin() + i);
+				break;
+			}
+		}
+		break; }
+	case WM_LBUTTONDOWN: {
+		TreeViewMultiselectData* data = (TreeViewMultiselectData*)dwRefData;
+		data->supressPaint = true;
+		HTREEITEM item1 = (HTREEITEM)DefSubclassProc(hwnd,TVM_GETNEXTITEM,TVGN_CARET,NULL);
+		LRESULT origRes = DefSubclassProc(hwnd,msg,wparam,lparam);
+		HTREEITEM item2 = (HTREEITEM)DefSubclassProc(hwnd,TVM_GETNEXTITEM,TVGN_CARET,NULL);
+		if(item1 != item2) {
+			NMTVMULTI nmh;
+			nmh.hdr.code = TVN_MULTISELCHANGED;
+			nmh.hdr.idFrom = GetDlgCtrlID(hwnd);
+			nmh.hdr.hwndFrom = hwnd;
+			nmh.oldItem = item1;
+			nmh.newItem = item2;
+			nmh.selectBoth = (wparam & MK_CONTROL) != 0;
+			SendMessage(GetParent(hwnd),
+				WM_NOTIFY,
+				(WPARAM)hwnd,
+				(LPARAM)&nmh);
+			if (nmh.selectBoth && (wparam & MK_CONTROL)) {
+				TVITEM item;
+				item.mask = TVIF_STATE | TVIF_HANDLE;
+				item.hItem = item1;
+				item.stateMask = 0xF;
+				BOOL succ = DefSubclassProc(hwnd,TVM_GETITEM,0,(LPARAM)&item);
+				item.state |= TVIS_SELECTED;
+				succ = DefSubclassProc(hwnd,TVM_SETITEM,0,(LPARAM)&item);
+			}
+			else {
+				for(auto hItem : data->selection) {
+					TVITEM item;
+					item.mask = TVIF_STATE | TVIF_HANDLE;
+					item.hItem = hItem;
+					item.stateMask = 0xF;
+					BOOL succ = DefSubclassProc(hwnd,TVM_GETITEM,0,(LPARAM)&item);
+					item.state &= ~TVIS_SELECTED;
+					succ = DefSubclassProc(hwnd,TVM_SETITEM,0,(LPARAM)&item);
+				}
+				data->selection.clear();
+			}
+			data->selection.push_back(item2);
+		}
+		data->supressPaint = false;
+		return origRes;
+		break; }
+	default:
+		break;
+	}
+	return DefSubclassProc(hwnd,msg,wparam,lparam);
+}
+
 
 }

@@ -24,6 +24,7 @@
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
+    <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
@@ -108,9 +109,12 @@
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
+    <ClInclude Include="External\ExternalClasses\LoverData.h" />
+    <ClInclude Include="External\ExternalClasses\TimeData.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="Files\ClothFile.h" />
+    <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\XXFile.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />
@@ -127,6 +131,7 @@
     <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
     <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
     <ClInclude Include="Functions\AAPlay\HButtonMove.h" />
+    <ClInclude Include="Functions\Serialize.h" />
     <ClInclude Include="Functions\Shared\Overrides.h" />
     <ClInclude Include="Functions\Shared\Slider.h" />
     <ClInclude Include="Functions\Shared\SpecialOverrides.h" />

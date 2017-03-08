@@ -34,7 +34,8 @@ extern std::wstring g_NamedConstantCategories[NCONSTCAT_N];
 extern std::vector<NamedConstant> g_NamedConstants[N_TYPES];
 
 inline const NamedConstant* NamedConstant::FromId(Types type,int id) {
-	if (id < 1) return NULL;
+	if (type < 0 || type >= N_TYPES) return NULL;
+	if (id < 1 || id > g_NamedConstants[type].size()) return NULL;
 	return &g_NamedConstants[type][id-1];
 }
 

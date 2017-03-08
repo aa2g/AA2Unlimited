@@ -28,3 +28,14 @@ done:
 - seperate eye texture
 - "There's an animation in AEditFacePartsXX.xa that allows for resizing of the mouth width. Would it be possible to add a slider for that? And while we're on the subject, would it be possible to implement more sliders overall, perhaps an extra page of them to allow modders to add more face sliding options to their faces?"
 - save eye highlight in card (the entire file)
+
+
+
+------------------------
+events/actions/expressions:
+
+- handle "minnas"
+- h scene ends (to see how many climaxes etc)
+- make/prevent ending h scene permaturely (because they were seen / doesnt like the position etc)
+- get traits
+- set traits

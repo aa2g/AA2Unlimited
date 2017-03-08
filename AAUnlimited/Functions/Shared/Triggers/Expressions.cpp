@@ -2,6 +2,7 @@
 
 #include "Thread.h"
 #include "Functions\AAPlay\Globals.h"
+#include "General\Util.h"
 
 namespace Shared {
 namespace Triggers {
@@ -9,6 +10,22 @@ namespace Triggers {
 /*
  * List of possible Expressions
  */
+
+Value Thread::GetTriggeringCard(std::vector<Value>&) {
+	return this->eventData->card;
+}
+
+//int ()
+Value Thread::GetThisCard(std::vector<Value>& params) {
+	return this->thisCard;
+}
+
+//bool (int)
+Value Thread::IsSeatFilled(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	return Value(cardInst->IsValid());
+}
 
 /*
  * Int stuff
@@ -37,13 +54,9 @@ Value Thread::MultiplyIntegers(std::vector<Value>& params) {
 	return Value(params[0].iVal * params[1].iVal);
 }
 
-Value Thread::GetTriggeringCard(std::vector<Value>&) {
-	return this->eventData->card;
-}
-
-//int ()
-Value Thread::GetThisCard(std::vector<Value>& params) {
-	return this->thisCard;
+Value Thread::Float2Int(std::vector<Value>& params) {
+	int i = params[0].fVal;
+	return Value(i);
 }
 
 /*
@@ -84,6 +97,60 @@ Value Thread::LessThanIntegers(std::vector<Value>& params) {
 Value Thread::EqualsStrings(std::vector<Value>& params) {
 	return *(params[0].strVal) == *(params[1].strVal);
 }
+//bool(float,float)
+Value Thread::GreaterThanFloats(std::vector<Value>& params) {
+	return params[0].fVal > params[1].fVal;
+}
+//bool(float,float)
+Value Thread::GreaterEqualsFloats(std::vector<Value>& params) {
+	return params[0].fVal >= params[1].fVal;
+} 
+//bool(float,float)
+Value Thread::EqualsFloats(std::vector<Value>& params) {
+	return params[0].fVal == params[1].fVal;
+}
+//bool(float,float)
+Value Thread::NotEqualsFloats(std::vector<Value>& params) {
+	return params[0].fVal != params[1].fVal;
+}
+//bool(float,float)
+Value Thread::LessEqualsFloats(std::vector<Value>& params) {
+	return params[0].fVal <= params[1].fVal;
+}
+//bool(float,float)
+Value Thread::LessThanFloats(std::vector<Value>& params) {
+	return params[0].fVal < params[1].fVal;
+}
+
+/*
+ * float stuff
+ */
+
+ //float (float min, float max)
+Value Thread::GetRandomFloat(std::vector<Value>& params) {
+	return Value(General::GetRandomFloat(params[0].fVal, params[1].fVal));
+}
+
+Value Thread::AddFloats(std::vector<Value>& params) {
+	return Value(params[0].fVal + params[1].fVal);
+}
+
+Value Thread::SubstractFloats(std::vector<Value>& params) {
+	return Value(params[0].fVal - params[1].fVal);
+}
+
+Value Thread::DivideFloats(std::vector<Value>& params) {
+	return Value(params[0].fVal / params[1].fVal);
+}
+
+Value Thread::MultiplyFloats(std::vector<Value>& params) {
+	return Value(params[0].fVal * params[1].fVal);
+}
+
+Value Thread::Int2Float(std::vector<Value>& params) {
+	float v = params[0].iVal;
+	return Value(v);
+}
 
 /*
  * string stuff
@@ -99,6 +166,10 @@ Value Thread::SubString(std::vector<Value>& params) {
 
 	return Value(str.substr(from,length));
 }
+
+/*
+ * card attributes
+ */
 
 //string(int)
 Value Thread::GetCardFirstName(std::vector<Value>& params) {
@@ -118,9 +189,117 @@ Value Thread::GetCardSecondName(std::vector<Value>& params) {
 	return Value(cardInst->m_char->m_charData->m_surname);
 }
 
+//int(int,int)
+Value Thread::GetCardLovePoints(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+	int cardTowards = params[1].iVal;
+	CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+	if (!towardsInst->IsValid()) return Value(0);
+
+	auto* relations = cardInst->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == cardTowards) break;
+	}
+	if (it == relations->m_end) return Value(0);
+
+	return Value(it->m_lovePoints + it->m_loveCount*30);
+
+}
+
+//int(int,int)
+Value Thread::GetCardLikePoints(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+	int cardTowards = params[1].iVal;
+	CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+	if (!towardsInst->IsValid()) return Value(0);
+
+	auto* relations = cardInst->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for(it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == cardTowards) break;
+	}
+	if (it == relations->m_end) return Value(0);
+
+	return Value(it->m_likePoints + it->m_likeCount*30);
+}
+
+//int(int,int)
+Value Thread::GetCardDislikePoints(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+	int cardTowards = params[1].iVal;
+	CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+	if (!towardsInst->IsValid()) return Value(0);
+
+	auto* relations = cardInst->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == cardTowards) break;
+	}
+	if (it == relations->m_end) return Value(0);
+
+	return Value(it->m_dislikePoints + it->m_dislikeCount*30);
+}
+
+//int(int,int)
+Value Thread::GetCardHatePoints(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+	int cardTowards = params[1].iVal;
+	CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+	if (!towardsInst->IsValid()) return Value(0);
+
+	auto* relations = cardInst->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == cardTowards) break;
+	}
+	if (it == relations->m_end) return Value(0);
+
+	return Value(it->m_hatePoints + it->m_hateCount*30);
+}
+
+//bool(int,int)		 
+Value Thread::IsLover(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+	int cardTowards = params[1].iVal;
+	CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+	if (!towardsInst->IsValid()) return Value(0);
+
+	//we just have to look if this struct exists at all
+	auto* relations = cardInst->m_char->GetLovers();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == cardTowards) break;
+	}
+	return Value(it == relations->m_end);
+}
+
 /*
  * Event Response
  */
+
+//PERIOD_ENDS
+//int()
+Value Thread::GetEndingPeriod(std::vector<Value>& params) {
+	if (this->eventData->GetId() != PERIOD_ENDS) return Value(0);
+	return ((PeriodEndsData*)eventData)->oldPeriod;
+}
+
+//int()
+Value Thread::GetStartingPeriod(std::vector<Value>& params) {
+	if (this->eventData->GetId() != PERIOD_ENDS) return Value(0);
+	return ((PeriodEndsData*)eventData)->newPeriod;
+}
 
 //bool()
 Value Thread::GetNpcResponseOriginalAnswer(std::vector<Value>& params) {
@@ -216,7 +395,8 @@ std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 	TEXT("Character Property"),
 	TEXT("Comparision - Int"),
 	TEXT("Comparision - String"),
-	TEXT("Comparision - Bool")
+	TEXT("Comparision - Bool"),
+	TEXT("Comparision - Float")
 };
 
 
@@ -343,6 +523,56 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			{}, (TYPE_INT),
 			&Thread::GetNpcTalkAbout
 		},
+		{
+			17, EXPRCAT_EVENT,
+			TEXT("Staring Period"), TEXT("Staring Period"), TEXT("In a Period Ends Event, this is the new period starting."),
+			{}, (TYPE_INT),
+			&Thread::GetStartingPeriod
+		},
+		{
+			18, EXPRCAT_EVENT,
+			TEXT("Ending Period"), TEXT("Ending Period"), TEXT("In a Period Ends Event, this is the old period that ended."),
+			{}, (TYPE_INT),
+			&Thread::GetEndingPeriod
+		},
+		{
+			19, EXPRCAT_CHARPROP,
+			TEXT("Love Points"), TEXT("Get %p 's Love Points towards %p"), TEXT("The total sum of love points. This includes the love history, "
+			"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
+			"single points, that have not added up to 30 and were therefor not converted to love history yet."),
+			{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardLovePoints
+		},
+		{
+			20, EXPRCAT_CHARPROP,
+			TEXT("Like Points"), TEXT("Get %p 's Like Points towards %p"), TEXT("The total sum of like points. This includes the like history, "
+			"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
+			"single points, that have not added up to 30 and were therefor not converted to like history yet."),
+			{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardLikePoints
+		},
+		{
+			21, EXPRCAT_CHARPROP,
+			TEXT("Dislike Points"), TEXT("Get %p 's Dislike Points towards %p"), TEXT("The total sum of dislike points. This includes the dislike history, "
+			"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
+			"single points, that have not added up to 30 and were therefor not converted to dislike history yet."),
+			{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardDislikePoints
+		},
+		{
+			22, EXPRCAT_CHARPROP,
+			TEXT("Hate Points"), TEXT("Get %p 's Hate Points towards %p"), TEXT("The total sum of hate points. This includes the hate history, "
+			"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
+			"single points, that have not added up to 30 and were therefor not converted to hate history yet."),
+			{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardHatePoints
+		},
+		{
+			23, EXPRCAT_MATH,
+			TEXT("Float to Int"), TEXT("Int ( %p )"), TEXT("Converts a Float to an Int by cutting off the decimals."),
+			{ TYPE_FLOAT }, (TYPE_INT),
+			&Thread::Float2Int
+		},
 	},
 
 	{ //BOOL
@@ -365,9 +595,9 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			NULL
 		},
 		{
-			4, EXPRCAT_COMPARISION_BOOL,
-			TEXT("Logical And"), TEXT("%p && %p"), TEXT("Logical and, including short-circut evaluation"),
-			{ TYPE_BOOL, TYPE_BOOL }, (TYPE_BOOL),
+			4,EXPRCAT_COMPARISION_BOOL,
+			TEXT("Logical And"),TEXT("%p && %p"),TEXT("Logical and, including short-circut evaluation"),
+			{ TYPE_BOOL, TYPE_BOOL },(TYPE_BOOL),
 			NULL
 		},
 		{
@@ -426,7 +656,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			14, EXPRCAT_EVENT,
-			TEXT("Npc Original Answer"), TEXT("Get Npc Original Answer"), 
+			TEXT("Npc Original Answer"), TEXT("Get Npc Original Answer"),
 			TEXT("If executed in a trigger with the Npc Answers Event, this is the original Answer the NPC made"),
 			{ }, (TYPE_BOOL),
 			&Thread::GetNpcResponseOriginalAnswer
@@ -453,8 +683,58 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			"using the Set Npc Response Percent Action"),
 			{}, (TYPE_BOOL),
 			&Thread::GetNpcResponseCurrentPercent
+		},
+		{
+			18, EXPRCAT_CHARPROP,
+			TEXT("Is Seat Filled"), TEXT("Seat %p is Filled"),
+			TEXT("Whether the given Seat has a character behind it. Characters are identified using their seat number. Use this in a loop through all seats "
+			"do determine if a character exists or not."),
+			{ TYPE_INT }, (TYPE_BOOL),
+			&Thread::IsSeatFilled
+		},
+		{
+			19, EXPRCAT_CHARPROP,
+			TEXT("Is Lover"), TEXT("%p has %p as a lover"),
+			TEXT("True if the characters are currently in a relationship. (technically, it checks if the first parameter is in a relationship with the second)"),
+			{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+			&Thread::IsLover
+		},
+		{
+			20,EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Greater Than"),TEXT("%p > %p"),TEXT("Greater-Than"),
+			{ TYPE_FLOAT, TYPE_FLOAT },(TYPE_BOOL),
+			&Thread::GreaterThanFloats
+		},
+		{
+			21, EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Greater Than or Equal"), TEXT("%p >= %p"), TEXT("Greater-Than or equal"),
+			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
+			&Thread::GreaterEqualsFloats
+		},
+		{
+			22, EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Equal"), TEXT("%p == %p"), TEXT("Equal"),
+			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
+			&Thread::EqualsFloats
+		},
+		{
+			23, EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Less Than or Equal"), TEXT("%p <= %p"), TEXT("less than or equal"),
+			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
+			&Thread::LessEqualsFloats
+		},
+		{
+			24, EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Less Than"), TEXT("%p < %p"), TEXT("less than"),
+			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
+			&Thread::LessThanFloats
+		},
+		{
+			25, EXPRCAT_COMPARISION_FLOAT,
+			TEXT("Not Equal"), TEXT("%p != %p"), TEXT("not equal"),
+			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
+			&Thread::NotEqualsFloats
 		}
-				
 	},
 	{ //FLOAT
 		{
@@ -474,6 +754,42 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
 			{}, (TYPE_FLOAT),
 			NULL
+		},
+		{
+			4, EXPRCAT_MATH,
+			TEXT("Random Float"), TEXT("Get Random Float between %p and %p"), TEXT("Generates a random float between the two arguments (including both)"),
+			{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
+			&Thread::GetRandomFloat
+		},
+		{
+			EXPR_INT_PLUS, EXPRCAT_MATH,
+			TEXT("+"), TEXT("%p + %p"), TEXT("Adds two floats"),
+			{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
+			&Thread::AddFloats
+		},
+		{
+			6, EXPRCAT_MATH,
+			TEXT("-"), TEXT("%p - %p"), TEXT("Substracts two floats"),
+			{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
+			&Thread::SubstractFloats
+		},
+		{
+			7, EXPRCAT_MATH,
+			TEXT("/"), TEXT("%p / %p"), TEXT("Divide two floats"),
+			{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
+			&Thread::DivideFloats
+		},
+		{
+			8, EXPRCAT_MATH,
+			TEXT("*"), TEXT("%p * %p"), TEXT("Multiply two floats"),
+			{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
+			&Thread::MultiplyFloats
+		},
+		{
+			9, EXPRCAT_MATH,
+			TEXT("Int to Float"), TEXT("Float ( %p )"), TEXT("Converts an Int to Float"),
+			{ TYPE_INT }, (TYPE_FLOAT),
+			&Thread::Int2Float
 		},
 	},
 	{ //STRING

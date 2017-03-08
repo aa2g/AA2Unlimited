@@ -40,6 +40,7 @@ enum ExpressionCategories {
 	EXPRCAT_COMPARISION_INT,
 	EXPRCAT_COMPARISION_STRING,
 	EXPRCAT_COMPARISION_BOOL,
+	EXPRCAT_COMPARISION_FLOAT,
 	EXPRCAT_N
 };
 
@@ -80,7 +81,8 @@ public:
 
 
 inline const Expression* Expression::FromId(Types type, int id) {
-	if (id < 1) return NULL;
+	if (type < 0 || type >= N_TYPES) return NULL;
+	if (id < 1 || id > g_Expressions[type].size()) return NULL;
 	return &g_Expressions[type][id-1];
 }
 

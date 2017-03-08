@@ -73,6 +73,7 @@ public:
 
 inline const Action* Action::FromId(int id) {
 	if (id < 1) return NULL;
+	if (id > g_Actions.size()) return NULL;
 	return &g_Actions[id-1];
 }
 

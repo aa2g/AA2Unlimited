@@ -139,6 +139,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			BSDialog::DialogProc);
 		thisPtr->AddDialog(IDD_TRIGGERS,&thisPtr->m_trDialog,index++,TEXT("Triggers"),
 			TRDialog::DialogProc);
+		thisPtr->AddDialog(IDD_MODULES,&thisPtr->m_mdDialog,index++,TEXT("Modules"),
+			MDDialog::DialogProc);
 
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
@@ -1805,6 +1807,26 @@ void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	Sync(true);
 }
 
+
+/*****************/
+/* Module Dialog */
+/*****************/
+
+INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		MDDialog* thisPtr = (MDDialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		return TRUE;
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::MDDialog::Refresh() {
+
+}
 
 
 UnlimitedDialog g_AAUnlimitDialog;

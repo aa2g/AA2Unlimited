@@ -64,6 +64,7 @@ namespace Triggers {
 
 	inline const Event* Event::FromId(int id) {
 		if (id < 1) return NULL;
+		if (id > g_Events.size()) return NULL;
 		return &g_Events[id-1];
 	}
 
@@ -108,7 +109,8 @@ namespace Triggers {
 	EDC_END
 
 	EDC_DECLARE(PeriodEndsData,PERIOD_ENDS)
-		int currentPeriod;
+		int oldPeriod;
+		int newPeriod;
 	EDC_END
 
 	EDC_DECLARE(NpcResponseData,NPC_RESPONSE)

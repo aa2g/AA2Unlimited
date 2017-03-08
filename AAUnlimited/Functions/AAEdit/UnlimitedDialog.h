@@ -232,7 +232,8 @@ namespace AAEdit {
 		std::vector<ActionTreeItem*> m_actions;
 
 		void SetCurrentTrigger(int index);
-		void AddTriggerAction(const Shared::Triggers::ParameterisedAction& action);
+		ActionTreeItem* AddTriggerAction(const Shared::Triggers::ParameterisedAction& action);
+		void AddTriggerGuiActions(std::vector<Shared::Triggers::Trigger::GUIAction*> actions);
 		struct SelectedAction_Data {
 			//so that cardActions[cardActionsInt] is the selected action
 			std::vector<Shared::Triggers::Trigger::GUIAction*>* cardActions = NULL;
@@ -243,6 +244,7 @@ namespace AAEdit {
 			operator bool() { return cardActionsInt != -1; }
 		};
 		SelectedAction_Data GetSelectedAction();
+		SelectedAction_Data GetSelectedAction(HTREEITEM selectedItem);
 		void AddTriggerEvent(const Shared::Triggers::ParameterisedEvent& event,int insertAfter);
 		int GetSelectedEvent();
 		void AddTriggerVariable(const Shared::Triggers::Variable& var,int insertAfter);
@@ -265,6 +267,12 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_trDialog;
+	struct MDDialog : public Dialog {
+
+
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_mdDialog;
 
 
 	HWND m_dialog;

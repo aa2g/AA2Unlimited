@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "config.h"
+#include "Serialize.h"
 #include "Functions\Shared\Slider.h"
 #include "General\ModuleInfo.h"
 #include "General\Buffer.h"
@@ -46,354 +47,8 @@ void AAUCardData::Reset() {
 	*this = g_defaultValues;
 }
 
-/**************************/
-/* Generic Read functions */
-/**************************/
-
-template<typename T>
-T AAUCardData::ReadData(char*& buffer,int& size) {
-	return ReadData_sub(buffer,size,(T*)0);
-}
-
-template<typename T>
-T AAUCardData::ReadData_sub(char*& buffer,int& size,T*) {
-	if (size < sizeof(T)) {
-		char idName[5];
-		*(DWORD*)(idName) = m_currReadMemberId;
-		idName[4] = '\0';
-		LOGPRIO(Logger::Priority::WARN) << "Not enough space left to parse member " << idName << "(" << m_currReadMemberId << "); expected " << sizeof(T) << ", but has " << size << "\r\n";
-		return T();
-	}
-	T retVal = *(T*)(buffer);
-	buffer += sizeof(T),size -= sizeof(T);
-	return retVal;
-}
-
-template<typename T>
-T* AAUCardData::ReadData_sub(char*& buffer,int& size,T**) {
-	return new T(ReadData<T>(buffer,size));
-}
-
-//read for string
-std::wstring AAUCardData::ReadData_sub(char*& buffer,int& size,std::wstring*) {
-	DWORD length = ReadData<DWORD>(buffer,size);
-	if (size < 0 || (DWORD)size < length) {
-		char idName[5];
-		*(DWORD*)(idName) = m_currReadMemberId;
-		idName[4] = '\0';
-		LOGPRIO(Logger::Priority::WARN) << "Not enough space left to parse member " << idName << "(" << m_currReadMemberId << "); expected " << length << ", but has " << size << "\r\n";
-		return std::wstring(L"");
-	}
-	std::wstring retVal((TCHAR*)buffer,length);
-	buffer += length*sizeof(TCHAR),size -= length*sizeof(TCHAR);
-	return retVal;
-}
-
-//special vector read for byte vectors, doesnt push every element
-std::vector<BYTE> AAUCardData::ReadData_sub(char*& buffer,int& size,std::vector<BYTE>*) {
-	DWORD length = ReadData<DWORD>(buffer,size);
-	std::vector<BYTE> retVal;
-	retVal.reserve(length);
-	retVal.assign(buffer,buffer+length);
-	buffer += length,size -= length;
-	return retVal;
-}
-
-//read for vectors
-template<typename T>
-std::vector<T> AAUCardData::ReadData_sub(char*&buffer,int& size,std::vector<T>*) {
-	DWORD length = ReadData<DWORD>(buffer,size);
-	std::vector<T> retVal;
-	retVal.reserve(length);
-	for (unsigned int i = 0; i < length; i++) {
-		T val = ReadData<T>(buffer,size);
-		retVal.push_back(std::move(val));
-	}
-	return retVal;
-}
-//for pairs
-template<typename T,typename U>
-std::pair<T,U> AAUCardData::ReadData_sub(char*&buffer,int& size,std::pair<T,U>*) {
-	T val1 = ReadData<T>(buffer,size);
-	U val2 = ReadData<U>(buffer,size);
-	return std::make_pair(std::move(val1),std::move(val2));
-}
-
-template<typename T, typename U>
-std::map<T, U> AAUCardData::ReadData_sub(char *& buffer, int & size, std::map<T, U>*)
-{
-	DWORD length = ReadData<DWORD>(buffer, size);
-	std::map<T,U> retVal;
-	retVal.reserve(length);
-	for (int i = 0; i < length; i++) {
-		T tval = ReadData<T>(buffer, size);
-		U uval = ReadData<U>(buffer, size);
-		retVal.emplace(std::move(tval), std::move(uval));
-	}
-	return retVal;
-}
-
-Shared::Triggers::Trigger AAUCardData::ReadData_sub(char *& buffer,int & size,Shared::Triggers::Trigger *)
-{
-	using namespace Shared::Triggers;
-	Trigger retVal;
-	retVal.name = ReadData<std::wstring>(buffer,size);
-	retVal.events = ReadData<decltype(retVal.events)>(buffer,size);
-	retVal.vars = ReadData<decltype(retVal.vars)>(buffer,size);
-	retVal.guiActions = ReadData<decltype(retVal.guiActions)>(buffer,size);
-	return retVal;
-}
-
-Shared::Triggers::ParameterisedEvent AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedEvent*)
-{
-	using namespace Shared::Triggers;
-	ParameterisedEvent retVal;
-	int id = ReadData<int>(buffer,size);
-	retVal.event = Event::FromId(id);
-	retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
-	return retVal;
-}
-
-Shared::Triggers::ParameterisedAction AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedAction*)
-{
-	using namespace Shared::Triggers;
-	ParameterisedAction retVal;
-	int id = ReadData<int>(buffer,size);
-	retVal.action = Action::FromId(id);
-	retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
-	return retVal;
-}
-Shared::Triggers::Trigger::GUIAction AAUCardData::ReadData_sub(char *& buffer,int & size,Shared::Triggers::Trigger::GUIAction *)
-{
-	using namespace Shared::Triggers;
-	Trigger::GUIAction retVal;
-	retVal.parent = NULL;
-	retVal.action = ReadData<decltype(retVal.action)>(buffer,size);
-
-	retVal.subactions = ReadData<decltype(retVal.subactions)>(buffer,size);
-	for(auto* elem : retVal.subactions) {
-		elem->parent = &retVal;
-	}
-	return retVal;
-}
-Shared::Triggers::ParameterisedExpression AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedExpression*)
-{
-	using namespace Shared::Triggers;
-	ParameterisedExpression retVal;
-	Types type = ReadData<Types>(buffer,size);
-	int id = ReadData<int>(buffer,size);
-	retVal.expression = Expression::FromId(type,id);
-	if(id == EXPR_CONSTANT) {
-		//constant
-		retVal.constant = ReadData<decltype(retVal.constant)>(buffer,size);
-	}
-	else if(id == EXPR_VAR) {
-		//variable
-		retVal.varName = ReadData<decltype(retVal.varName)>(buffer,size);
-	}
-	else if(id == EXPR_NAMEDCONSTANT) {
-		int id = ReadData<int>(buffer,size);
-		retVal.namedConstant = NamedConstant::FromId(retVal.expression->returnType, id);
-	}
-	else {
-		//function
-		retVal.actualParameters = ReadData<decltype(retVal.actualParameters)>(buffer,size);
-	}
-	
-	
-	return retVal;
-}
-Shared::Triggers::Variable AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::Variable*)
-{
-	using namespace Shared::Triggers;
-	Variable retVal;
-	retVal.type = ReadData<Types>(buffer,size);
-	retVal.name = ReadData<std::wstring>(buffer,size);
-	retVal.defaultValue = ReadData<decltype(retVal.defaultValue)>(buffer,size);
-	return retVal;
-}
-
-Shared::Triggers::Value AAUCardData::ReadData_sub(char*& buffer,int& size,Shared::Triggers::Value*)
-{
-	using namespace Shared::Triggers;
-	Value retVal;
-	retVal.type = ReadData<Types>(buffer,size);
-	switch(retVal.type) {
-	case TYPE_INT:
-		retVal.iVal = ReadData<int>(buffer,size);
-		break;
-	case TYPE_BOOL:
-		retVal.bVal = ReadData<bool>(buffer,size);
-		break;
-	case TYPE_FLOAT:
-		retVal.fVal = ReadData<float>(buffer,size);
-		break;
-	case TYPE_STRING:
-		retVal.strVal = new std::wstring(ReadData<std::wstring>(buffer,size));
-		break;
-	default:
-		break;
-	}
-	return retVal;
-}
-
-/***************************/
-/* Generic Write functions */
-/***************************/
-
-template<typename T>
-bool AAUCardData::WriteData(char** buffer,int* size,int& at,const T& data,bool resize) {
-	return WriteData_sub(buffer,size,at,data,resize,(T*)0);
-}
-
-//general
-template<typename T>
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T& data,bool resize,T*) {
-	bool ret = General::BufferAppend(buffer,size,at,(char*)(&data),sizeof(data),resize);
-	at += sizeof(data);
-	return ret;
-}
-
-template<typename T>
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const T* data,bool resize,T**) {
-	bool ret = true;
-	if (data == NULL) return true;
-	ret &= WriteData(buffer,size,at,*data,resize);
-	return ret;
-}
-
-template<typename T>
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, T* data,bool resize,T**) {
-	bool ret = true;
-	if (data == NULL) return true;
-	ret &= WriteData(buffer,size,at,*data,resize);
-	return ret;
-}
-
-//for string
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*) {
-	bool ret = true;
-	//write size first, then buffer
-	DWORD ssize = data.size();
-	ret &= General::BufferAppend(buffer,size,at,(const char*)(&ssize),4,resize);
-	at += 4;
-	ret &= General::BufferAppend(buffer,size,at,(const char*)data.c_str(),data.size()*sizeof(TCHAR),resize);
-	at += data.size() * sizeof(TCHAR);
-	return ret;
-}
-//for vector
-template<typename T>
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::vector<T>& data,bool resize,std::vector<T>*) {
-	DWORD length = data.size();
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,length,resize);
-	for (DWORD i = 0; i < length; i++) {
-		ret &= WriteData(buffer,size,at,data[i],resize);
-	}
-	return ret;
-}
-//for pairs
-template<typename T,typename U>
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at, const std::pair<T,U>& data,bool resize,std::pair<T,U>*) {
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.first,resize);
-	ret &= WriteData(buffer,size,at,data.second,resize);
-	return ret;
-}
-
-template<typename T, typename U>
-bool AAUCardData::WriteData_sub(char ** buffer, int * size, int & at, const std::map<T, U>& data, bool resize, std::map<T, U>*) {
-	bool ret = true;
-	ret &= WriteData(buffer, size, at, data.size(), resize);
-	for (const auto& it : data) {
-		ret &= WriteData(buffer, size, at, it, resize);
-	}
-	return ret;
-}
-
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Trigger& data,bool resize,Shared::Triggers::Trigger*) 
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.name,resize);
-	ret &= WriteData(buffer,size,at,data.events,resize);
-	ret &= WriteData(buffer,size,at,data.vars,resize);
-	ret &= WriteData(buffer,size,at,data.guiActions,resize);
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedEvent& data,bool resize,Shared::Triggers::ParameterisedEvent*)
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.event->id,resize);
-	ret &= WriteData(buffer,size,at,data.actualParameters,resize);
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedAction& data,bool resize,Shared::Triggers::ParameterisedAction*)
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.action->id,resize);
-	ret &= WriteData(buffer,size,at,data.actualParameters,resize);
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char ** buffer,int * size,int & at,const Shared::Triggers::Trigger::GUIAction & data,bool resize,Shared::Triggers::Trigger::GUIAction *)
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.action,resize);
-	ret &= WriteData(buffer,size,at,data.subactions,resize);
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedExpression& data,bool resize,Shared::Triggers::ParameterisedExpression*)
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.expression->returnType,resize);
-	ret &= WriteData(buffer,size,at,data.expression->id,resize);
-	if(data.expression->id == Shared::Triggers::EXPR_CONSTANT) {
-		ret &= WriteData(buffer,size,at,data.constant,resize);
-	}
-	else if(data.expression->id == Shared::Triggers::EXPR_VAR) {
-		ret &= WriteData(buffer,size,at,data.varName,resize);
-	}
-	else if(data.expression->id == Shared::Triggers::EXPR_NAMEDCONSTANT) {
-		ret &= WriteData(buffer,size,at,data.namedConstant->id,resize);
-	}
-	else {
-		ret &= WriteData(buffer,size,at,data.actualParameters,resize);
-	}
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Variable& data,bool resize,Shared::Triggers::Variable*)
-{
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.type,resize);
-	ret &= WriteData(buffer,size,at,data.name,resize);
-	ret &= WriteData(buffer,size,at,data.defaultValue,resize);
-	return ret;
-}
-bool AAUCardData::WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Value& data,bool resize,Shared::Triggers::Value*)
-{
-	using namespace Shared::Triggers;
-	bool ret = true;
-	ret &= WriteData(buffer,size,at,data.type,resize);
-
-	switch (data.type) {
-	case TYPE_INT:
-		ret &= WriteData(buffer,size,at,data.iVal,resize);
-		break;
-	case TYPE_BOOL:
-		ret &= WriteData(buffer,size,at,data.bVal,resize);
-		break;
-	case TYPE_FLOAT:
-		ret &= WriteData(buffer,size,at,data.fVal,resize);
-		break;
-	case TYPE_STRING:
-		ret &= WriteData(buffer,size,at,data.strVal,resize);
-		break;
-	default:
-		break;
-	}
-	return ret;
-}
-
 void AAUCardData::FromBuffer(char* buffer, int size) {
+	using namespace Serialize;
 	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
 	//read members
 	if (size < 4) return;
@@ -429,152 +84,160 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		DWORD identifier = *(DWORD*)(buffer);
 		m_currReadMemberId = identifier;
 		buffer += 4,size -= 4;
-		switch (identifier) {
-		case 'Vers':
-			m_version = ReadData<int>(buffer,size);
-			LOGPRIO(Logger::Priority::WARN) << "...found Version value after first chunk, value " << m_version << "\r\n";
-			break;
-		case 'TanS':
-			m_tanSlot = ReadData<BYTE>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found TanS, value " << m_tanSlot << "\r\n";
-			break;
-		case 'AUSS': {
-			//aau data set start; name, but also indicates that the following chunks write to this set
-			std::wstring name = ReadData<std::wstring>(buffer,size);
-			if(name != TEXT("(default)")) {
-				m_currAAUSet++;
-				m_aauSets.resize(m_aauSets.size()+1);
-				m_aauSets[m_currAAUSet].m_name = name;
-			}
-			LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << name << "r\n";
-			break; }
-		case 'OvrT': {
-			m_aauSets[m_currAAUSet].m_meshOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_meshOverrides)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_aauSets[m_currAAUSet].m_meshOverrides.size() << " elements; "
-				<< m_aauSets[m_currAAUSet].m_meshOverrideMap.size() << " were valid\r\n";
-			break; }
-		case 'AOvT': {
-			m_aauSets[m_currAAUSet].m_archiveOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveOverrides)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_aauSets[m_currAAUSet].m_archiveOverrides.size() << " elements; "
-				<< m_aauSets[m_currAAUSet].m_archiveOverrideMap.size() << " were valid\r\n";
-			break; }
-		case 'ARdr':
-			m_aauSets[m_currAAUSet].m_archiveRedirects = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveRedirects)>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_aauSets[m_currAAUSet].m_archiveRedirects.size() << " elements\r\n";
-			break;
-		case 'OOvr':
-			m_aauSets[m_currAAUSet].m_objectOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_objectOverrides)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_aauSets[m_currAAUSet].m_objectOverrides.size() << " elements;"
-				<< m_aauSets[m_currAAUSet].m_objectOverrideMap.size() << " were valid\r\n";
-			break;
-		case 'EtLN':
-			m_aauSets[m_currAAUSet].m_eyeTextures[0].texName = ReadData<std::wstring>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texName << "\r\n";
-			break;
-		case 'EtRN':
-			m_aauSets[m_currAAUSet].m_eyeTextures[1].texName = ReadData<std::wstring>(buffer, size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texName << "\r\n";
-			break;
-		case 'EtLF':
-			ret_files[0].fileStart = buffer-4; //before the chunk
-			m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
-			ret_files[0].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile.size() << "\r\n";
-			break;
-		case 'EtRF':
-			ret_files[1].fileStart = buffer-4; //before the chunk
-			m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
-			ret_files[1].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile.size() << "\r\n";
-			break;
-		case 'EhXN':
-			m_aauSets[m_currAAUSet].m_eyeHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightName)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_aauSets[m_currAAUSet].m_eyeHighlightName << "\r\n";
-			break;
-		case 'EhXF':
-			ret_files[2].fileStart = buffer-4; //before the chunk
-			m_aauSets[m_currAAUSet].m_eyeHighlightFile = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightFile)>(buffer,size);
-			ret_files[2].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_aauSets[m_currAAUSet].m_eyeHighlightFile.size() << "\r\n";
-			break;
-		case 'HrRd':
-			buffer += 4,size -= 4;
-			LOGPRIO(Logger::Priority::SPAM) << "found HrRd, but hair redirects are not supported anymore.\r\n";
-			break;
-		case 'TnRd': {
-			auto tanName = ReadData<std::wstring>(buffer,size);
-			m_aauSets[m_currAAUSet].m_tanName = tanName;
-			LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_aauSets[m_currAAUSet].m_tanName << "\r\n";
-			break; }
-		case 'HrHl': {
-			auto hairHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_hairHighlightName)>(buffer,size);
-			m_aauSets[m_currAAUSet].m_hairHighlightName = hairHighlightName;
-			break; }
-		case 'OlCl':
-			m_aauSets[m_currAAUSet].m_bOutlineColor = true;
-			m_aauSets[m_currAAUSet].m_outlineColor = ReadData<DWORD>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_aauSets[m_currAAUSet].m_outlineColor << "\r\n";
-			break;
-		case 'TnCl':
-			m_aauSets[m_currAAUSet].m_bTanColor = true;
-			m_aauSets[m_currAAUSet].m_tanColor = ReadData<DWORD>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_aauSets[m_currAAUSet].m_tanColor << "\r\n";
-			break;
-		case 'BnTr':
-			m_aauSets[m_currAAUSet].m_boneTransforms = ReadData<decltype(m_aauSets[m_currAAUSet].m_boneTransforms)>(buffer,size);
-			for (const auto& it : m_aauSets[m_currAAUSet].m_boneTransforms) {
-				if (m_aauSets[m_currAAUSet].m_boneTransformMap.find(it.first) == m_aauSets[m_currAAUSet].m_boneTransformMap.end()) {
-					m_aauSets[m_currAAUSet].m_boneTransformMap.emplace(it.first,it.second);
+		try {
+			switch (identifier) {
+			case 'Vers':
+				m_version = ReadData<int>(buffer,size);
+				LOGPRIO(Logger::Priority::WARN) << "...found Version value after first chunk, value " << m_version << "\r\n";
+				break;
+			case 'TanS':
+				m_tanSlot = ReadData<BYTE>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found TanS, value " << m_tanSlot << "\r\n";
+				break;
+			case 'AUSS': {
+				//aau data set start; name, but also indicates that the following chunks write to this set
+				std::wstring name = ReadData<std::wstring>(buffer,size);
+				if (name != TEXT("(default)")) {
+					m_currAAUSet++;
+					m_aauSets.resize(m_aauSets.size()+1);
+					m_aauSets[m_currAAUSet].m_name = name;
 				}
+				LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << name << "r\n";
+				break; }
+			case 'OvrT': {
+				m_aauSets[m_currAAUSet].m_meshOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_meshOverrides)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_aauSets[m_currAAUSet].m_meshOverrides.size() << " elements; "
+					<< m_aauSets[m_currAAUSet].m_meshOverrideMap.size() << " were valid\r\n";
+				break; }
+			case 'AOvT': {
+				m_aauSets[m_currAAUSet].m_archiveOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveOverrides)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found AOvT, loaded " << m_aauSets[m_currAAUSet].m_archiveOverrides.size() << " elements; "
+					<< m_aauSets[m_currAAUSet].m_archiveOverrideMap.size() << " were valid\r\n";
+				break; }
+			case 'ARdr':
+				m_aauSets[m_currAAUSet].m_archiveRedirects = ReadData<decltype(m_aauSets[m_currAAUSet].m_archiveRedirects)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found ARdr, loaded " << m_aauSets[m_currAAUSet].m_archiveRedirects.size() << " elements\r\n";
+				break;
+			case 'OOvr':
+				m_aauSets[m_currAAUSet].m_objectOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_objectOverrides)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found OOvr, loaded " << m_aauSets[m_currAAUSet].m_objectOverrides.size() << " elements;"
+					<< m_aauSets[m_currAAUSet].m_objectOverrideMap.size() << " were valid\r\n";
+				break;
+			case 'EtLN':
+				m_aauSets[m_currAAUSet].m_eyeTextures[0].texName = ReadData<std::wstring>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtLN: " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texName << "\r\n";
+				break;
+			case 'EtRN':
+				m_aauSets[m_currAAUSet].m_eyeTextures[1].texName = ReadData<std::wstring>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texName << "\r\n";
+				break;
+			case 'EtLF':
+				ret_files[0].fileStart = buffer-4; //before the chunk
+				m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer,size);
+				ret_files[0].fileEnd = buffer;
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[0].texFile.size() << "\r\n";
+				break;
+			case 'EtRF':
+				ret_files[1].fileStart = buffer-4; //before the chunk
+				m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer,size);
+				ret_files[1].fileEnd = buffer;
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_aauSets[m_currAAUSet].m_eyeTextures[1].texFile.size() << "\r\n";
+				break;
+			case 'EhXN':
+				m_aauSets[m_currAAUSet].m_eyeHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightName)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_aauSets[m_currAAUSet].m_eyeHighlightName << "\r\n";
+				break;
+			case 'EhXF':
+				ret_files[2].fileStart = buffer-4; //before the chunk
+				m_aauSets[m_currAAUSet].m_eyeHighlightFile = ReadData<decltype(m_aauSets[m_currAAUSet].m_eyeHighlightFile)>(buffer,size);
+				ret_files[2].fileEnd = buffer;
+				LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_aauSets[m_currAAUSet].m_eyeHighlightFile.size() << "\r\n";
+				break;
+			case 'HrRd':
+				buffer += 4,size -= 4;
+				LOGPRIO(Logger::Priority::SPAM) << "found HrRd, but hair redirects are not supported anymore.\r\n";
+				break;
+			case 'TnRd': {
+				auto tanName = ReadData<std::wstring>(buffer,size);
+				m_aauSets[m_currAAUSet].m_tanName = tanName;
+				LOGPRIO(Logger::Priority::SPAM) << "found TnRd, value " << m_aauSets[m_currAAUSet].m_tanName << "\r\n";
+				break; }
+			case 'HrHl': {
+				auto hairHighlightName = ReadData<decltype(m_aauSets[m_currAAUSet].m_hairHighlightName)>(buffer,size);
+				m_aauSets[m_currAAUSet].m_hairHighlightName = hairHighlightName;
+				break; }
+			case 'OlCl':
+				m_aauSets[m_currAAUSet].m_bOutlineColor = true;
+				m_aauSets[m_currAAUSet].m_outlineColor = ReadData<DWORD>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_aauSets[m_currAAUSet].m_outlineColor << "\r\n";
+				break;
+			case 'TnCl':
+				m_aauSets[m_currAAUSet].m_bTanColor = true;
+				m_aauSets[m_currAAUSet].m_tanColor = ReadData<DWORD>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found TnCl, value " << m_aauSets[m_currAAUSet].m_tanColor << "\r\n";
+				break;
+			case 'BnTr':
+				m_aauSets[m_currAAUSet].m_boneTransforms = ReadData<decltype(m_aauSets[m_currAAUSet].m_boneTransforms)>(buffer,size);
+				for (const auto& it : m_aauSets[m_currAAUSet].m_boneTransforms) {
+					if (m_aauSets[m_currAAUSet].m_boneTransformMap.find(it.first) == m_aauSets[m_currAAUSet].m_boneTransformMap.end()) {
+						m_aauSets[m_currAAUSet].m_boneTransformMap.emplace(it.first,it.second);
+					}
+				}
+				LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_aauSets[m_currAAUSet].m_boneTransformMap.size() << " elements.\r\n";
+				break;
+			case 'HrA0':
+				m_aauSets[m_currAAUSet].m_hairs[0] = ReadData<std::vector<HairPart>>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found HrA0, loaded " << m_aauSets[m_currAAUSet].m_hairs[0].size() << " elements\r\n";
+				break;
+			case 'HrA1':
+				m_aauSets[m_currAAUSet].m_hairs[1] = ReadData<std::vector<HairPart>>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found HrA1, loaded " << m_aauSets[m_currAAUSet].m_hairs[1].size() << " elements\r\n";
+				break;
+			case 'HrA2':
+				m_aauSets[m_currAAUSet].m_hairs[2] = ReadData<std::vector<HairPart>>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found HrA2, loaded " << m_aauSets[m_currAAUSet].m_hairs[2].size() << " elements\r\n";
+				break;
+			case 'HrA3':
+				m_aauSets[m_currAAUSet].m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_aauSets[m_currAAUSet].m_hairs[3].size() << " elements\r\n";
+				break;
+			case 'File':
+				ret_files[3].fileStart = buffer-4; //before the 'File'
+				m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer,size);
+				ret_files[3].fileEnd = buffer;
+				LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
+				break;
+			case 'BnT2':
+				m_boneRules = ReadData<decltype(m_boneRules)>(buffer,size);
+				GenBoneRuleMap();
+				LOGPRIO(Logger::Priority::SPAM) << "found BnT2, loaded " << m_boneRules.size() << " elements\r\n";
+				break;
+			case 'Slds':
+				m_sliders = ReadData<decltype(m_sliders)>(buffer,size);
+				GenSliderMap();
+				LOGPRIO(Logger::Priority::SPAM) << "found Slds, loaded " << m_sliders.size() << " elements\r\n";
+				break;
+			case 'Trgs':
+				m_triggers = ReadData<decltype(m_triggers)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found Trgs, loaded " << m_triggers.size() << " elements\r\n";
+				break;
+			case 'TrGv':
+				m_globalVars = ReadData<decltype(m_globalVars)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found TrGv, loaded " << m_globalVars.size() << " elements\r\n";
+				break;
+			case 'TrGV':
+				m_globalVarValues = ReadData<decltype(m_globalVarValues)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found TrGV, loaded " << m_globalVarValues.size() << " elements\r\n";
+				break;
 			}
-			LOGPRIO(Logger::Priority::SPAM) << "...found BnTr, loaded " << m_aauSets[m_currAAUSet].m_boneTransformMap.size() << " elements.\r\n";
-			break;
-		case 'HrA0':
-			m_aauSets[m_currAAUSet].m_hairs[0] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA0, loaded " << m_aauSets[m_currAAUSet].m_hairs[0].size() << " elements\r\n";
-			break;
-		case 'HrA1':
-			m_aauSets[m_currAAUSet].m_hairs[1] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA1, loaded " << m_aauSets[m_currAAUSet].m_hairs[1].size() << " elements\r\n";
-			break;
-		case 'HrA2':
-			m_aauSets[m_currAAUSet].m_hairs[2] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA2, loaded " << m_aauSets[m_currAAUSet].m_hairs[2].size() << " elements\r\n";
-			break;
-		case 'HrA3':
-			m_aauSets[m_currAAUSet].m_hairs[3] = ReadData<std::vector<HairPart>>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_aauSets[m_currAAUSet].m_hairs[3].size() << " elements\r\n";
-			break;
-		case 'File':
-			ret_files[3].fileStart = buffer-4; //before the 'File'
-			m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer,size);
-			ret_files[3].fileEnd = buffer;
-			LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
-			break;
-		case 'BnT2':
-			m_boneRules = ReadData<decltype(m_boneRules)>(buffer,size);
-			GenBoneRuleMap();
-			LOGPRIO(Logger::Priority::SPAM) << "found BnT2, loaded " << m_boneRules.size() << " elements\r\n";
-			break;
-		case 'Slds':
-			m_sliders = ReadData<decltype(m_sliders)>(buffer,size);
-			GenSliderMap();
-			LOGPRIO(Logger::Priority::SPAM) << "found Slds, loaded " << m_sliders.size() << " elements\r\n";
-			break;
-		case 'Trgs':
-			m_triggers = ReadData<decltype(m_triggers)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found Trgs, loaded " << m_triggers.size() << " elements\r\n";
-			break;
-		case 'TrGv':
-			m_globalVars = ReadData<decltype(m_globalVars)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found TrGv, loaded " << m_globalVars.size() << " elements\r\n";
-			break;
-		case 'TrGV':
-			m_globalVarValues = ReadData<decltype(m_globalVarValues)>(buffer,size);
-			LOGPRIO(Logger::Priority::SPAM) << "found TrGV, loaded " << m_globalVarValues.size() << " elements\r\n";
-			break;
 		}
-		
+		catch(InsufficientBufferException e) {
+			char idName[5];
+			*(DWORD*)(idName) = m_currReadMemberId;
+			idName[4] = '\0';
+			LOGPRIO(Logger::Priority::WARN) << "Not enough space left to parse member " << idName << "(" << m_currReadMemberId << "); "
+				"expected " << e.ExpectedSize() << ", but has " << e.AvailableSize() << "\r\n";
+		}
 	}
 
 	m_currAAUSet = 0;
@@ -632,6 +295,7 @@ bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
  * DWORD chunkDataLength
  */
 int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) {
+	using namespace Serialize;
 	LOGPRIO(Logger::Priority::SPAM) << "dumping card info...\r\n";
 	int at = 0;
 	bool ret = true;

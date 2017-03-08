@@ -96,6 +96,7 @@
     <ClCompile Include="Functions\Shared\Triggers\NamedConstant.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
+    <ClCompile Include="Files\ModuleFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -190,6 +191,10 @@
     <ClInclude Include="Functions\Shared\Triggers\NamedConstant.h" />
     <ClInclude Include="External\ExternalClasses\CharacterActivity.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
+    <ClInclude Include="External\ExternalClasses\LoverData.h" />
+    <ClInclude Include="External\ExternalClasses\TimeData.h" />
+    <ClInclude Include="Functions\Serialize.h" />
+    <ClInclude Include="Files\ModuleFile.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

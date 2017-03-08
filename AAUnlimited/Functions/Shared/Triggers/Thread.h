@@ -78,9 +78,16 @@ public:
 
 	Value GetTriggeringCard(std::vector<Value>& params);	//int ()
 	Value GetThisCard(std::vector<Value>& params); //int ()
+	Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
+	//card info
 	Value GetCardFirstName(std::vector<Value>& params); //string(int)
 	Value GetCardSecondName(std::vector<Value>& params); //string(int)
+	Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
+	Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)
+	Value GetCardDislikePoints(std::vector<Value>& params); //int(int,int)
+	Value GetCardHatePoints(std::vector<Value>& params); //int(int,int)
+	Value IsLover(std::vector<Value>& params); //bool(int,int)
 
 	//basic int stuff
 	Value GetRandomInt(std::vector<Value>& params); //int(int,int)
@@ -88,6 +95,16 @@ public:
 	Value SubstractIntegers(std::vector<Value>& params); //int(int,int)
 	Value DivideIntegers(std::vector<Value>& params); //int(int,int)
 	Value MultiplyIntegers (std::vector<Value>& params); //int(int,int)
+	Value Float2Int(std::vector<Value>& params); //int(float);
+
+	//basic float stuff
+	Value GetRandomFloat(std::vector<Value>& params); //float(float,float)
+	Value AddFloats(std::vector<Value>& params);	//float(float,float)
+	Value SubstractFloats(std::vector<Value>& params); //float(float,float)
+	Value DivideFloats(std::vector<Value>& params); //float(float,float)
+	Value MultiplyFloats(std::vector<Value>& params); //float(float,float)
+	Value Int2Float(std::vector<Value>& params); //float(int)
+
 
 	//basic bool stuff
 	//these two are handled directly cause short circut evaluation
@@ -100,12 +117,22 @@ public:
 	Value NotEqualsIntegers(std::vector<Value>& params); //bool(int,int)
 	Value LessEqualsIntegers(std::vector<Value>& params); //bool(int,int)
 	Value LessThanIntegers(std::vector<Value>& params); //bool(int,int)
+	Value GreaterThanFloats(std::vector<Value>& params); //bool(float,float)
+	Value GreaterEqualsFloats(std::vector<Value>& params); //bool(float,float)
+	Value EqualsFloats(std::vector<Value>& params); //bool(float,float)
+	Value NotEqualsFloats(std::vector<Value>& params); //bool(float,float)
+	Value LessEqualsFloats(std::vector<Value>& params); //bool(float,float)
+	Value LessThanFloats(std::vector<Value>& params); //bool(float,float)
 	Value EqualsStrings(std::vector<Value>& params); //bool(string,string)
 
 	//basic string stuff
 	Value SubString(std::vector<Value>& params); //string(string, int, int)
 
 	//Event Respone
+	//PERIOD_ENDS
+	Value GetEndingPeriod(std::vector<Value>& params);
+	Value GetStartingPeriod(std::vector<Value>& params);
+
 	//NPC_RESPONSE
 	Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
 	Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()

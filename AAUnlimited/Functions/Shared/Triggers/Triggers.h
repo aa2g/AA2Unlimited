@@ -73,6 +73,8 @@ namespace Triggers {
 
 		Variable* FindVar(std::wstring name);
 
+		
+
 		inline bool IsInitalized() { return bInitialized; }
 		inline bool IsBroken() { return broken; }
 

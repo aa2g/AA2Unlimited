@@ -269,53 +269,6 @@ private:
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
 
-	//read help functions
-	template<typename T>
-	T ReadData(char*& buffer,int& size);
-		template<typename T>
-		T ReadData_sub(char*& buffer,int& size, T*);
-		template<typename T>
-		T* ReadData_sub(char*& buffer,int& size,T**);
-		std::vector<BYTE> ReadData_sub(char*& buffer,int& size,std::vector<BYTE>*);
-		template<typename T>
-		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T>*);
-		template<typename T, typename U>
-		std::pair<T,U> ReadData_sub(char*& buffer,int& size,std::pair<T,U>*);
-		std::wstring ReadData_sub(char*& buffer,int& size,std::wstring*);
-		template<typename T, typename U>
-		std::map<T, U> ReadData_sub(char*& buffer, int& size, std::map<T, U>*);
-		Shared::Triggers::Trigger ReadData_sub(char*& buffer,int& size,Shared::Triggers::Trigger*);
-		Shared::Triggers::ParameterisedEvent ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedEvent*);
-		Shared::Triggers::ParameterisedAction ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedAction*);
-		Shared::Triggers::Trigger::GUIAction ReadData_sub(char*& buffer,int& size,Shared::Triggers::Trigger::GUIAction*);
-		Shared::Triggers::ParameterisedExpression ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedExpression*);
-		Shared::Triggers::Variable ReadData_sub(char*& buffer,int& size,Shared::Triggers::Variable*);
-		Shared::Triggers::Value ReadData_sub(char*& buffer,int& size,Shared::Triggers::Value*);
-
-	//write help functions
-	template<typename T>
-	bool WriteData(char** buffer,int* size,int& at,const T& data, bool resize);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, const T& data,bool resize, T*);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, const T*data,bool resize,T**);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, T* data,bool resize,T**);
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::vector<T>& data,bool resize,std::vector<T>*);
-		template<typename T, typename U>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::pair<T,U>& data,bool resize,std::pair<T,U>*);
-		template<typename T, typename U>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::map<T, U>& data, bool resize, std::map<T, U>*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Trigger& data,bool resize,Shared::Triggers::Trigger*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedEvent& data,bool resize,Shared::Triggers::ParameterisedEvent*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedAction& data,bool resize,Shared::Triggers::ParameterisedAction*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Trigger::GUIAction& data,bool resize,Shared::Triggers::Trigger::GUIAction*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedExpression& data,bool resize,Shared::Triggers::ParameterisedExpression*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Variable& data,bool resize,Shared::Triggers::Variable*);
-		bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Value& data,bool resize,Shared::Triggers::Value*);
-
 	//generate the maps from the vectors read from the file
 	void GenMeshOverrideMap();
 	void GenArchiveOverrideMap();

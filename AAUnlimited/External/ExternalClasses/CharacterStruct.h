@@ -2,6 +2,7 @@
 #include <Windows.h>
 
 #include "CharacterRelation.h"
+#include "LoverData.h"
 #include "External\AddressRule.h"
 #include "Frame.h"
 #include "CharacterData.h"
@@ -79,6 +80,12 @@ public:
 		if (m_moreData2 == NULL) return NULL;
 		BYTE* ptr = (BYTE*)(m_moreData2)+0x18;
 		return *(CharacterActivity**)(ptr);
+	}
+
+	inline IllusionArray<LoverData>* GetLovers() {
+		if (m_moreData2 == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_moreData2)+0x24;
+		return (IllusionArray<LoverData>*)ptr;
 	}
 
 	inline XXFile* GetXXFile(Models target) {
