@@ -11,6 +11,7 @@ namespace {
 		unsigned int num2;
 		unsigned int num3;
 		unsigned int num4;
+		unsigned int glassnum;
 		char suffix;
 
 		Name(const char* name) : prefix(0),suffix(0),num1(0),num2(0),num3(0),num4(0) {
@@ -30,7 +31,14 @@ namespace {
 			num1 = strtoul(name,(char**)&it,10);
 			if (*it != '_') { return; }
 			it++; if (!*it) return;
-			num2 = strtoul(it,(char**)&it,10);
+			if (*it == '3' && prefix == 'A' && extraPrefix == 'S' && num1 == 0) {
+				it++; if (!*it) return;
+				num2 = 3;
+				glassnum = strtoul(it, (char**)&it, 10);
+			}
+			else {
+				num2 = strtoul(it, (char**)&it, 10);
+			}
 			if (*it != '_') { return; }
 			it++; if (!*it) return;
 			num3 = strtoul(it,(char**)&it,10);
@@ -73,7 +81,7 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 			return ExtClass::CharacterStruct::HAIR_BACK;
 		case 23:
 			return ExtClass::CharacterStruct::HAIR_EXT;
-		case 30:
+		case 3:
 			return ExtClass::CharacterStruct::GLASSES;
 		default:
 			return ExtClass::CharacterStruct::INVALID;
