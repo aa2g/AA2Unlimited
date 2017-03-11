@@ -191,7 +191,7 @@ namespace Shared {
 
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
-		if(model !=  ExtClass::CharacterStruct::INVALID) {
+		if(model <= ExtClass::CharacterStruct::N_MODELS) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderFrameRuleMap(model);
 			if(saveMods) {
 				g_xxMods[model].clear();
@@ -314,7 +314,7 @@ namespace Shared {
 
 			ExtClass::CharacterStruct::Models model;
 			model = General::GetModelFromName(xxFile->m_name);
-			if (model !=  ExtClass::CharacterStruct::INVALID) {
+			if (model <= ExtClass::CharacterStruct::N_MODELS) {
 				smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
 			}
 
@@ -425,7 +425,7 @@ namespace Shared {
 
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
-		if (model !=  ExtClass::CharacterStruct::INVALID) {
+		if (model <= ExtClass::CharacterStruct::N_MODELS) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
 		}
 
