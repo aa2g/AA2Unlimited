@@ -9,6 +9,7 @@
 #include <CommCtrl.h>
 #include <Strsafe.h>
 #include <fstream>
+#include <Commctrl.h>
 
 #include "External\AddressRule.h"
 #include "External\ExternalClasses\Frame.h"
@@ -16,6 +17,7 @@
 #include "General\IllusionUtil.h"
 #include "General\Util.h"
 #include "Functions\Shared\Globals.h"
+#include "Functions\AAPlay\GameState.h"
 #include "Files\PoseMods.h"
 #include "Files\Config.h"
 #include "Files\PoseFile.h"
@@ -28,7 +30,14 @@
 
 namespace Poser {
 
+#define X 0
+#define Y 1
+#define Z 2
+
 	PoserWindow g_PoserWindow;
+
+	bool GetIsHiddenFrame(ExtClass::Frame* frame);
+	void SetHiddenFrame(ExtClass::Frame* frame, bool hidden);
 
 	enum Operation {
 		Rotate,
@@ -37,52 +46,106 @@ namespace Poser {
 	};
 	
 	struct OperationData {
-		float x, y, z, min, max;
+		float rangeMin(int axis) {
+			return min[axis] + delta[axis];
+		}
+
+		float rangeMax(int axis) {
+			return max[axis] + delta[axis];
+		}
+
+		float value[3];
+		float min[3];
+		float max[3];
+		float delta[3];
 	};
 
 	struct SliderInfo {
 		std::wstring frameName;
 		std::wstring descr;
 		ExtClass::Frame* xxFrame;
-		enum Operation curOperation;
-		int curAxis;
+		Operation currentOperation;
 		struct OperationData translate, rotate, scale;
 
-		float* curValue() {
-			OperationData* data = curOperation == Rotate ? &rotate : curOperation == Translate ? &translate : &scale;
-			if (curAxis == 0)
-				return &data->x;
-			else if (curAxis == 1)
-				return &data->y;
-			else
-				return &data->z;
+		void setCurrentOperation(Operation operation) {
+			currentOperation = operation;
 		}
 
-		void setValue(float newValue) {
-			float* value = curValue();
-			*value = newValue;
+		inline OperationData* getCurrentOperation() {
+			return currentOperation == Rotate ? &rotate : currentOperation == Translate ? &translate : &scale;
 		}
 
-		void fromSlider(int sldVal) {
-			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
-			float val = data.min + (data.max - data.min) / 0x10000 * sldVal;
-			float* value = curValue();
-			*value = val;
+		float* curValueX() {
+			return &getCurrentOperation()->value[X];
 		}
 
-		int toSlider() {
-			OperationData data = curOperation == Rotate ? rotate : curOperation == Translate ? translate : scale;
-			float range = data.max - data.min; //map from [min,max] to [0,0x10000]
-			float val;
-			val = (*curValue()) - data.min;
+		float* curValueY() {
+			return &getCurrentOperation()->value[Y];
+		}
+
+		float* curValueZ() {
+			return &getCurrentOperation()->value[Z];
+		}
+
+		void setValue(float newValueX, float newValueY, float newValueZ) {
+			*curValueX() = newValueX;
+			*curValueY() = newValueY;
+			*curValueZ() = newValueZ;
+		}
+
+		float fromSlider(int sldVal, int axis) {
+			return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
+		}
+
+		void fromSliderX(int sldVal) {
+			*curValueX() = fromSlider(sldVal, X);
+		}
+
+		void fromSliderY(int sldVal) {
+			*curValueY() = fromSlider(sldVal, Y);
+		}
+
+		void fromSliderZ(int sldVal) {
+			*curValueZ() = fromSlider(sldVal, Z);
+		}
+
+		int toSlider(float value, int axis) {
+			float range = getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
 			float coeff = 0x10000 / range;
-			return int(coeff * val);
+			return int(coeff * (value - getCurrentOperation()->rangeMin(axis)));
+		}
+
+		int toSliderX() {
+			return toSlider(*curValueX(), X);
+		}
+
+		int toSliderY() {
+			return toSlider(*curValueY(), Y);
+		}
+
+		int toSliderZ() {
+			return toSlider(*curValueZ(), Z);
+		}
+
+		void translateSlider(float delta, int axis) {
+			getCurrentOperation()->delta[axis] = delta;
 		}
 
 		void reset() {
-			rotate = { 0,0,0,(float)-M_PI,(float)M_PI };
-			translate = { 0,0,0,-2,2 };
-			scale = { 1,1,1,0,2 };
+			for (int i = 0; i < 3; i++) {
+				rotate.value[i] = 0;
+				rotate.min[i] = (float)-M_PI;
+				rotate.max[i] = (float)M_PI;
+				rotate.delta[i] = 0;
+				translate.value[i] = 0;
+				translate.min[i] = -2;
+				translate.max[i] = 2;
+				translate.delta[i] = 0;
+				scale.value[i] = 1;
+				scale.min[i] = 0;
+				scale.max[i] = 2;
+				scale.delta[i] = 0;
+			}
 		}
 	};
 	std::map<PoseMods::FrameCategory,std::vector<unsigned int>> loc_sliderCategories; // holds the index of each slider in the main slider vector
@@ -90,6 +153,7 @@ namespace Poser {
 																 // loc_sliderCategories[category][categoryIndex] = index
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
+	std::map<std::string, SliderInfo> loc_sliderInfosRoom;
 
 	class PoserCharacter {
 	public:
@@ -108,7 +172,7 @@ namespace Poser {
 			while (frame < Character->m_bonePtrArrayEnd) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, name)) {
-						(*frame)->m_renderFlag = hidden ? 2 : 0;
+						SetHiddenFrame(*frame, hidden);
 					}
 				}
 				frame++;
@@ -125,12 +189,14 @@ namespace Poser {
 
 		void SetTongueJuice(bool show) {
 			SetHidden("A00_O_kutisiru", !show);
+			SetHidden("A00_O_sitasiru", !show);
 		}
 
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
 		SliderInfo *CurrentSlider;
+		std::map<PoseMods::FrameCategory, int> CategoryCurrentSlider;
 	};
 
 	std::vector<PoserCharacter*> loc_targetCharacters;
@@ -145,6 +211,23 @@ namespace Poser {
 
 	void ApplySlider(void* slider = nullptr);
 	void GenSliderInfo();
+	PoseMods::FrameCategory loc_currentCategory;
+	std::string loc_currentRoomFrame;
+	SliderInfo* CurrentSlider() {
+		if (loc_currentCategory != PoseMods::FrameCategory::Room) {
+			return loc_targetChar->CurrentSlider;
+		}
+		else
+			return &loc_sliderInfosRoom[loc_currentRoomFrame];
+	}
+
+	bool GetIsHiddenFrame(ExtClass::Frame* frame) {
+		return frame->m_renderFlag == 2;
+	}
+
+	void SetHiddenFrame(ExtClass::Frame* frame, bool hidden) {
+		frame->m_renderFlag = hidden ? 2 : 0;
+	}
 
 	void StartEvent(EventType type) {
 		if (type == loc_eventType) return;
@@ -167,6 +250,7 @@ namespace Poser {
 		loc_targetCharacters.clear();
 		loc_targetChar = nullptr;
 		loc_loadCharacter = nullptr;
+		loc_sliderInfosRoom.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 	}
@@ -184,6 +268,7 @@ namespace Poser {
 			if (!loc_loadCharacter) {
 				loc_loadCharacter = new PoserCharacter(charStruct);
 				loc_targetCharacters.push_back(loc_loadCharacter);
+				g_PoserWindow.NewCharacter(loc_targetCharacters.size() - 1);
 			}
 			if (!loc_targetChar)
 				loc_targetChar = loc_loadCharacter;
@@ -193,6 +278,7 @@ namespace Poser {
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 			loc_loadCharacter = character;
+			g_PoserWindow.NewCharacter(0);
 		}
 	}
 
@@ -231,7 +317,9 @@ namespace Poser {
 			thisPtr->m_edPose = GetDlgItem(hwndDlg, IDC_PPS_EDPOSE);
 			thisPtr->m_edCharacter = GetDlgItem(hwndDlg, IDC_PPS_EDCHARACTER);
 			thisPtr->m_edFrame = GetDlgItem(hwndDlg, IDC_PPS_EDFRAME);
-			thisPtr->m_edValue = GetDlgItem(hwndDlg, IDC_PPS_EDVALUE);
+			thisPtr->m_edValueX = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEX);
+			thisPtr->m_edValueY = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEY);
+			thisPtr->m_edValueZ = GetDlgItem(hwndDlg, IDC_PPS_EDVALUEZ);
 			thisPtr->m_edMouth = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTH);
 			thisPtr->m_edMouthOpen = GetDlgItem(hwndDlg, IDC_PPS_EDMOUTHOPEN);
 			thisPtr->m_edEye = GetDlgItem(hwndDlg, IDC_PPS_EDEYE);
@@ -252,13 +340,16 @@ namespace Poser {
 			thisPtr->m_listCategories = GetDlgItem(hwndDlg, IDC_PPS_LISTCATEGORIES);
 			thisPtr->m_listBones = GetDlgItem(hwndDlg, IDC_PPS_LISTBONES);
 			thisPtr->m_listOperation = GetDlgItem(hwndDlg, IDC_PPS_LISTOP);
-			thisPtr->m_listAxis = GetDlgItem(hwndDlg, IDC_PPS_LISTAXIS);
-			thisPtr->m_sliderValue = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUE);
+			thisPtr->m_sliderValueX = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEX);
+			thisPtr->m_sliderValueY = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEY);
+			thisPtr->m_sliderValueZ = GetDlgItem(hwndDlg, IDC_PPS_SLIDERVALUEZ);
 			thisPtr->m_chkEyeTrack = GetDlgItem(hwndDlg, IDC_PPS_CHKEYETRACK);
 			thisPtr->m_chkAlwaysOnTop = GetDlgItem(hwndDlg, IDC_PPS_CHKALWAYSONTOP);
 			thisPtr->m_chkTears = GetDlgItem(hwndDlg, IDC_PPS_CHKTEARS);
 			thisPtr->m_chkDimEyes = GetDlgItem(hwndDlg, IDC_PPS_CHKDIMEYES);
 			thisPtr->m_chkTongueJuice = GetDlgItem(hwndDlg, IDC_PPS_CHKTONGUEJUICE);
+			thisPtr->m_tabModifiers = GetDlgItem(hwndDlg, IDC_PPS_TABMODIFIERS);
+			thisPtr->m_tabShowHide = GetDlgItem(hwndDlg, IDC_PPS_TABSHOWHIDE);
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
@@ -271,23 +362,25 @@ namespace Poser {
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"LeftLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"RightLeg"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Breasts"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Face"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Skirt"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Room"));
 			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Other"));
+			SendMessage(thisPtr->m_listCategories, LB_ADDSTRING, 0, LPARAM(L"Props"));
 
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Rotate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Translate")));
 			SendMessage(thisPtr->m_listOperation, LB_ADDSTRING, 0, LPARAM(TEXT("Scale")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("X")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Y")));
-			SendMessage(thisPtr->m_listAxis, LB_ADDSTRING, 0, LPARAM(TEXT("Z")));
 
-			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMIN, TRUE, 0);
-			SendMessage(thisPtr->m_sliderValue, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueX, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueX, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueY, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueY, TBM_SETRANGEMAX, TRUE, 0x10000);
+			SendMessage(thisPtr->m_sliderValueZ, TBM_SETRANGEMIN, TRUE, 0);
+			SendMessage(thisPtr->m_sliderValueZ, TBM_SETRANGEMAX, TRUE, 0x10000);
 			SendMessage(thisPtr->m_listCategories, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listBones, LB_SETCURSEL, 0, 0);
 			SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, 0, 0);
-			SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, 0, 0);
 
 			SendMessage(thisPtr->m_spinCharacter, UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 			SendMessage(thisPtr->m_spinPose, UDM_SETRANGE, 0, MAKELPARAM(32767, 0));
@@ -300,6 +393,19 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 
+			TCITEM tab;
+#define makeTab(data,text) tab.mask = TCIF_TEXT | TCIF_PARAM; tab.pszText = L#text; tab.lParam = data;
+			makeTab(1, x1);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 0, (LPARAM)(LPTCITEM)&tab);
+			makeTab(10, x10);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 1, (LPARAM)(LPTCITEM)&tab);
+			makeTab(100, x100);
+			SendMessage(thisPtr->m_tabModifiers, TCM_INSERTITEM, 2, (LPARAM)(LPTCITEM)&tab);
+			makeTab(1, Show);
+			SendMessage(thisPtr->m_tabShowHide, TCM_INSERTITEM, 0, (LPARAM)(LPTCITEM)&tab);
+			makeTab(0, Hide);
+			SendMessage(thisPtr->m_tabShowHide, TCM_INSERTITEM, 1, (LPARAM)(LPTCITEM)&tab);
+#undef makeTab
 			thisPtr->SyncList();
 
 			loc_syncing = false;
@@ -399,7 +505,7 @@ namespace Poser {
 					if (skeleton == NULL) return TRUE;
 					skeleton->m_animFrame = val;
 				}
-				else if (LOWORD(wparam) == IDC_PPS_EDVALUE) {
+				else if (LOWORD(wparam) == IDC_PPS_EDVALUEX || LOWORD(wparam) == IDC_PPS_EDVALUEY || LOWORD(wparam) == IDC_PPS_EDVALUEZ) {
 					if (!loc_syncing) {
 						thisPtr->SyncEdit();
 						ApplySlider();
@@ -436,12 +542,14 @@ namespace Poser {
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
 					loc_targetChar = loc_targetCharacters[val % loc_targetCharacters.size()];
-					//SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
-					//SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
+					//SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, CurrentSlider()->curOperation, 0);
+					//SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, CurrentSlider()->curAxis, 0);
 					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
 					LRESULT bon = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
 					if (cat != LB_ERR && bon != LB_ERR) {
-						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[loc_sliderCategories[(PoseMods::FrameCategory)cat][bon]];
+						if (!loc_sliderCategories[(PoseMods::FrameCategory)cat].empty()) {
+							loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[loc_sliderCategories[(PoseMods::FrameCategory)cat][bon]];
+						}
 					}
 					thisPtr->SyncList();
 				}
@@ -470,34 +578,36 @@ namespace Poser {
 					}
 					thisPtr->SyncList();
 				}
-				else if (id == IDC_PPS_BTNMODLL10) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-10.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLX) {
+					thisPtr->ApplyIncrement(X, -1);
 				}
-				else if (id == IDC_PPS_BTNMODLL1) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(-1.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLY) {
+					thisPtr->ApplyIncrement(Y, -1);
 				}
-				else if (id == IDC_PPS_BTNMODZERO) {
-					*loc_targetChar->CurrentSlider->curValue() = 0.0f;
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODLLZ) {
+					thisPtr->ApplyIncrement(Z, -1);
 				}
-				else if (id == IDC_PPS_BTNMODPP1) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(1.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODZEROX) {
+					thisPtr->ApplyIncrement(X, 0);
 				}
-				else if (id == IDC_PPS_BTNMODPP10) {
-					*loc_targetChar->CurrentSlider->curValue() += SliderIncrement(10.0f, loc_targetChar->CurrentSlider->curOperation);
-					thisPtr->SyncList();
-					ApplySlider();
+				else if (id == IDC_PPS_BTNMODZEROY) {
+					thisPtr->ApplyIncrement(Y, 0);
+				}
+				else if (id == IDC_PPS_BTNMODZEROZ) {
+					thisPtr->ApplyIncrement(Z, 0);
+				}
+				else if (id == IDC_PPS_BTNMODPPX) {
+					thisPtr->ApplyIncrement(X, 1);
+				}
+				else if (id == IDC_PPS_BTNMODPPY) {
+					thisPtr->ApplyIncrement(Y, 1);
+				}
+				else if (id == IDC_PPS_BTNMODPPZ) {
+					thisPtr->ApplyIncrement(Z, 1);
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
-					if (loc_targetChar->CurrentSlider->curOperation != Scale) {
-						*loc_targetChar->CurrentSlider->curValue() *= -1.0f;
+					if (CurrentSlider()->currentOperation != Scale) {
+						*CurrentSlider()->curValueX() *= -1.0f;
 						thisPtr->SyncList();
 						ApplySlider();
 					}
@@ -538,36 +648,32 @@ namespace Poser {
 				switch (id) {
 				case(IDC_PPS_LISTCATEGORIES): {
 					thisPtr->SyncBones();
+					thisPtr->SyncOperation();
 					break; }
 				case(IDC_PPS_LISTBONES): {
-					LRESULT cat = SendMessage(thisPtr->m_listCategories, LB_GETCURSEL, 0, 0);
-					LRESULT res = SendMessage(thisPtr->m_listBones, LB_GETCURSEL, 0, 0);
-					if (res != LB_ERR) {
-						int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
-						loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
-						SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, loc_targetChar->CurrentSlider->curOperation, 0);
-						SendMessage(thisPtr->m_listAxis, LB_SETCURSEL, loc_targetChar->CurrentSlider->curAxis, 0);
-						thisPtr->SyncList();
-					}
+					thisPtr->SyncOperation();
 					break; }
 				case (IDC_PPS_LISTOP): {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider->curOperation = Operation(res);
-						thisPtr->SyncList();
-					}
-					break; }
-				case (IDC_PPS_LISTAXIS): {
-					LRESULT res = SendMessage(thisPtr->m_listAxis, LB_GETCURSEL, 0, 0);
-					if (res != LB_ERR) {
-						loc_targetChar->CurrentSlider->curAxis = res;
+						CurrentSlider()->setCurrentOperation(Operation(res));
 						thisPtr->SyncList();
 					}
 					break; }
 				}
 				break; }
-
 			};
+			break; }
+		case WM_NOTIFY: {
+			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			NMHDR* param = (NMHDR*)(lparam);
+			DWORD code = param->code;
+			if (code == TCN_SELCHANGE && LOWORD(wparam) == IDC_PPS_TABSHOWHIDE) {
+				int idx = TabCtrl_GetCurSel(thisPtr->m_tabShowHide);
+				ExtClass::Frame* frame = CurrentSlider()->xxFrame;
+				if (frame)
+					SetHiddenFrame(frame, idx != 0);
+			}
 			break; }
 		case WM_HOTKEY: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -578,7 +684,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Translate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -586,7 +692,7 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Rotate, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
@@ -594,58 +700,151 @@ namespace Poser {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, Operation::Scale, 0);
 				LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 				if (res != LB_ERR) {
-					loc_targetChar->CurrentSlider->curOperation = Operation(res);
+					CurrentSlider()->setCurrentOperation(Operation(res));
 					thisPtr->SyncList();
 				}
 			}
+			break; }
 		}
-}
 
 		return FALSE;
 	}
 
+	void PoserWindow::NewCharacter(int index) {
+		if (loc_sliderCategories[PoseMods::Other].size()) {
+			PoserCharacter* c = loc_targetCharacters.at(index);
+			c->CurrentSlider = &c->SliderInfos.at(loc_sliderCategories[PoseMods::Other].front());
+			if (c == loc_targetChar) {
+				SendMessage(m_listCategories, LB_SETCURSEL, PoseMods::Other, 0);
+				SyncBones();
+				SendMessage(m_listBones, LB_SETCURSEL, 0, 0);
+				SyncOperation();
+				SyncList();
+			}
+		}
+	}
+
+	void PoserWindow::ApplyIncrement(int axis, int sign) {
+		float* value = CurrentSlider()->curValueX();
+		float* delta = &CurrentSlider()->getCurrentOperation()->delta[axis];
+		float increment = 0;
+		if (sign != 0) {
+			TCITEM tab;
+			TCHAR text[10];
+			tab.mask = TCIF_PARAM | TCIF_TEXT;
+			tab.pszText = text;
+			int index = TabCtrl_GetCurSel(m_tabModifiers);
+			TabCtrl_GetItem(m_tabModifiers, index, &tab);
+			increment += SliderIncrement(float(sign * (int)tab.lParam), CurrentSlider()->currentOperation);
+			value[axis] += increment;
+			*delta += increment;
+		}
+		else {
+			value[axis] = CurrentSlider()->currentOperation == Scale ? 1.0f : 0.0f;
+			*delta = 0;
+		}
+		SyncList();
+		ApplySlider();
+	}
+
 	void PoserWindow::SyncBones() {
 		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
+		loc_currentCategory = PoseMods::FrameCategory(res);
 		if (res != LB_ERR) {
-			SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
-			for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
-				SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+			if ((PoseMods::FrameCategory)res != PoseMods::FrameCategory::Room) {
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
 			}
+			else {
+				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s = loc_sliderInfosRoom.begin(); s != loc_sliderInfosRoom.end(); s++) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
+		}
+	}
+
+	void PoserWindow::SyncOperation() {
+		LRESULT cat = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
+		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+		if (res != LB_ERR) {
+			SliderInfo* slider = nullptr;
+			if ((PoseMods::FrameCategory)cat != PoseMods::FrameCategory::Room) {
+				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
+				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
+				slider = CurrentSlider();
+			}
+			else {
+				WCHAR name[255];
+				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
+				loc_currentRoomFrame = General::CastToString(std::wstring(name));
+				auto match = loc_sliderInfosRoom.find(General::CastToString(std::wstring(name)));
+				if (match != loc_sliderInfosRoom.end()) {
+					slider = &match->second;
+				}
+			}
+			if (slider) {
+				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
+				if (slider->xxFrame)
+					TabCtrl_SetCurSel(m_tabShowHide, GetIsHiddenFrame(slider->xxFrame) ? 1 : 0);
+			}
+			SyncList();
 		}
 	}
 
 	void PoserWindow::SyncEdit() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		float value = General::GetEditFloat(m_edValue);
-		loc_targetChar->CurrentSlider->setValue(value);
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
+		float valueX = General::GetEditFloat(m_edValueX);
+		float valueY = General::GetEditFloat(m_edValueY);
+		float valueZ = General::GetEditFloat(m_edValueZ);
+		CurrentSlider()->setValue(valueX, valueY, valueZ);
+		//SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, CurrentSlider()->toSliderX());
+		//SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
+		//SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncList() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		SendMessage(m_sliderValue, TBM_SETPOS, TRUE, loc_targetChar->CurrentSlider->toSlider());
+		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, CurrentSlider()->toSliderX());
+		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
+		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
-		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
 	void PoserWindow::SyncSlider() {
 		if (!loc_targetChar) return;
 		loc_syncing = true;
-		int pos = SendMessage(m_sliderValue, TBM_GETPOS, 0, 0);
-		loc_targetChar->CurrentSlider->fromSlider(pos);
+		CurrentSlider()->fromSliderX(SendMessage(m_sliderValueX, TBM_GETPOS, 0, 0));
+		CurrentSlider()->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
+		CurrentSlider()->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *loc_targetChar->CurrentSlider->curValue());
-		SendMessage(m_edValue, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
 
 	void ApplySlider(void* slider) {
-		SliderInfo* targetSlider = slider == NULL ? loc_targetChar->CurrentSlider : static_cast<SliderInfo*>(slider);
+		SliderInfo* targetSlider = slider == NULL ? CurrentSlider() : static_cast<SliderInfo*>(slider);
 		ExtClass::Frame *frame = targetSlider->xxFrame;
 		if(frame) {
 			//note that somehow those frame manipulations dont quite work as expected;
@@ -656,11 +855,11 @@ namespace Poser {
 			ExtClass::Frame* origFrame = &frame->m_children[0];
 
 			D3DMATRIX transMatrix;
-			(*Shared::D3DXMatrixTranslation)(&transMatrix, targetSlider->translate.x, targetSlider->translate.y, targetSlider->translate.z);
+			(*Shared::D3DXMatrixTranslation)(&transMatrix, targetSlider->translate.value[X], targetSlider->translate.value[Y], targetSlider->translate.value[Z]);
 			D3DMATRIX rotMatrix;
-			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.y, targetSlider->rotate.x, targetSlider->rotate.z);
+			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
 			D3DMATRIX scaleMatrix;
-			(*Shared::D3DXMatrixScaling)(&scaleMatrix, targetSlider->scale.x, targetSlider->scale.y, targetSlider->scale.z);
+			(*Shared::D3DXMatrixScaling)(&scaleMatrix, targetSlider->scale.value[X], targetSlider->scale.value[Y], targetSlider->scale.value[Z]);
 			D3DMATRIX matrix = origFrame->m_matrix5;
 			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &transMatrix);
 			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &rotMatrix);
@@ -697,6 +896,51 @@ namespace Poser {
 						targetChar = c;
 				}
 			}
+		}
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE) {
+			targetChar = loc_loadCharacter;
+		}
+		else if (model == ExtClass::CharacterStruct::H3DROOM) {
+			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
+
+				//make copy of the bone first
+				Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+				memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+
+				//turn match into a copy of the root for now, since there are a lot of members i dont know
+				memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+
+				//change parent and child stuff
+				bone->m_parent = newMatch->m_parent;
+				bone->m_nChildren = 1;
+				bone->m_children = newMatch;
+				newMatch->m_parent = bone;
+				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+					newMatch->m_children[i].m_parent = newMatch;
+				}
+
+				//change name
+				int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
+				bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+				bone->m_nameBufferSize = namelength;
+				strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
+				strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+
+				auto match = loc_sliderInfosRoom.find(bone->m_name);
+				if (match != loc_sliderInfosRoom.end()) {
+					match->second.xxFrame = bone;
+					ApplySlider(&match->second);
+				}
+				else {
+					SliderInfo slider;
+					slider.descr = std::wstring(bone->m_name, bone->m_name + bone->m_nameBufferSize - 1);
+					slider.frameName = slider.descr;
+					slider.reset();
+					slider.xxFrame = bone;
+					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
+					ApplySlider(&slider);
+				}
+			});
 		}
 		else
 			return;
@@ -776,10 +1020,8 @@ namespace Poser {
 			
 			info.reset();
 
-			info.curAxis = 0;
-			info.curOperation = Rotate;
-
 			info.xxFrame = NULL;
+			info.setCurrentOperation(Rotate);
 
 			loc_sliderInfos.push_back(info);
 			loc_sliderCategories[category].push_back(loc_sliderInfos.size() - 1);
@@ -814,15 +1056,15 @@ namespace Poser {
 				auto match = loc_targetChar->FrameMap.find(elem.frameName);
 				if (match != loc_targetChar->FrameMap.end()) {
 					slider = &loc_targetChar->SliderInfos[match->second];
-					slider->rotate.x = elem.matrix[0];
-					slider->rotate.y = elem.matrix[1];
-					slider->rotate.z = elem.matrix[2];
-					slider->translate.x = elem.matrix[3];
-					slider->translate.y = elem.matrix[4];
-					slider->translate.z = elem.matrix[5];
-					slider->scale.x = elem.matrix[6];
-					slider->scale.y = elem.matrix[7];
-					slider->scale.z = elem.matrix[8];
+					slider->rotate.value[X] = elem.matrix[0];
+					slider->rotate.value[Y] = elem.matrix[1];
+					slider->rotate.value[Z] = elem.matrix[2];
+					slider->translate.value[X] = elem.matrix[3];
+					slider->translate.value[Y] = elem.matrix[4];
+					slider->translate.value[Z] = elem.matrix[5];
+					slider->scale.value[X] = elem.matrix[6];
+					slider->scale.value[Y] = elem.matrix[7];
+					slider->scale.value[Z] = elem.matrix[8];
 					ApplySlider(slider);
 				}
 			}
@@ -855,15 +1097,15 @@ namespace Poser {
 						array mods = (*s).second.get<array>();
 						if (mods.size() == 9) {
 							slider = &c->SliderInfos[match->second];
-							slider->rotate.x = (float)mods[0].get<double>();
-							slider->rotate.y = (float)mods[1].get<double>();
-							slider->rotate.z = (float)mods[2].get<double>();
-							slider->translate.x = (float)mods[3].get<double>();
-							slider->translate.y = (float)mods[4].get<double>();
-							slider->translate.z = (float)mods[5].get<double>();
-							slider->scale.x = (float)mods[6].get<double>();
-							slider->scale.y = (float)mods[7].get<double>();
-							slider->scale.z = (float)mods[8].get<double>();
+							slider->rotate.value[X] = (float)mods[0].get<double>();
+							slider->rotate.value[Y] = (float)mods[1].get<double>();
+							slider->rotate.value[Z] = (float)mods[2].get<double>();
+							slider->translate.value[X] = (float)mods[3].get<double>();
+							slider->translate.value[Y] = (float)mods[4].get<double>();
+							slider->translate.value[Z] = (float)mods[5].get<double>();
+							slider->scale.value[X] = (float)mods[6].get<double>();
+							slider->scale.value[Y] = (float)mods[7].get<double>();
+							slider->scale.value[Z] = (float)mods[8].get<double>();
 							ApplySlider(slider);
 						}
 						else {
@@ -925,15 +1167,15 @@ namespace Poser {
 		value::object sliders;
 		for (SliderInfo& slider : c->SliderInfos) {
 			value::array values(9);
-			values[0] = value((double)slider.rotate.x);
-			values[1] = value((double)slider.rotate.y);
-			values[2] = value((double)slider.rotate.z);
-			values[3] = value((double)slider.translate.x);
-			values[4] = value((double)slider.translate.y);
-			values[5] = value((double)slider.translate.z);
-			values[6] = value((double)slider.scale.x);
-			values[7] = value((double)slider.scale.y);
-			values[8] = value((double)slider.scale.z);
+			values[0] = value((double)slider.rotate.value[X]);
+			values[1] = value((double)slider.rotate.value[Y]);
+			values[2] = value((double)slider.rotate.value[Z]);
+			values[3] = value((double)slider.translate.value[X]);
+			values[4] = value((double)slider.translate.value[Y]);
+			values[5] = value((double)slider.translate.value[Z]);
+			values[6] = value((double)slider.scale.value[X]);
+			values[7] = value((double)slider.scale.value[Y]);
+			values[8] = value((double)slider.scale.value[Z]);
 			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
 		}
 		json["sliders"] = value(sliders);

@@ -19,9 +19,11 @@ public:
 		LeftLeg,
 		RightLeg,
 		Breasts,
+		Face,
 		Skirt,
 		Room,
-		Other
+		Other,
+		Prop
 	};
 	PoseMods(std::wstring path);
 	~PoseMods();

@@ -24,12 +24,15 @@ namespace Poser {
 	public:
 		void Init();
 		void Hide();
+		void NewCharacter(int index);
 	private:
 		HWND m_dialog;
 		HWND m_edCharacter;
 		HWND m_edPose;
 		HWND m_edFrame;
-		HWND m_edValue;
+		HWND m_edValueX;
+		HWND m_edValueY;
+		HWND m_edValueZ;
 		HWND m_edMouth;
 		HWND m_edMouthOpen;
 		HWND m_edEye;
@@ -50,16 +53,22 @@ namespace Poser {
 		HWND m_listCategories;
 		HWND m_listBones;
 		HWND m_listOperation;
-		HWND m_listAxis;
-		HWND m_sliderValue;
+		HWND m_sliderValueX;
+		HWND m_sliderValueY;
+		HWND m_sliderValueZ;
 		HWND m_chkEyeTrack;
 		HWND m_chkTears;
 		HWND m_chkDimEyes;
 		HWND m_chkTongueJuice;
+		HWND m_chkGlasses;
 		HWND m_chkAlwaysOnTop;
+		HWND m_tabModifiers;
+		HWND m_tabShowHide;
 		UINT_PTR m_timer;
 		int m_curBone;
 
+		void ApplyIncrement(int axis, int sign);
+		void SyncOperation();
 		void SyncBones();
 		void SyncEdit();
 		void SyncList();
