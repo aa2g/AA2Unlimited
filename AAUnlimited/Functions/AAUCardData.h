@@ -93,6 +93,7 @@ public:
 	bool SetTan(const TCHAR* name);
 
 	bool AddAAUDataSet(const TCHAR* name);
+	bool CopyAAUDataSet(const TCHAR* name);
 	bool RemoveAAUDataSet(int index);
 	void SwitchActiveAAUDataSet(int newSet);
 

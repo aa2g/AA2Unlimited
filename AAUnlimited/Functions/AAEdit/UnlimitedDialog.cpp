@@ -246,7 +246,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if(identifier == IDC_GN_BTNAAUSETADD) {
 				TCHAR buf[256];
 				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
-				g_currChar.m_cardData.AddAAUDataSet(buf);
+				g_currChar.m_cardData.CopyAAUDataSet(buf);
 				thisPtr->RefreshAAuSetList();
 				return TRUE;
 			}

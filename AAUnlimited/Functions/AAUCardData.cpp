@@ -535,11 +535,22 @@ bool AAUCardData::RemoveBoneTransformation(int index) {
 }
 
 bool AAUCardData::AddAAUDataSet(const TCHAR* name) {
-	for(auto& elem : m_aauSets) {
+	for (auto& elem : m_aauSets) {
 		if (elem.m_name == name) return false;
 	}
 	m_aauSets.resize(m_aauSets.size() + 1);
-	m_aauSets[m_aauSets.size()-1].m_name = name;
+	m_aauSets[m_aauSets.size() - 1].m_name = name;
+	return true;
+}
+
+bool AAUCardData::CopyAAUDataSet(const TCHAR * name)
+{
+	for (auto& elem : m_aauSets) {
+		if (elem.m_name == name) return false;
+	}
+	m_aauSets.resize(m_aauSets.size() + 1);
+	m_aauSets[m_aauSets.size() - 1] = m_aauSets[GetCurrAAUSet()];
+	m_aauSets[m_aauSets.size() - 1].m_name = name;
 	return true;
 }
 bool AAUCardData::RemoveAAUDataSet(int index) {

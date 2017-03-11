@@ -702,7 +702,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_BOOL_NOT, EXPRCAT_COMPARISION_BOOL,
-			TEXT("Not"), TEXT("!"), TEXT("Logical Not"),
+			TEXT("Not"), TEXT("! %p"), TEXT("Logical Not"),
 			{ TYPE_BOOL }, (TYPE_BOOL),
 			&Thread::BoolNot
 		},
