@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Functions\Shared\Triggers\Triggers.h"
+#include "Functions\Shared\Triggers\Module.h"
 
 /*
  * Describes a module, a set of triggers with information.
@@ -11,13 +12,15 @@
  */
 class ModuleFile {
 public:
-	ModuleFile(const std::wstring& name,const std::wstring description,const std::vector<Shared::Triggers::Trigger*>& triggers);
-	std::wstring name;
-	std::wstring description;
-	std::vector<Shared::Triggers::Trigger> triggers;
+	inline ModuleFile(const TCHAR* path) { FromFile(path); }
+	ModuleFile(const Shared::Triggers::Module& mod);
+	Shared::Triggers::Module mod;
+
 
 	void FromFile(const TCHAR* path);
 	void WriteToFile(const TCHAR* path);
+
+	char* ToBuffer(int& size, int& at);
 
 	inline bool IsGood() { return good; }
 private:

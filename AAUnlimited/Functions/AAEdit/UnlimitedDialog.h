@@ -4,6 +4,7 @@
 #include <CommCtrl.h>
 #include <vector>
 
+#include "Files\ModuleFile.h"
 #include "Functions\AAUCardData.h"
 #include "External\ExternalClasses\XXFile.h"
 #include "Functions\Shared\Triggers\Triggers.h"
@@ -268,7 +269,11 @@ namespace AAEdit {
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_trDialog;
 	struct MDDialog : public Dialog {
-
+		HWND m_lbModulesAvailable;
+		HWND m_lbModulesUsed;
+		HWND m_edName;
+		HWND m_edDescr;
+		std::vector<ModuleFile> m_modules;
 
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);

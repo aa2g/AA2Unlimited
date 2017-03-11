@@ -1818,13 +1818,98 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		MDDialog* thisPtr = (MDDialog*)lparam;
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_lbModulesAvailable = GetDlgItem(hwndDlg,IDC_MB_LBAVAILABLE);
+		thisPtr->m_lbModulesUsed = GetDlgItem(hwndDlg,IDC_MD_LBINUSE);
+		thisPtr->m_edName = GetDlgItem(hwndDlg,IDC_MD_EDNAME);
+		thisPtr->m_edDescr = GetDlgItem(hwndDlg,IDC_MD_EDDESCR);
+
 		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		MDDialog* thisPtr = (MDDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		DWORD identifier = LOWORD(wparam);
+		DWORD notification = HIWORD(wparam);
+		HWND wnd = (HWND)lparam;
+		switch (identifier) {
+		case IDC_MD_LBAVAILABLE:
+		case IDC_MD_LBINUSE:
+			if(notification == LBN_SELCHANGE) {
+				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
+				if(sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
+					SendMessage(thisPtr->m_edDescr,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+					return TRUE;
+				}
+			}
+			break;
+		case IDC_MD_BTNRIGHT:
+			if(notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesAvailable,LB_GETCURSEL,0,0);
+				if(sel != LB_ERR) {
+					g_currChar.m_cardData.AddModule(thisPtr->m_modules[sel].mod);
+					thisPtr->Refresh();
+				}
+			}
+			break;
+		case IDC_MD_BTNLEFT:
+			if (notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					g_currChar.m_cardData.RemoveModule(sel);
+					thisPtr->Refresh();
+				}
+			}
+			break;
+		case IDC_MD_BTNADDASTRIGGER:
+			if (notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					for(auto& trigger : g_currChar.m_cardData.GetModules()[sel].triggers) {
+						g_currChar.m_cardData.GetTriggers().push_back(trigger);
+					}
+				}
+				g_currChar.m_cardData.RemoveModule(sel);
+				thisPtr->Refresh();
+			}
+			break;
+		}
 		break; }
 	}
 	return FALSE;
 }
 
 void UnlimitedDialog::MDDialog::Refresh() {
+	//list available modules
+	m_modules.clear();
+	SendMessage(m_lbModulesAvailable,LB_RESETCONTENT,0,0);
+	std::wstring modDirectory = General::BuildOverridePath(MODULE_PATH,TEXT("*"));
+	if (!General::DirExists(modDirectory.c_str())) {
+		CreateDirectory(modDirectory.c_str(),NULL);
+	}
+	WIN32_FIND_DATA data;
+	HANDLE hSearch = FindFirstFile(modDirectory.c_str(),&data);
+
+	if (hSearch != INVALID_HANDLE_VALUE) {
+		BOOL suc = FALSE;
+		do {
+			if (!(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				ModuleFile mod(General::BuildOverridePath(MODULE_PATH,data.cFileName).c_str());
+				if(mod.IsGood()) {
+					m_modules.push_back(mod);
+					SendMessage(m_lbModulesAvailable,LB_ADDSTRING,0,(LPARAM)data.cFileName);
+				}
+			}
+			suc = FindNextFile(hSearch,&data);
+		} while (suc != FALSE);
+		FindClose(hSearch);
+	}
+
+	//list current modules
+	SendMessage(m_lbModulesUsed,LB_RESETCONTENT,0,0);
+	for(auto& elem : g_currChar.m_cardData.GetModules()) {
+		SendMessage(m_lbModulesUsed,LB_ADDSTRING,0,(LPARAM)elem.name.c_str());
+	}
+
 
 }
 

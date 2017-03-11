@@ -48,6 +48,7 @@
     <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\InfoData.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\NamedConstant.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Thread.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="Functions\Shared\Triggers\Event.h" />
     <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
     <ClInclude Include="Functions\Shared\Triggers\InfoData.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Module.h" />
     <ClInclude Include="Functions\Shared\Triggers\NamedConstant.h" />
     <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
     <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />

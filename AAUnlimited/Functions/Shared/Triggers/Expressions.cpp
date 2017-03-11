@@ -283,6 +283,62 @@ Value Thread::IsLover(std::vector<Value>& params) {
 	}
 	return Value(it == relations->m_end);
 }
+//int(int, string, int)
+Value Thread::GetCardStorageInt(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return params[2];
+	auto& storage = inst->m_cardData.GetCardStorage();
+	auto it = storage.find(*params[1].strVal);
+	if(it != storage.end() && it->second.type == TYPE_INT) {
+		return it->second;
+	}
+	else {
+		return params[2];
+	}
+}
+//float(int, string, float)
+Value Thread::GetCardStorageFloat(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return params[2];
+	auto& storage = inst->m_cardData.GetCardStorage();
+	auto it = storage.find(*params[1].strVal);
+	if (it != storage.end() && it->second.type == TYPE_FLOAT) {
+		return it->second;
+	}
+	else {
+		return params[2];
+	}
+}
+//string(int, string, string)
+Value Thread::GetCardStorageString(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return params[2];
+	auto& storage = inst->m_cardData.GetCardStorage();
+	auto it = storage.find(*params[1].strVal);
+	if (it != storage.end() && it->second.type == TYPE_STRING) {
+		return it->second;
+	}
+	else {
+		return params[2];
+	}
+}
+//bool(int, string, bool)
+Value Thread::GetCardStorageBool(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return params[2];
+	auto& storage = inst->m_cardData.GetCardStorage();
+	auto it = storage.find(*params[1].strVal);
+	if (it != storage.end() && it->second.type == TYPE_BOOL) {
+		return it->second;
+	}
+	else {
+		return params[2];
+	}
+}
 
 /*
  * Event Response
@@ -419,7 +475,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_NAMEDCONSTANT, EXPRCAT_GENERAL,
-			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
+			TEXT("Enumeration"), TEXT("Enumeration"), TEXT("A known constant with a name"),
 			{}, (TYPE_INVALID),
 			NULL
 		},
@@ -439,7 +495,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_NAMEDCONSTANT, EXPRCAT_GENERAL,
-			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
+			TEXT("Enumeration"), TEXT("Enumeration"), TEXT("A known constant with a name"),
 			{}, (TYPE_INT),
 			NULL
 		},
@@ -573,6 +629,14 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			{ TYPE_FLOAT }, (TYPE_INT),
 			&Thread::Float2Int
 		},
+		{
+			24, EXPRCAT_CHARPROP,
+			TEXT("Get Card Storage Int"), TEXT("Get %p 's Card Storage entry under %p , defaulting to %p on error"), 
+			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+			"it returns the default value instead"),
+			{ TYPE_INT, TYPE_STRING, TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardStorageInt
+		},
 	},
 
 	{ //BOOL
@@ -590,7 +654,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_NAMEDCONSTANT, EXPRCAT_GENERAL,
-			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
+			TEXT("Enumeration"), TEXT("Enumeration"), TEXT("A known constant with a name"),
 			{}, (TYPE_BOOL),
 			NULL
 		},
@@ -734,7 +798,15 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Not Equal"), TEXT("%p != %p"), TEXT("not equal"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::NotEqualsFloats
-		}
+		},
+		{
+			26, EXPRCAT_CHARPROP,
+			TEXT("Get Card Storage Bool"), TEXT("Get %p 's Card Storage entry under %p , defaulting to %p on error"),
+			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+			"it returns the default value instead"),
+			{ TYPE_INT, TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
+				&Thread::GetCardStorageBool
+		},
 	},
 	{ //FLOAT
 		{
@@ -751,7 +823,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_NAMEDCONSTANT, EXPRCAT_GENERAL,
-			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
+			TEXT("Enumeration"), TEXT("Enumeration"), TEXT("A known constant with a name"),
 			{}, (TYPE_FLOAT),
 			NULL
 		},
@@ -791,6 +863,14 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			{ TYPE_INT }, (TYPE_FLOAT),
 			&Thread::Int2Float
 		},
+		{
+			10,EXPRCAT_CHARPROP,
+			TEXT("Get Card Storage Float"),TEXT("Get %p 's Card Storage entry under %p , defaulting to %p on error"),
+			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+			"it returns the default value instead"),
+			{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
+				&Thread::GetCardStorageFloat
+		},
 	},
 	{ //STRING
 		{
@@ -807,7 +887,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			EXPR_NAMEDCONSTANT, EXPRCAT_GENERAL,
-			TEXT("Named Constant"), TEXT("Named Constant"), TEXT("A known constant with a name"),
+			TEXT("Enumeration"), TEXT("Enumeration"), TEXT("A known constant with a name"),
 			{}, (TYPE_STRING),
 			NULL
 		},
@@ -831,6 +911,14 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			"Note that this may or may not be the family name depending on how the card maker ordered these."),
 			{ TYPE_INT }, (TYPE_STRING),
 				&Thread::SubString
+		},
+		{
+			7, EXPRCAT_CHARPROP,
+			TEXT("Get Card Storage String"), TEXT("Get %p 's Card Storage entry under %p , defaulting to %p on error"),
+			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+			"it returns the default value instead"),
+			{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+				&Thread::GetCardStorageString
 		},
 	}
 

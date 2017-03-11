@@ -69,6 +69,16 @@ public:
 	void NpcTalkTo(std::vector<Value>& params);
 	void NpcTalkToAbout(std::vector<Value>& params);
 
+	void SetCardStorageInt(std::vector<Value>& params);
+	void SetCardStorageFloat(std::vector<Value>& params);
+	void SetCardStorageString(std::vector<Value>& params);
+	void SetCardStorageBool(std::vector<Value>& params);
+
+	void RemoveCardStorageInt(std::vector<Value>& params);
+	void RemoveCardStorageFloat(std::vector<Value>& params);
+	void RemoveCardStorageString(std::vector<Value>& params);
+	void RemoveCardStorageBool(std::vector<Value>& params);
+
 	//event response
 	void SetNpcResponseAnswer(std::vector<Value>& params);
 	void SetNpcResponsePercent(std::vector<Value>& params);	//int()
@@ -127,6 +137,12 @@ public:
 
 	//basic string stuff
 	Value SubString(std::vector<Value>& params); //string(string, int, int)
+
+	
+	Value GetCardStorageInt(std::vector<Value>& params); //int(int, string, int)
+	Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
+	Value GetCardStorageString(std::vector<Value>& params); //string(int, string, string)
+	Value GetCardStorageBool(std::vector<Value>& params); //bool(int, string, bool)
 
 	//Event Respone
 	//PERIOD_ENDS

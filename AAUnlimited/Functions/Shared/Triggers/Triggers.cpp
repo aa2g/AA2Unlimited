@@ -184,16 +184,12 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 	}
 }
 
-void Trigger::Initialize(std::vector<Variable>* globals,std::vector<Value>* values, int owningCard) {
+void Trigger::Initialize(std::vector<GlobalVariable>* globals, int owningCard) {
 	globalVars = globals;
-	globalValues = values;
 	this->owningCard = owningCard;
 
 	//check for global consistency
-	if((globalVars == NULL) ^ (globalValues == NULL)) {
-		broken = true;
-	}
-	else if(globalVars != NULL && globalVars->size() != globalValues->size()) {
+	if(globalVars == NULL) {
 		broken = true;
 	}
 
@@ -447,6 +443,13 @@ void Trigger::GUIAction::FixParents() {
 		elem->parent = this;
 		elem->FixParents();
 	}
+}
+
+
+Shared::Triggers::GlobalVariable::GlobalVariable(Variable & var) : id(0),type(var.type),name(var.name) {
+	defaultValue = var.defaultValue.constant;
+	currentValue = defaultValue;
+	initialized = false;
 }
 
 

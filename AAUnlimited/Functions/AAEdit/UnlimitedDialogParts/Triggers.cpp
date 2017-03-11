@@ -753,7 +753,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							for(int i = 0; i < selCount; i++) {
 								trigs.push_back(&triggers[selBuffer[i]]);
 							}
-							ModuleFile file(info.name,info.description,trigs);
+							Module mod(info.name, info.description, trigs, g_currChar.m_cardData.GetGlobalVariables());
+							ModuleFile file(mod);
 							file.WriteToFile(path.c_str());
 						}
 
@@ -1030,7 +1031,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 			auto& elem = list[i];
 			std::wstring str = g_Types[elem.type].name + TEXT(" ") + elem.name;
 			str += TEXT(" = ");
-			str += thisPtr->ExpressionToString(elem.defaultValue);
+			ParameterisedExpression dummy(elem.type,elem.defaultValue);
+			str += thisPtr->ExpressionToString(dummy);
 			int ret = SendMessage(lb,LB_ADDSTRING,0,(LPARAM)str.c_str());
 
 		}
@@ -1053,13 +1055,12 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 				data.thisPtr = thisPtr;
 				data.var.defaultValue.expression = NULL;
 				data.onlyConstantInit = true;
+				data.checkGlobalNameConflict = true;
 				data.var.type = TYPE_INVALID;
 				int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDVARIABLE),hwndDlg,&AddVariableDialogProc,(LPARAM)&data);
 				if(result == 1) {
 					auto& list = g_currChar.m_cardData.GetGlobalVariables();
-					auto& valList = g_currChar.m_cardData.GetGlobalVarValues();
 					list.push_back(data.var);
-					valList.push_back(data.var.defaultValue.constant);
 					std::wstring str = g_Types[data.var.type].name + TEXT(" ") + data.var.name;
 					str += TEXT(" = ");
 					str += thisPtr->ExpressionToString(data.var.defaultValue);
@@ -1079,8 +1080,6 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 				if(sel != LB_ERR) {
 					auto& list = g_currChar.m_cardData.GetGlobalVariables();
 					list.erase(list.begin() + sel);
-					auto& varList = g_currChar.m_cardData.GetGlobalVarValues();
-					varList.erase(varList.begin() + sel);
 					SendMessage(GetDlgItem(hwndDlg,IDC_TR_GV_LBLIST),LB_DELETESTRING,sel,0);
 				}
 				return TRUE;
@@ -1256,23 +1255,27 @@ void loc_SelectVariableData::SelectFromComboBox(HWND dlg,int index) {
 	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STDESCR),FALSE);
 	ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
 
-
-	const Variable* var;
+	Types varType;
 	if (index & GLOBAL_VAR_FLAG) {
 		//global variable
 		index &= ~GLOBAL_VAR_FLAG;
-		var = &g_currChar.m_cardData.GetGlobalVariables()[index];
+		const GlobalVariable* var = &g_currChar.m_cardData.GetGlobalVariables()[index];
+		variable.expression = Expression::FromId(var->type,EXPR_VAR);
+		variable.varName = var->name;
+		varType = var->type;
 	}
 	else {
 		//local variable
-		var = &thisPtr->m_currentTrigger->vars[index];
+		const Variable* var; var = &thisPtr->m_currentTrigger->vars[index];
+		variable.expression = Expression::FromId(var->type,EXPR_VAR);
+		variable.varName = var->name;
+		varType = var->type;
 	}
-	variable.expression = &g_Expressions[var->type][1];
-	variable.varName = var->name;
+	
 	valid.resize(2);
 	valid[0] = true;
 	//invalidate expression if type doesnt fit
-	if (valid[1] && variable.actualParameters[1].expression->returnType != var->type) {
+	if (valid[1] && variable.actualParameters[1].expression->returnType != varType) {
 		valid[1] = false;
 	}
 
@@ -1526,11 +1529,17 @@ void loc_AddExpressionData::SelectFromComboBox(HWND dlg,int index) {
 		ShowWindow(GetDlgItem(dlg,IDC_TR_AA_STNAME),FALSE);
 		EnableWindow(GetDlgItem(dlg,IDC_TR_AA_BTNADD),FALSE);
 
-
 		HWND cb = GetDlgItem(dlg,IDC_TR_AA_CBVAR);
 		SendMessage(cb,CB_RESETCONTENT,0,0);
 		Types type = expression.expression->returnType;
 		for (auto& elem : thisPtr->m_currentTrigger->vars) {
+			if (elem.type == type) {
+				SendMessage(cb,CB_ADDSTRING,0,(LPARAM)elem.name.c_str());
+			}
+		}
+		//add globals as well
+		auto& list = g_currChar.m_cardData.GetGlobalVariables();
+		for(auto& elem : list) {
 			if (elem.type == type) {
 				SendMessage(cb,CB_ADDSTRING,0,(LPARAM)elem.name.c_str());
 			}
@@ -1859,6 +1868,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddActionDialogProc(_In_ HWND hwndDl
 void UnlimitedDialog::TRDialog::DoAddVariable() {
 	loc_AddVariableData data;
 	data.thisPtr = this;
+	data.checkLocalNameConflict = true;
 	data.var.defaultValue.expression = NULL;
 	data.var.type = TYPE_INVALID;
 	int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDVARIABLE),m_dialog,&AddVariableDialogProc,(LPARAM)&data);
@@ -1926,12 +1936,32 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 				loc_AddVariableData* data = (loc_AddVariableData*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 				std::wstring name = General::GetEditString(wnd);
 				data->var.name = name;
-				if(data->var.name.size() > 0 && data->thisPtr->m_currentTrigger->FindVar(name) == NULL && data->var.defaultValue.expression != NULL) {
+				bool valid = false;
+
+				if(data->var.name.size() > 0  && data->var.defaultValue.expression != NULL) {
+					valid = true;
+				}
+				if(data->checkLocalNameConflict) {
+					if(data->thisPtr->m_currentTrigger->FindVar(name) != NULL) {
+						valid = false;
+					}
+				}
+				if(data->checkGlobalNameConflict) {
+					auto& globals = g_currChar.m_cardData.GetGlobalVariables();
+					for(auto& var : globals) {
+						if(var.name == data->var.name) {
+							valid = false;
+							break;
+						}
+					}
+				}
+				if(valid) {
 					EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AV_BTNADD),TRUE);
 				}
 				else {
 					EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AV_BTNADD),FALSE);
 				}
+				
 				return TRUE;
 			}
 			break;
@@ -1957,7 +1987,15 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 					int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDACTION),hwndDlg,&AddActionDialogProc,(LPARAM)&edata);
 					if(result == 1) {
 						data->var.defaultValue = edata.expression;
-						if (data->var.name.size() > 0 && data->thisPtr->m_currentTrigger->FindVar(data->var.name) == NULL) {
+						auto& existingGlobals = g_currChar.m_cardData.GetGlobalVariables();
+						bool found = false;
+						for(auto& var : existingGlobals) {
+							if(var.name == data->var.name) {
+								found = true;
+								break;
+							}
+						}
+						if (data->var.name.size() > 0 && !found) {
 							EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AV_BTNADD),TRUE);
 						}
 						std::wstring valueName = data->thisPtr->ExpressionToString(data->var.defaultValue);

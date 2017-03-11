@@ -30,7 +30,7 @@ void InitOnLoad() {
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
 		for (auto& trg : aauData.GetTriggers()) {
-			trg.Initialize(&aauData.GetGlobalVariables(),&aauData.GetGlobalVarValues(), seat);
+			trg.Initialize(&aauData.GetGlobalVariables(), seat);
 		}
 		//throw init event
 		CardInitializeData data;
@@ -46,7 +46,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	//initialize triggers
 	auto& aauData = g_characters[seat].m_cardData;
 	for (auto& trg : aauData.GetTriggers()) {
-		trg.Initialize(&aauData.GetGlobalVariables(),&aauData.GetGlobalVarValues(),seat);
+		trg.Initialize(&aauData.GetGlobalVariables(),seat);
 	}
 	//throw init event
 	CardInitializeData data;

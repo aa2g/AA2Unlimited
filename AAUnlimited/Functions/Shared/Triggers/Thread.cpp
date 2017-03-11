@@ -12,7 +12,7 @@ Thread::GlobalStorage Thread::globalStorage;
 
 void Thread::ExecuteTrigger(Trigger* trg) {
 	if (trg == NULL) return;
-	if (!trg->IsInitalized()) trg->Initialize(NULL,NULL,-1);
+	if (!trg->IsInitalized()) trg->Initialize(NULL,-1);
 	if (trg->IsBroken()) return;
 	executeCount = 0;
 	maxExecuteCount = 1000;
@@ -49,7 +49,7 @@ bool Thread::ExecuteAction(ParameterisedAction& action) {
 		int varId = action.actualParameters[0].varId;
 		if(varId & GLOBAL_VAR_FLAG) {
 			Value val = EvaluateExpression(action.actualParameters[1]);
-			(*this->execTrigger->globalValues)[varId & ~GLOBAL_VAR_FLAG] = val;
+			(*this->execTrigger->globalVars)[varId & ~GLOBAL_VAR_FLAG].currentValue = val;
 		}
 		else {
 			VariableInstance* var = &localStorage.vars[varId];
@@ -87,7 +87,7 @@ Value Thread::EvaluateExpression(ParameterisedExpression& expr) {
 	else if (expr.expression->id == EXPR_VAR) {
 		//variable
 		if(expr.varId & GLOBAL_VAR_FLAG) {
-			return (*this->execTrigger->globalValues)[expr.varId & ~GLOBAL_VAR_FLAG];
+			return (*this->execTrigger->globalVars)[expr.varId & ~GLOBAL_VAR_FLAG].currentValue;
 		}
 		else {
 			VariableInstance* var = &localStorage.vars[expr.varId];

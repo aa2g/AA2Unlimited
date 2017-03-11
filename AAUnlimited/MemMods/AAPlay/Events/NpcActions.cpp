@@ -31,11 +31,11 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	using namespace Shared::Triggers;
 	using namespace AAPlay;
 	NpcResponseData data;
-	data.card = GetSeatFromStruct(askingChar->m_thisChar);
-	data.answeredTowards = GetSeatFromStruct(answerChar->m_thisChar);
+	data.card = GetSeatFromStruct(answerChar->m_thisChar);
+	data.answeredTowards = GetSeatFromStruct(askingChar->m_thisChar); 
 	data.originalResponse = originalReturn;
 	data.changedResponse = data.originalResponse;
-	data.conversationId = answerChar->m_currConversationId;
+	data.conversationId = askingChar->m_currConversationId; //this id is not set for the answerChar in case of minna
 	data.originalChance = answerChar->m_lastConversationAnswerPercent;
 	ThrowEvent(&data);
 	return data.changedResponse;

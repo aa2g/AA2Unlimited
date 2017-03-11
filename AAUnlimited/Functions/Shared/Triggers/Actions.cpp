@@ -253,6 +253,82 @@ void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
 	aau.SwitchActiveAAUDataSet(newset);
 }
 
+//int card, string keyname, int value
+void Thread::SetCardStorageInt(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+}
+//int card, string keyname, float value
+void Thread::SetCardStorageFloat(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+}
+//int card, string keyname, string value
+void Thread::SetCardStorageString(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+}
+//int card, string keyname, bool value
+void Thread::SetCardStorageBool(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+}
+
+//int card, string keyname
+void Thread::RemoveCardStorageInt(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	auto& atoms = inst->m_cardData.GetCardStorage();
+	auto it = atoms.find(*params[1].strVal);
+	if(it != atoms.end() && it->second.type == TYPE_INT) {
+		atoms.erase(it);
+	}
+}
+
+//int card, string keyname
+void Thread::RemoveCardStorageFloat(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	auto& atoms = inst->m_cardData.GetCardStorage();
+	auto it = atoms.find(*params[1].strVal);
+	if (it != atoms.end() && it->second.type == TYPE_FLOAT) {
+		atoms.erase(it);
+	}
+}
+
+//int card, string keyname
+void Thread::RemoveCardStorageString(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	auto& atoms = inst->m_cardData.GetCardStorage();
+	auto it = atoms.find(*params[1].strVal);
+	if (it != atoms.end() && it->second.type == TYPE_STRING) {
+		atoms.erase(it);
+	}
+}
+
+//int card, string keyname
+void Thread::RemoveCardStorageBool(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* inst = &AAPlay::g_characters[card];
+	if (!inst->IsValid()) return;
+	auto& atoms = inst->m_cardData.GetCardStorage();
+	auto it = atoms.find(*params[1].strVal);
+	if (it != atoms.end() && it->second.type == TYPE_BOOL) {
+		atoms.erase(it);
+	}
+}
 
 /* 
  * A list of all action categories
@@ -426,6 +502,62 @@ std::vector<Action> g_Actions = {
 		"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
 		{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 		&Thread::NpcTalkToAbout
+	},
+	{
+		24, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Integer"), TEXT("Set %p 's Card Storage entry under %p to %p"),
+		TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
+		"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+		"When the key is allready in use, the function will silently fail."),
+		{ TYPE_INT, TYPE_STRING, TYPE_INT },
+		&Thread::SetCardStorageInt
+	},
+	{
+		25, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Float"), TEXT("Set %p 's Card Storage entry under %p to %p"),
+		TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
+		"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+			"When the key is allready in use, the function will silently fail."),
+			{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },
+			&Thread::SetCardStorageFloat
+	},
+	{
+		26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("Set %p 's Card Storage entry under %p to %p"),
+		TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
+		"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+			"When the key is allready in use, the function will silently fail."),
+			{ TYPE_INT, TYPE_STRING, TYPE_STRING },
+			&Thread::SetCardStorageString
+	},
+	{
+		27, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Bool"), TEXT("Set %p 's Card Storage entry under %p to %p"),
+		TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
+		"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+			"When the key is allready in use, the function will silently fail."),
+			{ TYPE_INT, TYPE_STRING, TYPE_BOOL },
+		&Thread::SetCardStorageBool
+	},
+	{
+		28, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Integer"), TEXT("Remove %p 's Card Storage entry under %p"),
+		TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain an int, this function will fail."),
+		{ TYPE_INT, TYPE_STRING },
+		&Thread::RemoveCardStorageInt
+	},
+	{
+		29, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Float"), TEXT("Remove %p 's Card Storage entry under %p"),
+		TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a float, this function will fail."),
+		{ TYPE_INT, TYPE_STRING },
+		&Thread::RemoveCardStorageFloat
+	},
+	{
+		30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("Remove %p 's Card Storage entry under %p"),
+		TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a string, this function will fail."),
+		{ TYPE_INT, TYPE_STRING },
+		&Thread::RemoveCardStorageString
+	},
+	{
+		31, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Bool"), TEXT("Remove %p 's Card Storage entry under %p"),
+		TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a bool, this function will fail."),
+		{ TYPE_INT, TYPE_STRING },
+		&Thread::RemoveCardStorageBool
 	},
 };
 

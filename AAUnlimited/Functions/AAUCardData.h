@@ -8,6 +8,7 @@
 #include "TextureImage.h"
 #include "OverrideFile.h"
 #include "XXObjectFile.h"
+#include "Shared\Triggers\Module.h"
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "Functions\Shared\Triggers\Triggers.h"
 
@@ -95,6 +96,10 @@ public:
 	bool RemoveAAUDataSet(int index);
 	void SwitchActiveAAUDataSet(int newSet);
 
+	bool AddModule(const TCHAR* moduleName);
+	bool AddModule(const Shared::Triggers::Module& mod);
+	bool RemoveModule(int index);
+
 	void SaveOverrideFiles();
 	bool DumpSavedOverrideFiles();
 
@@ -181,9 +186,10 @@ public:
 	const std::vector<HairPart>&				GetHairs(BYTE kind);
 	//aausetdata end
 
-	std::vector<Shared::Triggers::Trigger>&		GetTriggers();
-	std::vector<Shared::Triggers::Variable>&	GetGlobalVariables();
-	std::vector<Shared::Triggers::Value>&		GetGlobalVarValues();
+	std::vector<Shared::Triggers::Trigger>&			GetTriggers();
+	std::vector<Shared::Triggers::GlobalVariable>&	GetGlobalVariables();
+	const std::vector<Shared::Triggers::Module>&	GetModules() const;
+	std::map<std::wstring,Shared::Triggers::Value>& GetCardStorage();
 		
 	const std::vector<BoneRuleV2>				GetMeshRuleList();
 	const std::map<std::wstring,std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName);
@@ -248,9 +254,10 @@ private:
 	std::vector<AAUDataSet> m_aauSets;
 	int m_currAAUSet;
 
-	std::vector<Shared::Triggers::Variable> m_globalVars;
-	std::vector<Shared::Triggers::Value> m_globalVarValues;
+	std::vector<Shared::Triggers::GlobalVariable> m_globalVars;
 	std::vector<Shared::Triggers::Trigger> m_triggers;
+	std::vector<Shared::Triggers::Module> m_modules;
+	std::map<std::wstring,Shared::Triggers::Value> m_cardStorage;
 
 	std::vector<SavedFile> m_savedFiles;
 
@@ -352,9 +359,11 @@ inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind
 
 inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { return m_triggers; }
 
-inline std::vector<Shared::Triggers::Variable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
+inline std::vector<Shared::Triggers::GlobalVariable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
 
-inline std::vector<Shared::Triggers::Value>& AAUCardData::GetGlobalVarValues() { return m_globalVarValues; }
+inline const std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() const { return m_modules; }
+
+inline std::map<std::wstring,Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
 
 inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_boneRules; }
 inline const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {

@@ -6,6 +6,7 @@
 #include <exception>
 
 #include "Shared\Triggers\Triggers.h"
+#include "Shared\Triggers\Module.h"
 #include "General\Buffer.h"
 
 namespace Serialize {
@@ -86,7 +87,9 @@ T ReadData(char*& buffer,int& size);
 	Shared::Triggers::Trigger::GUIAction ReadData_sub(char*& buffer,int& size,Shared::Triggers::Trigger::GUIAction*);
 	Shared::Triggers::ParameterisedExpression ReadData_sub(char*& buffer,int& size,Shared::Triggers::ParameterisedExpression*);
 	Shared::Triggers::Variable ReadData_sub(char*& buffer,int& size,Shared::Triggers::Variable*);
+	Shared::Triggers::GlobalVariable ReadData_sub(char*& buffer,int& size,Shared::Triggers::GlobalVariable*);
 	Shared::Triggers::Value ReadData_sub(char*& buffer,int& size,Shared::Triggers::Value*);
+	Shared::Triggers::Module ReadData_sub(char*& buffer,int& size,Shared::Triggers::Module*);
 
 //write help functions
 template<typename T>
@@ -110,7 +113,9 @@ bool WriteData(char** buffer,int* size,int& at,const T& data,bool resize);
 	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Trigger::GUIAction& data,bool resize,Shared::Triggers::Trigger::GUIAction*);
 	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::ParameterisedExpression& data,bool resize,Shared::Triggers::ParameterisedExpression*);
 	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Variable& data,bool resize,Shared::Triggers::Variable*);
+	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::GlobalVariable& data,bool resize,Shared::Triggers::GlobalVariable*);
 	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Value& data,bool resize,Shared::Triggers::Value*);
+	bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Module& data,bool resize,Shared::Triggers::Module*);
 
 
 template<typename T>
@@ -184,7 +189,6 @@ std::map<T,U> ReadData_sub(char *& buffer,int & size,std::map<T,U>*)
 {
 	DWORD length = ReadData<DWORD>(buffer,size);
 	std::map<T,U> retVal;
-	retVal.reserve(length);
 	for (int i = 0; i < length; i++) {
 		T tval = ReadData<T>(buffer,size);
 		U uval = ReadData<U>(buffer,size);
@@ -273,6 +277,18 @@ inline Shared::Triggers::Variable ReadData_sub(char*& buffer,int& size,Shared::T
 	return retVal;
 }
 
+inline Shared::Triggers::GlobalVariable ReadData_sub(char*& buffer,int& size,Shared::Triggers::GlobalVariable*)
+{
+	using namespace Shared::Triggers;
+	GlobalVariable retVal;
+	retVal.type = ReadData<Types>(buffer,size);
+	retVal.name = ReadData<std::wstring>(buffer,size);
+	retVal.defaultValue = ReadData<decltype(retVal.defaultValue)>(buffer,size);
+	retVal.currentValue = ReadData<decltype(retVal.currentValue)>(buffer,size);
+	retVal.initialized = ReadData<bool>(buffer,size);
+	return retVal;
+}
+
 inline Shared::Triggers::Value ReadData_sub(char*& buffer,int& size,Shared::Triggers::Value*)
 {
 	using namespace Shared::Triggers;
@@ -295,6 +311,17 @@ inline Shared::Triggers::Value ReadData_sub(char*& buffer,int& size,Shared::Trig
 		break;
 	}
 	return retVal;
+}
+
+inline Shared::Triggers::Module ReadData_sub(char*& buffer,int& size,Shared::Triggers::Module*)
+{
+	using namespace Shared::Triggers;
+	Module mod;
+	mod.name = ReadData<std::wstring>(buffer,size);
+	mod.description = ReadData<std::wstring>(buffer,size);
+	mod.triggers = ReadData<decltype(mod.triggers)>(buffer,size);
+	mod.globals = ReadData<decltype(mod.globals)>(buffer,size);
+	return mod;
 }
 
 /***************************/
@@ -428,6 +455,16 @@ inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers
 	ret &= WriteData(buffer,size,at,data.defaultValue,resize);
 	return ret;
 }
+inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::GlobalVariable& data,bool resize,Shared::Triggers::GlobalVariable*) 
+{
+	bool ret = true;
+	ret &= WriteData(buffer,size,at,data.type,resize);
+	ret &= WriteData(buffer,size,at,data.name,resize);
+	ret &= WriteData(buffer,size,at,data.defaultValue,resize);
+	ret &= WriteData(buffer,size,at,data.currentValue,resize);
+	ret &= WriteData(buffer,size,at,data.initialized,resize);
+	return ret;
+}
 inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Value& data,bool resize,Shared::Triggers::Value*)
 {
 	using namespace Shared::Triggers;
@@ -453,5 +490,15 @@ inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers
 	return ret;
 }
 
+inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers::Module& data,bool resize,Shared::Triggers::Module*) 
+{
+	using namespace Shared::Triggers;
+	bool ret = true;
+	WriteData(buffer,size,at,data.name,resize);
+	WriteData(buffer,size,at,data.description,resize);
+	WriteData(buffer,size,at,data.triggers,resize);
+	WriteData(buffer,size,at,data.globals,resize);
+	return ret;
+}
 
 }

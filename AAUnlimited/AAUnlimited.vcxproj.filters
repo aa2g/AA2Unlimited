@@ -97,6 +97,7 @@
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="External\ExternalClasses\TimeData.h" />
     <ClInclude Include="Functions\Serialize.h" />
     <ClInclude Include="Files\ModuleFile.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Module.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

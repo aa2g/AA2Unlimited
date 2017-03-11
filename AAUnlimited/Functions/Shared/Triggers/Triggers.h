@@ -36,6 +36,19 @@ namespace Triggers {
 		Value currValue;
 	};
 
+	class GlobalVariable {
+	public:
+		DWORD id;
+		Types type;
+		std::wstring name;
+		Value defaultValue;
+		Value currentValue;
+		bool initialized;
+
+		inline GlobalVariable() : initialized(false) {}
+		GlobalVariable(Variable& var);
+	};
+
 	class Trigger {
 	public:
 		std::wstring name;
@@ -59,11 +72,10 @@ namespace Triggers {
 
 		std::vector<ParameterisedAction> actions;
 
-		std::vector<Variable>* globalVars;
-		std::vector<Value>* globalValues;
+		std::vector<GlobalVariable>* globalVars;
 		int owningCard;
 
-		void Initialize(std::vector<Variable>* globals,std::vector<Value>* values, int owningCard);	//has to be called on an instance before a thread can execute it
+		void Initialize(std::vector<GlobalVariable>* globals, int owningCard);	//has to be called on an instance before a thread can execute it
 
 		static const int INSERT_START = -1;
 		static const int INSERT_END = -2;

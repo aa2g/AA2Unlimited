@@ -5,13 +5,10 @@
 #include "General\Util.h"
 using namespace Serialize;
 
-ModuleFile::ModuleFile(const std::wstring & name,const std::wstring description,const std::vector<Shared::Triggers::Trigger*>& triggers)
-	: name(name), description(description), good(false)
+ModuleFile::ModuleFile(const Shared::Triggers::Module& mod)
 {
-	this->triggers.reserve(triggers.size());
-	for(Shared::Triggers::Trigger* t : triggers) {
-		this->triggers.push_back(*t);
-	}
+	good = false;
+	this->mod = mod;
 	good = true;
 }
 
@@ -33,9 +30,7 @@ void ModuleFile::FromFile(const TCHAR* path) {
 	char* bufCpy = buffer;
 	int sizeCpy = lo;
 	try {
-		this->name = ReadData<std::wstring>(bufCpy,sizeCpy);
-		this->description = ReadData<std::wstring>(bufCpy,sizeCpy);
-		this->triggers = ReadData<decltype(triggers)>(bufCpy,sizeCpy);
+		mod = ReadData<decltype(mod)>(bufCpy,sizeCpy);
 		good = true;
 	}
 	catch(InsufficientBufferException e) {
@@ -51,13 +46,9 @@ void ModuleFile::FromFile(const TCHAR* path) {
 
 void ModuleFile::WriteToFile(const TCHAR* path) {
 	if (!good) return;
-	char* buffer = NULL;
-	int size = 0;
-	int at = 0;
-
-	WriteData(&buffer,&size,at,name,true);
-	WriteData(&buffer,&size,at,description,true);
-	WriteData(&buffer,&size,at,triggers,true);
+	int size,at;
+	char* buffer = ToBuffer(size,at);
+	if (!buffer) return;
 
 	General::CreatePathForFile(path);
 	HANDLE file = CreateFile(path,GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_ALWAYS,0,NULL);
@@ -73,5 +64,15 @@ void ModuleFile::WriteToFile(const TCHAR* path) {
 
 	delete[] buffer;
 
+}
+
+char * ModuleFile::ToBuffer(int& size,int& at) {
+	if (!good) return NULL;
+	char* buffer = NULL;
+	size = 0;
+	at = 0;
+
+	WriteData(&buffer,&size,at,mod,true);
+	return buffer;
 }
 

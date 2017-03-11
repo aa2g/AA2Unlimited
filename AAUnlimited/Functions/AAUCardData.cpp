@@ -13,6 +13,7 @@
 #include "General\Util.h"
 #include "Files\Logger.h"
 #include "Files\Config.h"
+#include "Files\ModuleFile.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
 
 const AAUCardData AAUCardData::g_defaultValues;
@@ -225,9 +226,13 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				m_globalVars = ReadData<decltype(m_globalVars)>(buffer,size);
 				LOGPRIO(Logger::Priority::SPAM) << "found TrGv, loaded " << m_globalVars.size() << " elements\r\n";
 				break;
-			case 'TrGV':
-				m_globalVarValues = ReadData<decltype(m_globalVarValues)>(buffer,size);
-				LOGPRIO(Logger::Priority::SPAM) << "found TrGV, loaded " << m_globalVarValues.size() << " elements\r\n";
+			case 'TrMd':
+				m_modules = ReadData<decltype(m_modules)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found TrMd, loaded " << m_modules.size() << " elements\r\n";
+				break;
+			case 'TrAt':
+				m_cardStorage = ReadData<decltype(m_cardStorage)>(buffer,size);
+				LOGPRIO(Logger::Priority::SPAM) << "found TrAt, loaded " << m_cardStorage.size() << " elements\r\n";
 				break;
 			}
 		}
@@ -385,8 +390,9 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	}
 	
 	DUMP_MEMBER_CONTAINER('TrGv',m_globalVars);
-	DUMP_MEMBER_CONTAINER('TrGV',m_globalVarValues);
 	DUMP_MEMBER_CONTAINER('Trgs',m_triggers);
+	DUMP_MEMBER_CONTAINER('TrMd',m_modules);
+	DUMP_MEMBER_CONTAINER('TrAt',m_cardStorage);
 
 	DUMP_MEMBER_CONTAINER('File',m_savedFiles);
 	DUMP_MEMBER_CONTAINER('BnT2',m_boneRules);
@@ -997,6 +1003,54 @@ bool AAUCardData::RemoveHair(int index) {
 	auto vMatch = m_aauSets[m_currAAUSet].m_hairs[kind].begin() + index;
 	m_aauSets[m_currAAUSet].m_hairs[kind].erase(vMatch);
 	return true; 
+}
+
+bool AAUCardData::AddModule(const TCHAR* moduleName) {
+	ModuleFile modFile(moduleName);
+	if(modFile.IsGood()) {
+		AddModule(modFile.mod);
+		return true;
+	}
+	return false;
+}
+
+bool AAUCardData::AddModule(const Shared::Triggers::Module& mod) {
+	bool globalConflict = false;
+	//check for globals in this module
+	for(auto& global : mod.globals) {
+		//search in our globals if we allready have this one
+		Shared::Triggers::GlobalVariable* var = NULL;
+		for(auto& ourGlobal : m_globalVars) {
+			if(ourGlobal.name == global.name) {
+				var = &ourGlobal;
+				break;
+			}
+		}
+		if(var == NULL) {
+			//new var, add
+
+		}
+		else {
+			//allready have this var
+			globalConflict = true;
+		}
+		
+	}
+
+	if(!globalConflict) {
+		m_modules.push_back(mod);
+		m_globalVars.insert(m_globalVars.end(), mod.globals.begin(), mod.globals.end());
+	}
+	
+	return true;
+}
+
+bool AAUCardData::RemoveModule(int index) {
+	if(index < 0 || (size_t)index >= m_modules.size()) {
+		return false;
+	}
+	m_modules.erase(m_modules.begin() + index);
+	return true;
 }
 
 /********************************/
