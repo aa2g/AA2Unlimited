@@ -5167,6 +5167,7 @@ call AA2Edit.exe+213EB8
         <Element Offset="115616" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="115696" Vartype="Float" Bytesize="4" Description="start of that array; each element 70 in size. also, pose?" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="117288" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="117308" Vartype="Byte" Bytesize="1" Description="draw flag?" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
       </Elements>
     </Structure>
     <Structure Name="bone" AutoFill="0" AutoCreate="1" DefaultHex="0" AutoDestroy="0" DoNotSaveLocal="0" AutoCreateStructsize="4096">
@@ -5278,7 +5279,9 @@ call AA2Edit.exe+213EB8
         <Element Offset="444" Vartype="Array of byte" Bytesize="40" Description="again variable size, at least 40" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="508" Vartype="Pointer" Bytesize="4" ChildStruct="xxFile" Description="xx file containing this bone" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="512" Vartype="Array of byte" Bytesize="40" Description="more flags? dont know purpose/size" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="521" Vartype="Byte" Bytesize="1" Description="??? (0 shows, 2 doesnt. why 2?)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="520" Vartype="Byte" Bytesize="1" Description="dontRefreshMatrix2Flag" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="521" Vartype="Byte" Bytesize="1" Description="visibility flag? (must be 2 to be visible)" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="522" Vartype="Byte" Bytesize="1" Description="combined out of the former 2" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="604" Vartype="4 Bytes" Bytesize="4" Description="read from file, size for something dynamic" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="608" Vartype="4 Bytes" Bytesize="4" Description="pointer to said dynamic memory, some string" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="612" Vartype="4 Bytes" Bytesize="4" Description="intially 0" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
@@ -10565,8 +10568,8 @@ call AA2Edit.exe+213EB8
         <Element Offset="396" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="400" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="404" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
-        <Element Offset="408" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="408" Vartype="Float" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
+        <Element Offset="408" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="412" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="416" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>
         <Element Offset="420" Vartype="4 Bytes" Bytesize="4" DisplayMethod="Unsigned Integer" BackgroundColor="80000005"/>

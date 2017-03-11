@@ -75,7 +75,7 @@ const TextureImage* HairHighlightOverride(wchar_t* texture) {
 bool HairRedirect(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
 	//jg2e(l)02_01|2|3|4_*.pp. file names AS00_20|1|2|3_slot_flip.xx|xa|bps
 	//first, check if archive fits
-	TCHAR* archiveFile = General::FindFileInPath(*archive);
+	/*TCHAR* archiveFile = General::FindFileInPath(*archive);
 	if (!General::StartsWith(archiveFile, TEXT("jg2e02_0"))) return false;
 	wchar_t* it = archiveFile + 8;
 	wchar_t* archiveKindIt = it;
@@ -104,7 +104,8 @@ bool HairRedirect(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** ou
 	*archiveKindIt = wcNewCat;
 	*fileKindIt = wcNewCat;
 
-	return false; //return false anyway, since this is merely a redirect
+	return false; //return false anyway, since this is merely a redirect*/
+	return false;
 }
 
 

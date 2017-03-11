@@ -88,6 +88,42 @@ inline float GetEditFloat(HWND ed) {
 	return (float)_wtof(tempbuf);
 }
 
+inline std::wstring GetEditString(HWND ed) {
+	int count = SendMessage(ed,WM_GETTEXTLENGTH,0,0);
+	std::wstring retVal;
+	retVal.reserve(count);
+	if(count < 1024) {
+		TCHAR buffer[1024];
+		SendMessage(ed,WM_GETTEXT,count+1,(LPARAM)buffer);
+		retVal = buffer;
+	}
+	else {
+		TCHAR* buffer = new TCHAR[count+1];
+		SendMessage(ed,WM_GETTEXT,count+1,(LPARAM)buffer);
+		retVal = buffer;
+		delete[] buffer;
+	}
+	return retVal;
+}
+
+inline std::wstring GetComboBoxString(HWND cb, int index) {
+	int count = SendMessage(cb,CB_GETLBTEXTLEN,index,0);
+	std::wstring retVal;
+	retVal.reserve(count);
+	if (count < 1024) {
+		TCHAR buffer[1024];
+		SendMessage(cb,CB_GETLBTEXT,index,(LPARAM)buffer);
+		retVal = buffer;
+	}
+	else {
+		TCHAR* buffer = new TCHAR[count+1];
+		SendMessage(cb,CB_GETLBTEXT,index,(LPARAM)buffer);
+		retVal = buffer;
+		delete[] buffer;
+	}
+	return retVal;
+}
+
 //returns a pointer to the start of the Chunk, or NULL if the chunk was not found
 BYTE* FindPngChunk(BYTE* buffer, DWORD bufferSize, DWORD chunkId);
 

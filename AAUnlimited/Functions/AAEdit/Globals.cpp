@@ -6,4 +6,6 @@ namespace AAEdit {
 
 CharInstData g_currChar;
 
+
+
 }

@@ -1,9 +1,12 @@
 #pragma once
 #include <Windows.h>
 
+#include "CharacterRelation.h"
+#include "LoverData.h"
 #include "External\AddressRule.h"
 #include "Frame.h"
 #include "CharacterData.h"
+#include "CharacterActivity.h"
 #include "XXFile.h"
 namespace ExtClass {
 
@@ -56,15 +59,37 @@ public:
 	Frame** m_bonePtrArray; //note that this is an array of only certain frequently used frames with a fixed position; the bone might be NULL thought.
 							//first one is neck (focused on q press), second one is spin (focused on w press), 10th (0x24 offset) is tears
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
-	BYTE m_unknown7[0xDB8];
+	BYTE m_unknown7[0xDB4];
 	void* m_somedata;
-	BYTE m_unknown8[0x1C];
+	void* m_moreUnknownData;
+	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
+	BYTE m_unknown9[0xC];
+	void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
+	BYTE m_unknown10[0x4];
 	XXFile* m_xxSkirt;
-	BYTE m_unknown9[0x18];
+	BYTE m_unknown11[0x1C];
+
 
 public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
+
+	inline IllusionArray<CharacterRelation>* GetRelations() {
+		BYTE* ptr = (BYTE*)m_moreData;
+		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A18);
+	}
+	
+	inline CharacterActivity* GetActivity() {
+		if (m_moreData2 == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_moreData2)+0x18;
+		return *(CharacterActivity**)(ptr);
+	}
+
+	inline IllusionArray<LoverData>* GetLovers() {
+		if (m_moreData2 == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_moreData2)+0x24;
+		return (IllusionArray<LoverData>*)ptr;
+	}
 
 	inline XXFile* GetXXFile(Models target) {
 		switch (target) {
