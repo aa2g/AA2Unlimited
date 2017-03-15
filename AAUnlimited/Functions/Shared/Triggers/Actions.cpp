@@ -240,6 +240,29 @@ void Thread::AddCardPoints(std::vector<Value>& params) {
 	AAPlay::ApplyRelationshipPoints(cardFrom->m_char,rel);
 }
 
+//int seat, int virtue
+void Thread::SetCardVirtue(std::vector<Value>& params) {
+	int seat = params[0].iVal;
+	int virtue = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.virtue = virtue % 5;
+}
+
+//int seat, int trait, bool enable
+void Thread::SetCardTrait(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int trait = params[1].iVal;
+	bool enable = params[2].bVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_traitBools[trait] = enable;
+}
 
 //int seat, int newseat
 void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
@@ -559,6 +582,20 @@ std::vector<Action> g_Actions = {
 		{ TYPE_INT, TYPE_STRING },
 		&Thread::RemoveCardStorageBool
 	},
+	{
+		32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Virtue"), TEXT("Set %p 's Virtue to %p"),
+		TEXT("Set selected character's virtue. "
+		"0- lowest, 1 - low, 2 - normal, 3 - high, 4 - highest."),
+			{ TYPE_INT, TYPE_INT },
+			&Thread::SetCardVirtue
+	},
+	{
+		32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Trait"), TEXT("Set %p 's %p Trait to %p"),
+		TEXT("Enable or disable selected character's trait."),
+		{ TYPE_INT, TYPE_INT, TYPE_BOOL },
+			&Thread::SetCardTrait
+	},
+
 };
 
 
