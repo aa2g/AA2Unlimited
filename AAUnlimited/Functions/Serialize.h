@@ -321,6 +321,7 @@ inline Shared::Triggers::Module ReadData_sub(char*& buffer,int& size,Shared::Tri
 	mod.description = ReadData<std::wstring>(buffer,size);
 	mod.triggers = ReadData<decltype(mod.triggers)>(buffer,size);
 	mod.globals = ReadData<decltype(mod.globals)>(buffer,size);
+	mod.dependencies = ReadData<decltype(mod.dependencies)>(buffer,size);
 	return mod;
 }
 
@@ -498,6 +499,7 @@ inline bool WriteData_sub(char** buffer,int* size,int& at,const Shared::Triggers
 	WriteData(buffer,size,at,data.description,resize);
 	WriteData(buffer,size,at,data.triggers,resize);
 	WriteData(buffer,size,at,data.globals,resize);
+	WriteData(buffer,size,at,data.dependencies,resize);
 	return ret;
 }
 

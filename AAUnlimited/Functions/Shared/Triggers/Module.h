@@ -17,9 +17,10 @@ public:
 	std::wstring description;
 	std::vector<Trigger> triggers;
 	std::vector<GlobalVariable> globals;
+	std::vector<std::wstring> dependencies;
 	
 	Module() = default;
-	Module(std::wstring name,std::wstring descr,std::vector<Trigger*> triggers,const std::vector<GlobalVariable>& environment);
+	Module(std::wstring name,std::wstring descr,const std::vector<Trigger*>& triggers, const std::vector<std::wstring>& dependencies, const std::vector<GlobalVariable>& environment);
 
 	//generates the globals field from existing globals by looking into the triggers and determining which globals are being used
 	void GenerateGlobals(const std::vector<GlobalVariable>& triggerGlobals); 

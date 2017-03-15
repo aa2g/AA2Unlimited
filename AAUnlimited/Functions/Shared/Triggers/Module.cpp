@@ -7,12 +7,14 @@ namespace Triggers {
 
 
 
-Module::Module(std::wstring name,std::wstring descr,std::vector<Trigger*> triggers,const std::vector<GlobalVariable>& environment) {
+Module::Module(std::wstring name,std::wstring descr,const std::vector<Trigger*>& triggers, 
+			   const std::vector<std::wstring>& dependencies,const std::vector<GlobalVariable>& environment) {
 	this->name = name;
 	this->description = descr;
 	for(Trigger* trg : triggers) {
 		this->triggers.push_back(*trg);
 	}
+	this->dependencies = dependencies;
 	GenerateGlobals(environment);
 }
 
@@ -57,8 +59,17 @@ void Module::GenerateGlobals(const std::vector<GlobalVariable>& triggerGlobals) 
 				//must be a global: find inside known globals
 				for(auto& global : triggerGlobals) {
 					if(global.name == expr->varName) {
-						//found our global
-						globals.push_back(global);
+						//found our global; make sure we havnt added this one yet
+						found = false;
+						for(auto& gvar : globals) {
+							if(gvar.name == expr->varName) {
+								found = true;
+								break;
+							}
+						}
+						if(!found) {
+							globals.push_back(global);
+						}
 						break;
 					}
 				}

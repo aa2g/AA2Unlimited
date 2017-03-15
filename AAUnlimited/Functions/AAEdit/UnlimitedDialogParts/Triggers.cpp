@@ -197,9 +197,27 @@ void UnlimitedDialog::TRDialog::SetCurrentTrigger(int index) {
 	Trigger* trg = NULL;
 	if(index >= 0 && (unsigned int)index < trigList.size()) {
 		trg = &trigList[index];
+		m_allowTriggerChange = true;
+	}
+	else if(index >= 0) {
+		//look inside module triggers
+		int cnt = index - trigList.size();
+		for(auto& mod : g_currChar.m_cardData.GetModules()) {
+			if(cnt >= mod.triggers.size()) {
+				cnt -= mod.triggers.size();
+				continue;
+			}
+			else {
+				trg = (Trigger*)&mod.triggers[cnt];
+				m_allowTriggerChange = false;
+				break;
+			}
+		}
 	}
 	
+	
 	m_currentTrigger = trg;
+	
 	for(auto* item : m_actions) {
 		delete item;
 	}
@@ -620,6 +638,11 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				menu = LoadMenu(General::DllInst,MAKEINTRESOURCE(IDR_TRIGGER_LIST));
 
 				subMenu = GetSubMenu(menu,0);
+				if(!thisPtr->m_allowTriggerChange) {
+					EnableMenuItem(subMenu,ID_TRM_DELETETRIGGER,MF_GRAYED);
+					EnableMenuItem(subMenu,ID_TRM_EXPORT,MF_GRAYED);
+					EnableMenuItem(subMenu,ID_TRM_RENAMETRIGGER,MF_GRAYED);
+				}
 
 				BOOL ret = TrackPopupMenu(subMenu,TPM_LEFTALIGN | TPM_RETURNCMD,
 					cursor.x,cursor.y,0,thisPtr->m_dialog,NULL);
@@ -629,9 +652,11 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				case ID_TRM_ADDTRIGGER: {
 					Trigger trg;
 					trg.name = TEXT("new trigger");
+					int ind = AAEdit::g_currChar.m_cardData.GetTriggers().size();
 					AAEdit::g_currChar.m_cardData.GetTriggers().push_back(trg);
 					int currSel = SendMessage(thisPtr->m_lbTriggers,LB_GETCURSEL,0,0);
-					SendMessage(thisPtr->m_lbTriggers,LB_ADDSTRING,0,(LPARAM)trg.name.c_str());
+					SendMessage(thisPtr->m_lbTriggers,LB_INSERTSTRING,ind,(LPARAM)trg.name.c_str());
+					if (currSel <= ind) currSel++;
 					SendMessage(thisPtr->m_lbTriggers,LB_SETCURSEL,currSel,0);
 					break; }
 				case ID_TRM_DELETETRIGGER: {
@@ -753,7 +778,8 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							for(int i = 0; i < selCount; i++) {
 								trigs.push_back(&triggers[selBuffer[i]]);
 							}
-							Module mod(info.name, info.description, trigs, g_currChar.m_cardData.GetGlobalVariables());
+							std::vector<std::wstring> dependencies; //todo
+							Module mod(info.name, info.description, trigs, dependencies, g_currChar.m_cardData.GetGlobalVariables());
 							ModuleFile file(mod);
 							file.WriteToFile(path.c_str());
 						}
@@ -786,6 +812,13 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			menu = LoadMenu(General::DllInst,MAKEINTRESOURCE(IDR_TRIGGER_EVA));
 
 			subMenu = GetSubMenu(menu,0);
+			if(!thisPtr->m_allowTriggerChange) {
+				EnableMenuItem(subMenu,ID_TRM_ADDEVENT,MF_GRAYED);
+				EnableMenuItem(subMenu,ID_TRM_ADDVARIABLE,MF_GRAYED);
+				EnableMenuItem(subMenu,ID_TRM_ADDACTION,MF_GRAYED);
+				EnableMenuItem(subMenu,ID_TRM_DELETESELECTION,MF_GRAYED);
+				EnableMenuItem(subMenu,ID_TRM_PASTE,MF_GRAYED);
+			}
 
 			BOOL ret = TrackPopupMenu(subMenu,TPM_LEFTALIGN | TPM_RETURNCMD,
 				cursor.x,cursor.y,0,thisPtr->m_dialog,NULL);
@@ -917,7 +950,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		}
 		else if(info->code == NM_DBLCLK && info->hwndFrom == thisPtr->m_tvTrigger) {
 			SelectedAction_Data sel = thisPtr->GetSelectedAction();
-			if(sel) {
+			if(thisPtr->m_allowTriggerChange && sel) {
 				loc_AddActionData data;
 				data.thisPtr = thisPtr;
 				data.action = (*sel.cardActions)[sel.cardActionsInt]->action;
@@ -929,7 +962,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						(*sel.cardActions)[sel.cardActionsInt]->action = data.action;
 						std::wstring str = thisPtr->EVANameToString(data.action.action->interactiveName,data.action.actualParameters);
 						TVITEM item;
-						item.mask = TVIF_STATE;
+						item.mask = TVIF_TEXT;
 						item.hItem = (*sel.guiActions)[sel.cardActionsInt]->tree;
 						item.pszText = (LPWSTR)str.c_str();
 						TreeView_SetItem(thisPtr->m_tvTrigger,&item);
@@ -964,6 +997,14 @@ void UnlimitedDialog::TRDialog::RefreshTriggerList() {
 	const auto& list = AAEdit::g_currChar.m_cardData.GetTriggers();
 	for (size_t i = 0; i < list.size(); i++) {
 		SendMessage(this->m_lbTriggers,LB_INSERTSTRING,i,(LPARAM)list[i].name.c_str());
+	}
+	const auto& modList = AAEdit::g_currChar.m_cardData.GetModules();
+	for(auto& mod : modList) {
+		std::wstring modprefix = mod.name + TEXT("::");
+		for(auto& trg : mod.triggers) {
+			std::wstring name = modprefix + trg.name;
+			SendMessage(this->m_lbTriggers,LB_ADDSTRING,0,(LPARAM)name.c_str());
+		}
 	}
 	if (list.size() == 0) {
 		EnableWindow(m_tvTrigger,FALSE);

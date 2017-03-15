@@ -219,6 +219,7 @@ namespace AAEdit {
 		HTREEITEM m_tiActions;
 		int m_currentTriggerIndex;
 		Shared::Triggers::Trigger* m_currentTrigger = NULL;
+		bool m_allowTriggerChange;
 		std::vector<HTREEITEM> m_events;
 		std::vector<HTREEITEM> m_variables;
 		struct ActionTreeItem {
