@@ -5,7 +5,8 @@ namespace Triggers {
 
 std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Relationship"),
-	TEXT("Conversation")
+	TEXT("Conversation"),
+	TEXT("Trait")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -195,7 +196,7 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			37, NCONSTCAT_CONVERSATIONS,
-				TEXT("STUDT_HOME_H"), TEXT("STUDT_HOME_H"), TEXT("STUDT_HOME_H"),
+				TEXT("STUDY_HOME_H"), TEXT("STUDY_HOME_H"), TEXT("STUDY_HOME_H"),
 				Value(32)
 		},
 		{
@@ -372,6 +373,201 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			72, NCONSTCAT_CONVERSATIONS,
 				TEXT("AFTER_H"), TEXT("AFTER_H"), TEXT("AFTER_H"),
 				Value(101)
+		},
+		{
+			73, NCONSTCAT_TRAIT,
+			TEXT("EASYGOING"), TEXT("EASYGOING"), TEXT("EASYGOING"),
+			Value(0)
+		},
+		{
+			74, NCONSTCAT_TRAIT,
+			TEXT("AFFABLE"), TEXT("AFFABLE"), TEXT("AFFABLE"),
+			Value(1)
+		},
+		{
+			75, NCONSTCAT_TRAIT,
+			TEXT("BAD_WITH_GUYS"), TEXT("BAD_WITH_GUYS"), TEXT("BAD_WITH_GUYS"),
+			Value(2)
+		},
+		{
+			76, NCONSTCAT_TRAIT,
+			TEXT("BAD_WITH_GIRLS"), TEXT("BAD_WITH_GIRLS"), TEXT("BAD_WITH_GIRLS"),
+			Value(3)
+		},
+		{
+			77, NCONSTCAT_TRAIT,
+			TEXT("CHARMING"), TEXT("CHARMING"), TEXT("CHARMING"),
+			Value(4)
+		},
+		{
+			78, NCONSTCAT_TRAIT,
+			TEXT("TSUNDERE"), TEXT("TSUNDERE"), TEXT("TSUNDERE"),
+			Value(5)
+		},
+		{
+			79, NCONSTCAT_TRAIT,
+			TEXT("CHIVALROUS"), TEXT("CHIVALROUS"), TEXT("CHIVALROUS"),
+			Value(6)
+		},
+		{
+			80, NCONSTCAT_TRAIT,
+			TEXT("TRENDY"), TEXT("TRENDY"), TEXT("TRENDY"),
+			Value(7)
+		},
+		{
+			81, NCONSTCAT_TRAIT,
+			TEXT("OBEDIENT"), TEXT("OBEDIENT"), TEXT("OBEDIENT"),
+			Value(8)
+		},
+		{
+			82, NCONSTCAT_TRAIT,
+			TEXT("POSITIVE"), TEXT("POSITIVE"), TEXT("POSITIVE"),
+			Value(9)
+		},
+		{
+			83, NCONSTCAT_TRAIT,
+			TEXT("SHY"), TEXT("SHY"), TEXT("SHY"),
+			Value(10)
+		},
+		{
+			84, NCONSTCAT_TRAIT,
+			TEXT("JEALOUS"), TEXT("JEALOUS"), TEXT("JEALOUS"),
+			Value(11)
+		},
+		{
+			85, NCONSTCAT_TRAIT,
+			TEXT("MELANCHOLY"), TEXT("MELANCHOLY"), TEXT("MELANCHOLY"),
+			Value(12)
+		},
+		{
+			86, NCONSTCAT_TRAIT,
+			TEXT("PERVERTED"), TEXT("PERVERTED"), TEXT("PERVERTED"),
+			Value(13)
+		},
+		{
+			87, NCONSTCAT_TRAIT,
+			TEXT("SERIOUS"), TEXT("SERIOUS"), TEXT("SERIOUS"),
+			Value(14)
+		},
+		{
+			88, NCONSTCAT_TRAIT,
+			TEXT("CALM"), TEXT("CALM"), TEXT("CALM"),
+			Value(15)
+		},
+		{
+			89, NCONSTCAT_TRAIT,
+			TEXT("IMPULSIVE"), TEXT("IMPULSIVE"), TEXT("IMPULSIVE"),
+			Value(16)
+		},
+		{
+			90, NCONSTCAT_TRAIT,
+			TEXT("ABSENTMINDED"), TEXT("ABSENTMINDED"), TEXT("ABSENTMINDED"),
+			Value(17)
+		},
+		{
+			91, NCONSTCAT_TRAIT,
+			TEXT("VIOLENT"), TEXT("VIOLENT"), TEXT("VIOLENT"),
+			Value(18)
+		},
+		{
+			92, NCONSTCAT_TRAIT,
+			TEXT("PASSIVE"), TEXT("PASSIVE"), TEXT("PASSIVE"),
+			Value(19)
+		},
+		{
+			93, NCONSTCAT_TRAIT,
+			TEXT("MEDDLESOME"), TEXT("MEDDLESOME"), TEXT("MEDDLESOME"),
+			Value(20)
+		},
+		{
+			94, NCONSTCAT_TRAIT,
+			TEXT("CLASS_PREZ"), TEXT("CLASS_PREZ"), TEXT("CLASS_PREZ"),
+			Value(21)
+		},
+		{
+			95, NCONSTCAT_TRAIT,
+			TEXT("CHATTY"), TEXT("CHATTY"), TEXT("CHATTY"),
+			Value(22)
+		},
+		{
+			96, NCONSTCAT_TRAIT,
+			TEXT("ALWAYS_HUNGRY"), TEXT("ALWAYS_HUNGRY"), TEXT("ALWAYS_HUNGRY"),
+			Value(23)
+		},
+		{
+			97, NCONSTCAT_TRAIT,
+			TEXT("ROMANTIC"), TEXT("ROMANTIC"), TEXT("ROMANTIC"),
+			Value(24)
+		},
+		{
+			98, NCONSTCAT_TRAIT,
+			TEXT("SINGLEMINDED"), TEXT("SINGLEMINDED"), TEXT("SINGLEMINDED"),
+			Value(25)
+		},
+		{
+			99, NCONSTCAT_TRAIT,
+			TEXT("INDECISIVE"), TEXT("INDECISIVE"), TEXT("INDECISIVE"),
+			Value(26)
+		},
+		{
+			100, NCONSTCAT_TRAIT,
+			TEXT("COMPETITIVE"), TEXT("COMPETITIVE"), TEXT("COMPETITIVE"),
+			Value(27)
+		},
+		{
+			101, NCONSTCAT_TRAIT,
+			TEXT("SCHEMING"), TEXT("SCHEMING"), TEXT("SCHEMING"),
+			Value(28)
+		},
+		{
+			102, NCONSTCAT_TRAIT,
+			TEXT("DILIGENT"), TEXT("DILIGENT"), TEXT("DILIGENT"),
+			Value(29)
+		},
+		{
+			103, NCONSTCAT_TRAIT,
+			TEXT("WILD"), TEXT("WILD"), TEXT("WILD"),
+			Value(30)
+		},
+		{
+			104, NCONSTCAT_TRAIT,
+			TEXT("MASOCHIST"), TEXT("MASOCHIST"), TEXT("MASOCHIST"),
+			Value(31)
+		},
+		{
+			105, NCONSTCAT_TRAIT,
+			TEXT("SWEATY"), TEXT("SWEATY"), TEXT("SWEATY"),
+			Value(32)
+		},
+		{
+			106, NCONSTCAT_TRAIT,
+			TEXT("EVIL"), TEXT("EVIL"), TEXT("EVIL"),
+			Value(33)
+		},
+		{
+			107, NCONSTCAT_TRAIT,
+			TEXT("DEAF"), TEXT("DEAF"), TEXT("DEAF"),
+			Value(34)
+		},
+		{
+			108, NCONSTCAT_TRAIT,
+			TEXT("EXPLOITABLE"), TEXT("EXPLOITABLE"), TEXT("EXPLOITABLE"),
+			Value(35)
+		},
+		{
+			109, NCONSTCAT_TRAIT,
+			TEXT("ASEXUAL"), TEXT("ASEXUAL"), TEXT("ASEXUAL"),
+			Value(36)
+		},
+		{
+			110, NCONSTCAT_TRAIT,
+			TEXT("LUCKY"), TEXT("LUCKY"), TEXT("LUCKY"),
+			Value(37)
+		},
+		{
+			111, NCONSTCAT_TRAIT,
+			TEXT("RAINBOW"), TEXT("RAINBOW"), TEXT("RAINBOW"),
+			Value(38)
 		},
 	},
 	{ //BOOL

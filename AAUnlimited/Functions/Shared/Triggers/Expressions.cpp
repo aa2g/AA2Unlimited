@@ -170,6 +170,24 @@ Value Thread::SubString(std::vector<Value>& params) {
 /*
  * card attributes
  */
+//int(int)
+Value Thread::GetCardVirtue(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.virtue);
+}
+
+//bool(int, int)
+Value Thread::GetCardTrait(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	int trait = params[1].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
+}
 
 //string(int)
 Value Thread::GetCardFirstName(std::vector<Value>& params) {
@@ -637,6 +655,12 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			{ TYPE_INT, TYPE_STRING, TYPE_INT }, (TYPE_INT),
 			&Thread::GetCardStorageInt
 		},
+		{
+			25, EXPRCAT_CHARPROP,
+			TEXT("Virtue"), TEXT("Virtue of %p"), TEXT("The virtue of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardVirtue
+		},
 	},
 
 	{ //BOOL
@@ -805,7 +829,13 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 			"it returns the default value instead"),
 			{ TYPE_INT, TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
-				&Thread::GetCardStorageBool
+			&Thread::GetCardStorageBool
+		},
+		{
+			27, EXPRCAT_CHARPROP,
+			TEXT("Trait"), TEXT("%p 's %p trait"), TEXT("The virtue of this character."),
+			{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+			&Thread::GetCardTrait
 		},
 	},
 	{ //FLOAT
@@ -907,7 +937,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			6, EXPRCAT_CHARPROP,
-			TEXT("Second Name"), TEXT("Second Name of %p"), TEXT("The first name this character was given (the upper one on the default card image). "
+			TEXT("Second Name"), TEXT("Second Name of %p"), TEXT("The second name this character was given (the lower one on the default card image). "
 			"Note that this may or may not be the family name depending on how the card maker ordered these."),
 			{ TYPE_INT }, (TYPE_STRING),
 				&Thread::SubString
