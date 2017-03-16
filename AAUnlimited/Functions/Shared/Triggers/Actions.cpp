@@ -248,7 +248,7 @@ void Thread::SetCardVirtue(std::vector<Value>& params) {
 		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 		return;
 	}
-	AAPlay::g_characters[seat].m_char->m_charData->m_character.virtue = virtue % 5;
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.virtue = min(max(virtue, 0), 4);
 }
 
 //int seat, int trait, bool enable
@@ -262,6 +262,30 @@ void Thread::SetCardTrait(std::vector<Value>& params)
 		return;
 	}
 	AAPlay::g_characters[seat].m_char->m_charData->m_traitBools[trait] = enable;
+}
+
+//int seat, int personality
+void Thread::SetCardPersonality(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int personality = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_bPersonality = personality;
+}
+
+//int seat, int pitch
+void Thread::SetCardVoicePitch(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int pitch = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_voicePitch = pitch;
 }
 
 //int seat, int newseat
@@ -586,16 +610,27 @@ std::vector<Action> g_Actions = {
 		32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Virtue"), TEXT("Set %p 's Virtue to %p"),
 		TEXT("Set selected character's virtue. "
 		"0- lowest, 1 - low, 2 - normal, 3 - high, 4 - highest."),
-			{ TYPE_INT, TYPE_INT },
-			&Thread::SetCardVirtue
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardVirtue
 	},
 	{
-		32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Trait"), TEXT("Set %p 's %p Trait to %p"),
+		33, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Trait"), TEXT("Set %p 's %p Trait to %p"),
 		TEXT("Enable or disable selected character's trait."),
 		{ TYPE_INT, TYPE_INT, TYPE_BOOL },
-			&Thread::SetCardTrait
+		&Thread::SetCardTrait
 	},
-
+	{
+		34, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Personality"), TEXT("Set %p 's Personality to %p"),
+		TEXT("Set character's personality."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardPersonality
+	},
+	{
+		35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("Set %p 's Voice Pitch to %p"),
+		TEXT("Set character's voice pitch."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardVoicePitch
+	},
 };
 
 

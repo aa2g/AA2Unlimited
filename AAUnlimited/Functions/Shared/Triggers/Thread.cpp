@@ -32,11 +32,14 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 	}
 
 	//execute actions
+
+	LOGPRIO(Logger::Priority::WARN) << "Trigger [" <<  execTrigger->name << "]:\r\n"
+		<< "\tThis card: [" << execTrigger->owningCard << "]" << "\r\n";
 	for(ip = 0; ip < trg->actions.size() && !execFinished; ip++) {
 		//get action
 		auto& action = trg->actions[ip];
+		LOGPRIONC(Logger::Priority::SPAM) " - " << action.action->name << "\r\n";
 		ExecuteAction(action);
-		LOGPRIO(Logger::Priority::WARN) << "Thread reached execution limit; trigger " <<  execTrigger->name << "\r\n";
 		if(executeCount > maxExecuteCount) {
 			return;
 		}
