@@ -154,6 +154,7 @@ namespace Poser {
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
 	std::map<std::string, SliderInfo> loc_sliderInfosRoom;
+	std::vector<std::map<std::string, SliderInfo>> loc_sliderInfosProps;
 
 	class PoserCharacter {
 	public:
@@ -192,6 +193,7 @@ namespace Poser {
 			SetHidden("A00_O_sitasiru", !show);
 		}
 
+		int id;
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
@@ -213,12 +215,17 @@ namespace Poser {
 	void GenSliderInfo();
 	PoseMods::FrameCategory loc_currentCategory;
 	std::string loc_currentRoomFrame;
+	std::vector<std::string> loc_currentPropsFrame;
 	SliderInfo* CurrentSlider() {
-		if (loc_currentCategory != PoseMods::FrameCategory::Room) {
+		if (loc_currentCategory == PoseMods::FrameCategory::Room) {
+			return &loc_sliderInfosRoom[loc_currentRoomFrame];
+		}
+		else if (loc_currentCategory == PoseMods::FrameCategory::Prop) {
+			return &loc_sliderInfosProps[loc_targetChar->id][loc_currentPropsFrame[loc_targetChar->id]];
+		}
+		else {
 			return loc_targetChar->CurrentSlider;
 		}
-		else
-			return &loc_sliderInfosRoom[loc_currentRoomFrame];
 	}
 
 	bool GetIsHiddenFrame(ExtClass::Frame* frame) {
@@ -251,6 +258,8 @@ namespace Poser {
 		loc_targetChar = nullptr;
 		loc_loadCharacter = nullptr;
 		loc_sliderInfosRoom.clear();
+		loc_sliderInfosProps.clear();
+		loc_currentPropsFrame.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 	}
@@ -267,7 +276,10 @@ namespace Poser {
 			}
 			if (!loc_loadCharacter) {
 				loc_loadCharacter = new PoserCharacter(charStruct);
+				loc_loadCharacter->id = loc_targetCharacters.size();
 				loc_targetCharacters.push_back(loc_loadCharacter);
+				loc_sliderInfosProps.resize(loc_targetCharacters.size());
+				loc_currentPropsFrame.resize(loc_targetCharacters.size());
 				g_PoserWindow.NewCharacter(loc_targetCharacters.size() - 1);
 			}
 			if (!loc_targetChar)
@@ -278,6 +290,9 @@ namespace Poser {
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 			loc_loadCharacter = character;
+			loc_loadCharacter->id = 0;
+			loc_sliderInfosProps.resize(loc_targetCharacters.size());
+			loc_currentPropsFrame.resize(loc_targetCharacters.size());
 			g_PoserWindow.NewCharacter(0);
 		}
 	}
@@ -751,20 +766,28 @@ namespace Poser {
 		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
 		loc_currentCategory = PoseMods::FrameCategory(res);
 		if (res != LB_ERR) {
-			if ((PoseMods::FrameCategory)res != PoseMods::FrameCategory::Room) {
-				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
-				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
-					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
-				}
-				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
-			}
-			else {
+			if ((PoseMods::FrameCategory)res == PoseMods::FrameCategory::Room) {
 				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
 				for (auto s = loc_sliderInfosRoom.begin(); s != loc_sliderInfosRoom.end(); s++) {
 					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
 				}
 				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
+			else if ((PoseMods::FrameCategory)res == PoseMods::FrameCategory::Prop) {
+				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s = loc_sliderInfosProps[loc_targetChar->id].begin(); s != loc_sliderInfosProps[loc_targetChar->id].end(); s++) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
+			else {
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
 			}
 		}
 	}
@@ -774,13 +797,7 @@ namespace Poser {
 		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 		if (res != LB_ERR) {
 			SliderInfo* slider = nullptr;
-			if ((PoseMods::FrameCategory)cat != PoseMods::FrameCategory::Room) {
-				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
-				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
-				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
-				slider = CurrentSlider();
-			}
-			else {
+			if ((PoseMods::FrameCategory)cat == PoseMods::FrameCategory::Room) {
 				WCHAR name[255];
 				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
 				loc_currentRoomFrame = General::CastToString(std::wstring(name));
@@ -788,6 +805,21 @@ namespace Poser {
 				if (match != loc_sliderInfosRoom.end()) {
 					slider = &match->second;
 				}
+			}
+			else if ((PoseMods::FrameCategory)cat == PoseMods::FrameCategory::Prop) {
+				WCHAR name[255];
+				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
+				loc_currentPropsFrame[loc_targetChar->id] = General::CastToString(std::wstring(name));
+				auto match = loc_sliderInfosProps[loc_targetChar->id].find(General::CastToString(std::wstring(name)));
+				if (match != loc_sliderInfosProps[loc_targetChar->id].end()) {
+					slider = &match->second;
+				}
+			}
+			else {
+				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
+				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
+				slider = CurrentSlider();
 			}
 			if (slider) {
 				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
@@ -882,6 +914,7 @@ namespace Poser {
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		using namespace ExtClass;
 		static const char prefix[]{ "pose_" };
+		static const char propPrefix[]{ "PROP_" };
 
 		if (xxFile == NULL) return;
 		if (loc_targetCharacters.size() == 0) return;
@@ -897,7 +930,7 @@ namespace Poser {
 				}
 			}
 		}
-		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE) {
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE/* || model == ExtClass::CharacterStruct::SKIRT*/) {
 			targetChar = loc_loadCharacter;
 		}
 		else if (model == ExtClass::CharacterStruct::H3DROOM) {
@@ -933,7 +966,7 @@ namespace Poser {
 				}
 				else {
 					SliderInfo slider;
-					slider.descr = std::wstring(bone->m_name, bone->m_name + bone->m_nameBufferSize - 1);
+					slider.descr = General::CastToWStringN(newMatch->m_name, newMatch->m_nameBufferSize);
 					slider.frameName = slider.descr;
 					slider.reset();
 					slider.xxFrame = bone;
@@ -983,7 +1016,51 @@ namespace Poser {
 
 				targetChar->SliderInfos[match->second].xxFrame = bone;
 				ApplySlider(&targetChar->SliderInfos[match->second]);
+			} 
+			else {
+				if (strncmp(bone->m_name, propPrefix, sizeof(propPrefix) - 1) == 0) {
+					auto& map = loc_sliderInfosProps[targetChar->id];
+
+					//make copy of the bone first
+					Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+					memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+
+					//turn match into a copy of the root for now, since there are a lot of members i dont know
+					memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+
+					//change parent and child stuff
+					bone->m_parent = newMatch->m_parent;
+					bone->m_nChildren = 1;
+					bone->m_children = newMatch;
+					newMatch->m_parent = bone;
+					for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+						newMatch->m_children[i].m_parent = newMatch;
+					}
+
+					//change name
+					int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
+					bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+					bone->m_nameBufferSize = namelength;
+					strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
+					strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+
+					auto slider = map.find(bone->m_name);
+					if (slider != map.end()) {
+						slider->second.xxFrame = bone;
+						ApplySlider(&slider->second);
+					}
+					else {
+						SliderInfo info;
+						info.descr = General::CastToWStringN(bone->m_name, bone->m_nameBufferSize);
+						info.frameName = info.descr;
+						info.reset();
+						info.xxFrame = bone;
+						map[bone->m_name] = info;
+						ApplySlider(&info);
+					}
+				}
 			}
+
 		});
 
 
