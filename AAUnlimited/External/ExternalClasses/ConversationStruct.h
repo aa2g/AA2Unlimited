@@ -117,7 +117,7 @@ public:
 };
 
 
-//ids can be seen at https://docs.google.com/spreadsheets/d/1gwmoVpKuSuF0PtEPLEB17eK_dexPaKU106ShZEpBLhg/edit#gid=1592342892
+//ids can be seen at https://docs.google.com/spreadsheets/d/1gwmoVpKuSuF0PtEPLEB17eK_dexPaKU106ShZEpBLhg/edit#gid=176627586
 enum ConversationId {
 	ENCOURAGE = 0, CALM = 1, PRAISE = 2, GRUMBLE = 3, APOLOGIZE = 4,
 	MAKE_STUDY = 5, MAKE_EXERCISE = 6, MAKE_CLUB = 7, MAKE_GET_ALONG = 8, MAKE_NO_PUBLIC_LEWD = 9,

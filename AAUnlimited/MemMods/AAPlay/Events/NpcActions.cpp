@@ -13,6 +13,26 @@ namespace NpcActions {
 
 using namespace ExtClass;
 
+BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
+	return newClothes;
+}
+
+void __declspec(naked) ClothesChangedRedirect() {
+	__asm {
+		mov ecx, [edx+0xE0]
+		push ecx
+		push edx
+
+		push eax
+		push ecx
+		call ClothesChangedRedirect
+
+		pop edx
+		pop ecx
+		ret
+	}
+}
+
 void ClothesChangeInjection() {
 	//the last line sets the clothes
 	/*AA2Play v12 FP v1.4.0a.exe+16F0BD - E8 CED4F7FF           - call "AA2Play v12 FP v1.4.0a.exe"+EC590 { ->AA2Play v12 FP v1.4.0a.exe+EC590 }
@@ -24,7 +44,12 @@ void ClothesChangeInjection() {
 	AA2Play v12 FP v1.4.0a.exe+16F0D1 - 8B 8A E0000000        - mov ecx,[edx+000000E0]
 	AA2Play v12 FP v1.4.0a.exe+16F0D7 - 88 41 44              - mov [ecx+44],al
 	*/
-
+	DWORD address = General::GameBase + 0x16F0D1;
+	DWORD redirectAddress = (DWORD)(&ClothesChangedRedirect);
+	Hook((BYTE*)address,
+		{ 0x8B, 0x8A, 0xE0, 0x00, 0x00, 0x00 },								//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
 }
 
 int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* askingChar, void* unknownStruct, DWORD unknownParameter, int originalReturn) {

@@ -106,10 +106,13 @@ struct loc_AddVariableData {
 };
 
 struct loc_ModuleInfo {
+	UnlimitedDialog::TRDialog* thisPtr;
 	std::wstring name;
 	std::wstring description;
 
 	std::vector<std::wstring> saveTriggers;
+	std::vector<Shared::Triggers::GlobalVariable*> saveGlobals;
+	std::vector<std::wstring> dependencies;
 };
 
 /////////////////
