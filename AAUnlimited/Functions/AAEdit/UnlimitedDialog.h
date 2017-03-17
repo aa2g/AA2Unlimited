@@ -15,6 +15,7 @@ namespace AAEdit {
 	struct loc_AddData;
 	struct loc_AddActionData;
 	struct loc_AddVariableData;
+	struct loc_ModuleInfo;
 
 /*
  * The little dialog that shows up in the editor to select stuff.
@@ -210,6 +211,7 @@ namespace AAEdit {
 	friend AAEdit::loc_AddData;
 	friend AAEdit::loc_AddActionData;
 	friend AAEdit::loc_AddVariableData;
+	friend AAEdit::loc_ModuleInfo;
 	struct TRDialog : public Dialog {
 		HWND m_lbTriggers;
 		HWND m_tvTrigger;

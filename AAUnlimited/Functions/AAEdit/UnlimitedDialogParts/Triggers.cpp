@@ -763,6 +763,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int selCount = SendMessage(thisPtr->m_lbTriggers,LB_GETSELCOUNT,0,0);
 					if(selCount > 0) {
 						loc_ModuleInfo info;
+						info.thisPtr = thisPtr;
 						int* selBuffer = new int[selCount];
 						SendMessage(thisPtr->m_lbTriggers,LB_GETSELITEMS,selCount,(LPARAM)selBuffer);
 						auto& triggers = g_currChar.m_cardData.GetTriggers();
@@ -770,16 +771,25 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							info.saveTriggers.push_back(triggers[selBuffer[i]].name);
 						}
 						
+						std::vector<Trigger*> trigs;
+						for (int i = 0; i < selCount; i++) {
+							trigs.push_back(&triggers[selBuffer[i]]);
+						}
+
+						Module mod;
+						mod.GenerateTrigGlobalDepend(trigs,g_currChar.m_cardData.GetGlobalVariables(),g_currChar.m_cardData.GetModules());
+						
+						info.dependencies = mod.dependencies;
+						for(auto& var : mod.globals) {
+							info.saveGlobals.push_back(&var);
+						}
 						
 						int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_EXPORT),hwndDlg,&ExportModuleDialogProc,(LPARAM)&info);
 						if (result == 1 && info.name.size() > 0) {
 							std::wstring path = General::BuildOverridePath(MODULE_PATH, info.name.c_str());
-							std::vector<Trigger*> trigs;
-							for(int i = 0; i < selCount; i++) {
-								trigs.push_back(&triggers[selBuffer[i]]);
-							}
-							std::vector<std::wstring> dependencies; //todo
-							Module mod(info.name, info.description, trigs, dependencies, g_currChar.m_cardData.GetGlobalVariables());
+							mod.name = info.name;
+							mod.description = info.description;
+
 							ModuleFile file(mod);
 							file.WriteToFile(path.c_str());
 						}
@@ -2065,6 +2075,15 @@ INT_PTR CALLBACK ExportModuleDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPA
 		SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_EDDESCR),WM_SETTEXT,0,(LPARAM)data->description.c_str());
 		for(std::wstring& str : data->saveTriggers) {
 			SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_LBTRIGLIST),LB_ADDSTRING,0,(LPARAM)str.c_str());
+		}
+		for(std::wstring& str : data->dependencies) {
+			SendMessage(GetDlgItem(hwndDlg,IDC_TR_EX_LBDEPEND),LB_ADDSTRING,0,(LPARAM)str.c_str());
+		}
+		for(auto* var : data->saveGlobals) {
+			std::wstring str = g_Types[var->type].name + TEXT(" ") + var->name;
+			str += TEXT(" = ");
+			ParameterisedExpression dummy(var->type,var->defaultValue);
+			str += data->thisPtr->ExpressionToString(dummy);
 		}
 
 		return TRUE;
