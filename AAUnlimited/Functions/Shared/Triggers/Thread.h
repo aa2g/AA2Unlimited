@@ -63,6 +63,9 @@ public:
 	void AddCardDislikePoints(std::vector<Value>& params);
 	void AddCardHatePoints(std::vector<Value>& params);
 	void AddCardPoints(std::vector<Value>& params);
+	void SetCardVirtue(std::vector<Value>& params);
+	void SetCardTrait(std::vector<Value>& params);
+
 
 	void NpcMoveRoom(std::vector<Value>& params);
 	void NpcActionNoTarget(std::vector<Value>& params);
@@ -90,7 +93,10 @@ public:
 	Value GetThisCard(std::vector<Value>& params); //int ()
 	Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
+
 	//card info
+	Value GetCardVirtue(std::vector<Value>& params); //int(int)
+	Value GetCardTrait(std::vector<Value>& params); //bool(int, int)
 	Value GetCardFirstName(std::vector<Value>& params); //string(int)
 	Value GetCardSecondName(std::vector<Value>& params); //string(int)
 	Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
