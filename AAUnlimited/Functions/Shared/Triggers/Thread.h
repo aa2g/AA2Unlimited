@@ -65,8 +65,9 @@ public:
 	void AddCardPoints(std::vector<Value>& params);
 	void SetCardVirtue(std::vector<Value>& params);
 	void SetCardTrait(std::vector<Value>& params);
-
-
+	void SetCardPersonality(std::vector<Value>& params);
+	void SetCardVoicePitch(std::vector<Value>& params);
+	
 	void NpcMoveRoom(std::vector<Value>& params);
 	void NpcActionNoTarget(std::vector<Value>& params);
 	void NpcTalkTo(std::vector<Value>& params);
@@ -97,6 +98,8 @@ public:
 	//card info
 	Value GetCardVirtue(std::vector<Value>& params); //int(int)
 	Value GetCardTrait(std::vector<Value>& params); //bool(int, int)
+	Value GetCardPersonality(std::vector<Value>& params); //int(int)
+	Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
 	Value GetCardFirstName(std::vector<Value>& params); //string(int)
 	Value GetCardSecondName(std::vector<Value>& params); //string(int)
 	Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)

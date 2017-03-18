@@ -189,6 +189,24 @@ Value Thread::GetCardTrait(std::vector<Value>& params) {
 	return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
 }
 
+//int(int)
+Value Thread::GetCardPersonality(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_bPersonality);
+}
+
+//int(int)
+Value Thread::GetCardVoicePitch(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_voicePitch);
+}
+
 //string(int)
 Value Thread::GetCardFirstName(std::vector<Value>& params) {
 	int card = params[0].iVal;
@@ -301,6 +319,7 @@ Value Thread::IsLover(std::vector<Value>& params) {
 	}
 	return Value(it == relations->m_end);
 }
+
 //int(int, string, int)
 Value Thread::GetCardStorageInt(std::vector<Value>& params) {
 	int card = params[0].iVal;
@@ -660,6 +679,18 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Virtue"), TEXT("Virtue of %p"), TEXT("The virtue of this character."),
 			{ TYPE_INT }, (TYPE_INT),
 			&Thread::GetCardVirtue
+		},
+		{
+			26, EXPRCAT_CHARPROP,
+			TEXT("Personality"), TEXT("%p 's personality"), TEXT("The personality of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardPersonality
+		},
+		{
+			27, EXPRCAT_CHARPROP,
+			TEXT("Voice Pitch"), TEXT("%p 's pitch"), TEXT("The voice pitch of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardVoicePitch
 		},
 	},
 
