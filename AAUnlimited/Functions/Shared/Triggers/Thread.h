@@ -67,6 +67,16 @@ public:
 	void SetCardTrait(std::vector<Value>& params);
 	void SetCardPersonality(std::vector<Value>& params);
 	void SetCardVoicePitch(std::vector<Value>& params);
+	void SetCardClub(std::vector<Value>& params);
+	void SetCardClubValue(std::vector<Value>& params);
+	void SetCardClubRank(std::vector<Value>& params);
+	void SetCardIntelligence(std::vector<Value>& params);
+	void SetCardIntelligenceValue(std::vector<Value>& params);
+	void SetCardIntelligenceRank(std::vector<Value>& params);
+	void SetCardStrength(std::vector<Value>& params);
+	void SetCardStrengthValue(std::vector<Value>& params);
+	void SetCardStrengthRank(std::vector<Value>& params);
+	void SetCardSociability(std::vector<Value>& params);
 	
 	void NpcMoveRoom(std::vector<Value>& params);
 	void NpcActionNoTarget(std::vector<Value>& params);
@@ -100,6 +110,16 @@ public:
 	Value GetCardTrait(std::vector<Value>& params); //bool(int, int)
 	Value GetCardPersonality(std::vector<Value>& params); //int(int)
 	Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
+	Value GetCardClub(std::vector<Value>& params); //int(int)
+	Value GetCardClubValue(std::vector<Value>& params); //int(int)
+	Value GetCardClubRank(std::vector<Value>& params); //int(int)
+	Value GetCardIntelligence(std::vector<Value>& params); //int(int)
+	Value GetCardIntelligenceValue(std::vector<Value>& params); //int(int)
+	Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
+	Value GetCardStrength(std::vector<Value>& params); //int(int)
+	Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
+	Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
+	Value GetCardSociability(std::vector<Value>& params); //int(int)
 	Value GetCardFirstName(std::vector<Value>& params); //string(int)
 	Value GetCardSecondName(std::vector<Value>& params); //string(int)
 	Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)

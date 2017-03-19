@@ -288,7 +288,121 @@ void Thread::SetCardVoicePitch(std::vector<Value>& params)
 	AAPlay::g_characters[seat].m_char->m_charData->m_voicePitch = pitch;
 }
 
-//int seat, int newseat
+//int seat, int club
+void Thread::SetCardClub(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int club = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_club = club % 8;
+}
+//int seat, int value
+void Thread::SetCardClubValue(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int value = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.clubValue = value;
+}
+//int seat, int rank
+void Thread::SetCardClubRank(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int rank = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.clubClassRanking = rank;
+}
+
+//int seat, int intelligence
+void Thread::SetCardIntelligence(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int intelligence = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligence = intelligence % 6;
+}
+//int seat, int value
+void Thread::SetCardIntelligenceValue(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int value = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligenceValue = value;
+}
+//int seat, int rank
+void Thread::SetCardIntelligenceRank(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int rank = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligenceClassRank = rank;
+}
+
+//int seat, int strength
+void Thread::SetCardStrength(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int strength = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.strength = strength % 6;
+}
+//int seat, int value
+void Thread::SetCardStrengthValue(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int value = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.strengthValue = value;
+}
+//int seat, int rank
+void Thread::SetCardStrengthRank(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int rank = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.strengthClassRank = rank;
+}
+
+//int seat, int sociability
+void Thread::SetCardSociability(std::vector<Value>& params)
+{
+	int seat = params[0].iVal;
+	int sociability = params[1].iVal;
+	if (!AAPlay::g_characters[seat].m_char) {
+		LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+		return;
+	}
+	AAPlay::g_characters[seat].m_char->m_charData->m_character.sociability = sociability;
+}
+
+//int seat, int newset
 void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
 	int seat = params[0].iVal;
 	int newset = params[1].iVal;
@@ -630,6 +744,66 @@ std::vector<Action> g_Actions = {
 		TEXT("Set character's voice pitch."),
 		{ TYPE_INT, TYPE_INT },
 		&Thread::SetCardVoicePitch
+	},
+	{
+		36, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club"), TEXT("Set %p 's club to %p"),
+		TEXT("Set character's club."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardClub
+	},
+	{
+		37, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Value"), TEXT("Set %p 's club value to %p"),
+		TEXT("Set character's club value."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardClubValue
+	},
+	{
+		37, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Rank"), TEXT("Set %p 's club rank to %p"),
+		TEXT("Set character's club rank."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardClubRank
+	},
+	{
+		38, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence"), TEXT("Set %p 's intelligence to %p"),
+		TEXT("Set character's intelligence."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardIntelligence
+	},
+	{
+		39, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Value"), TEXT("Set %p 's intelligence value to %p"),
+		TEXT("Set character's intelligence value."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardIntelligenceValue
+	},
+	{
+		40, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Rank"), TEXT("Set %p 's intelligence rank to %p"),
+		TEXT("Set character's intelligence rank."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardIntelligenceRank
+	},
+	{
+		41, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength"), TEXT("Set %p 's strength to %p"),
+		TEXT("Set character's strength."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardStrength
+	},
+	{
+		42, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Value"), TEXT("Set %p 's strength value to %p"),
+		TEXT("Set character's strength value."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardStrengthValue
+	},
+	{
+		43, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Rank"), TEXT("Set %p 's strength rank to %p"),
+		TEXT("Set character's strength rank."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardStrengthRank
+	},
+	{
+		43, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sociability"), TEXT("Set %p 's sociability to %p"),
+		TEXT("Set character's sociability."),
+		{ TYPE_INT, TYPE_INT },
+		&Thread::SetCardSociability
 	},
 };
 
