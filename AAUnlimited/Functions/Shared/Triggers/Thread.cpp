@@ -101,9 +101,9 @@ Value Thread::EvaluateExpression(ParameterisedExpression& expr) {
 		return expr.namedConstant->val;
 	}
 	else {
-		if(expr.expression->returnType == TYPE_BOOL && (expr.expression->id == 3 || expr.expression->id == 4)) {
+		if(expr.expression->returnType == TYPE_BOOL && (expr.expression->id == 4 || expr.expression->id == 5)) {
 			//short circut evaluation required
-			if(expr.expression->id == 3) {
+			if(expr.expression->id == 4) {
 				//and
 				for (int j = 0; j < expr.actualParameters.size(); j++) {
 					auto& param = expr.actualParameters[j];
