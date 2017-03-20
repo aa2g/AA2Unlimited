@@ -207,6 +207,96 @@ Value Thread::GetCardVoicePitch(std::vector<Value>& params) {
 	return Value(cardInst->m_char->m_charData->m_voicePitch);
 }
 
+//int(int)
+Value Thread::GetCardClub(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_club);
+}
+
+//int(int)
+Value Thread::GetCardClubValue(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value((int)cardInst->m_char->m_charData->m_character.clubValue);
+}
+
+//int(int)
+Value Thread::GetCardClubRank(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.clubClassRanking);
+}
+
+//int(int)
+Value Thread::GetCardIntelligence(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.intelligence);
+}
+
+//int(int)
+Value Thread::GetCardIntelligenceValue(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value((int)cardInst->m_char->m_charData->m_character.intelligenceValue);
+}
+
+//int(int)
+Value Thread::GetCardIntelligenceRank(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.intelligenceClassRank);
+}
+
+//int(int)
+Value Thread::GetCardStrength(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.strength);
+}
+
+//int(int)
+Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value((int)cardInst->m_char->m_charData->m_character.strengthValue);
+}
+
+//int(int)
+Value Thread::GetCardStrengthRank(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.strengthClassRank);
+}
+//int(int)
+Value Thread::GetCardSociability(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (cardInst == NULL) return Value(TEXT(""));
+
+	return Value(cardInst->m_char->m_charData->m_character.sociability);
+}
+
+
 //string(int)
 Value Thread::GetCardFirstName(std::vector<Value>& params) {
 	int card = params[0].iVal;
@@ -691,6 +781,66 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			TEXT("Voice Pitch"), TEXT("%p 's pitch"), TEXT("The voice pitch of this character."),
 			{ TYPE_INT }, (TYPE_INT),
 			&Thread::GetCardVoicePitch
+		},
+		{
+			28, EXPRCAT_CHARPROP,
+			TEXT("Club"), TEXT("%p 's club"), TEXT("The club of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardClub
+		},
+		{
+			29, EXPRCAT_CHARPROP,
+			TEXT("Club Value"), TEXT("%p 's club value"), TEXT("The club value of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardClubValue
+		},
+		{
+			30, EXPRCAT_CHARPROP,
+			TEXT("Club Rank"), TEXT("%p 's club rank"), TEXT("The club rank of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardClubRank
+		},
+		{
+			31, EXPRCAT_CHARPROP,
+			TEXT("Intelligence"), TEXT("%p 's intelligence"), TEXT("The intelligence of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardIntelligence
+		},
+		{
+			32, EXPRCAT_CHARPROP,
+			TEXT("Intelligence Value"), TEXT("%p 's intelligence value"), TEXT("The intelligence value of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardIntelligenceValue
+		},
+		{
+			33, EXPRCAT_CHARPROP,
+			TEXT("Intelligence Rank"), TEXT("%p 's intelligence rank"), TEXT("The intelligence rank of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardIntelligenceRank
+		},
+		{
+			34, EXPRCAT_CHARPROP,
+			TEXT("Strength"), TEXT("%p 's strength"), TEXT("The strength of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardStrength
+		},
+		{
+			35, EXPRCAT_CHARPROP,
+			TEXT("Strength Value"), TEXT("%p 's strength value"), TEXT("The strength value of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardStrengthValue
+		},
+		{
+			36, EXPRCAT_CHARPROP,
+			TEXT("Strength Rank"), TEXT("%p 's strength rank"), TEXT("The strength rank of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardStrengthRank
+		},
+		{
+			37, EXPRCAT_CHARPROP,
+			TEXT("Strength Rank"), TEXT("%p 's sociability"), TEXT("The sociability of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardSociability
 		},
 	},
 
