@@ -109,6 +109,7 @@
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\CharacterActivity.h" />
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
+    <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalClasses\LoverData.h" />
