@@ -800,7 +800,7 @@ std::vector<Action> g_Actions = {
 		&Thread::SetCardStrengthRank
 	},
 	{
-		43, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sociability"), TEXT("Set %p 's sociability to %p"),
+		44, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sociability"), TEXT("Set %p 's sociability to %p"),
 		TEXT("Set character's sociability."),
 		{ TYPE_INT, TYPE_INT },
 		&Thread::SetCardSociability

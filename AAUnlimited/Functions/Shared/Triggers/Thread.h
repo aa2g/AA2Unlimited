@@ -122,6 +122,7 @@ public:
 	Value GetCardSociability(std::vector<Value>& params); //int(int)
 	Value GetCardFirstName(std::vector<Value>& params); //string(int)
 	Value GetCardSecondName(std::vector<Value>& params); //string(int)
+	Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 	Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
 	Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)
 	Value GetCardDislikePoints(std::vector<Value>& params); //int(int,int)

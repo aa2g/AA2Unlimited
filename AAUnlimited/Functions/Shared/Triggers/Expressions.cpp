@@ -296,7 +296,6 @@ Value Thread::GetCardSociability(std::vector<Value>& params) {
 	return Value(cardInst->m_char->m_charData->m_character.sociability);
 }
 
-
 //string(int)
 Value Thread::GetCardFirstName(std::vector<Value>& params) {
 	int card = params[0].iVal;
@@ -313,6 +312,16 @@ Value Thread::GetCardSecondName(std::vector<Value>& params) {
 	if (cardInst == NULL) return Value(TEXT(""));
 
 	return Value(cardInst->m_char->m_charData->m_surname);
+}
+
+//int(int)
+Value Thread::GetCardPartnerCount(std::vector<Value>& params) {
+	int card = params[0].iVal;
+	CharInstData* cardInst = &AAPlay::g_characters[card];
+	if (!cardInst->IsValid()) return Value(0);
+
+	return Value((int)cardInst->m_char->m_hStats->m_partnerCount);
+
 }
 
 //int(int,int)
@@ -838,9 +847,30 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 		},
 		{
 			37, EXPRCAT_CHARPROP,
-			TEXT("Strength Rank"), TEXT("%p 's sociability"), TEXT("The sociability of this character."),
+			TEXT("Sociability"), TEXT("%p 's sociability"), TEXT("The sociability of this character."),
 			{ TYPE_INT }, (TYPE_INT),
 			&Thread::GetCardSociability
+		},
+		{
+			38, EXPRCAT_CHARPROP,
+			TEXT("Partners count"), TEXT("%p 's partners count"), TEXT("The partners count of this character."),
+			{ TYPE_INT }, (TYPE_INT),
+			&Thread::GetCardPartnerCount
+		},
+		{
+			39, EXPRCAT_EVENT,
+			TEXT("Npc Original Answer Chance"), TEXT("Get Npc Original Answer Percent"),
+			TEXT("If executed in a trigger with the Npc Answers Event, this is success Chance that the Interaction had in Percent"),
+			{}, (TYPE_INT),
+			&Thread::GetNpcResponseOriginalPercent
+		},
+		{
+			40, EXPRCAT_EVENT,
+			TEXT("Npc Current Answer Chance"), TEXT("Get Npc Current Answer Percent"),
+			TEXT("If executed in a trigger with the Npc Answers Event, this is the current Interaction Percent, modified by this or previously executed Triggers. "
+			"using the Set Npc Response Percent Action"),
+			{}, (TYPE_INT),
+			&Thread::GetNpcResponseCurrentPercent
 		},
 	},
 
@@ -939,22 +969,7 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			&Thread::GetNpcResponseCurrentAnswer
 		},
 		{
-			16, EXPRCAT_EVENT,
-			TEXT("Npc Original Answer Chance"), TEXT("Get Npc Original Answer Percent"),
-			TEXT("If executed in a trigger with the Npc Answers Event, this is success Chance that the Interaction had in Percent"),
-			{}, (TYPE_BOOL),
-			&Thread::GetNpcResponseOriginalPercent
-		},
-		{
-			17, EXPRCAT_EVENT,
-			TEXT("Npc Current Answer Chance"), TEXT("Get Npc Current Answer Percent"),
-			TEXT("If executed in a trigger with the Npc Answers Event, this is the current Interaction Percent, modified by this or previously executed Triggers. "
-			"using the Set Npc Response Percent Action"),
-			{}, (TYPE_BOOL),
-			&Thread::GetNpcResponseCurrentPercent
-		},
-		{
-			18, EXPRCAT_CHARPROP,
+			16, EXPRCAT_CHARPROP,
 			TEXT("Is Seat Filled"), TEXT("Seat %p is Filled"),
 			TEXT("Whether the given Seat has a character behind it. Characters are identified using their seat number. Use this in a loop through all seats "
 			"do determine if a character exists or not."),
@@ -962,50 +977,50 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			&Thread::IsSeatFilled
 		},
 		{
-			19, EXPRCAT_CHARPROP,
+			17, EXPRCAT_CHARPROP,
 			TEXT("Is Lover"), TEXT("%p has %p as a lover"),
 			TEXT("True if the characters are currently in a relationship. (technically, it checks if the first parameter is in a relationship with the second)"),
 			{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 			&Thread::IsLover
 		},
 		{
-			20,EXPRCAT_COMPARISION_FLOAT,
+			18,EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Greater Than"),TEXT("%p > %p"),TEXT("Greater-Than"),
 			{ TYPE_FLOAT, TYPE_FLOAT },(TYPE_BOOL),
 			&Thread::GreaterThanFloats
 		},
 		{
-			21, EXPRCAT_COMPARISION_FLOAT,
+			19, EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Greater Than or Equal"), TEXT("%p >= %p"), TEXT("Greater-Than or equal"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::GreaterEqualsFloats
 		},
 		{
-			22, EXPRCAT_COMPARISION_FLOAT,
+			20, EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Equal"), TEXT("%p == %p"), TEXT("Equal"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::EqualsFloats
 		},
 		{
-			23, EXPRCAT_COMPARISION_FLOAT,
+			21, EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Less Than or Equal"), TEXT("%p <= %p"), TEXT("less than or equal"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::LessEqualsFloats
 		},
 		{
-			24, EXPRCAT_COMPARISION_FLOAT,
+			22, EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Less Than"), TEXT("%p < %p"), TEXT("less than"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::LessThanFloats
 		},
 		{
-			25, EXPRCAT_COMPARISION_FLOAT,
+			23, EXPRCAT_COMPARISION_FLOAT,
 			TEXT("Not Equal"), TEXT("%p != %p"), TEXT("not equal"),
 			{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 			&Thread::NotEqualsFloats
 		},
 		{
-			26, EXPRCAT_CHARPROP,
+			24, EXPRCAT_CHARPROP,
 			TEXT("Get Card Storage Bool"), TEXT("Get %p 's Card Storage entry under %p , defaulting to %p on error"),
 			TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 			"it returns the default value instead"),
@@ -1013,8 +1028,8 @@ std::vector<Expression> g_Expressions[N_TYPES] = {
 			&Thread::GetCardStorageBool
 		},
 		{
-			27, EXPRCAT_CHARPROP,
-			TEXT("Trait"), TEXT("%p 's %p trait"), TEXT("The virtue of this character."),
+			25, EXPRCAT_CHARPROP,
+			TEXT("Trait"), TEXT("%p 's %p trait"), TEXT(""),
 			{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 			&Thread::GetCardTrait
 		},
