@@ -200,6 +200,8 @@
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Functions\Shared\Triggers\Module.h" />
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

@@ -17,9 +17,7 @@ public:
 	int m_likePoints;
 	int m_dislikePoints;
 	int m_hatePoints;
-	float m_unknown;
 	IllusionArray<DWORD> m_actionBacklog;		//between 0 and 4, 0 = love, 1 = like, 2 = dislike, 3 = hate
-	BYTE m_unknown2[4];
 	int m_loveCount;
 	int m_likeCount;
 	int m_dislikeCount;

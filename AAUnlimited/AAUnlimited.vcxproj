@@ -108,6 +108,8 @@
     <ClInclude Include="External\ExternalClasses\Animation.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\CharacterActivity.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />

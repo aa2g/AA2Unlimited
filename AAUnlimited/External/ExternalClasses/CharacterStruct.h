@@ -1,6 +1,8 @@
 #pragma once
 #include <Windows.h>
 
+#include "CharacterNpcReactData.h"
+#include "CharacterNpcAiData.h"
 #include "CharacterRelation.h"
 #include "LoverData.h"
 #include "External\AddressRule.h"
@@ -65,8 +67,9 @@ public:
 	void* m_somedata;
 	void* m_moreUnknownData;
 	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
+	BYTE m_unknown8_2[0x4];
 	HStatistics* m_hStats;
-	BYTE m_unknown9[0x8];
+	BYTE m_unknown9[0x4];
 	void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
 	BYTE m_unknown10[0x4];
 	XXFile* m_xxSkirt;
@@ -79,7 +82,7 @@ public:
 
 	inline IllusionArray<CharacterRelation>* GetRelations() {
 		BYTE* ptr = (BYTE*)m_moreData;
-		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A18);
+		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A14);
 	}
 	
 	inline CharacterActivity* GetActivity() {
@@ -90,8 +93,20 @@ public:
 
 	inline IllusionArray<LoverData>* GetLovers() {
 		if (m_moreData2 == NULL) return NULL;
-		BYTE* ptr = (BYTE*)(m_moreData2)+0x24;
+		BYTE* ptr = (BYTE*)(m_moreData2)+0x20;
 		return (IllusionArray<LoverData>*)ptr;
+	}
+
+	inline CharacterNpcReactData* GetNpcReactData() {
+		if (m_somedata == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_somedata)+0x1C;
+		return *(CharacterNpcReactData**)(ptr);
+	}
+
+	inline CharacterNpcAiData* GetNpcAiData() {
+		if (m_somedata == NULL) return NULL;
+		BYTE* ptr = (BYTE*)(m_somedata)+0x18;
+		return *(CharacterNpcAiData**)(ptr);
 	}
 
 	inline XXFile* GetXXFile(Models target) {
