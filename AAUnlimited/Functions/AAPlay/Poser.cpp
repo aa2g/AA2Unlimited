@@ -915,7 +915,13 @@ namespace Poser {
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		using namespace ExtClass;
 		static const char prefix[]{ "pose_" };
-		static const char propPrefix[]{ "PROP_" };
+		static const char prefixTrans[]{ "pose_tr_" };
+		static const char prefixRot[]{ "pose_rot_" };
+		static const char propFramePrefix[]{ "PROP_" };
+		static const char propPrefixTrans[]{ "prop_tr_" };
+		static const char propPrefixRot[]{ "prop_rot_" };
+		static const std::wstring suffixTrans(L" TR");
+		static const std::wstring suffixRot(L" ROT");
 
 		if (xxFile == NULL) return;
 		if (loc_targetCharacters.size() == 0) return;
@@ -923,6 +929,33 @@ namespace Poser {
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		targetChar = loc_loadCharacter;
+
+		auto InsertFrame = [&xxFile](ExtClass::Frame* bone, ExtClass::Frame** child, const char* prefix) {
+			//make copy of the bone first
+			Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+			memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+
+			//turn match into a copy of the root for now, since there are a lot of members i dont know
+			memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+
+			//change parent and child stuff
+			bone->m_parent = newMatch->m_parent;
+			bone->m_nChildren = 1;
+			bone->m_children = newMatch;
+			newMatch->m_parent = bone;
+			for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+				newMatch->m_children[i].m_parent = newMatch;
+			}
+
+			//change name
+			int namelength = newMatch->m_nameBufferSize + strlen(prefix);
+			bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+			bone->m_nameBufferSize = namelength;
+			strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
+			strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+			*child = newMatch;
+		};
+
 		if (model == ExtClass::CharacterStruct::SKELETON) {
 			if (targetChar->Character->m_xxSkeleton != xxFile) {
 				for (PoserCharacter* c : loc_targetCharacters) {
@@ -938,27 +971,13 @@ namespace Poser {
 			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 
 				//make copy of the bone first
-				Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-				memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
-
-				//turn match into a copy of the root for now, since there are a lot of members i dont know
-				memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
-
-				//change parent and child stuff
-				bone->m_parent = newMatch->m_parent;
-				bone->m_nChildren = 1;
-				bone->m_children = newMatch;
-				newMatch->m_parent = bone;
-				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-					newMatch->m_children[i].m_parent = newMatch;
-				}
-
-				//change name
-				int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
-				bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-				bone->m_nameBufferSize = namelength;
-				strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
-				strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+				Frame* trans, *rot;
+				Frame* child = nullptr;
+				InsertFrame(bone, &child, prefixTrans); 
+				trans = bone;
+				bone = child;
+				InsertFrame(bone, &child, prefixRot);
+				rot = bone;
 
 				auto match = loc_sliderInfosRoom.find(bone->m_name);
 				if (match != loc_sliderInfosRoom.end()) {
@@ -967,11 +986,18 @@ namespace Poser {
 				}
 				else {
 					SliderInfo slider;
-					slider.descr = General::CastToWStringN(newMatch->m_name, newMatch->m_nameBufferSize);
+					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
 					slider.frameName = slider.descr;
 					slider.reset();
-					slider.xxFrame = bone;
+					slider.xxFrame = trans;
 					slider.category = PoseMods::FrameCategory::Room;
+					slider.setCurrentOperation(Rotate);
+					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
+					ApplySlider(&slider);
+
+					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
+					slider.frameName = slider.descr;
+					slider.xxFrame = rot;
 					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
 					ApplySlider(&slider);
 				}
@@ -979,12 +1005,7 @@ namespace Poser {
 		}
 		else
 			return;
-		/*
-		else if (model != ExtClass::CharacterStruct::SKIRT)
-			// The skirt XXFile isn't defined in the character struct at this moment
-			// We suppose the skeleton is already loaded and targetChar points to the correct char
-			return;
-		*/
+
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			
@@ -995,72 +1016,49 @@ namespace Poser {
 			if (match != loc_frameMap.end()) {
 				if (model != ExtClass::CharacterStruct::SKIRT || targetChar->SliderInfos[match->second].category == PoseMods::FrameCategory::Skirt) {
 					//make copy of the bone first
-					Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-					memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
-
-					//turn match into a copy of the root for now, since there are a lot of members i dont know
-					memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
-
-					//change parent and child stuff
-					bone->m_parent = newMatch->m_parent;
-					bone->m_nChildren = 1;
-					bone->m_children = newMatch;
-					newMatch->m_parent = bone;
-					for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-						newMatch->m_children[i].m_parent = newMatch;
-					}
-
-					//change name
-					int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
-					bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-					bone->m_nameBufferSize = namelength;
-					strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
-					strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+					Frame* child = nullptr;
+					InsertFrame(bone, &child, prefix);
 
 					targetChar->SliderInfos[match->second].xxFrame = bone;
 					ApplySlider(&targetChar->SliderInfos[match->second]);
 				}
 			} 
 			else {
-				if (strncmp(bone->m_name, propPrefix, sizeof(propPrefix) - 1) == 0) {
+				if (strncmp(bone->m_name, propFramePrefix, sizeof(propFramePrefix) - 1) == 0) {
 					auto& map = loc_sliderInfosProps[targetChar->id];
 
 					//make copy of the bone first
-					Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-					memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+					Frame* trans, *rot;
+					Frame* child = nullptr;
+					InsertFrame(bone, &child, prefixTrans);
+					trans = bone;
+					bone = child;
+					InsertFrame(bone, &child, prefixRot);
+					rot = bone;
 
-					//turn match into a copy of the root for now, since there are a lot of members i dont know
-					memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
-
-					//change parent and child stuff
-					bone->m_parent = newMatch->m_parent;
-					bone->m_nChildren = 1;
-					bone->m_children = newMatch;
-					newMatch->m_parent = bone;
-					for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-						newMatch->m_children[i].m_parent = newMatch;
-					}
-
-					//change name
-					int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
-					bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-					bone->m_nameBufferSize = namelength;
-					strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
-					strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
-
-					auto slider = map.find(bone->m_name);
-					if (slider != map.end()) {
-						slider->second.xxFrame = bone;
-						ApplySlider(&slider->second);
+					auto sliderTrans = map.find(trans->m_name);
+					auto sliderRot= map.find(rot->m_name);
+					if (sliderTrans != map.end() && sliderRot != map.end()) {
+						sliderTrans->second.xxFrame = trans;
+						sliderRot->second.xxFrame = rot;
+						ApplySlider(&sliderTrans->second);
+						ApplySlider(&sliderRot->second);
 					}
 					else {
 						SliderInfo info;
-						info.descr = General::CastToWStringN(bone->m_name, bone->m_nameBufferSize);
+						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
 						info.frameName = info.descr;
 						info.reset();
-						info.xxFrame = bone;
+						info.xxFrame = trans;
+						info.setCurrentOperation(Rotate);
 						info.category = PoseMods::FrameCategory::Prop;
-						map[bone->m_name] = info;
+						map[trans->m_name] = info;
+
+						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
+						info.frameName = info.descr;
+						info.xxFrame = rot;
+						map[rot->m_name] = info;
+
 						ApplySlider(&info);
 					}
 				}
