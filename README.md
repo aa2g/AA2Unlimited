@@ -1,6 +1,5 @@
 
-# Test Builds (up-to-date but card compatibility is not guaranteed; back up your stuff; *DOWNLOAD THIS*)
-[-> MEGA <-](https://mega.nz/#F!IZs3VY5b!axfi9mlecCwLDdvpvIIbzw)
+# DOWNLOAD THE LATEST RELEASE IN THE Releases TAB UP THERE
 
 # AA2Unlimited
 AAFace was supposed to make the Maker do things that it allready could, but wouldnt want to. 
