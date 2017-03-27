@@ -2,15 +2,12 @@
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
 
 # AA2Unlimited
-AAFace was supposed to make the Maker do things that it allready could, but wouldnt want to. 
+AAFace was supposed to make the Maker do things that it already could, but wouldn't want to. 
 It basically gave a UI to these features.
 
 AAUnlimited, on the other hand, tries to make the game (and maker) do new things.
 
-As a Part of this, it puts additional Information into the card images in form of a PNG chunk right before the first IEND chunk.
-The Game treats these as part of the image, which means cards produced with these additional data will still work normally 
-if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data, and i asume 
-so will AASnowflake.
+As a part of this, it puts additional Information into the card images in form of a PNG chunk right before the first IEND chunk. The Game treats these as part of the image, which means cards produced with these additional data will still work normally if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data. Latest AA2Snowflake is aware of this data so you can use it to change card face without losing it. Because AAU data is attached to the card face it can be moved around with ReiEdit's import feature.
 
 ## Features:
 
