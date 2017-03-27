@@ -1,5 +1,5 @@
 
-# DOWNLOAD THE LATEST RELEASE IN THE Releases TAB UP THERE
+# DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
 
 # AA2Unlimited
 AAFace was supposed to make the Maker do things that it allready could, but wouldnt want to. 
