@@ -84,7 +84,7 @@ struct Slider {
 		return retmod;
 	}
 
-	static void ModifySRT(D3DVECTOR3* scale,D3DVECTOR3* rot,D3DVECTOR3* trans, Slider::Operation op, const AAUCardData::BoneMod& mod);
+	static void ModifySRT(D3DXVECTOR3* scale,D3DXVECTOR3* rot,D3DXVECTOR3* trans, Slider::Operation op, const AAUCardData::BoneMod& mod);
 	static void ModifyKeyframe(ExtClass::Keyframe* frame,Slider::Operation op,const AAUCardData::BoneMod& mod);
 };
 

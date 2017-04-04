@@ -16,16 +16,17 @@ __declspec(naked) void* __stdcall IllusionMemAlloc(size_t size) {
 }
 
 D3DMATRIX* (__stdcall *D3DXMatrixMultiply)(D3DMATRIX *pOut,const D3DMATRIX *pM1,const D3DMATRIX *pM2);
-D3DVECTOR4* (__stdcall *D3DXVec3Transform)(D3DVECTOR4 *pOut,const D3DVECTOR3 *pV,const D3DMATRIX  *pM);
-D3DQUATERNION* (__stdcall *D3DXQuaternionRotationYawPitchRoll)(D3DQUATERNION *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
-D3DQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DQUATERNION *pOut,D3DQUATERNION *pQ);
-D3DQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DQUATERNION *pOut,const D3DQUATERNION *pQ1,const D3DQUATERNION *pQ2);
-HRESULT(__stdcall *D3DXMatrixDecompose)(D3DVECTOR3 *pOutScale,D3DQUATERNION *pOutRotation,D3DVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
+D3DXVECTOR4* (__stdcall *D3DXVec3Transform)(D3DXVECTOR4 *pOut,const D3DXVECTOR3 *pV,const D3DMATRIX  *pM);
+D3DXQUATERNION* (__stdcall *D3DXQuaternionRotationYawPitchRoll)(D3DXQUATERNION *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
+D3DXQUATERNION* (__stdcall *D3DXQuaternionNormalize)(D3DXQUATERNION *pOut,D3DXQUATERNION *pQ);
+D3DXQUATERNION* (__stdcall *D3DXQuaternionMultiply) (D3DXQUATERNION *pOut,const D3DXQUATERNION *pQ1,const D3DXQUATERNION *pQ2);
+HRESULT(__stdcall *D3DXMatrixDecompose)(D3DXVECTOR3 *pOutScale,D3DXQUATERNION *pOutRotation,D3DXVECTOR3 *pOutTranslation,const D3DMATRIX *pM);
 D3DMATRIX* (__stdcall *D3DXMatrixTranslation)(D3DMATRIX *pOut, float x, float y, float z);
 D3DMATRIX* (__stdcall *D3DXMatrixScaling)(D3DMATRIX *pOut, float sx, float sy, float sz);
-D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut, const D3DQUATERNION *pQ);
-D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
-
+D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut, const D3DXQUATERNION *pQ);
+D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut, FLOAT Yaw, FLOAT Pitch, FLOAT Roll);
+D3DXQUATERNION* (__stdcall *D3DXQuaternionRotationAxis)(D3DXQUATERNION *pOut, const D3DXVECTOR3* pV, FLOAT Angle);
+void (__stdcall *D3DXQuaternionToAxisAngle)(CONST D3DXQUATERNION *pQ, D3DXVECTOR3 *pAxis, FLOAT *pAngle);
 
 void (__cdecl *IllusionDeleteXXFileProc)(void* someStruct, ExtClass::XXFile* file);
 void __stdcall IllusionDeleteXXFile(ExtClass::XXFile* file, ExtClass::CharacterStruct* owner) {
@@ -72,6 +73,8 @@ void Init() {
 	GETPROC(D3DXMatrixScaling);
 	GETPROC(D3DXMatrixRotationQuaternion);
 	GETPROC(D3DXMatrixRotationYawPitchRoll);
+	GETPROC(D3DXQuaternionRotationAxis);
+	GETPROC(D3DXQuaternionToAxisAngle);
 
 #undef GETPROC
 

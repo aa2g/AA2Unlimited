@@ -1540,9 +1540,9 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
 			if(rule != NULL) {
 				D3DMATRIX& mat = elem.second;
-				D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
-				D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
-				D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+				D3DXVECTOR3 scale = { mat._11, mat._12, mat._13 };
+				D3DXVECTOR3 rot = { mat._21, mat._22, mat._23 };
+				D3DXVECTOR3 trans = { mat._31, mat._32, mat._33 };
 				for(auto& elem : *rule) {
 					Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
 				}
@@ -1561,9 +1561,9 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 						if(bone->m_name == strBoneName) {
 							D3DMATRIX& mat = elem.srtMatrix;
 							D3DMATRIX& origMat = elem.origMatrix;
-							D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
-							D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
-							D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+							D3DXVECTOR3 scale = { mat._11, mat._12, mat._13 };
+							D3DXVECTOR3 rot = { mat._21, mat._22, mat._23 };
+							D3DXVECTOR3 trans = { mat._31, mat._32, mat._33 };
 							for (auto& elem : *rule) {
 								Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
 							}

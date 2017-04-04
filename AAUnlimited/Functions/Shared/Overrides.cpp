@@ -261,9 +261,9 @@ namespace Shared {
 
 					//change matchNews matrix
 					D3DMATRIX matr;
-					D3DVECTOR3 scales = { 1.0f,1.0f,1.0f };
-					D3DVECTOR3 trans = { 0,0,0 };
-					D3DVECTOR3 vecRot = { 0,0,0 };
+					D3DXVECTOR3 scales = { 1.0f,1.0f,1.0f };
+					D3DXVECTOR3 trans = { 0,0,0 };
+					D3DXVECTOR3 vecRot = { 0,0,0 };
 					//add our values
 					if (rmatch && mit != rmatch->end()) {
 						for (auto mod : mit->second) {
@@ -360,9 +360,9 @@ namespace Shared {
 					if (match) {
 						//change matchNews matrix
 						D3DMATRIX matr;
-						D3DVECTOR3 scales = { 1.0f,1.0f,1.0f };
-						D3DVECTOR3 trans = { 0,0,0 };
-						D3DVECTOR3 vecRot = { 0,0,0 };
+						D3DXVECTOR3 scales = { 1.0f,1.0f,1.0f };
+						D3DXVECTOR3 trans = { 0,0,0 };
+						D3DXVECTOR3 vecRot = { 0,0,0 };
 						//add our values
 						if (rmatch && mit != rmatch->end()) {
 							for (auto mod : mit->second) {
@@ -472,9 +472,9 @@ namespace Shared {
 			if (match) {
 				//change matchNews matrix
 				D3DMATRIX matr;
-				D3DVECTOR3 scales = { 1.0f,1.0f,1.0f };
-				D3DVECTOR3 trans = { 0,0,0 };
-				D3DVECTOR3 vecRot = { 0,0,0 };
+				D3DXVECTOR3 scales = { 1.0f,1.0f,1.0f };
+				D3DXVECTOR3 trans = { 0,0,0 };
+				D3DXVECTOR3 vecRot = { 0,0,0 };
 				//add our values
 				if (rmatch && mit != rmatch->end()) {
 					for (auto mod : mit->second) {
@@ -613,10 +613,10 @@ namespace Shared {
 
 			if (match) {
 				//decompose current matrix
-				D3DVECTOR3 scales;
-				D3DQUATERNION rot;
-				D3DVECTOR3 trans;
-				D3DVECTOR3 vecRot = { 0,0,0 };
+				D3DXVECTOR3 scales;
+				D3DXQUATERNION rot;
+				D3DXVECTOR3 trans;
+				D3DXVECTOR3 vecRot = { 0,0,0 };
 				(*Shared::D3DXMatrixDecompose)(&scales,&rot,&trans,&bone->m_matrix5);
 				//add our values
 				if (rmatch && mit != rmatch->end()) {
@@ -630,9 +630,9 @@ namespace Shared {
 					}
 				}
 
-				D3DQUATERNION modRot;
+				D3DXQUATERNION modRot;
 				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&modRot,vecRot.y,vecRot.x,vecRot.z);
-				D3DQUATERNION combinedRot;
+				D3DXQUATERNION combinedRot;
 				(*Shared::D3DXQuaternionMultiply)(&combinedRot,&rot,&modRot);
 				//recompose matrix
 				D3DMATRIX mscale = {

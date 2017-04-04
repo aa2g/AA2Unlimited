@@ -34,6 +34,10 @@ namespace Poser {
 #define Y 1
 #define Z 2
 
+	const D3DXVECTOR3 g_unitVec[3] = { 1, 0, 0,
+	                                   0, 1, 0,
+	                                   0, 0, 1};
+
 	PoserWindow g_PoserWindow;
 
 	bool GetIsHiddenFrame(ExtClass::Frame* frame);
@@ -45,53 +49,105 @@ namespace Poser {
 		Scale
 	};
 	
-	struct OperationData {
-		float rangeMin(int axis) {
-			return min[axis] + delta[axis];
-		}
-
-		float rangeMax(int axis) {
-			return max[axis] + delta[axis];
-		}
-
-		float value[3];
-		float min[3];
-		float max[3];
-		float delta[3];
-	};
-
 	struct SliderInfo {
 		std::wstring frameName;
 		std::wstring descr;
 		PoseMods::FrameCategory category;
 		ExtClass::Frame* xxFrame;
 		Operation currentOperation;
-		struct OperationData translate, rotate, scale;
+		struct TranslationScaleData {
+			float rangeMin(int axis) {
+				return min[axis] + delta[axis];
+			}
+
+			float rangeMax(int axis) {
+				return max[axis] + delta[axis];
+			}
+
+			float value[3];
+			float min[3];
+			float max[3];
+			float delta[3];
+		} translate, scale;
+		struct RotationData {
+			D3DXQUATERNION quaternion;
+			float minEuler[3];
+			float maxEuler[3];
+			inline void reset() {
+				Shared::D3DXQuaternionIdentity(&quaternion);
+				for (int i = 0; i < 3; i++) {
+					rotAxes[i].set(g_unitVec[i]);
+				}
+			}
+
+			struct RotationAxis {
+				D3DXVECTOR3 vector;
+
+				D3DXQUATERNION quaternion() {
+					//D3DXQUATERNION q = { vector.x, vector.y, vector.z, 0 };
+					return{ vector.x, vector.y, vector.z, 0 };
+					//return q;
+				}
+
+				void set(const D3DXVECTOR3& v) {
+					vector = v;
+				}
+
+				void set(const D3DXQUATERNION& q) {
+					vector.x = q.x;
+					vector.y = q.y;
+					vector.z = q.z;
+				}
+			} rotAxes[3];
+
+		} rotation;
+		
+		inline D3DXQUATERNION& getRotation() {
+			return rotation.quaternion;
+		}
 
 		void setCurrentOperation(Operation operation) {
 			currentOperation = operation;
 		}
 
-		inline OperationData* getCurrentOperation() {
-			return currentOperation == Rotate ? &rotate : currentOperation == Translate ? &translate : &scale;
+		inline TranslationScaleData* getCurrentOperation() {
+			return currentOperation == Translate ? &translate : &scale;
 		}
 
-		float* curValueX() {
-			return &getCurrentOperation()->value[X];
+		float getValue(int axis) {
+			if (currentOperation == Rotate) {
+				float angle[3];
+				EulerAnglesQuaternion(&getRotation(), angle);
+				return angle[axis];
+			}
+			return getCurrentOperation()->value[axis];
 		}
 
-		float* curValueY() {
-			return &getCurrentOperation()->value[Y];
+		void getEulerAngles(float *angle) {
+			EulerAnglesQuaternion(&getRotation(), angle);
 		}
 
-		float* curValueZ() {
-			return &getCurrentOperation()->value[Z];
+		void setValue(int axis, float value) {
+			if (currentOperation == Rotate) {
+				float angle[3];
+				getEulerAngles(angle);
+				angle[axis] = value;
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), angle[1], angle[0], angle[2]);
+			}
+			else {
+				getCurrentOperation()->value[axis] = value;
+			}
 		}
 
 		void setValue(float newValueX, float newValueY, float newValueZ) {
-			*curValueX() = newValueX;
-			*curValueY() = newValueY;
-			*curValueZ() = newValueZ;
+			if (currentOperation == Rotate) {
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), newValueY, newValueX, newValueZ);
+			}
+			else {
+				setValue(X, newValueX);
+				setValue(Y, newValueY);
+				setValue(Z, newValueZ);
+			}
 		}
 
 		float fromSlider(int sldVal, int axis) {
@@ -99,15 +155,15 @@ namespace Poser {
 		}
 
 		void fromSliderX(int sldVal) {
-			*curValueX() = fromSlider(sldVal, X);
+			setValue(X, fromSlider(sldVal, X));
 		}
 
 		void fromSliderY(int sldVal) {
-			*curValueY() = fromSlider(sldVal, Y);
+			setValue(Y, fromSlider(sldVal, Y));
 		}
 
 		void fromSliderZ(int sldVal) {
-			*curValueZ() = fromSlider(sldVal, Z);
+			setValue(Z, fromSlider(sldVal, Z));
 		}
 
 		int toSlider(float value, int axis) {
@@ -117,15 +173,50 @@ namespace Poser {
 		}
 
 		int toSliderX() {
-			return toSlider(*curValueX(), X);
+			return toSlider(getValue(X), X);
 		}
 
 		int toSliderY() {
-			return toSlider(*curValueY(), Y);
+			return toSlider(getValue(Y), Y);
 		}
 
 		int toSliderZ() {
-			return toSlider(*curValueZ(), Z);
+			return toSlider(getValue(Z), Z);
+		}
+
+		void increment(float order, int axis) {
+			float delta;
+			if (currentOperation == Rotate) {
+				if (order) {
+					delta = (float)M_PI * order / 180.0f;
+					D3DXQUATERNION deltaRotation, deltaRotationConjugate;
+					(*Shared::D3DXQuaternionRotationAxis)(&deltaRotation, &rotation.rotAxes[axis].vector, delta);
+					(*Shared::D3DXQuaternionConjugate)(&deltaRotationConjugate, &deltaRotation);
+					(*Shared::D3DXQuaternionMultiply)(&getRotation(), &getRotation(), &deltaRotation);
+					for (int i = 0; i < 3; i++) {
+						if (i != axis) {
+							D3DXQUATERNION temp = rotation.rotAxes[i].quaternion();
+							(*Shared::D3DXQuaternionMultiply)(&temp, &deltaRotationConjugate, &temp);
+							(*Shared::D3DXQuaternionMultiply)(&temp, &temp, &deltaRotation);
+							rotation.rotAxes[i].set(temp);
+						}
+					}
+				}
+				else {
+					rotation.reset();
+				}
+			}
+			else {
+				if (order) {
+					delta = currentOperation == Translate ? order / 10.0f : order / 50.0f;
+					getCurrentOperation()->value[axis] += delta;
+					getCurrentOperation()->delta[axis] += delta;
+				}
+				else {
+					getCurrentOperation()->value[axis] = currentOperation == Scale ? 1.0f : 0.0f;
+					getCurrentOperation()->delta[axis] = 0;
+				}
+			}
 		}
 
 		void translateSlider(float delta, int axis) {
@@ -134,10 +225,9 @@ namespace Poser {
 
 		void reset() {
 			for (int i = 0; i < 3; i++) {
-				rotate.value[i] = 0;
-				rotate.min[i] = (float)-M_PI;
-				rotate.max[i] = (float)M_PI;
-				rotate.delta[i] = 0;
+				rotation.reset();
+				rotation.minEuler[i] = (float)-M_PI;
+				rotation.maxEuler[i] = (float)M_PI;
 				translate.value[i] = 0;
 				translate.min[i] = -2;
 				translate.max[i] = 2;
@@ -148,6 +238,24 @@ namespace Poser {
 				scale.delta[i] = 0;
 			}
 		}
+
+		inline void EulerAnglesQuaternion(D3DXQUATERNION* pQ, FLOAT* angle) {
+			float yy = pQ->y * pQ->y;
+
+			float t0 = 2.0f * (pQ->w * pQ->x + pQ->y * pQ->z);
+			float t1 = 1.0f - 2.0f * (pQ->x * pQ->x + yy);
+			angle[0] = std::atan2(t0, t1);
+
+			float t2 = 2.0f * (pQ->w * pQ->y - pQ->z * pQ->x);
+			t2 = t2 > 1.0f ? 1.0f : t2;
+			t2 = t2 < -1.0f ? -1.0f : t2;
+			angle[1] = std::asin(t2);
+
+			float t3 = 2.0f * (pQ->w * pQ->z + pQ->x * pQ->y);
+			float t4 = 1.0f - 2.0f * (yy + pQ->z * pQ->z);
+			angle[2] = std::atan2(t3, t4);
+		}
+
 	};
 	std::map<PoseMods::FrameCategory,std::vector<unsigned int>> loc_sliderCategories; // holds the index of each slider in the main slider vector
 																 // according the the category they reside into
@@ -297,11 +405,6 @@ namespace Poser {
 			g_PoserWindow.NewCharacter(0);
 		}
 	}
-
-	float SliderIncrement(float order, Operation op) {
-		return op == Rotate ? ((float)M_PI * order / 180.0f) : op == Translate ? order / 10.0f : order / 50.0f;
-	}
-
 
 	void PoserWindow::Init() {
 		if (m_dialog == NULL) {
@@ -623,7 +726,7 @@ namespace Poser {
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
 					if (CurrentSlider()->currentOperation != Scale) {
-						*CurrentSlider()->curValueX() *= -1.0f;
+						CurrentSlider()->setValue(X, -CurrentSlider()->getValue(X));
 						thisPtr->SyncList();
 						ApplySlider();
 					}
@@ -741,8 +844,6 @@ namespace Poser {
 	}
 
 	void PoserWindow::ApplyIncrement(int axis, int sign) {
-		float* value = CurrentSlider()->curValueX();
-		float* delta = &CurrentSlider()->getCurrentOperation()->delta[axis];
 		float increment = 0;
 		if (sign != 0) {
 			TCITEM tab;
@@ -751,13 +852,10 @@ namespace Poser {
 			tab.pszText = text;
 			int index = TabCtrl_GetCurSel(m_tabModifiers);
 			TabCtrl_GetItem(m_tabModifiers, index, &tab);
-			increment += SliderIncrement(float(sign * (int)tab.lParam), CurrentSlider()->currentOperation);
-			value[axis] += increment;
-			*delta += increment;
+			CurrentSlider()->increment(float(sign * (int)tab.lParam), axis);
 		}
 		else {
-			value[axis] = CurrentSlider()->currentOperation == Scale ? 1.0f : 0.0f;
-			*delta = 0;
+			CurrentSlider()->increment(0, axis);
 		}
 		SyncList();
 		ApplySlider();
@@ -851,11 +949,11 @@ namespace Poser {
 		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
 		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(X));
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(Y));
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(Z));
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -867,11 +965,24 @@ namespace Poser {
 		CurrentSlider()->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
 		CurrentSlider()->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		float x, y, z;
+		if (CurrentSlider()->currentOperation == Rotate) {
+			float angle[3];
+			CurrentSlider()->getEulerAngles(angle);
+			x = angle[0];
+			y = angle[1];
+			z = angle[2];
+		}
+		else {
+			x = CurrentSlider()->getValue(X);
+			y = CurrentSlider()->getValue(Y);
+			z = CurrentSlider()->getValue(Z);
+		}
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), x);
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), y);
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), z);
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -890,7 +1001,8 @@ namespace Poser {
 			D3DMATRIX transMatrix;
 			(*Shared::D3DXMatrixTranslation)(&transMatrix, targetSlider->translate.value[X], targetSlider->translate.value[Y], targetSlider->translate.value[Z]);
 			D3DMATRIX rotMatrix;
-			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
+			//(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
+			(*Shared::D3DXMatrixRotationQuaternion)(&rotMatrix, &targetSlider->getRotation());
 			D3DMATRIX scaleMatrix;
 			(*Shared::D3DXMatrixScaling)(&scaleMatrix, targetSlider->scale.value[X], targetSlider->scale.value[Y], targetSlider->scale.value[Z]);
 			D3DMATRIX matrix = origFrame->m_matrix5;
@@ -898,7 +1010,7 @@ namespace Poser {
 			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &rotMatrix);
 			(*Shared::D3DXMatrixMultiply)(&rotMatrix, &scaleMatrix, &rotMatrix);
 
-			D3DVECTOR3 translations;
+			D3DXVECTOR3 translations;
 			translations.x = origFrame->m_matrix5._41 - matrix._41;
 			translations.y = origFrame->m_matrix5._42 - matrix._42;
 			translations.z = origFrame->m_matrix5._43 - matrix._43;
@@ -1137,9 +1249,9 @@ namespace Poser {
 				auto match = loc_targetChar->FrameMap.find(elem.frameName);
 				if (match != loc_targetChar->FrameMap.end()) {
 					slider = &loc_targetChar->SliderInfos[match->second];
-					slider->rotate.value[X] = elem.matrix[0];
-					slider->rotate.value[Y] = elem.matrix[1];
-					slider->rotate.value[Z] = elem.matrix[2];
+					//slider->rotate.value[X] = elem.matrix[0];
+					//slider->rotate.value[Y] = elem.matrix[1];
+					//slider->rotate.value[Z] = elem.matrix[2];
 					slider->translate.value[X] = elem.matrix[3];
 					slider->translate.value[Y] = elem.matrix[4];
 					slider->translate.value[Z] = elem.matrix[5];
@@ -1163,8 +1275,13 @@ namespace Poser {
 		
 		if (json.is<object>()) {
 			const object load = json.get<object>();
+			int version = 1;
 			SliderInfo* slider;
 			try {
+				auto versionCheck = load.find("_VERSION_");
+				if (versionCheck != load.end()) {
+					version = (int)versionCheck->second.get<double>();
+				}
 				c->Character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
 				c->Character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
 				object sliders = load.at("sliders").get<object>();
@@ -1176,17 +1293,29 @@ namespace Poser {
 					auto match = c->FrameMap.find((*s).first);
 					if (match != loc_targetChar->FrameMap.end()) {
 						array mods = (*s).second.get<array>();
-						if (mods.size() == 9) {
+						if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
 							slider = &c->SliderInfos[match->second];
-							slider->rotate.value[X] = (float)mods[0].get<double>();
-							slider->rotate.value[Y] = (float)mods[1].get<double>();
-							slider->rotate.value[Z] = (float)mods[2].get<double>();
-							slider->translate.value[X] = (float)mods[3].get<double>();
-							slider->translate.value[Y] = (float)mods[4].get<double>();
-							slider->translate.value[Z] = (float)mods[5].get<double>();
-							slider->scale.value[X] = (float)mods[6].get<double>();
-							slider->scale.value[Y] = (float)mods[7].get<double>();
-							slider->scale.value[Z] = (float)mods[8].get<double>();
+							float x, y, z, w;
+							int index = 0;
+							x = (float)mods[index++].get<double>();
+							y = (float)mods[index++].get<double>();
+							z = (float)mods[index++].get<double>();
+							if (version == 1) {
+								(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
+							}
+							else if (version ==2) {
+								w = (float)mods[index++].get<double>();
+								slider->rotation.quaternion.x = x;
+								slider->rotation.quaternion.y = y;
+								slider->rotation.quaternion.z = z;
+								slider->rotation.quaternion.w = w;
+							}
+							slider->translate.value[X] = (float)mods[index++].get<double>();
+							slider->translate.value[Y] = (float)mods[index++].get<double>();
+							slider->translate.value[Z] = (float)mods[index++].get<double>();
+							slider->scale.value[X] = (float)mods[index++].get<double>();
+							slider->scale.value[Y] = (float)mods[index++].get<double>();
+							slider->scale.value[Z] = (float)mods[index++].get<double>();
 							ApplySlider(slider);
 						}
 						else {
@@ -1243,20 +1372,22 @@ namespace Poser {
 	picojson::value poseToJson(PoserCharacter* c) {
 		using namespace picojson;
 		object json;
+		json["_VERSION_"] = value((double)2);
 		json["pose"] = value((double)c->Character->m_xxSkeleton->m_poseNumber);
 		json["frame"] = value((double)c->Character->m_xxSkeleton->m_animFrame);
 		value::object sliders;
 		for (SliderInfo& slider : c->SliderInfos) {
-			value::array values(9);
-			values[0] = value((double)slider.rotate.value[X]);
-			values[1] = value((double)slider.rotate.value[Y]);
-			values[2] = value((double)slider.rotate.value[Z]);
-			values[3] = value((double)slider.translate.value[X]);
-			values[4] = value((double)slider.translate.value[Y]);
-			values[5] = value((double)slider.translate.value[Z]);
-			values[6] = value((double)slider.scale.value[X]);
-			values[7] = value((double)slider.scale.value[Y]);
-			values[8] = value((double)slider.scale.value[Z]);
+			value::array values(10);
+			values[0] = value((double)slider.rotation.quaternion.x);
+			values[1] = value((double)slider.rotation.quaternion.y);
+			values[2] = value((double)slider.rotation.quaternion.z);
+			values[3] = value((double)slider.rotation.quaternion.w);
+			values[4] = value((double)slider.translate.value[X]);
+			values[5] = value((double)slider.translate.value[Y]);
+			values[6] = value((double)slider.translate.value[Z]);
+			values[7] = value((double)slider.scale.value[X]);
+			values[8] = value((double)slider.scale.value[Y]);
+			values[9] = value((double)slider.scale.value[Z]);
 			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
 		}
 		json["sliders"] = value(sliders);
