@@ -208,7 +208,7 @@ DWORD Crc32(BYTE* data,int len,DWORD regInit,bool invertResult) {
 	return reg;
 }
 
-D3DMATRIX MatrixFromSRT(D3DVECTOR3 & scales,D3DVECTOR3 & rots,D3DVECTOR3 & trans)
+D3DMATRIX MatrixFromSRT(D3DXVECTOR3 & scales,D3DXVECTOR3 & rots,D3DXVECTOR3 & trans)
 {
 	D3DMATRIX matr;
 
