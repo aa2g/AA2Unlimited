@@ -1029,7 +1029,7 @@ namespace Poser {
 		static const char prefix[]{ "pose_" };
 		static const char prefixTrans[]{ "pose_tr_" };
 		static const char prefixRot[]{ "pose_rot_" };
-		static const char propFramePrefix[]{ "PROP_" };
+		static const char propFramePrefix[]{ "AS00_N_Prop" };
 		static const char propPrefixTrans[]{ "prop_tr_" };
 		static const char propPrefixRot[]{ "prop_rot_" };
 		static const std::wstring suffixTrans(L" TR");
