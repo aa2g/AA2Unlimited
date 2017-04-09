@@ -1249,9 +1249,11 @@ namespace Poser {
 				auto match = loc_targetChar->FrameMap.find(elem.frameName);
 				if (match != loc_targetChar->FrameMap.end()) {
 					slider = &loc_targetChar->SliderInfos[match->second];
-					//slider->rotate.value[X] = elem.matrix[0];
-					//slider->rotate.value[Y] = elem.matrix[1];
-					//slider->rotate.value[Z] = elem.matrix[2];
+					float x, y, z;
+					x = elem.matrix[0];
+					y = elem.matrix[1];
+					z = elem.matrix[2];
+					(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
 					slider->translate.value[X] = elem.matrix[3];
 					slider->translate.value[Y] = elem.matrix[4];
 					slider->translate.value[Z] = elem.matrix[5];
