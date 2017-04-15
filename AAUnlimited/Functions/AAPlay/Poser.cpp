@@ -413,12 +413,15 @@ namespace Poser {
 				NULL,DialogProc,(LPARAM)this);
 		}
 		m_timer = SetTimer(m_dialog,1,2000,NULL);
+		EnableWindow(g_PoserWindow.m_dialog, TRUE);
 		ShowWindow(m_dialog,SW_SHOW);
 	}
 	void PoserWindow::Hide() {
 		KillTimer(m_dialog,m_timer);
 		m_timer = 0;
-		ShowWindow(m_dialog,SW_HIDE);
+		EnableWindow(g_PoserWindow.m_dialog, FALSE);
+		if(SendMessage(g_PoserWindow.m_chkAlwaysOnTop, BM_GETCHECK, 0, 0) == BST_CHECKED)
+			ShowWindow(m_dialog,SW_HIDE);
 	}
 
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
