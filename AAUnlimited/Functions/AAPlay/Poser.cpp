@@ -33,6 +33,7 @@ namespace Poser {
 #define X 0
 #define Y 1
 #define Z 2
+#define W 3
 
 	const D3DXVECTOR3 g_unitVec[3] = { 1, 0, 0,
 	                                   0, 1, 0,
@@ -114,6 +115,20 @@ namespace Poser {
 			return currentOperation == Translate ? &translate : &scale;
 		}
 
+		float getCurrentOperationRangeMin(int axis) {
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMin(axis);
+		}
+
+		float getCurrentOperationRange(int axis) {
+				if (currentOperation == Rotate)
+				return rotation.maxEuler[axis] - rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
+		}
+
 		float getValue(int axis) {
 			if (currentOperation == Rotate) {
 				float angle[3];
@@ -151,7 +166,10 @@ namespace Poser {
 		}
 
 		float fromSlider(int sldVal, int axis) {
-			return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis] + (rotation.maxEuler[axis] - rotation.minEuler[axis]) / 0x10000 * sldVal;
+			else
+				return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
 		}
 
 		void fromSliderX(int sldVal) {
@@ -167,9 +185,8 @@ namespace Poser {
 		}
 
 		int toSlider(float value, int axis) {
-			float range = getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
-			float coeff = 0x10000 / range;
-			return int(coeff * (value - getCurrentOperation()->rangeMin(axis)));
+			float coeff = 0x10000 / getCurrentOperationRange(axis);
+			return int(coeff * (value - getCurrentOperationRangeMin(axis)));
 		}
 
 		int toSliderX() {
@@ -412,12 +429,15 @@ namespace Poser {
 				NULL,DialogProc,(LPARAM)this);
 		}
 		m_timer = SetTimer(m_dialog,1,2000,NULL);
+		EnableWindow(g_PoserWindow.m_dialog, TRUE);
 		ShowWindow(m_dialog,SW_SHOW);
 	}
 	void PoserWindow::Hide() {
 		KillTimer(m_dialog,m_timer);
 		m_timer = 0;
-		ShowWindow(m_dialog,SW_HIDE);
+		EnableWindow(g_PoserWindow.m_dialog, FALSE);
+		if(SendMessage(g_PoserWindow.m_chkAlwaysOnTop, BM_GETCHECK, 0, 0) == BST_CHECKED)
+			ShowWindow(m_dialog,SW_HIDE);
 	}
 
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
@@ -1291,37 +1311,47 @@ namespace Poser {
 					it->reset();
 					ApplySlider(&(*it));
 				}
+
+				auto LoadSlider = [&version](SliderInfo* slider, array& mods) {
+					if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
+						float x, y, z, w;
+						int index = 0;
+						x = (float)mods[index++].get<double>();
+						y = (float)mods[index++].get<double>();
+						z = (float)mods[index++].get<double>();
+						if (version == 1) {
+							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
+						}
+						else if (version == 2) {
+							w = (float)mods[index++].get<double>();
+							slider->rotation.quaternion.x = x;
+							slider->rotation.quaternion.y = y;
+							slider->rotation.quaternion.z = z;
+							slider->rotation.quaternion.w = w;
+						}
+						slider->translate.value[X] = (float)mods[index++].get<double>();
+						slider->translate.value[Y] = (float)mods[index++].get<double>();
+						slider->translate.value[Z] = (float)mods[index++].get<double>();
+						slider->scale.value[X] = (float)mods[index++].get<double>();
+						slider->scale.value[Y] = (float)mods[index++].get<double>();
+						slider->scale.value[Z] = (float)mods[index++].get<double>();
+						ApplySlider(slider);
+					}
+					else {
+						//invalid json data
+					}
+				};
 				for (auto s = sliders.cbegin(); s != sliders.cend(); s++) {
 					auto match = c->FrameMap.find((*s).first);
 					if (match != loc_targetChar->FrameMap.end()) {
 						array mods = (*s).second.get<array>();
-						if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
-							slider = &c->SliderInfos[match->second];
-							float x, y, z, w;
-							int index = 0;
-							x = (float)mods[index++].get<double>();
-							y = (float)mods[index++].get<double>();
-							z = (float)mods[index++].get<double>();
-							if (version == 1) {
-								(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
-							}
-							else if (version ==2) {
-								w = (float)mods[index++].get<double>();
-								slider->rotation.quaternion.x = x;
-								slider->rotation.quaternion.y = y;
-								slider->rotation.quaternion.z = z;
-								slider->rotation.quaternion.w = w;
-							}
-							slider->translate.value[X] = (float)mods[index++].get<double>();
-							slider->translate.value[Y] = (float)mods[index++].get<double>();
-							slider->translate.value[Z] = (float)mods[index++].get<double>();
-							slider->scale.value[X] = (float)mods[index++].get<double>();
-							slider->scale.value[Y] = (float)mods[index++].get<double>();
-							slider->scale.value[Z] = (float)mods[index++].get<double>();
-							ApplySlider(slider);
-						}
-						else {
-							//invalid json data
+						LoadSlider(&c->SliderInfos[match->second], mods);
+					}
+					else {
+						auto match = loc_sliderInfosProps[c->id].find((*s).first);
+						if (match != loc_sliderInfosProps[c->id].end()) {
+							array mods = (*s).second.get<array>();
+							LoadSlider(&match->second, mods);
 						}
 					}
 				}
@@ -1378,7 +1408,7 @@ namespace Poser {
 		json["pose"] = value((double)c->Character->m_xxSkeleton->m_poseNumber);
 		json["frame"] = value((double)c->Character->m_xxSkeleton->m_animFrame);
 		value::object sliders;
-		for (SliderInfo& slider : c->SliderInfos) {
+		auto SaveSlider = [&sliders](auto& slider) {
 			value::array values(10);
 			values[0] = value((double)slider.rotation.quaternion.x);
 			values[1] = value((double)slider.rotation.quaternion.y);
@@ -1391,6 +1421,12 @@ namespace Poser {
 			values[8] = value((double)slider.scale.value[Y]);
 			values[9] = value((double)slider.scale.value[Z]);
 			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
+		};
+		for (SliderInfo& slider : c->SliderInfos) {
+			SaveSlider(slider);
+		}
+		for (auto i = loc_sliderInfosProps[c->id].begin(); i != loc_sliderInfosProps[c->id].end(); i++) {
+			SaveSlider(i->second);
 		}
 		json["sliders"] = value(sliders);
 
