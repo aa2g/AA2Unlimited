@@ -115,6 +115,20 @@ namespace Poser {
 			return currentOperation == Translate ? &translate : &scale;
 		}
 
+		float getCurrentOperationRangeMin(int axis) {
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMin(axis);
+		}
+
+		float getCurrentOperationRange(int axis) {
+				if (currentOperation == Rotate)
+				return rotation.maxEuler[axis] - rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
+		}
+
 		float getValue(int axis) {
 			if (currentOperation == Rotate) {
 				float angle[3];
@@ -152,7 +166,10 @@ namespace Poser {
 		}
 
 		float fromSlider(int sldVal, int axis) {
-			return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis] + (rotation.maxEuler[axis] - rotation.minEuler[axis]) / 0x10000 * sldVal;
+			else
+				return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
 		}
 
 		void fromSliderX(int sldVal) {
@@ -168,9 +185,8 @@ namespace Poser {
 		}
 
 		int toSlider(float value, int axis) {
-			float range = getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
-			float coeff = 0x10000 / range;
-			return int(coeff * (value - getCurrentOperation()->rangeMin(axis)));
+			float coeff = 0x10000 / getCurrentOperationRange(axis);
+			return int(coeff * (value - getCurrentOperationRangeMin(axis)));
 		}
 
 		int toSliderX() {
