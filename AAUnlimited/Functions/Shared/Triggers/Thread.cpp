@@ -2,6 +2,7 @@
 
 #include "Triggers.h"
 #include "Files\Logger.h"
+#include "Functions\AAPlay\Globals.h"
 
 namespace Shared {
 namespace Triggers {
@@ -32,9 +33,13 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 	}
 
 	//execute actions
+	CharInstData* triggeringCardInstance = &AAPlay::g_characters[this->eventData->card];
+	CharInstData* thisCardInstance = &AAPlay::g_characters[execTrigger->owningCard];
 
-	LOGPRIO(Logger::Priority::WARN) << "Trigger [" <<  execTrigger->name << "]:\r\n"
-		<< "\tThis card: [" << execTrigger->owningCard << "]" << "\r\n";
+
+	LOGPRIO(Logger::Priority::WARN) << "Trigger [" <<  execTrigger->name << "]:\r\n";
+	LOGPRIONC(Logger::Priority::SPAM) "\tThis card: [" << Value(thisCardInstance->m_char->m_charData->m_forename).strVal << " " << Value(thisCardInstance->m_char->m_charData->m_surname).strVal << "]" << "\r\n";
+	LOGPRIONC(Logger::Priority::SPAM) "\tTriggering card: [" << Value(triggeringCardInstance->m_char->m_charData->m_forename).strVal << " " << Value(triggeringCardInstance->m_char->m_charData->m_surname).strVal << "]:\r\n";
 	for(ip = 0; ip < trg->actions.size() && !execFinished; ip++) {
 		//get action
 		auto& action = trg->actions[ip];
