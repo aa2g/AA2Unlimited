@@ -139,7 +139,8 @@ namespace Shared {
 			Value SubstractIntegers(std::vector<Value>& params); //int(int,int)
 			Value DivideIntegers(std::vector<Value>& params); //int(int,int)
 			Value MultiplyIntegers(std::vector<Value>& params); //int(int,int)
-			Value Float2Int(std::vector<Value>& params); //int(float);
+			Value Float2Int(std::vector<Value>& params); //int(float)
+			Value StrLength(std::vector<Value>& params); //int(string)
 
 			//basic float stuff
 			Value GetRandomFloat(std::vector<Value>& params); //float(float,float)

@@ -53,10 +53,15 @@ namespace Shared {
 		Value Thread::MultiplyIntegers(std::vector<Value>& params) {
 			return Value(params[0].iVal * params[1].iVal);
 		}
-
+		//int(float)
 		Value Thread::Float2Int(std::vector<Value>& params) {
 			int i = params[0].fVal;
 			return Value(i);
+		}
+		//int(string)
+		Value Thread::StrLength(std::vector<Value>& params) {
+			auto str = params[0].strVal;
+			return Value((int)str->size());
 		}
 
 		/*
@@ -913,6 +918,12 @@ namespace Shared {
 					TEXT("The sexual orientation of this character."),
 					{TYPE_INT}, (TYPE_INT),
 					&Thread::GetCardOrientation
+				},
+				{
+					42, EXPRCAT_MATH,
+					TEXT("String Length"), TEXT("Length( %p )"), TEXT("Retrieves the length of the given string"),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::StrLength
 				},
 			},
 
