@@ -1214,13 +1214,13 @@ namespace Shared {
 				{
 					10, EXPRCAT_CHARPROP,
 					TEXT("Float to String"), TEXT("String( %p )"), TEXT("Converts a Float to String"),
-					{ (TYPE_INT) }, (TYPE_STRING),
+					{ (TYPE_FLOAT) }, (TYPE_STRING),
 					&Thread::FloatToString
 				},
 				{
 					11, EXPRCAT_CHARPROP,
 					TEXT("Bool to String"), TEXT("String( %p )"), TEXT("Converts a Bool to String"),
-					{ (TYPE_INT) }, (TYPE_STRING),
+					{ (TYPE_BOOL) }, (TYPE_STRING),
 					&Thread::BoolToString
 				},
 			}
