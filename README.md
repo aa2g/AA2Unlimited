@@ -35,7 +35,7 @@ data
 ```
 
 ### Card Data: adds additional card data to cards:
-- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!IVFyWIrb!meEOFx8i7nHDYMHOAQL2Kg) is highly recommended
+- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!IVFyWIrb!meEOFx8i7nHDYMHOAQL2Kg) is highly recommended. If it doesn't work and you get blackface get the same thing with Tantoo instead.
 - **Hair Highlight**: Use a hair highlight from *AAEdit\data\override\hair_highlight*. *Note*: effectively the same as **Mesh Override** `(Asp00_20_00_00_00\*)->(file)`, so this will not work if you have custom highlights without this name prefix
 
 These Features above are all simply special, wild-carded rules of one of the types below. While the rules below do NOT support wild cards naturally, all of these things could be done for specific slots or files using the rules directly. Whenever a High-Poly model is loaded (or all the time in AAEdit), these rules from the corresponding card are applied. The following generic rule types exist:
