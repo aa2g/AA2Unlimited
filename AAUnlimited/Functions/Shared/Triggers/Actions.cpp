@@ -436,6 +436,23 @@ namespace Shared {
 			);
 		}
 
+		//int seat, string name
+		void Thread::SetCardDescription(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			auto name = params[1].strVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_charData->m_description,
+				name->c_str(),
+				name->size()
+			);
+		}
+
 		//int seat, int orientation
 		void Thread::SetCardOrientation(std::vector<Value>& params)
 		{
@@ -871,6 +888,18 @@ namespace Shared {
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardOrientation
 			},
+			{
+				46, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Description"), TEXT("%p ::Description = %p"),
+				TEXT("Set character's description."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardDescription
+			},
+			//{
+			//	47, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
+			//	TEXT("Execute triggers with provided name."),
+			//	{ TYPE_STRING },
+			//	&Thread::FireTrigger
+			//},
 		};
 
 

@@ -190,7 +190,7 @@ public:
 
 	std::vector<Shared::Triggers::Trigger>&			GetTriggers();
 	std::vector<Shared::Triggers::GlobalVariable>&	GetGlobalVariables();
-	const std::vector<Shared::Triggers::Module>&	GetModules() const;
+	std::vector<Shared::Triggers::Module>&	GetModules();
 	std::map<std::wstring,Shared::Triggers::Value>& GetCardStorage();
 		
 	const std::vector<BoneRuleV2>				GetMeshRuleList();
@@ -363,7 +363,7 @@ inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { retu
 
 inline std::vector<Shared::Triggers::GlobalVariable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
 
-inline const std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() const { return m_modules; }
+inline /*const*/ std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() { return m_modules; }
 
 inline std::map<std::wstring,Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
 

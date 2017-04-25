@@ -63,6 +63,32 @@ namespace Shared {
 			auto str = params[0].strVal;
 			return Value((int)str->size());
 		}
+		//int(string source, string substring)
+		Value Thread::FirstIndexOf(std::vector<Value>& params) {
+			auto source = params[0].strVal;
+			auto sub = params[1].strVal;
+			int match = (int)source->find(sub->c_str());
+			if (match == std::wstring::npos) match = -1;
+			return Value(match);
+		}
+		//int(string source, int from, string substring)
+		Value Thread::FirstIndexOfFrom(std::vector<Value>& params) {
+			auto source = params[0].strVal;
+			auto sub = params[1].strVal;
+			int from = params[2].iVal;
+			int match = (int)source->find(sub->c_str(), from);
+			if (match == std::wstring::npos) match = -1;
+			return Value(match);
+		}
+		//int(string)
+		Value Thread::String2Int(std::vector<Value>& params) {
+			int i = _wtoi(params[0].strVal->c_str());
+			if (errno == EINVAL)
+			{
+				return Value(TEXT("Conversion failed"));
+			}
+			return Value(i);
+		}
 
 		/*
 		* Bool stuff
@@ -156,6 +182,15 @@ namespace Shared {
 			float v = params[0].iVal;
 			return Value(v);
 		}
+		//float(string)
+		Value Thread::String2Float(std::vector<Value>& params) {
+			float f = _wtof(params[0].strVal->c_str());
+			if (errno == EINVAL)
+			{
+				return Value(TEXT("Conversion failed"));
+			}
+			return Value(f);
+		}
 
 		/*
 		 * string stuff
@@ -165,7 +200,7 @@ namespace Shared {
 		Value Thread::SubString(std::vector<Value>& params) {
 			std::wstring& str = *params[0].strVal;
 			int from = params[1].iVal;
-			if (from < 0) from = 0;
+			if (from < 0) from = str.size() - from;
 			int length = params[2].iVal;
 			if (length < 0) length = 0;
 
@@ -196,6 +231,20 @@ namespace Shared {
 			auto boolVal = params[0].bVal;
 
 			return Value(std::to_wstring(boolVal));
+		}
+		//string(int from, int length, string newStr)
+		Value Thread::StringReplace(std::vector<Value>& params) {
+			std::wstring& str = *params[0].strVal;
+
+			int from = params[1].iVal;
+			if (from < 0) from = str.size() - from;
+
+			int length = params[2].iVal;
+			if (length < 0) length = 0;
+
+			std::wstring newStr = *params[3].strVal;
+
+			return Value(str.replace(from, length, newStr));
 		}
 
 		/*
@@ -343,6 +392,15 @@ namespace Shared {
 			if (cardInst == NULL) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_surname);
+		}
+
+		//string(int)
+		Value Thread::GetCardDescription(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (cardInst == NULL) return Value(TEXT(""));
+
+			return Value(cardInst->m_char->m_charData->m_description);
 		}
 
 		//int(int)
@@ -925,6 +983,24 @@ namespace Shared {
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::StrLength
 				},
+				{
+					43, EXPRCAT_MATH,
+					TEXT("First Index Of"), TEXT("%p ::FirstIndexOf( str: %p )"), TEXT("Retrieves the first occurence of str string."),
+					{ TYPE_STRING, TYPE_STRING }, (TYPE_INT),
+					&Thread::FirstIndexOf
+				},
+				{
+					44, EXPRCAT_MATH,
+					TEXT("String to Int"), TEXT("Int( %p )"), TEXT("Converts a String to an Int."),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::String2Int
+				},
+				{
+					45, EXPRCAT_MATH,
+					TEXT("First Index Of Starting At"), TEXT("%p ::FirstIndexOf( str: %p , from: %p )"), TEXT("Retrieves the first occurence of str string starting from from: index."),
+					{ TYPE_STRING, TYPE_STRING, TYPE_INT }, (TYPE_INT),
+					&Thread::FirstIndexOfFrom
+				},
 			},
 
 			{ //BOOL
@@ -1150,6 +1226,12 @@ namespace Shared {
 					{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
 						&Thread::GetCardStorageFloat
 				},
+				{
+					11, EXPRCAT_MATH,
+					TEXT("String to Float"), TEXT("Float( %p )"), TEXT("Converts a String to a Float."),
+					{ TYPE_STRING }, (TYPE_FLOAT),
+					&Thread::String2Float
+				},
 			},
 			{ //STRING
 				{
@@ -1222,6 +1304,18 @@ namespace Shared {
 					TEXT("Bool to String"), TEXT("String( %p )"), TEXT("Converts a Bool to String"),
 					{ (TYPE_BOOL) }, (TYPE_STRING),
 					&Thread::BoolToString
+				},
+				{
+					12, EXPRCAT_CHARPROP,
+					TEXT("Description"), TEXT("%p ::Description"), TEXT("This character's description"),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardDescription
+				},
+				{
+					13, EXPRCAT_GENERAL,
+					TEXT("Replace substring"), TEXT("%p ::Replace( from: %p , to: %p , str: %p )"), TEXT("Replace substring starting from the from: and ending with to:"),
+					{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_STRING),
+					&Thread::StringReplace
 				},
 			}
 

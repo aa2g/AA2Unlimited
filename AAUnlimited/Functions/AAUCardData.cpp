@@ -1031,6 +1031,7 @@ bool AAUCardData::AddModule(const TCHAR* moduleName) {
 }
 
 bool AAUCardData::AddModule(const Shared::Triggers::Module& mod) {
+	bool alwaysAdd = true;	//TODO: remove once action prompt is in place
 	bool globalConflict = false;
 	//check for globals in this module
 	for(auto& global : mod.globals) {
@@ -1044,7 +1045,9 @@ bool AAUCardData::AddModule(const Shared::Triggers::Module& mod) {
 		}
 		if(var == NULL) {
 			//new var, add
-
+			if (alwaysAdd) {
+				m_globalVars.push_back(global);
+			}
 		}
 		else {
 			//allready have this var
@@ -1053,9 +1056,13 @@ bool AAUCardData::AddModule(const Shared::Triggers::Module& mod) {
 		
 	}
 
-	if(!globalConflict) {
+	if(!globalConflict && !alwaysAdd) {	//no conflict, add everything
 		m_modules.push_back(mod);
 		m_globalVars.insert(m_globalVars.end(), mod.globals.begin(), mod.globals.end());
+	}
+	else {	//some conflicts, ask for aciton
+		//not implemented yet
+		if (alwaysAdd) m_modules.push_back(mod);
 	}
 	
 	return true;

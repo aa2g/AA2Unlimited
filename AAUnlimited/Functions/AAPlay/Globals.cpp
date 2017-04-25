@@ -29,9 +29,16 @@ void InitOnLoad() {
 		g_characters[seat].m_cardData.FromFileBuffer((char*)it->m_charData->m_pngBuffer,it->m_charData->m_pngBufferSize);
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
-		for (auto& trg : aauData.GetTriggers()) {
+		for (Trigger& trg : aauData.GetTriggers()) {
 			trg.Initialize(&aauData.GetGlobalVariables(), seat);
 		}
+		//initialize modules
+		for (auto& module : aauData.GetModules()) {
+			for (Trigger& trg : module.triggers) {
+				trg.Initialize(&aauData.GetGlobalVariables(), seat);
+			}
+		}
+
 		//throw init event
 		CardInitializeData data;
 		data.card = seat;
@@ -47,6 +54,12 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	auto& aauData = g_characters[seat].m_cardData;
 	for (auto& trg : aauData.GetTriggers()) {
 		trg.Initialize(&aauData.GetGlobalVariables(),seat);
+	}
+	//initialize modules
+	for (auto& module : aauData.GetModules()) {
+		for (auto& trg : module.triggers) {
+			trg.Initialize(&aauData.GetGlobalVariables(), seat);
+		}
 	}
 	//throw init event
 	CardInitializeData data;

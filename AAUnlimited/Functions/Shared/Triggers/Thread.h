@@ -56,7 +56,6 @@ namespace Shared {
 			void ConditionalJump(std::vector<Value>& params);
 			void EndExecution(std::vector<Value>& params);
 			void ConditionalEndExecution(std::vector<Value>& params);
-
 			void SwitchAAUDataSet(std::vector<Value>& params);
 			void AddCardLovePoints(std::vector<Value>& params);
 			void AddCardLikePoints(std::vector<Value>& params);
@@ -79,6 +78,7 @@ namespace Shared {
 			void SetCardSociability(std::vector<Value>& params);
 			void SetCardFirstName(std::vector<Value>& params);
 			void SetCardSecondName(std::vector<Value>& params);
+			void SetCardDescription(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
 
 			void NpcMoveRoom(std::vector<Value>& params);
@@ -125,6 +125,7 @@ namespace Shared {
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
 			Value GetCardSecondName(std::vector<Value>& params); //string(int)
+			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
@@ -141,7 +142,10 @@ namespace Shared {
 			Value MultiplyIntegers(std::vector<Value>& params); //int(int,int)
 			Value Float2Int(std::vector<Value>& params); //int(float)
 			Value StrLength(std::vector<Value>& params); //int(string)
-
+			Value FirstIndexOf(std::vector<Value>& params); //int(string, string)
+			Value FirstIndexOfFrom(std::vector<Value>& params); //int(string, int, string)
+			Value String2Int(std::vector<Value>& params); //int(string)
+			
 			//basic float stuff
 			Value GetRandomFloat(std::vector<Value>& params); //float(float,float)
 			Value AddFloats(std::vector<Value>& params);	//float(float,float)
@@ -149,7 +153,7 @@ namespace Shared {
 			Value DivideFloats(std::vector<Value>& params); //float(float,float)
 			Value MultiplyFloats(std::vector<Value>& params); //float(float,float)
 			Value Int2Float(std::vector<Value>& params); //float(int)
-
+			Value String2Float(std::vector<Value>& params); //float(string)
 
 			//basic bool stuff
 			//these two are handled directly cause short circut evaluation
@@ -176,6 +180,7 @@ namespace Shared {
 			Value IntToString(std::vector<Value>& params); //string(int)
 			Value FloatToString(std::vector<Value>& params); //string(float)
 			Value BoolToString(std::vector<Value>& params); //string(bool)
+			Value StringReplace(std::vector<Value>& params); //string(string, int, int)
 
 			Value GetCardStorageInt(std::vector<Value>& params); //int(int, string, int)
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
