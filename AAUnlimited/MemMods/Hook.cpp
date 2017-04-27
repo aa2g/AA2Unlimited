@@ -185,6 +185,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/PcConversation.h"
+#include "MemMods/AAPlay/Events/Time.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 #include "MemMods/AAPlay/Events/ClothingDialog.h"
@@ -265,6 +266,7 @@ void InitializeHooks() {
 		NpcActions::NpcAnswerInjection();
 		NpcActions::NpcMovingActionInjection();
 		NpcActions::NpcMovingActionPlanInjection();
+		//Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;

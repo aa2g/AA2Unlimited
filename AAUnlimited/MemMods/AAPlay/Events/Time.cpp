@@ -5,6 +5,8 @@
 #include "Functions\Shared\Triggers\Event.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Functions\AAPlay\Globals.h"
+#include "Functions/AAPlay/GameState.h"
 
 namespace PlayInjections {
 namespace Time {
@@ -12,8 +14,15 @@ namespace Time {
 
 void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 	Shared::Triggers::PeriodEndsData data;
+	do {
+		//assigns a random filled seat as the triggering card
+		//or use the current PC instead
+		data.card = rand() % 25;
+	} while (!AAPlay::g_characters[data.card].IsValid());
+
 	data.oldPeriod = oldPeriod;
 	data.newPeriod = ExtVars::AAPlay::GameTimeData()->currentPeriod;
+	Shared::GameState::setIsOverriding(false);
 	Shared::Triggers::ThrowEvent(&data);
 }
 
