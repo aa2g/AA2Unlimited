@@ -26,6 +26,7 @@
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="Functions\AAPlay\Poser.cpp" />
+    <ClCompile Include="Functions\AAPlay\PoserController.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\CardData.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
     <ClInclude Include="Files\PoseMods.h" />
+    <ClInclude Include="Functions\AAPlay\PoserController.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />

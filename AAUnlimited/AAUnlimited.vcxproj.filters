@@ -81,6 +81,7 @@
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
+    <ClCompile Include="Functions\AAPlay\PoserController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="Files\ClothFile.h" />
+    <ClInclude Include="Functions\AAPlay\PoserController.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
