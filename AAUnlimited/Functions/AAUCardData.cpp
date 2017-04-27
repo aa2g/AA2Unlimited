@@ -105,6 +105,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				}
 				LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << name << "r\n";
 				break; }
+			case 'AUDS': {
+				//aau card data set
+				m_aauSets[m_currAAUSet].m_charSetData = ReadData<decltype(m_aauSets[m_currAAUSet].m_charSetData)>(buffer, size);
+				LOGPRIO(Logger::Priority::SPAM) << "...found AUDS, size: " << sizeof(m_aauSets[m_currAAUSet].m_charSetData) << "\r\n";
+				break;
+			}
 			case 'OvrT': {
 				m_aauSets[m_currAAUSet].m_meshOverrides = ReadData<decltype(m_aauSets[m_currAAUSet].m_meshOverrides)>(buffer,size);
 				LOGPRIO(Logger::Priority::SPAM) << "...found OvrT, loaded " << m_aauSets[m_currAAUSet].m_meshOverrides.size() << " elements; "
@@ -361,6 +367,8 @@ int AAUCardData::ToBuffer(char** buffer,int* size, bool resize, bool pngChunks) 
 	//dump aau sets
 	for (int i = 0; i < m_aauSets.size(); i++) {
 		DUMP_MEMBER_AAUSET('AUSS',m_name);
+		//Card Data Set
+		DUMP_MEMBER_CONTAINER_AAUSET('AUDS', m_charSetData);
 		//overrides
 		DUMP_MEMBER_CONTAINER_AAUSET('OvrT',m_meshOverrides);
 		DUMP_MEMBER_CONTAINER_AAUSET('AOvT',m_archiveOverrides);
@@ -538,16 +546,12 @@ bool AAUCardData::RemoveBoneTransformation(int index) {
 	return true;
 }
 
-bool AAUCardData::AddAAUDataSet(const TCHAR* name) {
-	for (auto& elem : m_aauSets) {
-		if (elem.m_name == name) return false;
-	}
-	m_aauSets.resize(m_aauSets.size() + 1);
-	m_aauSets[m_aauSets.size() - 1].m_name = name;
+bool AAUCardData::UpdateAAUDataSet(int set, ExtClass::CharacterData* charData) {
+	m_aauSets[set].m_charSetData.CopyCharacterData(charData);
 	return true;
 }
 
-bool AAUCardData::CopyAAUDataSet(const TCHAR * name)
+bool AAUCardData::CopyAAUDataSet(const TCHAR * name, ExtClass::CharacterData* charData)
 {
 	for (auto& elem : m_aauSets) {
 		if (elem.m_name == name) return false;
@@ -555,6 +559,7 @@ bool AAUCardData::CopyAAUDataSet(const TCHAR * name)
 	m_aauSets.resize(m_aauSets.size() + 1);
 	m_aauSets[m_aauSets.size() - 1] = m_aauSets[GetCurrAAUSet()];
 	m_aauSets[m_aauSets.size() - 1].m_name = name;
+	m_aauSets[m_aauSets.size() - 1].m_charSetData.CopyCharacterData(charData);
 	return true;
 }
 bool AAUCardData::RemoveAAUDataSet(int index) {
@@ -564,9 +569,10 @@ bool AAUCardData::RemoveAAUDataSet(int index) {
 	if (index == m_currAAUSet) m_currAAUSet = 0;
 	return true;
 }
-void AAUCardData::SwitchActiveAAUDataSet(int newSet) {
+void AAUCardData::SwitchActiveAAUDataSet(int newSet, ExtClass::CharacterData* charData) {
 	if (newSet >= m_aauSets.size()) return;
 	m_currAAUSet = newSet;
+	charData->CopyCharacterSetData(&m_aauSets[m_currAAUSet].m_charSetData);
 }
 
 bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,AAUCardData::BoneMod mod) {

@@ -246,7 +246,14 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if(identifier == IDC_GN_BTNAAUSETADD) {
 				TCHAR buf[256];
 				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
-				g_currChar.m_cardData.CopyAAUDataSet(buf);
+
+				if (!g_currChar.IsValid()) {
+					DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
+					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+				}
+
+				AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+				AAEdit::g_currChar.m_cardData.CopyAAUDataSet(buf, g_currChar.m_char->m_charData);
 				thisPtr->RefreshAAuSetList();
 				return TRUE;
 			}
@@ -257,7 +264,12 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if (wnd == thisPtr->m_lbAAuSets) {
 				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
-					AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel);
+					if (!g_currChar.IsValid()) {
+						DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
+						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+					}
+					AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+					AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel, g_currChar.m_char->m_charData);
 					using namespace ExtVars::AAEdit;
 					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);
 				}

@@ -474,7 +474,7 @@ namespace Shared {
 				return;
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
-			aau.SwitchActiveAAUDataSet(newset);
+			aau.SwitchActiveAAUDataSet(newset, AAPlay::g_characters[seat].m_char->m_charData);
 		}
 
 		//int card, string keyname, int value

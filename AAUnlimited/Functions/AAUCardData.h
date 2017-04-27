@@ -93,10 +93,10 @@ public:
 
 	bool SetTan(const TCHAR* name);
 
-	bool AddAAUDataSet(const TCHAR* name);
-	bool CopyAAUDataSet(const TCHAR* name);
+	bool UpdateAAUDataSet(int set, ExtClass::CharacterData* charData);
+	bool CopyAAUDataSet(const TCHAR* name, ExtClass::CharacterData* charData);
 	bool RemoveAAUDataSet(int index);
-	void SwitchActiveAAUDataSet(int newSet);
+	void SwitchActiveAAUDataSet(int newSet, ExtClass::CharacterData* charData);
 
 	bool AddModule(const TCHAR* moduleName);
 	bool AddModule(const Shared::Triggers::Module& mod);
@@ -250,6 +250,8 @@ private:
 		std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
 
 		std::vector<HairPart> m_hairs[4];
+
+		ExtClass::CharacterSetData m_charSetData;
 
 		AAUDataSet();
 	};
