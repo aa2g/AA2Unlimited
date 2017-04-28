@@ -266,7 +266,7 @@ void InitializeHooks() {
 		NpcActions::NpcAnswerInjection();
 		NpcActions::NpcMovingActionInjection();
 		NpcActions::NpcMovingActionPlanInjection();
-		//Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
+		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;
