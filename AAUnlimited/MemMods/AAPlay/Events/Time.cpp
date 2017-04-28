@@ -30,15 +30,15 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 DWORD loc_PeriodChangeOriginalFunction;
 void __declspec(naked) PeriodChangeRedirect() {
 	__asm {
-		mov eax,[edi+20]
-		mov eax,[eax+20]
+		mov eax,[edi+0x20]
+		mov eax,[eax+0x20]
 		push eax //save old period
 
 		push [esp+8] //push original function argument
 		call [loc_PeriodChangeOriginalFunction]
 		push eax //save return value for later
 
-		push eax
+		push [esp+4]
 		call PeriodChangeEvent
 
 		pop eax //set return value
