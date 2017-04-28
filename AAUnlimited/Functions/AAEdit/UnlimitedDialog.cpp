@@ -187,6 +187,12 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				return TRUE;
 			}
 		}
+		if (!g_currChar.IsValid()) {
+			DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
+			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+		}
+
+		AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 		break; }
 	}
 	return FALSE;

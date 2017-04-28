@@ -32,7 +32,7 @@ public:
 	static const DWORD PngChunkId = 'aaUd';
 	static const DWORD PngChunkIdBigEndian = 'dUaa';
 	enum MeshModFlag {
-		MODIFY_FRAME = 1,MODIFY_BONE = 2
+		MODIFY_FRAME = 1, MODIFY_BONE = 2
 	};
 	static const int CurrentVersion = 2;
 public:
@@ -69,22 +69,22 @@ public:
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
 
-	bool AddObjectOverride(const TCHAR* object,const TCHAR* file);
+	bool AddObjectOverride(const TCHAR* object, const TCHAR* file);
 	bool RemoveObjectOverride(int index);
 
 	//bone transformations (deprecated)
-	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
+	bool AddBoneTransformation(const TCHAR* boneName, D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
 
 	//hairs
-	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
+	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip);
 	bool RemoveHair(int index);
 
 	struct BoneMod;
-	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
+	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, BoneMod mod);
 	bool RemoveBoneRule(int index);
 
-	void SetSliderValue(int sliderTarget,int sliderIndex,float value);
+	void SetSliderValue(int sliderTarget, int sliderIndex, float value);
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 	bool SetEyeHighlight(const TCHAR* texName);
@@ -113,9 +113,9 @@ public:
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
-	typedef std::pair<std::wstring,std::wstring> ObjectOverrideRule;
-	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
-	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
+	typedef std::pair<std::wstring, std::wstring> ObjectOverrideRule;
+	typedef std::pair<std::wstring, D3DMATRIX> BoneRule;
+	typedef std::pair<std::pair<int, std::wstring>, std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 	struct HairPart {
 		BYTE kind; //0-3
 		BYTE slot;
@@ -136,9 +136,9 @@ public:
 			for (int i = 0; i < 9; i++) if (data[i] != rhs.data[i]) return false; return true;
 		}
 	};
-	
-	typedef std::pair<std::pair<int,std::pair<std::wstring,std::wstring>>,BoneMod> BoneRuleV2;
-	typedef std::pair<std::pair<int,int>,float> SliderRule; //int is slider index in global array, float is selected value
+
+	typedef std::pair<std::pair<int, std::pair<std::wstring, std::wstring>>, BoneMod> BoneRuleV2;
+	typedef std::pair<std::pair<int, int>, float> SliderRule; //int is slider index in global array, float is selected value
 
 	//getter functions
 	BYTE GetTanSlot() const;
@@ -150,10 +150,10 @@ public:
 	const TextureImage*							GetMeshOverrideTexture(const TCHAR* texture) const;
 
 	const std::vector<ArchiveOverrideRule>&		GetArchiveOverrideList() const;
-	const OverrideFile*							GetArchiveOverrideFile(const TCHAR* archive,const TCHAR* texture) const;
+	const OverrideFile*							GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const;
 
 	const std::vector<ArchiveRedirectRule>&		GetArchiveRedirectList() const;
-	const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive,const TCHAR* texture) const;
+	const std::pair<std::wstring, std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const;
 
 	const std::vector<ObjectOverrideRule>&		GetObjectOverrideList() const;
 	const XXObjectFile*							GetObjectOverrideFile(const char* objectName) const;
@@ -186,23 +186,25 @@ public:
 	bool										HasFilesSaved();
 
 	const std::vector<HairPart>&				GetHairs(BYTE kind);
+
+	const std::vector<BoneRuleV2>				GetMeshRuleList();
+	const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName);
+	const std::map<std::wstring, std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName);
+
+	const std::vector<SliderRule> GetSliderList();
+	const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>>& GetSliderBoneRuleMap(int type);
+	const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>>& GetSliderFrameRuleMap(int type);
+	const std::vector<std::pair<const Shared::Slider*, BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone);
+	const std::vector<std::pair<const Shared::Slider*, BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model, std::wstring bone);
 	//aausetdata end
 
 	std::vector<Shared::Triggers::Trigger>&			GetTriggers();
 	std::vector<Shared::Triggers::GlobalVariable>&	GetGlobalVariables();
 	std::vector<Shared::Triggers::Module>&	GetModules();
-	std::map<std::wstring,Shared::Triggers::Value>& GetCardStorage();
-		
-	const std::vector<BoneRuleV2>				GetMeshRuleList();
-	const std::map<std::wstring,std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName);
-	const std::map<std::wstring,std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName);
+	std::map<std::wstring, Shared::Triggers::Value>& GetCardStorage();
 
-	const std::vector<SliderRule> GetSliderList();
-	const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderBoneRuleMap(int type);
-	const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderFrameRuleMap(int type);
-	const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model,std::wstring bone);
-	const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model,std::wstring bone);
-
+	struct AAUDataSet;
+	std::vector<AAUDataSet> m_aauSets;
 private:
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
@@ -215,16 +217,16 @@ private:
 		//DATA
 
 		std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
-		std::map<std::wstring,TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
+		std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
 
 		std::vector<ArchiveOverrideRule> m_archiveOverrides; //<archive,file>->file
-		std::map<std::pair<std::wstring,std::wstring>,OverrideFile> m_archiveOverrideMap;
+		std::map<std::pair<std::wstring, std::wstring>, OverrideFile> m_archiveOverrideMap;
 
 		std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
-		std::map<std::pair<std::wstring,std::wstring>,std::pair<std::wstring,std::wstring>> m_archiveRedirectMap;
+		std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
 
 		std::vector<ObjectOverrideRule> m_objectOverrides;
-		std::map<std::string,XXObjectFile> m_objectOverrideMap;
+		std::map<std::string, XXObjectFile> m_objectOverrideMap;
 
 		struct {
 			std::wstring texName;
@@ -247,31 +249,31 @@ private:
 		DWORD m_tanColor;
 
 		std::vector<BoneRule> m_boneTransforms;
-		std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
+		std::map<std::wstring, D3DMATRIX> m_boneTransformMap;
 
 		std::vector<HairPart> m_hairs[4];
 
 		ExtClass::CharacterSetData m_charSetData;
 
+		std::vector<BoneRuleV2> m_boneRules;
+		std::map<std::wstring, std::map<std::wstring, std::vector<BoneMod>>> m_boneRuleMap;
+		std::map<std::wstring, std::map<std::wstring, std::vector<BoneMod>>> m_frameRuleMap;
+
+		std::vector<SliderRule> m_sliders;
+		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
+		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
+
 		AAUDataSet();
 	};
-	std::vector<AAUDataSet> m_aauSets;
+	//std::vector<AAUDataSet> m_aauSets;
 	int m_currAAUSet;
 
 	std::vector<Shared::Triggers::GlobalVariable> m_globalVars;
 	std::vector<Shared::Triggers::Trigger> m_triggers;
 	std::vector<Shared::Triggers::Module> m_modules;
-	std::map<std::wstring,Shared::Triggers::Value> m_cardStorage;
+	std::map<std::wstring, Shared::Triggers::Value> m_cardStorage;
 
 	std::vector<SavedFile> m_savedFiles;
-
-	std::vector<BoneRuleV2> m_boneRules;
-	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
-	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_frameRuleMap;
-
-	std::vector<SliderRule> m_sliders;
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
 
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
@@ -298,7 +300,7 @@ inline int AAUCardData::GetCurrAAUSet() const {
 }
 inline std::vector<std::wstring> AAUCardData::GetAAUSetDataList() const {
 	std::vector<std::wstring> vec(m_aauSets.size());
-	for(int i = 0; i < m_aauSets.size(); i++) {
+	for (int i = 0; i < m_aauSets.size(); i++) {
 		vec[i] = m_aauSets[i].m_name;
 	}
 	return vec;
@@ -310,13 +312,13 @@ inline const TextureImage* AAUCardData::GetMeshOverrideTexture(const TCHAR* text
 	return it == m_aauSets[m_currAAUSet].m_meshOverrideMap.end() ? NULL : &it->second;
 }
 inline const std::vector<AAUCardData::ArchiveOverrideRule>& AAUCardData::GetArchiveOverrideList() const { return m_aauSets[m_currAAUSet].m_archiveOverrides; }
-inline const OverrideFile* AAUCardData::GetArchiveOverrideFile(const TCHAR* archive,const TCHAR* texture) const {
-	auto it = m_aauSets[m_currAAUSet].m_archiveOverrideMap.find(std::pair<std::wstring,std::wstring>(archive,texture));
+inline const OverrideFile* AAUCardData::GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
+	auto it = m_aauSets[m_currAAUSet].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 	return it == m_aauSets[m_currAAUSet].m_archiveOverrideMap.end() ? NULL : &it->second;
 }
 inline const std::vector<AAUCardData::ArchiveRedirectRule>& AAUCardData::GetArchiveRedirectList() const { return m_aauSets[m_currAAUSet].m_archiveRedirects; }
-inline const std::pair<std::wstring,std::wstring>* AAUCardData::GetArchiveRedirectFile(const TCHAR* archive,const TCHAR* texture) const {
-	auto it = m_aauSets[m_currAAUSet].m_archiveRedirectMap.find(std::pair<std::wstring,std::wstring>(archive,texture));
+inline const std::pair<std::wstring, std::wstring>* AAUCardData::GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
+	auto it = m_aauSets[m_currAAUSet].m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
 	return it == m_aauSets[m_currAAUSet].m_archiveRedirectMap.end() ? NULL : &it->second;
 }
 
@@ -365,34 +367,34 @@ inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { retu
 
 inline std::vector<Shared::Triggers::GlobalVariable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
 
-inline /*const*/ std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() { return m_modules; }
+inline std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() { return m_modules; }
 
-inline std::map<std::wstring,Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
+inline std::map<std::wstring, Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
 
-inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_boneRules; }
-inline const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {
-	auto it = m_boneRuleMap.find(xxFileName);
-	return it == m_boneRuleMap.end() ? NULL : &it->second;
+inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_aauSets[m_currAAUSet].m_boneRules; }
+inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {
+	auto it = m_aauSets[m_currAAUSet].m_boneRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currAAUSet].m_boneRuleMap.end() ? NULL : &it->second;
 }
-inline const std::map<std::wstring,std::vector<AAUCardData::BoneMod>>* AAUCardData::GetFrameRule(const TCHAR* xxFileName) {
-	auto it = m_frameRuleMap.find(xxFileName);
-	return it == m_frameRuleMap.end() ? NULL : &it->second;
+inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetFrameRule(const TCHAR* xxFileName) {
+	auto it = m_aauSets[m_currAAUSet].m_frameRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currAAUSet].m_frameRuleMap.end() ? NULL : &it->second;
 }
 
-inline const std::vector<AAUCardData::SliderRule> AAUCardData::GetSliderList() { return m_sliders; }
-inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>& AAUCardData::GetSliderBoneRuleMap(int type) {
-	return m_boneSliderMap[type];
+inline const std::vector<AAUCardData::SliderRule> AAUCardData::GetSliderList() { return m_aauSets[m_currAAUSet].m_sliders; }
+inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderBoneRuleMap(int type) {
+	return m_aauSets[m_currAAUSet].m_boneSliderMap[type];
 }
-inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>& AAUCardData::GetSliderFrameRuleMap(int type) {
-	return m_frameSliderMap[type];
+inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderFrameRuleMap(int type) {
+	return m_aauSets[m_currAAUSet].m_frameSliderMap[type];
 }
-inline const std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>* AAUCardData::GetSliderBoneRule(ExtClass::CharacterStruct::Models model,std::wstring bone) {
-	auto it = m_boneSliderMap[model].find(bone);
-	return (it != m_boneSliderMap[model].end()) ? &it->second : NULL;
+inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+	auto it = m_aauSets[m_currAAUSet].m_boneSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currAAUSet].m_boneSliderMap[model].end()) ? &it->second : NULL;
 }
-inline const std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>* AAUCardData::GetSliderFrameRule(ExtClass::CharacterStruct::Models model,std::wstring bone) {
-	auto it = m_frameSliderMap[model].find(bone);
-	return (it != m_frameSliderMap[model].end()) ? &it->second : NULL;
+inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderFrameRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+	auto it = m_aauSets[m_currAAUSet].m_frameSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currAAUSet].m_frameSliderMap[model].end()) ? &it->second : NULL;
 }
 
 /*
@@ -401,9 +403,9 @@ Important differences in versions:
 OvrT: in version 1, mesh textures were relative to aaedit/data/texture/override (VER1_OVERRIDE_IMAGE_PATH)
 	  in version 2, mesh textures are relative to the override path
 AOvT: in version 1, override files were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
-	  in version 2, override files are relative to the override path 
+	  in version 2, override files are relative to the override path
 OOvr: in version 1, object overrides were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
-	  in version 2, object overrides are relative to the override path 
+	  in version 2, object overrides are relative to the override path
 TnRd: in version 1, the tan image were relative to data\\texture\\override\\tan\\ (VER1_TAN_PATH TEXT)
 	  in version 2, the file is always relative from the override path
 HrHl: in version 1, the hair highlight images were relative to data\\texture\\override\\hair_highlight\\ (VER1_HAIR_HIGHLIGHT_PATH)
