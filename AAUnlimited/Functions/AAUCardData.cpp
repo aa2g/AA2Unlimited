@@ -208,12 +208,6 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				m_aauSets[m_currAAUSet].m_hairs[3] = ReadData<std::vector<HairPart>>(buffer, size);
 				LOGPRIO(Logger::Priority::SPAM) << "found HrA3, loaded " << m_aauSets[m_currAAUSet].m_hairs[3].size() << " elements\r\n";
 				break;
-			case 'File':
-				ret_files[3].fileStart = buffer - 4; //before the 'File'
-				m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer, size);
-				ret_files[3].fileEnd = buffer;
-				LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
-				break;
 			case 'BnT2':
 				m_aauSets[m_currAAUSet].m_boneRules = ReadData<decltype(m_aauSets[m_currAAUSet].m_boneRules)>(buffer, size);
 				GenBoneRuleMap();
@@ -223,6 +217,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				m_aauSets[m_currAAUSet].m_sliders = ReadData<decltype(m_aauSets[m_currAAUSet].m_sliders)>(buffer, size);
 				GenSliderMap();
 				LOGPRIO(Logger::Priority::SPAM) << "found Slds, loaded " << m_aauSets[m_currAAUSet].m_sliders.size() << " elements\r\n";
+				break;
+			case 'File':
+				ret_files[3].fileStart = buffer - 4; //before the 'File'
+				m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer, size);
+				ret_files[3].fileEnd = buffer;
+				LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
 				break;
 			case 'Trgs':
 				m_triggers = ReadData<decltype(m_triggers)>(buffer, size);

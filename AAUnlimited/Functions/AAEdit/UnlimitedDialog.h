@@ -69,6 +69,7 @@ namespace AAEdit {
 		HWND m_lbAAuSets;
 		HWND m_edAAuSetName;
 		HWND m_btnAAuSetAdd;
+		HWND m_btnLoadCloth;
 
 		void Refresh();
 		void RefreshAAuSetList();
