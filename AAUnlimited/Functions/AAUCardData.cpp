@@ -35,7 +35,7 @@ AAUCardData::AAUCardData()
 AAUCardData::AAUDataSet::AAUDataSet() {
 	m_bOutlineColor = false;
 	m_bTanColor = false;
-	m_name = TEXT("(default)");
+	wcscpy_s(m_name, TEXT("(default)"));
 }
 
 
@@ -79,7 +79,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	m_currAAUSet = 0;
 	m_aauSets.clear();
 	m_aauSets.resize(1);
-	m_aauSets[0].m_name = TEXT("(default)");
+	wcscpy_s(m_aauSets[0].m_name, TEXT("(default)"));
 
 	while (size > 4) {
 		DWORD identifier = *(DWORD*)(buffer);
@@ -97,13 +97,18 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				break;
 			case 'AUSS': {
 				//aau data set start; name, but also indicates that the following chunks write to this set
-				std::wstring name = ReadData<std::wstring>(buffer, size);
-				if (name != TEXT("(default)")) {
+				wchar_t wcharName[32];	//TODO: remove magic number
+				for (int letter = 0; letter < 32; letter++) {	//read the buffer
+					wcharName[letter] = (wchar_t)*buffer;
+					buffer += sizeof(wchar_t);
+					size -= sizeof(wchar_t);
+				}
+				if (wcscmp(wcharName, L"(default)")) {	//if it's an actual Style name
 					m_currAAUSet++;
 					m_aauSets.resize(m_aauSets.size() + 1);
-					m_aauSets[m_currAAUSet].m_name = name;
+					wcscpy_s(m_aauSets[m_currAAUSet].m_name, wcharName);
 				}
-				LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << name << "r\n";
+				LOGPRIO(Logger::Priority::SPAM) << "...found AUSS; starting new aau data set named " << std::wstring(wcharName) << "\r\n";
 				break; }
 			case 'AUDS': {
 				//aau card data set
@@ -559,7 +564,7 @@ bool AAUCardData::CopyAAUDataSet(const TCHAR * name, ExtClass::CharacterData* ch
 	}
 	m_aauSets.resize(m_aauSets.size() + 1);
 	m_aauSets[m_aauSets.size() - 1] = m_aauSets[GetCurrAAUSet()];
-	m_aauSets[m_aauSets.size() - 1].m_name = name;
+	wcscpy_s(m_aauSets[m_aauSets.size() - 1].m_name, name);
 	m_aauSets[m_aauSets.size() - 1].m_charSetData.CopyCharacterData(charData);
 	return true;
 }

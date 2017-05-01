@@ -265,6 +265,7 @@ namespace ExtClass {
 		FaceDetails m_faceDetails;
 		Hair m_hair;
 		Clothes m_clothes[4];
+		BYTE m_unknown12[0x3]; //more padding i guess
 	public:
 
 		//CharacterSetData() = delete;
@@ -273,6 +274,43 @@ namespace ExtClass {
 		bool empty() { return false; };
 		void CopyCharacterData(CharacterData* data);
 	};
+
+	class CharacterSetDataUnpadded : public CharacterDataTypes
+	{
+	public:
+		BYTE m_gender; //0=male, 1=female. no tumbler, thats all.
+		Figure m_figure;
+		Chest m_chest;
+		BodyColor m_bodyColor;
+		BYTE m_faceSlot;
+		Eyes m_eyes;
+		Eyebrows m_eyebrows;
+		FaceDetails m_faceDetails;
+		Hair m_hair;
+		Clothes m_clothes[4];
+	public:
+
+		//CharacterSetData() = delete;
+		//~CharacterSetData() = delete;
+
+		bool empty() { return false; };
+
+		CharacterSetData Pad() {
+			CharacterSetData padded;
+			padded.m_gender = this->m_gender;
+			padded.m_figure = this->m_figure;
+			padded.m_chest = this->m_chest;
+			padded.m_bodyColor = this->m_bodyColor;
+			padded.m_faceSlot = this->m_faceSlot;
+			padded.m_eyes = this->m_eyes;
+			padded.m_eyebrows = this->m_eyebrows;
+			padded.m_faceDetails = this->m_faceDetails;
+			padded.m_hair = this->m_hair;	//should be deep copy
+			for (int i = 0; i< 4; i++) padded.m_clothes[i] = this->m_clothes[i];
+			return padded;
+		}
+	};
+
 
 	static_assert(sizeof(CharacterData) == 0xBF0, "CharacterData size mismatch");
 

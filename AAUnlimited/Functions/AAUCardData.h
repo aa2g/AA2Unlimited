@@ -212,7 +212,7 @@ private:
 
 	//modifications can be saved in multiple sets.
 	struct AAUDataSet {
-		std::wstring m_name;
+		wchar_t m_name[32];
 
 		//DATA
 
