@@ -33,8 +33,10 @@ namespace EditInjections {
 							DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
 							AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
 						}
-						AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), AAEdit::g_currChar.m_char->m_charData);
-						AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(0, AAEdit::g_currChar.m_char->m_charData);
+						if (AAEdit::g_currChar.IsValid()) {
+							AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), AAEdit::g_currChar.m_char->m_charData);
+							AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(0, AAEdit::g_currChar.m_char->m_charData);
+						}
 					}
 					break;
 				}

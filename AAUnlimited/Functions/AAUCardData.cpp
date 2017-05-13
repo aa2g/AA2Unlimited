@@ -368,12 +368,12 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 	//version
 	DUMP_MEMBER('Vers', m_version);
 	//tan-slot
-	DUMP_MEMBER('TanS', m_tanSlot);
+	//DUMP_MEMBER('TanS', m_tanSlot);	//deprecated
+	//embedded files
+	DUMP_MEMBER_CONTAINER('File', m_savedFiles);
 	//dump aau sets
 	for (int i = 0; i < m_aauSets.size(); i++) {
 		DUMP_MEMBER_AAUSET('AUSS', m_name);
-		//Card Data Set
-		DUMP_MEMBER_CONTAINER_AAUSET('AUDS', m_charSetData);
 		//overrides
 		DUMP_MEMBER_CONTAINER_AAUSET('OvrT', m_meshOverrides);
 		DUMP_MEMBER_CONTAINER_AAUSET('AOvT', m_archiveOverrides);
@@ -407,6 +407,8 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 
 		DUMP_MEMBER_CONTAINER_AAUSET('BnT2', m_boneRules);
 		DUMP_MEMBER_CONTAINER_AAUSET('Slds', m_sliders);
+		//Card Data Set
+		DUMP_MEMBER_CONTAINER_AAUSET('AUDS', m_charSetData);
 	}
 
 	DUMP_MEMBER_CONTAINER('TrGv', m_globalVars);
@@ -414,7 +416,6 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 	DUMP_MEMBER_CONTAINER('TrMd', m_modules);
 	DUMP_MEMBER_CONTAINER('TrAt', m_cardStorage);
 
-	DUMP_MEMBER_CONTAINER('File', m_savedFiles);
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
 	if (pngChunks) {
