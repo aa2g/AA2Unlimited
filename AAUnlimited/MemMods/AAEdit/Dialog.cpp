@@ -28,15 +28,30 @@ namespace EditInjections {
 			case WM_COMMAND: {
 				switch (HIWORD(wparam)) {
 				case BN_CLICKED: {
-					if (General::IsAAEdit && LOWORD(wparam) == 10032) { //Save character button
-						if (!AAEdit::g_currChar.IsValid()) {
-							DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-							AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+					switch (LOWORD(wparam)) {
+					case 10032: //Save character button
+						if (General::IsAAEdit) {
+							if (!AAEdit::g_currChar.IsValid()) {
+								const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+								const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+								AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+								if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+							}
+							if (AAEdit::g_currChar.IsValid()) {
+								AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), AAEdit::g_currChar.m_char->m_charData);
+								AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(0, AAEdit::g_currChar.m_char->m_charData);
+							}
 						}
-						if (AAEdit::g_currChar.IsValid()) {
-							AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), AAEdit::g_currChar.m_char->m_charData);
-							AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(0, AAEdit::g_currChar.m_char->m_charData);
+						break;
+					case 10001: //Main screen button
+					case 10031:	//New character button
+					case 10033: //Open card button
+						if (General::IsAAEdit) {
+							if (AAEdit::g_currChar.IsValid()) {
+								AAEdit::g_currChar.m_char = NULL;
+							}
 						}
+						break;
 					}
 					break;
 				}

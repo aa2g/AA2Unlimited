@@ -157,8 +157,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			MoveWindow(diag->m_dialog,rct.left,rct.top,rct.right - rct.left,rct.bottom - rct.top,FALSE);
 		}
 
-		DWORD charDataRule[] { 0x353254, 0x2C, 0};
-		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+		const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+		if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 
 		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
 
@@ -189,8 +191,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			}
 		}
 		if (!g_currChar.IsValid()) {
-			DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+			const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+			const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+			if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 		}
 		if (g_currChar.IsValid()) {
 			AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
@@ -257,8 +261,10 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
 
 				if (!g_currChar.IsValid()) {
-					DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+					const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+					const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+					if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 				}
 				if (g_currChar.IsValid()) {
 					AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
@@ -312,8 +318,10 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
 					if (!g_currChar.IsValid()) {
-						DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+						const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+						const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+						if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 					}
 
 					if (g_currChar.IsValid()) {
