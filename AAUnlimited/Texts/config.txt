@@ -27,6 +27,10 @@ fPOVOffsetX = 0.0					;
 fPOVOffsetY = 0.005					; Offsets for the POV focus points
 fPOVOffsetZ = -0.75					;
 
+screenshotFormat = 0				; format to save game screenshots in
+									; 0 - BMP
+									; 1 - JPG
+
 ;;;;;;;
 ; HAi ;
 ;;;;;;;

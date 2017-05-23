@@ -99,6 +99,7 @@
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
