@@ -56,5 +56,5 @@ These Features above are all simply special, wild-carded rules of one of the typ
 
 ### Tech-Support
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
-- Try asking questions [here](https://discordapp.com/widget?id=306103444333264896&theme=dark) or in [this discord channel](https://discord.gg/Du4dRMb)
+- Try asking questions in [this discord channel](https://discord.gg/Du4dRMb)
 - Make an issue on github
