@@ -1,17 +1,13 @@
 
-# Test Builds (up-to-date but card compatibility is not guaranteed; back up your stuff; *DOWNLOAD THIS*)
-[-> MEGA <-](https://mega.nz/#F!IZs3VY5b!axfi9mlecCwLDdvpvIIbzw)
+# DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
 
 # AA2Unlimited
-AAFace was supposed to make the Maker do things that it allready could, but wouldnt want to. 
+AAFace was supposed to make the Maker do things that it already could, but wouldn't want to. 
 It basically gave a UI to these features.
 
 AAUnlimited, on the other hand, tries to make the game (and maker) do new things.
 
-As a Part of this, it puts additional Information into the card images in form of a PNG chunk right before the first IEND chunk.
-The Game treats these as part of the image, which means cards produced with these additional data will still work normally 
-if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data, and i asume 
-so will AASnowflake.
+As a part of this, it puts additional Information into the card images in form of a PNG chunk right before the first IEND chunk. The Game treats these as part of the image, which means cards produced with these additional data will still work normally if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data. Latest AA2Snowflake is aware of this data so you can use it to change card face without losing it. Because AAU data is attached to the card face it can be moved around with ReiEdit's import feature.
 
 ## Features:
 
@@ -39,7 +35,7 @@ data
 ```
 
 ### Card Data: adds additional card data to cards:
-- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!IVFyWIrb!meEOFx8i7nHDYMHOAQL2Kg) is highly recommended
+- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!IVFyWIrb!meEOFx8i7nHDYMHOAQL2Kg) is highly recommended. If it doesn't work and you get blackface get the same thing with Tantoo instead.
 - **Hair Highlight**: Use a hair highlight from *AAEdit\data\override\hair_highlight*. *Note*: effectively the same as **Mesh Override** `(Asp00_20_00_00_00\*)->(file)`, so this will not work if you have custom highlights without this name prefix
 
 These Features above are all simply special, wild-carded rules of one of the types below. While the rules below do NOT support wild cards naturally, all of these things could be done for specific slots or files using the rules directly. Whenever a High-Poly model is loaded (or all the time in AAEdit), these rules from the corresponding card are applied. The following generic rule types exist:
