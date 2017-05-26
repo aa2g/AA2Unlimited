@@ -57,7 +57,7 @@ namespace Shared {
 		}
 		//int(float)
 		Value Thread::Float2Int(std::vector<Value>& params) {
-			int i = params[0].fVal;
+			int i = int(params[0].fVal);
 			return Value(i);
 		}
 		//int(string)
@@ -235,15 +235,13 @@ namespace Shared {
 		//bool(float)
 		Value Thread::RollFloat(std::vector<Value>& params) {
 			float roll = General::GetRandomFloat(0.0f, 1.0f);
-			if (roll <= params[0].fVal) return Value(true);
-			else return Value(false);
+			return Value(roll <= params[0].fVal);
 		}
 		//bool(int)
 		Value Thread::RollInt(std::vector<Value>& params) {
 			int range = 100;
 			int roll = rand() % range + 1;
-			if (roll <= params[0].fVal) return Value(true);
-			else return Value(false);
+			return Value(roll <= params[0].iVal);
 		}
 		
 
@@ -273,7 +271,7 @@ namespace Shared {
 		}
 
 		Value Thread::Int2Float(std::vector<Value>& params) {
-			float v = params[0].iVal;
+			float v = float(params[0].iVal);
 			return Value(v);
 		}
 		//float(string)
