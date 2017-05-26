@@ -128,6 +128,7 @@ namespace Shared {
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
+			Value GetCardGender(std::vector<Value>& params); //int(int)
 			Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardDislikePoints(std::vector<Value>& params); //int(int,int)
@@ -172,6 +173,15 @@ namespace Shared {
 			Value NotEqualsFloats(std::vector<Value>& params); //bool(float,float)
 			Value LessEqualsFloats(std::vector<Value>& params); //bool(float,float)
 			Value LessThanFloats(std::vector<Value>& params); //bool(float,float)
+			Value IsInterruptAction(std::vector<Value>& params); //bool(int)
+			Value IsMinnaAction(std::vector<Value>& params); //bool(int)
+			Value IsForceAction(std::vector<Value>& params); //bool(int)
+			Value IsSexAction(std::vector<Value>& params); //bool(int)
+			Value IsNoPromptAction(std::vector<Value>& params); //bool(int)
+			Value IsGameOverAction(std::vector<Value>& params); //bool(int)
+			Value IsNoTargetAction(std::vector<Value>& params); //bool(int)
+			Value RollFloat(std::vector<Value>& params); //bool(float)
+			Value RollInt(std::vector<Value>& params); //bool(int)
 			Value EqualsStrings(std::vector<Value>& params); //bool(string,string)
 
 			//basic string stuff

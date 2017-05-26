@@ -3,6 +3,7 @@
 #include "Thread.h"
 #include "Functions\AAPlay\Globals.h"
 #include "General\Util.h"
+#include "External\ExternalClasses\ConversationStruct.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -23,6 +24,7 @@ namespace Shared {
 		//bool (int)
 		Value Thread::IsSeatFilled(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (card > 24) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			return Value(cardInst->IsValid());
 		}
@@ -152,6 +154,98 @@ namespace Shared {
 		Value Thread::LessThanFloats(std::vector<Value>& params) {
 			return params[0].fVal < params[1].fVal;
 		}
+		//bool(int)
+		Value Thread::IsInterruptAction(std::vector<Value>& params) {
+			int interruptActions[] = {
+				ExtClass::ConversationId::INTERRUPT_COMPETE, ExtClass::ConversationId::INTERRUPT_STOP_QUARREL, ExtClass::ConversationId::INTERRUPT_WHAT_ARE_YOU_DOING,
+				ExtClass::ConversationId::H_END, ExtClass::ConversationId::H_NOTE, ExtClass::ConversationId::BREAK_CHAT, ExtClass::ConversationId::BREAK_H
+			};
+			for each (int action in interruptActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsMinnaAction(std::vector<Value>& params) {
+			int minnaActions[] = {
+				ExtClass::ConversationId::MINNA_BE_FRIENDLY, ExtClass::ConversationId::MINNA_CLUB, ExtClass::ConversationId::MINNA_COME, ExtClass::ConversationId::MINNA_EAT, ExtClass::ConversationId::MINNA_H, ExtClass::ConversationId::MINNA_KARAOKE, ExtClass::ConversationId::MINNA_LUNCH, ExtClass::ConversationId::MINNA_REST, ExtClass::ConversationId::MINNA_SPORTS, ExtClass::ConversationId::MINNA_STUDY
+			};
+			for each (int action in minnaActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsForceAction(std::vector<Value>& params) {
+			int forceActions[] = {
+				ExtClass::ConversationId::FIGHT, ExtClass::ConversationId::FORCE_H, ExtClass::ConversationId::FORCE_IGNORE, ExtClass::ConversationId::FORCE_PUT_THIS_ON, ExtClass::ConversationId::FORCE_SHOW_THAT, ExtClass::ConversationId::INSULT, ExtClass::ConversationId::SLAP
+			};
+			for each (int action in forceActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsSexAction(std::vector<Value>& params) {
+			int sexActions[] = {
+				ExtClass::ConversationId::FOLLOW_ME_H, ExtClass::ConversationId::FORCE_H, ExtClass::ConversationId::MINNA_H, ExtClass::ConversationId::NORMAL_H, ExtClass::ConversationId::NO_PROMPT_H, ExtClass::ConversationId::SKIP_CLASS_H, ExtClass::ConversationId::SKIP_CLASS_SURPRISE_H, ExtClass::ConversationId::STUDY_HOME_H, ExtClass::ConversationId::LEWD_REWARD
+			};
+			for each (int action in sexActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsNoPromptAction(std::vector<Value>& params) {
+			int noPromptActions[] = {
+				ExtClass::ConversationId::EXPLOITABLE_LINE, ExtClass::ConversationId::FORCE_BREAKUP, ExtClass::ConversationId::GOOD_BYE_KISS, ExtClass::ConversationId::GOOD_MORNING_KISS, ExtClass::ConversationId::I_SAW_SOMEONE_HAVE_H, ExtClass::ConversationId::I_WILL_CHEAT, ExtClass::ConversationId::MURDER, ExtClass::ConversationId::MURDER_NOTICE, ExtClass::ConversationId::NEVERMIND, ExtClass::ConversationId::NO_PROMPT_H, ExtClass::ConversationId::NO_PROMPT_KISS, ExtClass::ConversationId::REVEAL_PREGNANCY, ExtClass::ConversationId::SHAMELESS, ExtClass::ConversationId::SLAP, ExtClass::ConversationId::SOMEONE_GOT_CONFESSED_TO, ExtClass::ConversationId::SOMEONE_LIKES_YOU, ExtClass::ConversationId::STOP_FOLLOWING, ExtClass::ConversationId::TOGETHER_FOREVER
+			};
+			for each (int action in noPromptActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsGameOverAction(std::vector<Value>& params) {
+			int gameOverActions[] = {
+				ExtClass::ConversationId::MURDER, ExtClass::ConversationId::REVEAL_PREGNANCY, ExtClass::ConversationId::TOGETHER_FOREVER
+			};
+			for each (int action in gameOverActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
+		Value Thread::IsNoTargetAction(std::vector<Value>& params) {
+			int noTargetActions[] = {
+				ExtClass::ConversationId::CHANGE_CLOTHES, ExtClass::ConversationId::DO_CLUB, ExtClass::ConversationId::DO_EXERCISE, ExtClass::ConversationId::DO_STUDY
+			};
+			for each (int action in noTargetActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(float)
+		Value Thread::RollFloat(std::vector<Value>& params) {
+			float roll = General::GetRandomFloat(0.0f, 1.0f);
+			if (roll <= params[0].fVal) return Value(true);
+			else return Value(false);
+		}
+		//bool(int)
+		Value Thread::RollInt(std::vector<Value>& params) {
+			int range = 100;
+			int roll = rand() % range + 1;
+			if (roll <= params[0].fVal) return Value(true);
+			else return Value(false);
+		}
+		
 
 		/*
 		 * float stuff
@@ -420,6 +514,15 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(0);
 
 			return Value((int)cardInst->m_char->m_charData->m_character.orientation);
+		}
+
+		//int(int)
+		Value Thread::GetCardGender(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+
+			return Value((int)cardInst->m_char->m_charData->m_gender);
 		}
 
 		//int(int,int)
@@ -957,21 +1060,21 @@ namespace Shared {
 				},
 				{
 					39, EXPRCAT_EVENT,
-					TEXT("Npc Original Answer Chance"), TEXT("OriginalAnswerPercent"),
+					TEXT("Npc Original Response Chance"), TEXT("OriginalResponsePercent"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is success Chance that the Interaction had in Percent"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseOriginalPercent
 				},
 				{
 					40, EXPRCAT_EVENT,
-					TEXT("Npc Current Answer Chance"), TEXT("CurrentAnswerPercent"),
+					TEXT("Npc Current Response Chance"), TEXT("CurrentResponsePercent"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Interaction Percent, modified by this or previously executed Triggers. "
 					"using the Set Npc Response Percent Action"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentPercent
 				},
 				{
-					41, EXPRCAT_EVENT,
+					41, EXPRCAT_CHARPROP,
 					TEXT("Sex Orientation"), TEXT("%p ::Orientation"),
 					TEXT("The sexual orientation of this character."),
 					{TYPE_INT}, (TYPE_INT),
@@ -1000,6 +1103,12 @@ namespace Shared {
 					TEXT("First Index Of Starting At"), TEXT("%p ::FirstIndexOf( str: %p , from: %p )"), TEXT("Retrieves the first occurence of str string starting from from: index."),
 					{ TYPE_STRING, TYPE_STRING, TYPE_INT }, (TYPE_INT),
 					&Thread::FirstIndexOfFrom
+				},
+				{
+					46, EXPRCAT_CHARPROP,
+					TEXT("Gender"), TEXT("%p ::Gender"), TEXT("Character's gender. 0 means Male, 1 means Female. No tumblr here."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardGender
 				},
 			},
 
@@ -1084,14 +1193,14 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Original Answer"), TEXT("OriginalAnswer"),
+					TEXT("Npc Original Response"), TEXT("OriginalResponse"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the original Answer the NPC made"),
 					{ }, (TYPE_BOOL),
 					&Thread::GetNpcResponseOriginalAnswer
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Current Answer"), TEXT("CurrentAnswer"),
+					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
 					"using the Set Npc Response Answer Action"),
 					{ }, (TYPE_BOOL),
@@ -1161,6 +1270,60 @@ namespace Shared {
 					TEXT("Trait"), TEXT("%p ::Trait( %p )"), TEXT(""),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardTrait
+				},
+				{
+					26, EXPRCAT_GENERAL,
+					TEXT("Check Interruption Action"), TEXT("%p ::isInterrupt"), TEXT("Returs true if INTERRUPT_COMPETE, INTERRUPT_STOP_QUARREL, INTERRUPT_WHAT_ARE_YOU_DOING, H_END, H_NOTE, BREAK_CHAT, BREAK_H"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsInterruptAction
+				},
+				{
+					27, EXPRCAT_GENERAL,
+					TEXT("Check Minna Action"), TEXT("%p ::isMinna"), TEXT("Returs true if MINNA_BE_FRIENDLY, MINNA_CLUB, MINNA_COME, MINNA_EAT, MINNA_H, MINNA_KARAOKE, MINNA_LUNCH, MINNA_REST, MINNA_SPORTS, MINNA_STUDY"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsMinnaAction
+				},
+				{
+					28, EXPRCAT_GENERAL,
+					TEXT("Check Force Action"), TEXT("%p ::isForce"), TEXT("Returns true if FIGHT, FORCE_H, FORCE_IGNORE, FORCE_PUT_THIS_ON, FORCE_SHOW_THAT, INSULT, SLAP"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsForceAction
+				},
+				{
+					29, EXPRCAT_GENERAL,
+					TEXT("Check Sex Action"), TEXT("%p ::isSex"), TEXT("Returns true if FOLLOW_ME_H, FORCE_H, MINNA_H, NORMAL_H, NO_PROMPT_H, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, STUDY_HOME_H, LEWD_REWARD"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsSexAction
+				},
+				{
+					30, EXPRCAT_GENERAL,
+					TEXT("Check NoPrompt Action"), TEXT("%p ::isNoPrompt"), TEXT("Returns true if EXPLOITABLE_LINE, FORCE_BREAKUP, GOOD_BYE_KISS, GOOD_MORNING_KISS, I_SAW_SOMEONE_HAVE_H, I_WILL_CHEAT, MURDER, MURDER_NOTICE, NEVERMIND, NO_PROMPT_H, NO_PROMPT_KISS, REVEAL_PREGNANCY, SHAMELESS, SLAP, SOMEONE_GOT_CONFESSED_TO, SOMEONE_LIKES_YOU, STOP_FOLLOWING, TOGETHER_FOREVER"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsNoPromptAction
+				},
+				{
+					31, EXPRCAT_GENERAL,
+					TEXT("Check Game Over Action"), TEXT("%p ::isGameOver"), TEXT("Returns true if MURDER, REVEAL_PREGNANCY, TOGETHER_FOREVER"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsGameOverAction
+				},
+				{
+					32, EXPRCAT_GENERAL,
+					TEXT("Check No Target Action"), TEXT("%p ::isNoTarget"), TEXT("Returns true if CHANGE_CLOTHES, DO_CLUB, DO_EXERCISE, DO_STUDY"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsNoTargetAction
+				},
+				{
+					33, EXPRCAT_MATH,
+					TEXT("Roll Float"), TEXT("Roll( %p )"), TEXT("Generates a random [0.0, 1.0] float value and if it's less than or equal to the provided argument returns true. Arguments over 1.0 always roll success"),
+					{ TYPE_FLOAT }, (TYPE_BOOL),
+					&Thread::RollFloat
+				},
+				{
+					34, EXPRCAT_MATH,
+					TEXT("Roll Int"), TEXT("Roll( %p )"), TEXT("Generates a random [1, 100] integer value and if it's less than or equal to the provided argument returns true. Arguments over 100 always roll success"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::RollInt
 				},
 			},
 			{ //FLOAT

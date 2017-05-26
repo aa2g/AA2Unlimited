@@ -684,13 +684,13 @@ namespace Shared {
 				&Thread::ConditionalEndExecution
 			},
 			{
-				18, ACTIONCAT_EVENT, TEXT("Set Npc Response Answer"), TEXT("ResponseAnswer = %p"),
+				18, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Answer"), TEXT("CurrentResponseAnswer = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
 				{ TYPE_BOOL },
 				&Thread::SetNpcResponseAnswer
 			},
 			{
-				19, ACTIONCAT_EVENT, TEXT("Set Npc Response Percent"), TEXT("ResponsePercent = %p"),
+				19, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Percent"), TEXT("CurrentResponsePercent = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI."),
 				{ TYPE_INT },
@@ -889,7 +889,7 @@ namespace Shared {
 				&Thread::SetCardOrientation
 			},
 			{
-				46, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Description"), TEXT("%p ::Description = %p"),
+				49, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Description"), TEXT("%p ::Description = %p"),
 				TEXT("Set character's description."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardDescription
