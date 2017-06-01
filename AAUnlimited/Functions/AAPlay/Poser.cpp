@@ -33,6 +33,11 @@ namespace Poser {
 #define X 0
 #define Y 1
 #define Z 2
+#define W 3
+
+	const D3DXVECTOR3 g_unitVec[3] = { 1, 0, 0,
+	                                   0, 1, 0,
+	                                   0, 0, 1};
 
 	PoserWindow g_PoserWindow;
 
@@ -45,86 +50,190 @@ namespace Poser {
 		Scale
 	};
 	
-	struct OperationData {
-		float rangeMin(int axis) {
-			return min[axis] + delta[axis];
-		}
-
-		float rangeMax(int axis) {
-			return max[axis] + delta[axis];
-		}
-
-		float value[3];
-		float min[3];
-		float max[3];
-		float delta[3];
-	};
-
 	struct SliderInfo {
 		std::wstring frameName;
 		std::wstring descr;
+		PoseMods::FrameCategory category;
 		ExtClass::Frame* xxFrame;
 		Operation currentOperation;
-		struct OperationData translate, rotate, scale;
+		struct TranslationScaleData {
+			float rangeMin(int axis) {
+				return min[axis] + delta[axis];
+			}
+
+			float rangeMax(int axis) {
+				return max[axis] + delta[axis];
+			}
+
+			float value[3];
+			float min[3];
+			float max[3];
+			float delta[3];
+		} translate, scale;
+		struct RotationData {
+			D3DXQUATERNION quaternion;
+			float minEuler[3];
+			float maxEuler[3];
+			inline void reset() {
+				Shared::D3DXQuaternionIdentity(&quaternion);
+				for (int i = 0; i < 3; i++) {
+					rotAxes[i].set(g_unitVec[i]);
+				}
+			}
+
+			struct RotationAxis {
+				D3DXVECTOR3 vector;
+
+				D3DXQUATERNION quaternion() {
+					//D3DXQUATERNION q = { vector.x, vector.y, vector.z, 0 };
+					return{ vector.x, vector.y, vector.z, 0 };
+					//return q;
+				}
+
+				void set(const D3DXVECTOR3& v) {
+					vector = v;
+				}
+
+				void set(const D3DXQUATERNION& q) {
+					vector.x = q.x;
+					vector.y = q.y;
+					vector.z = q.z;
+				}
+			} rotAxes[3];
+
+		} rotation;
+		
+		inline D3DXQUATERNION& getRotation() {
+			return rotation.quaternion;
+		}
 
 		void setCurrentOperation(Operation operation) {
 			currentOperation = operation;
 		}
 
-		inline OperationData* getCurrentOperation() {
-			return currentOperation == Rotate ? &rotate : currentOperation == Translate ? &translate : &scale;
+		inline TranslationScaleData* getCurrentOperation() {
+			return currentOperation == Translate ? &translate : &scale;
 		}
 
-		float* curValueX() {
-			return &getCurrentOperation()->value[X];
+		float getCurrentOperationRangeMin(int axis) {
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMin(axis);
 		}
 
-		float* curValueY() {
-			return &getCurrentOperation()->value[Y];
+		float getCurrentOperationRange(int axis) {
+				if (currentOperation == Rotate)
+				return rotation.maxEuler[axis] - rotation.minEuler[axis];
+			else
+				return getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
 		}
 
-		float* curValueZ() {
-			return &getCurrentOperation()->value[Z];
+		float getValue(int axis) {
+			if (currentOperation == Rotate) {
+				float angle[3];
+				EulerAnglesQuaternion(&getRotation(), angle);
+				return angle[axis];
+			}
+			return getCurrentOperation()->value[axis];
+		}
+
+		void getEulerAngles(float *angle) {
+			EulerAnglesQuaternion(&getRotation(), angle);
+		}
+
+		void setValue(int axis, float value) {
+			if (currentOperation == Rotate) {
+				float angle[3];
+				getEulerAngles(angle);
+				angle[axis] = value;
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), angle[1], angle[0], angle[2]);
+			}
+			else {
+				getCurrentOperation()->value[axis] = value;
+			}
 		}
 
 		void setValue(float newValueX, float newValueY, float newValueZ) {
-			*curValueX() = newValueX;
-			*curValueY() = newValueY;
-			*curValueZ() = newValueZ;
+			if (currentOperation == Rotate) {
+				(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), newValueY, newValueX, newValueZ);
+			}
+			else {
+				setValue(X, newValueX);
+				setValue(Y, newValueY);
+				setValue(Z, newValueZ);
+			}
 		}
 
 		float fromSlider(int sldVal, int axis) {
-			return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
+			if (currentOperation == Rotate)
+				return rotation.minEuler[axis] + (rotation.maxEuler[axis] - rotation.minEuler[axis]) / 0x10000 * sldVal;
+			else
+				return getCurrentOperation()->rangeMin(axis) + (getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis)) / 0x10000 * sldVal;
 		}
 
 		void fromSliderX(int sldVal) {
-			*curValueX() = fromSlider(sldVal, X);
+			setValue(X, fromSlider(sldVal, X));
 		}
 
 		void fromSliderY(int sldVal) {
-			*curValueY() = fromSlider(sldVal, Y);
+			setValue(Y, fromSlider(sldVal, Y));
 		}
 
 		void fromSliderZ(int sldVal) {
-			*curValueZ() = fromSlider(sldVal, Z);
+			setValue(Z, fromSlider(sldVal, Z));
 		}
 
 		int toSlider(float value, int axis) {
-			float range = getCurrentOperation()->rangeMax(axis) - getCurrentOperation()->rangeMin(axis); //map from [min,max] to [0,0x10000]
-			float coeff = 0x10000 / range;
-			return int(coeff * (value - getCurrentOperation()->rangeMin(axis)));
+			float coeff = 0x10000 / getCurrentOperationRange(axis);
+			return int(coeff * (value - getCurrentOperationRangeMin(axis)));
 		}
 
 		int toSliderX() {
-			return toSlider(*curValueX(), X);
+			return toSlider(getValue(X), X);
 		}
 
 		int toSliderY() {
-			return toSlider(*curValueY(), Y);
+			return toSlider(getValue(Y), Y);
 		}
 
 		int toSliderZ() {
-			return toSlider(*curValueZ(), Z);
+			return toSlider(getValue(Z), Z);
+		}
+
+		void increment(float order, int axis) {
+			float delta;
+			if (currentOperation == Rotate) {
+				if (order) {
+					delta = (float)M_PI * order / 180.0f;
+					D3DXQUATERNION deltaRotation, deltaRotationConjugate;
+					(*Shared::D3DXQuaternionRotationAxis)(&deltaRotation, &rotation.rotAxes[axis].vector, delta);
+					(*Shared::D3DXQuaternionConjugate)(&deltaRotationConjugate, &deltaRotation);
+					(*Shared::D3DXQuaternionMultiply)(&getRotation(), &getRotation(), &deltaRotation);
+					for (int i = 0; i < 3; i++) {
+						if (i != axis) {
+							D3DXQUATERNION temp = rotation.rotAxes[i].quaternion();
+							(*Shared::D3DXQuaternionMultiply)(&temp, &deltaRotationConjugate, &temp);
+							(*Shared::D3DXQuaternionMultiply)(&temp, &temp, &deltaRotation);
+							rotation.rotAxes[i].set(temp);
+						}
+					}
+				}
+				else {
+					rotation.reset();
+				}
+			}
+			else {
+				if (order) {
+					delta = currentOperation == Translate ? order / 10.0f : order / 50.0f;
+					getCurrentOperation()->value[axis] += delta;
+					getCurrentOperation()->delta[axis] += delta;
+				}
+				else {
+					getCurrentOperation()->value[axis] = currentOperation == Scale ? 1.0f : 0.0f;
+					getCurrentOperation()->delta[axis] = 0;
+				}
+			}
 		}
 
 		void translateSlider(float delta, int axis) {
@@ -133,10 +242,9 @@ namespace Poser {
 
 		void reset() {
 			for (int i = 0; i < 3; i++) {
-				rotate.value[i] = 0;
-				rotate.min[i] = (float)-M_PI;
-				rotate.max[i] = (float)M_PI;
-				rotate.delta[i] = 0;
+				rotation.reset();
+				rotation.minEuler[i] = (float)-M_PI;
+				rotation.maxEuler[i] = (float)M_PI;
 				translate.value[i] = 0;
 				translate.min[i] = -2;
 				translate.max[i] = 2;
@@ -147,6 +255,24 @@ namespace Poser {
 				scale.delta[i] = 0;
 			}
 		}
+
+		inline void EulerAnglesQuaternion(D3DXQUATERNION* pQ, FLOAT* angle) {
+			float yy = pQ->y * pQ->y;
+
+			float t0 = 2.0f * (pQ->w * pQ->x + pQ->y * pQ->z);
+			float t1 = 1.0f - 2.0f * (pQ->x * pQ->x + yy);
+			angle[0] = std::atan2(t0, t1);
+
+			float t2 = 2.0f * (pQ->w * pQ->y - pQ->z * pQ->x);
+			t2 = t2 > 1.0f ? 1.0f : t2;
+			t2 = t2 < -1.0f ? -1.0f : t2;
+			angle[1] = std::asin(t2);
+
+			float t3 = 2.0f * (pQ->w * pQ->z + pQ->x * pQ->y);
+			float t4 = 1.0f - 2.0f * (yy + pQ->z * pQ->z);
+			angle[2] = std::atan2(t3, t4);
+		}
+
 	};
 	std::map<PoseMods::FrameCategory,std::vector<unsigned int>> loc_sliderCategories; // holds the index of each slider in the main slider vector
 																 // according the the category they reside into
@@ -154,6 +280,7 @@ namespace Poser {
 	std::vector<SliderInfo> loc_sliderInfos;
 	std::map<std::string,unsigned int> loc_frameMap;
 	std::map<std::string, SliderInfo> loc_sliderInfosRoom;
+	std::vector<std::map<std::string, SliderInfo>> loc_sliderInfosProps;
 
 	class PoserCharacter {
 	public:
@@ -192,6 +319,7 @@ namespace Poser {
 			SetHidden("A00_O_sitasiru", !show);
 		}
 
+		int id;
 		ExtClass::CharacterStruct* Character;
 		std::vector<SliderInfo> SliderInfos;
 		std::map<std::string, unsigned int> FrameMap;
@@ -213,12 +341,17 @@ namespace Poser {
 	void GenSliderInfo();
 	PoseMods::FrameCategory loc_currentCategory;
 	std::string loc_currentRoomFrame;
+	std::vector<std::string> loc_currentPropsFrame;
 	SliderInfo* CurrentSlider() {
-		if (loc_currentCategory != PoseMods::FrameCategory::Room) {
+		if (loc_currentCategory == PoseMods::FrameCategory::Room) {
+			return &loc_sliderInfosRoom[loc_currentRoomFrame];
+		}
+		else if (loc_currentCategory == PoseMods::FrameCategory::Prop) {
+			return &loc_sliderInfosProps[loc_targetChar->id][loc_currentPropsFrame[loc_targetChar->id]];
+		}
+		else {
 			return loc_targetChar->CurrentSlider;
 		}
-		else
-			return &loc_sliderInfosRoom[loc_currentRoomFrame];
 	}
 
 	bool GetIsHiddenFrame(ExtClass::Frame* frame) {
@@ -251,6 +384,8 @@ namespace Poser {
 		loc_targetChar = nullptr;
 		loc_loadCharacter = nullptr;
 		loc_sliderInfosRoom.clear();
+		loc_sliderInfosProps.clear();
+		loc_currentPropsFrame.clear();
 		g_PoserWindow.Hide();
 		loc_eventType = NoEvent;
 	}
@@ -267,7 +402,10 @@ namespace Poser {
 			}
 			if (!loc_loadCharacter) {
 				loc_loadCharacter = new PoserCharacter(charStruct);
+				loc_loadCharacter->id = loc_targetCharacters.size();
 				loc_targetCharacters.push_back(loc_loadCharacter);
+				loc_sliderInfosProps.resize(loc_targetCharacters.size());
+				loc_currentPropsFrame.resize(loc_targetCharacters.size());
 				g_PoserWindow.NewCharacter(loc_targetCharacters.size() - 1);
 			}
 			if (!loc_targetChar)
@@ -278,14 +416,12 @@ namespace Poser {
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
 			loc_loadCharacter = character;
+			loc_loadCharacter->id = 0;
+			loc_sliderInfosProps.resize(loc_targetCharacters.size());
+			loc_currentPropsFrame.resize(loc_targetCharacters.size());
 			g_PoserWindow.NewCharacter(0);
 		}
 	}
-
-	float SliderIncrement(float order, Operation op) {
-		return op == Rotate ? ((float)M_PI * order / 180.0f) : op == Translate ? order / 10.0f : order / 50.0f;
-	}
-
 
 	void PoserWindow::Init() {
 		if (m_dialog == NULL) {
@@ -293,12 +429,15 @@ namespace Poser {
 				NULL,DialogProc,(LPARAM)this);
 		}
 		m_timer = SetTimer(m_dialog,1,2000,NULL);
+		EnableWindow(g_PoserWindow.m_dialog, TRUE);
 		ShowWindow(m_dialog,SW_SHOW);
 	}
 	void PoserWindow::Hide() {
 		KillTimer(m_dialog,m_timer);
 		m_timer = 0;
-		ShowWindow(m_dialog,SW_HIDE);
+		EnableWindow(g_PoserWindow.m_dialog, FALSE);
+		if(SendMessage(g_PoserWindow.m_chkAlwaysOnTop, BM_GETCHECK, 0, 0) == BST_CHECKED)
+			ShowWindow(m_dialog,SW_HIDE);
 	}
 
 	INT_PTR CALLBACK PoserWindow::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
@@ -607,7 +746,7 @@ namespace Poser {
 				}
 				else if (id == IDC_PPS_BTNMODFLIP) {
 					if (CurrentSlider()->currentOperation != Scale) {
-						*CurrentSlider()->curValueX() *= -1.0f;
+						CurrentSlider()->setValue(X, -CurrentSlider()->getValue(X));
 						thisPtr->SyncList();
 						ApplySlider();
 					}
@@ -725,8 +864,6 @@ namespace Poser {
 	}
 
 	void PoserWindow::ApplyIncrement(int axis, int sign) {
-		float* value = CurrentSlider()->curValueX();
-		float* delta = &CurrentSlider()->getCurrentOperation()->delta[axis];
 		float increment = 0;
 		if (sign != 0) {
 			TCITEM tab;
@@ -735,13 +872,10 @@ namespace Poser {
 			tab.pszText = text;
 			int index = TabCtrl_GetCurSel(m_tabModifiers);
 			TabCtrl_GetItem(m_tabModifiers, index, &tab);
-			increment += SliderIncrement(float(sign * (int)tab.lParam), CurrentSlider()->currentOperation);
-			value[axis] += increment;
-			*delta += increment;
+			CurrentSlider()->increment(float(sign * (int)tab.lParam), axis);
 		}
 		else {
-			value[axis] = CurrentSlider()->currentOperation == Scale ? 1.0f : 0.0f;
-			*delta = 0;
+			CurrentSlider()->increment(0, axis);
 		}
 		SyncList();
 		ApplySlider();
@@ -751,20 +885,28 @@ namespace Poser {
 		LRESULT res = SendMessage(m_listCategories, LB_GETCURSEL, 0, 0);
 		loc_currentCategory = PoseMods::FrameCategory(res);
 		if (res != LB_ERR) {
-			if ((PoseMods::FrameCategory)res != PoseMods::FrameCategory::Room) {
-				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
-				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
-					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
-				}
-				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
-			}
-			else {
+			if ((PoseMods::FrameCategory)res == PoseMods::FrameCategory::Room) {
 				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
 				for (auto s = loc_sliderInfosRoom.begin(); s != loc_sliderInfosRoom.end(); s++) {
 					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
 				}
 				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
+			else if ((PoseMods::FrameCategory)res == PoseMods::FrameCategory::Prop) {
+				LRESULT cur = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s = loc_sliderInfosProps[loc_targetChar->id].begin(); s != loc_sliderInfosProps[loc_targetChar->id].end(); s++) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(General::CastToWString(s->first).c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, cur, 0);
+			}
+			else {
+				SendMessage(m_listBones, LB_RESETCONTENT, 0, 0);
+				for (auto s : loc_sliderCategories[(PoseMods::FrameCategory)res]) {
+					SendMessage(this->m_listBones, LB_ADDSTRING, 0, LPARAM(loc_sliderInfos.at(s).descr.c_str()));
+				}
+				SendMessage(m_listBones, LB_SETCURSEL, loc_targetChar->CategoryCurrentSlider[PoseMods::FrameCategory(res)], 0);
 			}
 		}
 	}
@@ -774,13 +916,7 @@ namespace Poser {
 		LRESULT res = SendMessage(m_listBones, LB_GETCURSEL, 0, 0);
 		if (res != LB_ERR) {
 			SliderInfo* slider = nullptr;
-			if ((PoseMods::FrameCategory)cat != PoseMods::FrameCategory::Room) {
-				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
-				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
-				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
-				slider = CurrentSlider();
-			}
-			else {
+			if ((PoseMods::FrameCategory)cat == PoseMods::FrameCategory::Room) {
 				WCHAR name[255];
 				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
 				loc_currentRoomFrame = General::CastToString(std::wstring(name));
@@ -788,6 +924,21 @@ namespace Poser {
 				if (match != loc_sliderInfosRoom.end()) {
 					slider = &match->second;
 				}
+			}
+			else if ((PoseMods::FrameCategory)cat == PoseMods::FrameCategory::Prop) {
+				WCHAR name[255];
+				SendMessage(m_listBones, LB_GETTEXT, res, (LPARAM)name);
+				loc_currentPropsFrame[loc_targetChar->id] = General::CastToString(std::wstring(name));
+				auto match = loc_sliderInfosProps[loc_targetChar->id].find(General::CastToString(std::wstring(name)));
+				if (match != loc_sliderInfosProps[loc_targetChar->id].end()) {
+					slider = &match->second;
+				}
+			}
+			else {
+				loc_targetChar->CategoryCurrentSlider[(PoseMods::FrameCategory)cat] = res;
+				int idx = loc_sliderCategories[(PoseMods::FrameCategory)cat][res];
+				loc_targetChar->CurrentSlider = &loc_targetChar->SliderInfos[idx];
+				slider = CurrentSlider();
 			}
 			if (slider) {
 				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
@@ -818,11 +969,11 @@ namespace Poser {
 		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, CurrentSlider()->toSliderY());
 		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, CurrentSlider()->toSliderZ());
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(X));
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(Y));
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), CurrentSlider()->getValue(Z));
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -834,11 +985,24 @@ namespace Poser {
 		CurrentSlider()->fromSliderY(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0));
 		CurrentSlider()->fromSliderZ(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0));
 		TCHAR number[52];
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueX());
+		float x, y, z;
+		if (CurrentSlider()->currentOperation == Rotate) {
+			float angle[3];
+			CurrentSlider()->getEulerAngles(angle);
+			x = angle[0];
+			y = angle[1];
+			z = angle[2];
+		}
+		else {
+			x = CurrentSlider()->getValue(X);
+			y = CurrentSlider()->getValue(Y);
+			z = CurrentSlider()->getValue(Z);
+		}
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), x);
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueY());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), y);
 		SendMessage(m_edValueY, WM_SETTEXT, 0, (LPARAM)number);
-		_snwprintf_s(number, 52, 16, TEXT("%.3f"), *CurrentSlider()->curValueZ());
+		_snwprintf_s(number, 52, 16, TEXT("%.3f"), z);
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
 	}
@@ -857,7 +1021,8 @@ namespace Poser {
 			D3DMATRIX transMatrix;
 			(*Shared::D3DXMatrixTranslation)(&transMatrix, targetSlider->translate.value[X], targetSlider->translate.value[Y], targetSlider->translate.value[Z]);
 			D3DMATRIX rotMatrix;
-			(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
+			//(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
+			(*Shared::D3DXMatrixRotationQuaternion)(&rotMatrix, &targetSlider->getRotation());
 			D3DMATRIX scaleMatrix;
 			(*Shared::D3DXMatrixScaling)(&scaleMatrix, targetSlider->scale.value[X], targetSlider->scale.value[Y], targetSlider->scale.value[Z]);
 			D3DMATRIX matrix = origFrame->m_matrix5;
@@ -865,7 +1030,7 @@ namespace Poser {
 			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &rotMatrix);
 			(*Shared::D3DXMatrixMultiply)(&rotMatrix, &scaleMatrix, &rotMatrix);
 
-			D3DVECTOR3 translations;
+			D3DXVECTOR3 translations;
 			translations.x = origFrame->m_matrix5._41 - matrix._41;
 			translations.y = origFrame->m_matrix5._42 - matrix._42;
 			translations.z = origFrame->m_matrix5._43 - matrix._43;
@@ -882,6 +1047,13 @@ namespace Poser {
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		using namespace ExtClass;
 		static const char prefix[]{ "pose_" };
+		static const char prefixTrans[]{ "pose_tr_" };
+		static const char prefixRot[]{ "pose_rot_" };
+		static const char propFramePrefix[]{ "AS00_N_Prop" };
+		static const char propPrefixTrans[]{ "prop_tr_" };
+		static const char propPrefixRot[]{ "prop_rot_" };
+		static const std::wstring suffixTrans(L" TR");
+		static const std::wstring suffixRot(L" ROT");
 
 		if (xxFile == NULL) return;
 		if (loc_targetCharacters.size() == 0) return;
@@ -889,6 +1061,33 @@ namespace Poser {
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 		targetChar = loc_loadCharacter;
+
+		auto InsertFrame = [&xxFile](ExtClass::Frame* bone, ExtClass::Frame** child, const char* prefix) {
+			//make copy of the bone first
+			Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
+			memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+
+			//turn match into a copy of the root for now, since there are a lot of members i dont know
+			memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+
+			//change parent and child stuff
+			bone->m_parent = newMatch->m_parent;
+			bone->m_nChildren = 1;
+			bone->m_children = newMatch;
+			newMatch->m_parent = bone;
+			for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+				newMatch->m_children[i].m_parent = newMatch;
+			}
+
+			//change name
+			int namelength = newMatch->m_nameBufferSize + strlen(prefix);
+			bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+			bone->m_nameBufferSize = namelength;
+			strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
+			strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+			*child = newMatch;
+		};
+
 		if (model == ExtClass::CharacterStruct::SKELETON) {
 			if (targetChar->Character->m_xxSkeleton != xxFile) {
 				for (PoserCharacter* c : loc_targetCharacters) {
@@ -897,34 +1096,20 @@ namespace Poser {
 				}
 			}
 		}
-		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE) {
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE || model == ExtClass::CharacterStruct::SKIRT) {
 			targetChar = loc_loadCharacter;
 		}
 		else if (model == ExtClass::CharacterStruct::H3DROOM) {
 			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 
 				//make copy of the bone first
-				Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-				memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
-
-				//turn match into a copy of the root for now, since there are a lot of members i dont know
-				memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
-
-				//change parent and child stuff
-				bone->m_parent = newMatch->m_parent;
-				bone->m_nChildren = 1;
-				bone->m_children = newMatch;
-				newMatch->m_parent = bone;
-				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-					newMatch->m_children[i].m_parent = newMatch;
-				}
-
-				//change name
-				int namelength = newMatch->m_nameBufferSize + sizeof(prefix) - 1;
-				bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-				bone->m_nameBufferSize = namelength;
-				strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
-				strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
+				Frame* trans, *rot;
+				Frame* child = nullptr;
+				InsertFrame(bone, &child, prefixTrans); 
+				trans = bone;
+				bone = child;
+				InsertFrame(bone, &child, prefixRot);
+				rot = bone;
 
 				auto match = loc_sliderInfosRoom.find(bone->m_name);
 				if (match != loc_sliderInfosRoom.end()) {
@@ -933,10 +1118,18 @@ namespace Poser {
 				}
 				else {
 					SliderInfo slider;
-					slider.descr = std::wstring(bone->m_name, bone->m_name + bone->m_nameBufferSize - 1);
+					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
 					slider.frameName = slider.descr;
 					slider.reset();
-					slider.xxFrame = bone;
+					slider.xxFrame = trans;
+					slider.category = PoseMods::FrameCategory::Room;
+					slider.setCurrentOperation(Rotate);
+					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
+					ApplySlider(&slider);
+
+					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
+					slider.frameName = slider.descr;
+					slider.xxFrame = rot;
 					loc_sliderInfosRoom[General::CastToString(slider.frameName)] = slider;
 					ApplySlider(&slider);
 				}
@@ -944,12 +1137,7 @@ namespace Poser {
 		}
 		else
 			return;
-		/*
-		else if (model != ExtClass::CharacterStruct::SKIRT)
-			// The skirt XXFile isn't defined in the character struct at this moment
-			// We suppose the skeleton is already loaded and targetChar points to the correct char
-			return;
-		*/
+
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 			
@@ -958,32 +1146,56 @@ namespace Poser {
 
 			//apply matches by adding matrizes
 			if (match != loc_frameMap.end()) {
-				//make copy of the bone first
-				Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-				memcpy_s(newMatch,sizeof(Frame),bone,sizeof(Frame));
+				if (model != ExtClass::CharacterStruct::SKIRT || targetChar->SliderInfos[match->second].category == PoseMods::FrameCategory::Skirt) {
+					//make copy of the bone first
+					Frame* child = nullptr;
+					InsertFrame(bone, &child, prefix);
 
-				//turn match into a copy of the root for now, since there are a lot of members i dont know
-				memcpy_s(bone,sizeof(Frame),xxFile->m_root,sizeof(Frame));
-
-				//change parent and child stuff
-				bone->m_parent = newMatch->m_parent;
-				bone->m_nChildren = 1;
-				bone->m_children = newMatch;
-				newMatch->m_parent = bone;
-				for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-					newMatch->m_children[i].m_parent = newMatch;
+					targetChar->SliderInfos[match->second].xxFrame = bone;
+					ApplySlider(&targetChar->SliderInfos[match->second]);
 				}
+			} 
+			else {
+				if (strncmp(bone->m_name, propFramePrefix, sizeof(propFramePrefix) - 1) == 0) {
+					auto& map = loc_sliderInfosProps[targetChar->id];
 
-				//change name
-				int namelength = newMatch->m_nameBufferSize + sizeof(prefix)-1;
-				bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-				bone->m_nameBufferSize = namelength;
-				strcpy_s(bone->m_name,bone->m_nameBufferSize,prefix);
-				strcat_s(bone->m_name,bone->m_nameBufferSize,newMatch->m_name);
+					//make copy of the bone first
+					Frame* trans, *rot;
+					Frame* child = nullptr;
+					InsertFrame(bone, &child, prefixTrans);
+					trans = bone;
+					bone = child;
+					InsertFrame(bone, &child, prefixRot);
+					rot = bone;
 
-				targetChar->SliderInfos[match->second].xxFrame = bone;
-				ApplySlider(&targetChar->SliderInfos[match->second]);
+					auto sliderTrans = map.find(trans->m_name);
+					auto sliderRot= map.find(rot->m_name);
+					if (sliderTrans != map.end() && sliderRot != map.end()) {
+						sliderTrans->second.xxFrame = trans;
+						sliderRot->second.xxFrame = rot;
+						ApplySlider(&sliderTrans->second);
+						ApplySlider(&sliderRot->second);
+					}
+					else {
+						SliderInfo info;
+						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
+						info.frameName = info.descr;
+						info.reset();
+						info.xxFrame = trans;
+						info.setCurrentOperation(Rotate);
+						info.category = PoseMods::FrameCategory::Prop;
+						map[trans->m_name] = info;
+
+						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
+						info.frameName = info.descr;
+						info.xxFrame = rot;
+						map[rot->m_name] = info;
+
+						ApplySlider(&info);
+					}
+				}
 			}
+
 		});
 
 
@@ -1022,6 +1234,7 @@ namespace Poser {
 
 			info.xxFrame = NULL;
 			info.setCurrentOperation(Rotate);
+			info.category = category;
 
 			loc_sliderInfos.push_back(info);
 			loc_sliderCategories[category].push_back(loc_sliderInfos.size() - 1);
@@ -1056,9 +1269,11 @@ namespace Poser {
 				auto match = loc_targetChar->FrameMap.find(elem.frameName);
 				if (match != loc_targetChar->FrameMap.end()) {
 					slider = &loc_targetChar->SliderInfos[match->second];
-					slider->rotate.value[X] = elem.matrix[0];
-					slider->rotate.value[Y] = elem.matrix[1];
-					slider->rotate.value[Z] = elem.matrix[2];
+					float x, y, z;
+					x = elem.matrix[0];
+					y = elem.matrix[1];
+					z = elem.matrix[2];
+					(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
 					slider->translate.value[X] = elem.matrix[3];
 					slider->translate.value[Y] = elem.matrix[4];
 					slider->translate.value[Z] = elem.matrix[5];
@@ -1082,8 +1297,13 @@ namespace Poser {
 		
 		if (json.is<object>()) {
 			const object load = json.get<object>();
+			int version = 1;
 			SliderInfo* slider;
 			try {
+				auto versionCheck = load.find("_VERSION_");
+				if (versionCheck != load.end()) {
+					version = (int)versionCheck->second.get<double>();
+				}
 				c->Character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
 				c->Character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
 				object sliders = load.at("sliders").get<object>();
@@ -1091,25 +1311,47 @@ namespace Poser {
 					it->reset();
 					ApplySlider(&(*it));
 				}
+
+				auto LoadSlider = [&version](SliderInfo* slider, array& mods) {
+					if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
+						float x, y, z, w;
+						int index = 0;
+						x = (float)mods[index++].get<double>();
+						y = (float)mods[index++].get<double>();
+						z = (float)mods[index++].get<double>();
+						if (version == 1) {
+							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.quaternion, y, x, z);
+						}
+						else if (version == 2) {
+							w = (float)mods[index++].get<double>();
+							slider->rotation.quaternion.x = x;
+							slider->rotation.quaternion.y = y;
+							slider->rotation.quaternion.z = z;
+							slider->rotation.quaternion.w = w;
+						}
+						slider->translate.value[X] = (float)mods[index++].get<double>();
+						slider->translate.value[Y] = (float)mods[index++].get<double>();
+						slider->translate.value[Z] = (float)mods[index++].get<double>();
+						slider->scale.value[X] = (float)mods[index++].get<double>();
+						slider->scale.value[Y] = (float)mods[index++].get<double>();
+						slider->scale.value[Z] = (float)mods[index++].get<double>();
+						ApplySlider(slider);
+					}
+					else {
+						//invalid json data
+					}
+				};
 				for (auto s = sliders.cbegin(); s != sliders.cend(); s++) {
 					auto match = c->FrameMap.find((*s).first);
 					if (match != loc_targetChar->FrameMap.end()) {
 						array mods = (*s).second.get<array>();
-						if (mods.size() == 9) {
-							slider = &c->SliderInfos[match->second];
-							slider->rotate.value[X] = (float)mods[0].get<double>();
-							slider->rotate.value[Y] = (float)mods[1].get<double>();
-							slider->rotate.value[Z] = (float)mods[2].get<double>();
-							slider->translate.value[X] = (float)mods[3].get<double>();
-							slider->translate.value[Y] = (float)mods[4].get<double>();
-							slider->translate.value[Z] = (float)mods[5].get<double>();
-							slider->scale.value[X] = (float)mods[6].get<double>();
-							slider->scale.value[Y] = (float)mods[7].get<double>();
-							slider->scale.value[Z] = (float)mods[8].get<double>();
-							ApplySlider(slider);
-						}
-						else {
-							//invalid json data
+						LoadSlider(&c->SliderInfos[match->second], mods);
+					}
+					else {
+						auto match = loc_sliderInfosProps[c->id].find((*s).first);
+						if (match != loc_sliderInfosProps[c->id].end()) {
+							array mods = (*s).second.get<array>();
+							LoadSlider(&match->second, mods);
 						}
 					}
 				}
@@ -1162,21 +1404,29 @@ namespace Poser {
 	picojson::value poseToJson(PoserCharacter* c) {
 		using namespace picojson;
 		object json;
+		json["_VERSION_"] = value((double)2);
 		json["pose"] = value((double)c->Character->m_xxSkeleton->m_poseNumber);
 		json["frame"] = value((double)c->Character->m_xxSkeleton->m_animFrame);
 		value::object sliders;
-		for (SliderInfo& slider : c->SliderInfos) {
-			value::array values(9);
-			values[0] = value((double)slider.rotate.value[X]);
-			values[1] = value((double)slider.rotate.value[Y]);
-			values[2] = value((double)slider.rotate.value[Z]);
-			values[3] = value((double)slider.translate.value[X]);
-			values[4] = value((double)slider.translate.value[Y]);
-			values[5] = value((double)slider.translate.value[Z]);
-			values[6] = value((double)slider.scale.value[X]);
-			values[7] = value((double)slider.scale.value[Y]);
-			values[8] = value((double)slider.scale.value[Z]);
+		auto SaveSlider = [&sliders](auto& slider) {
+			value::array values(10);
+			values[0] = value((double)slider.rotation.quaternion.x);
+			values[1] = value((double)slider.rotation.quaternion.y);
+			values[2] = value((double)slider.rotation.quaternion.z);
+			values[3] = value((double)slider.rotation.quaternion.w);
+			values[4] = value((double)slider.translate.value[X]);
+			values[5] = value((double)slider.translate.value[Y]);
+			values[6] = value((double)slider.translate.value[Z]);
+			values[7] = value((double)slider.scale.value[X]);
+			values[8] = value((double)slider.scale.value[Y]);
+			values[9] = value((double)slider.scale.value[Z]);
 			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
+		};
+		for (SliderInfo& slider : c->SliderInfos) {
+			SaveSlider(slider);
+		}
+		for (auto i = loc_sliderInfosProps[c->id].begin(); i != loc_sliderInfosProps[c->id].end(); i++) {
+			SaveSlider(i->second);
 		}
 		json["sliders"] = value(sliders);
 

@@ -30,15 +30,15 @@ void Cleanup();
 
 ExtClass::HInfo* loc_hinfo = NULL;
 ExtClass::Frame* loc_focusBone = NULL;
-D3DVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
+D3DXVECTOR3 loc_focusOffset{ 0,0,0 }; //additional translation offset
 int loc_state = 0; //0 - default, 1 - active POV, 2 - passive POV
 
 ExtClass::CharacterStruct* loc_passiveChar = NULL;
 ExtClass::CharacterStruct* loc_activeChar = NULL;
 ExtClass::XXFile* loc_passiveFaceXX = NULL; //face xx of the characters. if changed, model was reloaded
 ExtClass::XXFile* loc_activeFaceXX = NULL;
-D3DVECTOR3 loc_passiveEyeOffset; //offsets from neck to eyes
-D3DVECTOR3 loc_activeEyeOffset;
+D3DXVECTOR3 loc_passiveEyeOffset; //offsets from neck to eyes
+D3DXVECTOR3 loc_activeEyeOffset;
 bool loc_passiveFaceHidden = false;
 bool loc_activeFaceHidden = false;
 
@@ -80,8 +80,8 @@ void ShowFace(bool active, bool visible) {
 	}
 }
 
-D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
-	D3DVECTOR3 retVal{ 0,0,0 };
+D3DXVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
+	D3DXVECTOR3 retVal{ 0,0,0 };
 	//find left and right eye
 	ExtClass::Frame* rightEye,*leftEye;
 	rightEye = character->m_xxFace->FindBone("A00_J_meR2",-1);
@@ -89,7 +89,7 @@ D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 
 	if (rightEye != NULL && leftEye != NULL) {
 		ExtClass::Frame* it;
-		D3DVECTOR3 rightEyePos {0,0,0};
+		D3DXVECTOR3 rightEyePos {0,0,0};
 		it = rightEye;
 		while(it != NULL) {
 			rightEyePos.x += it->m_matrix5._41;
@@ -97,7 +97,7 @@ D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 			rightEyePos.z += it->m_matrix5._43;
 			it = it->m_parent;
 		}
-		D3DVECTOR3 leftEyePos {0,0,0};
+		D3DXVECTOR3 leftEyePos {0,0,0};
 		it = leftEye;
 		while (it != NULL) {
 			rightEyePos.x += it->m_matrix5._41;
@@ -106,7 +106,7 @@ D3DVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 			it = it->m_parent;
 		}
 		//point in the middle between the two eyes
-		D3DVECTOR3 eyeMid;
+		D3DXVECTOR3 eyeMid;
 		eyeMid.x = rightEyePos.x - leftEyePos.x; eyeMid.x = leftEyePos.x + eyeMid.x/2;
 		eyeMid.y = rightEyePos.y - leftEyePos.y; eyeMid.y = leftEyePos.y + eyeMid.y/2;
 		eyeMid.z = rightEyePos.z - leftEyePos.z; eyeMid.z = leftEyePos.z + eyeMid.z/2;
