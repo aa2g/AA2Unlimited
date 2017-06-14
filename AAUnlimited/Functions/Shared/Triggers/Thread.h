@@ -107,6 +107,11 @@ namespace Shared {
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
+			//time info
+			Value GetDaysPassed(std::vector<Value>& params); //int ()
+			Value GetCurrentDay(std::vector<Value>& params); //int()
+			Value GetCurrentPeriod(std::vector<Value>& params); //int()
+
 
 			//card info
 			Value GetCardVirtue(std::vector<Value>& params); //int(int)
@@ -134,6 +139,7 @@ namespace Shared {
 			Value GetCardDislikePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardHatePoints(std::vector<Value>& params); //int(int,int)
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
+			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
 
 			//basic int stuff
 			Value GetRandomInt(std::vector<Value>& params); //int(int,int)
@@ -197,7 +203,7 @@ namespace Shared {
 			Value GetCardStorageString(std::vector<Value>& params); //string(int, string, string)
 			Value GetCardStorageBool(std::vector<Value>& params); //bool(int, string, bool)
 
-			//Event Respone
+			//Event Response
 			//PERIOD_ENDS
 			Value GetEndingPeriod(std::vector<Value>& params);
 			Value GetStartingPeriod(std::vector<Value>& params);

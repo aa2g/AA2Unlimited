@@ -74,7 +74,7 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 				//as with the if/else if, change the end labels to fit into this
 				int end = actions.size() - 1;
 				int jumpN = end - state.ifEndJump + 1;
-				actions[state.ifStartJump].actualParameters[0].constant.iVal = jumpN;
+				actions[state.ifEndJump].actualParameters[0].constant.iVal = jumpN;
 				//now, switch all the else if end labels as well
 				for (auto& elseifLabels : state.elseIfLabels) {
 					int elseIfEnd = elseifLabels.second;

@@ -4,6 +4,7 @@
 #include "Functions\AAPlay\Globals.h"
 #include "General\Util.h"
 #include "External\ExternalClasses\ConversationStruct.h"
+#include "External\ExternalVariables\AAPlay\GameGlobals.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -27,6 +28,19 @@ namespace Shared {
 			if (card > 24) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			return Value(cardInst->IsValid());
+		}
+
+		//int ()
+		Value Thread::GetDaysPassed(std::vector<Value>& params) {
+			return ExtVars::AAPlay::GameTimeData()->nDays;
+		}
+
+		Value Thread::GetCurrentDay(std::vector<Value>& params) {
+			return ExtVars::AAPlay::GameTimeData()->day;
+		}
+
+		Value Thread::GetCurrentPeriod(std::vector<Value>& params) {
+			return ExtVars::AAPlay::GameTimeData()->currentPeriod;
 		}
 
 		/*
@@ -674,6 +688,18 @@ namespace Shared {
 				return params[2];
 			}
 		}
+		//int(int, int)
+		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int dayOfCycle = (params[1].iVal - 1) % 14; // 2 weeks cycle, first Monday is a 2nd day in DaysPassed but 1st index in pregnancyRisks, so -1
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) {
+				return 3;
+			}
+			else {
+				return inst->m_char->m_charData->m_pregnancyRisks[dayOfCycle];
+			}
+		}
 
 		/*
 		 * Event Response
@@ -787,7 +813,8 @@ namespace Shared {
 			TEXT("Comparision - Int"),
 			TEXT("Comparision - String"),
 			TEXT("Comparision - Bool"),
-			TEXT("Comparision - Float")
+			TEXT("Comparision - Float"),
+			TEXT("AAU Styles"),
 		};
 
 
@@ -1107,6 +1134,34 @@ namespace Shared {
 					TEXT("Gender"), TEXT("%p ::Gender"), TEXT("Character's gender. 0 means Male, 1 means Female. No tumblr here."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardGender
+				},
+
+				{
+					47, EXPRCAT_GENERAL,
+					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Ammount of days passed from the beginning of the game."),
+					{}, (TYPE_INT),
+					&Thread::GetDaysPassed
+				},
+
+				{
+					48, EXPRCAT_GENERAL,
+					TEXT("Current Day"), TEXT("CurrentDay"), TEXT("0=Sunday, 1=Monday... 6=Saturday."),
+					{}, (TYPE_INT),
+					&Thread::GetCurrentDay
+				},
+
+				{
+					49, EXPRCAT_GENERAL,
+					TEXT("Current Period"), TEXT("CurrentPeriod"), TEXT("10 = sleep, 1 = day, 2 = nothing to talk, 3 = first lesson,4 = first break, 5 = sports, 6 = second break, 7 = club, 8 = end, 9 = home again"),
+					{}, (TYPE_INT),
+					&Thread::GetCurrentPeriod
+				},
+
+				{
+					50, EXPRCAT_CHARPROP,
+					TEXT("Pregnancy Risk"), TEXT("%p ::PregnancyRisk(day: %p )"), TEXT("Pregnancy risk of %p character at %p day."),
+					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
+					&Thread::GetPregnancyRisk
 				},
 			},
 

@@ -35,7 +35,7 @@ data
 ```
 
 ### Card Data: adds additional card data to cards:
-- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!ZMh1QD5a!lPAANflSsmkjOjywPatYCg) is highly recommended. If it doesn't work and you get blackface get the same thing with Tantoo instead.
+- **Tan**: Uses a tan from *AAEdit\data\override\tan*. The folder is expected to have the same format used for [Tantoo](http://www.hongfire.com/forum/forum/hentai-lair/hf-modding-translation/artificial-academy-2-mods/409828-skin-cum-tan-nipples-lips-manager-pack-aa2tantoo) (just copy its tan folder over). [Hight pixel density skin](https://mega.nz/#F!IVFyWIrb!meEOFx8i7nHDYMHOAQL2Kg) is highly recommended. If it doesn't work and you get blackface get the same thing with Tantoo instead.
 - **Hair Highlight**: Use a hair highlight from *AAEdit\data\override\hair_highlight*. *Note*: effectively the same as **Mesh Override** `(Asp00_20_00_00_00\*)->(file)`, so this will not work if you have custom highlights without this name prefix
 
 These Features above are all simply special, wild-carded rules of one of the types below. While the rules below do NOT support wild cards naturally, all of these things could be done for specific slots or files using the rules directly. Whenever a High-Poly model is loaded (or all the time in AAEdit), these rules from the corresponding card are applied. The following generic rule types exist:
@@ -53,8 +53,3 @@ These Features above are all simply special, wild-carded rules of one of the typ
 - **Additional Hairs**: more hairs than the original 4 can be added. Note that these hairs do not have low poly modles (yet)
 - **Body Modification**: can put an SRT(*S*cale *R*otation *T*ranslation) matrix in front of frames or modify the SRT matrix of bones. Essentially generic body(or hair, or outfit, or anything) sliders. Only use if you are aware of how AA2 handles bodies.
   - *Note*: due to how AA2 handles frames, this is not the same as changing a frame in SB3U. rotations and scales will affect the original matrix of this frame. Adjust your matrix accordingly to make up for the incorrect translations.
-
-### Tech-Support
-- Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
-- Try asking questions in [this discord channel](https://discord.gg/Du4dRMb)
-- Make an issue on github

@@ -227,8 +227,8 @@ namespace ExtClass {
 		BYTE m_voicePitch;
 		BYTE m_traitBools[39]; //reiedit says last bool is rainbow card
 		BYTE m_preferenceBools[13];
+		BYTE m_reservedPreferenceBools[3];
 		BYTE m_pregnancyRisks[14]; //2 = dangerous, 1 = safe, 0 = normal
-		BYTE m_unknown12[0x3]; //more padding i guess
 		DWORD m_hCompatibility[25]; //index is seat order, which counts from top -> bottom, then right -> left
 		char m_item1[260];
 		char m_item2[260];

@@ -64,6 +64,8 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	data.originalChance = answerChar->m_lastConversationAnswerPercent;
 	data.changedChance = data.originalChance;
 	ThrowEvent(&data);
+	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
+	answerChar->m_lastConversationAnswerPercent = data.changedChance;
 	return data.changedResponse;
 }
 
