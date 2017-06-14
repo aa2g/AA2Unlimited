@@ -62,6 +62,7 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	data.changedResponse = data.originalResponse;
 	data.conversationId = askingChar->m_currConversationId; //this id is not set for the answerChar in case of minna
 	data.originalChance = answerChar->m_lastConversationAnswerPercent;
+	data.changedChance = data.originalChance;
 	ThrowEvent(&data);
 	return data.changedResponse;
 }

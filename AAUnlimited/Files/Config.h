@@ -25,6 +25,8 @@ public:
 		USE_POSER_HOTKEYS,
 		HKEY_POSER_TRANSLATE, HKEY_POSER_ROTATE, HKEY_POSER_SCALE,
 
+		SCREENSHOT_FORMAT,
+
 		num_elements
 	};
 	union MemberData {

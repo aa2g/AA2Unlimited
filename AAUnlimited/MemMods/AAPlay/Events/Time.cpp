@@ -5,6 +5,8 @@
 #include "Functions\Shared\Triggers\Event.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Functions\AAPlay\Globals.h"
+#include "Functions/AAPlay/GameState.h"
 
 namespace PlayInjections {
 namespace Time {
@@ -12,8 +14,15 @@ namespace Time {
 
 void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 	Shared::Triggers::PeriodEndsData data;
+	do {
+		//assigns a random filled seat as the triggering card
+		//or use the current PC instead
+		data.card = rand() % 25;
+	} while (!AAPlay::g_characters[data.card].IsValid());
+
 	data.oldPeriod = oldPeriod;
 	data.newPeriod = ExtVars::AAPlay::GameTimeData()->currentPeriod;
+	Shared::GameState::setIsOverriding(false);
 	Shared::Triggers::ThrowEvent(&data);
 }
 
@@ -21,18 +30,19 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 DWORD loc_PeriodChangeOriginalFunction;
 void __declspec(naked) PeriodChangeRedirect() {
 	__asm {
-		mov eax,[edi+20]
-		mov eax,[eax+20]
+		mov eax,[edi+0x20]
+		mov eax,[eax+0x20]
 		push eax //save old period
 
-		push [esp+4]
+		push [esp+8] //push original function argument
 		call [loc_PeriodChangeOriginalFunction]
 		push eax //save return value for later
 
-		push eax
+		push [esp+4]
 		call PeriodChangeEvent
 
-		pop eax
+		pop eax //set return value
+		add esp,4 //remove old period from stack
 		ret 4
 	}
 }

@@ -26,6 +26,7 @@
 #include "Functions\Shared\Triggers\Triggers.h"
 #include "Functions\Shared\Triggers\Expressions.h"
 #include "Files\Logger.h"
+#include "Files\ClothFile.h"
 #include "resource.h"
 #include "config.h"
 
@@ -156,8 +157,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			MoveWindow(diag->m_dialog,rct.left,rct.top,rct.right - rct.left,rct.bottom - rct.top,FALSE);
 		}
 
-		DWORD charDataRule[] { 0x353254, 0x2C, 0};
-		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+		const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+		if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 
 		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
 
@@ -186,6 +189,15 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				}
 				return TRUE;
 			}
+		}
+		if (!g_currChar.IsValid()) {
+			const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+			const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+			if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+		}
+		if (g_currChar.IsValid()) {
+			AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 		}
 		break; }
 	}
@@ -221,6 +233,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
 		thisPtr->m_lbAAuSets = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS);
 		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
+		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 
 		return TRUE;
@@ -246,9 +259,56 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if(identifier == IDC_GN_BTNAAUSETADD) {
 				TCHAR buf[256];
 				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
-				g_currChar.m_cardData.CopyAAUDataSet(buf);
+
+				if (!g_currChar.IsValid()) {
+					const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+					const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+					if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+				}
+				if (g_currChar.IsValid()) {
+					AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+					AAEdit::g_currChar.m_cardData.CopyAAUDataSet(buf, g_currChar.m_char->m_charData);
+				}
 				thisPtr->RefreshAAuSetList();
 				return TRUE;
+			}
+			if (identifier == IDC_GN_BTNLOADCLOTH) {
+				const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+				if (path != NULL) {
+					ClothFile load(General::FileToBuffer(path));
+					if (!load.IsValid()) return FALSE;
+					auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[AAEdit::g_currChar.m_char->m_currClothes];
+					cloth->slot = load.m_slot;
+					cloth->skirtLength = load.m_shortSkirt;
+					cloth->socks = load.m_socksId;
+					cloth->indoorShoes = load.m_shoesIndoorId;
+					cloth->outdoorShoes = load.m_shoesOutdoorId;
+					cloth->isOnePiece = load.m_isOnePiece;
+					cloth->hasUnderwear = load.m_hasUnderwear;
+					cloth->hasSkirt = load.m_hasSkirt;
+					cloth->colorTop1 = load.m_colorTop1;
+					cloth->colorTop2 = load.m_colorTop2;
+					cloth->colorTop3 = load.m_colorTop3;
+					cloth->colorTop4 = load.m_colorTop4;
+					cloth->colorBottom1 = load.m_colorBottom1;
+					cloth->colorBottom2 = load.m_colorBottom2;
+					cloth->colorUnderwear = load.m_colorUnderwear;
+					cloth->colorSocks = load.m_colorSocks;
+					cloth->colorIndoorShoes = load.m_colorIndoorShoes;
+					cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
+					cloth->textureBottom1 = load.m_skirtTextureId;
+					cloth->textureUnderwear = load.m_underwearTextureId;
+					cloth->textureBottom1Hue = load.m_skirtHue;
+					cloth->textureBottom1Lightness = load.m_skirtBrightness;
+					cloth->shadowBottom1Hue = load.m_skirtShadowHue;
+					cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
+					cloth->textureUnderwearHue = load.m_underwearHue;
+					cloth->textureUnderwearLightness = load.m_underwearBrightness;
+					cloth->shadowUnderwearHue = load.m_underwearShadowHue;
+					cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+					return TRUE;
+				}
 			}
 			break; }
 		case LBN_SELCHANGE: {
@@ -257,7 +317,17 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if (wnd == thisPtr->m_lbAAuSets) {
 				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
-					AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel);
+					if (!g_currChar.IsValid()) {
+						const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+						const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+						if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+					}
+
+					if (g_currChar.IsValid()) {
+						AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+						AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel, g_currChar.m_char->m_charData);
+					}
 					using namespace ExtVars::AAEdit;
 					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);
 				}
@@ -1602,9 +1672,9 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
 			if(rule != NULL) {
 				D3DMATRIX& mat = elem.second;
-				D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
-				D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
-				D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+				D3DXVECTOR3 scale = { mat._11, mat._12, mat._13 };
+				D3DXVECTOR3 rot = { mat._21, mat._22, mat._23 };
+				D3DXVECTOR3 trans = { mat._31, mat._32, mat._33 };
 				for(auto& elem : *rule) {
 					Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
 				}
@@ -1623,9 +1693,9 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 						if(bone->m_name == strBoneName) {
 							D3DMATRIX& mat = elem.srtMatrix;
 							D3DMATRIX& origMat = elem.origMatrix;
-							D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
-							D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
-							D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
+							D3DXVECTOR3 scale = { mat._11, mat._12, mat._13 };
+							D3DXVECTOR3 rot = { mat._21, mat._22, mat._23 };
+							D3DXVECTOR3 trans = { mat._31, mat._32, mat._33 };
 							for (auto& elem : *rule) {
 								Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
 							}

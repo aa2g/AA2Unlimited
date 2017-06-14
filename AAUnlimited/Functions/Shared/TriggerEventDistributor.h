@@ -5,14 +5,14 @@
 
 namespace Shared {
 
-namespace Triggers {
+	namespace Triggers {
 
-void RegisterTrigger(Triggers::Trigger* trg);
+		void RegisterTrigger(Triggers::Trigger* trg);
 
-void UnregisterTrigger(Triggers::Trigger* trg);
+		void UnregisterTrigger(Triggers::Trigger* trg);
 
-void ThrowEvent(Triggers::EventData* data);
+		void ThrowEvent(Triggers::EventData* data);
 
-}
+	}
 
 }

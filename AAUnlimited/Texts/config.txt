@@ -20,12 +20,16 @@ bEnableFacecam = true				; when enabled, pressing q locks the camera in the face
 
 bEnableHPosButtonReorder = true		; reorders the position buttons in multiple columns so they dont go out of the window and become unclickable
 
-bUseClothesPoser = false			; enables poser in cloth select screen
-bUseDialoguePoser = false			; enables poser in dialogue and sex scenes
+bUseClothesPoser = true			; enables poser in cloth select screen
+bUseDialoguePoser = true			; enables poser in dialogue and sex scenes
 
 fPOVOffsetX = 0.0					;
 fPOVOffsetY = 0.005					; Offsets for the POV focus points
 fPOVOffsetZ = -0.75					;
+
+screenshotFormat = 0				; format to save game screenshots in
+									; 0 - BMP
+									; 1 - JPG
 
 ;;;;;;;
 ; HAi ;
@@ -45,12 +49,12 @@ savedFileUsage = 1					; determines how eye files that were saved into the card 
 									; 2: same as 1, but do not ask for permission; just extract
 									; 3: do not extract files
 
-bSaveFileAutoRemove = false			; if true, after saved files were successfully extracted, they will be removed from the card
+bSaveFileAutoRemove = true			; if true, after saved files were successfully extracted, they will be removed from the card
 									; in an attempt to save hard drive space
 bSaveFileBackup = true				; does a backup of a card before saved files are removed
 
 
-legacyMode = 1						; determines how old cards using the old paths are treated.
+legacyMode = 3						; determines how old cards using the old paths are treated.
 									; 0: old cards are treated as non-AAU cards and are ignored
 									; 1: old cards will use the old pathing methods.
 									; 2: old cards will be treated like new cards; paths will be reinterpreted

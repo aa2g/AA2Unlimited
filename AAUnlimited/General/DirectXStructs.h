@@ -3,14 +3,14 @@
 #include <Windows.h>
 #include <d3d9.h>
 
-struct D3DVECTOR4 {
+struct D3DXVECTOR4 {
 	FLOAT x,y,z,w;
 };
 
-struct D3DVECTOR3 {
+struct D3DXVECTOR3 {
 	FLOAT x,y,z;
 };
 
-struct D3DQUATERNION {
+struct D3DXQUATERNION {
 	FLOAT x,y,z,w;
 };

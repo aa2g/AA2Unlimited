@@ -17,8 +17,10 @@ namespace OpenCard {
 
 
 void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
-	DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+	const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+	const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+	if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 	//clear current data
 	AAEdit::g_currChar.m_cardData.Reset();
 	//first, find our unlimited data

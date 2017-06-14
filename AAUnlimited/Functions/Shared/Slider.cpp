@@ -3,7 +3,7 @@
 
 namespace Shared {
 
-	void Slider::ModifySRT(D3DVECTOR3* scale,D3DVECTOR3* rot,D3DVECTOR3* trans,Slider::Operation op,const AAUCardData::BoneMod& mod) {
+	void Slider::ModifySRT(D3DXVECTOR3* scale,D3DXVECTOR3* rot,D3DXVECTOR3* trans,Slider::Operation op,const AAUCardData::BoneMod& mod) {
 		switch (op) {
 		case ADD:
 			scale->x += mod.scales[0];
@@ -49,9 +49,9 @@ namespace Shared {
 			frame->m_scaleX += elem.scales[0];
 			frame->m_scaleY += elem.scales[1];
 			frame->m_scaleZ += elem.scales[2];
-			D3DQUATERNION rotQuat;
+			D3DXQUATERNION rotQuat;
 			(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
-			D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame->m_quatX;
+			D3DXQUATERNION* origQuat = (D3DXQUATERNION*)&frame->m_quatX;
 			(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
 			frame->m_transX += elem.transformations[0];
 			frame->m_transY += elem.transformations[1];
@@ -61,9 +61,9 @@ namespace Shared {
 			frame->m_scaleX *= elem.scales[0];
 			frame->m_scaleY *= elem.scales[1];
 			frame->m_scaleZ *= elem.scales[2];
-			D3DQUATERNION rotQuat;
+			D3DXQUATERNION rotQuat;
 			(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
-			D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame->m_quatX;
+			D3DXQUATERNION* origQuat = (D3DXQUATERNION*)&frame->m_quatX;
 			(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
 			frame->m_transX *= elem.transformations[0];
 			frame->m_transY *= elem.transformations[1];
@@ -73,9 +73,9 @@ namespace Shared {
 			if(elem.scales[0] != 0) frame->m_scaleX /= elem.scales[0];
 			if (elem.scales[1] != 0) frame->m_scaleY /= elem.scales[1];
 			if (elem.scales[2] != 0) frame->m_scaleZ /= elem.scales[2];
-			D3DQUATERNION rotQuat;
+			D3DXQUATERNION rotQuat;
 			(*Shared::D3DXQuaternionRotationYawPitchRoll)(&rotQuat,elem.rotations[1],elem.rotations[0],elem.rotations[2]);
-			D3DQUATERNION* origQuat = (D3DQUATERNION*)&frame->m_quatX;
+			D3DXQUATERNION* origQuat = (D3DXQUATERNION*)&frame->m_quatX;
 			(*Shared::D3DXQuaternionMultiply)(origQuat,origQuat,&rotQuat);
 			if (elem.transformations[0] != 0) frame->m_transX /= elem.transformations[0];
 			if (elem.transformations[1] != 0) frame->m_transY /= elem.transformations[1];

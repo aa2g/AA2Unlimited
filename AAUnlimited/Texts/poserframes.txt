@@ -71,11 +71,13 @@ a01_J_UplegL_010	LLEG	SRT XYZ		Left Upper Leg
 a01_J_LegL_01		LLEG	SRT XYZ		Left Lower Leg
 a01_J_HizaL_01		LLEG	SRT XYZ		Left Knee
 a01_J_FootL_02		LLEG	SRT XYZ		Left Foot
+a01_J_ToesL_01		RLEG	SRT XYZ		Left Toes
 
 a01_J_UplegR_010	RLEG	SRT XYZ		Right Upper Leg
 a01_J_LegR_01		RLEG	SRT XYZ		Right Lower Leg
 a01_J_HizaR_01		RLEG	SRT XYZ		Right Knee
 a01_J_FootR_02		RLEG	SRT XYZ		Right Foot
+a01_J_ToesR_01		RLEG	SRT XYZ		Right Toes
 
 a01_J_MuneR_01		BREAST	SRT XYZ		Right Breast 1
 a01_J_MuneR_02		BREAST	SRT XYZ		Right Breast 2
@@ -121,6 +123,11 @@ A00_J_sita05	FACE	SRT	XYZ		Tongue 6
 A00_J_sita06	FACE	SRT	XYZ		Tongue 7
 A00_O_namida	FACE	SRT	XYZ		Tears
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Skirt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 a01_J_SK_F_01		SKIRT	SRT	XYZ		SK_F_01
 a01_J_SK_F_02		SKIRT	SRT	XYZ		SK_F_02
 a01_J_SK_F_03		SKIRT	SRT	XYZ		SK_F_03
@@ -153,27 +160,3 @@ a01_J_SK_UL_01		SKIRT	SRT	XYZ		SK_UL_01
 a01_J_SK_UL_02		SKIRT	SRT	XYZ		SK_UL_02
 a01_J_SK_UL_03		SKIRT	SRT	XYZ		SK_UL_03
 a01_J_SK_UL_04		SKIRT	SRT	XYZ		SK_UL_04
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Props
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-AS00_N_Prop0		PROP	T	XYZ		Prop0 (Position)
-AS00_N_Prop0B		PROP	SR	XYZ		Prop0 (Orientation)
-AS00_N_Prop1		PROP	T	XYZ		Prop1 (Position)
-AS00_N_Prop1B		PROP	SR	XYZ		Prop1 (Orientation)
-AS00_N_Prop2		PROP	T	XYZ		Prop2 (Position)
-AS00_N_Prop2B		PROP	SR	XYZ		Prop2 (Orientation)
-AS00_N_Prop3		PROP	T	XYZ		Prop3 (Position)
-AS00_N_Prop3B		PROP	SR	XYZ		Prop3 (Orientation)
-AS00_N_Prop4		PROP	T	XYZ		Prop4 (Position)
-AS00_N_Prop4B		PROP	SR	XYZ		Prop4 (Orientation)
-AS00_N_Prop5		PROP	T	XYZ		Prop5 (Position)
-AS00_N_Prop5B		PROP	SR	XYZ		Prop5 (Orientation)
-AS00_N_Prop6		PROP	T	XYZ		Prop6 (Position)
-AS00_N_Prop6B		PROP	SR	XYZ		Prop6 (Orientation)
-AS00_N_Prop7		PROP	T	XYZ		Prop7 (Position)
-AS00_N_Prop7B		PROP	SR	XYZ		Prop7 (Orientation)
-AS00_N_Prop8		PROP	T	XYZ		Prop8 (Position)
-AS00_N_Prop8B		PROP	SR	XYZ		Prop8 (Orientation)
-AS00_N_Prop9		PROP	T	XYZ		Prop9 (Position)
-AS00_N_Prop9B		PROP	SR	XYZ		Prop9 (Orientation)

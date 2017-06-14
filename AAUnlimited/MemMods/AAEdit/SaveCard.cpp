@@ -16,8 +16,10 @@ namespace SaveCard {
 
 
 void __stdcall AddUnlimitData(wchar_t* fileName) {
-	DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
-	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+	const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+	const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+	if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 
 	if(AAEdit::g_AAUnlimitDialog.IsSaveFilesSet()) {
 		AAEdit::g_currChar.m_cardData.SaveOverrideFiles();

@@ -3,7 +3,7 @@
 namespace PlayInjections {
 namespace Time {
 
-
+	void PeriodChangeInjection();
 
 }
 }
