@@ -61,7 +61,6 @@
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
-    <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
@@ -161,7 +160,6 @@
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
     <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
-    <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="config.h" />
@@ -273,12 +271,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\..\Game\AAUnlimited</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\..\Game\AAUnlimited</OutDir>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
