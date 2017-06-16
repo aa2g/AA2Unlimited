@@ -906,13 +906,13 @@ namespace Shared {
 				},
 				{
 					11, EXPRCAT_EVENT,
-					TEXT("Answered Character"), TEXT("AnswerTarget"), TEXT("In a NPC Answered event, the character the NPC answered to"),
+					TEXT("NPC Answer Target"), TEXT("AnswerTarget"), TEXT("In a NPC Answered event, the character the NPC answered to"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseTarget
 				},
 				{
 					12, EXPRCAT_EVENT,
-					TEXT("Answered Conversation"), TEXT("AnsweredConversation"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+					TEXT("NPC Answered Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseConversation
 				},
@@ -924,7 +924,7 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Action Id"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
+					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
 					"id in in targeted actions"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcActionId
