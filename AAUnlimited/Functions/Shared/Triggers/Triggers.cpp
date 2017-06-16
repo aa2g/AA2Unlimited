@@ -98,8 +98,11 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 			if(loopHead != loopEnd) {
 				//insert the jump that actually does the looping
 				int jumpN = CalculateJumpDistance(loopEnd,loopHead);
-				ParameterisedExpression exprJumpN(TYPE_INT,Value(0));
-				ParameterisedExpression exprJumpCond(TYPE_BOOL,EXPR_BOOL_NOT,elem->action.actualParameters);
+				std::vector<ParameterisedExpression> loopJumpParams;
+				ParameterisedExpression loopJumpExpr(TYPE_BOOL, Value(false)); // always false (to make it "true" by EXPR_BOOL_NOT and always jump to loopHead
+				loopJumpParams.push_back(loopJumpExpr);
+				ParameterisedExpression exprJumpN(TYPE_INT,Value(jumpN));
+				ParameterisedExpression exprJumpCond(TYPE_BOOL,EXPR_BOOL_NOT, loopJumpParams);
 				ParameterisedAction jumpAction(ACTION_CONDJUMP,{ exprJumpN, exprJumpCond });
 				actions.push_back(jumpAction);
 				loopEnd++; //loop ends after this jump now
@@ -146,6 +149,9 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 			jumpAction = ParameterisedAction(ACTION_CONDJUMP,{ exprJumpN, exprJumpCond });
 			actions.push_back(jumpAction);
 			int loopEnd = actions.size();
+			//fix jump distance of for jump when var >= till
+			jumpN = CalculateJumpDistance(loopHead, loopEnd);
+			actions[loopHead].actualParameters[0].constant.iVal = jumpN;
 			//lastly, fix continues and breaks
 			//redirect all the continues
 			for (int contJump : continues) {
