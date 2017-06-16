@@ -1,5 +1,7 @@
 #include "NamedConstant.h"
 #include "External\ExternalClasses\ConversationStruct.h"
+#include "External\ExternalClasses\TimeData.h"
+#include "External\ExternalClasses\CharacterData.h"
 
 
 
@@ -9,7 +11,10 @@ namespace Triggers {
 std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Relationship"),
 	TEXT("Conversation"),
-	TEXT("Trait")
+	TEXT("Trait"),
+	TEXT("Time (Day)"),
+	TEXT("Time (Period)"),
+	TEXT("Character (Pregnancy Risk)")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -800,6 +805,110 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 				TEXT("RAINBOW"), TEXT("RAINBOW"), TEXT("RAINBOW"),
 				Value(38)
 		},
+		//Time
+		{
+			157, NCONSTCAT_TIME_PERIOD,
+			TEXT("MORNING_ROOM"), TEXT("MORNING_ROOM"), TEXT("MORNING_ROOM"),
+			Value(ExtClass::PeriodId::MORNING_ROOM)
+		},
+		{
+			158, NCONSTCAT_TIME_PERIOD,
+			TEXT("MORNING_SCHOOL"), TEXT("MORNING_SCHOOL"), TEXT("MORNING_SCHOOL"),
+			Value(ExtClass::PeriodId::MORNING_SCHOOL)
+		},
+		{
+			159, NCONSTCAT_TIME_PERIOD,
+			TEXT("FIRST_LESSON"), TEXT("FIRST_LESSON"), TEXT("FIRST_LESSON"),
+			Value(ExtClass::PeriodId::FIRST_LESSON)
+		},
+		{
+			160, NCONSTCAT_TIME_PERIOD,
+			TEXT("FIRST_BREAK"), TEXT("FIRST_BREAK"), TEXT("FIRST_BREAK"),
+			Value(ExtClass::PeriodId::FIRST_BREAK)
+		},
+		{
+			161, NCONSTCAT_TIME_PERIOD,
+			TEXT("SPORTS"), TEXT("SPORTS"), TEXT("SPORTS"),
+			Value(ExtClass::PeriodId::SPORTS)
+		},
+		{
+			162, NCONSTCAT_TIME_PERIOD,
+			TEXT("SECOND_BREAK"), TEXT("SECOND_BREAK"), TEXT("SECOND_BREAK"),
+			Value(ExtClass::PeriodId::SECOND_BREAK)
+		},
+		{
+			163, NCONSTCAT_TIME_PERIOD,
+			TEXT("CLUB"), TEXT("CLUB"), TEXT("CLUB"),
+			Value(ExtClass::PeriodId::CLUB)
+		},
+		{
+			164, NCONSTCAT_TIME_PERIOD,
+			TEXT("EVENING_SCHOOL"), TEXT("EVENING_SCHOOL"), TEXT("EVENING_SCHOOL"),
+			Value(ExtClass::PeriodId::EVENING_SCHOOL)
+		},
+		{
+			165, NCONSTCAT_TIME_PERIOD,
+			TEXT("EVENING_ROOM"), TEXT("EVENING_ROOM"), TEXT("EVENING_ROOM"),
+			Value(ExtClass::PeriodId::EVENING_ROOM)
+		},
+		{
+			166, NCONSTCAT_TIME_PERIOD,
+			TEXT("SLEEP"), TEXT("SLEEP"), TEXT("SLEEP"),
+			Value(ExtClass::PeriodId::SLEEP)
+		},
+
+		{
+			167, NCONSTCAT_TIME_DAY,
+			TEXT("MONDAY"), TEXT("MONDAY"), TEXT("MONDAY"),
+			Value(ExtClass::DayName::MONDAY)
+		},
+		{
+			168, NCONSTCAT_TIME_DAY,
+			TEXT("TUESDAY"), TEXT("TUESDAY"), TEXT("TUESDAY"),
+			Value(ExtClass::DayName::TUESDAY)
+		},
+		{
+			169, NCONSTCAT_TIME_DAY,
+			TEXT("WEDNESDAY"), TEXT("WEDNESDAY"), TEXT("WEDNESDAY"),
+			Value(ExtClass::DayName::WEDNESDAY)
+		},
+		{
+			170, NCONSTCAT_TIME_DAY,
+			TEXT("THURSDAY"), TEXT("THURSDAY"), TEXT("THURSDAY"),
+			Value(ExtClass::DayName::THURSDAY)
+		},
+		{
+			171, NCONSTCAT_TIME_DAY,
+			TEXT("FRIDAY"), TEXT("FRIDAY"), TEXT("FRIDAY"),
+			Value(ExtClass::DayName::FRIDAY)
+		},
+		{
+			172, NCONSTCAT_TIME_DAY,
+			TEXT("SATURDAY"), TEXT("SATURDAY"), TEXT("SATURDAY"),
+			Value(ExtClass::DayName::SATURDAY)
+		},
+		{
+			173, NCONSTCAT_TIME_DAY,
+			TEXT("SUNDAY"), TEXT("SUNDAY"), TEXT("SUNDAY"),
+			Value(ExtClass::DayName::SUNDAY)
+		},
+		//Character
+		{
+			174, NCONSTCAT_CHAR_PREG_RISK,
+			TEXT("NORMAL"), TEXT("NORMAL"), TEXT("NORMAL"),
+			Value(ExtClass::PregnancyRisk::PREGRISK_NORMAL)
+		},
+		{
+			175, NCONSTCAT_CHAR_PREG_RISK,
+			TEXT("SAFE"), TEXT("SAFE"), TEXT("SAFE"),
+			Value(ExtClass::PregnancyRisk::PREGRISK_SAFE)
+		},
+		{
+			176, NCONSTCAT_CHAR_PREG_RISK,
+			TEXT("DANGEROUS"), TEXT("DANGEROUS"), TEXT("DANGEROUS"),
+			Value(ExtClass::PregnancyRisk::PREGRISK_DANGEROUS)
+		},
+		
 	},
 	{ //BOOL
 		
