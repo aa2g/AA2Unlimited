@@ -572,8 +572,8 @@ bool AAUCardData::CopyAAUDataSet(const TCHAR * name, ExtClass::CharacterData* ch
 bool AAUCardData::RemoveAAUDataSet(int index) {
 	if (index >= m_aauSets.size()) return false;
 	if (index == 0) return false;
+	if (index == m_currAAUSet) { m_currAAUSet = 0; }
 	m_aauSets.erase(m_aauSets.begin() + index);
-	if (index == m_currAAUSet) m_currAAUSet = 0;
 	return true;
 }
 void AAUCardData::SwitchActiveAAUDataSet(int newSet, ExtClass::CharacterData* charData) {

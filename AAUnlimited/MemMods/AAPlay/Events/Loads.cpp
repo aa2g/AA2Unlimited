@@ -8,6 +8,7 @@
 #include "Functions\AAPlay\Globals.h"
 #include "Functions\AAPlay\Poser.h"
 #include "Functions/AAPlay/Facecam.h"
+#include "Functions/AAPlay/GameState.h"
 
 #include "Functions\Shared\TriggerEventDistributor.h"
 
@@ -27,6 +28,10 @@ namespace {
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::SetTargetCharacter(loadCharacter);
+	//Add the character to the conversation list
+	if (Shared::GameState::getIsPcConversation()) {
+		Shared::GameState::addConversationCharacter(loadCharacter);
+	}
 	//throw high poly event
 	HiPolyInitData data;
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);

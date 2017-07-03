@@ -245,7 +245,16 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 			//remove this rule
-			g_currChar.m_cardData.RemoveAAUDataSet(sel);
+			if (!g_currChar.IsValid()) {
+				const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+				const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+				AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+				if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+			}
+			if (g_currChar.IsValid()) {
+				g_currChar.m_cardData.SwitchActiveAAUDataSet(0, g_currChar.m_char->m_charData);
+				g_currChar.m_cardData.RemoveAAUDataSet(sel);
+			}
 			thisPtr->RefreshAAuSetList();
 			return TRUE;
 		}

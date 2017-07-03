@@ -21,12 +21,15 @@ void InitOnLoad() {
 	//initialize characters
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
-	for(start; start != end; start++) {
+	int idxCharacter = 0;
+	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
 
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].m_cardData.FromFileBuffer((char*)it->m_charData->m_pngBuffer,it->m_charData->m_pngBufferSize);
+		g_characters[seat].charOffset = 0x04 * idxCharacter;
+
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
 		for (Trigger& trg : aauData.GetTriggers()) {
@@ -50,6 +53,18 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
 	g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	
+	//get chrOffset
+	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
+	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
+	int idxCharacter = 0;
+	for (start; start != end; start++, idxCharacter++) {
+		ExtClass::CharacterStruct* it = *start;
+		if (it->m_seat == seat) {
+			g_characters[seat].charOffset = 0x04 * idxCharacter;
+		}
+	}
+
 	//initialize triggers
 	auto& aauData = g_characters[seat].m_cardData;
 	for (auto& trg : aauData.GetTriggers()) {

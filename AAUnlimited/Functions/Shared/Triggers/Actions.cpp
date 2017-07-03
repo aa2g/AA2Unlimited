@@ -4,6 +4,8 @@
 
 #include "Files\Logger.h"
 #include "Functions\AAPlay\Globals.h"
+#include "Functions\AAPlay\GameState.h"
+#include "External\AddressRule.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -554,6 +556,46 @@ namespace Shared {
 			}
 		}
 
+		//int seat
+		void Thread::SetPC(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) return;
+			else {
+				Shared::GameState::setPlayerCharacter(seat);
+			}
+		}
+
+		//int seatPC, int seatPartner
+		void Thread::StartHScene(std::vector<Value>& params) {
+			int seatPC = params[0].iVal;
+			CharInstData* instPC = &AAPlay::g_characters[seatPC];
+			if (!instPC->IsValid()) return;
+			int seatPartner = params[1].iVal;
+			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
+			if (!instPartner->IsValid()) return;
+			
+
+			//setup PC for the H scene
+			std::vector<Value> pc;
+			pc.push_back(params[0]);
+			SetPC(pc);
+			//setup partner for H scene
+			static const DWORD partnerOffsets[]{ 0x376164, 0x28, 0x28 };
+			static const DWORD chrOffset[]{ 0x3761CC, 0x28, 0x2C, 0x20, instPartner->charOffset };
+			void* ptrPartner = (void*)ExtVars::ApplyRule(partnerOffsets);
+			*static_cast<int*>(ptrPartner) = (int)ExtVars::ApplyRule(chrOffset);
+
+			if (this->eventData->GetId() == PC_CONVERSATION_STATE_UPDATED) {
+				((PCConversationStateUpdatedData*)this->eventData)->m_bStartH++;
+			}
+			static const DWORD hOffsets[]{ 0x3761CC, 0x28, 0x28 };
+			void* hTrigger = (void*)ExtVars::ApplyRule(hOffsets);
+			(*(static_cast<int*>(hTrigger)))++;	//I'm sorry
+
+		}
+
+
 		/*
 		 * A list of all action categories
 		 */
@@ -893,6 +935,18 @@ namespace Shared {
 				TEXT("Set character's description."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardDescription
+			},
+			{
+				50, ACTIONCAT_GENERAL, TEXT("Change Player Character"), TEXT("%p ::SetPC"),
+				TEXT("Change current Player Character."),
+				{ TYPE_INT },
+				&Thread::SetPC
+			},
+			{
+				51, ACTIONCAT_GENERAL, TEXT("Start H scene"), TEXT("Start H(pc: %p , partner: %p )"),
+				TEXT("Start H scene between 2 characters"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::StartHScene
 			},
 			//{
 			//	47, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),

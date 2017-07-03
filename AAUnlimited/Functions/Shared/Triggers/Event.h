@@ -43,6 +43,8 @@ namespace Triggers {
 		PERIOD_ENDS,
 		NPC_RESPONSE,
 		NPC_WALK_TO_ROOM, NPC_WANT_ACTION_NOTARGET, NPC_WANT_TALK_WITH, NPC_WANT_TALK_WITH_ABOUT,
+		PC_CONVERSATION_STATE_UPDATED,
+		PC_CONVERSATION_ENDED,
 		
 		
 		N_EVENTS
@@ -141,8 +143,14 @@ namespace Triggers {
 		int conversationAbout;
 	EDC_END
 
-
-
+	EDC_DECLARE(PCConversationStateUpdatedData, PC_CONVERSATION_STATE_UPDATED)
+		int state;
+		int npc_response;
+		int pc_response;
+		int action;
+		BYTE* m_bStartH;
+	EDC_END
+		
 
 #undef EDC_DECLARE
 #undef EDC_END

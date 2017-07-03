@@ -5,6 +5,7 @@
 #include "General\Util.h"
 #include "External\ExternalClasses\ConversationStruct.h"
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Functions/AAPlay/GameState.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -20,6 +21,11 @@ namespace Shared {
 		//int ()
 		Value Thread::GetThisCard(std::vector<Value>& params) {
 			return this->thisCard;
+		}
+
+		Value Thread::GetPC(std::vector<Value>&) {
+			auto pc = *(Shared::GameState::getPlayerCharacter());
+			return pc->m_seat;
 		}
 
 		//bool (int)
@@ -701,6 +707,18 @@ namespace Shared {
 			}
 		}
 
+		//int(int)
+		Value Thread::GetCurrentSyle(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value(inst->m_cardData.GetCurrAAUSet());
+			}
+		}
+
 		/*
 		 * Event Response
 		 */
@@ -771,6 +789,9 @@ namespace Shared {
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->action;
 				break;
+			case PC_CONVERSATION_STATE_UPDATED:
+				return ((PCConversationStateUpdatedData*)eventData)->action;
+				break;
 			default:
 				return 0;
 				break;
@@ -805,6 +826,48 @@ namespace Shared {
 			}
 		}
 
+		//int()
+		Value Thread::GetConversationState(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return ((PCConversationStateUpdatedData*)eventData)->state;
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
+		//int()
+		Value Thread::GetConversationAnswer(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				if (((PCConversationStateUpdatedData*)eventData)->npc_response >= 0) {
+					return ((PCConversationStateUpdatedData*)eventData)->npc_response;
+				}
+				else if (((PCConversationStateUpdatedData*)eventData)->pc_response >= 0) {
+					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
+				}
+				else return -1;
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
+		//int(int idx)
+		Value Thread::GetConversationActor(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 			TEXT("General"),
 			TEXT("Event Response"),
@@ -815,6 +878,7 @@ namespace Shared {
 			TEXT("Comparision - Bool"),
 			TEXT("Comparision - Float"),
 			TEXT("AAU Styles"),
+			TEXT("Conversation")
 		};
 
 
@@ -1135,33 +1199,59 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardGender
 				},
-
 				{
 					47, EXPRCAT_GENERAL,
 					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Ammount of days passed from the beginning of the game."),
 					{}, (TYPE_INT),
 					&Thread::GetDaysPassed
 				},
-
 				{
 					48, EXPRCAT_GENERAL,
 					TEXT("Current Day"), TEXT("CurrentDay"), TEXT("0=Sunday, 1=Monday... 6=Saturday."),
 					{}, (TYPE_INT),
 					&Thread::GetCurrentDay
 				},
-
 				{
 					49, EXPRCAT_GENERAL,
 					TEXT("Current Period"), TEXT("CurrentPeriod"), TEXT("10 = sleep, 1 = day, 2 = nothing to talk, 3 = first lesson,4 = first break, 5 = sports, 6 = second break, 7 = club, 8 = end, 9 = home again"),
 					{}, (TYPE_INT),
 					&Thread::GetCurrentPeriod
 				},
-
 				{
 					50, EXPRCAT_CHARPROP,
 					TEXT("Pregnancy Risk"), TEXT("%p ::PregnancyRisk(day: %p )"), TEXT("Pregnancy risk of %p character at %p day."),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::GetPregnancyRisk
+				},
+				{
+					51, EXPRCAT_CHARPROP,
+					TEXT("Current Style"), TEXT("%p ::Style"), TEXT("Currently used Style."),
+					{ (TYPE_INT) }, (TYPE_INT),
+					&Thread::GetCurrentSyle
+				},
+				{
+					52, EXPRCAT_CONVERSATION,
+					TEXT("State"), TEXT("ConversationState"), TEXT("Current conversation state."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationState
+				},
+				{
+					53, EXPRCAT_CONVERSATION,
+					TEXT("Actor"), TEXT("Actor:: %p "), TEXT("Conversation actor, listed from left to right."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetConversationActor
+				},
+				{
+					54, EXPRCAT_CONVERSATION,
+					TEXT("Answer"), TEXT("ConversationAnswer"), TEXT("Conversation answer, either given by PC or NPC."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationAnswer
+				},
+				{
+					55, EXPRCAT_GENERAL,
+					TEXT("Player Character"), TEXT("PC"), TEXT("Currently controlled character."),
+					{}, (TYPE_INT),
+					&Thread::GetPC
 				},
 			},
 

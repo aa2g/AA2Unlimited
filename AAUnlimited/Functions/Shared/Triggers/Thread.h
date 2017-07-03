@@ -96,6 +96,9 @@ namespace Shared {
 			void RemoveCardStorageString(std::vector<Value>& params);
 			void RemoveCardStorageBool(std::vector<Value>& params);
 
+			void SetPC(std::vector<Value>& params);
+			void StartHScene(std::vector<Value>& params);
+
 			//event response
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
@@ -105,6 +108,7 @@ namespace Shared {
 
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
 			Value GetThisCard(std::vector<Value>& params); //int ()
+			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
 			//time info
@@ -140,6 +144,7 @@ namespace Shared {
 			Value GetCardHatePoints(std::vector<Value>& params); //int(int,int)
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
+			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
 
 			//basic int stuff
 			Value GetRandomInt(std::vector<Value>& params); //int(int,int)
@@ -227,6 +232,11 @@ namespace Shared {
 
 			//NPC_WANT_TALK_WITH_ABOUT
 			Value GetNpcTalkAbout(std::vector<Value>& params);
+
+			//PC_CONVERSATION_STATE_UPDATED
+			Value GetConversationState(std::vector<Value>& params);
+			Value GetConversationAnswer(std::vector<Value>& params);
+			Value GetConversationActor(std::vector<Value>& params);
 
 
 

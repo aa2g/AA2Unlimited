@@ -34,6 +34,8 @@ public:
 
 	ActionParamStruct m_forceAction;
 
+	int charOffset;
+
 	void Reset();
 	inline bool IsValid() { return m_char != NULL; }
 };

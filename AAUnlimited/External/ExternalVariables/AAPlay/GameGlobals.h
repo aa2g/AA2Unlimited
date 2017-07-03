@@ -14,6 +14,8 @@ ExtClass::PcConversationStruct* PlayerConversationPtr(); //pointer to the global
 ExtClass::CharacterStruct** ClassMembersArray();
 ExtClass::CharacterStruct** ClassMembersArrayEnd(); //first invalid pointer in the array
 
+void* ptrCharTargetArray();
+
 ExtClass::TimeData* GameTimeData();
 
 }
