@@ -103,6 +103,7 @@
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
     <ClCompile Include="Files\PoseMods.cpp" />
+    <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
     <ClInclude Include="Files\PoseMods.h" />
+    <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
@@ -273,7 +275,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
