@@ -16,6 +16,7 @@ bool IsAAEdit = false;
 
 std::wstring AAEditPath;
 std::wstring AAPlayPath;
+std::wstring AAUPath;
 std::wstring GameExeName;
 
 namespace {
@@ -153,7 +154,13 @@ bool Initialize() {
 		}
 	}
 
-	
+	// wherever the DLL sits we consider home for AAU-specific files
+	{
+		TCHAR buffer[512];
+		GetModuleFileName(General::DllInst, buffer, 512);
+		AAUPath = buffer;
+		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
+	}
 
 	return true;
 }

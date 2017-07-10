@@ -3,9 +3,9 @@
  * General Defines for the project
  */
 
-#define CONFIG_FILE_PATH TEXT("AAUnlimited\\config.txt")
-#define LOGGER_FILE_PATH TEXT("AAUnlimited\\logfile.txt")
-#define POSEMOD_FILE_PATH TEXT("AAUnlimited\\poserframes.txt")
+#define CONFIG_FILE_PATH TEXT("config.txt")
+#define LOGGER_FILE_PATH TEXT("logfile.txt")
+#define POSEMOD_FILE_PATH TEXT("poserframes.txt")
 
 #define OVERRIDE_PATH TEXT("data\\override\\")
 
