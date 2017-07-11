@@ -54,11 +54,6 @@ static int WINAPI my_mbwc(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f)
 	return orig_mbwc(a, b, c, d, e, f);
 }
 
-static UINT WINAPI my_getacp()
-{
-	return 932;
-}
-
 void PatchAA2Play() {
 	// Fonts
 	patch1(0x005BEBE3, SHIFTJIS_CHARSET);
@@ -66,9 +61,12 @@ void PatchAA2Play() {
 	patch1(0x005C39A1, SHIFTJIS_CHARSET);
 	patch1(0x005AEA80, SHIFTJIS_CHARSET);
 
+	// multibyte -> sjis and back
 	orig_wcmb = (decltype(orig_wcmb))patch_iat(0x006E318C, (DWORD)&my_wcmb);
 	orig_mbwc = (decltype(orig_mbwc))patch_iat(0x006E3190, (DWORD)&my_mbwc);
-	patch_iat(0x006E30D0, (DWORD)&my_getacp);
+
+	// eliminate explicit racism
+	patchmem(0x0061BD45, (BYTE*)"\x90\x90", 2);
 }
 
 }
