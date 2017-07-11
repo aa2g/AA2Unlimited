@@ -39,11 +39,11 @@ end
 ---------------------------
 
 Config = {}
-assert(_CF, "Config subsystem not initialized")
+assert(_CONFIG, "Config subsystem not initialized")
 Config.keys = setmetatable(_CF, {__index=_G, __newindex=function(t,k,v)
 	rawset(t,k,v)
 	-- propagate the setting to C++
-	get_set_config(k,v)
+	_BINDING.config(k,v)
 end
 })
 

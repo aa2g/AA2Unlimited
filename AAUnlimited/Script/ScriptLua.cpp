@@ -4,6 +4,8 @@
 #include "ScriptLua.h"
 #include "General/ModuleInfo.h"
 
+
+
 static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
 // Pseudo-API
@@ -48,7 +50,7 @@ lua_State *LuaNewState()
 	EXPORT_WSTR(AAUPath);
 	EXPORT_WSTR(GameExeName);
 
-	lua_setglobal(L, "_BINDING");
+	lua_setglobal(L, LUA_BINDING_TABLE);
 	return L;
 }
 

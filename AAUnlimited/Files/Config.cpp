@@ -1,13 +1,17 @@
 #include <Windows.h>
+
+// FIXME: Name clash, because MSVC ignores case, workaround is to not rely on search order
+#include "../config.h"
 #include "Config.h"
+
 #include "Logger.h"
-#include "Script\ScriptLua.h"
+#include "Script/ScriptLua.h"
 
 /*
  * Lua init script actually parses config file and fills in the C++ config fields
  * defined in knownMembers. Fields which are not knownMembers are free-form, and
  * exclusively tracked by lua, and can be be queried by [ifsb]Get() methods.
- * Those Get() call answer queries for knownMember too, but must be avoided
+ * These Get() calls answer queries for knownMember too, but must be avoided
  * in certain situations (performance, callbacks) - hence why we keep some fields
  * confined in C++ struct.
  */
@@ -102,29 +106,32 @@ static int luaConfig_wrap(lua_State *L) {
 // Initialize Lua config context
 Config::Config(lua_State *LL) : Config() {
 	this->L = LL;
-	lua_register(L, "get_set_config", &luaConfig_wrap);
 	lua_newtable(L);
-	lua_setglobal(L, "_CF");
+	lua_setglobal(L, LUA_CONFIG_TABLE);
+	lua_getglobal(L, LUA_BINDING_TABLE);
+	lua_pushcfunction(L, &luaConfig_wrap);
+	lua_setfield(L, -2, "config");
+	lua_pop(L, 1);
 }
 
 // Config value getters which reach into Lua VM
 bool Config::bGet(const char *name) {
-	lua_getglobal(L, "_CF");
+	lua_getglobal(L, LUA_CONFIG_TABLE);
 	lua_getfield(L, -1, name);
 	auto v = lua_toboolean(L, -1); lua_pop(L, 2); return v;
 }
 int Config::iGet(const char *name) {
-	lua_getglobal(L, "_CF");
+	lua_getglobal(L, LUA_CONFIG_TABLE);
 	lua_getfield(L, -1, name);
 	auto v = lua_tointeger(L, -1); lua_pop(L, 2); return v;
 }
 double Config::fGet(const char *name) {
-	lua_getglobal(L, "_CF");
+	lua_getglobal(L, LUA_CONFIG_TABLE);
 	lua_getfield(L, -1, name);
 	auto v = lua_tonumber(L, -1); lua_pop(L, 2); return v;
 }
 const char *Config::sGet(const char *name) {
-	lua_getglobal(L, "_CF");
+	lua_getglobal(L, LUA_CONFIG_TABLE);
 	lua_getfield(L, -1, name);
 	auto v = lua_tostring(L, -1); lua_pop(L, 2); return v;
 }

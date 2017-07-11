@@ -18,3 +18,7 @@
 #define VER1_OVERRIDE_ARCHIVE_PATH TEXT("data\\")
 #define VER1_TAN_PATH TEXT("data\\texture\\override\\tan\\")
 #define VER1_HAIR_HIGHLIGHT_PATH TEXT("data\\texture\\override\\hair_highlight\\")
+
+#define LUA_CONFIG_TABLE  "_CONFIG"
+#define LUA_BINDING_TABLE "_BINDING"
+#define LUA_HOOKS_TABLE   "_HOOKS"

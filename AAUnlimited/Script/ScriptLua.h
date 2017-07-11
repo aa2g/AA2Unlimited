@@ -1,5 +1,6 @@
 #pragma once
 #include "lua.hpp"
+
 extern lua_State *g_L;
 
 int lua_pushwstring(lua_State *L, std::wstring s);
