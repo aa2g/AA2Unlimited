@@ -41,32 +41,23 @@ end
 ---------------------------
 -- config processing
 ---------------------------
-Config = {}
-Config.keys = setmetatable(_CONFIG, {__index=_G, __newindex=function(t,k,v)
-	rawset(t,k,v)
-	-- propagate the setting to C++
-	if _BINDING.config then
-		_BINDING.config(k,v)
-	end
+local cfproxy = {}
+function cfproxy:__index(k)
+	return _CONFIG[k] or _BINDING.config(k)
 end
-})
+function cfproxy:__newindex(k,v)
+	_BINDING.config(k,v)
+	_CONFIG[k] = v
+end
+Config = setmetatable(Config, cfroxyy)
 
--- load config chunk, rudimentarily converts .txt to .lua if necessary
+-- load config
 function Config.load(name)
-	local txt = Path(name .. ".txt")
 	local lua = Path(name .. ".lua")
 
-	local ch, err = Check("load config", loadfile(lua, nil, Config.keys))
-	local f = io.open(txt,"r")
-	if not ch and f and and not io.open(lua,"r") then
-		Log.info("Converting config.txt to config.lua")
-		local out = Check("convert config", io.open(lua, "w+"))
-		if out then
-			out:write(f:gsub(";","--"))
-			f:close()
-		end
-		return Config.load(name)
-	end
+	setmetatable(_G, cfproxy)
+	local ch = Check("load config", loadfile(lua))
+	setmetatable(_G, nil)
 	ch(binding)
 	setmetatable(Config.keys, nil)
 end
