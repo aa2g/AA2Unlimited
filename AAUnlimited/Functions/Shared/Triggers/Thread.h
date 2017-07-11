@@ -80,6 +80,8 @@ namespace Shared {
 			void SetCardSecondName(std::vector<Value>& params);
 			void SetCardDescription(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
+			void SetCardSexExperience(std::vector<Value>& params);
+			void SetCardAnalSexExperience(std::vector<Value>& params);
 
 			void NpcMoveRoom(std::vector<Value>& params);
 			void NpcActionNoTarget(std::vector<Value>& params);
@@ -145,6 +147,16 @@ namespace Shared {
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
 			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
+			Value GetSexExperience(std::vector<Value>& params); //bool(int)
+			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
+			Value FindSeat(std::vector<Value>& params); //int(string)
+			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
+			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
+			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
+			Value GetCardRejectCount(std::vector<Value>& params); //int(int)
+			Value GetCardWinCount(std::vector<Value>& params); //int(int)
+			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
+			Value GetCardSkipCount(std::vector<Value>& params); //int(int)
 
 			//basic int stuff
 			Value GetRandomInt(std::vector<Value>& params); //int(int,int)

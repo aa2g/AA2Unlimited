@@ -467,6 +467,30 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.orientation = orientation;
 		}
 
+		//int seat, bool experience
+		void Thread::SetCardSexExperience(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int experience = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.h_experience = experience;
+		}
+
+		//int seat, bool experience
+		void Thread::SetCardAnalSexExperience(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int experience = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.a_h_experience = experience;
+		}
+
 		//int seat, int newset
 		void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -947,6 +971,18 @@ namespace Shared {
 				TEXT("Start H scene between 2 characters"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::StartHScene
+			},
+			{
+				52, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Vaginal"), TEXT("%p ::SexXP = %p"),
+				TEXT("Set vaginal experience for the character"),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCardSexExperience
+			},
+			{
+				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::SexXP = %p"),
+				TEXT("Set anal experience for the character"),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCardAnalSexExperience
 			},
 			//{
 			//	47, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),

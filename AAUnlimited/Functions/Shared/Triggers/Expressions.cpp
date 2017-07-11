@@ -263,7 +263,7 @@ namespace Shared {
 			int roll = rand() % range + 1;
 			return Value(roll <= params[0].iVal);
 		}
-		
+
 
 		/*
 		 * float stuff
@@ -718,6 +718,135 @@ namespace Shared {
 				return Value(inst->m_cardData.GetCurrAAUSet());
 			}
 		}
+
+		//bool(int)
+		Value Thread::GetSexExperience(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[card];
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((bool)instance->m_char->m_charData->m_character.h_experience);
+			}
+		}
+
+		//bool(int)
+		Value Thread::GetAnalSexExperience(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[card];
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((bool)instance->m_char->m_charData->m_character.a_h_experience);
+			}
+		}
+
+		//int(string)
+		Value Thread::FindSeat(std::vector<Value>& params) {
+			std::wstring* fullName = params[0].strVal;
+			CharInstData* instance;
+			for (int i = 0; i < 25; i++) {
+				instance = &AAPlay::g_characters[i];
+				if (!instance->IsValid()) {
+					continue;
+				}
+				else {
+					std::wstring iFullName;
+					iFullName += *Value(instance->m_char->m_charData->m_surname).strVal;
+					iFullName += L" ";
+					iFullName += *Value(instance->m_char->m_charData->m_forename).strVal;
+					if (iFullName == *fullName) return Value(i);
+				}
+			}
+			return Value(-1);
+		}
+
+		//string(int)
+		Value Thread::GetCardLastHPartner(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_hStats->m_latestHPartner);
+			}
+		}
+		//string(int)
+		Value Thread::GetCardFirstHPartner(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_hStats->m_firstHPartner);
+			}
+		}
+
+		//string(int)
+		Value Thread::GetCardFirstAnalPartner(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_hStats->m_firstAnalPartner);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardRejectCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value((int)instance->m_char->m_hStats->m_rejectCount);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardWinCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value((int)instance->m_char->m_hStats->m_winningOverSomeoneCount);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardVictoryCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value((int)instance->m_char->m_hStats->m_victoryCount);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardSkipCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value((int)instance->m_char->m_hStats->m_classesSkipped);
+			}
+		}
+
+
 
 		/*
 		 * Event Response
@@ -1253,6 +1382,36 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetPC
 				},
+				{
+					56, EXPRCAT_GENERAL,
+					TEXT("Find Seat"), TEXT("Seat( %p )"), TEXT("Find a character with the provided full name(last name first name). Returns -1 if no such character is found"),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::FindSeat
+				},
+				{
+					57, EXPRCAT_CHARPROP,
+					TEXT("Reject Count"), TEXT("%p ::Rejects"), TEXT("Returns how many times this character was rejected."),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardRejectCount
+				},
+				{
+					58, EXPRCAT_CHARPROP,
+					TEXT("Win Count"), TEXT("%p ::Wins"), TEXT("Returns how many times this character won when competing over someone."),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardWinCount
+				},
+				{
+					59, EXPRCAT_CHARPROP,
+					TEXT("Victory Count"), TEXT("%p ::Victories"), TEXT("Returns how many times this character won in a fight."),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardVictoryCount
+				},
+				{
+					60, EXPRCAT_CHARPROP,
+					TEXT("Skip Count"), TEXT("%p ::Skips"), TEXT("Returns how many times this character skipped a class."),
+					{ TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardSkipCount
+				},
 			},
 
 			{ //BOOL
@@ -1468,6 +1627,18 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::RollInt
 				},
+				{
+					35, EXPRCAT_CHARPROP,
+					TEXT("Sex Experience: Vaginal"), TEXT("%p ::SexXP"), TEXT("Returns true if the character is not a virgin."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetSexExperience
+				},
+				{
+					36, EXPRCAT_CHARPROP,
+					TEXT("Sex Experience: Anal"), TEXT("%p ::AnalXP"), TEXT("Returns true if the character is not an anal virgin."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetAnalSexExperience
+				},
 			},
 			{ //FLOAT
 				{
@@ -1622,6 +1793,24 @@ namespace Shared {
 					TEXT("Replace substring"), TEXT("%p ::Replace( from: %p , to: %p , str: %p )"), TEXT("Replace substring starting from the from: and ending with to:"),
 					{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_STRING),
 					&Thread::StringReplace
+				},
+				{
+					14, EXPRCAT_CHARPROP,
+					TEXT("Last Sex Partner"), TEXT("%p ::LastSex"), TEXT("Returns the full name of the last sex partner as it appears on the character sheet."),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardLastHPartner
+				},
+				{
+					15, EXPRCAT_CHARPROP,
+					TEXT("First Sex Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardFirstHPartner
+				},
+				{
+					16, EXPRCAT_CHARPROP,
+					TEXT("First Anal Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardFirstAnalPartner
 				},
 			}
 
