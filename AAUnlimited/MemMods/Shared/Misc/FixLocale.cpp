@@ -54,6 +54,11 @@ static int WINAPI my_mbwc(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f)
 	return orig_mbwc(a, b, c, d, e, f);
 }
 
+static UINT WINAPI my_getacp()
+{
+	return 932;
+}
+
 void PatchAA2Play() {
 	// Fonts
 	patch1(0x005BEBE3, SHIFTJIS_CHARSET);
@@ -63,6 +68,7 @@ void PatchAA2Play() {
 
 	orig_wcmb = (decltype(orig_wcmb))patch_iat(0x006E318C, (DWORD)&my_wcmb);
 	orig_mbwc = (decltype(orig_mbwc))patch_iat(0x006E3190, (DWORD)&my_mbwc);
+	patch_iat(0x006E30D0, (DWORD)&my_getacp);
 }
 
 }
