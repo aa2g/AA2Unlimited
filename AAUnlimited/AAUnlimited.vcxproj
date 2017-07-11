@@ -104,6 +104,7 @@
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
     <ClCompile Include="Files\PoseMods.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
+    <ClCompile Include="Script\ScriptLua.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
@@ -209,6 +210,7 @@
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="Functions\Shared\Shadowing.h" />
+    <ClInclude Include="Script\ScriptLua.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -314,13 +316,15 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>cd $(SolutionDir)$(Configuration)\

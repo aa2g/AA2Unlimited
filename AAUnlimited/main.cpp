@@ -3,6 +3,7 @@
 #include "Files/Config.h"
 #include "General/ModuleInfo.h"
 #include "MemMods/Hook.h"
+#include "Script/ScriptLua.h"
 #include "config.h"
 
 #include <time.h>
@@ -23,6 +24,7 @@ BOOL WINAPI DllMain(
 		}
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
 		g_Config = Config(General::BuildAAUPath(CONFIG_FILE_PATH).c_str());
+		Script::Lua::Initialize();
 		InitializeHooks();
 		return TRUE;
 	}

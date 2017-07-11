@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AAUnlimitedDll", "AAUnlimited\AAUnlimited.vcxproj", "{AA2A22EF-17CB-4B53-B921-05C18036AD15}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E1AF35E4-2324-493C-B446-6B70A164A0B2} = {E1AF35E4-2324-493C-B446-6B70A164A0B2}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AAUnlimitedExe", "AAUnlimitedExe\AAUnlimitedExe.vcxproj", "{4A7115E6-6CB3-44C3-81EE-FBA875E81F1C}"
 EndProject
