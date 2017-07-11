@@ -1,5 +1,8 @@
+#include <Windows.h>
+
 #include <codecvt>
 #include "config.h"
+#include "Files/Config.h"
 #include "Files/Logger.h"
 #include "ScriptLua.h"
 #include "General/ModuleInfo.h"
@@ -23,13 +26,31 @@ std::wstring luaL_checkwstring(lua_State *L, int idx) {
 }
 
 
-// TBD: Wrap all of the following into singleton class to lessen the impact of having global namespace
 lua_State *g_L;
 
 #define EXPORT_NAME(n) lua_setfield(L, -2, #n)
 #define EXPORT_INT(n) lua_pushinteger(L, n); EXPORT_NAME(n)
 #define EXPORT_BOOL(n) lua_pushboolean(L, n); EXPORT_NAME(n)
 #define EXPORT_WSTR(n) lua_pushwstring(L, n); EXPORT_NAME(n)
+
+static int bind_config(lua_State *L) {
+	return g_Config.luaConfig(L);
+}
+
+static int bind_logger(lua_State *L) {
+	Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+	int top = lua_gettop(L);
+	for (int i = 2; i <= top; i++) {
+		g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+	}
+	return 0;
+}
+
+static luaL_Reg binding[] = {
+	{ "logger", bind_logger },
+	{ "config", bind_config },
+	{ NULL, NULL }
+};
 
 lua_State *LuaNewState()
 {
@@ -50,6 +71,7 @@ lua_State *LuaNewState()
 	EXPORT_WSTR(AAUPath);
 	EXPORT_WSTR(GameExeName);
 
+	luaL_setfuncs(L, binding, 0);
 	lua_setglobal(L, LUA_BINDING_TABLE);
 	return L;
 }

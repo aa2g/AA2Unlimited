@@ -99,19 +99,8 @@ int Config::luaConfig(lua_State *L) {
 	return 0;
 }
 
-static int luaConfig_wrap(lua_State *L) {
-	return g_Config.luaConfig(L);
-}
-
-// Initialize Lua config context
 Config::Config(lua_State *LL) : Config() {
 	this->L = LL;
-	lua_newtable(L);
-	lua_setglobal(L, LUA_CONFIG_TABLE);
-	lua_getglobal(L, LUA_BINDING_TABLE);
-	lua_pushcfunction(L, &luaConfig_wrap);
-	lua_setfield(L, -2, "config");
-	lua_pop(L, 1);
 }
 
 // Config value getters which reach into Lua VM
