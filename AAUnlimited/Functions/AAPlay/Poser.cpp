@@ -1217,7 +1217,7 @@ namespace Poser {
 	void GenSliderInfo() {
 		if (!loc_sliderInfos.empty()) return;
 
-		PoseMods mods(POSEMOD_FILE_PATH);
+		PoseMods mods(General::BuildAAUPath(POSEMOD_FILE_PATH).c_str());
 		auto& input = mods.GetInput();
 		for(auto& elem : input) {
 			SliderInfo info;

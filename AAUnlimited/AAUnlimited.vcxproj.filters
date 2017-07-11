@@ -100,6 +100,7 @@
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
+    <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
+    <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

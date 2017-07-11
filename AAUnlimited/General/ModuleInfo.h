@@ -15,9 +15,16 @@ extern bool IsAAEdit;
 //path to the aa2 folders from the registry, including trailing backslash
 extern std::wstring AAEditPath;
 extern std::wstring AAPlayPath;
+extern std::wstring AAUPath;
 extern std::wstring GameExeName; //name of the exe we are hooked to
 
 bool Initialize();
+
+inline std::wstring BuildAAUPath(const TCHAR* file) {
+	std::wstring retVal(AAUPath);
+	if (file != NULL) retVal += file;
+	return retVal;
+}
 
 //subpath should not start with a backslash
 inline std::wstring BuildPlayPath(const TCHAR* subpath, const TCHAR* file) {
