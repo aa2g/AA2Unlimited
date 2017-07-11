@@ -23,8 +23,9 @@ BOOL WINAPI DllMain(
 			return FALSE;
 		}
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
-		g_Config = Config(General::BuildAAUPath(CONFIG_FILE_PATH).c_str());
-		Script::Lua::Initialize();
+		g_L = LuaNewState();
+		g_Config = Config(g_L);
+		LuaRunScript(General::BuildAAUPath(LUA_FILE_PATH));
 		InitializeHooks();
 		return TRUE;
 	}

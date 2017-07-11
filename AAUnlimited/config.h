@@ -3,7 +3,7 @@
  * General Defines for the project
  */
 
-#define CONFIG_FILE_PATH TEXT("config.txt")
+#define LUA_FILE_PATH TEXT("init.lua")
 #define LOGGER_FILE_PATH TEXT("logfile.txt")
 #define POSEMOD_FILE_PATH TEXT("poserframes.txt")
 

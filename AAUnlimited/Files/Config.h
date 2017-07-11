@@ -1,9 +1,12 @@
 #pragma once
 #include <string>
 
+struct lua_State;
+
 /*
-* Parses a config file and holds the data defined in it
-*/
+ * Parses a config file and holds the data defined in it.
+ */
+
 class Config
 {
 public:
@@ -32,17 +35,19 @@ public:
 	union MemberData {
 		bool bVal;
 		int iVal;
-		float fVal;
-		char* sVal;
+		double fVal;
+		const char* sVal;
 	};
 public:
 	Config();
+	Config(lua_State*);
 	Config(const TCHAR* path);
-	Config(Config& rhs);
-	Config(Config&& rhs);
-	Config& operator=(Config& rhs);
-	Config& operator=(Config&& rhs);
-	~Config();
+	bool bGet(const char *name);
+	int iGet(const char *name);
+	double fGet(const char *name);
+	const char *sGet(const char *name);
+	std::wstring wsGet(const char *name);
+	int luaConfig(lua_State *L);
 
 	inline const MemberData& GetKeyValue(Members key) {
 		return m_members[key];
@@ -72,10 +77,7 @@ private:
 
 	static const MemberInfo knownMembers[num_elements];
 	MemberData m_members[num_elements];
-
-	bool StartsWith(const char* str, const char* word);
-	void GetLine(char* str, char** nextLine);
-	char* GetToken(char* str, char** nextPart);
+	lua_State *L;
 };
 
 extern Config g_Config;

@@ -1,6 +1,16 @@
 #include <Windows.h>
 #include "Config.h"
 #include "Logger.h"
+#include "Script\ScriptLua.h"
+
+/*
+ * Lua init script actually parses config file and fills in the C++ config fields
+ * defined in knownMembers. Fields which are not knownMembers are free-form, and
+ * exclusively tracked by lua, and can be be queried by [ifsb]Get() methods.
+ * Those Get() call answer queries for knownMember too, but must be avoided
+ * in certain situations (performance, callbacks) - hence why we keep some fields
+ * confined in C++ struct.
+ */
 
 const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::BOOL,	"bUseAdditionalTanSlots", false),	//USE_TAN_SLOTS
@@ -53,251 +63,68 @@ Config::Config() {
 	}
 }
 
-Config::Config(const TCHAR* path) : Config()
-{
-	HANDLE hFile = CreateFile(path,FILE_READ_ACCESS,FILE_SHARE_READ,NULL,OPEN_EXISTING,0,NULL);
-	if (hFile == NULL ||hFile == INVALID_HANDLE_VALUE) {
-		LOGPRIO(Logger::Priority::ERR) << "could not config open file " << path << "\r\n";
-		return;
-	}
-	DWORD size,hi;
-	size = GetFileSize(hFile,&hi);
-	if (size == 0) {
-		//empty config file
-		LOGPRIO(Logger::Priority::WARN) << "config file appears to be empty\r\n";
-		CloseHandle(hFile);
-		return;
-	}
-	char* buffer = new char[size+1];
-	ReadFile(hFile,buffer,size,&hi,NULL);
-	CloseHandle(hFile);
-	buffer[size] = '\0';
-
-	//read line by line for value changes
-	char* it = NULL,*nextLine = buffer;
-	do {
-		it = nextLine;
-		GetLine(it,&nextLine);
-		if (*it == '\0') continue;
-		//analyse line
-		char* varName;
-		char* value;
-		//skip whitespaces till name
-		while (isspace(*it) && *it) it++;
-		if (*it == '\0') continue; //was just line of whitespaces
-		varName = it;
-		//skip till equals or whitespaces (after name)
-		while (!isspace(*it) && *it && *it != '=') it++;
-		if (*it == '\0') {
-			LOGPRIO(Logger::Priority::WARN) << "varaible without assigned value in config file: " << varName << "\r\n";
-			continue;
-		}
-		//nullterminate; now we have varName
-		char old = *it; *it = '\0';
-		it++;
-		//skip over equals sign
-		if (old != '=') {
-			while (*it != '=' && *it) it++;
-			it++;
-		}
-		//skip whitespaces till value
-		while (isspace(*it) && *it) it++;
-		if (*it == '\0') {
-			LOGPRIO(Logger::Priority::WARN) << "empty assignment statement in config file for variable: " << varName << "\r\n";
-			continue;
-		}
-		//rest is value
-		value = it;
-
-		//find name in list of known variables
-		int index = -1;
-		for (int i = 0; i < num_elements; i++) {
-			if (strcmp(knownMembers[i].name,varName) == 0) {
-				index = i;
-				break;
-			}
-		}
-		if (index == -1) {
-			LOGPRIO(Logger::Priority::WARN) << "unkown variable in config file: " << varName << "\r\n";
-			continue;
-		}
-
-		//interpret value depending on type
-		switch (knownMembers[index].type) {
-		case BOOL:
-			if (StartsWith(value,"true")) {
-				m_members[index].bVal = true;
-			}
-			else if (StartsWith(value,"false")) {
-				m_members[index].bVal = false;
-			}
-			else {
-				LOGPRIO(Logger::Priority::WARN) << "invalid boolean parameter " << value << "\r\n";
-			}
-			break;
+// API provided to lua to get/set C++ fields
+int Config::luaConfig(lua_State *L) {
+	const char *k = luaL_checkstring(L, 1);
+	for (int i = 0; i < num_elements; i++) {
+		if (strcmp(knownMembers[i].name, k)) continue;
+		auto d = m_members[i];
+		switch (knownMembers[i].type) {
 		case INT:
-			m_members[index].iVal = strtol(value,NULL,0);
-			break;
+			lua_pushinteger(L, d.iVal);
+			if (lua_gettop(L) > 1)
+				d.iVal = luaL_checkinteger(L, 2);
+			return 1;
 		case FLOAT:
-			m_members[index].fVal = strtof(value,NULL);
-			break;
-		case STRING: {
-			//find starting and closing "s
-			char* start,*end;
-			while (*it != '"' && it != '\0') it++;
-			if (it == '\0') {
-				LOGPRIO(Logger::Priority::WARN) << "invalid string parameter; no opening '\"' in " << value << "\r\n";
-				break;
-			}
-			it++;
-			start = it;
-			while (*it != '"' && it != '\0') it++;
-			if (it == '\0') {
-				LOGPRIO(Logger::Priority::WARN) << "invalid string parameter; no closing '\"' in " << value << "\r\n";
-				break;
-			}
-			end = it-1;
-			*it = '\0';
-			m_members[index].sVal = _strdup(start);
-			break; }
+			lua_pushnumber(L, d.fVal);
+			if (lua_gettop(L) > 1)
+				d.fVal = luaL_checknumber(L, 2);
+			return 1;
+		case STRING:
+			lua_pushstring(L, d.sVal);
+			if (lua_gettop(L) > 1)
+				d.sVal = luaL_checkstring(L, 2);
+			return 1;
+		case BOOL:
+			lua_pushboolean(L, d.bVal);
+			if (lua_gettop(L) > 1)
+				d.bVal = lua_toboolean(L, 2);
+			return 1;
 		}
-	} while (nextLine != NULL);
-	delete[] buffer;
+	}
+	return 0;
 }
 
-Config::Config(Config & rhs)
-{
-	for (int i = 0; i < num_elements; i++) {
-		if (knownMembers[i].type == STRING && rhs.m_members[i].sVal != knownMembers[i].data.sVal) {
-			//make copy of string if its not the default one
-			m_members[i].sVal = rhs.m_members[i].sVal;
-		}
-		else {
-			m_members[i] = rhs.m_members[i];
-		}
-	}
+static int luaConfig_wrap(lua_State *L) {
+	return g_Config.luaConfig(L);
 }
 
-Config::Config(Config && rhs)
-{
-	for (int i = 0; i < num_elements; i++) {
-		m_members[i] = rhs.m_members[i];
-		rhs.m_members[i].sVal = NULL;
-	}
+// Initialize Lua config context
+Config::Config(lua_State *LL) : Config() {
+	this->L = LL;
+	lua_register(L, "get_set_config", &luaConfig_wrap);
+	lua_newtable(L);
+	lua_setglobal(L, "_CF");
 }
 
-Config & Config::operator=(Config & rhs)
-{
-	for (int i = 0; i < num_elements; i++) {
-		if (knownMembers[i].type == STRING && rhs.m_members[i].sVal != knownMembers[i].data.sVal) {
-			//make copy of string if its not the default one
-			m_members[i].sVal = rhs.m_members[i].sVal;
-		}
-		else {
-			m_members[i] = rhs.m_members[i];
-		}
-	}
-	return *this;
+// Config value getters which reach into Lua VM
+bool Config::bGet(const char *name) {
+	lua_getglobal(L, "_CF");
+	lua_getfield(L, -1, name);
+	auto v = lua_toboolean(L, -1); lua_pop(L, 2); return v;
 }
-
-Config & Config::operator=(Config && rhs)
-{
-	for (int i = 0; i < num_elements; i++) {
-		m_members[i] = rhs.m_members[i];
-		rhs.m_members[i].sVal = NULL;
-	}
-	return *this;
+int Config::iGet(const char *name) {
+	lua_getglobal(L, "_CF");
+	lua_getfield(L, -1, name);
+	auto v = lua_tointeger(L, -1); lua_pop(L, 2); return v;
 }
-
-
-Config::~Config()
-{
-	for (int i = 0; i < num_elements; i++) {
-		if (knownMembers[i].type == STRING && m_members[i].sVal != knownMembers[i].data.sVal) {
-			delete m_members[i].sVal;
-			m_members[i].sVal = NULL;
-		}
-	}
+double Config::fGet(const char *name) {
+	lua_getglobal(L, "_CF");
+	lua_getfield(L, -1, name);
+	auto v = lua_tonumber(L, -1); lua_pop(L, 2); return v;
 }
-
-
-/*
-* Checks if the string at str starts with word
-*/
-bool Config::StartsWith(const char * str,const char * word)
-{
-	while (*word && *str && (*str++ == *word++));
-	if (*word == '\0') return true;
-	return false;
-}
-
-/*
-* Modifies str so that it points to a single line, comments (;) or newlines filtered out.
-* if nextLine != NULL, *nextLine becomes the start of the next line, or NULL if end was reached
-*/
-void Config::GetLine(char* str,char** nextLine) {
-	char* it = str;
-	//iterate to either ; (comment), \r\n (newline), \n (newline - unix style), \r (newline - mac style),
-	//so probably just \r or \n, or \0
-	while (true) {
-		if (*it == ';') {
-			*it++ = '\0';
-			//skip rest of line
-			while (*it && *it != '\r' && *it != '\n') it++;
-			while (*it && *it == '\r' || *it == '\n') it++;
-			if (nextLine != NULL) {
-				if (*it)
-					*nextLine = it;
-				else
-					*nextLine = NULL;
-			}
-			break;
-		}
-		else if (*it == '\r' || *it == '\n') {
-			*it++ = '\0';
-			while (*it && *it == '\r' || *it == '\n') it++;
-			if (nextLine != NULL) {
-				if (*it)
-					*nextLine = it;
-				else
-					*nextLine = NULL;
-			}
-			break;
-		}
-		else if (*it == '\0') {
-			if (nextLine != NULL) *nextLine = NULL;
-			break;
-		}
-		it++;
-	}
-}
-
-/*
-* Gets next whitespace seperated token from str, nullterminates it,
-* sets nextPart (if != NULL) to point to after the \0 and then
-* returns a pointer to the beginning of the token (skipping whitespaces),
-* or NULL if no token was found (only whitespaces and \0)
-*/
-char* Config::GetToken(char* str,char** nextPart) {
-	while (isspace(*str) && *str != '\0') str++;
-	if (*str == '\0') {
-		if (nextPart != NULL) *nextPart = NULL;
-		return NULL;
-	}
-	char* ret = str;
-	while (!isspace(*str) && *str != '\0') str++;
-	if (*str == '\0') {
-		if (nextPart != NULL) *nextPart = NULL;
-		return ret;
-	}
-	*str = '\0';
-	if (nextPart != NULL) {
-		if (*(str+1) == '\0') {
-			*nextPart = NULL;
-		}
-		else {
-			*nextPart = str+1;
-		}
-	}
-	return ret;
+const char *Config::sGet(const char *name) {
+	lua_getglobal(L, "_CF");
+	lua_getfield(L, -1, name);
+	auto v = lua_tostring(L, -1); lua_pop(L, 2); return v;
 }
