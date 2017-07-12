@@ -16,16 +16,25 @@ BOOL WINAPI DllMain(
 { 
 	if (fdwReason == DLL_PROCESS_ATTACH) {
 		srand(time(NULL));
-		//MessageBox(NULL, L"hi", L"hi", 0);
-		//change calls in code to ours
+
 		General::DllInst = hinstDLL;
 		if (!General::Initialize()) {
 			return FALSE;
 		}
+
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
 		g_L = LuaNewState();
 		g_Config = Config(g_L);
-		LuaRunScript(General::BuildAAUPath(LUA_FILE_PATH));
+		while (!LuaRunScript(General::BuildAAUPath(LUA_FILE_PATH))) {
+			switch (MessageBox(NULL, L"Lua bootstrap script failed (see logfile.txt)", L"Error", MB_ICONERROR | MB_ABORTRETRYIGNORE)) {
+			case IDABORT:
+				// Kill it
+				ExitProcess(1);
+			case IDIGNORE:
+				// The module will unload and the game will run vanilla.
+				return FALSE;
+			}
+		}
 		InitializeHooks();
 		return TRUE;
 	}

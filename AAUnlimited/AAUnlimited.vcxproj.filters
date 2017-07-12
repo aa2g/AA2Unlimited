@@ -226,5 +226,6 @@
     <None Include="Cheat Engine Tables\AA2Play v12 FP v1.4.0a.CT" />
     <None Include="Texts\init.lua" />
     <None Include="Texts\main.lua" />
+    <None Include="Texts\config.lua" />
   </ItemGroup>
 </Project>

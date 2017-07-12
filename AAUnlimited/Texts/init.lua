@@ -1,8 +1,11 @@
+x()
+
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
 assert(_BINDING)
-assert(_HOOKS)
+_HOOKS = _HOOKS or {}
+_HOOKS.config = _HOOKS.config or {}
 _CONFIG = _CONFIG or {}
 
 ---------------------------
@@ -25,7 +28,7 @@ end
 assert(_BINDING.logger, "C++ logger missing")
 Log = {}
 
-// XREF: match enum Files/logger.h
+-- XREF: match enum Files/logger.h
 for prio,name in ipairs { "spam", "info", "warn", "err", "crit" } do
 	local p = prio-1
 	Log[name] = function(...)
@@ -38,6 +41,11 @@ function _HOOKS.logger(...)
 	return false, ...
 end
 
+function _HOOKS.config.logPrio(v)
+	_BINDING.setlogprio(v)
+	return v
+end
+
 ---------------------------
 -- config processing
 ---------------------------
@@ -46,20 +54,25 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.config(k)
 end
 function cfproxy:__newindex(k,v)
-	_BINDING.config(k,v)
-	_CONFIG[k] = v
+	if _HOOKS.config and _HOOKS.config[k] then
+		v = _HOOKS.config[k](v)
+	end
+	if v then
+		_BINDING.config(k,v)
+		_CONFIG[k] = v
+	end
 end
-Config = setmetatable(Config, cfroxyy)
+Config = setmetatable({}, cfroxyy)
 
 -- load config
 function Config.load(name)
 	local lua = Path(name .. ".lua")
 
-	setmetatable(_G, cfproxy)
 	local ch = Check("load config", loadfile(lua))
-	setmetatable(_G, nil)
+	setmetatable(_G, cfproxy)
 	ch(binding)
-	setmetatable(Config.keys, nil)
+	setmetatable(_G, nil)
+	setmetatable(Config, cfproxy)
 end
 
 ---------------------------
@@ -68,7 +81,7 @@ end
 package.path = Path("?.lua") .. ";" .. package.path -- in top level, only simple lua files are allowed
 package.path = Path("lib", "?.lua") .. ";" .. package.path
 package.path = Path("lib", "?", "init.lua") .. ";" .. package.path
-package.cpath = Path"lib", "?.dll") .. ";" .. package.cpath
-package.cpath = Path"lib", "?", "init.dll") .. ";" .. package.cpath
+package.cpath = Path("lib", "?.dll") .. ";" .. package.cpath
+package.cpath = Path("lib", "?", "init.dll") .. ";" .. package.cpath
 
 require "main"

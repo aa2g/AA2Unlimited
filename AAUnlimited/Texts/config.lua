@@ -75,3 +75,10 @@ bSaveFileBackup = true
 --3: the game will attempt a conversion
 legacyMode = 3
 
+-- Set log level
+--0: spam
+--1: info
+--2: warn
+--3: err
+--4: crit
+logPrio = 0

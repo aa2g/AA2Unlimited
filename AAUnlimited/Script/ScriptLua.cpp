@@ -37,6 +37,12 @@ static int bind_config(lua_State *L) {
 	return g_Config.luaConfig(L);
 }
 
+static int bind_setlogprio(lua_State *L) {
+	Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+	g_Logger.SetPriority(prio);
+	return 0;
+}
+
 static int bind_logger(lua_State *L) {
 	Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
 	int top = lua_gettop(L);
@@ -48,21 +54,23 @@ static int bind_logger(lua_State *L) {
 
 static luaL_Reg binding[] = {
 	{ "logger", bind_logger },
+	{ "setlogprio", bind_setlogprio },
 	{ "config", bind_config },
 	{ NULL, NULL }
 };
 
 lua_State *LuaNewState()
 {
+	printf("making\n");
 	// Make state
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
-	lua_close(L);
 
 	// Export bound values
 	lua_newtable(L);
 
 	using namespace General;
+
 	EXPORT_INT(GameBase);
 	EXPORT_BOOL(IsAAPlay);
 	EXPORT_BOOL(IsAAEdit);
@@ -81,7 +89,7 @@ bool LuaRunScript(std::wstring &path) {
 	std::wstring r;
 	if (luaL_loadfile(L, utf8.to_bytes(path).c_str()) == LUA_OK && lua_pcall(L, 0, 0, 0) == LUA_OK)
 		return 1;
-	LOGPRIO(Logger::Priority::ERR) << "Script " << path << " failed with:\r\n" << lua_tostring(L, -1);
+	LOGPRIONC(Logger::Priority::ERR) lua_tostring(L, -1) << "\r\n";
 	lua_pop(L, 1);
 	return 0;
 }
