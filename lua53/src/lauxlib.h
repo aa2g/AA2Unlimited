@@ -59,6 +59,11 @@ LUALIB_API void (luaL_checkstack) (lua_State *L, int sz, const char *msg);
 LUALIB_API void (luaL_checktype) (lua_State *L, int arg, int t);
 LUALIB_API void (luaL_checkany) (lua_State *L, int arg);
 
+#if defined(LUA_TYPEEXTENSION)
+LUALIB_API void *luaL_testlightuserdatax (lua_State *L, int lud, int x);
+LUALIB_API void *luaL_checklightuserdatax (lua_State *L, int lud, int x);
+#endif
+
 LUALIB_API int   (luaL_newmetatable) (lua_State *L, const char *tname);
 LUALIB_API void  (luaL_setmetatable) (lua_State *L, const char *tname);
 LUALIB_API void *(luaL_testudata) (lua_State *L, int ud, const char *tname);

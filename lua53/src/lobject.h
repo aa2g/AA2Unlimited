@@ -144,7 +144,7 @@ typedef struct lua_TValue {
 #define ttisinteger(o)		checktag((o), LUA_TNUMINT)
 #define ttisnil(o)		checktag((o), LUA_TNIL)
 #define ttisboolean(o)		checktag((o), LUA_TBOOLEAN)
-#define ttislightuserdata(o)	checktag((o), LUA_TLIGHTUSERDATA)
+#define ttislightuserdata(o)	checktype((o), LUA_TLIGHTUSERDATA)
 #define ttisstring(o)		checktype((o), LUA_TSTRING)
 #define ttisshrstring(o)	checktag((o), ctb(LUA_TSHRSTR))
 #define ttislngstring(o)	checktag((o), ctb(LUA_TLNGSTR))
@@ -370,7 +370,7 @@ typedef union UUdata {
 
 #define setuservalue(L,u,o) \
 	{ const TValue *io=(o); Udata *iu = (u); \
-	  iu->user_ = io->value_; iu->ttuv_ = rttype(io); \
+	  iu->user_ = io->value_; iu->ttuv_ = check_exp((rttype(o) >> 8) == 0, rttype(io)); \
 	  checkliveness(L,io); }
 
 
@@ -427,6 +427,24 @@ typedef struct Proto {
   TString  *source;  /* used for debug information */
   GCObject *gclist;
 } Proto;
+
+
+/*
+** {======================================================
+** type extension
+** =======================================================
+*/
+#if defined(LUA_TYPEEXTENSION)
+
+/* type tag extension of a TValue */
+#define ttypex(o)       ((o)->tt_ >> LUAI_TEXSHIFT)
+#define setttx_(o,x)    ((o)->tt_=ttype((o) | ((x) << LUAI_TEXSHIFT)))
+
+#define setxpvalue(obj,x,ttx) \
+  { TValue *io=(obj); val_(io).p=(x); settt_(io, LUA_TLIGHTUSERDATA | (ttx<<LUAI_TEXSHIFT)); }
+
+#endif
+/* }====================================================== */
 
 
 

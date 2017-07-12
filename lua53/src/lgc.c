@@ -290,6 +290,10 @@ static void markmt (global_State *g) {
   int i;
   for (i=0; i < LUA_NUMTAGS; i++)
     markobjectN(g, g->mt[i]);
+#if defined(LUA_TYPEEXTENSION)
+  for (i=0; i < g->usedttx; i++)
+    markobjectN(g, g->mtx[i]);
+#endif
 }
 
 

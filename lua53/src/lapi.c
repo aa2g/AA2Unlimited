@@ -560,6 +560,31 @@ LUA_API void lua_pushboolean (lua_State *L, int b) {
   lua_unlock(L);
 }
 
+#if defined(LUA_TYPEEXTENSION)
+
+LUA_API int lua_allocatetypex (lua_State *L) {
+  global_State *g = G(L);
+  luaM_growvector(L, g->mtx, g->usedttx, g->sizemtx, struct Table *, MAX_INT,
+                     "type extensions");
+  return g->usedttx++;
+}
+
+
+LUA_API int lua_typex(lua_State *L, int idx) {
+  const TValue *o = index2addr(L, idx);
+  return ttypex(o);
+}
+
+
+LUA_API void lua_pushlightuserdatax (lua_State *L, void *p, int x) {
+  lua_lock(L);
+  api_check(L, x >= 0 && x < G(L)->usedttx, "invalid typex value");
+  setxpvalue(L->top, p, x);
+  api_incr_top(L);
+  lua_unlock(L);
+}
+
+#else
 
 LUA_API void lua_pushlightuserdata (lua_State *L, void *p) {
   lua_lock(L);
@@ -568,6 +593,7 @@ LUA_API void lua_pushlightuserdata (lua_State *L, void *p) {
   lua_unlock(L);
 }
 
+#endif
 
 LUA_API int lua_pushthread (lua_State *L) {
   lua_lock(L);
@@ -706,6 +732,11 @@ LUA_API int lua_getmetatable (lua_State *L, int objindex) {
     case LUA_TUSERDATA:
       mt = uvalue(obj)->metatable;
       break;
+#if defined(LUA_TYPEEXTENSION)
+    case LUA_TLIGHTUSERDATA:
+      mt = G(L)->mtx[ttypex(obj)];
+      break;
+#endif
     default:
       mt = G(L)->mt[ttnov(obj)];
       break;
@@ -871,6 +902,12 @@ LUA_API int lua_setmetatable (lua_State *L, int objindex) {
       }
       break;
     }
+#if defined(LUA_TYPEEXTENSION)
+    case LUA_TLIGHTUSERDATA: {
+      G(L)->mtx[ttypex(obj)] = mt;
+      break;
+    }
+#endif
     default: {
       G(L)->mt[ttnov(obj)] = mt;
       break;

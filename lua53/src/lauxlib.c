@@ -296,6 +296,24 @@ LUALIB_API int luaL_execresult (lua_State *L, int stat) {
 ** =======================================================
 */
 
+#if defined(LUA_TYPEEXTENSION)
+
+LUALIB_API void *luaL_testlightuserdatax (lua_State *L, int lud, int x) {
+  return lua_type(L, lud) == LUA_TLIGHTUSERDATA && lua_typex(L, lud) == x
+         ? lua_touserdata(L, lud)
+         : NULL;
+}
+
+
+LUALIB_API void *luaL_checklightuserdatax (lua_State *L, int lud, int x) {
+  void *p = luaL_testlightuserdatax(L, lud, x);
+  if (p == NULL)
+    luaL_argerror(L, lud, "not light userdata or typex mismatch");
+  return p;
+}
+
+#endif
+
 LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
   if (luaL_getmetatable(L, tname) != LUA_TNIL)  /* name already in use? */
     return 0;  /* leave previous value on top, but return 0 */

@@ -231,9 +231,15 @@ LUA_API const char *(lua_pushvfstring) (lua_State *L, const char *fmt,
 LUA_API const char *(lua_pushfstring) (lua_State *L, const char *fmt, ...);
 LUA_API void  (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
 LUA_API void  (lua_pushboolean) (lua_State *L, int b);
+#if defined(LUA_TYPEEXTENSION)
+LUA_API int   (lua_allocatetypex) (lua_State *L);
+LUA_API int   (lua_typex) (lua_State *L, int idx);
+LUA_API void  (lua_pushlightuserdatax) (lua_State *L, void *p, int x);
+#define lua_pushlightuserdata(L,p) lua_pushlightuserdatax(L, p, 0)
+#else
 LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);
+#endif
 LUA_API int   (lua_pushthread) (lua_State *L);
-
 
 /*
 ** get functions (Lua -> stack)

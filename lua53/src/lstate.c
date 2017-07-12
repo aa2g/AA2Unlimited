@@ -300,6 +300,20 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
   if (l == NULL) return NULL;
   L = &l->l.l;
   g = &l->g;
+#if defined(LUA_TYPEEXTENSION)
+#define INITSIZEXMT 4
+  struct Table **mtx = cast(struct Table **, (*f)(ud, NULL, 0,
+                            INITSIZEXMT*sizeof(struct Table*)));
+  if (mtx == NULL) {
+    (*f)(ud, l, sizeof(LG), 0);
+    return NULL;
+  }
+  /* the zero value is for default ttx */
+  g->usedttx = 1;
+  g->sizemtx = INITSIZEXMT;
+  for (i=0; i < INITSIZEXMT; i++) mtx[i] = NULL; g->mtx = mtx;
+#undef INITSIZEXMT
+#endif
   L->next = NULL;
   L->tt = LUA_TTHREAD;
   g->currentwhite = bitmask(WHITE0BIT);

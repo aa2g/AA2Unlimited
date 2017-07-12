@@ -320,4 +320,7 @@ typedef unsigned long Instruction;
 	{ if (G(L)->gcrunning) { pre; luaC_fullgc(L, 0); pos; } }
 #endif
 
+#if defined(LUA_TYPEEXTENSION) && !defined(LUAI_TEXSHIFT)
+#define LUAI_TEXSHIFT 7
+#endif
 #endif

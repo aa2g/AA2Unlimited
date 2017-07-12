@@ -150,6 +150,11 @@ typedef struct global_State {
   TString *memerrmsg;  /* memory-error message */
   TString *tmname[TM_N];  /* array with tag-method names */
   struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types */
+#if defined(LUA_TYPEEXTENSION)
+  int usedttx;
+  int sizemtx;
+  struct Table **mtx;
+#endif
   TString *strcache[STRCACHE_N][STRCACHE_M];  /* cache for strings in API */
 } global_State;
 

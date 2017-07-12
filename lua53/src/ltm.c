@@ -76,6 +76,11 @@ const TValue *luaT_gettmbyobj (lua_State *L, const TValue *o, TMS event) {
     case LUA_TUSERDATA:
       mt = uvalue(o)->metatable;
       break;
+#if defined(LUA_TYPEEXTENSION)
+    case LUA_TLIGHTUSERDATA:
+      mt = G(L)->mtx[ttypex(o)];
+      break;
+#endif
     default:
       mt = G(L)->mt[ttnov(o)];
   }
