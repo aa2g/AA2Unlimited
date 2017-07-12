@@ -6,7 +6,7 @@
 namespace SharedInjections {
 namespace FixLocale {
 
-BOOL IsEmulated() {
+int IsEmulated() {
 	return GetACP() == 932;
 }
 
