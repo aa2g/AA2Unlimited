@@ -1,5 +1,5 @@
 #pragma once
-#include "../config.h"
+#include "defs.h"
 #include <string>
 #include "Script/ScriptLua.h"
 
@@ -46,6 +46,7 @@ public:
 	double fGet(const char *name);
 	const char *sGet(const char *name);
 	std::wstring wsGet(const char *name);
+
 
 	inline auto operator[](const char *name) const {
 		return g_Lua[LUA_CONFIG_TABLE][name];

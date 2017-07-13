@@ -1,7 +1,6 @@
 #include <Windows.h>
 
-// FIXME: Name clash, because MSVC ignores case, workaround is to not rely on search order
-#include "../config.h"
+#include "../defs.h"
 #include "Config.h"
 
 #include "Logger.h"
@@ -99,19 +98,3 @@ Config::Config() {
 	g_Lua[LUA_BINDING_TABLE]["config"] = &luaConfig;
 }
 
-// Config value getters which reach into Lua VM
-bool Config::bGet(const char *name) {
-	return g_Lua[LUA_CONFIG_TABLE][name];
-}
-
-int Config::iGet(const char *name) {
-	return g_Lua[LUA_CONFIG_TABLE][name];
-}
-
-double Config::fGet(const char *name) {
-	return g_Lua[LUA_CONFIG_TABLE][name];
-}
-
-const char *Config::sGet(const char *name) {
-	return g_Lua[LUA_CONFIG_TABLE][name];
-}

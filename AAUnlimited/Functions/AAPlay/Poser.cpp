@@ -24,7 +24,7 @@
 #include "Files\PoseFile.h"
 #include "Files\ClothFile.h"
 #include "resource.h"
-#include "config.h"
+#include "defs.h"
 
 #include "3rdparty\picojson\picojson.h"
 

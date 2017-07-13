@@ -5,7 +5,7 @@
 #include "General\Util.h"
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
-#include "config.h"
+#include "defs.h"
 
 
 OverrideFile::OverrideFile() : m_good(false) {

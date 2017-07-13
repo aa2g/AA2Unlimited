@@ -31,6 +31,8 @@ public:
 	~Logger();
 	void Initialize(const TCHAR * file, Priority prio);
 
+	static void bindLua();
+
 	template<typename T>
 	Logger& operator<<(const T& p) {
 		if (outfile.good() && currPrio >= filter) {

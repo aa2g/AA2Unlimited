@@ -5,7 +5,7 @@
 
 #include "General\ModuleInfo.h"
 #include "Files\Logger.h"
-#include "config.h"
+#include "defs.h"
 
 
 TextureImage::TextureImage() {

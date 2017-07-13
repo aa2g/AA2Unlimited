@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <string>
 
-#include <config.h>
+#include "defs.h"
 
 namespace General {
 

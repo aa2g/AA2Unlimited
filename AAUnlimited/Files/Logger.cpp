@@ -1,9 +1,28 @@
 #include <Windows.h>
 #include "Logger.h"
+#include "Script/ScriptLua.h"
 
 #include <string>
 
 Logger g_Logger;
+
+void Logger::bindLua()
+{
+	auto b = g_Lua[LUA_BINDING_TABLE];
+	b["setlogprio"] = ([](int n) {
+		g_Logger.SetPriority(Logger::Priority(n));
+	});
+
+	b["logger"] = lua_CFunction([](lua_State *L) {
+		Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+		int top = lua_gettop(L);
+		for (int i = 2; i <= top; i++) {
+			g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+		}
+		return 0;
+	});
+}
+
 
 Logger::Logger() : currPrio(Priority::ERR), filter(Priority::SPAM) {
 

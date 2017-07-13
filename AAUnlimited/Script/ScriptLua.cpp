@@ -1,7 +1,7 @@
 #include <Windows.h>
 
 #include <codecvt>
-#include "config.h"
+#include "defs.h"
 #include "Files/Config.h"
 #include "Files/Logger.h"
 #include "ScriptLua.h"
@@ -9,12 +9,25 @@
 
 Lua g_Lua;
 
+/*
+static int bind_logger(lua_State *L) {
+	Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+	int top = lua_gettop(L);
+	for (int i = 2; i <= top; i++) {
+		g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+	}
+	return 0;
+}*/
+
+
 Lua::Lua(bool libs) : sel::State(libs) {
-	/*
-	HandleExceptionsWith(([]int n, std::string msg, std::exception_ptr) {
+	HandleExceptionsWith([](int n, std::string msg, std::exception_ptr) {
 		LOGPRIONC(Logger::Priority::ERR) msg << "\r\n";
-	}));*/
+	});
+	Lua &l = *this;
+	l(LUA_BINDING_TABLE " = {}");
 }
+
 
 /*
 

@@ -138,7 +138,6 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="MemMods\AAEdit\Dialog.h" />
-    <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="General\Util.h" />
@@ -286,6 +285,7 @@
     <ClInclude Include="Script\Selene\util.h">
       <Filter>Selene</Filter>
     </ClInclude>
+    <ClInclude Include="defs.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

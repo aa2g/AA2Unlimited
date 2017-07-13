@@ -4,7 +4,7 @@
 #include "General/ModuleInfo.h"
 #include "MemMods/Hook.h"
 #include "Script/ScriptLua.h"
-#include "config.h"
+#include "defs.h"
 
 #include <time.h>
 

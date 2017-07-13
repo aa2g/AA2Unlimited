@@ -5,7 +5,7 @@
 #include <intrin.h>
 #include <sstream>
 
-#include "config.h"
+#include "defs.h"
 #include "Serialize.h"
 #include "Functions\Shared\Slider.h"
 #include "General\ModuleInfo.h"
