@@ -5,6 +5,7 @@
 
 #include <string>
 #include <sstream>
+#include "Script/ScriptLua.h"
 
 namespace General {
 
@@ -161,6 +162,14 @@ bool Initialize() {
 		AAUPath = buffer;
 		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
 	}
+
+	auto b = g_Lua[LUA_BINDING_TABLE];
+	b["gamebase"] = unsigned(GameBase);
+	b["play"] = IsAAPlay;
+	b["edit"] = IsAAEdit;
+	b["editpath"] = utf8.to_bytes(AAEditPath);
+	b["playpath"] = utf8.to_bytes(AAPlayPath);
+	b["exename"] = utf8.to_bytes(GameExeName);
 
 	return true;
 }
