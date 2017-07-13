@@ -575,7 +575,6 @@ LUA_API int lua_typex(lua_State *L, int idx) {
   return ttypex(o);
 }
 
-
 LUA_API void lua_pushlightuserdatax (lua_State *L, void *p, int x) {
   lua_lock(L);
   api_check(L, x >= 0 && x < G(L)->usedttx, "invalid typex value");
@@ -583,8 +582,7 @@ LUA_API void lua_pushlightuserdatax (lua_State *L, void *p, int x) {
   api_incr_top(L);
   lua_unlock(L);
 }
-
-#else
+#endif
 
 LUA_API void lua_pushlightuserdata (lua_State *L, void *p) {
   lua_lock(L);
@@ -593,7 +591,12 @@ LUA_API void lua_pushlightuserdata (lua_State *L, void *p) {
   lua_unlock(L);
 }
 
-#endif
+LUA_API void lua_pushuserdata (lua_State *L, void *p) {
+  lua_lock(L);
+  setuvalue(L, L->top, p);
+  api_incr_top(L);
+  lua_unlock(L);
+}
 
 LUA_API int lua_pushthread (lua_State *L) {
   lua_lock(L);
@@ -872,6 +875,22 @@ LUA_API void lua_rawsetp (lua_State *L, int idx, const void *p) {
   lua_unlock(L);
 }
 
+LUA_API int lua_setmetatablex (lua_State *L, int x) {
+  Table *mt;
+  lua_lock(L);
+  api_checknelems(L, 1);
+  if (ttisnil(L->top - 1))
+    mt = NULL;
+  else {
+    api_check(L, ttistable(L->top - 1), "table expected");
+    mt = hvalue(L->top - 1);
+  }
+  api_check(L, x >= 0 && x < G(L)->usedttx, "invalid typex value");
+  G(L)->mtx[x] = mt;
+  L->top--;
+  lua_unlock(L);
+  return 1;
+}
 
 LUA_API int lua_setmetatable (lua_State *L, int objindex) {
   TValue *obj;

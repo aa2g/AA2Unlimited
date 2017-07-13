@@ -1,3 +1,4 @@
+#define LUA_TYPEEXTENSION 1
 /*
 ** $Id: luaconf.h,v 1.259 2016/12/22 13:08:50 roberto Exp $
 ** Configuration file for Lua

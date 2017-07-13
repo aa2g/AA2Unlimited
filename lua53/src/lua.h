@@ -235,10 +235,9 @@ LUA_API void  (lua_pushboolean) (lua_State *L, int b);
 LUA_API int   (lua_allocatetypex) (lua_State *L);
 LUA_API int   (lua_typex) (lua_State *L, int idx);
 LUA_API void  (lua_pushlightuserdatax) (lua_State *L, void *p, int x);
-#define lua_pushlightuserdata(L,p) lua_pushlightuserdatax(L, p, 0)
-#else
-LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);
 #endif
+LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);
+LUA_API void  (lua_pushuserdata) (lua_State *L, void *p);
 LUA_API int   (lua_pushthread) (lua_State *L);
 
 /*
@@ -269,6 +268,9 @@ LUA_API void  (lua_rawset) (lua_State *L, int idx);
 LUA_API void  (lua_rawseti) (lua_State *L, int idx, lua_Integer n);
 LUA_API void  (lua_rawsetp) (lua_State *L, int idx, const void *p);
 LUA_API int   (lua_setmetatable) (lua_State *L, int objindex);
+#if defined(LUA_TYPEEXTENSION)
+LUA_API int   (lua_setmetatablex) (lua_State *L, int x);
+#endif
 LUA_API void  (lua_setuservalue) (lua_State *L, int idx);
 
 

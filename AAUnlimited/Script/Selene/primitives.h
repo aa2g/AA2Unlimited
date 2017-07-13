@@ -4,6 +4,7 @@
 #include <string>
 #include "traits.h"
 #include <type_traits>
+#include <typeinfo>
 #include "MetatableRegistry.h"
 
 extern "C" {
@@ -19,6 +20,8 @@ extern "C" {
 namespace sel {
 
 namespace detail {
+
+using TypeID = std::reference_wrapper<const std::type_info>;
 
 template <typename T>
 struct is_primitive {
@@ -285,14 +288,30 @@ T _pop(_id<T> t, lua_State *l) {
 
 inline void _push(lua_State *) {}
 
+inline void push_ud_typeid(lua_State *l, void *p, TypeID tid) {
+	MetatableRegistry::detail::_push_meta_table(l);
+	MetatableRegistry::detail::_push_typeinfo(l, tid);
+    lua_gettable(l, -2);
+    int typex = lua_tointeger(l, -1);
+    lua_pop(l, 2);
+    if (!typex) {
+        // there is no typex, so must be legit userdata
+	if (!MetatableRegistry::IsRegisteredType(l, tid)) {
+        	throw CopyUnregisteredType(tid);
+	}
+	lua_pushuserdata(l, p);
+    } else {
+	lua_pushlightuserdatax(l, p, typex);
+    }
+}
+
 template <typename T>
 inline void _push(lua_State *l, T* t) {
   if(t == nullptr) {
     lua_pushnil(l);
   }
   else {
-    lua_pushlightuserdata(l, t);
-    MetatableRegistry::SetMetatable(l, typeid(T));
+    push_ud_typeid(l, t, typeid(T));
   }
 }
 
@@ -301,10 +320,10 @@ inline typename std::enable_if<
     !is_primitive<typename std::decay<T>::type>::value
 >::type
 _push(lua_State *l, T& t) {
-    lua_pushlightuserdata(l, &t);
-    MetatableRegistry::SetMetatable(l, typeid(T));
+    push_ud_typeid(l, t, typeid(T));
 }
 
+/*
 template <typename T>
 inline typename std::enable_if<
     !is_primitive<typename std::decay<T>::type>::value
@@ -319,7 +338,7 @@ _push(lua_State *l, T&& t) {
     void *addr = lua_newuserdata(l, sizeof(T));
     new(addr) T(std::forward<T>(t));
     MetatableRegistry::SetMetatable(l, typeid(T));
-}
+}*/
 
 inline void _push(lua_State *l, bool b) {
     lua_pushboolean(l, b);

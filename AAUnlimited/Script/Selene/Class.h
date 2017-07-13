@@ -140,7 +140,7 @@ public:
           const std::string &name,
           Members... members) : _name(name) {
         _metatable_name = _name + "_lib";
-        MetatableRegistry::PushNewMetatable(state, typeid(T), _metatable_name);
+        MetatableRegistry::PushNewMetatable(state, typeid(T), _metatable_name, false);
         _register_dtor(state);
         _register_ctor(state);
         _register_members(state, members...);

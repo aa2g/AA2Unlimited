@@ -126,36 +126,36 @@ public:
 		lua_State *L = state;
 
 		// top level meta
-		_metatable_name = _name + "_ext";
-		MetatableRegistry::PushNewMetatable(state, typeid(T), _metatable_name);
-
-		// table with methods and getter/setter
-		lua_newtable(L);
-		lua_pushvalue(L, -1);
-		lua_setmetatable(L, -1);
+		_metatable_name = "ExtClass::" + _name;
+		MetatableRegistry::PushNewMetatable(state, typeid(T), _metatable_name, true);
 		_register_members(L, members...);
 
 		// getter
 		lua_pushcfunction(state, lua_CFunction([](lua_State *L) {
-			lua_pushstring(L, (std::string("get_") + lua_tostring(L, 2)).c_str());
-			lua_rawget(L, 1);
-			lua_call(L, 0, 1);
+			lua_getmetatable(L, 1);
+			lua_pushvalue(L, 2);
+			lua_rawget(L, -2);
+			if (lua_isnil(L, -1)) {
+				lua_pushstring(L, (std::string("get_") + lua_tostring(L, 2)).c_str());
+				lua_rawget(L, -3);
+				lua_pushvalue(L, 1);
+				lua_call(L, 1, 1);
+			}
 			return 1;
 		}));
 		lua_setfield(L, -2, "__index");
 
 		// setter
 		lua_pushcfunction(L, lua_CFunction([](lua_State *L) {
+			lua_getmetatable(L, 1);
 			lua_pushstring(L, (std::string("set_") + lua_tostring(L, 2)).c_str());
-			lua_rawget(L, 1);
+			lua_rawget(L, -2);
+			lua_pushvalue(L, 1);
 			lua_pushvalue(L, 3);
-			lua_call(L, 1, 0);
+			lua_call(L, 2, 0);
 			return 0;
 		}));
 		lua_setfield(L, -2, "__newindex");
-
-		// set parent's meta to our method table
-		lua_setmetatable(L, -2);
 		lua_pop(L, 1);
     }
     ~ExtClass() = default;

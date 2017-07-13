@@ -28,18 +28,20 @@ static inline void _create_table_in_registry(lua_State *state, const std::string
     lua_settable(state, LUA_REGISTRYINDEX);
 }
 
+// typeid -> name
 static inline void _push_names_table(lua_State *state) {
     lua_pushliteral(state, "selene_metatable_names");
     lua_gettable(state, LUA_REGISTRYINDEX);
 }
 
+// meta -> typeid & typeid -> ttx
 static inline void _push_meta_table(lua_State *state) {
     lua_pushliteral(state, "selene_metatables");
     lua_gettable(state, LUA_REGISTRYINDEX);
 }
 
 static inline void _push_typeinfo(lua_State *state, TypeID type) {
-    lua_pushlightuserdata(state, const_cast<std::type_info*>(&type.get()));
+    lua_pushinteger(state, int(type.get().hash_code()));
 }
 
 static inline void _get_metatable(lua_State *state, TypeID type) {
@@ -56,7 +58,8 @@ static inline void Create(lua_State *state) {
     detail::_create_table_in_registry(state, "selene_metatables");
 }
 
-static inline void PushNewMetatable(lua_State *state, TypeID type, const std::string& name) {
+static inline int PushNewMetatable(lua_State *state, TypeID type, const std::string& name, bool typex) {
+    int typ = 0;
     detail::_push_names_table(state);
 
     detail::_push_typeinfo(state, type);
@@ -75,7 +78,17 @@ static inline void PushNewMetatable(lua_State *state, TypeID type, const std::st
     lua_pushvalue(state, -3);
     lua_settable(state, -3);
 
+    if (typex) {
+    	detail::_push_typeinfo(state, type);
+	typ = lua_allocatetypex(state);
+	lua_pushinteger(state, typ);
+	lua_settable(state, -3);
+	lua_pushvalue(state, -2);
+	lua_setmetatablex(state, typ);
+    }
+
     lua_pop(state, 1);
+    return typ;
 }
 
 static inline bool SetMetatable(lua_State *state, TypeID type) {
