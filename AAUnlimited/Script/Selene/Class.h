@@ -55,7 +55,7 @@ private:
         };
         _funs.emplace_back(
             sel::make_unique<ClassFun<1, T, M>>(
-                state, std::string{member_name},
+                state, std::string("get_") + member_name,
                 _metatable_name.c_str(), lambda_get));
 
         std::function<void(T*, M)> lambda_set = [member](T *t, M value) {

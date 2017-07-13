@@ -6,6 +6,7 @@
 #include "HCamera.h"
 #include "../IllusionList.h"
 #include "../../AddressRule.h"
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -95,7 +96,17 @@ public:
 		const static DWORD rule[] { 0x24, 0x4, 0x198, 0 };
 		return (HCamera*)ExtVars::ApplyRule(this,rule); 
 	}
-
+	static inline void bindLua() {
+#define LUA_CLASS HInfo
+		LUA_EXTCLASS(HInfo,
+			LUA_FIELD(m_activeParticipant),
+			LUA_FIELD(m_passiveParticipant),
+			LUA_FIELD(GetCamera),
+			LUA_FIELD(GetHPosData),
+			LUA_FIELD(GetHPosition)
+		);
+#undef LUA_CLASS
+	};
 	HInfo() = delete;
 	~HInfo() = delete;
 };

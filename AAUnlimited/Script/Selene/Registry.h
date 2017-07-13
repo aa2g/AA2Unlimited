@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Class.h"
+#include "ExtClass.h"
 #include <functional>
 #include "Fun.h"
 #include "MetatableRegistry.h"
@@ -71,11 +72,23 @@ public:
                        detail::_indices<N...>) {
         RegisterClassWorker<T, CtorArgs...>(name, std::get<N>(funs)...);
     }
+    template <typename T, typename... Funs, size_t... N>
+    void RegisterExtClass(const std::string &name, std::tuple<Funs...> funs,
+                       detail::_indices<N...>) {
+        RegisterExtClassWorker<T>(name, std::get<N>(funs)...);
+    }
+
 
     template <typename T, typename... CtorArgs, typename... Funs>
     void RegisterClassWorker(const std::string &name, Funs... funs) {
         _classes.emplace_back(
             sel::make_unique<Class<T, Ctor<T, CtorArgs...>, Funs...>>(
+                _state, name, funs...));
+    }
+    template <typename T, typename... Funs>
+    void RegisterExtClassWorker(const std::string &name, Funs... funs) {
+        _classes.emplace_back(
+            sel::make_unique<ExtClass<T, Funs...>>(
                 _state, name, funs...));
     }
 };

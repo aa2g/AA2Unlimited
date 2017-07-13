@@ -108,6 +108,13 @@ public:
     }
 
 public:
+    template <typename T, typename... Funs>
+    void ExtClass(const char *_name, Funs... funs) {
+        auto fun_tuple = std::make_tuple(std::forward<Funs>(funs)...);
+        typename detail::_indices_builder<sizeof...(Funs)>::type d;
+        _registry->RegisterExtClass<T>(_name, fun_tuple, d);
+    }
+
     Selector operator[](const char *name) const {
         return Selector(_l, *_registry, *_exception_handler, name);
     }
