@@ -97,9 +97,17 @@ inline bool _get(_id<bool>, lua_State *l, const int index) {
     return lua_toboolean(l, index) != 0;
 }
 
-inline int _get(_id<int>, lua_State *l, const int index) {
-    return static_cast<int>(lua_tointeger(l, index));
+
+#define _GET_INT(it) \
+inline int _get(_id<it>, lua_State *l, const int index) { \
+    return static_cast<it>(lua_tointeger(l, index)); \
 }
+_GET_INT(int)
+_GET_INT(DWORD)
+_GET_INT(WORD)
+_GET_INT(BYTE)
+#undef _GET_INT
+
 
 inline unsigned int _get(_id<unsigned int>, lua_State *l, const int index) {
 #if LUA_VERSION_NUM >= 502 && LUA_VERSION_NUM < 503
@@ -344,9 +352,16 @@ inline void _push(lua_State *l, bool b) {
     lua_pushboolean(l, b);
 }
 
-inline void _push(lua_State *l, int i) {
-    lua_pushinteger(l, i);
+#define _PUSH_INT(it) \
+inline void _push(lua_State *l, it i) { \
+    lua_pushinteger(l, int(i)); \
 }
+
+_PUSH_INT(int)
+_PUSH_INT(DWORD)
+_PUSH_INT(WORD)
+_PUSH_INT(BYTE)
+#undef _PUSH_INT
 
 inline void _push(lua_State *l, unsigned int u) {
 #if LUA_VERSION_NUM >= 503
