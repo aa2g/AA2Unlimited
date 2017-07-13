@@ -2,6 +2,7 @@
 #include "External\ExternalClasses\ConversationStruct.h"
 #include "External\ExternalClasses\TimeData.h"
 #include "External\ExternalClasses\CharacterData.h"
+#include "Functions\Shared\Triggers\Event.h"
 
 
 
@@ -14,7 +15,8 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Trait"),
 	TEXT("Time (Day)"),
 	TEXT("Time (Period)"),
-	TEXT("Character (Pregnancy Risk)")
+	TEXT("Character (Pregnancy Risk)"),
+	TEXT("Event Type")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -805,7 +807,7 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 				TEXT("RAINBOW"), TEXT("RAINBOW"), TEXT("RAINBOW"),
 				Value(38)
 		},
-		//Time
+		//Period
 		{
 			157, NCONSTCAT_TIME_PERIOD,
 			TEXT("MORNING_ROOM"), TEXT("MORNING_ROOM"), TEXT("MORNING_ROOM"),
@@ -856,7 +858,7 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("SLEEP"), TEXT("SLEEP"), TEXT("SLEEP"),
 			Value(ExtClass::PeriodId::SLEEP)
 		},
-
+		//Time of Day
 		{
 			167, NCONSTCAT_TIME_DAY,
 			TEXT("MONDAY"), TEXT("MONDAY"), TEXT("MONDAY"),
@@ -908,6 +910,83 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("DANGEROUS"), TEXT("DANGEROUS"), TEXT("DANGEROUS"),
 			Value(ExtClass::PregnancyRisk::PREGRISK_DANGEROUS)
 		},
+		//Events
+		//{
+		//	177, NCONSTCAT_EVENT_TYPE,
+		//	TEXT("Invalid"), TEXT("INVALID"), TEXT(""),
+		//	Value(Shared::Triggers::Events::INVALID)
+		//},
+		{
+			178, NCONSTCAT_EVENT_TYPE,
+			TEXT("Clothes Changed"), TEXT("CLOTHES_CHANGED"), TEXT("Whenever a character changes clothes, either in the changing room or by entering the next period. (Not yet implemented)"),
+			Value(Shared::Triggers::Events::CLOTHES_CHANGED)
+		},
+		{
+			179, NCONSTCAT_EVENT_TYPE,
+			TEXT("Card Initialized"), TEXT("CARD_INITIALIZED"), TEXT("After the AAU Card data was successfully loaded, either because a class containing this card was loaded, or because "
+					 "this card was added to the class roster"),
+			Value(Shared::Triggers::Events::CARD_INITIALIZED)
+		},
+		{
+			180, NCONSTCAT_EVENT_TYPE,
+			TEXT("Card Destroyed"), TEXT("CARD_DESTROYED"), TEXT("Before the AAU Card data will be unloaded"),
+			Value(Shared::Triggers::Events::CARD_DESTROYED)
+		},
+		{
+			181, NCONSTCAT_EVENT_TYPE,
+			TEXT("Hi Poly Model Initialized"), TEXT("HI_POLY_INIT"), TEXT("Right after the Characters High Poly Model started loading"),
+			Value(Shared::Triggers::Events::HI_POLY_INIT)
+		},
+		{
+			182, NCONSTCAT_EVENT_TYPE,
+			TEXT("Hi Poly Model Loaded"), TEXT("HI_POLY_END"), TEXT("Right after the Character High Poly Model finished loading"),
+			Value(Shared::Triggers::Events::HI_POLY_END)
+		},
+		{
+			183, NCONSTCAT_EVENT_TYPE,
+			TEXT("Card Added to Class"), TEXT("CARD_ADDED"), TEXT("When a card (including this card) is added to a class, after the CARD_INTIALIZED event is executed"),
+			Value(Shared::Triggers::Events::CARD_ADDED)
+		},
+		{
+			184, NCONSTCAT_EVENT_TYPE,
+			TEXT("A Period Ends"), TEXT("PERIOD_ENDS"), TEXT("After a period ends, including lessions themselves"),
+			Value(Shared::Triggers::Events::PERIOD_ENDS)
+		},
+		{
+			185, NCONSTCAT_EVENT_TYPE,
+			TEXT("NPC Answers in Conversation"), TEXT("NPC_RESPONSE"), TEXT("Whenever a NPC made a yes/no decision, no matter if towards the PC or another NPC. Triggering Card is the NPC that gives the Answer"),
+			Value(Shared::Triggers::Events::NPC_RESPONSE)
+		},
+		{
+			186, NCONSTCAT_EVENT_TYPE,
+			TEXT("Npc Starts Walking to a Room"), TEXT("NPC_WALK_TO_ROOM"), TEXT("Whenever a NPC decides to walk towards a room"),
+			Value(Shared::Triggers::Events::NPC_WALK_TO_ROOM)
+		},
+		{
+			187, NCONSTCAT_EVENT_TYPE,
+			TEXT("Npc Wants to do something with no Target"), TEXT("NPC_WANT_ACTION_NOTARGET"), TEXT("Whenever a NPC decides to do an action that does not require another Npc"),
+			Value(Shared::Triggers::Events::NPC_WANT_ACTION_NOTARGET)
+		},
+		{
+			188, NCONSTCAT_EVENT_TYPE,
+			TEXT("Npc Wants to Talk With Someone"), TEXT("NPC_WANT_TALK_WITH"), TEXT("Whenever a NPC decides to talk to someone"),
+			Value(Shared::Triggers::Events::NPC_WANT_TALK_WITH)
+		},
+		{
+			189, NCONSTCAT_EVENT_TYPE,
+			TEXT("Npc Wants to Talk With Someone About Someone"), TEXT("NPC_WANT_TALK_WITH_ABOUT"), TEXT("Whenever a NPC decides to talk to someone about someone else, such as spreading rumors or asking for opinion about someone"),
+			Value(Shared::Triggers::Events::NPC_WANT_TALK_WITH_ABOUT)
+		},
+		{
+			190, NCONSTCAT_EVENT_TYPE,
+			TEXT("PC conversation state updated"), TEXT("PC_CONVERSATION_STATE_UPDATED"), TEXT("PC Conversation state updated"),
+			Value(Shared::Triggers::Events::PC_CONVERSATION_STATE_UPDATED)
+		},
+		//{
+		//	191, NCONSTCAT_EVENT_TYPE,
+		//	TEXT("PC conversation ended"), TEXT("PC_CONVERSATION_ENDED"), TEXT("PC conversation ended"),
+		//	Value(Shared::Triggers::Events::PC_CONVERSATION_ENDED)
+		//},
 		
 	},
 	{ //BOOL

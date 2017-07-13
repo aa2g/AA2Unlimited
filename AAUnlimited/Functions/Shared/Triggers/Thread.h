@@ -249,6 +249,9 @@ namespace Shared {
 			Value GetConversationState(std::vector<Value>& params);
 			Value GetConversationAnswer(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
+			Value GetConversationPcResponse(std::vector<Value>& params);
+			Value GetConversationAction(std::vector<Value>& params);
+			Value GetEventID(std::vector<Value>& params);
 
 
 

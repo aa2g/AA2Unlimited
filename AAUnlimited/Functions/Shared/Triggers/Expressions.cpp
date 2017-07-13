@@ -989,12 +989,47 @@ namespace Shared {
 		Value Thread::GetConversationActor(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
-				return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 				break;
 			default:
 				return 0;
 				break;
 			}
+		}
+
+		//int()
+		Value Thread::GetConversationPcResponse(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				if (((PCConversationStateUpdatedData*)this->eventData)->pc_response < 3 &&
+					((PCConversationStateUpdatedData*)this->eventData)->pc_response >= 0)
+					return Value(((PCConversationStateUpdatedData*)this->eventData)->pc_response);
+				else return Value(-1);
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
+		//int()
+		Value Thread::GetConversationAction(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return Value(((PCConversationStateUpdatedData*)this->eventData)->action);
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
+
+		//int()
+		Value Thread::GetEventID(std::vector<Value>& params) {
+			return Value(this->eventData->GetId());
 		}
 
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
@@ -1411,6 +1446,18 @@ namespace Shared {
 					TEXT("Skip Count"), TEXT("%p ::Skips"), TEXT("Returns how many times this character skipped a class."),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardSkipCount
+				},
+				{
+					61, EXPRCAT_CONVERSATION,
+					TEXT("PC Response"), TEXT("PC Response"), TEXT("Returns PC response in a conversation. 0 is \"Yes\", 1 is \"No\", 2 is \"Huh?\", -1 is undefined."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationPcResponse
+				},
+				{
+					62, EXPRCAT_CONVERSATION,
+					TEXT("Conversation ID"), TEXT("PC ConversationId"), TEXT("Returns conversationID of the PC conversation."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationAction
 				},
 			},
 

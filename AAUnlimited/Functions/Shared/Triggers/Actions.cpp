@@ -601,9 +601,7 @@ namespace Shared {
 			
 
 			//setup PC for the H scene
-			std::vector<Value> pc;
-			pc.push_back(params[0]);
-			SetPC(pc);
+			Shared::GameState::setPlayerCharacter(seatPC);
 			//setup partner for H scene
 			static const DWORD partnerOffsets[]{ 0x376164, 0x28, 0x28 };
 			static const DWORD chrOffset[]{ 0x3761CC, 0x28, 0x2C, 0x20, instPartner->charOffset };
