@@ -197,7 +197,7 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 		}
 		if (g_currChar.IsValid()) {
-			AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+			AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 		}
 		break; }
 	}
@@ -252,8 +252,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 			}
 			if (g_currChar.IsValid()) {
-				g_currChar.m_cardData.SwitchActiveAAUDataSet(0, g_currChar.m_char->m_charData);
-				g_currChar.m_cardData.RemoveAAUDataSet(sel);
+				g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
+				g_currChar.m_cardData.RemoveCardStyle(sel);
 			}
 			thisPtr->RefreshAAuSetList();
 			return TRUE;
@@ -276,8 +276,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 				}
 				if (g_currChar.IsValid()) {
-					AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
-					AAEdit::g_currChar.m_cardData.CopyAAUDataSet(buf, g_currChar.m_char->m_charData);
+					AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+					AAEdit::g_currChar.m_cardData.CopyCardStyle(buf, g_currChar.m_char->m_charData);
 				}
 				thisPtr->RefreshAAuSetList();
 				return TRUE;
@@ -334,8 +334,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					}
 
 					if (g_currChar.IsValid()) {
-						AAEdit::g_currChar.m_cardData.UpdateAAUDataSet(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
-						AAEdit::g_currChar.m_cardData.SwitchActiveAAUDataSet(sel, g_currChar.m_char->m_charData);
+						AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
 					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);

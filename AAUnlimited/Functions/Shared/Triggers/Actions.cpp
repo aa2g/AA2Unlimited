@@ -492,7 +492,7 @@ namespace Shared {
 		}
 
 		//int seat, int newset
-		void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
+		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int newset = params[1].iVal;
 			if (!AAPlay::g_characters[seat].m_char) {
@@ -500,7 +500,7 @@ namespace Shared {
 				return;
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
-			aau.SwitchActiveAAUDataSet(newset, AAPlay::g_characters[seat].m_char->m_charData);
+			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
 		}
 
 		//int card, string keyname, int value
@@ -693,9 +693,9 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch AAU Data Set"), TEXT("%p ::DataSet = %p"), TEXT("TODO: add description"),
+				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch Style"), TEXT("%p ::Style = %p"), TEXT("Switches current character style."),
 				{ TYPE_INT, TYPE_INT },
-				&Thread::SwitchAAUDataSet
+				&Thread::SwitchCardStyle
 			},
 
 			{
@@ -810,7 +810,7 @@ namespace Shared {
 					&Thread::SetCardStorageFloat
 			},
 			{
-				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetStr( %p ) = %p "),
+				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetString( %p ) = %p "),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 					"When the key is allready in use, the function will silently fail."),
@@ -838,7 +838,7 @@ namespace Shared {
 				&Thread::RemoveCardStorageFloat
 			},
 			{
-				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p ::DropStr( %p ) "),
+				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p ::DropString( %p ) "),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a string, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageString
@@ -869,7 +869,7 @@ namespace Shared {
 				&Thread::SetCardPersonality
 			},
 			{
-				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p .VoicePitch = %p"),
+				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p ::Pitch = %p"),
 				TEXT("Set character's voice pitch."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardVoicePitch
@@ -983,7 +983,7 @@ namespace Shared {
 				&Thread::SetCardAnalSexExperience
 			},
 			//{
-			//	47, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
+			//	54, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
 			//	TEXT("Execute triggers with provided name."),
 			//	{ TYPE_STRING },
 			//	&Thread::FireTrigger

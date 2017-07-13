@@ -254,11 +254,13 @@ namespace Shared {
 		}
 		//bool(float)
 		Value Thread::RollFloat(std::vector<Value>& params) {
+			if (params[0].fVal <= 0.0) return Value(false);
 			float roll = General::GetRandomFloat(0.0f, 1.0f);
 			return Value(roll <= params[0].fVal);
 		}
 		//bool(int)
 		Value Thread::RollInt(std::vector<Value>& params) {
+			if (params[0].iVal <= 0) return Value(false);
 			int range = 100;
 			int roll = rand() % range + 1;
 			return Value(roll <= params[0].iVal);
@@ -1042,7 +1044,8 @@ namespace Shared {
 			TEXT("Comparision - Bool"),
 			TEXT("Comparision - Float"),
 			TEXT("AAU Styles"),
-			TEXT("Conversation")
+			TEXT("Conversation"),
+			TEXT("Strings")
 		};
 
 
@@ -1134,13 +1137,13 @@ namespace Shared {
 				},
 				{
 					11, EXPRCAT_EVENT,
-					TEXT("NPC Answer Target"), TEXT("AnswerTarget"), TEXT("In a NPC Answered event, the character the NPC answered to"),
+					TEXT("Npc Answer - Target"), TEXT("AnswerTarget"), TEXT("In a NPC Answered event, the character the NPC answered to."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseTarget
 				},
 				{
 					12, EXPRCAT_EVENT,
-					TEXT("NPC Answered Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+					TEXT("Npc Answer - Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseConversation
 				},
@@ -1153,7 +1156,7 @@ namespace Shared {
 				{
 					14, EXPRCAT_EVENT,
 					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
-					"id in in targeted actions"),
+					"id in the targeted actions."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcActionId
 				},
@@ -1171,13 +1174,13 @@ namespace Shared {
 				},
 				{
 					17, EXPRCAT_EVENT,
-					TEXT("Starting Period"), TEXT("StartPeriod"), TEXT("In a Period Ends Event, this is the new period starting."),
+					TEXT("Period - Starting"), TEXT("StartPeriod"), TEXT("In a Period Ends Event, this is the new period starting."),
 					{}, (TYPE_INT),
 					&Thread::GetStartingPeriod
 				},
 				{
 					18, EXPRCAT_EVENT,
-					TEXT("Ending Period"), TEXT("EndPeriod"), TEXT("In a Period Ends Event, this is the old period that ended."),
+					TEXT("Period - Ending"), TEXT("EndPeriod"), TEXT("In a Period Ends Event, this is the old period that ended."),
 					{}, (TYPE_INT),
 					&Thread::GetEndingPeriod
 				},
@@ -1229,25 +1232,27 @@ namespace Shared {
 				},
 				{
 					25, EXPRCAT_CHARPROP,
-					TEXT("Virtue"), TEXT("%p ::Virtue"), TEXT("The virtue of this character."),
+					TEXT("Virtue"), TEXT("%p ::Virtue"), TEXT("The virtue of this character."
+					" 0 = Lowest ... 4 = Highest"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVirtue
 				},
 				{
 					26, EXPRCAT_CHARPROP,
-					TEXT("Personality"), TEXT("%p ::Personality"), TEXT("The personality of this character."),
+					TEXT("Personality"), TEXT("%p ::Personality"), TEXT("The personalityId of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPersonality
 				},
 				{
 					27, EXPRCAT_CHARPROP,
-					TEXT("Voice Pitch"), TEXT("%p ::Pitch"), TEXT("The voice pitch of this character."),
+					TEXT("Voice Pitch"), TEXT("%p ::Pitch"), TEXT("The voice pitch of this character."
+					" 0 = Lowest ... 4 = Highest"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVoicePitch
 				},
 				{
 					28, EXPRCAT_CHARPROP,
-					TEXT("Club"), TEXT("%p ::Club"), TEXT("The club of this character."),
+					TEXT("Club"), TEXT("%p ::Club"), TEXT("The clubId of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClub
 				},
@@ -1307,21 +1312,21 @@ namespace Shared {
 				},
 				{
 					38, EXPRCAT_CHARPROP,
-					TEXT("Partners count"), TEXT("%p ::PartnersCount"), TEXT("The partners count of this character."),
+					TEXT("Partners count"), TEXT("%p ::PartnersCount"), TEXT("The sexual partners count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPartnerCount
 				},
 				{
 					39, EXPRCAT_EVENT,
 					TEXT("Npc Original Response Chance"), TEXT("OriginalResponsePercent"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is success Chance that the Interaction had in Percent"),
+					TEXT("If executed in a trigger with the Npc Answers Event, this is displayed success chance that the interaction had in percents."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseOriginalPercent
 				},
 				{
 					40, EXPRCAT_EVENT,
 					TEXT("Npc Current Response Chance"), TEXT("CurrentResponsePercent"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Interaction Percent, modified by this or previously executed Triggers. "
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the current interaction percent, modified by this or previously executed triggers "
 					"using the Set Npc Response Percent Action"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentPercent
@@ -1329,18 +1334,18 @@ namespace Shared {
 				{
 					41, EXPRCAT_CHARPROP,
 					TEXT("Sex Orientation"), TEXT("%p ::Orientation"),
-					TEXT("The sexual orientation of this character."),
+					TEXT("The sexual orientation of this character. 0 = Straight, 1 = Lean Straight , 2 = Bisexual , 3 = Lean Homo, 4 = Homo"),
 					{TYPE_INT}, (TYPE_INT),
 					&Thread::GetCardOrientation
 				},
 				{
-					42, EXPRCAT_MATH,
+					42, EXPRCAT_STRINGS,
 					TEXT("String Length"), TEXT("Length( %p )"), TEXT("Retrieves the length of the given string"),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::StrLength
 				},
 				{
-					43, EXPRCAT_MATH,
+					43, EXPRCAT_STRINGS,
 					TEXT("First Index Of"), TEXT("%p ::FirstIndexOf( str: %p )"), TEXT("Retrieves the first occurence of str string."),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_INT),
 					&Thread::FirstIndexOf
@@ -1352,7 +1357,7 @@ namespace Shared {
 					&Thread::String2Int
 				},
 				{
-					45, EXPRCAT_MATH,
+					45, EXPRCAT_STRINGS,
 					TEXT("First Index Of Starting At"), TEXT("%p ::FirstIndexOf( str: %p , from: %p )"), TEXT("Retrieves the first occurence of str string starting from from: index."),
 					{ TYPE_STRING, TYPE_STRING, TYPE_INT }, (TYPE_INT),
 					&Thread::FirstIndexOfFrom
@@ -1365,7 +1370,7 @@ namespace Shared {
 				},
 				{
 					47, EXPRCAT_GENERAL,
-					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Ammount of days passed from the beginning of the game."),
+					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Days passed from the beginning of the save."),
 					{}, (TYPE_INT),
 					&Thread::GetDaysPassed
 				},
@@ -1413,7 +1418,7 @@ namespace Shared {
 				},
 				{
 					55, EXPRCAT_GENERAL,
-					TEXT("Player Character"), TEXT("PC"), TEXT("Currently controlled character."),
+					TEXT("Player Character"), TEXT("PC"), TEXT("Currently controlled character's seat."),
 					{}, (TYPE_INT),
 					&Thread::GetPC
 				},
@@ -1777,7 +1782,7 @@ namespace Shared {
 					NULL
 				},
 				{
-					4, EXPRCAT_GENERAL,
+					4, EXPRCAT_STRINGS,
 					TEXT("Substring"), TEXT("%p ::Substring(startIdx: %p , length: %p )"), TEXT("A substring that starts at the first parameter (inclusive) and has "
 					"a specific length"),
 					{TYPE_STRING, TYPE_INT, TYPE_INT}, (TYPE_STRING),
@@ -1812,19 +1817,19 @@ namespace Shared {
 					&Thread::StringConcat
 				},
 				{
-					9, EXPRCAT_CHARPROP,
+					9, EXPRCAT_MATH,
 					TEXT("Int to String"), TEXT("String( %p )"), TEXT("Converts an Int to String"),
 					{ (TYPE_INT) }, (TYPE_STRING),
 					&Thread::IntToString
 				},
 				{
-					10, EXPRCAT_CHARPROP,
+					10, EXPRCAT_MATH,
 					TEXT("Float to String"), TEXT("String( %p )"), TEXT("Converts a Float to String"),
 					{ (TYPE_FLOAT) }, (TYPE_STRING),
 					&Thread::FloatToString
 				},
 				{
-					11, EXPRCAT_CHARPROP,
+					11, EXPRCAT_MATH,
 					TEXT("Bool to String"), TEXT("String( %p )"), TEXT("Converts a Bool to String"),
 					{ (TYPE_BOOL) }, (TYPE_STRING),
 					&Thread::BoolToString
@@ -1836,7 +1841,7 @@ namespace Shared {
 					&Thread::GetCardDescription
 				},
 				{
-					13, EXPRCAT_GENERAL,
+					13, EXPRCAT_STRINGS,
 					TEXT("Replace substring"), TEXT("%p ::Replace( from: %p , to: %p , str: %p )"), TEXT("Replace substring starting from the from: and ending with to:"),
 					{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_STRING),
 					&Thread::StringReplace

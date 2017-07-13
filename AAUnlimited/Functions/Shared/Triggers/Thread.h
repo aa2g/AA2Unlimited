@@ -56,7 +56,7 @@ namespace Shared {
 			void ConditionalJump(std::vector<Value>& params);
 			void EndExecution(std::vector<Value>& params);
 			void ConditionalEndExecution(std::vector<Value>& params);
-			void SwitchAAUDataSet(std::vector<Value>& params);
+			void SwitchCardStyle(std::vector<Value>& params);
 			void AddCardLovePoints(std::vector<Value>& params);
 			void AddCardLikePoints(std::vector<Value>& params);
 			void AddCardDislikePoints(std::vector<Value>& params);
