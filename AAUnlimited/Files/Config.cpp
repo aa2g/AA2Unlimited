@@ -46,6 +46,38 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 
 Config g_Config;
 
+// API provided to lua to get/set C++ fields.
+static int luaConfig(lua_State *L) {
+	const char *k = luaL_checkstring(L, 1);
+	for (int i = 0; i < Config::num_elements; i++) {
+		if (strcmp(Config::knownMembers[i].name, k)) continue;
+		auto d = g_Config.m_members[i];
+		switch (Config::knownMembers[i].type) {
+		case Config::INT:
+			lua_pushinteger(L, d.iVal);
+			if (lua_gettop(L) > 1)
+				d.iVal = luaL_checkinteger(L, 2);
+			return 1;
+		case Config::FLOAT:
+			lua_pushnumber(L, d.fVal);
+			if (lua_gettop(L) > 1)
+				d.fVal = luaL_checknumber(L, 2);
+			return 1;
+		case Config::STRING:
+			lua_pushstring(L, d.sVal);
+			if (lua_gettop(L) > 1)
+				d.sVal = luaL_checkstring(L, 2);
+			return 1;
+		case Config::BOOL:
+			lua_pushboolean(L, d.bVal);
+			if (lua_gettop(L) > 1)
+				d.bVal = lua_toboolean(L, 2);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 Config::Config() {
 	//initialize with default values
 	for (int i = 0; i < num_elements; i++) {
@@ -63,64 +95,23 @@ Config::Config() {
 			m_members[i].sVal = knownMembers[i].data.sVal;
 			break;
 		}
-
 	}
-}
-
-// API provided to lua to get/set C++ fields
-int Config::luaConfig(lua_State *L) {
-	const char *k = luaL_checkstring(L, 1);
-	for (int i = 0; i < num_elements; i++) {
-		if (strcmp(knownMembers[i].name, k)) continue;
-		auto d = m_members[i];
-		switch (knownMembers[i].type) {
-		case INT:
-			lua_pushinteger(L, d.iVal);
-			if (lua_gettop(L) > 1)
-				d.iVal = luaL_checkinteger(L, 2);
-			return 1;
-		case FLOAT:
-			lua_pushnumber(L, d.fVal);
-			if (lua_gettop(L) > 1)
-				d.fVal = luaL_checknumber(L, 2);
-			return 1;
-		case STRING:
-			lua_pushstring(L, d.sVal);
-			if (lua_gettop(L) > 1)
-				d.sVal = luaL_checkstring(L, 2);
-			return 1;
-		case BOOL:
-			lua_pushboolean(L, d.bVal);
-			if (lua_gettop(L) > 1)
-				d.bVal = lua_toboolean(L, 2);
-			return 1;
-		}
-	}
-	return 0;
-}
-
-Config::Config(lua_State *LL) : Config() {
-	this->L = LL;
+	g_Lua[LUA_BINDING_TABLE]["config"] = &luaConfig;
 }
 
 // Config value getters which reach into Lua VM
 bool Config::bGet(const char *name) {
-	lua_getglobal(L, LUA_CONFIG_TABLE);
-	lua_getfield(L, -1, name);
-	auto v = lua_toboolean(L, -1); lua_pop(L, 2); return v;
+	return g_Lua[LUA_CONFIG_TABLE][name];
 }
+
 int Config::iGet(const char *name) {
-	lua_getglobal(L, LUA_CONFIG_TABLE);
-	lua_getfield(L, -1, name);
-	auto v = lua_tointeger(L, -1); lua_pop(L, 2); return v;
+	return g_Lua[LUA_CONFIG_TABLE][name];
 }
+
 double Config::fGet(const char *name) {
-	lua_getglobal(L, LUA_CONFIG_TABLE);
-	lua_getfield(L, -1, name);
-	auto v = lua_tonumber(L, -1); lua_pop(L, 2); return v;
+	return g_Lua[LUA_CONFIG_TABLE][name];
 }
+
 const char *Config::sGet(const char *name) {
-	lua_getglobal(L, LUA_CONFIG_TABLE);
-	lua_getfield(L, -1, name);
-	auto v = lua_tostring(L, -1); lua_pop(L, 2); return v;
+	return g_Lua[LUA_CONFIG_TABLE][name];
 }

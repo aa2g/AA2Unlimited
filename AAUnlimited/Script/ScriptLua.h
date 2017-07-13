@@ -1,11 +1,14 @@
 #pragma once
+#include <codecvt>
 #include "lua.hpp"
+#include "Selene/selene.h"
 
-extern lua_State *g_L;
+static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
-int lua_pushwstring(lua_State *L, std::wstring s);
-std::wstring lua_towstring(lua_State *L, int idx);
+class Lua : public sel::State {
+public:;
+	inline Lua() : sel::State() {};
+	Lua(bool libs);
+};
 
-// TBD: Wrap all of the following into a class deriving from lua_State, to avoid polluting global namespace
-lua_State *LuaNewState();
-bool LuaRunScript(std::wstring &path);
+extern Lua g_Lua;

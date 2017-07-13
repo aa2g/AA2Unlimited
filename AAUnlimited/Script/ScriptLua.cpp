@@ -7,24 +7,45 @@
 #include "ScriptLua.h"
 #include "General/ModuleInfo.h"
 
+Lua g_Lua;
 
+Lua::Lua(bool libs) : sel::State(libs) {
+	/*
+	HandleExceptionsWith(([]int n, std::string msg, std::exception_ptr) {
+		LOGPRIONC(Logger::Priority::ERR) msg << "\r\n";
+	}));*/
+}
+
+/*
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
-// Pseudo-API
-int lua_pushwstring(lua_State *L, std::wstring w) {
-	auto s = utf8.to_bytes(w);
-	lua_pushlstring(L, s.c_str(), s.length());
-	return 1;
+
+void Lua::Lua(bool libs) {
+	L = luaL_newstate();
+	if (libs)
+		luaL_openlibs(L);
 }
 
-std::wstring luaL_checkwstring(lua_State *L, int idx) {
-	size_t l;
-	const char *s = luaL_checklstring(L, idx, &l);
-	std::string sl(s, l);
-	return utf8.from_bytes(sl);
+void Lua : ~Lua() {
+	lua_close(L);
 }
 
+bool Lua::Run(std::wstring &path) {
+	std::wstring r;
+	if (luaL_loadfile(L, utf8.to_bytes(path).c_str()) == LUA_OK && lua_pcall(L, 0, 0, 0) == LUA_OK)
+		return 1;
+	LOGPRIONC(Logger::Priority::ERR) lua_tostring(L, -1) << "\r\n";
+	lua_pop(L, 1);
+	return 0;
+}
+
+
+class Lua {
+public:;
+	   lua_State *L;
+	   void Lua()
+};
 
 lua_State *g_L;
 
@@ -61,7 +82,6 @@ static luaL_Reg binding[] = {
 
 lua_State *LuaNewState()
 {
-	printf("making\n");
 	// Make state
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -96,3 +116,4 @@ bool LuaRunScript(std::wstring &path) {
 
 
 
+*/

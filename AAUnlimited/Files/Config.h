@@ -1,7 +1,7 @@
 #pragma once
+#include "../config.h"
 #include <string>
-
-struct lua_State;
+#include "Script/ScriptLua.h"
 
 /*
  * Parses a config file and holds the data defined in it.
@@ -38,21 +38,23 @@ public:
 		double fVal;
 		const char* sVal;
 	};
-public:
+
 	Config();
-	Config(lua_State*);
 	Config(const TCHAR* path);
 	bool bGet(const char *name);
 	int iGet(const char *name);
 	double fGet(const char *name);
 	const char *sGet(const char *name);
 	std::wstring wsGet(const char *name);
-	int luaConfig(lua_State *L);
+
+	inline auto operator[](const char *name) const {
+		return g_Lua[LUA_CONFIG_TABLE][name];
+	}
 
 	inline const MemberData& GetKeyValue(Members key) {
 		return m_members[key];
 	}
-private:
+
 	//map Member -> datatype, name, default value
 	enum MemberType {
 		BOOL, INT, FLOAT, STRING, UINT
@@ -77,7 +79,6 @@ private:
 
 	static const MemberInfo knownMembers[num_elements];
 	MemberData m_members[num_elements];
-	lua_State *L;
 };
 
 extern Config g_Config;

@@ -211,6 +211,30 @@
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="Functions\Shared\Shadowing.h" />
     <ClInclude Include="Script\ScriptLua.h" />
+    <ClInclude Include="Script\Selene\BaseFun.h" />
+    <ClInclude Include="Script\Selene\Class.h" />
+    <ClInclude Include="Script\Selene\ClassFun.h" />
+    <ClInclude Include="Script\Selene\Ctor.h" />
+    <ClInclude Include="Script\Selene\Dtor.h" />
+    <ClInclude Include="Script\Selene\ExceptionHandler.h" />
+    <ClInclude Include="Script\Selene\ExceptionTypes.h" />
+    <ClInclude Include="Script\Selene\Fun.h" />
+    <ClInclude Include="Script\Selene\function.h" />
+    <ClInclude Include="Script\Selene\LuaName.h" />
+    <ClInclude Include="Script\Selene\LuaRef.h" />
+    <ClInclude Include="Script\Selene\MetatableRegistry.h" />
+    <ClInclude Include="Script\Selene\Obj.h" />
+    <ClInclude Include="Script\Selene\ObjFun.h" />
+    <ClInclude Include="Script\Selene\primitives.h" />
+    <ClInclude Include="Script\Selene\references.h" />
+    <ClInclude Include="Script\Selene\Registry.h" />
+    <ClInclude Include="Script\Selene\ResourceHandler.h" />
+    <ClInclude Include="Script\Selene\Selector.h" />
+    <ClInclude Include="Script\Selene\selene.h" />
+    <ClInclude Include="Script\Selene\State.h" />
+    <ClInclude Include="Script\Selene\traits.h" />
+    <ClInclude Include="Script\Selene\Tuple.h" />
+    <ClInclude Include="Script\Selene\util.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

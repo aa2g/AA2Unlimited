@@ -234,7 +234,7 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
-		if (g_Config.iGet("FixLocale") > FixLocale::IsEmulated())
+		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 			FixLocale::SetCP();
 	}
 
@@ -273,7 +273,7 @@ void InitializeHooks() {
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 		ScreenCapture::InitInjection();
 		using namespace SharedInjections;
-		if (g_Config.iGet("FixLocale") > FixLocale::IsEmulated())
+		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 			FixLocale::PatchAA2Play();
 	}
 	else if (General::IsAAEdit) {
