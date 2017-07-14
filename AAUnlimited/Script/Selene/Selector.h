@@ -59,6 +59,7 @@ private:
     // Functor is activated when the () operator is invoked.
     mutable  MovingFlag _functor_active;
 
+
     Selector(lua_State *s, Registry &r, ExceptionHandler &eh, const std::string &name,
              std::vector<LuaRef> traversal, LuaRef key)
         : _state(s), _registry(&r), _exception_handler(&eh), _name(name), _traversal(traversal),
@@ -154,6 +155,7 @@ private:
         }
     }
 public:
+    Selector() {};
 
     Selector(const Selector &) = default;
     Selector(Selector &&) = default;
@@ -166,6 +168,7 @@ public:
             ResetStackOnScopeExit save(_state);
             _traverse();
             _get();
+	    if (lua_isnil(_state, -1)) { lua_pop(_state, 1); return; }
             if (std::uncaught_exception())
             {
                 try {
@@ -193,12 +196,45 @@ public:
         return copy;
     }
 
+	/*
     template <typename L>
     void operator=(L lambda) const {
         _evaluate_store([this, lambda]() {
             _registry->Register(lambda);
         });
-    }
+    }*/
+
+    /*
+	template <typename L>
+	typename std::enable_if<!std::is_pointer<L>::value>::type
+	operator=(L lambda) const {
+		_evaluate_store([this, lambda]() {
+			_registry->Register(lambda);
+		});
+	}
+	template <typename L>
+	typename std::enable_if<std::is_function<L>::value>::type
+	operator=(L lambda) const {
+		_evaluate_store([this, lambda]() {
+			_registry->Register(lambda);
+		});
+	}
+*/
+	template <typename L>
+	typename std::enable_if<std::is_function<L>::value || (!std::is_pointer<L>::value)>::type
+	operator=(L lambda) const {
+		_evaluate_store([this, lambda]() {
+			_registry->Register(lambda);
+		});
+	}
+
+	// TBD: make this is_class?
+	template <typename T>
+    void operator=(T* t) const {
+		_evaluate_store([this, t]() {
+		    detail::_push(_state, t);
+		});
+	}
 
     void operator=(bool b) const {
         _evaluate_store([this, b]() {

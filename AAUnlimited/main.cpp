@@ -25,7 +25,7 @@ BOOL WINAPI DllMain(
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
 		g_Lua = Lua(true);
 		g_Logger.bindLua();
-		g_Config = Config();
+		g_Config.bindLua();
 
 		if (!g_Lua.Load(utf8.to_bytes(General::BuildAAUPath(LUA_FILE_PATH)))) {
 			switch (MessageBox(NULL, L"Lua bootstrap script failed (see logfile.txt)", L"Error", MB_ICONERROR | MB_ABORTRETRYIGNORE)) {

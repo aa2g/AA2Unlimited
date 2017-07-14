@@ -3,84 +3,54 @@
 #include <string>
 #include "Script/ScriptLua.h"
 
-/*
- * Parses a config file and holds the data defined in it.
- */
-
-class Config
+extern class Config
 {
-public:
-	enum Members {
-		USE_TAN_SLOTS, USE_MESH_TEXTURE_OVERRIDES, USE_H_AI, USE_SHADOWING, USE_H_FACECAM,
-		USE_H_POS_BUTTON_MOVE, USE_POSER_CLOTHES, USE_POSER_DIALOGUE,
-		
-		NO_PROMPT_IS_FORCE, HAI_ON_NO_PROMPT,
-
-		SAVED_EYE_TEXTURE_USAGE,
-		SAVED_FILE_USAGE, SAVED_FILE_REMOVE, SAVED_FILE_BACKUP,
-
-		FACELESS_SLOT_MALE, FACELESS_SLOT_FEMALE,
-
-		POV_OFFSET_X, POV_OFFSET_Y, POV_OFFSET_Z,
-
-		LEGACY_MODE,
-
-		USE_POSER_HOTKEYS,
-		HKEY_POSER_TRANSLATE, HKEY_POSER_ROTATE, HKEY_POSER_SCALE,
-
-		SCREENSHOT_FORMAT,
-
-		num_elements
-	};
-	union MemberData {
-		bool bVal;
-		int iVal;
-		double fVal;
-		const char* sVal;
-	};
-
-	Config();
-	Config(const TCHAR* path);
-	bool bGet(const char *name);
-	int iGet(const char *name);
-	double fGet(const char *name);
-	const char *sGet(const char *name);
-	std::wstring wsGet(const char *name);
-
+public:;
+	// Undefined fields all default to 0/NULL/false
+	int screenshotFormat;
+	const char *sPoserHotKeys = "WER";
+	int legacyMode;
+	double fPOVOffsetZ;
+	double fPOVOffsetY;
+	double fPOVOffsetX;
+	bool bSaveFileBackup = true;
+	bool bSaveFileAutoRemove;
+	int savedFileUsage;
+	int savedEyeTextureUsage = 1;
+	bool bHAiOnNoPromptH;
+	bool bUseDialoguePoser;
+	bool bUseClothesPoser;
+	bool bEnableHPosButtonReorder;
+	bool bEnableFacecam;
+	bool bUseShadowing;
+	bool bUseHAi;
 
 	inline auto operator[](const char *name) const {
 		return g_Lua[LUA_CONFIG_TABLE][name];
 	}
 
-	inline const MemberData& GetKeyValue(Members key) {
-		return m_members[key];
+	static inline void bindLua() {
+#define LUA_CLASS Config
+		LUA_EXTCLASS(Config,
+			LUA_FIELD(screenshotFormat),
+			LUA_FIELD(sPoserHotKeys),
+			LUA_FIELD(fPOVOffsetX),
+			LUA_FIELD(fPOVOffsetY),
+			LUA_FIELD(fPOVOffsetZ),
+			LUA_FIELD(bSaveFileBackup),
+			LUA_FIELD(bSaveFileAutoRemove),
+			LUA_FIELD(savedFileUsage),
+			LUA_FIELD(bHAiOnNoPromptH),
+			LUA_FIELD(bUseDialoguePoser),
+			LUA_FIELD(bUseClothesPoser),
+			LUA_FIELD(bEnableHPosButtonReorder),
+			LUA_FIELD(bEnableFacecam),
+			LUA_FIELD(bUseShadowing),
+			LUA_FIELD(bUseHAi)
+		);
+#undef LUA_CLASS
+		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;
 	}
+} g_Config;
 
-	//map Member -> datatype, name, default value
-	enum MemberType {
-		BOOL, INT, FLOAT, STRING, UINT
-	};
-	struct MemberInfo {
-		MemberType type;
-		const char* name;
-		MemberData data;
-		MemberInfo(MemberType type, const char* name, bool b) : type(type), name(name) {
-			data.bVal = b;
-		}
-		MemberInfo(MemberType type, const char* name, float f) : type(type), name(name) {
-			data.fVal = f;
-		}
-		MemberInfo(MemberType type, const char* name, int i) : type(type), name(name) {
-			data.iVal = i;
-		}
-		MemberInfo(MemberType type, const char* name, char* str) : type(type), name(name) {
-			data.sVal = str;
-		}
-	};
-
-	static const MemberInfo knownMembers[num_elements];
-	MemberData m_members[num_elements];
-};
-
-extern Config g_Config;
 

@@ -26,7 +26,7 @@ bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD*
 	if (ret) return true;
 	ret = Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
 	if (ret) return true;
-	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
+	if (g_Config.bUseShadowing) {
 		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
 		if (ret) return true;
 	}

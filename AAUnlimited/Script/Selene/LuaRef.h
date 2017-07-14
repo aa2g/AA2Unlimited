@@ -28,6 +28,7 @@ class LuaRef {
 private:
     std::shared_ptr<int> _ref;
 public:
+    LuaRef() {};
     LuaRef(lua_State *state, int ref)
         : _ref(new int{ref}, detail::LuaRefDeleter{state}) {}
 

@@ -105,7 +105,7 @@ namespace Shared {
 		if (eyeTexture.size() > 0) {
 			//if usage is 2, texture should be dumped from the buffer directly
 			const std::vector<BYTE>& fileSave = g_currentChar->m_cardData.GetEyeTextureBuffer(leftRight);
-			if (fileSave.size() > 0 && g_Config.GetKeyValue(Config::SAVED_EYE_TEXTURE_USAGE).iVal == 2) {
+			if (fileSave.size() > 0 && g_Config.savedEyeTextureUsage == 2) {
 				loc_dumpTexture = true;
 				loc_textureBuffer = &fileSave;
 			}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <windows.h>
 #include "ExceptionTypes.h"
 #include <string>
 #include "traits.h"

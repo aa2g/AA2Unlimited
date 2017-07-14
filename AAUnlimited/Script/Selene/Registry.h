@@ -11,6 +11,7 @@
 
 namespace sel {
 namespace detail {
+
 template <typename T>
 struct lambda_traits : public lambda_traits<decltype(&T::operator())> {};
 

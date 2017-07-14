@@ -9,9 +9,16 @@
 #include "Functions/AAPlay/HButtonMove.h"
 #include "Functions/AAPlay/Facecam.h"
 #include "Functions/AAPlay/Poser.h"
+#include "Script/ScriptLua.h"
 
 namespace PlayInjections {
 namespace HPlayInjections {
+
+sel::Selector lua;
+
+void bindLua() {
+	lua = g_Lua[LUA_HOOKS_TABLE]["H"];
+}
 
 
 bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
@@ -20,7 +27,9 @@ bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 //take note that these ticks might be called multiple times even after returning contScene = false
 bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	HAi::PreTick(hInfo);
+	lua["PreTick"](hInfo);
 	bool contScene = loc_OriginalTickFunction(hInfo);
+	lua["PostTick"](hInfo, contScene);
 	HAi::PostTick(hInfo,contScene);
 	HButtonMove::PostTick(hInfo,contScene);
 	Facecam::PostTick(hInfo,contScene);
@@ -51,6 +60,7 @@ void TickInjection() {
 }
 
 void __stdcall FocusCameraEvent(ExtClass::Frame* bone) {
+	lua["FocusCameraEvent"]();
 	Facecam::AdjustCamera(bone);
 }
 

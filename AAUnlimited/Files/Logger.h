@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
 #include <Windows.h>
+#include "Script/ScriptLua.h"
 
 #define LOGPRIONC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << 
 #define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIC __ ": " <<
@@ -15,7 +16,7 @@
  * will be performed.
  */
 
-class Logger
+extern class Logger
 {
 public:
 	enum class Priority {
@@ -30,8 +31,6 @@ public:
 	Logger(const TCHAR* file,Priority prio);
 	~Logger();
 	void Initialize(const TCHAR * file, Priority prio);
-
-	static void bindLua();
 
 	template<typename T>
 	Logger& operator<<(const T& p) {
@@ -77,6 +76,24 @@ public:
 		return *this;
 	}
 
+	static inline void bindLua() {
+		// The functions we want to bind are too snow-flakeish, so we have to do that
+		// by hand.
+		auto b = g_Lua[LUA_BINDING_TABLE];
+		b["setlogprio"] = ([](int n) {
+			g_Logger.SetPriority(Logger::Priority(n));
+		});
+
+		b["logger"] = lua_CFunction([](lua_State *L) {
+			Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+			int top = lua_gettop(L);
+			for (int i = 2; i <= top; i++) {
+				g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+			}
+			return 0;
+		});
+	}
+
 	void SetPriority(Priority prio);
 	//returns true if the logger would print messages for the given priority
 	bool FilterPriority(Priority prio);
@@ -84,6 +101,6 @@ private:
 	std::ofstream outfile;
 	Priority filter;
 	Priority currPrio;
-};
+} g_Logger;
 
-extern Logger g_Logger;
+

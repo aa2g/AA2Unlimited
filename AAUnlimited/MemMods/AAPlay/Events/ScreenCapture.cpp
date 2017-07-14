@@ -95,7 +95,7 @@ namespace PlayInjections {
 
 		void InitInjection() {
 			gdiInit = false;
-			if (!g_Config.GetKeyValue(Config::SCREENSHOT_FORMAT).iVal) return;
+			if (!g_Config.screenshotFormat) return;
 			// Screenshot formats:
 			// 0 - BMP (don't redirect)
 			// 1 - JPG

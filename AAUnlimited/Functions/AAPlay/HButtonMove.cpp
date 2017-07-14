@@ -67,7 +67,7 @@ void MoveButtons(ExtClass::HInfo* info) {
 void PostTick(ExtClass::HInfo* info, bool cont) {
 	//the buttons move themselves back at a position change, so we need
 	//to keep moving them to the right position if that happened
-	if (!g_Config.GetKeyValue(Config::USE_H_POS_BUTTON_MOVE).bVal) return;
+	if (!g_Config.bEnableHPosButtonReorder) return;
 	if (loc_controlButton == NULL || loc_controlButton->m_renderX != loc_controlX) {
 		MoveButtons(info);
 	}

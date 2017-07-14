@@ -209,7 +209,7 @@ void InitializeHooks() {
 		using namespace SharedInjections;
 
 		ArchiveFile::OpenFileInject();
-		if (g_Config.GetKeyValue(Config::USE_MESH_TEXTURE_OVERRIDES).bVal) {
+		if (bool(g_Config["bUseAdditionalTanSlots"])) {
 			MeshTexture::OverrideTextureListSizeInject();
 			MeshTexture::OverrideTextureListNameInject();
 			MeshTexture::OverrideStartInject();
@@ -245,6 +245,7 @@ void InitializeHooks() {
 		using namespace PlayInjections;
 		HPlayInjections::TickInjection();
 		HPlayInjections::FocusCameraInjection();
+		HPlayInjections::bindLua();
 
 		PcConversation::StartInjection();
 		PcConversation::EndInjection();
@@ -256,7 +257,7 @@ void InitializeHooks() {
 		Loads::SaveFileLoadInjection();
 		Loads::TransferInInjection();
 		Loads::TransferOutInjection();
-		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {
+		if (bool(g_Config["bUseAdditionalTanSlots"])) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
 			TanSlotUnlimit::LoadLoopEndInject();
@@ -278,7 +279,7 @@ void InitializeHooks() {
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;
-		if (g_Config.GetKeyValue(Config::USE_TAN_SLOTS).bVal) {
+		if (bool(g_Config["bUseAdditionalTanSlots"])) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
 			TanSlotUnlimit::LoadLoopEndInject();

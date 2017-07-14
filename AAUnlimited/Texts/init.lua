@@ -3,7 +3,7 @@
 ---------------------------
 assert(_BINDING)
 _HOOKS = _HOOKS or {}
-_HOOKS.config = _HOOKS.config or {}
+_HOOKS.Config = _HOOKS.Config or {}
 _CONFIG = _CONFIG or {}
 
 ---------------------------
@@ -39,7 +39,7 @@ function _HOOKS.logger(...)
 	return false, ...
 end
 
-function _HOOKS.config.logPrio(v)
+function _HOOKS.Config.logPrio(v)
 	_BINDING.setlogprio(v)
 	return v
 end
@@ -49,18 +49,20 @@ end
 ---------------------------
 local cfproxy = {}
 function cfproxy:__index(k)
-	return _CONFIG[k] or _BINDING.config(k)
+	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
-	if _HOOKS.config and _HOOKS.config[k] then
-		v = _HOOKS.config[k](v)
+	if _HOOKS.Config and _HOOKS.Config[k] then
+		v = _HOOKS.Config[k](v)
 	end
 	if v then
-		_BINDING.config(k,v)
-		_CONFIG[k] = v
+		-- if setting a binding fails, its not a C++ setting
+		if not pcall(function() _BINDING.Config(k,v) end) then
+			_CONFIG[k] = v
+		end
 	end
 end
-Config = setmetatable({}, cfroxyy)
+Config = setmetatable({}, cfproxy)
 
 -- load config
 function Config.load(name)
@@ -70,6 +72,8 @@ function Config.load(name)
 	setmetatable(_G, cfproxy)
 	ch(binding)
 	setmetatable(_G, nil)
+
+	-- _G.Config transparently binds Lua and C++ together
 	setmetatable(Config, cfproxy)
 end
 

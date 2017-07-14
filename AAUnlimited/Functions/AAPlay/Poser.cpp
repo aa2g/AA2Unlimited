@@ -364,8 +364,8 @@ namespace Poser {
 
 	void StartEvent(EventType type) {
 		if (type == loc_eventType) return;
-		if (!g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal && type == ClothingScene) return;
-		if (!g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal
+		if (!g_Config.bUseClothesPoser && type == ClothingScene) return;
+		if (!g_Config.bUseDialoguePoser
 			&& (type == NpcInteraction || type == HMode )) return;
 		if (loc_eventType && type != loc_eventType) {
 			EndEvent();
@@ -392,7 +392,7 @@ namespace Poser {
 
 	void SetTargetCharacter(ExtClass::CharacterStruct* charStruct) {
 		GenSliderInfo();
-		if (loc_eventType != ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal) {
+		if (loc_eventType != ClothingScene && g_Config.bUseDialoguePoser) {
 			if (loc_eventType != NpcInteraction)
 				StartEvent(HMode);
 			loc_loadCharacter = nullptr;
@@ -411,7 +411,7 @@ namespace Poser {
 			if (!loc_targetChar)
 				loc_targetChar = loc_loadCharacter;
 		}
-		else if (loc_eventType == ClothingScene && g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
+		else if (loc_eventType == ClothingScene && g_Config.bUseClothesPoser) {
 			PoserCharacter* character = new PoserCharacter(charStruct);
 			loc_targetCharacters.push_back(character);
 			loc_targetChar = character;
@@ -444,9 +444,9 @@ namespace Poser {
 		static bool ignoreNextSlider = false;
 
 		//set hotkeys		
-		auto hkTranslate = g_Config.GetKeyValue(Config::HKEY_POSER_TRANSLATE).bVal;	//W
-		auto hkRotate = g_Config.GetKeyValue(Config::HKEY_POSER_ROTATE).bVal;	//E
-		auto hkScale = g_Config.GetKeyValue(Config::HKEY_POSER_SCALE).bVal;	//R
+		auto hkTranslate = g_Config.sPoserHotKeys[0]; //W
+		auto hkRotate = g_Config.sPoserHotKeys[1]; //E
+		auto hkScale = g_Config.sPoserHotKeys[2]; //R
 
 		switch (msg) {
 		case WM_INITDIALOG: {
@@ -550,7 +550,7 @@ namespace Poser {
 			loc_syncing = false;
 
 			//register hotkeys
-			if (g_Config.GetKeyValue(Config::USE_POSER_HOTKEYS).bVal) RegisterHotKey(
+			if (g_Config.sPoserHotKeys[0]) RegisterHotKey(
 				hwndDlg,
 				hkTranslate,
 				MOD_NOREPEAT,

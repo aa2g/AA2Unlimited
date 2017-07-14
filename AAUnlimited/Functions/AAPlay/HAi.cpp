@@ -29,7 +29,7 @@ void Initialize(HInfo* info) {
 
 void PreTick(HInfo* hinfo)
 {
-	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+	if (!g_Config.bUseHAi) return;
 	if (!loc_isForcedH) return; //only do something if forced
 	if (!loc_initialized) return;
 	loc_forceAi.Tick(hinfo);
@@ -38,7 +38,7 @@ void PreTick(HInfo* hinfo)
 
 void PostTick(HInfo* hinfo, bool notEnd)
 {
-	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+	if (!g_Config.bUseHAi) return;
 	if (!loc_isForcedH) return; //only do something if forced
 	if (!loc_initialized) {
 		//initialize
@@ -54,11 +54,11 @@ void PostTick(HInfo* hinfo, bool notEnd)
 }
 
 void ConversationTickPost(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+	if (!g_Config.bUseHAi) return;
 
 	ConversationSubStruct* convData = param->GetSubStruct();
 	if (convData->m_conversationId == ConversationId::FORCE_H 	//npc wants to force
-		||  (g_Config.GetKeyValue(Config::HAI_ON_NO_PROMPT).bVal
+		||  (g_Config.bHAiOnNoPromptH
 			&& convData->m_conversationId == ConversationId::NO_PROMPT_H)) 
 	{
 		loc_isTalkedTo = true;
@@ -75,14 +75,14 @@ void ConversationTickPost(ExtClass::NpcPcInteractiveConversationStruct* param) {
 }
 
 void ConversationTickPost(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-	if (!g_Config.GetKeyValue(Config::USE_H_AI).bVal) return;
+	if (!g_Config.bUseHAi) return;
 	ConversationSubStruct* convData = param->GetSubStruct();
 	/*if (g_Config.GetKeyValue(Config::NO_PROMPT_IS_FORCE).bVal) {
 		if (convData->m_conversationId == ConversationId::NO_PROMPT_H) {
 			convData->m_conversationId = ConversationId::FORCE_H;
 		}
 	}*/
-	if (g_Config.GetKeyValue(Config::HAI_ON_NO_PROMPT).bVal 
+	if (g_Config.bHAiOnNoPromptH 
 	&& convData->m_conversationId == ConversationId::NO_PROMPT_H) {
 		loc_isForcedH = true;
 	}
