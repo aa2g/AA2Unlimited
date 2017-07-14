@@ -83,7 +83,7 @@ function Config.load(name)
 	setmetatable(_G, cfproxy)
 
 	local ret, msg = xpcall(ch, function()
-		Log.spam(debug.traceback(err))
+		Log.spam("tata" .. debug.traceback(err))
 	end)
 
 	setmetatable(_G, nil)
@@ -115,10 +115,7 @@ print = function(...)
 		res[i] = tostring(v)
 	end
 	local msg = table.concat(res, " ")
-	local i = debug.getinfo(2, "nSl")
-	Log.spam(
-		(i.name or "??") .. "() line "..(i.currentline or "?")..": ".. msg
-	)
+	Log.spam(msg)
 end
 
 Config.load("config")
@@ -143,13 +140,13 @@ function load_modules()
 		else
 			local ok, msg = xpcall(require, debug.traceback, mod[1])
 			if not ok then
-				Log.err(msg)
+				Log.err("nunu"..msg)
 			else
 				Log.spam("Loading module "..mod[1])
 				if type(msg) == "function" then
 					ok, msg = xpcall(msg, debug.traceback, table.unpack(mod))
 					if not ok then
-						Log.err(msg)
+						Log.err("fufu"..msg)
 					end
 				end
 			end

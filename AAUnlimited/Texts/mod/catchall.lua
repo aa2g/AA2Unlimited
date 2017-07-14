@@ -6,15 +6,11 @@ _EVENTS.Seats.CardDestroy = function(n)
 	print(n)
 end
 
-_EVENTS.Seats.CardDestroy = function(n)
-	print(n)
-end
-
 _EVENTS.H.PreTick = function(n)
 	print(n)
 end
 
-_EVENTS.H.PreTick = function(n)
+_EVENTS.H.FocusCameraEvent = function(n)
 	print(n)
 end
 
@@ -24,10 +20,12 @@ end
 
 _EVENTS.NpcActions.ClothesChangedEvent = function(a,b)
 	print(a,b)
+	return b
 end
 
 _EVENTS.NpcActions.NpcAnswerEvent = function(a,b,c)
 	print(a,b,c)
+	return c
 end
 
 _EVENTS.NpcActions.NpcMovingActionEvent = function(u,p)
@@ -40,6 +38,7 @@ end
 
 _EVENTS.PcActions.ClothesPickEvent = function(p)
 	print(p)
+	return p
 end
 
 _EVENTS.Convo.StartEvent = function()

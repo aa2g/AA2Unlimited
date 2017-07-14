@@ -314,5 +314,14 @@
     <None Include="Texts\main.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\catchall.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\fixlocale.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\memory.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -22,10 +22,10 @@ bEnableFacecam = true
 bEnableHPosButtonReorder = true		
 
 --enables poser in cloth select screen
-bUseClothesPoser = true			
+bUseClothesPoser = false
 
 --enables poser in dialogue and sex scenes
-bUseDialoguePoser = true			
+bUseDialoguePoser = false
 
 --Offsets for the POV focus points
 fPOVOffsetX = 0.0

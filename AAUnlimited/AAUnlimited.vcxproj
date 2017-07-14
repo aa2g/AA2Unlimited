@@ -253,6 +253,9 @@
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
     <None Include="Texts\main.lua" />
+    <None Include="Texts\mod\catchall.lua" />
+    <None Include="Texts\mod\fixlocale.lua" />
+    <None Include="Texts\mod\memory.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
