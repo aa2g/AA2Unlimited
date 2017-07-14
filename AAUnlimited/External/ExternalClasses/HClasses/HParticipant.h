@@ -40,6 +40,27 @@ public:
 public:
 	HParticipant() = delete;
 	~HParticipant() = delete;
+#define LUA_CLASS HParticipant
+	static inline void bindLua() {
+		LUA_EXTCLASS(HParticipant,
+			LUA_FIELD(m_shoesOffState),
+			LUA_FIELD(m_bClothesSlipped),
+			LUA_FIELD(m_clothesState),
+			LUA_FIELD(m_nCremeOn3),
+			LUA_FIELD(m_nCremeOnBack),
+			LUA_FIELD(m_nCremeOn2),
+			LUA_FIELD(m_nCremeOn1),
+			LUA_FIELD(m_nCremeOnFront),
+			LUA_FIELD(m_nClimedOutside),
+
+			LUA_FIELD(m_nPosChanges),
+			LUA_FIELD(m_nClimTogether),
+			LUA_FIELD(m_nClim),
+			LUA_FIELD(m_nClimedInRear),
+			LUA_FIELD(m_nClimedInFront)
+		);
+	}
+#undef LUA_CLASS
 };
 
 static_assert(sizeof(HParticipant) == 0xA3,"HParticipant struct must have size of A3");

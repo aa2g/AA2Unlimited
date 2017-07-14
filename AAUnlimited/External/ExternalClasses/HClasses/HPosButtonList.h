@@ -22,6 +22,23 @@ public:
 	HGUIButton* GetRandomActiveButton();
 	HGUIButton* GetRandomButton();
 
+	inline HGUIButton *GetButton(int idx) {
+		if (idx < 0)
+			return NULL;
+		if (m_arrButtonList + idx > m_pLastButton)
+			return NULL;
+		return m_arrButtonList[idx];
+	}
+
+#define LUA_CLASS HPosButtonList
+	static inline void bindLua() {
+		LUA_EXTCLASS(HPosButtonList,
+			LUA_FIELD(GetButtonCount),
+			LUA_FIELD(GetButton)
+		);
+	}
+#undef LUA_CLASS
+
 	static void InitializeHooks();
 };
 static_assert(sizeof(HPosButtonList) == 0x10,"HPosButtonList must be 0x10 bytes wide");

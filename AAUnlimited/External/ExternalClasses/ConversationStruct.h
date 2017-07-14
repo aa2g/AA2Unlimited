@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -61,6 +62,20 @@ public:
 	inline DWORD GetConversationKind() { return *(DWORD*)((BYTE*)(this) + 0x839C); }
 	ConversationSubStruct() = delete;
 	~ConversationSubStruct() = delete;
+	static inline void bindLua() {
+#define LUA_CLASS ConversationSubStruct
+		LUA_EXTCLASS(ConversationSubStruct,
+			LUA_FIELD(m_playerAnswer),
+			LUA_FIELD(m_conversationAnswerId),
+			LUA_FIELD(m_conversationId),
+			LUA_FIELD(m_conversationState),
+			LUA_FIELD(m_npcTalkState),
+			LUA_FIELD(m_response),
+			LUA_FIELD(m_bCurrentlyAnswering),
+			LUA_FIELD(m_bStartH)
+		);
+	}
+#undef LUA_CLASS
 };
 
 static_assert(sizeof(ConversationSubStruct) == 0x50, "Invalid size");
@@ -98,7 +113,14 @@ public:
 public:
 	NpcPcInteractiveConversationStruct() = delete;
 	~NpcPcInteractiveConversationStruct() = delete;
-
+#define LUA_CLASS NpcPcInteractiveConversationStruct
+	static inline void bindLua() {
+		LUA_EXTCLASS(NpcPcInteractiveConversationStruct,
+			LUA_FIELD(m_askWaitTime),
+			LUA_FIELD(m_answerWaitTime)
+		);
+	}
+#undef LUA_CLASS
 };
 
 class NpcPcNonInteractiveConversationStruct : public BaseConversationStruct {
@@ -203,6 +225,17 @@ class PcConversationStruct {
 
 	PcConversationStruct() = delete;
 	~PcConversationStruct() = delete;
+
+
+	static inline void bindLua() {
+#define LUA_CLASS PcConversationStruct
+		LUA_EXTCLASS(PcConversationStruct,
+			LUA_FIELD(m_loopMax),
+			LUA_FIELD(m_loopCounter),
+			LUA_FIELD(m_currentConversation)
+		);
+#undef LUA_CLASS
+	};
 };
 
 

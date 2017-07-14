@@ -11,6 +11,7 @@
 #include "CharacterActivity.h"
 #include "HStatistics.h"
 #include "XXFile.h"
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -79,6 +80,20 @@ public:
 public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
+
+#define LUA_CLASS CharacterStruct
+	static inline void bindLua() {
+		LUA_EXTCLASS(CharacterStruct,
+			LUA_FIELD(m_charData),
+			LUA_FIELD(m_seat),
+			LUA_FIELD(m_bClothesOn),
+			LUA_FIELD(m_currClothSlot),
+			LUA_FIELD(m_currClothes),
+			LUA_FIELD(m_hStats),
+			LUA_FIELD(GetActivity)
+		);
+	}
+#undef LUA_CLASS
 
 	inline IllusionArray<CharacterRelation>* GetRelations() {
 		BYTE* ptr = (BYTE*)m_moreData;

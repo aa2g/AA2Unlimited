@@ -236,6 +236,18 @@ public:
 		});
 	}
 
+	void clear() {
+		_evaluate_store([this]() {
+			lua_pushnil(_state);
+		});
+	}
+/*	void operator=(std::nullptr_t b) const {
+		_evaluate_store([this, b]() {
+			detail::_push(_state, b);
+		});
+	}*/
+
+
     void operator=(bool b) const {
         _evaluate_store([this, b]() {
             detail::_push(_state, b);

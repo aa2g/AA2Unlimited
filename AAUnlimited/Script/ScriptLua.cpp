@@ -6,6 +6,8 @@
 #include "Files/Logger.h"
 #include "ScriptLua.h"
 #include "General/ModuleInfo.h"
+#include "External/ExternalClasses/HClasses/HInfo.h"
+#include "External/ExternalClasses/Frame.h"
 
 Lua g_Lua;
 
@@ -15,4 +17,12 @@ Lua::Lua(bool libs) : sel::State(libs) {
 	});
 	Lua &l = *this;
 	l(LUA_BINDING_TABLE " = {}");
+	if (!libs) return;
+
+	g_Logger.bindLua();
+	g_Config.bindLua();
+
+	using namespace ExtClass;
+	HInfo::bindLua();
+	Frame::bindLua();
 }

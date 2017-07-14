@@ -83,3 +83,4 @@ logPrio = 0
 --2 = enable (always patch)
 FixLocale = 1
 
+sPoserHotKeys = "WER"

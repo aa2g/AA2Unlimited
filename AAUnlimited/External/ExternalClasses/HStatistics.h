@@ -36,6 +36,21 @@ public:
 	DWORD m_cumInAnal[25];
 	DWORD m_cumSwallowed[25];
 
+#define LUA_CLASS HStatistics
+	static inline void bindLua() {
+		LUA_EXTCLASS(HStatistics,
+			LUA_FIELD(m_victoryCount),
+			LUA_FIELD(m_classesSkipped),
+			LUA_FIELD(m_winningOverSomeoneCount),
+			LUA_FIELD(m_partnerCount),
+			LUA_FIELD(m_rejectCount),
+			LUA_FIELD(m_academicGrade),
+			LUA_FIELD(m_sportGrade),
+			LUA_FIELD(m_clubGrade)
+		);
+		// TBD: arrays
+	}
+#undef LUA_CLASS
 
 	HStatistics() = delete;
 	~HStatistics() = delete;

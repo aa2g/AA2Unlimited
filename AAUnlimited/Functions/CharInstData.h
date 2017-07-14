@@ -21,9 +21,21 @@ public:
 		ExtClass::CharacterActivity* target1;
 		ExtClass::CharacterActivity* target2;
 		DWORD unknown2; //always 1, though initialized to 2
+		static inline void bindLua() {
+#define LUA_CLASS ActionParamStruct
+			LUA_EXTCLASS(ActionParamStruct,
+				LUA_FIELD(conversationId),
+				LUA_FIELD(movementType),
+				LUA_FIELD(roomTarget),
+				LUA_FIELD(target1),
+				LUA_FIELD(target2)
+			);
+		}
+#undef LUA_CLASS
 	};
 
 public:
+
 	CharInstData();
 	~CharInstData();
 
@@ -38,5 +50,7 @@ public:
 
 	void Reset();
 	inline bool IsValid() { return m_char != NULL; }
+
+
 };
 

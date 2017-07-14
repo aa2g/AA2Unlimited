@@ -22,6 +22,7 @@ void InitOnLoad() {
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 	int idxCharacter = 0;
+	auto luaseats = g_Lua[LUA_BINDING_TABLE]["Seats"];
 	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
 
@@ -46,6 +47,10 @@ void InitOnLoad() {
 		CardInitializeData data;
 		data.card = seat;
 		ThrowEvent(&data);
+
+		// ditto for lua
+		luaseats[seat] = &g_characters[seat];
+		g_Lua[LUA_BINDING_TABLE]["Seats"]["CardInitialize"](seat, false);
 	}
 }
 
@@ -80,6 +85,10 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardInitializeData data;
 	data.card = seat;
 	ThrowEvent(&data);
+
+	g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
+	g_Lua[LUA_BINDING_TABLE]["Seats"]["CardInitialize"](seat, true);
+
 	//throw added to class event
 	CardAddedData cdata;
 	cdata.card = seat;
@@ -91,6 +100,8 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
+	g_Lua[LUA_BINDING_TABLE]["Seats"]["CardDestroy"](seat, true);
+	g_Lua[LUA_BINDING_TABLE]["Seats"][seat].clear();
 	//destroy
 	g_characters[seat].Reset();
 }
@@ -120,6 +131,7 @@ void ApplyRelationshipPoints(ExtClass::CharacterStruct* characterFrom,ExtClass::
 	AA2Play v12 FP v1.4.0a.exe+142938 - E8 132F0000           - call "AA2Play v12 FP v1.4.0a.exe"+145850 { ->AA2Play v12 FP v1.4.0a.exe+145850 }
 	AA2Play v12 FP v1.4.0a.exe+14293D - C6 43 2C 00           - mov byte ptr [ebx+2C],00 { 0 }
 	*/
+
 	void* unknownStruct = (void*)characterFrom->m_moreData;
 	
 	void  (__stdcall *firstFunc)(void* structAbove,ExtClass::CharacterRelation* relation);

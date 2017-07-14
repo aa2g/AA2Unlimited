@@ -275,6 +275,7 @@ private:
 
 	std::vector<SavedFile> m_savedFiles;
 
+
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);

@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 #include "IllusionArray.h"
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -32,7 +33,27 @@ public:
 public:
 	CharacterRelation() = delete;
 	~CharacterRelation() = delete;
-
+	static inline void bindLua() {
+#define LUA_CLASS CharacterRelation
+		LUA_EXTCLASS(CharacterRelation,
+			LUA_FIELD(m_poin),
+			LUA_FIELD(m_hate),
+			LUA_FIELD(m_dislike),
+			LUA_FIELD(m_like),
+			LUA_FIELD(m_love),
+			LUA_FIELD(m_hateCount),
+			LUA_FIELD(m_dislikeCount),
+			LUA_FIELD(m_likeCount),
+			LUA_FIELD(m_loveCount),
+			LUA_FIELD(m_hatePoints),
+			LUA_FIELD(m_dislikePoints),
+			LUA_FIELD(m_likePoints),
+			LUA_FIELD(m_lovePoints),
+			LUA_FIELD(m_targetSeat)
+		);
+		// TBD: arrays for backlog
+	}
+#undef LUA_CLASS
 };
 
 static_assert(sizeof(CharacterRelation) == 0x58,"Character Relation should be 0x58 bytes in size");

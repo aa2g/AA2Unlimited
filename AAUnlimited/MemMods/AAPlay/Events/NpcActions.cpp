@@ -6,14 +6,21 @@
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
 #include "Functions\AAPlay\Globals.h"
+#include "Script/ScriptLua.h"
 
 namespace PlayInjections {
 namespace NpcActions {
 
+sel::Selector lua;
+
+void bindLua() {
+	lua = g_Lua[LUA_HOOKS_TABLE]["NPC"];
+}
 
 using namespace ExtClass;
 
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
+	lua["ClothesChangedEvent"](npc, newClothes);
 	return newClothes;
 }
 
@@ -66,6 +73,11 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	ThrowEvent(&data);
 	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
 	answerChar->m_lastConversationAnswerPercent = data.changedChance;
+
+	int newresp = lua["NpcAnswerEvent"](answerChar, askingChar, originalReturn);
+	if (newresp > 0)
+		return newresp;
+
 	return data.changedResponse;
 }
 
@@ -137,6 +149,8 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 		}
 	}
 	if (user == NULL) return;
+
+	lua["NpcMovingActionEvent"](user, params);
 
 	using namespace Shared::Triggers;
 
@@ -228,6 +242,9 @@ bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::Action
 		}
 	}
 	if (user == NULL) return success;
+
+	if (bool(lua["NpcMovingActionPlanEvent"](params)))
+		return true;
 
 	//apply a forced action if queued
 	auto* inst = AAPlay::GetInstFromStruct(user);

@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <d3d9.h>
+#include "Script/ScriptLua.h"
 
 #include "Bone.h"
 
@@ -54,6 +55,14 @@ public:
 	BYTE m_unknown4[0x9]; //there are several flags here. dont know what they do. some crash if changed.
 	BYTE m_renderFlag; //0: show, 2: dont show?
 	BYTE m_unknown5[0x40EA];
+
+	static inline void bindLua() {
+#define LUA_CLASS Frame
+		LUA_EXTCLASS(Frame,
+			LUA_FIELD(m_parent)
+		);
+#undef LUA_CLASS
+	};
 };
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");

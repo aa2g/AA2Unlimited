@@ -164,12 +164,12 @@ bool Initialize() {
 	}
 
 	auto b = g_Lua[LUA_BINDING_TABLE];
-	b["gamebase"] = unsigned(GameBase);
-	b["play"] = IsAAPlay;
-	b["edit"] = IsAAEdit;
-	b["editpath"] = utf8.to_bytes(AAEditPath);
-	b["playpath"] = utf8.to_bytes(AAPlayPath);
-	b["exename"] = utf8.to_bytes(GameExeName);
+	b["GameBase"] = unsigned(GameBase);
+	b["IsAAPlay"] = IsAAPlay;
+	b["IsAAEdit"] = IsAAEdit;
+	b["AAEditPath"] = utf8.to_bytes(AAEditPath);
+	b["AAPlayPath"] = utf8.to_bytes(AAPlayPath);
+	b["GameExeName"] = utf8.to_bytes(GameExeName);
 
 	return true;
 }

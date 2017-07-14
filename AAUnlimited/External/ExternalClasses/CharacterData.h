@@ -2,6 +2,7 @@
 #include <Windows.h>
 
 #include "HClasses\HPosData.h"
+#include <Script/ScriptLua.h>
 
 namespace ExtClass {
 
@@ -235,6 +236,19 @@ namespace ExtClass {
 		char m_item3[260];
 		Clothes m_clothes[4];
 	public:
+#define LUA_CLASS CharacterData
+		static inline void bindLua() {
+			LUA_EXTCLASS(CharacterData,
+				LUA_FIELD(m_voicePitch),
+				LUA_FIELD(m_faceSlot),
+				LUA_FIELD(m_club),
+				LUA_FIELD(m_bPersonality),
+				LUA_FIELD(m_gender),
+				LUA_FIELD(GetPreferenceFlags)
+			);
+			// TBD: a lot
+		}
+#undef LUA_CLASS
 
 		inline DWORD GetPreferenceFlags() {
 			DWORD retVal = 0;
