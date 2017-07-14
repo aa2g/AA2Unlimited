@@ -11,11 +11,9 @@ namespace PlayInjections {
 
 
 BYTE __stdcall ClothesPickEvent(BYTE newClothes) {
-	bool changed;
-	BYTE nc;
-	std::tie(changed, nc) = g_Lua[LUA_EVENTS_TABLE]["PcActions"]["ClothesPickEvent"](newClothes);
-	if (changed) newClothes = nc;
-	return newClothes;
+	auto f = g_Lua[LUA_EVENTS_TABLE]["PcActions"]["ClothesPickEvent"];
+	if (f.exists())
+		return f(newClothes);
 }
 
 

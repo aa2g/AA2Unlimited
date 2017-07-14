@@ -146,9 +146,11 @@ function load_modules()
 				Log.err(msg)
 			else
 				Log.spam("Loading module "..mod[1])
-				ok, msg = xpcall(msg, debug.traceback, table.unpack(mod))
-				if not ok then
-					Log.err(msg)
+				if type(msg) == "function" then
+					ok, msg = xpcall(msg, debug.traceback, table.unpack(mod))
+					if not ok then
+						Log.err(msg)
+					end
 				end
 			end
 		end

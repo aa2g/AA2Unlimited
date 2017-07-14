@@ -14,10 +14,9 @@ namespace NpcActions {
 using namespace ExtClass;
 
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
-	bool changed;
-	BYTE nc;
-	std::tie(changed, nc) = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["ClothesChangedEvent"](npc, newClothes);
-	if (changed) newClothes = nc;
+	auto f = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["ClothesChangedEvent"];
+	if (f.exists())
+		return f(npc, newClothes);
 	return newClothes;
 }
 
@@ -71,10 +70,9 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
 	answerChar->m_lastConversationAnswerPercent = data.changedChance;
 
-	int newresp; bool changed;
-	std::tie(changed, newresp) = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["NpcAnswerEvent"](answerChar, askingChar, originalReturn);
-	if (changed)
-		return newresp;
+	auto f = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["NpcAnswerEvent"];
+	if (f.exists())
+		return f(answerChar, askingChar, originalReturn);
 
 	return data.changedResponse;
 }
