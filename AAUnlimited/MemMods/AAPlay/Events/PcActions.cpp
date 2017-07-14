@@ -1,13 +1,20 @@
+#include <tuple>
+
 #include "PcActions.h"
 
 #include "MemMods/Hook.h"
 #include "General/ModuleInfo.h"
+#include "Script/ScriptLua.h"
 
 namespace PlayInjections {
-namespace PcActions {
+	namespace PcActions {
 
 
 BYTE __stdcall ClothesPickEvent(BYTE newClothes) {
+	bool changed;
+	BYTE nc;
+	std::tie(changed, nc) = g_Lua[LUA_EVENTS_TABLE]["PcActions"]["ClothesPickEvent"](newClothes);
+	if (changed) newClothes = nc;
 	return newClothes;
 }
 

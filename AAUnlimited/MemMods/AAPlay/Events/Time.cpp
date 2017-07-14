@@ -22,7 +22,7 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 
 	data.oldPeriod = oldPeriod;
 	data.newPeriod = ExtVars::AAPlay::GameTimeData()->currentPeriod;
-	g_Lua[LUA_BINDING_TABLE]["Time"]("PeriodEnds", oldPeriod, data.newPeriod);
+	g_Lua[LUA_EVENTS_TABLE]["Time"]("PeriodEnds", oldPeriod, data.newPeriod);
 	Shared::GameState::setIsOverriding(false);
 	Shared::Triggers::ThrowEvent(&data);
 }

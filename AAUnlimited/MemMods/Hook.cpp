@@ -245,7 +245,6 @@ void InitializeHooks() {
 		using namespace PlayInjections;
 		HPlayInjections::TickInjection();
 		HPlayInjections::FocusCameraInjection();
-		HPlayInjections::bindLua();
 
 		PcConversation::StartInjection();
 		PcConversation::EndInjection();

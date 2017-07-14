@@ -163,14 +163,6 @@ bool Initialize() {
 		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
 	}
 
-	auto b = g_Lua[LUA_BINDING_TABLE];
-	b["GameBase"] = unsigned(GameBase);
-	b["IsAAPlay"] = IsAAPlay;
-	b["IsAAEdit"] = IsAAEdit;
-	b["AAEditPath"] = utf8.to_bytes(AAEditPath);
-	b["AAPlayPath"] = utf8.to_bytes(AAPlayPath);
-	b["GameExeName"] = utf8.to_bytes(GameExeName);
-
 	return true;
 }
 

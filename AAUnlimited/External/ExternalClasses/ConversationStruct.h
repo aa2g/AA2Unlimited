@@ -226,7 +226,7 @@ class PcConversationStruct {
 	PcConversationStruct() = delete;
 	~PcConversationStruct() = delete;
 
-
+public:
 	static inline void bindLua() {
 #define LUA_CLASS PcConversationStruct
 		LUA_EXTCLASS(PcConversationStruct,

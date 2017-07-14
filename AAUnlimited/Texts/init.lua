@@ -2,8 +2,8 @@
 -- C++ interfacing globals
 ---------------------------
 assert(_BINDING)
-_HOOKS = _HOOKS or {}
-_HOOKS.Config = _HOOKS.Config or {}
+_EVENTS = _EVENTS or {}
+_EVENTS.Config = _EVENTS.Config or {}
 _CONFIG = _CONFIG or {}
 
 ---------------------------
@@ -35,11 +35,12 @@ for prio,name in ipairs { "spam", "info", "warn", "err", "crit" } do
 end
 
 -- empty logger hook
-function _HOOKS.logger(...)
+function _EVENTS.logger(...)
 	return false, ...
 end
 
-function _HOOKS.Config.logPrio(v)
+-- fictional config field via config event
+function _EVENTS.Config.logPrio(v)
 	_BINDING.setlogprio(v)
 	return v
 end
@@ -52,8 +53,8 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
-	if _HOOKS.Config and _HOOKS.Config[k] then
-		v = _HOOKS.Config[k](v)
+	if _EVENTS.Config and _EVENTS.Config[k] then
+		v = _EVENTS.Config[k](v)
 	end
 	if v then
 		-- if setting a binding fails, its not a C++ setting

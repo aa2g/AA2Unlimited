@@ -10,6 +10,7 @@ class Lua : public sel::State {
 public:;
 	inline Lua() : sel::State() {};
 	Lua(bool libs);
+	void bind();
 };
 
 #define LUA_EXTCLASS(n,...) g_Lua.ExtClass<LUA_CLASS>(#n, __VA_ARGS__)

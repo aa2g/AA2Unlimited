@@ -13,25 +13,19 @@ namespace PlayInjections {
  */
 namespace PcConversation {
 
-sel::Selector lua;
-
-void bindLua() {
-	lua = g_Lua[LUA_HOOKS_TABLE]["Convo"];
-}
-
 	Shared::Triggers::PCConversationStateUpdatedData data;
 /********************
  * Start / End Event
  ********************/
 
 void __stdcall StartEvent() {
-	lua["StartEvent"]();
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["StartEvent"]();
 	Shared::GameState::setIsPcConversation(true);
 	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall EndEvent() {
-	lua["EndEvent"]();
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["EndEvent"]();
 	Shared::GameState::setIsPcConversation(false);
 	data.state = -1;
 	Shared::Triggers::ThrowEvent(&data);
@@ -72,11 +66,11 @@ void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
  * NPC -> PC interactive conversation tick event
  *******************/
 void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	lua["NpcPcInteractivePreTick"](param, param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePreTick"](param, param->GetSubStruct());
 }
 
 void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	lua["NpcPcInteractivePostTick"](param, param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePostTick"](param, param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
@@ -85,11 +79,11 @@ void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationSt
 *******************/
 
 void __stdcall NpcPcNonInteractivePreTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-	lua["NpcPcNonInteractivePreTick"](param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePreTick"](param->GetSubStruct());
 }
 
 void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-	lua["NpcPcNonInteractivePostTick"](param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePostTick"](param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
@@ -98,7 +92,7 @@ void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversa
  * Parameter type is whatever it currently is
  ********************/
 void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
-	lua["NpcAnswer"](param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcAnswer"](param->GetSubStruct());
 }
 
 /*******************
@@ -106,7 +100,7 @@ void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
  * Parameter type is whatever it currently is
  *******************/
 void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
-	lua["PcAnswer"](param->GetSubStruct());
+	g_Lua[LUA_EVENTS_TABLE]["Convo"]["PcAnswer"](param->GetSubStruct());
 	HAi::ConversationPcResponse(param);
 }
 

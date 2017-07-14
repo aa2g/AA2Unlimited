@@ -36,6 +36,9 @@ BOOL WINAPI DllMain(
 			}
 		}
 		InitializeHooks();
+
+		// This must be done post-hook initialization
+		g_Lua.bind();
 		return TRUE;
 	}
 }

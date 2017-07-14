@@ -50,7 +50,7 @@ void InitOnLoad() {
 
 		// ditto for lua
 		luaseats[seat] = &g_characters[seat];
-		g_Lua[LUA_BINDING_TABLE]["Seats"]["CardInitialize"](seat, false);
+		g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, false);
 	}
 }
 
@@ -87,7 +87,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	ThrowEvent(&data);
 
 	g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
-	g_Lua[LUA_BINDING_TABLE]["Seats"]["CardInitialize"](seat, true);
+	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, true);
 
 	//throw added to class event
 	CardAddedData cdata;
@@ -100,7 +100,7 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
-	g_Lua[LUA_BINDING_TABLE]["Seats"]["CardDestroy"](seat, true);
+	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardDestroy"](seat, true);
 	g_Lua[LUA_BINDING_TABLE]["Seats"][seat].clear();
 	//destroy
 	g_characters[seat].Reset();
