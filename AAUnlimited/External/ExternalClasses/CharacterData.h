@@ -25,7 +25,7 @@ namespace ExtClass {
 #pragma pack(push, 1)
 
 	/*
-	*Declares all the complex structs used by CharacterData and CharacterSetData
+	*Declares all the complex structs used by CharacterData and CardStyleData
 	*/
 	class CharacterDataTypes
 	{
@@ -167,7 +167,7 @@ namespace ExtClass {
 		//CharacterDataTypes() = delete;
 		//~CharacterDataTypes() = delete;
 	};
-	class CharacterSetData;
+	class CardStyleData;
 	class CharacterData;
 
 
@@ -249,10 +249,10 @@ namespace ExtClass {
 		CharacterData() = delete;
 		~CharacterData() = delete;
 
-		void CopyCharacterSetData(CharacterSetData* data);
+		void CopyCharacterSetData(CardStyleData* data);
 	};
 
-	class CharacterSetData : public CharacterDataTypes
+	class CardStyleData : public CharacterDataTypes
 	{
 	public:
 		BYTE m_gender; //0=male, 1=female. no tumbler, thats all.
@@ -268,14 +268,14 @@ namespace ExtClass {
 		BYTE m_unknown12[0x3]; //more padding i guess
 	public:
 
-		//CharacterSetData() = delete;
-		//~CharacterSetData() = delete;
+		//CardStyleData() = delete;
+		//~CardStyleData() = delete;
 
 		bool empty() { return false; };
 		void CopyCharacterData(CharacterData* data);
 	};
 
-	class CharacterSetDataUnpadded : public CharacterDataTypes
+	class CardStyleDataUnpadded : public CharacterDataTypes
 	{
 	public:
 		BYTE m_gender; //0=male, 1=female. no tumbler, thats all.
@@ -290,13 +290,13 @@ namespace ExtClass {
 		Clothes m_clothes[4];
 	public:
 
-		//CharacterSetData() = delete;
-		//~CharacterSetData() = delete;
+		//CardStyleData() = delete;
+		//~CardStyleData() = delete;
 
 		bool empty() { return false; };
 
-		CharacterSetData Pad() {
-			CharacterSetData padded;
+		CardStyleData Pad() {
+			CardStyleData padded;
 			padded.m_gender = this->m_gender;
 			padded.m_figure = this->m_figure;
 			padded.m_chest = this->m_chest;

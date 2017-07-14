@@ -467,8 +467,32 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.orientation = orientation;
 		}
 
+		//int seat, bool experience
+		void Thread::SetCardSexExperience(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int experience = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.h_experience = experience;
+		}
+
+		//int seat, bool experience
+		void Thread::SetCardAnalSexExperience(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int experience = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.a_h_experience = experience;
+		}
+
 		//int seat, int newset
-		void Thread::SwitchAAUDataSet(std::vector<Value>& params) {
+		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int newset = params[1].iVal;
 			if (!AAPlay::g_characters[seat].m_char) {
@@ -476,7 +500,7 @@ namespace Shared {
 				return;
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
-			aau.SwitchActiveAAUDataSet(newset, AAPlay::g_characters[seat].m_char->m_charData);
+			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
 		}
 
 		//int card, string keyname, int value
@@ -577,9 +601,7 @@ namespace Shared {
 			
 
 			//setup PC for the H scene
-			std::vector<Value> pc;
-			pc.push_back(params[0]);
-			SetPC(pc);
+			Shared::GameState::setPlayerCharacter(seatPC);
 			//setup partner for H scene
 			static const DWORD partnerOffsets[]{ 0x376164, 0x28, 0x28 };
 			static const DWORD chrOffset[]{ 0x3761CC, 0x28, 0x2C, 0x20, instPartner->charOffset };
@@ -671,9 +693,9 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch AAU Data Set"), TEXT("%p ::DataSet = %p"), TEXT("TODO: add description"),
+				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch Style"), TEXT("%p ::Style = %p"), TEXT("Switches current character style."),
 				{ TYPE_INT, TYPE_INT },
-				&Thread::SwitchAAUDataSet
+				&Thread::SwitchCardStyle
 			},
 
 			{
@@ -788,7 +810,7 @@ namespace Shared {
 					&Thread::SetCardStorageFloat
 			},
 			{
-				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetStr( %p ) = %p "),
+				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetString( %p ) = %p "),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 					"When the key is allready in use, the function will silently fail."),
@@ -816,7 +838,7 @@ namespace Shared {
 				&Thread::RemoveCardStorageFloat
 			},
 			{
-				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p ::DropStr( %p ) "),
+				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p ::DropString( %p ) "),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a string, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageString
@@ -847,7 +869,7 @@ namespace Shared {
 				&Thread::SetCardPersonality
 			},
 			{
-				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p .VoicePitch = %p"),
+				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p ::Pitch = %p"),
 				TEXT("Set character's voice pitch."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardVoicePitch
@@ -948,8 +970,20 @@ namespace Shared {
 				{ TYPE_INT, TYPE_INT },
 				&Thread::StartHScene
 			},
+			{
+				52, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Vaginal"), TEXT("%p ::SexXP = %p"),
+				TEXT("Set vaginal experience for the character"),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCardSexExperience
+			},
+			{
+				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::SexXP = %p"),
+				TEXT("Set anal experience for the character"),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCardAnalSexExperience
+			},
 			//{
-			//	47, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
+			//	54, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
 			//	TEXT("Execute triggers with provided name."),
 			//	{ TYPE_STRING },
 			//	&Thread::FireTrigger

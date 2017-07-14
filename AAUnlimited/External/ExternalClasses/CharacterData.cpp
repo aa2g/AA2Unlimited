@@ -1,7 +1,7 @@
 #include "CharacterData.h"
 
 namespace ExtClass {
-	void CharacterSetData::CopyCharacterData(CharacterData * data)
+	void CardStyleData::CopyCharacterData(CharacterData * data)
 	{
 		this->m_gender = data->m_gender;
 		this->m_figure = data->m_figure;
@@ -15,7 +15,7 @@ namespace ExtClass {
 		for (int i = 0; i< 4; i++) this->m_clothes[i] = data->m_clothes[i];
 	}
 
-	void CharacterData::CopyCharacterSetData(CharacterSetData * data)
+	void CharacterData::CopyCharacterSetData(CardStyleData * data)
 	{
 		this->m_gender = data->m_gender;
 		this->m_figure = data->m_figure;

@@ -93,10 +93,10 @@ public:
 
 	bool SetTan(const TCHAR* name);
 
-	bool UpdateAAUDataSet(int set, ExtClass::CharacterData* charData);
-	bool CopyAAUDataSet(const TCHAR* name, ExtClass::CharacterData* charData);
-	bool RemoveAAUDataSet(int index);
-	void SwitchActiveAAUDataSet(int newSet, ExtClass::CharacterData* charData);
+	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
+	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
+	bool RemoveCardStyle(int index);
+	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
 
 	bool AddModule(const TCHAR* moduleName);
 	bool AddModule(const Shared::Triggers::Module& mod);
@@ -203,15 +203,15 @@ public:
 	std::vector<Shared::Triggers::Module>&	GetModules();
 	std::map<std::wstring, Shared::Triggers::Value>& GetCardStorage();
 
-	struct AAUDataSet;
-	std::vector<AAUDataSet> m_aauSets;
+	struct CardStyle;
+	std::vector<CardStyle> m_aauSets;
 private:
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 
 
 	//modifications can be saved in multiple sets.
-	struct AAUDataSet {
+	struct CardStyle {
 		wchar_t m_name[32];
 
 		//DATA
@@ -253,7 +253,7 @@ private:
 
 		std::vector<HairPart> m_hairs[4];
 
-		ExtClass::CharacterSetData m_charSetData;
+		ExtClass::CardStyleData m_cardStyleData;
 
 		std::vector<BoneRuleV2> m_boneRules;
 		std::map<std::wstring, std::map<std::wstring, std::vector<BoneMod>>> m_boneRuleMap;
@@ -263,10 +263,10 @@ private:
 		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
 		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
 
-		AAUDataSet();
+		CardStyle();
 	};
-	//std::vector<AAUDataSet> m_aauSets;
-	int m_currAAUSet;
+	//std::vector<CardStyle> m_aauSets;
+	int m_currCardStyle;
 
 	std::vector<Shared::Triggers::GlobalVariable> m_globalVars;
 	std::vector<Shared::Triggers::Trigger> m_triggers;
@@ -296,7 +296,7 @@ private:
 inline BYTE AAUCardData::GetTanSlot() const { return m_tanSlot; }
 
 inline int AAUCardData::GetCurrAAUSet() const {
-	return m_currAAUSet;
+	return m_currCardStyle;
 }
 inline std::vector<std::wstring> AAUCardData::GetAAUSetDataList() const {
 	std::vector<std::wstring> vec(m_aauSets.size());
@@ -306,62 +306,62 @@ inline std::vector<std::wstring> AAUCardData::GetAAUSetDataList() const {
 	return vec;
 }
 
-inline const std::vector<AAUCardData::MeshOverrideRule>& AAUCardData::GetMeshOverrideList() const { return m_aauSets[m_currAAUSet].m_meshOverrides; }
+inline const std::vector<AAUCardData::MeshOverrideRule>& AAUCardData::GetMeshOverrideList() const { return m_aauSets[m_currCardStyle].m_meshOverrides; }
 inline const TextureImage* AAUCardData::GetMeshOverrideTexture(const TCHAR* texture) const {
-	auto it = m_aauSets[m_currAAUSet].m_meshOverrideMap.find(texture);
-	return it == m_aauSets[m_currAAUSet].m_meshOverrideMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_meshOverrideMap.find(texture);
+	return it == m_aauSets[m_currCardStyle].m_meshOverrideMap.end() ? NULL : &it->second;
 }
-inline const std::vector<AAUCardData::ArchiveOverrideRule>& AAUCardData::GetArchiveOverrideList() const { return m_aauSets[m_currAAUSet].m_archiveOverrides; }
+inline const std::vector<AAUCardData::ArchiveOverrideRule>& AAUCardData::GetArchiveOverrideList() const { return m_aauSets[m_currCardStyle].m_archiveOverrides; }
 inline const OverrideFile* AAUCardData::GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
-	auto it = m_aauSets[m_currAAUSet].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
-	return it == m_aauSets[m_currAAUSet].m_archiveOverrideMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+	return it == m_aauSets[m_currCardStyle].m_archiveOverrideMap.end() ? NULL : &it->second;
 }
-inline const std::vector<AAUCardData::ArchiveRedirectRule>& AAUCardData::GetArchiveRedirectList() const { return m_aauSets[m_currAAUSet].m_archiveRedirects; }
+inline const std::vector<AAUCardData::ArchiveRedirectRule>& AAUCardData::GetArchiveRedirectList() const { return m_aauSets[m_currCardStyle].m_archiveRedirects; }
 inline const std::pair<std::wstring, std::wstring>* AAUCardData::GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
-	auto it = m_aauSets[m_currAAUSet].m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
-	return it == m_aauSets[m_currAAUSet].m_archiveRedirectMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+	return it == m_aauSets[m_currCardStyle].m_archiveRedirectMap.end() ? NULL : &it->second;
 }
 
-inline const std::vector<AAUCardData::ObjectOverrideRule>& AAUCardData::GetObjectOverrideList() const { return m_aauSets[m_currAAUSet].m_objectOverrides; }
+inline const std::vector<AAUCardData::ObjectOverrideRule>& AAUCardData::GetObjectOverrideList() const { return m_aauSets[m_currCardStyle].m_objectOverrides; }
 inline const XXObjectFile* AAUCardData::GetObjectOverrideFile(const char* objectName) const {
-	auto it = m_aauSets[m_currAAUSet].m_objectOverrideMap.find(objectName);
-	return it == m_aauSets[m_currAAUSet].m_objectOverrideMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_objectOverrideMap.find(objectName);
+	return it == m_aauSets[m_currCardStyle].m_objectOverrideMap.end() ? NULL : &it->second;
 }
 
-inline const std::wstring& AAUCardData::GetEyeTexture(int leftright) { return m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texName; }
-inline const std::vector<BYTE>& AAUCardData::GetEyeTextureBuffer(int leftright) { return m_aauSets[m_currAAUSet].m_eyeTextures[leftright].texFile; }
+inline const std::wstring& AAUCardData::GetEyeTexture(int leftright) { return m_aauSets[m_currCardStyle].m_eyeTextures[leftright].texName; }
+inline const std::vector<BYTE>& AAUCardData::GetEyeTextureBuffer(int leftright) { return m_aauSets[m_currCardStyle].m_eyeTextures[leftright].texFile; }
 
-inline const std::wstring AAUCardData::GetEyeHighlightTexture() { return m_aauSets[m_currAAUSet].m_eyeHighlightName; }
-inline const std::vector<BYTE>& AAUCardData::GetEyeHighlightTextureBuffer() { return m_aauSets[m_currAAUSet].m_eyeHighlightFile; }
+inline const std::wstring AAUCardData::GetEyeHighlightTexture() { return m_aauSets[m_currCardStyle].m_eyeHighlightName; }
+inline const std::vector<BYTE>& AAUCardData::GetEyeHighlightTextureBuffer() { return m_aauSets[m_currCardStyle].m_eyeHighlightFile; }
 
-inline const std::wstring& AAUCardData::GetHairHighlightName() { return m_aauSets[m_currAAUSet].m_hairHighlightName; }
-inline const TextureImage& AAUCardData::GetHairHighlightTex() { return m_aauSets[m_currAAUSet].m_hairHighlightImage; }
+inline const std::wstring& AAUCardData::GetHairHighlightName() { return m_aauSets[m_currCardStyle].m_hairHighlightName; }
+inline const TextureImage& AAUCardData::GetHairHighlightTex() { return m_aauSets[m_currCardStyle].m_hairHighlightImage; }
 
-inline const std::wstring& AAUCardData::GetTanName() { return m_aauSets[m_currAAUSet].m_tanName; }
+inline const std::wstring& AAUCardData::GetTanName() { return m_aauSets[m_currCardStyle].m_tanName; }
 inline const TextureImage& AAUCardData::GetTanTex(int i) {
-	if (i >= 0 && i < 5) return m_aauSets[m_currAAUSet].m_tanImages[i];
-	return m_aauSets[m_currAAUSet].m_tanImages[0];
+	if (i >= 0 && i < 5) return m_aauSets[m_currCardStyle].m_tanImages[i];
+	return m_aauSets[m_currCardStyle].m_tanImages[0];
 }
 
-inline const DWORD AAUCardData::GetOutlineColor() { return m_aauSets[m_currAAUSet].m_outlineColor; }
-inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { return m_aauSets[m_currAAUSet].m_outlineColor = color; }
-inline const bool AAUCardData::HasOutlineColor() { return m_aauSets[m_currAAUSet].m_bOutlineColor; }
-inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_aauSets[m_currAAUSet].m_bOutlineColor = has; }
+inline const DWORD AAUCardData::GetOutlineColor() { return m_aauSets[m_currCardStyle].m_outlineColor; }
+inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { return m_aauSets[m_currCardStyle].m_outlineColor = color; }
+inline const bool AAUCardData::HasOutlineColor() { return m_aauSets[m_currCardStyle].m_bOutlineColor; }
+inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_aauSets[m_currCardStyle].m_bOutlineColor = has; }
 
-inline const DWORD AAUCardData::GetTanColor() { return m_aauSets[m_currAAUSet].m_tanColor; }
-inline const DWORD AAUCardData::SetTanColor(COLORREF color) { return m_aauSets[m_currAAUSet].m_tanColor = color; }
-inline const bool AAUCardData::HasTanColor() { return m_aauSets[m_currAAUSet].m_bTanColor; }
-inline const DWORD AAUCardData::SetHasTanColor(bool has) { return m_aauSets[m_currAAUSet].m_bTanColor = has; }
+inline const DWORD AAUCardData::GetTanColor() { return m_aauSets[m_currCardStyle].m_tanColor; }
+inline const DWORD AAUCardData::SetTanColor(COLORREF color) { return m_aauSets[m_currCardStyle].m_tanColor = color; }
+inline const bool AAUCardData::HasTanColor() { return m_aauSets[m_currCardStyle].m_bTanColor; }
+inline const DWORD AAUCardData::SetHasTanColor(bool has) { return m_aauSets[m_currCardStyle].m_bTanColor = has; }
 
-inline const std::vector<AAUCardData::BoneRule> AAUCardData::GetBoneTransformationList() { return m_aauSets[m_currAAUSet].m_boneTransforms; }
+inline const std::vector<AAUCardData::BoneRule> AAUCardData::GetBoneTransformationList() { return m_aauSets[m_currCardStyle].m_boneTransforms; }
 inline const D3DMATRIX* AAUCardData::GetBoneTransformationRule(const TCHAR* boneName) {
-	auto it = m_aauSets[m_currAAUSet].m_boneTransformMap.find(boneName);
-	return it == m_aauSets[m_currAAUSet].m_boneTransformMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_boneTransformMap.find(boneName);
+	return it == m_aauSets[m_currCardStyle].m_boneTransformMap.end() ? NULL : &it->second;
 }
 
 inline bool AAUCardData::HasFilesSaved() { return m_savedFiles.size() > 0; }
 
-inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind) { return m_aauSets[m_currAAUSet].m_hairs[kind]; }
+inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind) { return m_aauSets[m_currCardStyle].m_hairs[kind]; }
 
 inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { return m_triggers; }
 
@@ -371,30 +371,30 @@ inline std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() { return
 
 inline std::map<std::wstring, Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
 
-inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_aauSets[m_currAAUSet].m_boneRules; }
+inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_aauSets[m_currCardStyle].m_boneRules; }
 inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {
-	auto it = m_aauSets[m_currAAUSet].m_boneRuleMap.find(xxFileName);
-	return it == m_aauSets[m_currAAUSet].m_boneRuleMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_boneRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currCardStyle].m_boneRuleMap.end() ? NULL : &it->second;
 }
 inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetFrameRule(const TCHAR* xxFileName) {
-	auto it = m_aauSets[m_currAAUSet].m_frameRuleMap.find(xxFileName);
-	return it == m_aauSets[m_currAAUSet].m_frameRuleMap.end() ? NULL : &it->second;
+	auto it = m_aauSets[m_currCardStyle].m_frameRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currCardStyle].m_frameRuleMap.end() ? NULL : &it->second;
 }
 
-inline const std::vector<AAUCardData::SliderRule> AAUCardData::GetSliderList() { return m_aauSets[m_currAAUSet].m_sliders; }
+inline const std::vector<AAUCardData::SliderRule> AAUCardData::GetSliderList() { return m_aauSets[m_currCardStyle].m_sliders; }
 inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderBoneRuleMap(int type) {
-	return m_aauSets[m_currAAUSet].m_boneSliderMap[type];
+	return m_aauSets[m_currCardStyle].m_boneSliderMap[type];
 }
 inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderFrameRuleMap(int type) {
-	return m_aauSets[m_currAAUSet].m_frameSliderMap[type];
+	return m_aauSets[m_currCardStyle].m_frameSliderMap[type];
 }
 inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
-	auto it = m_aauSets[m_currAAUSet].m_boneSliderMap[model].find(bone);
-	return (it != m_aauSets[m_currAAUSet].m_boneSliderMap[model].end()) ? &it->second : NULL;
+	auto it = m_aauSets[m_currCardStyle].m_boneSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currCardStyle].m_boneSliderMap[model].end()) ? &it->second : NULL;
 }
 inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderFrameRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
-	auto it = m_aauSets[m_currAAUSet].m_frameSliderMap[model].find(bone);
-	return (it != m_aauSets[m_currAAUSet].m_frameSliderMap[model].end()) ? &it->second : NULL;
+	auto it = m_aauSets[m_currCardStyle].m_frameSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currCardStyle].m_frameSliderMap[model].end()) ? &it->second : NULL;
 }
 
 /*

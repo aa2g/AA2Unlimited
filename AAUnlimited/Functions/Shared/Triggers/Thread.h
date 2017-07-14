@@ -56,7 +56,7 @@ namespace Shared {
 			void ConditionalJump(std::vector<Value>& params);
 			void EndExecution(std::vector<Value>& params);
 			void ConditionalEndExecution(std::vector<Value>& params);
-			void SwitchAAUDataSet(std::vector<Value>& params);
+			void SwitchCardStyle(std::vector<Value>& params);
 			void AddCardLovePoints(std::vector<Value>& params);
 			void AddCardLikePoints(std::vector<Value>& params);
 			void AddCardDislikePoints(std::vector<Value>& params);
@@ -80,6 +80,8 @@ namespace Shared {
 			void SetCardSecondName(std::vector<Value>& params);
 			void SetCardDescription(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
+			void SetCardSexExperience(std::vector<Value>& params);
+			void SetCardAnalSexExperience(std::vector<Value>& params);
 
 			void NpcMoveRoom(std::vector<Value>& params);
 			void NpcActionNoTarget(std::vector<Value>& params);
@@ -145,6 +147,16 @@ namespace Shared {
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
 			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
+			Value GetSexExperience(std::vector<Value>& params); //bool(int)
+			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
+			Value FindSeat(std::vector<Value>& params); //int(string)
+			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
+			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
+			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
+			Value GetCardRejectCount(std::vector<Value>& params); //int(int)
+			Value GetCardWinCount(std::vector<Value>& params); //int(int)
+			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
+			Value GetCardSkipCount(std::vector<Value>& params); //int(int)
 
 			//basic int stuff
 			Value GetRandomInt(std::vector<Value>& params); //int(int,int)
@@ -237,6 +249,9 @@ namespace Shared {
 			Value GetConversationState(std::vector<Value>& params);
 			Value GetConversationAnswer(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
+			Value GetConversationPcResponse(std::vector<Value>& params);
+			Value GetConversationAction(std::vector<Value>& params);
+			Value GetEventID(std::vector<Value>& params);
 
 
 

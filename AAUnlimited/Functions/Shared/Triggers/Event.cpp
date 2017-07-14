@@ -29,11 +29,11 @@ namespace Shared {
 				{}
 			},
 			{ HI_POLY_INIT, EVENTCAT_LOADS, TEXT("Hi Poly Model Initialized"), TEXT("Hi Poly Model Initialized"),
-				TEXT("After the Characters High Poly Model was loaded"),
+				TEXT("Right after the Characters High Poly Model started loading"),
 				{}
 			},
-			{ HI_POLY_END, EVENTCAT_LOADS, TEXT("Hi Poly Model Destroyed"), TEXT("Hi Poly Model Destroyed"),
-				TEXT("Before the Characters High Poly Model will be unloaded"),
+			{ HI_POLY_END, EVENTCAT_LOADS, TEXT("Hi Poly Model Loaded"), TEXT("Hi Poly Model Loaded"),
+				TEXT("Right after the Character High Poly Model finished loading"),
 				{}
 			},
 			{ CARD_ADDED, EVENTCAT_CARD, TEXT("Card Added to Class"), TEXT("Card Added to Class"),
