@@ -138,6 +138,8 @@ public:
 			if (lua_isnil(L, -1)) {
 				lua_pushstring(L, (std::string("get_") + lua_tostring(L, 2)).c_str());
 				lua_rawget(L, -3);
+				if (lua_isnil(L, -1))
+					return 1;
 				lua_pushvalue(L, 1);
 				lua_call(L, 1, 1);
 			}

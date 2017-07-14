@@ -286,6 +286,9 @@
       <Filter>Selene</Filter>
     </ClInclude>
     <ClInclude Include="defs.h" />
+    <ClInclude Include="Script\Selene\ExtClass.h">
+      <Filter>Selene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

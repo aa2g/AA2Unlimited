@@ -84,3 +84,7 @@ logPrio = 0
 FixLocale = 1
 
 sPoserHotKeys = "WER"
+
+mods = {
+	{ "fixlocale" },
+}

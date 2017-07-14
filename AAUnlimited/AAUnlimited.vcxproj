@@ -218,6 +218,7 @@
     <ClInclude Include="Script\Selene\Dtor.h" />
     <ClInclude Include="Script\Selene\ExceptionHandler.h" />
     <ClInclude Include="Script\Selene\ExceptionTypes.h" />
+    <ClInclude Include="Script\Selene\ExtClass.h" />
     <ClInclude Include="Script\Selene\Fun.h" />
     <ClInclude Include="Script\Selene\function.h" />
     <ClInclude Include="Script\Selene\LuaName.h" />

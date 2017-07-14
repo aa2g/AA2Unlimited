@@ -52,6 +52,10 @@ template <>
 struct is_primitive<std::string> {
     static constexpr bool value = true;
 };
+template <>
+struct is_primitive<const char *> {
+	static constexpr bool value = true;
+};
 
 template<typename T>
 using decay_primitive =
@@ -126,6 +130,10 @@ inline std::string _get(_id<std::string>, lua_State *l, const int index) {
     size_t size;
     const char *buff = lua_tolstring(l, index, &size);
     return std::string{buff, size};
+}
+
+inline const char *_get(_id<const char *>, lua_State *l, const int index) {
+    return lua_tostring(l, index);
 }
 
 using _lua_check_get = void (*)(lua_State *l, int index);
@@ -247,6 +255,18 @@ inline std::string _check_get(_id<std::string>, lua_State *l, const int index) {
     }
     return std::string{buff, size};
 }
+
+inline const char *_check_get(_id<const char *>, lua_State *l, const int index) {
+    char const * buff = lua_tostring(l, index);
+    if(buff == nullptr) {
+        throw GetParameterFromLuaTypeError{
+            [](lua_State *l, int index){luaL_checkstring(l, index);},
+            index
+        };
+    }
+    return buff;
+}
+
 
 // Worker type-trait struct to _get_n
 // Getting multiple elements returns a tuple

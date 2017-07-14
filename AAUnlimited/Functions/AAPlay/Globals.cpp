@@ -22,7 +22,6 @@ void InitOnLoad() {
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 	int idxCharacter = 0;
-	auto luaseats = g_Lua[LUA_BINDING_TABLE]["Seats"];
 	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
 
@@ -49,7 +48,7 @@ void InitOnLoad() {
 		ThrowEvent(&data);
 
 		// ditto for lua
-		luaseats[seat] = &g_characters[seat];
+//		g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
 		g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, false);
 	}
 }
@@ -86,7 +85,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	data.card = seat;
 	ThrowEvent(&data);
 
-	g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
+//	g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
 	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, true);
 
 	//throw added to class event
@@ -100,8 +99,8 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
-	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardDestroy"](seat, true);
-	g_Lua[LUA_BINDING_TABLE]["Seats"][seat].clear();
+	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardDestroy"](seat);
+//	g_Lua[LUA_BINDING_TABLE]["Seats"][seat].clear();
 	//destroy
 	g_characters[seat].Reset();
 }
