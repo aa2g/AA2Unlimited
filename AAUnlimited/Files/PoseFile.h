@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "../3rdparty/picojson/picojson.h"
+
 class PoseFile {
 public:
 	PoseFile();

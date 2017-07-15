@@ -81,6 +81,7 @@
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
+    <ClCompile Include="Functions\AAPlay\PoserController.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="Files\ClothFile.h" />
+    <ClInclude Include="Functions\AAPlay\PoserController.h" />
     <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />
     <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
     <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
