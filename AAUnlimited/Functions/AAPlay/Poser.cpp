@@ -333,12 +333,12 @@ namespace Poser {
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH) {
 					if (loc_syncing) return false;
 					int val = General::GetEditInt(ed);
-					g_PoserController.CurrentCharacter()->GetFace().SetBlush((int)((float)val / 9.0f));
+					g_PoserController.CurrentCharacter()->GetFace().SetBlush(val);
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDBLUSH2) {
 					if (loc_syncing) return false;
 					int val = General::GetEditInt(ed);
-					g_PoserController.CurrentCharacter()->GetFace().SetBlushLines((int)((float)val / 9.0f));
+					g_PoserController.CurrentCharacter()->GetFace().SetBlushLines(val);
 				}
 				else if (LOWORD(wparam) == IDC_PPS_EDCHARACTER) {
 					int val = General::GetEditInt(ed);
