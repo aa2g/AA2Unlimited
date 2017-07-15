@@ -38,4 +38,22 @@ inline void* ApplyRule(void* startAddress, const DWORD(&offsetArr)[size]) {
 	return (void*)(start);
 }
 
+//https://www.unknowncheats.me/forum/c-and-c/58694-address-logger.html
+
+inline bool Match(const BYTE* pData, const BYTE* bMask, const char* szMask){
+	for (;*szMask;++szMask, ++pData, ++bMask)
+		if (*szMask == 'x' && *pData != *bMask)
+			return false;
+	return (*szMask) == NULL;
+}
+
+
+inline DWORD FindPattern(DWORD dwAddress, DWORD dwLen, BYTE *bMask, char * szMask){
+	for (DWORD i = 0; i < dwLen; i++)
+		if (Match((BYTE*)(dwAddress + i), bMask, szMask))
+			return (DWORD)(dwAddress + i);
+
+	return 0;
+}
+
 }
