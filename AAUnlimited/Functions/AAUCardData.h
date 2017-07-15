@@ -8,7 +8,9 @@
 #include "TextureImage.h"
 #include "OverrideFile.h"
 #include "XXObjectFile.h"
+#include "Shared\Triggers\Module.h"
 #include "External\ExternalClasses\CharacterStruct.h"
+#include "Functions\Shared\Triggers\Triggers.h"
 
 namespace Shared {
 	struct Slider;
@@ -30,7 +32,7 @@ public:
 	static const DWORD PngChunkId = 'aaUd';
 	static const DWORD PngChunkIdBigEndian = 'dUaa';
 	enum MeshModFlag {
-		MODIFY_FRAME = 1,MODIFY_BONE = 2
+		MODIFY_FRAME = 1, MODIFY_BONE = 2
 	};
 	static const int CurrentVersion = 2;
 public:
@@ -55,22 +57,34 @@ public:
 	int ToBuffer(char** buffer, int* size, bool resize, bool pngChunks);
 	void Reset();
 
+	//add/remove stuffs
+
+	//overrides
 	bool AddMeshOverride(const TCHAR* texture, const TCHAR* override);
 	bool RemoveMeshOverride(int index);
+
 	bool AddArchiveOverride(const TCHAR* archice, const TCHAR* archivefile, const TCHAR* override);
 	bool RemoveArchiveOverride(int index);
+
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
 	bool RemoveArchiveRedirect(int index);
-	bool AddObjectOverride(const TCHAR* object,const TCHAR* file);
+
+	bool AddObjectOverride(const TCHAR* object, const TCHAR* file);
 	bool RemoveObjectOverride(int index);
-	bool AddBoneTransformation(const TCHAR* boneName,D3DMATRIX transform);
+
+	//bone transformations (deprecated)
+	bool AddBoneTransformation(const TCHAR* boneName, D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
-	bool AddHair(BYTE kind,BYTE slot,BYTE adjustment,bool flip);
+
+	//hairs
+	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip);
 	bool RemoveHair(int index);
+
 	struct BoneMod;
-	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName,const TCHAR* boneName,BoneMod mod);
+	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, BoneMod mod);
 	bool RemoveBoneRule(int index);
-	void SetSliderValue(int sliderTarget,int sliderIndex,float value);
+
+	void SetSliderValue(int sliderTarget, int sliderIndex, float value);
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 	bool SetEyeHighlight(const TCHAR* texName);
@@ -78,6 +92,15 @@ public:
 	bool SetHairHighlight(const TCHAR* name);
 
 	bool SetTan(const TCHAR* name);
+
+	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
+	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
+	bool RemoveCardStyle(int index);
+	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
+
+	bool AddModule(const TCHAR* moduleName);
+	bool AddModule(const Shared::Triggers::Module& mod);
+	bool RemoveModule(int index);
 
 	void SaveOverrideFiles();
 	bool DumpSavedOverrideFiles();
@@ -90,9 +113,9 @@ public:
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
-	typedef std::pair<std::wstring,std::wstring> ObjectOverrideRule;
-	typedef std::pair<std::wstring,D3DMATRIX> BoneRule;
-	typedef std::pair<std::pair<int,std::wstring>,std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
+	typedef std::pair<std::wstring, std::wstring> ObjectOverrideRule;
+	typedef std::pair<std::wstring, D3DMATRIX> BoneRule;
+	typedef std::pair<std::pair<int, std::wstring>, std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 	struct HairPart {
 		BYTE kind; //0-3
 		BYTE slot;
@@ -113,191 +136,151 @@ public:
 			for (int i = 0; i < 9; i++) if (data[i] != rhs.data[i]) return false; return true;
 		}
 	};
-	
-	typedef std::pair<std::pair<int,std::pair<std::wstring,std::wstring>>,BoneMod> BoneRuleV2;
-	typedef std::pair<std::pair<int,int>,float> SliderRule; //int is slider index in global array, float is selected value
+
+	typedef std::pair<std::pair<int, std::pair<std::wstring, std::wstring>>, BoneMod> BoneRuleV2;
+	typedef std::pair<std::pair<int, int>, float> SliderRule; //int is slider index in global array, float is selected value
 
 	//getter functions
-	inline BYTE GetTanSlot() const { return m_tanSlot; }
-	inline const std::vector<MeshOverrideRule>& GetMeshOverrideList() const { return m_meshOverrides; }
-	inline const TextureImage* GetMeshOverrideTexture(const TCHAR* texture) const {
-		auto it = m_meshOverrideMap.find(texture);
-		return it == m_meshOverrideMap.end() ? NULL : &it->second;
-	}
-	inline const std::vector<ArchiveOverrideRule>& GetArchiveOverrideList() const { return m_archiveOverrides; }
-	inline const OverrideFile* GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
-		auto it = m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
-		return it == m_archiveOverrideMap.end() ? NULL : &it->second;
-	}
-	inline const std::vector<ArchiveRedirectRule>& GetArchiveRedirectList() const { return m_archiveRedirects; }
-	inline const std::pair<std::wstring,std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
-		auto it = m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
-		return it == m_archiveRedirectMap.end() ? NULL : &it->second;
-	}
+	BYTE GetTanSlot() const;
 
-	inline const std::vector<ObjectOverrideRule>& GetObjectOverrideList() const { return m_objectOverrides; }
-	inline const XXObjectFile* GetObjectOverrideFile(const char* objectName) const {
-		auto it = m_objectOverrideMap.find(objectName);
-		return it == m_objectOverrideMap.end() ? NULL : &it->second;
-	}
+	std::vector<std::wstring>					GetAAUSetDataList() const;
+	int											GetCurrAAUSet() const;
+	//aauset data start
+	const std::vector<MeshOverrideRule>&		GetMeshOverrideList() const;
+	const TextureImage*							GetMeshOverrideTexture(const TCHAR* texture) const;
 
-	inline BYTE GetHairRedirect(BYTE category) { return m_hairRedirects.arr[category]; }
-	inline void SetHairRedirect(BYTE category, BYTE value) { m_hairRedirects.arr[category] = value; }
+	const std::vector<ArchiveOverrideRule>&		GetArchiveOverrideList() const;
+	const OverrideFile*							GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const;
 
-	inline const std::wstring& GetEyeTexture(int leftright) { return m_eyeTextures[leftright].texName; }
-	inline const std::vector<BYTE>& GetEyeTextureBuffer(int leftright) { return m_eyeTextures[leftright].texFile; }
+	const std::vector<ArchiveRedirectRule>&		GetArchiveRedirectList() const;
+	const std::pair<std::wstring, std::wstring>* GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const;
 
-	inline const std::wstring GetEyeHighlightTexture() { return m_eyeHighlightName; }
-	inline const std::vector<BYTE>& GetEyeHighlightTextureBuffer() { return m_eyeHighlightFile; }
+	const std::vector<ObjectOverrideRule>&		GetObjectOverrideList() const;
+	const XXObjectFile*							GetObjectOverrideFile(const char* objectName) const;
 
-	inline const std::wstring& GetHairHighlightName() { return m_hairHighlightName; }
-	inline const TextureImage& GetHairHighlightTex() { return m_hairHighlightImage; }
+	const std::wstring&							GetEyeTexture(int leftright);
+	const std::vector<BYTE>&					GetEyeTextureBuffer(int leftright);
 
-	inline const std::wstring& GetTanName() { return m_tanName; }
-	inline const TextureImage& GetTanTex(int i) {
-		if (i >= 0 && i < 5) return m_tanImages[i];
-		return m_tanImages[0];
-	}
-	
-	inline const DWORD GetOutlineColor() { return m_outlineColor; }
-	inline const DWORD SetOutlineColor(COLORREF color) { return m_outlineColor = color; }
-	inline const bool HasOutlineColor() { return m_bOutlineColor; }
-	inline const DWORD SetHasOutlineColor(bool has) { return m_bOutlineColor = has; }
+	const std::wstring							GetEyeHighlightTexture();
+	const std::vector<BYTE>&					GetEyeHighlightTextureBuffer();
 
-	inline const DWORD GetTanColor() { return m_tanColor; }
-	inline const DWORD SetTanColor(COLORREF color) { return m_tanColor = color; }
-	inline const bool HasTanColor() { return m_bTanColor; }
-	inline const DWORD SetHasTanColor(bool has) { return m_bTanColor = has; }
+	const std::wstring&							GetHairHighlightName();
+	const TextureImage&							GetHairHighlightTex();
 
-	inline const std::vector<BoneRule> GetBoneTransformationList() { return m_boneTransforms; }
-	inline const D3DMATRIX* GetBoneTransformationRule(const TCHAR* boneName) {
-		auto it = m_boneTransformMap.find(boneName);
-		return it == m_boneTransformMap.end() ? NULL : &it->second;
-	}
+	const std::wstring&							GetTanName();
+	const TextureImage&							GetTanTex(int i);
 
-	inline bool HasFilesSaved() { return m_savedFiles.size() > 0; }
+	const DWORD									GetOutlineColor();
+	const DWORD									SetOutlineColor(COLORREF color);
+	const bool									HasOutlineColor();
+	const DWORD									SetHasOutlineColor(bool has);
 
-	inline const std::vector<HairPart>& GetHairs(BYTE kind) { return m_hairs[kind]; }
+	const DWORD									GetTanColor();
+	const DWORD									SetTanColor(COLORREF color);
+	const bool									HasTanColor();
+	const DWORD									SetHasTanColor(bool has);
 
-	inline const std::vector<BoneRuleV2> GetMeshRuleList() { return m_boneRules; }
-	inline const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName) {
-		auto it = m_boneRuleMap.find(xxFileName);
-		return it == m_boneRuleMap.end() ? NULL : &it->second;
-	}
-	inline const std::map<std::wstring,std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName) {
-		auto it = m_frameRuleMap.find(xxFileName);
-		return it == m_frameRuleMap.end() ? NULL : &it->second;
-	}
+	const std::vector<BoneRule>					GetBoneTransformationList();
+	const D3DMATRIX*							GetBoneTransformationRule(const TCHAR* boneName);
 
-	inline const std::vector<SliderRule> GetSliderList() { return m_sliders; }
-	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderBoneRuleMap(int type) {
-		return m_boneSliderMap[type];
-	}
-	inline const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>>& GetSliderFrameRuleMap(int type) {
-		return m_frameSliderMap[type];
-	}
-	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
-		auto it = m_boneSliderMap[model].find(bone);
-		return (it != m_boneSliderMap[model].end()) ? &it->second : NULL;
-	}
-	inline const std::vector<std::pair<const Shared::Slider*,BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model,std::wstring bone) {
-		auto it = m_frameSliderMap[model].find(bone);
-		return (it != m_frameSliderMap[model].end()) ? &it->second : NULL;
-	}
+	bool										HasFilesSaved();
 
+	const std::vector<HairPart>&				GetHairs(BYTE kind);
+
+	const std::vector<BoneRuleV2>				GetMeshRuleList();
+	const std::map<std::wstring, std::vector<BoneMod>>* GetBoneRule(const TCHAR* xxFileName);
+	const std::map<std::wstring, std::vector<BoneMod>>* GetFrameRule(const TCHAR* xxFileName);
+
+	const std::vector<SliderRule> GetSliderList();
+	const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>>& GetSliderBoneRuleMap(int type);
+	const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>>& GetSliderFrameRuleMap(int type);
+	const std::vector<std::pair<const Shared::Slider*, BoneMod>>* GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone);
+	const std::vector<std::pair<const Shared::Slider*, BoneMod>>* GetSliderFrameRule(ExtClass::CharacterStruct::Models model, std::wstring bone);
+	//aausetdata end
+
+	std::vector<Shared::Triggers::Trigger>&			GetTriggers();
+	std::vector<Shared::Triggers::GlobalVariable>&	GetGlobalVariables();
+	std::vector<Shared::Triggers::Module>&	GetModules();
+	std::map<std::wstring, Shared::Triggers::Value>& GetCardStorage();
+
+	struct CardStyle;
+	std::vector<CardStyle> m_aauSets;
 private:
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
-	std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
-	std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
-	
-	std::vector<ArchiveOverrideRule> m_archiveOverrides; //<archive,file>->file
-	std::map<std::pair<std::wstring, std::wstring>, OverrideFile> m_archiveOverrideMap;
 
-	std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
-	std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
 
-	std::vector<ObjectOverrideRule> m_objectOverrides;
-	std::map<std::string,XXObjectFile> m_objectOverrideMap;
+	//modifications can be saved in multiple sets.
+	struct CardStyle {
+		wchar_t m_name[32];
 
-	struct {
-		std::wstring texName;
-		std::vector<BYTE> texFile; //contains file if it should be saved inside the card
-	} m_eyeTextures[2]; //0 is the left (default), 1 is the right (the extra eye texture)
+		//DATA
 
-	std::wstring m_eyeHighlightName;
-	std::vector<BYTE> m_eyeHighlightFile; //contains file if it should be saved inside the card
+		std::vector<MeshOverrideRule> m_meshOverrides;	//replaces textures by other textures
+		std::map<std::wstring, TextureImage> m_meshOverrideMap;	//map-representation of vector above for actual use
 
-	std::wstring m_hairHighlightName; //hair highlight
-	TextureImage m_hairHighlightImage;
+		std::vector<ArchiveOverrideRule> m_archiveOverrides; //<archive,file>->file
+		std::map<std::pair<std::wstring, std::wstring>, OverrideFile> m_archiveOverrideMap;
 
-	std::wstring m_tanName; //tan settings
-	TextureImage m_tanImages[5];
+		std::vector<ArchiveRedirectRule> m_archiveRedirects; //<archive,file>-><archive,file>
+		std::map<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> m_archiveRedirectMap;
 
-	union {
-		DWORD full;
-		BYTE arr[4];
+		std::vector<ObjectOverrideRule> m_objectOverrides;
+		std::map<std::string, XXObjectFile> m_objectOverrideMap;
+
 		struct {
-			BYTE front;
-			BYTE side;
-			BYTE back;
-			BYTE extension;
-		};
-	} m_hairRedirects;
+			std::wstring texName;
+			std::vector<BYTE> texFile; //contains file if it should be saved inside the card
+		} m_eyeTextures[2]; //0 is the left (default), 1 is the right (the extra eye texture)
 
-	bool m_bOutlineColor;
-	DWORD m_outlineColor;
+		std::wstring m_eyeHighlightName;
+		std::vector<BYTE> m_eyeHighlightFile; //contains file if it should be saved inside the card
 
-	bool m_bTanColor;
-	DWORD m_tanColor;
+		std::wstring m_hairHighlightName; //hair highlight
+		TextureImage m_hairHighlightImage;
 
-	std::vector<BoneRule> m_boneTransforms;
-	std::map<std::wstring,D3DMATRIX> m_boneTransformMap;
+		std::wstring m_tanName; //tan settings
+		TextureImage m_tanImages[5];
+
+		bool m_bOutlineColor;
+		DWORD m_outlineColor;
+
+		bool m_bTanColor;
+		DWORD m_tanColor;
+
+		std::vector<BoneRule> m_boneTransforms;
+		std::map<std::wstring, D3DMATRIX> m_boneTransformMap;
+
+		std::vector<HairPart> m_hairs[4];
+
+		ExtClass::CardStyleData m_cardStyleData;
+
+		std::vector<BoneRuleV2> m_boneRules;
+		std::map<std::wstring, std::map<std::wstring, std::vector<BoneMod>>> m_boneRuleMap;
+		std::map<std::wstring, std::map<std::wstring, std::vector<BoneMod>>> m_frameRuleMap;
+
+		std::vector<SliderRule> m_sliders;
+		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
+		std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
+
+		CardStyle();
+	};
+	//std::vector<CardStyle> m_aauSets;
+	int m_currCardStyle;
+
+	std::vector<Shared::Triggers::GlobalVariable> m_globalVars;
+	std::vector<Shared::Triggers::Trigger> m_triggers;
+	std::vector<Shared::Triggers::Module> m_modules;
+	std::map<std::wstring, Shared::Triggers::Value> m_cardStorage;
 
 	std::vector<SavedFile> m_savedFiles;
 
-	std::vector<HairPart> m_hairs[4];
-
-	std::vector<BoneRuleV2> m_boneRules;
-	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_boneRuleMap;
-	std::map<std::wstring,std::map<std::wstring,std::vector<BoneMod>>> m_frameRuleMap;
-
-	std::vector<SliderRule> m_sliders;
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_boneSliderMap[ExtClass::CharacterStruct::N_MODELS];
-	std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,BoneMod>>> m_frameSliderMap[ExtClass::CharacterStruct::N_MODELS];
 private:
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
 
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
-
-	//read help functions
-	template<typename T>
-	T ReadData(char*& buffer,int& size);
-		template<typename T>
-		T ReadData_sub(char*& buffer,int& size, T*);
-		std::vector<BYTE> ReadData_sub(char*& buffer,int& size,std::vector<BYTE>*);
-		template<typename T>
-		std::vector<T> ReadData_sub(char*& buffer,int& size,std::vector<T>*);
-		template<typename T, typename U>
-		std::pair<T,U> ReadData_sub(char*& buffer,int& size,std::pair<T,U>*);
-		std::wstring ReadData_sub(char*& buffer,int& size,std::wstring*);
-		template<typename T, typename U>
-		std::map<T, U> ReadData_sub(char*& buffer, int& size, std::map<T, U>*);
-
-	//write help functions
-	template<typename T>
-	bool WriteData(char** buffer,int* size,int& at,const T& data, bool resize);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, const T& data,bool resize, T*);
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::wstring& data,bool resize,std::wstring*);
-		template<typename T>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::vector<T>& data,bool resize,std::vector<T>*);
-		template<typename T, typename U>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::pair<T,U>& data,bool resize,std::pair<T,U>*);
-		template<typename T, typename U>
-		bool WriteData_sub(char** buffer,int* size,int& at, const std::map<T, U>& data, bool resize, std::map<T, U>*);
 
 	//generate the maps from the vectors read from the file
 	void GenMeshOverrideMap();
@@ -310,15 +293,119 @@ private:
 	void GenAllFileMaps();
 };
 
+inline BYTE AAUCardData::GetTanSlot() const { return m_tanSlot; }
+
+inline int AAUCardData::GetCurrAAUSet() const {
+	return m_currCardStyle;
+}
+inline std::vector<std::wstring> AAUCardData::GetAAUSetDataList() const {
+	std::vector<std::wstring> vec(m_aauSets.size());
+	for (int i = 0; i < m_aauSets.size(); i++) {
+		vec[i] = m_aauSets[i].m_name;
+	}
+	return vec;
+}
+
+inline const std::vector<AAUCardData::MeshOverrideRule>& AAUCardData::GetMeshOverrideList() const { return m_aauSets[m_currCardStyle].m_meshOverrides; }
+inline const TextureImage* AAUCardData::GetMeshOverrideTexture(const TCHAR* texture) const {
+	auto it = m_aauSets[m_currCardStyle].m_meshOverrideMap.find(texture);
+	return it == m_aauSets[m_currCardStyle].m_meshOverrideMap.end() ? NULL : &it->second;
+}
+inline const std::vector<AAUCardData::ArchiveOverrideRule>& AAUCardData::GetArchiveOverrideList() const { return m_aauSets[m_currCardStyle].m_archiveOverrides; }
+inline const OverrideFile* AAUCardData::GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
+	auto it = m_aauSets[m_currCardStyle].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+	return it == m_aauSets[m_currCardStyle].m_archiveOverrideMap.end() ? NULL : &it->second;
+}
+inline const std::vector<AAUCardData::ArchiveRedirectRule>& AAUCardData::GetArchiveRedirectList() const { return m_aauSets[m_currCardStyle].m_archiveRedirects; }
+inline const std::pair<std::wstring, std::wstring>* AAUCardData::GetArchiveRedirectFile(const TCHAR* archive, const TCHAR* texture) const {
+	auto it = m_aauSets[m_currCardStyle].m_archiveRedirectMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+	return it == m_aauSets[m_currCardStyle].m_archiveRedirectMap.end() ? NULL : &it->second;
+}
+
+inline const std::vector<AAUCardData::ObjectOverrideRule>& AAUCardData::GetObjectOverrideList() const { return m_aauSets[m_currCardStyle].m_objectOverrides; }
+inline const XXObjectFile* AAUCardData::GetObjectOverrideFile(const char* objectName) const {
+	auto it = m_aauSets[m_currCardStyle].m_objectOverrideMap.find(objectName);
+	return it == m_aauSets[m_currCardStyle].m_objectOverrideMap.end() ? NULL : &it->second;
+}
+
+inline const std::wstring& AAUCardData::GetEyeTexture(int leftright) { return m_aauSets[m_currCardStyle].m_eyeTextures[leftright].texName; }
+inline const std::vector<BYTE>& AAUCardData::GetEyeTextureBuffer(int leftright) { return m_aauSets[m_currCardStyle].m_eyeTextures[leftright].texFile; }
+
+inline const std::wstring AAUCardData::GetEyeHighlightTexture() { return m_aauSets[m_currCardStyle].m_eyeHighlightName; }
+inline const std::vector<BYTE>& AAUCardData::GetEyeHighlightTextureBuffer() { return m_aauSets[m_currCardStyle].m_eyeHighlightFile; }
+
+inline const std::wstring& AAUCardData::GetHairHighlightName() { return m_aauSets[m_currCardStyle].m_hairHighlightName; }
+inline const TextureImage& AAUCardData::GetHairHighlightTex() { return m_aauSets[m_currCardStyle].m_hairHighlightImage; }
+
+inline const std::wstring& AAUCardData::GetTanName() { return m_aauSets[m_currCardStyle].m_tanName; }
+inline const TextureImage& AAUCardData::GetTanTex(int i) {
+	if (i >= 0 && i < 5) return m_aauSets[m_currCardStyle].m_tanImages[i];
+	return m_aauSets[m_currCardStyle].m_tanImages[0];
+}
+
+inline const DWORD AAUCardData::GetOutlineColor() { return m_aauSets[m_currCardStyle].m_outlineColor; }
+inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { return m_aauSets[m_currCardStyle].m_outlineColor = color; }
+inline const bool AAUCardData::HasOutlineColor() { return m_aauSets[m_currCardStyle].m_bOutlineColor; }
+inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_aauSets[m_currCardStyle].m_bOutlineColor = has; }
+
+inline const DWORD AAUCardData::GetTanColor() { return m_aauSets[m_currCardStyle].m_tanColor; }
+inline const DWORD AAUCardData::SetTanColor(COLORREF color) { return m_aauSets[m_currCardStyle].m_tanColor = color; }
+inline const bool AAUCardData::HasTanColor() { return m_aauSets[m_currCardStyle].m_bTanColor; }
+inline const DWORD AAUCardData::SetHasTanColor(bool has) { return m_aauSets[m_currCardStyle].m_bTanColor = has; }
+
+inline const std::vector<AAUCardData::BoneRule> AAUCardData::GetBoneTransformationList() { return m_aauSets[m_currCardStyle].m_boneTransforms; }
+inline const D3DMATRIX* AAUCardData::GetBoneTransformationRule(const TCHAR* boneName) {
+	auto it = m_aauSets[m_currCardStyle].m_boneTransformMap.find(boneName);
+	return it == m_aauSets[m_currCardStyle].m_boneTransformMap.end() ? NULL : &it->second;
+}
+
+inline bool AAUCardData::HasFilesSaved() { return m_savedFiles.size() > 0; }
+
+inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind) { return m_aauSets[m_currCardStyle].m_hairs[kind]; }
+
+inline std::vector<Shared::Triggers::Trigger>& AAUCardData::GetTriggers() { return m_triggers; }
+
+inline std::vector<Shared::Triggers::GlobalVariable>& AAUCardData::GetGlobalVariables() { return m_globalVars; }
+
+inline std::vector<Shared::Triggers::Module>& AAUCardData::GetModules() { return m_modules; }
+
+inline std::map<std::wstring, Shared::Triggers::Value>& AAUCardData::GetCardStorage() { return m_cardStorage; }
+
+inline const std::vector<AAUCardData::BoneRuleV2> AAUCardData::GetMeshRuleList() { return m_aauSets[m_currCardStyle].m_boneRules; }
+inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetBoneRule(const TCHAR* xxFileName) {
+	auto it = m_aauSets[m_currCardStyle].m_boneRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currCardStyle].m_boneRuleMap.end() ? NULL : &it->second;
+}
+inline const std::map<std::wstring, std::vector<AAUCardData::BoneMod>>* AAUCardData::GetFrameRule(const TCHAR* xxFileName) {
+	auto it = m_aauSets[m_currCardStyle].m_frameRuleMap.find(xxFileName);
+	return it == m_aauSets[m_currCardStyle].m_frameRuleMap.end() ? NULL : &it->second;
+}
+
+inline const std::vector<AAUCardData::SliderRule> AAUCardData::GetSliderList() { return m_aauSets[m_currCardStyle].m_sliders; }
+inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderBoneRuleMap(int type) {
+	return m_aauSets[m_currCardStyle].m_boneSliderMap[type];
+}
+inline const std::map<std::wstring, std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>>& AAUCardData::GetSliderFrameRuleMap(int type) {
+	return m_aauSets[m_currCardStyle].m_frameSliderMap[type];
+}
+inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderBoneRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+	auto it = m_aauSets[m_currCardStyle].m_boneSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currCardStyle].m_boneSliderMap[model].end()) ? &it->second : NULL;
+}
+inline const std::vector<std::pair<const Shared::Slider*, AAUCardData::BoneMod>>* AAUCardData::GetSliderFrameRule(ExtClass::CharacterStruct::Models model, std::wstring bone) {
+	auto it = m_aauSets[m_currCardStyle].m_frameSliderMap[model].find(bone);
+	return (it != m_aauSets[m_currCardStyle].m_frameSliderMap[model].end()) ? &it->second : NULL;
+}
+
 /*
 Important differences in versions:
 
 OvrT: in version 1, mesh textures were relative to aaedit/data/texture/override (VER1_OVERRIDE_IMAGE_PATH)
 	  in version 2, mesh textures are relative to the override path
 AOvT: in version 1, override files were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
-	  in version 2, override files are relative to the override path 
+	  in version 2, override files are relative to the override path
 OOvr: in version 1, object overrides were relative to aaplay or aaedits data folder (VER1_OVERRIDE_ARCHIVE_PATH)
-	  in version 2, object overrides are relative to the override path 
+	  in version 2, object overrides are relative to the override path
 TnRd: in version 1, the tan image were relative to data\\texture\\override\\tan\\ (VER1_TAN_PATH TEXT)
 	  in version 2, the file is always relative from the override path
 HrHl: in version 1, the hair highlight images were relative to data\\texture\\override\\hair_highlight\\ (VER1_HAIR_HIGHLIGHT_PATH)
@@ -326,14 +413,6 @@ HrHl: in version 1, the hair highlight images were relative to data\\texture\\ov
 
 File: in version 1, the integer denotes the root path in which the file is located (aaplay = 0, aaedit = 1).
 	  in version 2, the file is always relative from the override path
-
-
-
-
-
-
-
-
 
 
 */

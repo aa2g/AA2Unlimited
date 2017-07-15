@@ -1,6 +1,7 @@
 #pragma once
 
 #include "External\ExternalVariables\AAPlay\GameGlobals.h"
+#include "Functions\AAPlay\Globals.h"
 
 namespace Shared {
 	namespace GameState {
@@ -20,10 +21,21 @@ namespace Shared {
 		void setIsHighPolyLoaded(bool value);
 		bool getIsHighPolyLoaded();
 
+		void setPCConversationState(DWORD value);
+		DWORD getPCConversationState();
+
+		void addConversationCharacter(ExtClass::CharacterStruct * chara);
+		ExtClass::CharacterStruct * getConversationCharacter(int idx);
+		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
+		void clearConversationCharacter(int idx);
+
+		ExtClass::CharacterStruct ** getCharacters();
+		
 		inline ExtClass::CharacterStruct ** getPlayerCharacter()
 		{
 			return ExtVars::AAPlay::PlayerCharacterPtr();
 		}
+		void setPlayerCharacter(int seat);
 
 		inline ExtClass::PcConversationStruct * getPlayerConversation()
 		{

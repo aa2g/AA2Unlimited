@@ -81,3 +81,38 @@ void FocusCameraInjection() {
 
 }
 }
+
+
+//AA2Play v12 FP v1.4.0a.exe+326FC0 is virtual table [+4] is function that changes h position (thiscall on temp struct, unknown properties) (part of the tick)
+/*
+jump is usually taken if h scene is NOT ended due to high virtue first time
+AA2Play v12 FP v1.4.0a.exe+95167 - E8 E4F8FFFF           - call "AA2Play v12 FP v1.4.0a.exe"+94A50 { ->AA2Play v12 FP v1.4.0a.exe+94A50 }
+AA2Play v12 FP v1.4.0a.exe+9516C - 84 C0                 - test al,al
+AA2Play v12 FP v1.4.0a.exe+9516E - 74 48                 - je "AA2Play v12 FP v1.4.0a.exe"+951B8 { ->AA2Play v12 FP v1.4.0a.exe+951B8 }
+*/
+//ends h scene as a result of the scene switch
+//AA2Play v12 FP v1.4.0a.exe+9519E - E8 2DE8FEFF           - call "AA2Play v12 FP v1.4.0a.exe"+839D0 { ->AA2Play v12 FP v1.4.0a.exe+839D0 }
+
+/*
+jump is taken if h scene is ended because npc was seen. eax is hstruct (part of the tick)
+AA2Play v12 FP v1.4.0a.exe+80F83 - 8B C3                 - mov eax,ebx
+AA2Play v12 FP v1.4.0a.exe+80F85 - E8 36220000           - call "AA2Play v12 FP v1.4.0a.exe"+831C0 { ->AA2Play v12 FP v1.4.0a.exe+831C0 }
+AA2Play v12 FP v1.4.0a.exe+80F8A - 84 C0                 - test al,al
+AA2Play v12 FP v1.4.0a.exe+80F8C - 75 28                 - jne "AA2Play v12 FP v1.4.0a.exe"+80FB6 { ->AA2Play v12 FP v1.4.0a.exe+80FB6 }
+ */
+/*
+jump is taken if was seen long enough to end h scene
+esi is npc action data (charstruct f60->1C)
+AA2Play v12 FP v1.4.0a.exe+190DB5 - 8B 56 08              - mov edx,[esi+08]
+AA2Play v12 FP v1.4.0a.exe+190DB8 - 8B 82 B40B0000        - mov eax,[edx+00000BB4]
+AA2Play v12 FP v1.4.0a.exe+190DBE - 01 46 28              - add [esi+28],eax
+AA2Play v12 FP v1.4.0a.exe+190DC1 - 8B 46 28              - mov eax,[esi+28]
+AA2Play v12 FP v1.4.0a.exe+190DC4 - 3D 60EA0000           - cmp eax,0000EA60 { 60000 }
+AA2Play v12 FP v1.4.0a.exe+190DC9 - 73 1E                 - jae "AA2Play v12 FP v1.4.0a.exe"+190DE9 { ->AA2Play v12 FP v1.4.0a.exe+190DE9 }
+*/
+/*
+if above jump is taken, this function returns true and takes the jump, ending the scene
+AA2Play v12 FP v1.4.0a.exe+190AB1 - E8 7A020000           - call "AA2Play v12 FP v1.4.0a.exe"+190D30 { ->AA2Play v12 FP v1.4.0a.exe+190D30 }
+AA2Play v12 FP v1.4.0a.exe+190AB6 - 84 C0                 - test al,al
+AA2Play v12 FP v1.4.0a.exe+190AB8 - 75 18                 - jne "AA2Play v12 FP v1.4.0a.exe"+190AD2 { ->AA2Play v12 FP v1.4.0a.exe+190AD2 }
+*/

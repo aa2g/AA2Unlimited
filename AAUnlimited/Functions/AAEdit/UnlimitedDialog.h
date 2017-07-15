@@ -1,13 +1,21 @@
 #pragma once
 
 #include <Windows.h>
+#include <CommCtrl.h>
 #include <vector>
 
+#include "Files\ModuleFile.h"
 #include "Functions\AAUCardData.h"
 #include "External\ExternalClasses\XXFile.h"
+#include "Functions\Shared\Triggers\Triggers.h"
 #include "Functions\Shared\Slider.h"
 
 namespace AAEdit {
+
+	struct loc_AddData;
+	struct loc_AddActionData;
+	struct loc_AddVariableData;
+	struct loc_ModuleInfo;
 
 /*
  * The little dialog that shows up in the editor to select stuff.
@@ -58,8 +66,13 @@ namespace AAEdit {
 		HWND m_cbSaveFiles;
 		HWND m_cbSaveEyeTexture;
 		HWND m_cbSaveEyeHighlight;
+		HWND m_lbAAuSets;
+		HWND m_edAAuSetName;
+		HWND m_btnAAuSetAdd;
+		HWND m_btnLoadCloth;
 
 		void Refresh();
+		void RefreshAAuSetList();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_gnDialog;
 	struct MODialog : public Dialog {
@@ -196,6 +209,79 @@ namespace AAEdit {
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_bsDialog;
+	friend AAEdit::loc_AddData;
+	friend AAEdit::loc_AddActionData;
+	friend AAEdit::loc_AddVariableData;
+	friend AAEdit::loc_ModuleInfo;
+	struct TRDialog : public Dialog {
+		HWND m_lbTriggers;
+		HWND m_tvTrigger;
+
+		HTREEITEM m_tiEvents;
+		HTREEITEM m_tiVariables;
+		HTREEITEM m_tiActions;
+		int m_currentTriggerIndex;
+		Shared::Triggers::Trigger* m_currentTrigger = NULL;
+		bool m_allowTriggerChange;
+		std::vector<HTREEITEM> m_events;
+		std::vector<HTREEITEM> m_variables;
+		struct ActionTreeItem {
+			HTREEITEM tree;
+			std::vector<ActionTreeItem*> subactions;
+			HTREEITEM subActionLabel; //some actions may have a subaction label for easier adding
+			ActionTreeItem* parent;
+			inline ~ActionTreeItem() {
+				for (auto* item : subactions) delete item;
+			}
+		};
+		std::vector<ActionTreeItem*> m_actions;
+
+		void SetCurrentTrigger(int index);
+		ActionTreeItem* AddTriggerAction(const Shared::Triggers::ParameterisedAction& action);
+		void AddTriggerGuiActions(std::vector<Shared::Triggers::Trigger::GUIAction*> actions);
+		struct SelectedAction_Data {
+			//so that cardActions[cardActionsInt] is the selected action
+			std::vector<Shared::Triggers::Trigger::GUIAction*>* cardActions = NULL;
+			int cardActionsInt = -1;
+			std::vector<ActionTreeItem*>* guiActions = NULL;
+			bool isSubLabel = false;
+
+			operator bool() { return cardActionsInt != -1; }
+		};
+		SelectedAction_Data GetSelectedAction();
+		SelectedAction_Data GetSelectedAction(HTREEITEM selectedItem);
+		void AddTriggerEvent(const Shared::Triggers::ParameterisedEvent& event,int insertAfter);
+		int GetSelectedEvent();
+		void AddTriggerVariable(const Shared::Triggers::Variable& var,int insertAfter);
+		int GetSelectedVariable();
+		HTREEITEM GenerateActionSubLabel(HTREEITEM parent, int actionId);
+
+		std::wstring EVANameToString(const std::wstring& name,const std::vector<Shared::Triggers::ParameterisedExpression>& actualParameters);
+		std::wstring ExpressionToString(const Shared::Triggers::ParameterisedExpression& param);
+
+		void InitializeTriggers();
+		void DoAddAction();
+		void DoAddVariable();
+		void DoAddEvent();
+		static INT_PTR CALLBACK AddActionDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+		static INT_PTR CALLBACK AddVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+		static INT_PTR CALLBACK AddGlobalVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+
+		void RefreshTriggerList();
+		void RefreshTriggerActions();
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_trDialog;
+	struct MDDialog : public Dialog {
+		HWND m_lbModulesAvailable;
+		HWND m_lbModulesUsed;
+		HWND m_edName;
+		HWND m_edDescr;
+		std::vector<ModuleFile> m_modules;
+
+		void Refresh();
+		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+	} m_mdDialog;
 
 
 	HWND m_dialog;

@@ -8,6 +8,11 @@
 #include "Functions\AAPlay\Globals.h"
 #include "Functions\AAPlay\Poser.h"
 #include "Functions/AAPlay/Facecam.h"
+#include "Functions/AAPlay/GameState.h"
+
+#include "Functions\Shared\TriggerEventDistributor.h"
+
+using namespace Shared::Triggers;
 
 namespace PlayInjections {
 /*
@@ -15,14 +20,32 @@ namespace PlayInjections {
  */
 namespace Loads {
 
+namespace {
+	int loc_hiPolyLoaded;
+}
+
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::SetTargetCharacter(loadCharacter);
+	//Add the character to the conversation list
+	if (Shared::GameState::getIsPcConversation()) {
+		Shared::GameState::addConversationCharacter(loadCharacter);
+	}
+	//throw high poly event
+	HiPolyInitData data;
+	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+	loc_hiPolyLoaded = data.card;
+	ThrowEvent(&data);
+	
 } 
 
 void __stdcall HiPolyLoadEndEvent() {
 	Shared::MeshTextureCharLoadEnd();
+	//throw high poly end event
+	HiPolyEndData data;
+	data.card = loc_hiPolyLoaded;
+	ThrowEvent(&data);
 }
 
 void __stdcall SaveLoadEvent() {
@@ -179,10 +202,14 @@ void SaveFileLoadInjection() {
 DWORD TransferInOriginalFunc;
 void __declspec(naked) TransferInRedirect() {
 	__asm {
+		push [esp+8]
+		push [esp+8]
 		call [TransferInOriginalFunc]
-		push [edi]
+		pushad
+		push esi
 		call TransferInEvent
-		ret
+		popad
+		ret 8
 	}
 }
 
@@ -194,10 +221,24 @@ void TransferInInjection() {
 	AA2Play v12 FP v1.4.0a.exe+EBA68 - 89 5C 24 18           - mov [esp+18],ebx
 	AA2Play v12 FP v1.4.0a.exe+EBA6C - E8 2FAA0100           - call "AA2Play v12 FP v1.4.0a.exe"+1064A0 { ->AA2Play v12 FP v1.4.0a.exe+1064A0 }
 	*/
-	DWORD address = General::GameBase + 0xEBA6C;
+	/*DWORD address = General::GameBase + 0xEBA6C;
 	DWORD redirectAddress = (DWORD)(&TransferInRedirect);
 	Hook((BYTE*)address,
 		{ 0xE8, 0x2F, 0xAA, 0x01, 0x00 },							//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		&TransferInOriginalFunc);*/
+
+	//a little bit fater up. relationship data is initialized after the call. esi is character struct
+	//2 param stdcall
+	/*AA2Play v12 FP v1.4.0a.exe+EBC9C - 56                    - push esi
+	AA2Play v12 FP v1.4.0a.exe+EBC9D - 57                    - push edi
+	AA2Play v12 FP v1.4.0a.exe+EBC9E - E8 7DFCFFFF           - call "AA2Play v12 FP v1.4.0a.exe"+EB920 { ->AA2Play v12 FP v1.4.0a.exe+EB920 }
+	AA2Play v12 FP v1.4.0a.exe+EBCA3 - 8B 56 3C              - mov edx,[esi+3C]
+	*/
+	DWORD address = General::GameBase + 0xEBC9E;
+	DWORD redirectAddress = (DWORD)(&TransferInRedirect);
+	Hook((BYTE*)address,
+		{ 0xE8, 0x7D, 0xFC, 0xFF, 0xFF },							//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&TransferInOriginalFunc);
 }
@@ -231,6 +272,13 @@ void TransferOutInjection() {
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&TransferOutOriginalFunc);
 }
+
+
+//sets selected club when transfered or club is changed by player action. eax is character struct
+//AA2Play v12 FP v1.4.0a.exe+DED74 - 88 82 46040000        - mov [edx+00000446],al
+//AA2Play v12 FP v1.4.0a.exe+DED7A - E8 21DA0100           - call "AA2Play v12 FP v1.4.0a.exe"+FC7A0 { ->AA2Play v12 FP v1.4.0a.exe+FC7A0 }
+//AA2Play v12 FP v1.4.0a.exe+DED7F - 83 C4 1C              - add esp,1C { 28 }
+
 
 
 }

@@ -1,5 +1,10 @@
 #include "UnlimitedDialog.h"
 
+/*
+ * TODO: break up this file. every single tab is defined in this file. its impossible to read if you dont know what youre searching for,
+ * and even then its pretty spaghetti
+ */
+
 #include <Windows.h>
 #include <CommCtrl.h>
 #include <queue>
@@ -18,7 +23,10 @@
 #include "Functions\AAEdit\Globals.h"
 #include "Functions\Shared\Globals.h"
 #include "Functions\Shared\Overrides.h"
+#include "Functions\Shared\Triggers\Triggers.h"
+#include "Functions\Shared\Triggers\Expressions.h"
 #include "Files\Logger.h"
+#include "Files\ClothFile.h"
 #include "resource.h"
 #include "config.h"
 
@@ -130,6 +138,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
 			BSDialog::DialogProc);
+		thisPtr->AddDialog(IDD_TRIGGERS,&thisPtr->m_trDialog,index++,TEXT("Triggers"),
+			TRDialog::DialogProc);
+		thisPtr->AddDialog(IDD_MODULES,&thisPtr->m_mdDialog,index++,TEXT("Modules"),
+			MDDialog::DialogProc);
 
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
@@ -145,8 +157,10 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			MoveWindow(diag->m_dialog,rct.left,rct.top,rct.right - rct.left,rct.bottom - rct.top,FALSE);
 		}
 
-		DWORD charDataRule[] { 0x353254, 0x2C, 0};
-		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
+		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+		const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+		AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+		if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
 
 		TabCtrl_SetCurSel(thisPtr->m_tabs,0);
 
@@ -175,6 +189,15 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				}
 				return TRUE;
 			}
+		}
+		if (!g_currChar.IsValid()) {
+			const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+			const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+			if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+		}
+		if (g_currChar.IsValid()) {
+			AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 		}
 		break; }
 	}
@@ -208,20 +231,138 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_cbSaveFiles = GetDlgItem(hwndDlg,IDC_GN_CBSAVEFILES);
 		thisPtr->m_cbSaveEyeTexture = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYETEX);
 		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
+		thisPtr->m_lbAAuSets = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS);
+		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
+		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
+		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 
 		return TRUE;
 		break; }
+	case WM_VKEYTOITEM: {
+		//DEL-key was pressed while the list box had the focus
+		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		if (LOWORD(wparam) == VK_DELETE) {
+			//get current selection text
+			int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
+			//remove this rule
+			if (!g_currChar.IsValid()) {
+				const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+				const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+				AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+				if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+			}
+			if (g_currChar.IsValid()) {
+				g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
+				g_currChar.m_cardData.RemoveCardStyle(sel);
+			}
+			thisPtr->RefreshAAuSetList();
+			return TRUE;
+		}
+		break; }
+	
 	case WM_COMMAND: {
 		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
-		
+		switch(HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if(identifier == IDC_GN_BTNAAUSETADD) {
+				TCHAR buf[256];
+				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
+
+				if (!g_currChar.IsValid()) {
+					const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+					const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+					if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+				}
+				if (g_currChar.IsValid()) {
+					AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+					AAEdit::g_currChar.m_cardData.CopyCardStyle(buf, g_currChar.m_char->m_charData);
+				}
+				thisPtr->RefreshAAuSetList();
+				return TRUE;
+			}
+			if (identifier == IDC_GN_BTNLOADCLOTH) {
+				const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+				if (path != NULL) {
+					ClothFile load(General::FileToBuffer(path));
+					if (!load.IsValid()) return FALSE;
+					auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[AAEdit::g_currChar.m_char->m_currClothes];
+					cloth->slot = load.m_slot;
+					cloth->skirtLength = load.m_shortSkirt;
+					cloth->socks = load.m_socksId;
+					cloth->indoorShoes = load.m_shoesIndoorId;
+					cloth->outdoorShoes = load.m_shoesOutdoorId;
+					cloth->isOnePiece = load.m_isOnePiece;
+					cloth->hasUnderwear = load.m_hasUnderwear;
+					cloth->hasSkirt = load.m_hasSkirt;
+					cloth->colorTop1 = load.m_colorTop1;
+					cloth->colorTop2 = load.m_colorTop2;
+					cloth->colorTop3 = load.m_colorTop3;
+					cloth->colorTop4 = load.m_colorTop4;
+					cloth->colorBottom1 = load.m_colorBottom1;
+					cloth->colorBottom2 = load.m_colorBottom2;
+					cloth->colorUnderwear = load.m_colorUnderwear;
+					cloth->colorSocks = load.m_colorSocks;
+					cloth->colorIndoorShoes = load.m_colorIndoorShoes;
+					cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
+					cloth->textureBottom1 = load.m_skirtTextureId;
+					cloth->textureUnderwear = load.m_underwearTextureId;
+					cloth->textureBottom1Hue = load.m_skirtHue;
+					cloth->textureBottom1Lightness = load.m_skirtBrightness;
+					cloth->shadowBottom1Hue = load.m_skirtShadowHue;
+					cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
+					cloth->textureUnderwearHue = load.m_underwearHue;
+					cloth->textureUnderwearLightness = load.m_underwearBrightness;
+					cloth->shadowUnderwearHue = load.m_underwearShadowHue;
+					cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+					return TRUE;
+				}
+			}
+			break; }
+		case LBN_SELCHANGE: {
+			GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+			HWND wnd = (HWND)lparam;
+			if (wnd == thisPtr->m_lbAAuSets) {
+				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					if (!g_currChar.IsValid()) {
+						const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+						const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+						if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+					}
+
+					if (g_currChar.IsValid()) {
+						AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
+					}
+					using namespace ExtVars::AAEdit;
+					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);
+				}
+				return TRUE;
+			}
+			break; }
+		}
 		break; }
 	}
 	return FALSE;
 }
 
-void UnlimitedDialog::GNDialog::Refresh() {
-
+void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
+	SendMessage(this->m_lbAAuSets,LB_RESETCONTENT,0,0);
+	auto list = AAEdit::g_currChar.m_cardData.GetAAUSetDataList();
+	for (size_t i = 0; i < list.size(); i++) {
+		SendMessage(this->m_lbAAuSets,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
+	}
+	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
 }
+
+void UnlimitedDialog::GNDialog::Refresh() {
+	RefreshAAuSetList();
+}
+
+
 
 /************************/
 /* Mesh Override Dialog */
@@ -1744,6 +1885,113 @@ void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	SendMessage(edit,WM_SETTEXT,0,(LPARAM)buffer);
 	Sync(true);
 }
+
+
+/*****************/
+/* Module Dialog */
+/*****************/
+
+INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		MDDialog* thisPtr = (MDDialog*)lparam;
+		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,lparam); //register class to this hwnd
+		thisPtr->m_dialog = hwndDlg;
+		thisPtr->m_lbModulesAvailable = GetDlgItem(hwndDlg,IDC_MB_LBAVAILABLE);
+		thisPtr->m_lbModulesUsed = GetDlgItem(hwndDlg,IDC_MD_LBINUSE);
+		thisPtr->m_edName = GetDlgItem(hwndDlg,IDC_MD_EDNAME);
+		thisPtr->m_edDescr = GetDlgItem(hwndDlg,IDC_MD_EDDESCR);
+
+		return TRUE;
+		break; }
+	case WM_COMMAND: {
+		MDDialog* thisPtr = (MDDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+		DWORD identifier = LOWORD(wparam);
+		DWORD notification = HIWORD(wparam);
+		HWND wnd = (HWND)lparam;
+		switch (identifier) {
+		case IDC_MD_LBAVAILABLE:
+		case IDC_MD_LBINUSE:
+			if(notification == LBN_SELCHANGE) {
+				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
+				if(sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
+					SendMessage(thisPtr->m_edDescr,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+					return TRUE;
+				}
+			}
+			break;
+		case IDC_MD_BTNRIGHT:
+			if(notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesAvailable,LB_GETCURSEL,0,0);
+				if(sel != LB_ERR) {
+					g_currChar.m_cardData.AddModule(thisPtr->m_modules[sel].mod);
+					thisPtr->Refresh();
+				}
+			}
+			break;
+		case IDC_MD_BTNLEFT:
+			if (notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					g_currChar.m_cardData.RemoveModule(sel);
+					thisPtr->Refresh();
+				}
+			}
+			break;
+		case IDC_MD_BTNADDASTRIGGER:
+			if (notification == BN_CLICKED) {
+				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
+				if (sel != LB_ERR) {
+					for(auto& trigger : g_currChar.m_cardData.GetModules()[sel].triggers) {
+						g_currChar.m_cardData.GetTriggers().push_back(trigger);
+					}
+				}
+				g_currChar.m_cardData.RemoveModule(sel);
+				thisPtr->Refresh();
+			}
+			break;
+		}
+		break; }
+	}
+	return FALSE;
+}
+
+void UnlimitedDialog::MDDialog::Refresh() {
+	//list available modules
+	m_modules.clear();
+	SendMessage(m_lbModulesAvailable,LB_RESETCONTENT,0,0);
+	std::wstring modDirectory = General::BuildOverridePath(MODULE_PATH,TEXT("*"));
+	if (!General::DirExists(modDirectory.c_str())) {
+		CreateDirectory(modDirectory.c_str(),NULL);
+	}
+	WIN32_FIND_DATA data;
+	HANDLE hSearch = FindFirstFile(modDirectory.c_str(),&data);
+
+	if (hSearch != INVALID_HANDLE_VALUE) {
+		BOOL suc = FALSE;
+		do {
+			if (!(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				ModuleFile mod(General::BuildOverridePath(MODULE_PATH,data.cFileName).c_str());
+				if(mod.IsGood()) {
+					m_modules.push_back(mod);
+					SendMessage(m_lbModulesAvailable,LB_ADDSTRING,0,(LPARAM)data.cFileName);
+				}
+			}
+			suc = FindNextFile(hSearch,&data);
+		} while (suc != FALSE);
+		FindClose(hSearch);
+	}
+
+	//list current modules
+	SendMessage(m_lbModulesUsed,LB_RESETCONTENT,0,0);
+	for(auto& elem : g_currChar.m_cardData.GetModules()) {
+		SendMessage(m_lbModulesUsed,LB_ADDSTRING,0,(LPARAM)elem.name.c_str());
+	}
+
+
+}
+
 
 UnlimitedDialog g_AAUnlimitDialog;
 

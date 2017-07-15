@@ -82,6 +82,26 @@
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="Functions\AAPlay\PoserController.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Expressions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Thread.cpp" />
+    <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
+    <ClCompile Include="Functions\Shared\TriggerEventDistributor.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\InfoData.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\NamedConstant.cpp" />
+    <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
+    <ClCompile Include="Files\ModuleFile.cpp" />
+    <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
+    <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -161,6 +181,33 @@
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Functions\AAPlay\PoserController.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Triggers.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Expressions.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Value.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Thread.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Event.h" />
+    <ClInclude Include="Functions\Shared\TriggerEventDistributor.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
+    <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
+    <ClInclude Include="Functions\Shared\Triggers\InfoData.h" />
+    <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />
+    <ClInclude Include="Functions\Shared\Triggers\NamedConstant.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterActivity.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
+    <ClInclude Include="External\ExternalClasses\LoverData.h" />
+    <ClInclude Include="External\ExternalClasses\TimeData.h" />
+    <ClInclude Include="Functions\Serialize.h" />
+    <ClInclude Include="Files\ModuleFile.h" />
+    <ClInclude Include="Functions\Shared\Triggers\Module.h" />
+    <ClInclude Include="External\ExternalClasses\HStatistics.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
+    <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

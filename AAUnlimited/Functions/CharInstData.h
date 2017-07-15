@@ -13,6 +13,17 @@
 class CharInstData
 {
 public:
+	struct ActionParamStruct {
+		DWORD conversationId = -1;
+		DWORD movementType;
+		DWORD roomTarget;
+		DWORD unknown; //always -1
+		ExtClass::CharacterActivity* target1;
+		ExtClass::CharacterActivity* target2;
+		DWORD unknown2; //always 1, though initialized to 2
+	};
+
+public:
 	CharInstData();
 	~CharInstData();
 
@@ -21,6 +32,11 @@ public:
 
 	std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> m_hairs[4];
 
+	ActionParamStruct m_forceAction;
+
+	int charOffset;
+
 	void Reset();
+	inline bool IsValid() { return m_char != NULL; }
 };
 

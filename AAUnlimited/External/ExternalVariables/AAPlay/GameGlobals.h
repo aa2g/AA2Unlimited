@@ -2,6 +2,7 @@
 
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "External\ExternalClasses\ConversationStruct.h"
+#include "External\ExternalClasses\TimeData.h"
 
 namespace ExtVars {
 namespace AAPlay {
@@ -12,6 +13,10 @@ ExtClass::PcConversationStruct* PlayerConversationPtr(); //pointer to the global
 
 ExtClass::CharacterStruct** ClassMembersArray();
 ExtClass::CharacterStruct** ClassMembersArrayEnd(); //first invalid pointer in the array
+
+void* ptrCharTargetArray();
+
+ExtClass::TimeData* GameTimeData();
 
 }
 }

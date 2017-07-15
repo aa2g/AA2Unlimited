@@ -179,15 +179,19 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 
 #include "MemMods/Shared/Events/MeshTexture.h"
 #include "MemMods/Shared/Misc/EyeTexture.h"
+#include "MemMods/Shared/Misc/FixLocale.h"
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 #include "MemMods/Shared/Events/FileDump.h"
 #include "MemMods/Shared/Events/HairMeshes.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/PcConversation.h"
+#include "MemMods/AAPlay/Events/Time.h"
 #include "MemMods/AAPlay/Events/Loads.h"
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 #include "MemMods/AAPlay/Events/ClothingDialog.h"
+#include "MemMods/AAPlay/Events/NpcActions.h"
+#include "MemMods/AAPlay/Events/ScreenCapture.h"
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAEdit/SaveCard.h"
@@ -230,6 +234,8 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
+		if (!FixLocale::IsEmulated())
+			FixLocale::SetCP();
 	}
 
 	if (General::IsAAPlay) {
@@ -260,6 +266,15 @@ void InitializeHooks() {
 		}
 		ClothingDialog::InitInjection();
 		ClothingDialog::ExitInjection();
+
+		NpcActions::NpcAnswerInjection();
+		NpcActions::NpcMovingActionInjection();
+		NpcActions::NpcMovingActionPlanInjection();
+		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
+		ScreenCapture::InitInjection();
+		using namespace SharedInjections;
+		if (!FixLocale::IsEmulated())
+			FixLocale::PatchAA2Play();
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;

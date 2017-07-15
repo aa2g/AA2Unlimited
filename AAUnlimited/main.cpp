@@ -21,8 +21,8 @@ BOOL WINAPI DllMain(
 		if (!General::Initialize()) {
 			return FALSE;
 		}
-		g_Logger.Initialize(General::BuildPlayPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
-		g_Config = Config(General::BuildPlayPath(CONFIG_FILE_PATH).c_str());
+		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
+		g_Config = Config(General::BuildAAUPath(CONFIG_FILE_PATH).c_str());
 		InitializeHooks();
 		return TRUE;
 	}

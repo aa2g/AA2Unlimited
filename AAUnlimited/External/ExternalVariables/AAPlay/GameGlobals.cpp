@@ -34,5 +34,12 @@ ExtClass::CharacterStruct** ClassMembersArrayEnd() {
 		ApplyRule(offsets);
 }
 
+ExtClass::TimeData* GameTimeData() {
+	static const DWORD offsets[]{ 0x3761CC, 0x28, 0x1C, 0x20 };
+	//static const DWORD offsets[]{ 0x376164, 0x2C };
+	return (ExtClass::TimeData*)
+		ApplyRule(offsets);
+}
+
 }
 }

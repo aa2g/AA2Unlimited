@@ -5,6 +5,7 @@
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/Poser.h"
 #include "Functions/AAPlay/GameState.h"
+#include "Functions/Shared/TriggerEventDistributor.h"
 
 namespace PlayInjections {
 /*
@@ -12,6 +13,7 @@ namespace PlayInjections {
  */
 namespace PcConversation {
 
+	Shared::Triggers::PCConversationStateUpdatedData data;
 /********************
  * Start / End Event
  ********************/
@@ -23,6 +25,10 @@ void __stdcall StartEvent() {
 
 void __stdcall EndEvent() {
 	Shared::GameState::setIsPcConversation(false);
+	data.state = -1;
+	Shared::Triggers::ThrowEvent(&data);
+
+	Shared::GameState::clearConversationCharacter(-1);
 	Poser::EndEvent();
 }
 
@@ -32,11 +38,26 @@ void __stdcall EndEvent() {
  ********************/
 
 void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
+	const int arbitraryMaxResponse = 10;
 
+	auto substruct = param->GetSubStruct();
+	auto prevState = Shared::GameState::getPCConversationState();
+
+	if (prevState != substruct->m_npcTalkState) {
+		Shared::GameState::setPCConversationState(substruct->m_npcTalkState);
+
+		//Shared::Triggers::PCConversationStateUpdatedData data;
+		data.state = substruct->m_npcTalkState;
+		data.npc_response = (substruct->m_response < arbitraryMaxResponse) ? substruct->m_response : -1;
+		data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
+		data.action = substruct->m_conversationId;
+		data.m_bStartH = &(substruct->m_bStartH);
+		data.card = (*(Shared::GameState::getPlayerCharacter()))->m_seat;
+		Shared::Triggers::ThrowEvent(&data);
+	}
 }
 
 void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
-
 }
 
 /********************
@@ -66,7 +87,7 @@ void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversa
  * Parameter type is whatever it currently is
  ********************/
 void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
-	
+
 }
 
 /*******************
