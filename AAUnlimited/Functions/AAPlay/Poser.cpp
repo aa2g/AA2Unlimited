@@ -23,7 +23,7 @@
 #include "Files\PoseFile.h"
 #include "Files\ClothFile.h"
 #include "resource.h"
-#include "config.h"
+#include "defs.h"
 
 #include "PoserController.h"
 #include "3rdparty\picojson\picojson.h"
@@ -41,9 +41,9 @@ namespace Poser {
 	bool loc_syncing;
 
 	void StartEvent(EventType type) {
-		if (!g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal && type == ClothingScene) return;
-		if (!g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal
-			&& (type == NpcInteraction || type == HMode)) return;
+		if (!g_Config.bUseClothesPoser && type == ClothingScene) return;
+		if (!g_Config.bUseDialoguePoser
+			&& (type == NpcInteraction || type == HMode )) return;
 		g_PoserController.GenSliderInfo();
 		g_PoserWindow.Init();
 	}
@@ -54,7 +54,7 @@ namespace Poser {
 	}
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
-		if (g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal || g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
+		if (g_Config.bUseDialoguePoser || g_Config.bUseClothesPoser) {
 			g_PoserController.GenSliderInfo();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
@@ -117,9 +117,10 @@ namespace Poser {
 		static bool ignoreNextSlider = false;
 
 		//set hotkeys		
-		auto hkTranslate = g_Config.GetKeyValue(Config::HKEY_POSER_TRANSLATE).bVal;	//W
-		auto hkRotate = g_Config.GetKeyValue(Config::HKEY_POSER_ROTATE).bVal;	//E
-		auto hkScale = g_Config.GetKeyValue(Config::HKEY_POSER_SCALE).bVal;	//R
+		//
+		auto hkTranslate = g_Config.sPoserHotKeys[0]; //W
+		auto hkRotate = g_Config.sPoserHotKeys[1]; //E
+		auto hkScale = g_Config.sPoserHotKeys[2]; //R
 
 		switch (msg) {
 		case WM_INITDIALOG: {
@@ -224,7 +225,7 @@ namespace Poser {
 			loc_syncing = false;
 
 			//register hotkeys
-			if (g_Config.GetKeyValue(Config::USE_POSER_HOTKEYS).bVal) RegisterHotKey(
+			if (g_Config.sPoserHotKeys[0]) RegisterHotKey(
 				hwndDlg,
 				hkTranslate,
 				MOD_NOREPEAT,

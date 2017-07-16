@@ -336,5 +336,8 @@
     <None Include="Texts\mod\launcher\dlg.lua">
       <Filter>Lua\Launcher</Filter>
     </None>
+    <None Include="Texts\mod\nocd.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

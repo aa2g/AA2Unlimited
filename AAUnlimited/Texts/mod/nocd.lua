@@ -1,3 +1,3 @@
 return function()
-	GPoke(0x1E36, "\xeb")
+	g_poke(0x1E36, "\xeb")
 end
