@@ -24,7 +24,7 @@ namespace Poser {
 		struct SliderInfo {
 
 			SliderInfo()
-				: xxFrame(nullptr) {
+				: xxFrame(nullptr), guide(nullptr) {
 
 			}
 
@@ -35,6 +35,7 @@ namespace Poser {
 			PoseMods::FrameCategory category;
 
 			ExtClass::Frame* xxFrame;
+			ExtClass::Frame* guide;
 
 			enum Operation {
 				Rotate,
@@ -343,6 +344,8 @@ namespace Poser {
 
 		~PoserController();
 
+		ExtClass::XXFile* GetXXFile(ExtClass::CharacterStruct::Models model);
+
 		inline bool GetIsHiddenFrame(ExtClass::Frame* frame) {
 			return frame->m_renderFlag == 2;
 		}
@@ -417,6 +420,9 @@ namespace Poser {
 			m_currentCategory = category;
 		}
 
+		bool IsActive() {
+			return m_isActive;
+		}
 		void StartPoser();
 		void StopPoser();
 		void Clear();
@@ -435,6 +441,12 @@ namespace Poser {
 
 		void FrameModEvent(ExtClass::XXFile* xxFile);
 
+		std::wstring GetOverride(const std::wstring& file);
+		void SetOverride(const std::wstring& file, const std::wstring& override);
+		bool IsUseGuidesEnabled();
+		void SetUseGuides(bool enabled);
+
+		bool m_isActive;
 		PoseMods::FrameCategory m_currentCategory;
 		std::vector<PoserCharacter*> m_characters;
 		PoserCharacter* m_targetCharacter; // the most recent loaded character
@@ -447,8 +459,9 @@ namespace Poser {
 		std::vector<SliderInfo> m_sliders;
 		std::map<std::string, SliderInfo> m_roomSliders;
 		std::string m_roomCurrentFrame;
+		std::map<std::wstring, std::wstring> m_overrides;
 
-
+		bool m_useGuides;
 };
 
 }

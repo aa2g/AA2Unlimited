@@ -80,6 +80,12 @@ namespace Poser {
 		m_currentSlider = &m_sliders[0];
 	}
 
+	ExtClass::XXFile* PoserController::GetXXFile(ExtClass::CharacterStruct::Models model) {
+		PoserController::PoserCharacter* c = CurrentCharacter();
+		if (!c) return nullptr;
+		return c->m_character->GetXXFile(model);
+	}
+
 	void PoserController::SetHidden(const char* name, bool hidden) {
 		ExtClass::Frame** frame = CurrentCharacter()->m_character->m_bonePtrArray;
 		ExtClass::Frame** arrayEnd= CurrentCharacter()->m_character->m_bonePtrArrayEnd;
@@ -93,7 +99,8 @@ namespace Poser {
 		}
 	}
 
-	PoserController::PoserController() : m_currentCharacter(0) {
+	PoserController::PoserController() : m_currentCharacter(0), m_isActive(false),
+	m_useGuides(false) {
 	}
 
 	PoserController::~PoserController()	{
@@ -101,10 +108,12 @@ namespace Poser {
 
 	void PoserController::StartPoser() {
 		GenSliderInfo();
+		m_isActive = true;
 	}
 
 	void PoserController::StopPoser() {
 		Clear();
+		m_isActive = false;
 	}
 
 	void PoserController::Clear() {
@@ -246,6 +255,12 @@ namespace Poser {
 
 		//adjust bone matrizes
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
+			if (General::StartsWith(bone->m_name, "guide_")) {
+				auto match = PoserCharacter::s_frameMap.find(bone->m_name + 6);
+				if (match != PoserCharacter::s_frameMap.end()) {
+					targetChar->m_sliders[match->second].guide = bone;
+				}
+			}
 
 			//try to find matches in both the bone rules and slider rules
 			auto match = PoserCharacter::s_frameMap.find(bone->m_name);
@@ -595,6 +610,35 @@ namespace Poser {
 		cloth->textureUnderwearLightness = load.m_underwearBrightness;
 		cloth->shadowUnderwearHue = load.m_underwearShadowHue;
 		cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+	}
+
+	std::wstring PoserController::GetOverride(const std::wstring& file) {
+		//A00_00_01_00h.xx - skeleton
+		if (m_useGuides && file.length() == 16 && General::StartsWith(file, L"A00_00") && file.substr(10, 6) == L"00h.xx") {
+			return L"poser\\skeleton\\female_guides.xx";
+		}
+		auto it = m_overrides.find(file);
+		if (it != m_overrides.end()) {
+			return it->second;
+		}
+		return std::wstring();
+	}
+
+	void PoserController::SetOverride(const std::wstring& file, const std::wstring& override) {
+		if (override.empty()) {
+			m_overrides.erase(file);
+		}
+		else {
+			m_overrides[file] = override;
+		}
+	}
+
+	bool PoserController::IsUseGuidesEnabled() {
+		return m_useGuides;
+	}
+
+	void PoserController::SetUseGuides(bool enabled) {
+		m_useGuides = enabled;
 	}
 
 }

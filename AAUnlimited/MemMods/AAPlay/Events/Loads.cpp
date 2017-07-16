@@ -27,7 +27,7 @@ namespace {
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	Shared::MeshTextureCharLoadStart(loadCharacter);
-	Poser::SetTargetCharacter(loadCharacter);
+	Poser::LoadCharacter(loadCharacter);
 	//Add the character to the conversation list
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
@@ -42,6 +42,7 @@ void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 
 void __stdcall HiPolyLoadEndEvent() {
 	Shared::MeshTextureCharLoadEnd();
+	Poser::LoadCharacterEnd();
 	//throw high poly end event
 	HiPolyEndData data;
 	data.card = loc_hiPolyLoaded;

@@ -53,12 +53,36 @@ namespace Poser {
 		g_PoserWindow.Hide();
 	}
 
-	void SetTargetCharacter(ExtClass::CharacterStruct* charStruct) {
+	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		if (g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal || g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
 			g_PoserController.GenSliderInfo();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
 		}
+	}
+
+	void LoadCharacterEnd() {
+		//g_PoserController.SetHidden(ExtClass::CharacterStruct::Models::SKELETON, "guide_", true);
+	}
+
+	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
+		if (!g_PoserController.IsActive()) {
+			return false;
+		}
+		std::wstring& override = g_PoserController.GetOverride(std::wstring(*paramFile));
+		override = General::BuildOverridePath(override.c_str());
+		HANDLE hFile = CreateFile(override.c_str(), FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		if (hFile == NULL || hFile == INVALID_HANDLE_VALUE) {
+			return false;
+		}
+		DWORD lo, hi;
+		lo = GetFileSize(hFile, &hi);
+		void* fileBuffer = Shared::IllusionMemAlloc(lo);
+		ReadFile(hFile, fileBuffer, lo, &hi, NULL);
+		CloseHandle(hFile);
+		*outBuffer = (BYTE*)fileBuffer;
+		*readBytes = hi;
+		return true;
 	}
 
 	inline PoserController::SliderInfo* CurrentSlider() {
@@ -440,6 +464,26 @@ namespace Poser {
 					const static DWORD rule[]{ 0x368274 };
 					SetParent(thisPtr->m_dialog, isChecked ? *(HWND*)ExtVars::ApplyRule(rule) : NULL);
 				}
+				else if (id == IDC_PPS_BTNGUIDES) {
+					g_PoserController.SetUseGuides(!g_PoserController.IsUseGuidesEnabled());
+				}
+				else if (id == IDC_PPS_CHKSHOWGUIDES) {
+					LRESULT res = SendMessage(thisPtr->m_chkAlwaysOnTop, BM_GETCHECK, 0, 0);
+					if (res) {
+						PoserController::SliderInfo* s = CurrentSlider();
+						if (s) {
+							g_PoserController.SetHiddenFrame(s->guide, false);
+						}
+					}
+					else {
+						for (PoserController::SliderInfo& s : g_PoserController.CurrentCharacter()->m_sliders) {
+							if (s.guide) {
+								g_PoserController.SetHiddenFrame(s.guide, true);
+							}
+						}
+					}
+					bool isChecked = res == BST_CHECKED;
+				}
 				break; }
 			case LBN_SELCHANGE: {
 				PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -592,8 +636,15 @@ namespace Poser {
 			}
 			if (slider) {
 				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
-				if (slider->xxFrame)
+				if (slider->xxFrame) {
+					std::string guide = General::CastToString(slider->frameName);
+					for (PoserController::SliderInfo& s : g_PoserController.CurrentCharacter()->m_sliders) {
+						if (s.guide) {
+							g_PoserController.SetHiddenFrame(s.guide, guide.compare(s.guide->m_name + 6) != 0);
+						}
+					}
 					TabCtrl_SetCurSel(m_tabShowHide, g_PoserController.GetIsHiddenFrame(slider->xxFrame) ? 1 : 0);
+				}
 			}
 			SyncList();
 		}
