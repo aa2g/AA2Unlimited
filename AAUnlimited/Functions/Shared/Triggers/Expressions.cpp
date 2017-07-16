@@ -1464,6 +1464,12 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetConversationAction
 				},
+				{
+					63, EXPRCAT_CONVERSATION,
+					TEXT("Event ID"), TEXT("Event"), TEXT("Returns EventId."),
+					{}, (TYPE_INT),
+					&Thread::GetEventID
+				},
 			},
 
 			{ //BOOL

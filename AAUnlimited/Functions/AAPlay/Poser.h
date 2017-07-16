@@ -17,15 +17,17 @@ namespace Poser {
 
 	void StartEvent(EventType type);
 	void EndEvent();
-	void SetTargetCharacter(ExtClass::CharacterStruct* c);
+	void LoadCharacter(ExtClass::CharacterStruct* c);
+	void LoadCharacterEnd();
 	void FrameModEvent(ExtClass::XXFile* xxFile);
+	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer);
 
 	class PoserWindow {
 	public:
 		void Init();
 		void Hide();
 		void NewCharacter(int index);
-	private:
+
 		HWND m_dialog;
 		HWND m_edCharacter;
 		HWND m_edPose;
@@ -62,6 +64,7 @@ namespace Poser {
 		HWND m_chkTongueJuice;
 		HWND m_chkGlasses;
 		HWND m_chkAlwaysOnTop;
+		HWND m_chkShowGuides;
 		HWND m_tabModifiers;
 		HWND m_tabShowHide;
 		UINT_PTR m_timer;

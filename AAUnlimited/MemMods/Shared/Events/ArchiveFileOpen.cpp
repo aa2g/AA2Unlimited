@@ -8,6 +8,7 @@
 #include "Functions\Shared\Overrides.h"
 #include "Functions\Shared\SpecialOverrides.h"
 #include "Functions\Shared\Shadowing.h"
+#include "Functions\AAPlay\Poser.h"
 
 namespace SharedInjections {
 namespace ArchiveFile {
@@ -18,6 +19,8 @@ namespace ArchiveFile {
 */
 bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	bool ret;
+	ret = Poser::OverrideFile(paramArchive, paramFile, readBytes, outBuffer);
+	if (ret) return true;
 	ret = Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
 	if (ret) return true;
 	ret = Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer);

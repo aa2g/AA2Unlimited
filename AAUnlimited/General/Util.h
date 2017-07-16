@@ -9,10 +9,14 @@
 namespace General {
 	
 
-inline bool StartsWith(const TCHAR* str, const TCHAR* prefix) {
+inline bool StartsWith(const char* str, const char* prefix) {
 	while (*str && *prefix && *str == *prefix) str++, prefix++;
 	return !*prefix;
 }
+inline bool StartsWith(const TCHAR* str, const TCHAR* prefix) {
+	while (*str && *prefix && *str == *prefix) str++, prefix++;
+	return !*prefix;
+	}
 inline bool StartsWith(const std::wstring& str, const TCHAR* prefix) {
 	return StartsWith(str.c_str(), prefix);
 }
