@@ -14,7 +14,9 @@ local function patch_aaplay()
 end
 
 
-return function(mod, level)
+local _M={}
+
+function _M:load(mod, level)
 	level = level or 1
 	-- not emulated, nor japanese system (langid 17)
 	if (level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
@@ -24,3 +26,5 @@ return function(mod, level)
 		SetThreadLocale(1041)
 	end
 end
+
+return _M

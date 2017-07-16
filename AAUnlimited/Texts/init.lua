@@ -7,6 +7,14 @@ assert(_BINDING)
 _EVENTS = _EVENTS or {}
 _EVENTS.Config = _EVENTS.Config or {}
 _CONFIG = _CONFIG or {}
+_BINDING.Seats = {}
+_EVENTS.Seats = {}
+_EVENTS.H = {}
+_EVENTS.Convo = {}
+_EVENTS.NpcActions = {}
+_EVENTS.PcActions = {}
+_EVENTS.Time = {}
+_WIN32 = {}
 
 
 ---------------------------
@@ -128,17 +136,6 @@ end
 
 Config.load("config")
 
-_BINDING.Seats = {}
-_EVENTS.Seats = {}
-_EVENTS.H = {}
-_EVENTS.Convo = {}
-_EVENTS.NpcActions = {}
-_EVENTS.PcActions = {}
-_EVENTS.Time = {}
-
-_WIN32 = {}
-
-
 -- add more if you need it
 local dlls = {"KERNEL32.DLL","USER32.DLL"}
 setmetatable(_WIN32, {
@@ -156,6 +153,7 @@ setmetatable(_WIN32, {
 })
 
 local modules = {}
+local mnames = {}
 
 function load_modules()
 
@@ -164,35 +162,46 @@ function load_modules()
 		if not type(mod) == "table" then
 			log.error("invalid mod entry at index %d", i)
 		else
-			local ok, msg = xpcall(require, debug.traceback, mod[1])
+			local ok, data = xpcall(require, debug.traceback, mod[1])
 			if not ok then
-				log.error("Module %s failed: %s", mod[1], msg)
+				log.error("Module %s failed: %s", mod[1], data)
 			else
-				if type(msg) == "function" then
-					log("Loaded %s", mod[1])
-					table.insert(modules, {msg,mod})
+				if type(data) == "table" and data.load then
+					data.info = mod
+					log("Loaded %s", data.info[1])
+					table.insert(modules, data)
+					modules[data.info[1]] = data
 				end
 			end
 		end
 	end
 end
 
-function init_modules()
-	-- lock globals post-load
+function load_module(mod)
+	local ok, msg = xpcall(mod.load, debug.traceback, table.unpack(mod.info))
+	if not ok then
+		log.error("Unable to initialize %s: %s", mod.info[1], msg)
+	else
+		log("Initialized %s", mod.info[1])
+	end
+end
+
+function lock_globals()
 	setmetatable(_G, {
 		__index = function(t,k)
 			return _BINDING[k] or _WIN32[k] or error("accessing undefined global '"..tostring(k).."'")
 		end
 	})
+end
 
+function unlock_globals()
+	setmetatable(_G, nil)
+end
+
+function init_modules()
+	lock_globals()
 	log("Initializing modules")
-	for i,mod in ipairs(modules) do
-		local ok, msg = xpcall(mod[1], debug.traceback, table.unpack(mod[2]))
-		if not ok then
-			log.error("Unable to initialize %s: %s", mod[2][1], msg)
-		else
-			log("Initialized %s", mod[2][1])
-		end
+	for _,mod in ipairs(modules) do
+		load_module(mod)
 	end
-
 end

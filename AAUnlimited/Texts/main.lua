@@ -1,3 +1,3 @@
 Config.load("config")
-Log.info("Lua scripting initialized.")
+log.info("Lua scripting initialized.")
 
