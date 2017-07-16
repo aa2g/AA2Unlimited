@@ -17,8 +17,10 @@ namespace Poser {
 
 	void StartEvent(EventType type);
 	void EndEvent();
-	void SetTargetCharacter(ExtClass::CharacterStruct* c);
+	void LoadCharacter(ExtClass::CharacterStruct* c);
+	void LoadCharacterEnd();
 	void FrameModEvent(ExtClass::XXFile* xxFile);
+	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer);
 
 	class PoserWindow {
 	public:
