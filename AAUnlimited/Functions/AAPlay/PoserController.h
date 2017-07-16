@@ -392,7 +392,7 @@ namespace Poser {
 		}
 
 		inline void SetCurrentSlider(PoseMods::FrameCategory category, int index) {
-			if (category == PoseMods::Room) return;
+			if (category == PoseMods::Room || category == PoseMods::Prop) return;
 			CurrentCharacter()->SetCurrentSlider(category, m_sliderCategories[category][index]);
 		}
 
@@ -445,6 +445,8 @@ namespace Poser {
 		void SetOverride(const std::wstring& file, const std::wstring& override);
 		bool IsUseGuidesEnabled();
 		void SetUseGuides(bool enabled);
+		bool ShowGuides();
+		void SetShowGuides(bool show);
 
 		bool m_isActive;
 		PoseMods::FrameCategory m_currentCategory;
@@ -462,6 +464,7 @@ namespace Poser {
 		std::map<std::wstring, std::wstring> m_overrides;
 
 		bool m_useGuides;
+		bool m_showGuides;
 };
 
 }

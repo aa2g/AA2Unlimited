@@ -259,6 +259,7 @@ namespace Poser {
 				auto match = PoserCharacter::s_frameMap.find(bone->m_name + 6);
 				if (match != PoserCharacter::s_frameMap.end()) {
 					targetChar->m_sliders[match->second].guide = bone;
+					SetHiddenFrame(bone, !m_showGuides);
 				}
 			}
 
@@ -639,6 +640,14 @@ namespace Poser {
 
 	void PoserController::SetUseGuides(bool enabled) {
 		m_useGuides = enabled;
+	}
+
+	bool PoserController::ShowGuides() {
+		return m_showGuides;
+	}
+
+	void PoserController::SetShowGuides(bool show) {
+		m_showGuides = show;
 	}
 
 }

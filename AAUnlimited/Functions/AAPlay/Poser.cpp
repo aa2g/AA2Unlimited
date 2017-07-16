@@ -58,6 +58,8 @@ namespace Poser {
 			g_PoserController.GenSliderInfo();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
+			g_PoserWindow.SyncBones();
+			g_PoserWindow.SyncOperation();
 		}
 	}
 
@@ -98,6 +100,9 @@ namespace Poser {
 			m_timer = SetTimer(m_dialog, 1, 2000, NULL);
 		EnableWindow(g_PoserWindow.m_dialog, TRUE);
 		ShowWindow(m_dialog, SW_SHOW);
+		if (!g_PoserController.m_sliderCategories[PoseMods::Other].empty()) {
+			SendMessage(m_listCategories, LB_SETCURSEL, PoseMods::Other, 0);
+		}
 	}
 
 	void PoserWindow::Hide() {
@@ -155,6 +160,7 @@ namespace Poser {
 			thisPtr->m_chkTears = GetDlgItem(hwndDlg, IDC_PPS_CHKTEARS);
 			thisPtr->m_chkDimEyes = GetDlgItem(hwndDlg, IDC_PPS_CHKDIMEYES);
 			thisPtr->m_chkTongueJuice = GetDlgItem(hwndDlg, IDC_PPS_CHKTONGUEJUICE);
+			thisPtr->m_chkShowGuides = GetDlgItem(hwndDlg, IDC_PPS_CHKSHOWGUIDES);
 			thisPtr->m_tabModifiers = GetDlgItem(hwndDlg, IDC_PPS_TABMODIFIERS);
 			thisPtr->m_tabShowHide = GetDlgItem(hwndDlg, IDC_PPS_TABSHOWHIDE);
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -468,7 +474,8 @@ namespace Poser {
 					g_PoserController.SetUseGuides(!g_PoserController.IsUseGuidesEnabled());
 				}
 				else if (id == IDC_PPS_CHKSHOWGUIDES) {
-					LRESULT res = SendMessage(thisPtr->m_chkAlwaysOnTop, BM_GETCHECK, 0, 0);
+					LRESULT res = SendMessage(thisPtr->m_chkShowGuides, BM_GETCHECK, 0, 0);
+					g_PoserController.SetShowGuides((bool)res);
 					if (res) {
 						PoserController::SliderInfo* s = CurrentSlider();
 						if (s) {
@@ -638,9 +645,10 @@ namespace Poser {
 				SendMessage(m_listOperation, LB_SETCURSEL, slider->currentOperation, 0);
 				if (slider->xxFrame) {
 					std::string guide = General::CastToString(slider->frameName);
+					bool showGuide = g_PoserController.ShowGuides();
 					for (PoserController::SliderInfo& s : g_PoserController.CurrentCharacter()->m_sliders) {
 						if (s.guide) {
-							g_PoserController.SetHiddenFrame(s.guide, guide.compare(s.guide->m_name + 6) != 0);
+							g_PoserController.SetHiddenFrame(s.guide, !showGuide && (guide.compare(s.guide->m_name + 6) != 0));
 						}
 					}
 					TabCtrl_SetCurSel(m_tabShowHide, g_PoserController.GetIsHiddenFrame(slider->xxFrame) ? 1 : 0);

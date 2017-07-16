@@ -27,7 +27,7 @@ namespace Poser {
 		void Init();
 		void Hide();
 		void NewCharacter(int index);
-	private:
+
 		HWND m_dialog;
 		HWND m_edCharacter;
 		HWND m_edPose;
@@ -64,6 +64,7 @@ namespace Poser {
 		HWND m_chkTongueJuice;
 		HWND m_chkGlasses;
 		HWND m_chkAlwaysOnTop;
+		HWND m_chkShowGuides;
 		HWND m_tabModifiers;
 		HWND m_tabShowHide;
 		UINT_PTR m_timer;
