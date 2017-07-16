@@ -59,6 +59,7 @@
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\GameTick.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\GameTick.h" />
     <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
@@ -255,6 +257,8 @@
     <None Include="Texts\main.lua" />
     <None Include="Texts\mod\catchall.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
+    <None Include="Texts\mod\launcher\dlg.lua" />
+    <None Include="Texts\mod\launcher\init.lua" />
     <None Include="Texts\mod\memory.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

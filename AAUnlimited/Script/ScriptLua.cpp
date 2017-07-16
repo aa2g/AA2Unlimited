@@ -16,11 +16,30 @@
 #include "Functions/Shared/Triggers/Actions.h"
 #include "MemMods/MemRightsLock.h"
 
-
-
 Lua g_Lua(true);
 
 Lua::Lua(bool libs) : sel::State(libs) {
+}
+
+// direct assembly code callback, stdcall/thiscall
+int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
+	lua_State *L = g_Lua._l;
+	lua_getglobal(L, LUA_EVENTS_TABLE);
+	lua_getfield(L, -1, "callback");
+	lua_rawgeti(L, -1, idx);
+
+	lua_pushinteger(L, _this);
+	for (int i = 0; i < narg; i++)
+		lua_pushinteger(L, argbuf[i]);
+
+	int ok = lua_pcall(L, 1+narg, 1, 0);
+	if (ok != LUA_OK) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) "Callback failed " << lua_tostring(L, -1) << "\r\n";
+	}
+
+	int ret = lua_tointeger(L, -1);
+	lua_pop(L, 3);
+	return ret;
 }
 
 void Lua::init() {
@@ -71,8 +90,8 @@ void Lua::bind() {
 
 	// Very low level utilities
 	using namespace General;
-	g_Lua[LUA_BINDING_TABLE]["Peek"] = lua_CFunction([](lua_State *L) {
-		// buf = Peek(addr, len)
+	g_Lua[LUA_BINDING_TABLE]["peek"] = lua_CFunction([](lua_State *L) {
+		// buf = peek(addr, len)
 		int addr = luaL_checkinteger(L, 1);
 		int nbytes = luaL_checkinteger(L, 2);
 		char *buf = (char*)alloca(nbytes);
@@ -80,8 +99,8 @@ void Lua::bind() {
 		lua_pushlstring(L, buf, nbytes);
 		return 1;
 	});
-	g_Lua[LUA_BINDING_TABLE]["Poke"] = lua_CFunction([](lua_State *L) {
-		// Poke(addr, buf)
+	g_Lua[LUA_BINDING_TABLE]["poke"] = lua_CFunction([](lua_State *L) {
+		// poke(addr, buf)
 		int addr = luaL_checkinteger(L, 1);
 		size_t nbytes;
 		const char *buf = luaL_checklstring(L, 2, &nbytes);
@@ -90,21 +109,33 @@ void Lua::bind() {
 		memcpy(ptr, buf, nbytes);
 		return 0;
 	});
-	g_Lua[LUA_BINDING_TABLE]["PInvoke"] = lua_CFunction([](lua_State *L) {
-		// eax, edx = PInvoke(addr, stack), stdcall only
+
+	g_Lua[LUA_BINDING_TABLE]["proc_invoke"] = lua_CFunction([](lua_State *L) {
+		// eax, edx = proc_invoke(addr, args...), stdcall/thiscall only
+		DWORD *argbuf = (DWORD*)alloca((lua_gettop(L) - 2)*4);
 		int addr = luaL_checkinteger(L, 1);
-		size_t nbytes;
-		const char *buf = luaL_checklstring(L, 2, &nbytes);
+		int _this = lua_tointeger(L, 2);
+		for (int i = 3; i <= lua_gettop(L); i++) {
+			if (lua_type(L, i) == LUA_TSTRING) {
+				argbuf[i - 3] = (DWORD)lua_tostring(L, i);
+			}
+			else {
+				argbuf[i - 3] = lua_tointeger(L, i);
+			}
+		}
+		size_t nbytes = (lua_gettop(L)-2)*4;
 		void *ptr = (void*)(addr);
 		int saved_eax, saved_edx;
 		__asm {
 			mov eax, addr
-			mov esi, buf
+			mov edx, _this
+			mov esi, argbuf
 			mov edi, esp
 			mov ecx, nbytes
 			sub esp, ecx
 			sub edi, ecx
 			rep movsb
+			mov ecx, edx
 			call eax
 			mov saved_eax, eax
 			mov saved_edx, edx
@@ -113,13 +144,14 @@ void Lua::bind() {
 		lua_pushinteger(L, saved_edx);
 		return 2;
 	});
-	g_Lua[LUA_BINDING_TABLE]["XPages"] = [](int size) {
+	g_Lua[LUA_BINDING_TABLE]["callback"] = int(&callback_ptr);
+	g_Lua[LUA_BINDING_TABLE]["x_pages"] = [](int size) {
 		void *d = VirtualAlloc(0, size, MEM_COMMIT, PAGE_EXECUTE_READ);
 		return int(d);
 	};
 	g_Lua[LUA_BINDING_TABLE]["GetProcAddress"] = lua_CFunction([](lua_State *L) {
 		if (lua_gettop(L) < 2) return 0;
-		void *res = GetProcAddress(LoadLibraryA(lua_tostring(L, 1)), lua_tostring(L, 2));
+		void *res = GetProcAddress(GetModuleHandleA(lua_tostring(L, 1)), lua_tostring(L, 2));
 		lua_pushinteger(L, int(res));
 		return int(res != NULL);
 	});
@@ -147,5 +179,4 @@ void Lua::bind() {
 	// Higher level triggers
 	using namespace Shared::Triggers;
 	g_Lua[LUA_BINDING_TABLE]["SafeAddCardPoints"] = &SafeAddCardPoints;
-
 }

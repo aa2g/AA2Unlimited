@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <sstream>
 #include <Windows.h>
 #include "Script/ScriptLua.h"
 
@@ -36,11 +37,13 @@ public:
 	Logger& operator<<(const T& p) {
 		if (outfile.good() && currPrio >= filter) {
 			outfile << p;
+			outbuf << p;
 		}
+		flush();
 		outfile.flush();
 		return *this;
 	}
-
+	void flush();
 	template<>
 	Logger& operator<<(const Priority& prio) {
 		currPrio = prio;
@@ -99,6 +102,7 @@ public:
 	bool FilterPriority(Priority prio);
 private:
 	std::ofstream outfile;
+	std::ostringstream outbuf;
 	Priority filter;
 	Priority currPrio;
 } g_Logger;

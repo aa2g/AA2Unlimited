@@ -29,14 +29,19 @@ end
 -- logger
 ---------------------------
 assert(_BINDING.logger, "C++ logger missing")
-Log = {}
+log = {}
 
 -- XREF: match enum Files/logger.h
-for prio,name in ipairs { "spam", "info", "warn", "err", "crit" } do
+for prio,name in ipairs { "spam", "info", "warn", "error", "crit" } do
 	local p = prio-1
-	Log[name] = function(...)
-		return _BINDING.logger(p, ...)
+	log[name] = function(...)
+		return _BINDING.logger(p, string.format(...))
 	end
+	setmetatable(log, {
+		__call = function(o,...)
+			o.spam(...)
+		end
+	})
 end
 
 -- empty logger hook
@@ -83,7 +88,7 @@ function Config.load(name)
 	setmetatable(_G, cfproxy)
 
 	local ret, msg = xpcall(ch, function()
-		Log.spam("tata" .. debug.traceback(err))
+		log.spam("tata" .. debug.traceback(err))
 	end)
 
 	setmetatable(_G, nil)
@@ -99,14 +104,17 @@ end
 ---------------------------
 package.path = Path("?.lua") .. ";" .. package.path -- in top level, only simple lua files are allowed
 
-package.path = Path("lib", "?.lua") .. ";" .. package.path
-package.path = Path("lib", "?", "init.lua") .. ";" .. package.path
-
 package.path = Path("mod", "?.lua") .. ";" .. package.path
 package.path = Path("mod", "?", "init.lua") .. ";" .. package.path
 
 package.cpath = Path("lib", "?.dll") .. ";" .. package.cpath
+package.cpath = Path("lib", "?53.dll") .. ";" .. package.cpath
 package.cpath = Path("lib", "?", "init.dll") .. ";" .. package.cpath
+package.cpath = Path("lib", "?", "init53.dll") .. ";" .. package.cpath
+
+
+package.path = Path("lib", "?.lua") .. ";" .. package.path
+package.path = Path("lib", "?", "init.lua") .. ";" .. package.path
 
 stdio_print = print
 print = function(...)
@@ -115,7 +123,7 @@ print = function(...)
 		res[i] = tostring(v)
 	end
 	local msg = table.concat(res, " ")
-	Log.spam(msg)
+	log.spam(msg)
 end
 
 Config.load("config")
@@ -128,28 +136,63 @@ _EVENTS.NpcActions = {}
 _EVENTS.PcActions = {}
 _EVENTS.Time = {}
 
+_WIN32 = {}
+
+
+-- add more if you need it
+local dlls = {"KERNEL32.DLL","USER32.DLL"}
+setmetatable(_WIN32, {
+	__index = function(t,k)
+		for _,v in ipairs(dlls) do
+			local got = GetProcAddress(v,k)
+			if got then
+				_WIN32[k] = function(...)
+					return _BINDING.proc_invoke(got,nil,...)
+				end
+				return _WIN32[k]
+			end
+		end
+	end
+})
+
+local modules = {}
+
 function load_modules()
-	setmetatable(_G, {
-		__index = _BINDING
-	})
 
 	Config.mods = Config.mods or {}
 	for i,mod in ipairs(Config.mods) do
 		if not type(mod) == "table" then
-			Log.err("invalid mod entry")
+			log.error("invalid mod entry at index %d", i)
 		else
 			local ok, msg = xpcall(require, debug.traceback, mod[1])
 			if not ok then
-				Log.err("nunu"..msg)
+				log.error("Module %s failed: %s", mod[1], msg)
 			else
-				Log.spam("Loading module "..mod[1])
 				if type(msg) == "function" then
-					ok, msg = xpcall(msg, debug.traceback, table.unpack(mod))
-					if not ok then
-						Log.err("fufu"..msg)
-					end
+					log("Loaded %s", mod[1])
+					table.insert(modules, {msg,mod})
 				end
 			end
 		end
 	end
+end
+
+function init_modules()
+	-- lock globals post-load
+	setmetatable(_G, {
+		__index = function(t,k)
+			return _BINDING[k] or _WIN32[k] or error("accessing undefined global '"..tostring(k).."'")
+		end
+	})
+
+	log("Initializing modules")
+	for i,mod in ipairs(modules) do
+		local ok, msg = xpcall(mod[1], debug.traceback, table.unpack(mod[2]))
+		if not ok then
+			log.error("Unable to initialize %s: %s", mod[2][1], msg)
+		else
+			log("Initialized %s", mod[2][1])
+		end
+	end
+
 end

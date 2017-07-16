@@ -40,7 +40,10 @@ BOOL WINAPI DllMain(
 
 		// This must be done post-hook initialization
 		g_Lua.bind();
+		SetDllDirectory(General::BuildAAUPath(L"lib").c_str());
 		g_Lua["load_modules"]();
+		g_Logger.flush(); // make lua see pending log entries
+		g_Lua["init_modules"]();
 		return TRUE;
 	}
 }

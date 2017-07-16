@@ -87,5 +87,6 @@ sPoserHotKeys = "WER"
 
 mods = {
 	{ "fixlocale" },
-	{ "catchall" }
+	{ "catchall" },
+	{ "launcher" }
 }
