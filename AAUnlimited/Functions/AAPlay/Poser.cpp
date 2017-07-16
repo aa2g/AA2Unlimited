@@ -206,6 +206,8 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinBlush, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 
+			SendMessage(thisPtr->m_chkShowGuides, BM_SETCHECK, g_PoserController.ShowGuides() ? BST_CHECKED : BST_UNCHECKED, 0);
+
 			TCITEM tab;
 #define makeTab(data,text) tab.mask = TCIF_TEXT | TCIF_PARAM; tab.pszText = L#text; tab.lParam = data;
 			makeTab(1, x1);
@@ -478,7 +480,7 @@ namespace Poser {
 					g_PoserController.SetShowGuides((bool)res);
 					if (res) {
 						PoserController::SliderInfo* s = CurrentSlider();
-						if (s) {
+						if (s && s->guide) {
 							g_PoserController.SetHiddenFrame(s->guide, false);
 						}
 					}
@@ -648,7 +650,7 @@ namespace Poser {
 					bool showGuide = g_PoserController.ShowGuides();
 					for (PoserController::SliderInfo& s : g_PoserController.CurrentCharacter()->m_sliders) {
 						if (s.guide) {
-							g_PoserController.SetHiddenFrame(s.guide, !showGuide && (guide.compare(s.guide->m_name + 6) != 0));
+							g_PoserController.SetHiddenFrame(s.guide, !(showGuide && (guide.compare(s.guide->m_name + 6) == 0)));
 						}
 					}
 					TabCtrl_SetCurSel(m_tabShowHide, g_PoserController.GetIsHiddenFrame(slider->xxFrame) ? 1 : 0);
