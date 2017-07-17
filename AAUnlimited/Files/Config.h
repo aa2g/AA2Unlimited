@@ -24,6 +24,7 @@ public:;
 	bool bEnableFacecam;
 	bool bUseShadowing;
 	bool bUseHAi;
+	bool bUsePPeX = true;
 
 	inline auto operator[](const char *name) const {
 		return g_Lua[LUA_CONFIG_TABLE][name];

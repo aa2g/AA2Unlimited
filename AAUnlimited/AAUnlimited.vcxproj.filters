@@ -113,6 +113,7 @@
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
     <ClCompile Include="Script\ScriptLua.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\GameTick.cpp" />
+    <ClCompile Include="Files\PPeX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -296,6 +297,7 @@
       <Filter>Selene</Filter>
     </ClInclude>
     <ClInclude Include="MemMods\AAPlay\Events\GameTick.h" />
+    <ClInclude Include="Files\PPeX.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -316,9 +318,6 @@
       <Filter>Lua</Filter>
     </None>
     <None Include="Texts\init.lua">
-      <Filter>Lua</Filter>
-    </None>
-    <None Include="Texts\main.lua">
       <Filter>Lua</Filter>
     </None>
     <None Include="Texts\mod\catchall.lua">

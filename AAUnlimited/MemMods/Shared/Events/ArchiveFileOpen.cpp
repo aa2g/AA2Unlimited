@@ -9,6 +9,8 @@
 #include "Functions\Shared\SpecialOverrides.h"
 #include "Functions\Shared\Shadowing.h"
 #include "Functions\AAPlay\Poser.h"
+#include "Files/PPeX.h"
+
 
 namespace SharedInjections {
 namespace ArchiveFile {
@@ -33,7 +35,9 @@ bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD*
 		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
 		if (ret) return true;
 	}
-	return false;
+	if (g_Config.bUsePPeX)
+		ret = g_PPeX.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer);
+	return ret;
 }
 
 DWORD OpenFileNormalExit;
