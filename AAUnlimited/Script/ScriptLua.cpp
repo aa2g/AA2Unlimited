@@ -166,7 +166,9 @@ void Lua::bind() {
 	};
 
 	using namespace ExtVars::AAPlay;
-	g_Lua[LUA_BINDING_TABLE]["GetGameTimeData"] = GameTimeData();
+	g_Lua[LUA_BINDING_TABLE]["GetGameTimeData"] = []() {
+		return GameTimeData();
+	};
 	g_Lua[LUA_BINDING_TABLE]["GetPlayerCharacter"] = []() {
 		return *PlayerCharacterPtr();
 	};
