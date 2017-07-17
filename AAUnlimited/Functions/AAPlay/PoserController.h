@@ -14,9 +14,9 @@
 
 namespace Poser {
 
-	const D3DXVECTOR3 unitVec[3] = { 1, 0, 0,
-	                                 0, 1, 0,
-	                                 0, 0, 1 };
+	const D3DXQUATERNION unitVec[3] = { 1, 0, 0, 0,
+	                                    0, 1, 0, 0,
+	                                    0, 0, 1, 0 };
 
 	class PoserController
 	{
