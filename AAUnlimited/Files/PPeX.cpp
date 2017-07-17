@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 #include <io.h>
+#include "Files/Logger.h"
+
 #include "zstd.h"
 
 using namespace std;
@@ -17,7 +19,6 @@ PPeX g_PPeX;
 
 // hardcoded. neither 24 or 96k are viable option for the game.
 #define SRATE 48000
-
 
 enum {
 	FLAG_ZSTD = 1,
@@ -88,6 +89,8 @@ void PPeX::AddArchive(const wchar_t *fn) {
 	// md5 -> fentry, for dupe backrefs
 	map<uint64_t, int> hashes;
 
+	LOGPRIONC(Logger::Priority::INFO) "Loading " << fn << "\r\n";
+
 	FILE *afh = _wfopen(fn, L"rb");
 	binstream fh(afh);
 
@@ -145,6 +148,7 @@ void PPeX::AddArchive(const wchar_t *fn) {
 			}
 			fe.flags |= FLAG_AUDIO;
 		}
+		LOGPRIONC(Logger::Priority::INFO) "Adding " << wfn << "\r\n";
 	}
 
 	handles.push_back(HANDLE(_get_osfhandle(_fileno(afh))));
@@ -194,7 +198,7 @@ bool PPeX::ArchiveDecompress(wchar_t* paramArchive, wchar_t* paramFile, DWORD* r
 		uint32_t nchan = x->nchan;
 		for (int i = 0; i < x->count; i++) {
 			uint32_t frm = *(uint32_t*)data;
-			int got = opus_decode(decoder[nchan-1], data, frm, (opus_int16*)pcm, 6 * 960, 0);
+			int got = opus_decode(decoder[nchan-1], data, frm, (opus_int16*)pcm, 48 * 120, 0);
 			data += frm;
 			if (got < 0) break; // minimal sanity
 			// convert to little endian
