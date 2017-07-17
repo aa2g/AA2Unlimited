@@ -14,7 +14,8 @@ class PPeX {
 	};
 	OpusDecoder *decoder[2];
 	std::vector<HANDLE> handles;
-	std::map<std::wstring, fileEntry> files;
+	std::vector<fileEntry> flist;
+	std::map<std::wstring,int> files;
 public:;
 	PPeX();
 	void AddArchive(const wchar_t *fn);

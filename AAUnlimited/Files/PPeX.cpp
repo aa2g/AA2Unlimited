@@ -86,19 +86,20 @@ void PPeX::AddPath(const wstring &path) {
 
 void PPeX::AddArchive(const wchar_t *fn) {
 	// md5 -> fentry, for dupe backrefs
-	map<uint64_t, fileEntry> hashes;
-
+	map<uint64_t, int> hashes;
 
 	FILE *afh = _wfopen(fn, L"rb");
 	binstream fh(afh);
 
-	// dummy header
 	fh.skip(10);
+
+	//fh.seekg(1024, fh.beg);
 	fh.skip(uint16_t(fh.i16()));
 
 	// get number of files
 	uint32_t number = fh.i32();
 	fh.i32();
+
 
 	for (int i = 0; i < number; i++) {
 		uint8_t comp = fh.i8();
@@ -112,34 +113,38 @@ void PPeX::AddArchive(const wchar_t *fn) {
 		wchar_t *wfn = (wchar_t*)buf;
 		fh.read(buf, nlen);
 
-		fileEntry fe;
+		int fid = flist.size();
 
 		// a dupe?
 		if (comp == 0xff) {
-			fe = hashes[md5];
+			files[wstring(wfn)] = hashes[md5];
 			fh.skip(12);
-		}
-		else {
-			// now fetch the important bits
-			fe.hid = handles.size();
-			fe.offset = fh.i64();
-			fe.csize = fh.i32();
-			fe.usize = fh.i32();
-			fe.flags = 0;
-			if (comp == 2)
-				fe.flags |= FLAG_ZSTD;
-			wchar_t *p = wcsrchr(wfn, L'.');
-			if (p) {
-				if (!wcscmp(p, L".xgg")) {
-					wcscpy(p, L".wav");
-					fe.flags |= FLAG_OPUS;
-				}
-				fe.flags |= FLAG_AUDIO;
-			}
+			continue;
 		}
 
-		files[wstring(wfn)] = fe;
-		hashes[md5] = fe;
+		// make the new file references
+		fid = flist.size();
+		flist.emplace_back();
+		hashes[md5] = fid;
+		files[wfn] = fid;
+		fileEntry &fe = flist[fid-1];
+
+		// now fetch the important bits
+		fe.hid = handles.size();
+		fe.offset = fh.i64();
+		fe.csize = fh.i32();
+		fe.usize = fh.i32();
+		fe.flags = 0;
+		if (comp == 2)
+			fe.flags |= FLAG_ZSTD;
+		wchar_t *p = wcsrchr(wfn, L'.');
+		if (p) {
+			if (!wcscmp(p, L".xgg")) {
+				wcscpy(p, L".wav");
+				fe.flags |= FLAG_OPUS;
+			}
+			fe.flags |= FLAG_AUDIO;
+		}
 	}
 
 	handles.push_back(HANDLE(_get_osfhandle(_fileno(afh))));
@@ -148,7 +153,14 @@ void PPeX::AddArchive(const wchar_t *fn) {
 
 bool PPeX::ArchiveDecompress(wchar_t* paramArchive, wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	auto path = wstring(paramArchive) + L"/" + paramFile;
-	fileEntry &fe = files[path];
+	int fid;
+	try {
+		fid = files[path];
+	}
+	catch (out_of_range &e) {
+		return false;
+	}
+	fileEntry &fe = flist[fid];
 	uint64_t off = fe.offset;
 	uint8_t *ubuf = NULL;
 	uint8_t *cbuf = NULL;
