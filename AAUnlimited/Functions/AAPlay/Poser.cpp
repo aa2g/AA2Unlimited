@@ -92,6 +92,8 @@ namespace Poser {
 	}
 
 	void PoserWindow::Init() {
+		if (g_PoserController.IsActive())
+			return;
 		if (m_dialog == NULL) {
 			CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_PLAY_POSE),
 				NULL, DialogProc, (LPARAM)this);
