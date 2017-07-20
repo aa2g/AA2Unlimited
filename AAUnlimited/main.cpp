@@ -46,7 +46,7 @@ BOOL WINAPI DllMain(
 		g_Logger.flush(); // make lua see pending log entries
 		g_Lua["init_modules"]();
 		if (g_Config.bUsePPeX)
-			g_PPeX.Connect(L"\\.\\pipe\\PPEX");
+			g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
 		return TRUE;
 	}
 }

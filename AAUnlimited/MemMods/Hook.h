@@ -47,3 +47,5 @@ DWORD DWRelativeToAbsolute(BYTE* currLoc, DWORD offset);
 DWORD WRelativeToAbsolute(BYTE* currLoc, WORD offset);
 
 void InitializeHooks();
+
+DWORD PatchIAT(DWORD *iat, void *newp);

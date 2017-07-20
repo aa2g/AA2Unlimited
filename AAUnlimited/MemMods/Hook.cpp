@@ -170,6 +170,14 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 	*(DWORD*)(funcIt) = DWAbsoluteToRelative(funcIt, (DWORD)toCall);
 }
 
+DWORD PatchIAT(DWORD *iat, void *newp)
+{
+	Memrights r(iat, 4);
+	DWORD orig = *iat;
+	*iat = (DWORD)newp;
+	return orig;
+}
+
 #include "General/ModuleInfo.h"
 
 #include "External/ExternalClasses.h"
