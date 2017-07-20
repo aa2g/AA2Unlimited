@@ -112,8 +112,8 @@
     <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
     <ClCompile Include="Script\ScriptLua.cpp" />
-    <ClCompile Include="MemMods\AAPlay\Events\GameTick.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\MemAlloc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -296,8 +296,8 @@
     <ClInclude Include="Script\Selene\ExtClass.h">
       <Filter>Selene</Filter>
     </ClInclude>
-    <ClInclude Include="MemMods\AAPlay\Events\GameTick.h" />
     <ClInclude Include="Files\PPeX.h" />
+    <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

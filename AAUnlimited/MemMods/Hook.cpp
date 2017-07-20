@@ -183,6 +183,7 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 #include "MemMods/Shared/Events/FileDump.h"
 #include "MemMods/Shared/Events/HairMeshes.h"
+#include "MemMods/Shared/Events/MemAlloc.h"
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/PcConversation.h"
@@ -234,6 +235,8 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
+		MemAlloc::MemAllocInject();
+
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::SetCP();
 	}

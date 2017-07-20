@@ -3,24 +3,15 @@
 #include "opus.h"
 
 class PPeX {
-	struct fileEntry {
-		uint32_t hid; // index to handles[]
-		uint32_t flags;
-		
-		uint32_t csize;
-		uint32_t usize;
-		
-		uint64_t offset;
-	};
-	OpusDecoder *decoder[2];
-	std::vector<HANDLE> handles;
-	std::vector<fileEntry> flist;
-	std::map<std::wstring,int> files;
+	size_t Read(char *buf, DWORD len);
+	std::wstring PPeX::GetString();
+	bool Write(char *buf, size_t len);
+	bool PPeX::PutString(std::wstring s);
+	HANDLE pipe;
 public:;
+	bool Connect(const wchar_t *path);
 	PPeX();
-	void AddArchive(const wchar_t *fn);
-	void AddPath(const std::wstring &path);
-	bool ArchiveDecompress(wchar_t* paramArchive, wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer);
+	bool ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer);
 };
 
 extern PPeX g_PPeX;

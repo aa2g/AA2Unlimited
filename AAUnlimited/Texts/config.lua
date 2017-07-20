@@ -81,7 +81,7 @@ logPrio = 0
 --0 = disable (never patch)
 --1 = auto, only if there is no emulator (or native ja-jp system)
 --2 = enable (always patch)
-FixLocale = 1
+bUsePPeX = false
 
 sPoserHotKeys = "WER"
 

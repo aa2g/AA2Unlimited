@@ -5,7 +5,7 @@
 #include "Script/ScriptLua.h"
 
 #define LOGPRIONC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << 
-#define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIC __ ": " <<
+#define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIG__ ": " <<
 #define LOGPRIO(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << \
 	(g_Logger.FilterPriority(Logger::Priority::SPAM) ? ("[" __FUNCSIG__ "]:\r\n\t") : "")
 

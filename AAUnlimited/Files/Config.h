@@ -6,17 +6,16 @@
 extern class Config
 {
 public:;
-	// Undefined fields all default to 0/NULL/false
 	int screenshotFormat;
-	const char *sPoserHotKeys = "WER";
+	const char *sPoserHotKeys;
 	int legacyMode;
 	double fPOVOffsetZ;
 	double fPOVOffsetY;
 	double fPOVOffsetX;
-	bool bSaveFileBackup = true;
+	bool bSaveFileBackup;
 	bool bSaveFileAutoRemove;
 	int savedFileUsage;
-	int savedEyeTextureUsage = 1;
+	int savedEyeTextureUsage;
 	bool bHAiOnNoPromptH;
 	bool bUseDialoguePoser;
 	bool bUseClothesPoser;
@@ -24,7 +23,7 @@ public:;
 	bool bEnableFacecam;
 	bool bUseShadowing;
 	bool bUseHAi;
-	bool bUsePPeX = true;
+	bool bUsePPeX;
 
 	inline auto operator[](const char *name) const {
 		return g_Lua[LUA_CONFIG_TABLE][name];
@@ -47,7 +46,9 @@ public:;
 			LUA_FIELD(bEnableHPosButtonReorder),
 			LUA_FIELD(bEnableFacecam),
 			LUA_FIELD(bUseShadowing),
-			LUA_FIELD(bUseHAi)
+			LUA_FIELD(bUseHAi),
+			LUA_FIELD(bUsePPeX)
+
 		);
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

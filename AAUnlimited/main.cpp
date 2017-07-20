@@ -4,6 +4,7 @@
 #include "General/ModuleInfo.h"
 #include "MemMods/Hook.h"
 #include "Script/ScriptLua.h"
+#include "Files/PPeX.h"
 #include "defs.h"
 
 #include <time.h>
@@ -44,6 +45,8 @@ BOOL WINAPI DllMain(
 		g_Lua["load_modules"]();
 		g_Logger.flush(); // make lua see pending log entries
 		g_Lua["init_modules"]();
+		if (g_Config.bUsePPeX)
+			g_PPeX.Connect(L"\\.\\pipe\\PPEX");
 		return TRUE;
 	}
 }
