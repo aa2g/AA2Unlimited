@@ -85,7 +85,12 @@ bool PPeX::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFi
 
 	wchar_t *p = wcsrchr((wchar_t*)paramArchive, L'\\');
 	if (p) paramArchive = p + 1;
-	wstring path = (wstring(paramArchive, wcslen(paramArchive) - 3) + L"/" + paramFile);
+	int parchlen = wcslen(paramArchive);
+	if (parchlen < 3)
+		return false;
+	if (wcscmp(paramArchive + parchlen - 3, L".pp"))
+		return false;
+	wstring path = (wstring(paramArchive, parchlen - 3) + L"/" + paramFile);
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 	PutString(L"load");
