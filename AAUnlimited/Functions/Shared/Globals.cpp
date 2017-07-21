@@ -58,6 +58,7 @@ void Init() {
 		//"AA2Play v12 FP v1.4.0a.exe"+21BCA0  <-- memory alloc function, only parameter is eax = size
 		//IllusionMemAllocProc = General::GameBase + 0x21BCA0;
 		IllusionMemAllocHeap = (HANDLE*)(General::GameBase + 0x3A6744);
+		IllusionMemUsed = (DWORD*)(General::GameBase + 0x3A6740);
 
 		//AA2Play v12 FP v1.4.0a.exe+2320D0 - FF 25 D8344501        - jmp dword ptr ["AA2Play v12 FP v1.4.0a.exe"+2E34D8] { ->->d3dx9_42.dll+1A3ED8 }
 		/**(DWORD*)(&D3DXMatrixMultiply) = General::GameBase + 0x2320D0;
