@@ -147,6 +147,7 @@ namespace Shared {
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
 			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
+			Value FindStyle(std::vector<Value>& params); //int(string)
 			Value GetSexExperience(std::vector<Value>& params); //bool(int)
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)

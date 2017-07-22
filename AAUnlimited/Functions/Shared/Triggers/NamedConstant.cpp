@@ -526,11 +526,11 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 				TEXT("I_SAW_SOMEONE_HAVE_H"), TEXT("I_SAW_SOMEONE_HAVE_H"), TEXT("I_SAW_SOMEONE_HAVE_H"),
 				Value(ExtClass::ConversationId::I_SAW_SOMEONE_HAVE_H)
 		},
-		{
-			101, NCONSTCAT_CONVERSATIONS,
-				TEXT("STOP_FOLLOWING"), TEXT("STOP_FOLLOWING"), TEXT("STOP_FOLLOWING"),
-				Value(ExtClass::ConversationId::STOP_FOLLOWING)
-		},
+		//{ //free slot
+		//	101, NCONSTCAT_CONVERSATIONS,
+		//		TEXT(""), TEXT(""), TEXT(""),
+		//		Value(ExtClass::ConversationId::)
+		//},
 		{
 			102, NCONSTCAT_CONVERSATIONS,
 				TEXT("DO_NOT_GET_INVOLVED"), TEXT("DO_NOT_GET_INVOLVED"), TEXT("DO_NOT_GET_INVOLVED"),
