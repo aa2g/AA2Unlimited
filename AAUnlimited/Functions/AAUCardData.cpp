@@ -997,9 +997,9 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 	//if empty tan name we unset and invalidate the current style tan files
 	if (!wcsnlen_s(name, 255)) {
 		for (int i = 0; i < 5; i++) {
-			m_aauSets[m_currCardStyle].m_tanImages[i] = TextureImage();
+			m_styles[m_currCardStyle].m_tanImages[i] = TextureImage();
 		}
-		m_aauSets[m_currCardStyle].m_tanName = L"";
+		m_styles[m_currCardStyle].m_tanName = L"";
 		return false;
 	}
 	std::wstring path;
