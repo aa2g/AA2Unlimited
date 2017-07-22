@@ -55,7 +55,7 @@ namespace Poser {
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		if (g_Config.GetKeyValue(Config::USE_POSER_DIALOGUE).bVal || g_Config.GetKeyValue(Config::USE_POSER_CLOTHES).bVal) {
-			g_PoserController.GenSliderInfo();
+			g_PoserWindow.Init();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
 			g_PoserWindow.SyncBones();
