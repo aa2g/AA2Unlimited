@@ -1467,12 +1467,16 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.1f, 0.1f
 			},
 			{ TEXT("Bottom Bone Width"),
-				{ { CharacterStruct::BODY, 0 } },
+				{ { CharacterStruct::BODY, 0 },
+				  { CharacterStruct::SKIRT, 0 },
+				  { CharacterStruct::SKIRT, 1 }, },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Bone Thickness"),
-				{ { CharacterStruct::BODY, 1 }  },
-				-0.5f, 0.5f
+				{ { CharacterStruct::BODY, 1 },
+				  { CharacterStruct::SKIRT, 2 },
+				  { CharacterStruct::SKIRT, 3 }, },
+			-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Width"),
 				{ { CharacterStruct::SKELETON, 7 } },
