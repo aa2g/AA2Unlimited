@@ -4,6 +4,7 @@ bUseAdditionalTanSlots = false
 --apply mesh texture override rules. When a xx (mesh) file is loaded, the 
 --textures and texture list will be compared to a set of override rules,
 --and if a rule applies, the texture will be replaced.
+--this is needed for gui sliders and poser to work, among other things
 bUseMeshTextureOverrides = true		
 
 --enables H-AI

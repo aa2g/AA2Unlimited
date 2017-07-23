@@ -298,7 +298,7 @@ local function buildtabs() return
 			title = "Settings",
 			iup.gridbox {
 				padding="3x3",
-				nmargin="x0",
+				nmargin="x4",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
@@ -315,9 +315,9 @@ local function buildtabs() return
 		iup.frame {
 			title = "Toggles",
 			iup.vbox {
-				gap="4",
+				gap="3",
 				aaut("bUseAdditionalTanSlots", iup.toggle {title = "Additional tan slots (DANGEROUS)" }),
---				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh texture overrides" }),
+				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "(evil) AI can force H on PC" }),
 				aaut("bUseShadowing", iup.toggle {title = "Game file shadowing" }),

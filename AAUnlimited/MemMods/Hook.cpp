@@ -218,7 +218,7 @@ void InitializeHooks() {
 		using namespace SharedInjections;
 
 		ArchiveFile::OpenFileInject();
-		if (bool(g_Config["bUseAdditionalTanSlots"])) {
+		if (bool(g_Config["bUseMeshTextureOverrides"])) {
 			MeshTexture::OverrideTextureListSizeInject();
 			MeshTexture::OverrideTextureListNameInject();
 			MeshTexture::OverrideStartInject();

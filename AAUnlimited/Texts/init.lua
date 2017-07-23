@@ -120,13 +120,11 @@ function Config.save(fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
-		log("saving freeform "..k)
 		saveval(f,k,v)
 	end
 	for k,v in pairs(getmetatable(_BINDING.Config)) do
 		local n = k:match("^get_(.*)")
 		if n then
-			log("saving binding "..n)
 			saveval(f,n,_BINDING.Config[n])
 		end
 	end
