@@ -27,6 +27,8 @@ public:
 
 		SCREENSHOT_FORMAT,
 
+		TRIGGERS,
+
 		num_elements
 	};
 	union MemberData {

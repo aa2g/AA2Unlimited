@@ -27,7 +27,8 @@ const Config::MemberInfo Config::knownMembers[num_elements] = {
 	MemberInfo(Config::INT,		"hkPoserTranslate", 0x57),	//HKEY_POSER_TRANSLATE
 	MemberInfo(Config::INT,		"hkPoserRotate", 0x45),	//HKEY_POSER_ROTATE
 	MemberInfo(Config::INT,		"hkPoserScale", 0x52),	//HKEY_POSER_SCALE
-	MemberInfo(Config::INT,		"screenshotFormat", 0x0)	//HKEY_POSER_SCALE
+	MemberInfo(Config::INT,		"screenshotFormat", 0x0),	//HKEY_POSER_SCALE
+	MemberInfo(Config::BOOL,		"bTriggers", false)	//TRIGGERS
 };
 
 Config g_Config;

@@ -27,6 +27,7 @@
 #include "Functions\Shared\Triggers\Expressions.h"
 #include "Files\Logger.h"
 #include "Files\ClothFile.h"
+#include "Files\Config.h"
 #include "resource.h"
 #include "config.h"
 
@@ -138,10 +139,12 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
 			BSDialog::DialogProc);
-		thisPtr->AddDialog(IDD_TRIGGERS,&thisPtr->m_trDialog,index++,TEXT("Triggers"),
-			TRDialog::DialogProc);
-		thisPtr->AddDialog(IDD_MODULES,&thisPtr->m_mdDialog,index++,TEXT("Modules"),
-			MDDialog::DialogProc);
+		if (g_Config.GetKeyValue(Config::TRIGGERS).bVal) {
+			thisPtr->AddDialog(IDD_TRIGGERS, &thisPtr->m_trDialog, index++, TEXT("Triggers"),
+				TRDialog::DialogProc);
+			thisPtr->AddDialog(IDD_MODULES, &thisPtr->m_mdDialog, index++, TEXT("Modules"),
+				MDDialog::DialogProc);
+		}
 
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
