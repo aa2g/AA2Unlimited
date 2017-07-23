@@ -41,6 +41,7 @@ namespace Shared {
 	 * XX file modification
 	 */ 
 	void XXBoneModification(ExtClass::Frame* boneParent, bool backup);
+	void XXFileModificationReset();
 	void XXFileModification(ExtClass::XXFile* file, bool backup);
 		//this data is used in aaedit only to make sliders instantly visible. the matrix is an SRT matrix
 		extern std::vector<std::pair<ExtClass::Frame*,D3DMATRIX>> g_xxMods[ExtClass::CharacterStruct::N_MODELS];
