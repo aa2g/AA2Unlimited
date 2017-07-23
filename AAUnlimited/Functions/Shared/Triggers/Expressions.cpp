@@ -721,6 +721,16 @@ namespace Shared {
 			}
 		}
 
+		//int(string)
+		Value Thread::FindStyle(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			std::wstring* styleName = params[1].strVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				return Value(0);
+			}
+			return Value(AAPlay::g_characters[seat].m_cardData.FindStyleIdxByName(styleName));
+		}
+
 		//bool(int)
 		Value Thread::GetSexExperience(std::vector<Value>& params) {
 			int card = params[0].iVal;

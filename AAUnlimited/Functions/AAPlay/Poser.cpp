@@ -55,16 +55,19 @@ namespace Poser {
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		if (g_Config.bUseDialoguePoser || g_Config.bUseClothesPoser) {
-			g_PoserController.GenSliderInfo();
+			g_PoserWindow.Init();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
-			g_PoserWindow.SyncBones();
-			g_PoserWindow.SyncOperation();
+			for (auto& s : g_PoserController.CurrentCharacter()->m_sliders) {
+				s.guide = nullptr;
+			}
 		}
 	}
 
 	void LoadCharacterEnd() {
 		//g_PoserController.SetHidden(ExtClass::CharacterStruct::Models::SKELETON, "guide_", true);
+		g_PoserWindow.SyncBones();
+		g_PoserWindow.SyncOperation();
 	}
 
 	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
@@ -92,6 +95,8 @@ namespace Poser {
 	}
 
 	void PoserWindow::Init() {
+		if (g_PoserController.IsActive())
+			return;
 		if (m_dialog == NULL) {
 			CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_PLAY_POSE),
 				NULL, DialogProc, (LPARAM)this);

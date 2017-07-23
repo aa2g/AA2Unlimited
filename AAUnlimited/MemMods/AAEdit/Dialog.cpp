@@ -83,7 +83,7 @@ namespace EditInjections {
 			//				DWORD charDataRule[]{ 0x353254, 0x2C, 0 };
 			//				AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(charDataRule);
 			//			}
-			//			auto styleData = AAEdit::g_currChar.m_cardData.m_aauSets[AAEdit::g_currChar.m_cardData.GetCurrAAUSet()].m_cardStyleData;
+			//			auto styleData = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.GetCurrAAUSet()].m_cardStyleData;
 			//			//display current changes
 			//			switch (currTab) {
 			//			case MakerTabs::Figure: {

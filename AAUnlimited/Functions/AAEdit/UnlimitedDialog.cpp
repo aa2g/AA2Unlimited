@@ -876,7 +876,9 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			int sel = SendMessage(thisPtr->m_cbSelect, CB_GETCURSEL, 0, 0);
 			TCHAR name[256];
 			name[0] = '\0';
-			SendMessage(thisPtr->m_cbSelect, CB_GETLBTEXT, sel, (LPARAM)name);
+			if (sel) {
+				SendMessage(thisPtr->m_cbSelect, CB_GETLBTEXT, sel, (LPARAM)name);
+			}
 			g_currChar.m_cardData.SetTan(name);
 			//redraw tan
 			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_TAN);
@@ -939,10 +941,8 @@ void UnlimitedDialog::TSDialog::LoadTanList() {
 
 void UnlimitedDialog::TSDialog::Refresh() {
 	std::wstring name = g_currChar.m_cardData.GetTanName();
-	if(SendMessage(m_cbSelect,CB_SELECTSTRING,-1,(LPARAM)name.c_str()) == CB_ERR) {
-		//we dont have this tan
-		SendMessage(m_cbSelect,CB_SELECTSTRING,-1,(LPARAM)TEXT("-- None --"));
-	}
+	LRESULT i = SendMessage(m_cbSelect, CB_FINDSTRINGEXACT, -1, (LPARAM)name.c_str());
+	SendMessage(m_cbSelect, CB_SETCURSEL, i == CB_ERR ? 0 : i, NULL);
 }
 
 /***************/
@@ -1467,12 +1467,16 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.1f, 0.1f
 			},
 			{ TEXT("Bottom Bone Width"),
-				{ { CharacterStruct::BODY, 0 } },
+				{ { CharacterStruct::BODY, 0 },
+				  { CharacterStruct::SKIRT, 0 },
+				  { CharacterStruct::SKIRT, 1 }, },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Bone Thickness"),
-				{ { CharacterStruct::BODY, 1 }  },
-				-0.5f, 0.5f
+				{ { CharacterStruct::BODY, 1 },
+				  { CharacterStruct::SKIRT, 2 },
+				  { CharacterStruct::SKIRT, 3 }, },
+			-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Width"),
 				{ { CharacterStruct::SKELETON, 7 } },
@@ -1638,6 +1642,8 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			if(slider->flags & AAUCardData::MODIFY_FRAME) {
 				for (auto& elem : Shared::g_xxMods[slider->target]) {
 					ExtClass::Frame* frame = elem.first;
+					if (!frame->m_name)
+						continue;
 					TCHAR buff[256];
 					size_t written;
 					mbstowcs_s(&written,buff,frame->m_name+5,256);
@@ -1674,6 +1680,8 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 	for (ExtClass::CharacterStruct::Models model : renewFiles) {
 		for(auto& elem : Shared::g_xxMods[model]) {
 			ExtClass::Frame* frame = (ExtClass::Frame*)elem.first;
+			if (!frame->m_name)
+				continue;
 			TCHAR buff[256];
 			size_t written;
 			mbstowcs_s(&written,buff,frame->m_name+5,256);

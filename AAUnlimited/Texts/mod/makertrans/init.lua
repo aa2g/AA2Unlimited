@@ -29,6 +29,10 @@ local function translate()
 	log.spam("maker translation has "..count.." strings")
 
 	-- hook main dialog proc, and scan dialog items right before init
+	-- TBD: MemMods/AAEdit/Dialog.cpp (stuff cuntpasted from AAFace) hook the same thing,
+	-- - to inject controls. Awkward. For the time being, make sure we don't collide,
+	-- but seek to unify the injects eventually.
+	
 	g_hook_func(0x19AB90, 6, 4, function(orig, this, hdlg, msg, wparam, lparam)
 		local ret = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
 		if msg ~= WM_INITDIALOG then
