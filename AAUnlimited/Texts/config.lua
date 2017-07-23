@@ -22,10 +22,10 @@ bEnableFacecam = true
 bEnableHPosButtonReorder = true		
 
 --enables poser in cloth select screen
-bUseClothesPoser = false
+bUseClothesPoser = true
 
 --enables poser in dialogue and sex scenes
-bUseDialoguePoser = false
+bUseDialoguePoser = true
 
 --Offsets for the POV focus points
 fPOVOffsetX = 0.0
@@ -77,16 +77,25 @@ legacyMode = 3
 --4: crit
 logPrio = 0
 
---patch the game for proper locale support
---0 = disable (never patch)
---1 = auto, only if there is no emulator (or native ja-jp system)
---2 = enable (always patch)
-bUsePPeX = true
-
 sPoserHotKeys = "WER"
 
+-- load .ppx files
+bUsePPeX = false
+
+-- load .pp2 files
+bUsePP2 = true
+
+-- MB cache memory for general data
+PP2Cache = 256
+
+-- MB cache memory for decompressed audio
+PP2AudioCache = 512
+
+
 mods = {
+	{ "fakereg" },
 	{ "fixlocale" },
 	{ "catchall" },
-	{ "launcher" }
+	{ "makertrans" },
+	{ "launcher" },
 }

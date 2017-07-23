@@ -17,21 +17,24 @@ _EVENTS.Time = {}
 _WIN32 = {}
 
 
+
 ---------------------------
 -- basic utils
 ---------------------------
-function Check(x,a,b,...)
+function check(x,a,b,...)
 	if a == nil then
-		Log.warn(x .. "failed with: " .. b)
+		log.warn(x .. "failed with: " .. b)
 	end
 	return a,b,...
 end
 
-function Path(...)
-	return table.concat({_BINDING.AAUPath, ...}, "/")
+function aau_path(...)
+	return table.concat({_BINDING.GetAAUPath(), ...}, "/")
 end
 
-
+function host_path(...)
+	return table.concat({_BINDING.IsAAEdit and _BINDING.GetAAEditPath() or _BINDING.GetAAPlayPath(), ...}, "/")
+end
 
 ---------------------------
 -- logger
@@ -75,7 +78,7 @@ function cfproxy:__newindex(k,v)
 	if _EVENTS.Config and _EVENTS.Config[k] then
 		v = _EVENTS.Config[k](v)
 	end
-	if v then
+	if v ~= nil then
 		-- if setting a binding fails, its not a C++ setting
 		if not pcall(function() _BINDING.Config[k] = v end) then
 			_CONFIG[k] = v
@@ -89,40 +92,63 @@ Config = setmetatable({}, cfproxy)
 function Config.load(name)
 
 
-	local lua = Path(name .. ".lua")
+	local lua = aau_path(name .. ".lua")
 
-	local ch = Check("load config", loadfile(lua))
+	local ch = check("load config", loadfile(lua))
+	if not ch then return end
 
 	setmetatable(_G, cfproxy)
 
 	local ret, msg = xpcall(ch, function()
-		log.spam("tata" .. debug.traceback(err))
+		log.spam("Config failed with " .. debug.traceback(err))
 	end)
 
 	setmetatable(_G, nil)
+end
 
-	-- _G.Config transparently binds Lua and C++ together
-	setmetatable(Config, cfproxy)
+local function saveval(of,n,v)
+	if type(v) == "function" then return end
+	if n ~= "mods" then
+		log(n)
+		of:write(string.format("%s=%q\n",n,v))
+	end
+end
 
+function Config.save(fn)
+	local fn = fn or aau_path("savedconfig.lua")
+	log("saving config to "..fn)
 
+	local f = io.open(fn, "w+")
+	for k,v in pairs(_CONFIG) do
+		log("saving freeform "..k)
+		saveval(f,k,v)
+	end
+	for k,v in pairs(getmetatable(_BINDING.Config)) do
+		local n = k:match("^get_(.*)")
+		if n then
+			log("saving binding "..n)
+			saveval(f,n,_BINDING.Config[n])
+		end
+	end
+	f:close()
 end
 
 ---------------------------
 -- libraries
 ---------------------------
-package.path = Path("?.lua") .. ";" .. package.path -- in top level, only simple lua files are allowed
+package.path = aau_path("?.lua") .. ";" .. package.path -- in top level, only simple lua files are allowed
 
-package.path = Path("mod", "?.lua") .. ";" .. package.path
-package.path = Path("mod", "?", "init.lua") .. ";" .. package.path
+package.path = aau_path("mod", "?.lua") .. ";" .. package.path
+package.path = aau_path("mod", "?", "init.lua") .. ";" .. package.path
 
-package.cpath = Path("lib", "?.dll") .. ";" .. package.cpath
-package.cpath = Path("lib", "?53.dll") .. ";" .. package.cpath
-package.cpath = Path("lib", "?", "init.dll") .. ";" .. package.cpath
-package.cpath = Path("lib", "?", "init53.dll") .. ";" .. package.cpath
+package.cpath = aau_path("lib", "?.dll") .. ";" .. package.cpath
+package.cpath = aau_path("lib", "?53.dll") .. ";" .. package.cpath
+package.cpath = aau_path("lib", "?", "init.dll") .. ";" .. package.cpath
+package.cpath = aau_path("lib", "?", "init53.dll") .. ";" .. package.cpath
 
 
-package.path = Path("lib", "?.lua") .. ";" .. package.path
-package.path = Path("lib", "?", "init.lua") .. ";" .. package.path
+package.path = aau_path("lib", "?.lua") .. ";" .. package.path
+package.path = aau_path("lib", "?", "init.lua") .. ";" .. package.path
 
 stdio_print = print
 print = function(...)
@@ -134,14 +160,22 @@ print = function(...)
 	log.spam(msg)
 end
 
+
+---------------------------
+-- now load config files
+---------------------------
 Config.load("config")
+Config.load("savedconfig")
+-- _G.Config transparently binds Lua and C++ together
+setmetatable(Config, cfproxy)
+
 
 -- add more if you need it
 local dlls = {"KERNEL32.DLL","USER32.DLL"}
 setmetatable(_WIN32, {
 	__index = function(t,k)
 		for _,v in ipairs(dlls) do
-			local got = GetProcAddress(v,k)
+			local got = _BINDING.GetProcAddress(v,k)
 			if got then
 				_WIN32[k] = function(...)
 					return _BINDING.proc_invoke(got,nil,...)
@@ -159,6 +193,7 @@ function load_modules()
 
 	Config.mods = Config.mods or {}
 	for i,mod in ipairs(Config.mods) do
+		log("Trying to load "..mod[1])
 		if not type(mod) == "table" then
 			log.error("invalid mod entry at index %d", i)
 		else
@@ -171,6 +206,8 @@ function load_modules()
 					log("Loaded %s", data.info[1])
 					table.insert(modules, data)
 					modules[data.info[1]] = data
+				else
+					log.error("%s is not a valid module", mod[1])
 				end
 			end
 		end
@@ -204,4 +241,25 @@ function init_modules()
 	for _,mod in ipairs(modules) do
 		load_module(mod)
 	end
+end
+
+function table.extend(a,b)
+	for k,v in pairs(b) do
+		a[k] = v
+	end
+end
+
+function table.append(a,b)
+	local last = #a
+	for i,v in ipairs(b) do
+		a[i+last] = v
+	end
+	return a
+end
+
+function table.indexof(t,q)
+	for idx,v in ipairs(t) do
+		if v == q then return idx end
+	end
+	return 0
 end

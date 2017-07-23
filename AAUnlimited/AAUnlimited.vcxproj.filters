@@ -23,6 +23,9 @@
     <Filter Include="Lua\Launcher">
       <UniqueIdentifier>{f8591d55-7743-4c1e-8fd3-d1e62a291960}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\makertrans">
+      <UniqueIdentifier>{d8182a1c-5e55-438b-b8ce-b6f1e98b13d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -114,6 +117,7 @@
     <ClCompile Include="Script\ScriptLua.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MemAlloc.cpp" />
+    <ClCompile Include="Files\PP2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -298,6 +302,7 @@
     </ClInclude>
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
+    <ClInclude Include="Files\PP2.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -336,6 +341,21 @@
       <Filter>Lua\Launcher</Filter>
     </None>
     <None Include="Texts\mod\nocd.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\strutil.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\makertrans\dict.lua">
+      <Filter>Lua\makertrans</Filter>
+    </None>
+    <None Include="Texts\mod\makertrans\init.lua">
+      <Filter>Lua\makertrans</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\gsd.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\fakereg.lua">
       <Filter>Lua</Filter>
     </None>
   </ItemGroup>

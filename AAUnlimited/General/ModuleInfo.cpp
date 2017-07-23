@@ -29,7 +29,8 @@ namespace {
 }
 
 bool Initialize() {
-	GameBase = (DWORD)GetModuleHandle(NULL);
+	if (AAPlayPath.size() > 0 && AAEditPath.size() > 0)
+		return true;
 
 	// find paths in registry
 	{
@@ -78,6 +79,12 @@ bool Initialize() {
 
 	}
 
+	return true;
+}
+
+// This is very early init (pre-hooks), when we still can't make assumptions about
+// where the game actually is, but AAU internals (ie lua) can run already.
+bool InitializeAAU() {
 	//get name of exe we are in
 	{
 		TCHAR buffer[512];
@@ -85,8 +92,10 @@ bool Initialize() {
 		GameExeName = buffer;
 	}
 
+	GameBase = (DWORD)GetModuleHandle(NULL);
+
 	//try to check the resource file to figure out where we are
-	
+
 	{
 		std::wstringstream resourceInfo(L""); //keps additional information in case of fail
 		DWORD legacy;
@@ -121,11 +130,11 @@ bool Initialize() {
 				else if (playVersion && playName) IsAAPlay = true;
 				else {
 					resourceInfo << L"Resource data unconclusive:\r\n\tVersion: " << strFileVersion;
-					if		(editVersion) resourceInfo << L" (Version of AAEdit)";
+					if (editVersion) resourceInfo << L" (Version of AAEdit)";
 					else if (playVersion) resourceInfo << L" (Version of AAPlay)";
 					else				  resourceInfo << L" (unknown version number; expected " << AAPlayVersion << L" for play or " << AAEditVersion << L" for edit)";
 					resourceInfo << L"\r\n\tProduct Name: " << strProductName;
-					if		(editName) resourceInfo << L" (Name of AAEdit)";
+					if (editName) resourceInfo << L" (Name of AAEdit)";
 					else if (playName) resourceInfo << L" (Name of AAPlay)";
 					else			   resourceInfo << L" (unknown Name; expected " << AAPlayProductName << L" for play or " << AAEditProductName << L" for edit)";
 				}
@@ -162,8 +171,6 @@ bool Initialize() {
 		AAUPath = buffer;
 		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
 	}
-
-	return true;
 }
 
 

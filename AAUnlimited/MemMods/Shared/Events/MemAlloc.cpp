@@ -2,6 +2,7 @@
 
 #include "MemAlloc.h"
 #include "Files\Config.h"
+#include "Files\PP2.h"
 #include "MemMods\Hook.h"
 #include "MemMods\MemRightsLock.h"
 #include "General\ModuleInfo.h"
@@ -32,9 +33,9 @@ void MemAllocInject() {
 		iat_HeapFree = (DWORD*)(General::GameBase + 0x4C4248);
 	}
 	else if (General::IsAAPlay) {
-		iat_HeapSize = (DWORD*)(General::GameBase + 0x4E324C);
-		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x4E3254);
-		iat_HeapFree = (DWORD*)(General::GameBase + 0x4E3258);
+		iat_HeapSize = (DWORD*)(General::GameBase + 0x2E324C);
+		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x2E3254);
+		iat_HeapFree = (DWORD*)(General::GameBase + 0x2E3258);
 	}
 
 	PatchIAT(iat_HeapSize, &InjectedHeapSize);

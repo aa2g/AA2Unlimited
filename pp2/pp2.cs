@@ -12,34 +12,47 @@ using OpusCodec;
 using System.Security.Cryptography;
 using System.Diagnostics;
 
+public class Flags
+{
+    public static ushort OPUS = 0x400;
+    public static ushort ZSTD = 0x800;
+    public static ushort ALONE = 0x1000;
+    public static ushort LINK = 0x8000;
 
+}
 
 // Describes one file to be packed in a chunk (probably with other files)
 // This can be easily interfac-ied, needs to give only .GetData(), .GetMeta() & .naked
 public class ChunkFile
 {
-    const int MAXSIZE = 16 * 1024 * 1024;
+    const int MAXSIZE = 32 * 1024 * 1024;
     // helper fields
     public bool done, naked; // no zstd, and no chunk grouping
     public ppSubfile pp;
 
     // serialized data in meta()
-    public long chunk_idx;
-    public long chunk_off;
-    public long orig_size;
+    public uint chunk_idx;
+    public uint chunk_off;
+    public uint orig_size;
     public long md5;        // first 64bits only
-    public long flags;      // type and flags
+    public ushort chpos;      // type and flags
+    public ushort flags;      // type and flags
     public string name;
 
     // serializes file metadata for packed file header
     public void meta(Stream outf)
     {
-        outf.Write(BitConverter.GetBytes(chunk_idx), 0, 8);
-        outf.Write(BitConverter.GetBytes(chunk_off), 0, 8);
-        outf.Write(BitConverter.GetBytes(orig_size), 0, 8);
+        outf.Write(BitConverter.GetBytes(chunk_idx), 0, 4);
+        outf.Write(BitConverter.GetBytes(chunk_off), 0, 4);
+        outf.Write(BitConverter.GetBytes(orig_size), 0, 4);
+        outf.Write(BitConverter.GetBytes(chpos), 0, 2);
+        outf.Write(BitConverter.GetBytes(flags), 0, 2);
+    }
+
+    public void metaname(Stream outf)
+    {
         outf.Write(BitConverter.GetBytes(md5), 0, 8);
-        outf.Write(BitConverter.GetBytes(flags), 0, 8);
-        outf.Write(BitConverter.GetBytes(name.Length), 0, 2);
+        outf.Write(BitConverter.GetBytes(name.Length * 2), 0, 2);
         outf.Write(Encoding.Unicode.GetBytes(name), 0, name.Length * 2);
     }
 
@@ -47,9 +60,22 @@ public class ChunkFile
     {
         pp = _pp;
         name = (Path.GetFileName(pp.ppPath) + "/" + pp.Name).ToLower();
+
         if (name.EndsWith(".wav"))
-            naked = true;
-        orig_size = (int)pp.size;
+        {
+            var tmp = new byte[44];
+            pp.CreateReadStream().Read(tmp, 0, 44);
+            if (checkWav(tmp) != 0)
+            {
+                naked = true;
+                flags |= Flags.OPUS;
+            }
+        }
+        if (!naked)
+        {
+            flags |= Flags.ZSTD;
+        }
+        orig_size = (uint)pp.size;
         var hasher = MD5.Create();
 
         md5 = BitConverter.ToInt64(hasher.ComputeHash(pp.CreateReadStream()), 0);
@@ -63,8 +89,12 @@ public class ChunkFile
     public void GetData(ChunkBuilder cb, Stream os)
     {
         cb.FlushOnOverflow((int)orig_size, MAXSIZE, os);
+        ushort chp = cb.chpos;
+        chpos = chp;
         chunk_idx = cb.idx;
-        chunk_off = (long)cb.buffer.Length;
+        chunk_off = (uint)cb.buffer.Length;
+        if (chpos == 0)
+            Debug.Assert(chunk_off == 0);
         var src = pp.CreateReadStream();
         if (naked)
         {
@@ -98,28 +128,83 @@ public class ChunkFile
     */
 
 
-    // TODO: make this less hard coded
+    int checkWav(byte[] wav)
+    {
+        int nchan = wav[22];
+        int isr = wav[24] | (((int)wav[25]) << 8);
+        int bps = wav[28] | (((int)wav[29]) << 8) | (((int)wav[30]) << 16);
+        int width = bps / isr / nchan;
+        if (width != 2)
+            return 0;
+        return isr;
+    }
     unsafe void encodeWavToOpus(byte[] wav, Stream os)
     {
-        const int BASERATE = 64000;
         int nchan = wav[22];
+        int isr = checkWav(wav);
         int pos = 44;
         int total = wav.Length - pos;
         var packet = new byte[65536];
-        int step = 1920 * 2 * nchan;
         IntPtr error;
-        IntPtr ctx = OPUS.opus_encoder_create(48000, nchan, (int)Application.Audio, out error);
-        var wavbuf = new byte[step];
-        flags |= (long)nchan;
-        OPUS.opus_encoder_ctl(ctx, Ctl.OPUS_SET_BITRATE_REQUEST, (IntPtr)(BASERATE * nchan));
-        OPUS.opus_encoder_ctl(ctx, Ctl.OPUS_SET_EXPERT_FRAME_DURATION_REQUEST, (IntPtr)5005);
-        for (int i = pos; i < total; i += 2)
+        //int bstep = 2880;
+
+        int[][] hifi = new int[][]
         {
-            var t = wav[i + 1];
-            wav[i] = wav[i + 1];
-            wav[i + 1] = t;
+            //          f  sr  nchan kbps   osr    60/120 step
+            new int [] {1, 22050, 1, 40000, 24000},
+            new int [] {1, 22050, 2, 64000, 24000},
+            new int [] {2, 44100, 1, 48000, 48000},
+            new int [] {2, 44100, 2, 64000, 48000}
+        };
+
+        int[][] lofi = new int[][]
+        {
+            //          f  sr  nchan kbps   osr    60/120 step
+            new int [] {1, 22050, 1, 32000, 24000},
+            new int [] {1, 22050, 2, 48000, 24000},
+            new int [] {2, 44100, 1, 40000, 48000},
+            new int [] {2, 44100, 2, 64000, 48000}
+        };
+
+        var paras = lofi;
+
+        IntPtr ctx = (IntPtr)0;
+
+        int step = 0;
+        int framelen = 1920;
+        foreach (var para in paras)
+        {
+            int flg = para[0];
+            int sr = para[1];
+            int nch = para[2];
+            int kbps = para[3];
+            int osr = para[4];
+            if (sr == isr && nch == nchan)
+            {
+                ctx = OPUS.opus_encoder_create(osr, nchan, (int)Application.Voip, out error);
+                if ((long)ctx == 0L)
+                    throw new Exception("opus_encoder_create failed " + isr + ", " + nchan + " for "+name);
+
+                flags |= (ushort)flg;
+                flags |= (ushort)(nchan << 4);
+                int  ret;
+                
+                ret = OPUS.opus_encoder_ctl(ctx, Ctl.OPUS_SET_COMPLEXITY_REQUEST, (IntPtr)10);
+                ret = OPUS.opus_encoder_ctl(ctx, Ctl.OPUS_SET_BITRATE_REQUEST, (IntPtr)kbps);
+                //ret = OPUS.opus_encoder_ctl(ctx, Ctl.OPUS_SET_VBR_CONSTRAINT_REQUEST, (IntPtr)0);
+                break;
+            }
         }
+        if ((long)ctx == 0L)
+            throw new Exception("Failed to setup for " + isr + ", " + nchan + " for " + name);
+
+        step = framelen * 2 * nchan;
+
+        var wavbuf = new byte[step];
+
         long packed = 0;
+        int rsum, ravg;
+        rsum = ravg = 0;
         for (int i = 0; i < total; i += step)
         {
             int wavlen = total - i;
@@ -131,22 +216,29 @@ public class ChunkFile
             {
                 Array.Clear(wavbuf, wavlen, step - wavlen);
             }
-            Array.Copy(wav, i, wavbuf, 0, wavlen);
+            Array.Copy(wav, i + 44, wavbuf, 0, wavlen);
 
             int ret;
             fixed (byte* ppacket = packet)
             {
-                ret = OPUS.opus_encode(ctx, wavbuf, 1920, new IntPtr(ppacket), packet.Length);
+                ret = OPUS.opus_encode(ctx, wavbuf, framelen, new IntPtr(ppacket), packet.Length);
             }
             if (ret < 0)
             {
-                throw new Exception("Encoding failed - " + ((Errors)ret).ToString());
+                throw new Exception("Encoding failed - " + ((Errors)ret).ToString() + " for " + name);
             }
+            if (ret > 65534)
+                throw new Exception("Frame overflow " + ret);
+            rsum += ret;
+            ravg++;
             packed += ret;
             os.WriteByte((byte)ret);
             os.WriteByte((byte)(ret >> 8));
             os.Write(packet, 0, ret);
+            if ((i % (step*32)) == 0)
+                Console.Write("w");
         }
+       // Console.WriteLine("average packet " + (rsum / ravg));
         Console.Write(packed * 100 / wav.Length);
         OPUS.opus_encoder_destroy(ctx);
     }
@@ -156,38 +248,44 @@ public class ChunkFile
 public class ChunkBuilder
 {
     public MemoryStream buffer; // we build the chunk there on the go
-    public long at; // where the chunk is in the file
-    public long bufulen; // buffer unpacked length
-    public int idx; // index of this chunk
+    public uint at; // where the chunk is in the file
+    public uint bufulen; // buffer unpacked length
+    public uint idx; // index of this chunk
+    public ushort chpos;
 
+    long last;
+    ChunkFile lastf;
 
     long totalu, totalc;
     long tosize;
 
     List<ChunkFile> files;
-    Dictionary<long, ChunkFile> hash;
-    MemoryStream table;
+    Dictionary<String, uint> links;
+
+    Dictionary<long, uint> hash;
+    public MemoryStream table;
 
     public ChunkBuilder()
     {
         files = new List<ChunkFile>();
-        hash = new Dictionary<long, ChunkFile>();
+        hash = new Dictionary<long, uint>();
         table = new MemoryStream();
         buffer = new MemoryStream();
+        links = new Dictionary<string, uint>();
     }
 
     public void AddChunkFile(ChunkFile chf)
     {
-        ChunkFile chtry;
+        uint link;
         // link to earlier hash if it's a dupe
-        if (!hash.TryGetValue(chf.md5, out chtry))
+        if (hash.TryGetValue(chf.md5, out link))
         {
-            hash[chf.md5] = chf;
-            chtry = chf;
-            Console.Write(".");
-            tosize += chf.orig_size;
-        } else Console.Write("!");
-        files.Add(chtry);
+            links[chf.name] = link;
+            return;
+        }
+        hash[chf.md5] = (uint)files.Count();
+        files.Add(chf);
+        tosize += chf.orig_size;
     }
 
     public void EncodeChunks(Stream os)
@@ -196,6 +294,8 @@ public class ChunkBuilder
         {
             AppendFile(os, chf);
         }
+        FlushZstd(os);
+        table.Write(BitConverter.GetBytes(at), 0, 4);
     }
 
     public void AppendFile(Stream os, ChunkFile chf)
@@ -206,18 +306,28 @@ public class ChunkBuilder
         }
         if (chf.naked)
             FlushZstd(os);
+        lastf = chf;
         Console.Write(Path.GetExtension(chf.name).ToUpper()[1]);
         chf.GetData(this, os);
+        chpos++;
+/*        if (buffer.Length == 37207)
+        {
+            Console.WriteLine("debug");
+        }*/
         totalu += chf.orig_size;
         chf.done = true;
         if (chf.naked)
             FlushStore(os);
     }
 
-    public void FlushOnOverflow(int size, int ms, Stream os)
+    public bool FlushOnOverflow(int size, int ms, Stream os)
     {
         if (buffer.Length + size > ms)
+        {
             FlushZstd(os);
+            return true;
+        }
+        return false;
     }
 
 
@@ -230,7 +340,6 @@ public class ChunkBuilder
             clen = (int)ZSTD.ZSTD_compress(new IntPtr(pcbuf), (IntPtr)cbuf.Length, input, (IntPtr)input.Length, 22);
         }
         var res = new MemoryStream();
-
         res.Write(cbuf, 0, clen);
         return res;
     }
@@ -260,7 +369,7 @@ public class ChunkBuilder
         ZSTD.ZSTD_freeCCtx(ctx);
         var res = new MemoryStream();
 
-        res.Write(cbuf, 5, (int)dpos);
+        res.Write(cbuf, 0, (int)dpos);
         return res;
     }
 
@@ -268,7 +377,7 @@ public class ChunkBuilder
     {
         if (buffer.Length == 0)
             return;
-        bufulen = buffer.Length;
+        bufulen = (uint)buffer.Length;
         buffer = zstdPack(buffer.ToArray());
         FlushStore(os);
     }
@@ -282,34 +391,81 @@ public class ChunkBuilder
 
     public void FlushForce(Stream os)
     {
-        table.Write(BitConverter.GetBytes(at), 0, 8);
-        table.Write(BitConverter.GetBytes(bufulen), 0, 8);
-        at += buffer.Length;
+        //Console.WriteLine("chunk at " + at);
+        table.Write(BitConverter.GetBytes(at), 0, 4);
+        at += (uint)buffer.Length;
         os.Write(buffer.ToArray(), 0, (int)buffer.Length);
         totalc += buffer.Length;
         buffer = new MemoryStream();
         idx++;
-        Console.WriteLine("");
-        Console.WriteLine(totalu / 1024 / 1024 + "/" + tosize / 1024 / 1024 + "MB, " + totalu * 100 / tosize +
-            "% Done, ratio " + totalc * 100 / totalu + "%");
+        var now = DateTimeOffset.Now.ToLocalTime().Ticks;
+        if (now > last)
+        {
+            last = now + 10 * 1000000;
+            Console.WriteLine("");
+            Console.WriteLine(totalu / 1024 / 1024 + "/" + tosize / 1024 / 1024 + "MB, " + totalu * 100 / (tosize+1) +
+                "% Done, ratio " + totalc * 100 / (totalu+1) + "%");
+        }
+        if (chpos == 1)
+        {
+            lastf.flags |= Flags.ALONE;
+        }
+
+        // some sanity
+        if ((lastf.flags & Flags.OPUS) != 0)
+        {
+            Debug.Assert((lastf.flags & Flags.ALONE) != 0);
+            Debug.Assert(chpos == 1);
+        }
+        chpos = 0;
+        Debug.Assert(buffer.Length == 0);
     }
 
     public void WriteMetadata(Stream os)
     {
         var pak = new MemoryStream();
-        pak.Write(BitConverter.GetBytes(table.Length), 0, 4);
-        pak.Write(table.ToArray(), 0, (int)table.Length);
+
+        // version
+        pak.Write(BitConverter.GetBytes((int)0), 0, 4);
+        pak.Write(BitConverter.GetBytes((int)(table.Length/4)), 0, 4);
         pak.Write(BitConverter.GetBytes((int)files.Count()), 0, 4);
+        pak.Write(BitConverter.GetBytes((int)(files.Count() + links.Count())), 0, 4);
+
+        // dump chunk table
+        pak.Write(table.ToArray(), 0, (int)table.Length);
+
+        // dump file meta
+        int co = 0;
         foreach (ChunkFile chf in files)
         {
+/*            Console.WriteLine("writing file no " + co++ +
+                ", chunk=" + chf.chunk_idx +
+                ", chpos=" + chf.chpos  +
+                ", choff=" + chf.chunk_off +
+                ", orig=" + chf.orig_size +
+                ", name=" + chf.name
+                );*/
             chf.meta(pak);
         }
+
+        // dump file names
+        foreach (ChunkFile chf in files)
+        {
+            chf.metaname(pak);
+        }
+
+        // dump file name links
+        foreach (var link in links)
+        {
+            pak.Write(BitConverter.GetBytes((long)link.Value), 0, 8);
+            pak.Write(BitConverter.GetBytes((ushort)((link.Key.Length * 2)|0x8000)), 0, 2);
+            pak.Write(Encoding.Unicode.GetBytes(link.Key), 0, link.Key.Length * 2);
+        }
+
         var zpak = zstdPack(pak.ToArray());
+        //var zpak = pak;
         os.Write(zpak.ToArray(), 0, (int)zpak.Length);
-        //os.Write(pak.ToArray(), 0, (int)pak.Length);
-        os.Write(BitConverter.GetBytes((long)pak.Length), 0, 8);
-        os.Write(BitConverter.GetBytes((long)zpak.Length+8), 0, 8);
-        os.WriteByte(1);
+        os.Write(BitConverter.GetBytes((uint)zpak.Length), 0, 4);
     }
 }
 
@@ -320,28 +476,35 @@ class pp2
     {
         if (args.Length < 3)
         {
-            Console.WriteLine("usage: pp2 \\some\\path\\to\\aa2play\\data output.pp2 [maxchunk]");
+            Console.WriteLine("usage: pp2 \\some\\path\\to\\aa2play\\data output.pp2 regex");
+            return;
         }
         var chb = new ChunkBuilder();
+        Regex r = null;
+        r = new Regex(args[2], RegexOptions.IgnoreCase);
+        int nfm = 16;
         foreach (string fn in Directory.GetFiles(args[0], "*.pp"))
         {
             Console.Write("Opening " + fn);
             if (fn.EndsWith("base.pp"))
                 continue;
             ppParser pp = new ppParser(fn);
+            int nmatch = 0;
             foreach (ppSubfile file in pp.Subfiles)
             {
-                if (file.Name.EndsWith(".wav"))
-                    continue;
-                chb.AddChunkFile(new ChunkFile(file));
-                //break;
+                //Console.WriteLine(ext);
+                if (r.Match(file.Name).Success)
+                {
+                    chb.AddChunkFile(new ChunkFile(file));
+                    nmatch++;
+                }
             }
-            Console.WriteLine(pp.Subfiles.Count() + " files");
+            Console.WriteLine("..." + nmatch + " files matched");
+            //if (nfm-- == 0) break;
         }
 
         var outf = new FileStream(args[1], FileMode.Create, FileAccess.Write);
         chb.EncodeChunks(outf);
-        chb.FlushZstd(outf);
         chb.WriteMetadata(outf);
         // store length of metadata as last integer, so reader can locate
         // the metadata header

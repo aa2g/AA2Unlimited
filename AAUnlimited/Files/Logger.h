@@ -2,6 +2,9 @@
 #include <fstream>
 #include <sstream>
 #include <Windows.h>
+#include <mutex>
+#include <thread>
+
 #include "Script/ScriptLua.h"
 
 #define LOGPRIONC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << 
@@ -32,18 +35,20 @@ public:
 	Logger(const TCHAR* file,Priority prio);
 	~Logger();
 	void Initialize(const TCHAR * file, Priority prio);
+	std::thread::id tid;
 
 	template<typename T>
 	Logger& operator<<(const T& p) {
+		std::unique_lock<std::mutex> lock(mutex);
 		if (outfile.good() && currPrio >= filter) {
 			outfile << p;
 			outbuf << p;
 		}
-		flush();
+		luaFlush();
 		outfile.flush();
 		return *this;
 	}
-	void flush();
+	void luaFlush();
 	template<>
 	Logger& operator<<(const Priority& prio) {
 		currPrio = prio;
@@ -67,7 +72,9 @@ public:
 		return *this;
 	}
 
+	std::mutex mutex;
 	Logger& operator<<(const std::wstring& str) {
+		std::unique_lock<std::mutex> lock(mutex);
 		std::string cstr(str.begin(),str.end());
 		outfile << cstr.c_str();
 		outfile.flush();

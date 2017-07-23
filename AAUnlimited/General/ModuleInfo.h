@@ -19,6 +19,8 @@ extern std::wstring AAUPath;
 extern std::wstring GameExeName; //name of the exe we are hooked to
 
 bool Initialize();
+bool InitializeAAU();
+
 
 inline std::wstring BuildAAUPath(const TCHAR* file) {
 	std::wstring retVal(AAUPath);

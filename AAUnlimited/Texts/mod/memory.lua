@@ -29,6 +29,25 @@ g_xchg_dword = g_wrap(xchg_dword)
 
 _EVENTS.callback = {}
 
+--[[
+00000000  8D442404          lea eax,[esp+0x4]
+00000004  53                push ebx
+00000005  51                push ecx
+00000006  56                push esi
+00000007  57                push edi
+00000008  68UUUUUUUU        push dword 0xUUUUUUUU ; callback index
+0000000D  68WWWWWWWW        push dword 0xWWWWWWWW ; nargs
+00000012  50                push eax
+00000013  51                push ecx
+00000014  E807000000        call dword 0x20
+00000019  5F                pop edi
+0000001A  5E                pop esi
+0000001B  59                pop ecx
+0000001C  5B                pop ebx
+0000001D  C2YYYY            ret 0xYYYY            ; (nargs+1) * 4
+00000020  68XXXXXXXX        push dword 0xXXXXXXXX ; lua dispatch handler
+00000025  C3                ret
+]]
 local dbg = "\x90"
 --dbg="\xcc"
 local asm = 
@@ -65,3 +84,27 @@ function hook_vptr(addr, nargs, f)
 end
 
 g_hook_vptr = g_wrap(hook_vptr)
+
+
+
+
+function hook_func(addr, fixbytes, nargs, f)
+	if type(fixbytes) == "number" then
+		fixbytes = peek(addr, fixbytes)
+	end
+	assert(#fixbytes >= 6, "fixbytes must be at least 6, got " .. tostring(#fixbytes))
+	local orig = x_pages(4096)
+	poke(orig, fixbytes .. push(addr + #fixbytes) .. "\xc3")
+	local ff = function(...)
+		return f(orig, ...)
+	end
+	local cb = make_callback(ff, nargs)
+	poke(addr, push(cb) .. "\xc3")
+	return orig
+end
+
+g_hook_func = g_wrap(hook_func)
+
+function malloc(n)
+	return _WIN32.LocalAlloc(0, n)
+end

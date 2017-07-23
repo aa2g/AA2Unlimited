@@ -20,7 +20,7 @@ function _M:load(mod, level)
 	level = level or 1
 	-- not emulated, nor japanese system (langid 17)
 	if (level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
-		if (IsAAPlay) then
+		if (_BINDING.IsAAPlay) then
 			patch_aaplay()
 		end
 		SetThreadLocale(1041)

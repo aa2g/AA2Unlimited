@@ -10,7 +10,7 @@
 #include "Functions\Shared\Shadowing.h"
 #include "Functions\AAPlay\Poser.h"
 #include "Files/PPeX.h"
-
+#include "Files/PP2.h"
 
 namespace SharedInjections {
 namespace ArchiveFile {
@@ -37,6 +37,9 @@ bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD*
 	}
 	if (g_Config.bUsePPeX)
 		ret = g_PPeX.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer);
+	if (g_Config.bUsePP2)
+		ret = g_PP2.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer);
+
 	return ret;
 }
 

@@ -10,8 +10,14 @@ Logger::Logger() : currPrio(Priority::ERR), filter(Priority::SPAM) {
 
 }
 
-void Logger::flush()
+void Logger::luaFlush()
 {
+	// Lua can't survive on multiple threads. If the log entry comes in from different
+	// thread, it will live on recorded in the buffer. Main thread picks it up
+	// at some point later.
+	if (std::this_thread::get_id() != tid)
+		return;
+
 	// Note that we can't use fancy selene templating in here, because that
 	// by itself uses logger, ie if something goes awry, it would loop.
 	lua_State *L = g_Lua._l;
@@ -33,6 +39,7 @@ Logger::Logger(const TCHAR * file,Priority prio) : currPrio(Priority::ERR),filte
 }
 
 void Logger::Initialize(const TCHAR * file, Priority prio) {
+	tid = std::this_thread::get_id();
 	outfile.open(file);
 	if (!outfile.good()) {
 		MessageBox(0, (std::wstring(TEXT("Could not open Logfile ")) + file).c_str(), TEXT("Error"), 0);

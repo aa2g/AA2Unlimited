@@ -57,10 +57,11 @@ void Lua::init() {
 	g_Lua[LUA_BINDING_TABLE]["GameBase"] = unsigned(GameBase);
 	g_Lua[LUA_BINDING_TABLE]["IsAAPlay"] = IsAAPlay;
 	g_Lua[LUA_BINDING_TABLE]["IsAAEdit"] = IsAAEdit;
-	g_Lua[LUA_BINDING_TABLE]["AAEditPath"] = utf8.to_bytes(AAEditPath);
-	g_Lua[LUA_BINDING_TABLE]["AAPlayPath"] = utf8.to_bytes(AAPlayPath);
-	g_Lua[LUA_BINDING_TABLE]["AAUPath"] = utf8.to_bytes(AAUPath);
 	g_Lua[LUA_BINDING_TABLE]["GameExeName"] = utf8.to_bytes(GameExeName);
+
+	g_Lua[LUA_BINDING_TABLE]["GetAAEditPath"] = []() { return utf8.to_bytes(AAEditPath); };
+	g_Lua[LUA_BINDING_TABLE]["GetAAPlayPath"] = []() { return utf8.to_bytes(AAPlayPath); };
+	g_Lua[LUA_BINDING_TABLE]["GetAAUPath"] = []() { return utf8.to_bytes(AAUPath); };
 }
 
 void Lua::bind() {
@@ -93,12 +94,29 @@ void Lua::bind() {
 	g_Lua[LUA_BINDING_TABLE]["peek"] = lua_CFunction([](lua_State *L) {
 		// buf = peek(addr, len)
 		int addr = luaL_checkinteger(L, 1);
-		int nbytes = luaL_checkinteger(L, 2);
-		char *buf = (char*)alloca(nbytes);
-		memcpy(buf, (void*)(addr), nbytes);
-		lua_pushlstring(L, buf, nbytes);
+		int scanmax = luaL_checkinteger(L, 2);	
+		char *p = (char*)addr;
+		int i = scanmax;
+
+		if (lua_gettop(L) > 2) {
+			size_t untilsz;
+			int step = 1;
+			const char *until = luaL_checklstring(L, 3, &untilsz);
+			if (lua_gettop(L) > 3)
+				step = lua_tointeger(L, 4);
+			if (step < 1)
+				step = 1;
+
+			for (i = 0; i < scanmax; i += step) {
+				if (!memcmp(p + i, until, untilsz))
+					break;
+			}
+		}
+		
+		lua_pushlstring(L, p, i);
 		return 1;
 	});
+
 	g_Lua[LUA_BINDING_TABLE]["poke"] = lua_CFunction([](lua_State *L) {
 		// poke(addr, buf)
 		int addr = luaL_checkinteger(L, 1);
@@ -181,4 +199,9 @@ void Lua::bind() {
 	// Higher level triggers
 	using namespace Shared::Triggers;
 	g_Lua[LUA_BINDING_TABLE]["SafeAddCardPoints"] = &SafeAddCardPoints;
+
+	using namespace General;
+	g_Lua[LUA_BINDING_TABLE]["SetAAPlayPath"] = [](std::string p) { AAPlayPath = utf8.from_bytes(p); };
+	g_Lua[LUA_BINDING_TABLE]["SetAAEditPath"] = [](std::string p) { AAEditPath = utf8.from_bytes(p); };
+
 }

@@ -26,6 +26,7 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
+    <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Files\PoseFile.h" />
+    <ClInclude Include="Files\PP2.h" />
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="Files\XXFile.h" />
     <ClInclude Include="Functions\AAPlay\GameState.h" />
@@ -259,11 +261,16 @@
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
     <None Include="Texts\mod\catchall.lua" />
+    <None Include="Texts\mod\fakereg.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
+    <None Include="Texts\mod\launcher\gsd.lua" />
     <None Include="Texts\mod\launcher\init.lua" />
+    <None Include="Texts\mod\makertrans\dict.lua" />
+    <None Include="Texts\mod\makertrans\init.lua" />
     <None Include="Texts\mod\memory.lua" />
     <None Include="Texts\mod\nocd.lua" />
+    <None Include="Texts\mod\strutil.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
@@ -318,6 +325,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <TargetName>aau</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>

@@ -7,7 +7,7 @@ extern class Config
 {
 public:;
 	int screenshotFormat;
-	const char *sPoserHotKeys;
+	std::string sPoserHotKeys;
 	int legacyMode;
 	double fPOVOffsetZ;
 	double fPOVOffsetY;
@@ -24,6 +24,9 @@ public:;
 	bool bUseShadowing;
 	bool bUseHAi;
 	bool bUsePPeX;
+	bool bUsePP2;
+	int PP2Cache;
+	int PP2AudioCache;
 
 	inline auto operator[](const char *name) const {
 		return g_Lua[LUA_CONFIG_TABLE][name];
@@ -40,6 +43,7 @@ public:;
 			LUA_FIELD(bSaveFileBackup),
 			LUA_FIELD(bSaveFileAutoRemove),
 			LUA_FIELD(savedFileUsage),
+			LUA_FIELD(savedEyeTextureUsage),
 			LUA_FIELD(bHAiOnNoPromptH),
 			LUA_FIELD(bUseDialoguePoser),
 			LUA_FIELD(bUseClothesPoser),
@@ -47,8 +51,11 @@ public:;
 			LUA_FIELD(bEnableFacecam),
 			LUA_FIELD(bUseShadowing),
 			LUA_FIELD(bUseHAi),
-			LUA_FIELD(bUsePPeX)
-
+			LUA_FIELD(bUsePPeX),
+			LUA_FIELD(bUsePP2),
+			LUA_FIELD(PP2Cache),
+			LUA_FIELD(PP2AudioCache),
+			LUA_FIELD(legacyMode)
 		);
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

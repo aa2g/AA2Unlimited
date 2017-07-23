@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "opus.h"
 
+
 class PPeX {
 	size_t Read(char *buf, DWORD len);
 	std::wstring PPeX::GetString();

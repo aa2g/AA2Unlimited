@@ -5,6 +5,7 @@
 #include "MemMods/Hook.h"
 #include "Script/ScriptLua.h"
 #include "Files/PPeX.h"
+#include "Files/PP2.h"
 #include "defs.h"
 
 #include <time.h>
@@ -19,7 +20,7 @@ BOOL WINAPI DllMain(
 		srand(time(NULL));
 
 		General::DllInst = hinstDLL;
-		if (!General::Initialize()) {
+		if (!General::InitializeAAU()) {
 			return FALSE;
 		}
 
@@ -37,16 +38,27 @@ BOOL WINAPI DllMain(
 			}
 		}
 
-		InitializeHooks();
-
-		// This must be done post-hook initialization
+		// Now give chance to lua to run early. This loads that side of config, but
+		// doesn't do anything with the game yet, for that we must wait for inithooks.
 		g_Lua.bind();
 		SetDllDirectory(General::BuildAAUPath(L"lib").c_str());
 		g_Lua["load_modules"]();
-		g_Logger.flush(); // make lua see pending log entries
+
+		// Now initialize the rest
+		if (!General::Initialize()) {
+			return FALSE;
+		}
+		InitializeHooks();
+
+		// And run rest of lua
+		g_Logger.luaFlush(); // make lua see pending log entries
 		g_Lua["init_modules"]();
 		if (g_Config.bUsePPeX)
 			g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
+		if (g_Config.bUsePP2) {
+			g_PP2.AddPath(General::BuildPlayPath(L"data"));
+		}
+
 		return TRUE;
 	}
 }
