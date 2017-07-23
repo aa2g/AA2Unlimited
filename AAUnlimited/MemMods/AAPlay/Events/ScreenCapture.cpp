@@ -14,8 +14,10 @@
 namespace PlayInjections {
 	namespace ScreenCapture {
 
-		CLSID encoderClsid;
+		CLSID JPGencoderClsid;
+		CLSID PNGencoderClsid;
 		Gdiplus::EncoderParameters jpegParameters;
+
 		ULONG jpegQuality;
 		bool gdiInit;
 
@@ -59,7 +61,9 @@ namespace PlayInjections {
 
 			Gdiplus::GdiplusStartup(&gdiToken, &gdiStartupInput, NULL);
 
-			GetEncoderClsid(L"image/jpeg", &encoderClsid);
+			GetEncoderClsid(L"image/jpeg", &JPGencoderClsid);
+			GetEncoderClsid(L"image/png", &PNGencoderClsid);
+
 			gdiInit = true;
 		}
 
@@ -71,13 +75,22 @@ namespace PlayInjections {
 				jpegParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
 				jpegParameters.Parameter[0].NumberOfValues = 1;
 				jpegParameters.Parameter[0].Value = &jpegQuality;
-				jpegQuality = 100;
+				jpegQuality = 85; // make it look shit, so that people use png instead
 			}
 			Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO((BITMAPINFO*)gdiBitmapInfo, (void*)gdiBitmapData);
 			size_t pathLength = wcslen(path);
-			static const WCHAR jpgExtension[]{ L"jpg" };
-			wcsncpy_s(path + pathLength - 3, 4, jpgExtension, 3);
-			bitmap->Save(path, &encoderClsid, &jpegParameters);
+			const wchar_t *ext = L"jpg";
+			auto cls = &JPGencoderClsid;
+			auto *params = &jpegParameters;
+
+			if (g_Config.screenshotFormat == 2) {
+				cls = &PNGencoderClsid;
+				ext = L"png";
+				params = NULL;
+			}
+
+			wcsncpy_s(path + pathLength - 3, 4, ext, 3);
+			bitmap->Save(path, cls, params);
 			delete bitmap;
 		}
 
@@ -99,7 +112,7 @@ namespace PlayInjections {
 			// Screenshot formats:
 			// 0 - BMP (don't redirect)
 			// 1 - JPG
-			// 2 - ...
+			// 2 - PNG
 			
 			/*
 			00E85EEC   > 8B9424 B4000000MOV EDX,DWORD PTR SS:[ESP+B4]            ;  Full path pointer
