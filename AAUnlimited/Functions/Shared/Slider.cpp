@@ -182,9 +182,9 @@ namespace Shared {
 		{
 			//SKIRT
 			{ ExtClass::CharacterStruct::SKIRT, 0, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_BONE }, //kosi width
-			{ ExtClass::CharacterStruct::SKIRT, 1, TEXT("A00_N_sukato"),{ 1.2f,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //kosi width
+			{ ExtClass::CharacterStruct::SKIRT, 1, TEXT("A00_N_sukato"),{ 0.5f,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //kosi width
 			{ ExtClass::CharacterStruct::SKIRT, 2, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_BONE }, //kosi thickness
-			{ ExtClass::CharacterStruct::SKIRT, 3, TEXT("A00_N_sukato"),{ 0,0,1.5f, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //kosi thickness
+			{ ExtClass::CharacterStruct::SKIRT, 3, TEXT("A00_N_sukato"),{ 0,0,0.5f, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //kosi thickness
 		}
 	};
 
