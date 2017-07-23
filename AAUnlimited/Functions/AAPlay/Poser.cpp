@@ -58,6 +58,9 @@ namespace Poser {
 			g_PoserWindow.Init();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
+			for (auto& s : g_PoserController.CurrentCharacter()->m_sliders) {
+				s.guide = nullptr;
+			}
 		}
 	}
 
