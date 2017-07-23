@@ -41,6 +41,7 @@ require "iuplua"
 require "iupluacontrols"
 
 
+local wantexit = false
 local gsdlib = require "launcher.gsd"
 local gsdconfig
 
@@ -162,9 +163,10 @@ local step = "x6"
 
 local buts = {}
 local launch = function()
-	local b = iup.button{title="Launch game", expand="HORIZONTAL", size="x32", margin="8x8",
+	local b = iup.button{title="Launch the " .. (_BINDING.IsAAPlay and "game" or "editor"), expand="HORIZONTAL", size="x32", margin="8x8",
 	action=function()
 		for _,v in ipairs(buts) do v.active="no" end
+		wantexit  = true
 		iup.ExitLoop()
 		if nocloseafterlaunch then
 			function dlg:close_cb()
@@ -408,6 +410,8 @@ return function()
 		};
 		title = "AA2Unlimited 0.5 preview",
 	}
+	dlg.startfocus = buts[1]
+
 	function dlg:close_cb()
 		os.exit(0)
 	end
@@ -420,6 +424,10 @@ return function()
 		return true
 	end
 	log("dialog shown")
-	iup.MainLoop()
+	while not wantexit do
+		iup.MainLoop()
+		log("wantexit "..wantexit)
+	end
+	log("handing over to game thread")
 end
 
