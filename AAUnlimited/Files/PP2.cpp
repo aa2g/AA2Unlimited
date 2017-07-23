@@ -332,18 +332,22 @@ HANDLE PP2::HGet() {
 void PP2::CacheGC(size_t sz) {
 	vector<uint64_t> array;
 	int idx = 0;
+	long tsize = 0;
 
 	for (auto &p : pfiles) {
 		for (auto const& e : p.score) {
 			if (p.cache.find(e.first) == p.cache.end())
 				continue;
-
+			tsize += p.cache[e.first]->csize;
 			uint64_t v = ((uint64_t)e.second << 32) | ((uint64_t)e.first << 8) | idx;
 			array.push_back(v);
 		}
 		idx++;
 	}
 	sort(array.begin(), array.end());
+
+	LOGPRIONC(Logger::Priority::SPAM) std::dec
+		<< "CacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << tsize / 1024 << "KiB";
 
 	int dropped = 0;
 	int nent = 0;
@@ -354,24 +358,28 @@ void PP2::CacheGC(size_t sz) {
 			break;
 	}
 	LOGPRIONC(Logger::Priority::SPAM)
-		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 / 1024 << "MB\r\n";
+		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB\r\n";
 }
 
 void PP2::ACacheGC(size_t sz) {
 	vector<uint64_t> array;
 	int idx = 0;
+	long tsize = 0;
 
 	for (auto &p : pfiles) {
 		for (auto const& e : p.ascore) {
 			if (p.acache.find(e.first) == p.acache.end())
 				continue;
-
+			tsize += p.files[e.first].osize;
 			uint64_t v = ((uint64_t)e.second << 32) | ((uint64_t)e.first << 8) | idx;
 			array.push_back(v);
 		}
 		idx++;
 	}
 	sort(array.begin(), array.end());
+
+	LOGPRIONC(Logger::Priority::SPAM) std::dec
+		<< "ACacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << acache_used / 1024 << "KIB";
 
 	int dropped = 0;
 	int nent = 0;
@@ -381,11 +389,13 @@ void PP2::ACacheGC(size_t sz) {
 		assert(ac[entry] != NULL);
 		HeapFree(HGet(), 0, ac[entry]);
 		ac.erase(entry);
-		dropped += pfiles[a & 0xff].files[entry].osize;
+		int esz = pfiles[a & 0xff].files[entry].osize;
+		dropped += esz;
 		nent++;
+		acache_used -= esz;
 		if (dropped > sz)
 			break;
 	}
 	LOGPRIONC(Logger::Priority::SPAM)
-		"ACacheGC: Freed " << nent << " uncompressed audio cache entries, " << dropped / 1024 / 1024 << "MB\r\n";
+		"ACacheGC: Freed " << nent << " uncompressed audio cache entries, " << dropped / 1024 << "KiB\r\n";
 }
