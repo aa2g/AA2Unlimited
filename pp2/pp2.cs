@@ -18,8 +18,23 @@ public class Flags
     public static ushort ZSTD = 0x800;
     public static ushort ALONE = 0x1000;
     public static ushort LINK = 0x8000;
-
 }
+
+public class DirEntry : IReadFile
+{
+    public string Name { get; set; }
+    public string fp;
+    public DirEntry(string fullpath)
+    {
+        Name = Path.GetFileName(fullpath);
+        fp = fullpath;
+    }
+    public Stream CreateReadStream()
+    {
+        return new FileInfo(fp).OpenRead();
+    }
+}
+
 
 // Describes one file to be packed in a chunk (probably with other files)
 // This can be easily interfac-ied, needs to give only .GetData(), .GetMeta() & .naked
@@ -28,7 +43,7 @@ public class ChunkFile
     const int MAXSIZE = 32 * 1024 * 1024;
     // helper fields
     public bool done, naked; // no zstd, and no chunk grouping
-    public ppSubfile pp;
+    public IReadFile pp;
 
     // serialized data in meta()
     public uint chunk_idx;
@@ -56,10 +71,10 @@ public class ChunkFile
         outf.Write(Encoding.Unicode.GetBytes(name), 0, name.Length * 2);
     }
 
-    public ChunkFile(ppSubfile _pp)
+    public ChunkFile(IReadFile _pp, string parent, uint size)
     {
         pp = _pp;
-        name = (Path.GetFileName(pp.ppPath) + "/" + pp.Name).ToLower();
+        name = (parent + "/" + pp.Name).ToLower();
 
         if (name.EndsWith(".wav"))
         {
@@ -75,7 +90,7 @@ public class ChunkFile
         {
             flags |= Flags.ZSTD;
         }
-        orig_size = (uint)pp.size;
+        orig_size = size;
         var hasher = MD5.Create();
 
         md5 = BitConverter.ToInt64(hasher.ComputeHash(pp.CreateReadStream()), 0);
@@ -463,7 +478,7 @@ public class ChunkBuilder
         }
 
         var zpak = zstdPack(pak.ToArray());
-        //var zpak = pak;
+        //zpak = pak;
         os.Write(zpak.ToArray(), 0, (int)zpak.Length);
         os.Write(BitConverter.GetBytes((uint)zpak.Length), 0, 4);
     }
@@ -472,38 +487,82 @@ public class ChunkBuilder
 
 class pp2
 {
+    static void process_pp_files(ChunkBuilder chb, IEnumerable<string> dirs, Regex r)
+    {
+        foreach (var dd in dirs)
+        {
+            foreach (string fn in Directory.GetFiles(dd, "*.pp"))
+            {
+                Console.Write("Opening " + fn);
+                if (fn.EndsWith("base.pp"))
+                    continue;
+                ppParser pp = new ppParser(fn);
+                int nmatch = 0;
+                foreach (ppSubfile file in pp.Subfiles)
+                {
+                    //Console.WriteLine(ext);
+                    if (r.Match(file.Name).Success)
+                    {                       
+                        chb.AddChunkFile(new ChunkFile(file, Path.GetFileName(file.ppPath), file.size));
+                        nmatch++;
+                    }
+                }
+                Console.WriteLine("..." + nmatch + " files matched");
+                //if (nfm-- == 0) break;
+            }
+        }
+    }
+
+    static void process_unpacked_tree(ChunkBuilder chb, IEnumerable<string> dirs, Regex r)
+    {
+        
+        foreach (var dd in dirs)
+        {
+            Console.WriteLine("Scan " + dd);
+            foreach (string dirn in Directory.GetDirectories(dd))
+            {
+                var pdirn = Path.GetFileName(dirn);
+                Console.WriteLine("Opening " + pdirn);
+                if (!pdirn.StartsWith("jg2"))
+                    continue;
+                pdirn += ".pp";
+
+                foreach (var f in Directory.GetFiles(dirn))
+                {
+                    uint size = (uint)new System.IO.FileInfo(f).Length;
+                    var plain = Path.GetFileName(f);
+                    if (r.Match(plain).Success)
+                    {
+                        chb.AddChunkFile(new ChunkFile(new DirEntry(f), pdirn, size));
+                    }
+                }
+            }
+        }
+    }
+
     static void Main(string[] args)
     {
         if (args.Length < 3)
         {
-            Console.WriteLine("usage: pp2 \\some\\path\\to\\aa2play\\data output.pp2 regex");
+            Console.WriteLine("usage: pp2 output.pp2 regex path... path...");
             return;
         }
         var chb = new ChunkBuilder();
         Regex r = null;
-        r = new Regex(args[2], RegexOptions.IgnoreCase);
-        int nfm = 16;
-        foreach (string fn in Directory.GetFiles(args[0], "*.pp"))
+        r = new Regex(args[1], RegexOptions.IgnoreCase);
+        //int nfm = 16;
+        var trail = Path.GetFileName(args[2]);
+        Console.WriteLine(trail);
+        if (trail == "AA2_MAKE" || trail == "AA2_PLAY")
         {
-            Console.Write("Opening " + fn);
-            if (fn.EndsWith("base.pp"))
-                continue;
-            ppParser pp = new ppParser(fn);
-            int nmatch = 0;
-            foreach (ppSubfile file in pp.Subfiles)
-            {
-                //Console.WriteLine(ext);
-                if (r.Match(file.Name).Success)
-                {
-                    chb.AddChunkFile(new ChunkFile(file));
-                    nmatch++;
-                }
-            }
-            Console.WriteLine("..." + nmatch + " files matched");
-            //if (nfm-- == 0) break;
+            process_unpacked_tree(chb, args.Skip(2), r);
+        } else
+        {
+
+            process_pp_files(chb, args.Skip(2), r);
         }
 
-        var outf = new FileStream(args[1], FileMode.Create, FileAccess.Write);
+        var outf = new FileStream(args[0], FileMode.Create, FileAccess.Write);
         chb.EncodeChunks(outf);
         chb.WriteMetadata(outf);
         // store length of metadata as last integer, so reader can locate
