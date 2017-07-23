@@ -13,9 +13,9 @@ function _M.load()
 	local close = 0x2C4004
 	local open = 0x2C4008
 	if _BINDING.IsAAPlay then
-		local query = 0x2E3000
-		local close = 0x2E3004
-		local open = 0x2E3008
+		query = 0x2E3000
+		close = 0x2E3004
+		open = 0x2E3008
 	end
 	g_hook_vptr(open, 5, function(orig, this, key, subkey, opt, sam, result)
 		if (key == 0x80000001) then
@@ -24,6 +24,7 @@ function _M.load()
 		end
 		return proc_invoke(orig, this, key, subkey, opt, sam, result)
 	end)
+
 	g_hook_vptr(query, 6, function(orig, this, key, value, res, type, pdata, pcdata)
 		if key == 0xdeadbabe then
 			local str = utf8_to_unicode(fakepath .. "\x00")
@@ -36,12 +37,13 @@ function _M.load()
 		end
 		return proc_invoke(orig, this, key, value, res, type, pdata, pcdata)
 	end)
-	g_hook_vptr(close, 1, function(orig, this, hk)
+	opt = g_hook_vptr(close, 1, function(orig, this, hk)
 		if (hk == 0xdeadbabe) then
 			return 0
 		end
 		return proc_invoke(orig, this, hk)
 	end)
+
 end
 
 return _M
