@@ -1642,6 +1642,8 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			if(slider->flags & AAUCardData::MODIFY_FRAME) {
 				for (auto& elem : Shared::g_xxMods[slider->target]) {
 					ExtClass::Frame* frame = elem.first;
+					if (!frame->m_name)
+						continue;
 					TCHAR buff[256];
 					size_t written;
 					mbstowcs_s(&written,buff,frame->m_name+5,256);
@@ -1678,6 +1680,8 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 	for (ExtClass::CharacterStruct::Models model : renewFiles) {
 		for(auto& elem : Shared::g_xxMods[model]) {
 			ExtClass::Frame* frame = (ExtClass::Frame*)elem.first;
+			if (!frame->m_name)
+				continue;
 			TCHAR buff[256];
 			size_t written;
 			mbstowcs_s(&written,buff,frame->m_name+5,256);
