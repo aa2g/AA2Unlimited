@@ -58,13 +58,13 @@ namespace Poser {
 			g_PoserWindow.Init();
 			g_PoserController.StartPoser();
 			g_PoserController.SetTargetCharacter(charStruct);
-			g_PoserWindow.SyncBones();
-			g_PoserWindow.SyncOperation();
 		}
 	}
 
 	void LoadCharacterEnd() {
 		//g_PoserController.SetHidden(ExtClass::CharacterStruct::Models::SKELETON, "guide_", true);
+		g_PoserWindow.SyncBones();
+		g_PoserWindow.SyncOperation();
 	}
 
 	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
