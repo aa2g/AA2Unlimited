@@ -324,11 +324,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
     <TargetName>aau</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -344,6 +345,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Debug;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Debug</AdditionalLibraryDirectories>
       <AdditionalDependencies>libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
       <Command>cd $(SolutionDir)$(Configuration)\
@@ -380,10 +382,13 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Release;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Release</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>cd $(SolutionDir)$(Configuration)\
-xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
+      <Command>copy /Y $(SolutionDir)$(Configuration)\aau.dll c:\mega\aa2mini\aau
+cd $(ProjectDir)\Texts
+copy /Y *.lua c:\mega\aa2mini\aau
+xcopy /Y /E mod c:\mega\aa2mini\aau\mod</Command>
       <Message>Copy .dll to Game Directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
