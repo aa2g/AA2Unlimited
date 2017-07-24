@@ -96,7 +96,7 @@ PP2AudioCache = 512
 mods = {
 	{ "fakereg" },
 	{ "fixlocale" },
-	{ "catchall" },
+--	{ "catchall" },
 	{ "makertrans" },
 	{ "launcher" },
 }

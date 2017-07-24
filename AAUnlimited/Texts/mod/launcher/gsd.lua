@@ -65,13 +65,13 @@ function _M.load_gsd()
 	for _,v in ipairs(format) do
 		local buf = data:sub(pos,pos+#v-1)
 		if type(v) == "string" then
-			log("skipping %d %s ", pos-1,
+--[[			log("skipping %d %s ", pos-1,
 				buf:gsub("(.)",
 					function(d)
 						return string.format("%02x ", string.byte(d))
 					end
 				)
-			)
+			)]]
 			pos = pos + #v
 		else
 			local name = next(v)

@@ -427,10 +427,10 @@ return function()
 		return true
 	end
 	log("dialog shown")
-	while not wantexit do
+--	while not wantexit do
 		iup.MainLoop()
-		log("wantexit "..wantexit)
-	end
+--		log("wantexit "..wantexit)
+--	end
 	log("handing over to game thread")
 end
 
