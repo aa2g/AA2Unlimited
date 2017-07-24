@@ -27,13 +27,12 @@ using namespace std;
 
 PP2 g_PP2;
 
-bool PP2File::OPUS_decompress(int freq, int nchan, char *dst, size_t dstlen, char *src, size_t srclen)
+bool PP2File::OPUS_decompress(int srate, int opusrate, int nchan, char *dst, size_t dstlen, char *src, size_t srclen)
 {
 	OpusDecoder *dec;
 	int err;
-	dec = opus_decoder_create(12000 << freq, nchan, &err);
+	dec = opus_decoder_create(opusrate, nchan, &err);
 
-	int srate = 11025 << freq;
 	strcpy(dst, "RIFF");
 #define W(x,y) *((uint32_t*)(dst+x)) = y;
 	*(uint32_t*)(dst + 4) = dstlen - 8;
@@ -264,7 +263,10 @@ void *PP2File::getCache(uint32_t idx) {
 	score[idx]++;
 
 	if (fe.flags & FLAG_OPUS) {
-		OPUS_decompress(fe.flags & 0xf, (fe.flags>>4)&0xf, ret, fe.osize, ce->data, ce->csize);
+		int wshift = fe.flags & 3;
+		int wavrate = ((fe.flags & 4) ? 12000 : 11025) << wshift;
+		int opusrate = 12000 << wshift;
+		OPUS_decompress(wavrate, opusrate, (fe.flags>>4)&0xf, ret, fe.osize, ce->data, ce->csize);
 		if ((pp2->acache_used / 1024 / 1024) > g_Config.PP2AudioCache)
 			pp2->ACacheGC(pp2->acache_used / 4);
 
@@ -318,6 +320,11 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 		if (p.names.find(path) == p.names.end())
 			continue;
 		auto fidx = p.names[path];
+		if (fidx == 0xffffffff) {
+			*readBytes = 0;
+			*outBuffer = (BYTE*)GameAlloc(0);
+			return true;
+		}
 		*readBytes = p.files[fidx].osize;
 		*outBuffer = (BYTE*)p.getCache(fidx);
 		

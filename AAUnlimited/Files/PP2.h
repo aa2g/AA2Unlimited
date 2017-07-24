@@ -39,7 +39,7 @@ public:
 	uint32_t freeCache(uint32_t idx);
 	cacheEntry *allocCache(uint32_t idx, size_t sz);
 	PP2File::cacheEntry *PP2File::reallocCache(uint32_t, PP2File::cacheEntry *ce);
-	bool OPUS_decompress(int freq, int nchan, char *dst, size_t dstlen, char *src, size_t srclen);
+	bool OPUS_decompress(int, int, int nchan, char *dst, size_t dstlen, char *src, size_t srclen);
 	uint32_t chunkSize(uint32_t chunk);
 };
 

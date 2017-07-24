@@ -148,6 +148,11 @@ public class ChunkFile
         int nchan = wav[22];
         int isr = wav[24] | (((int)wav[25]) << 8);
         int bps = wav[28] | (((int)wav[29]) << 8) | (((int)wav[30]) << 16);
+        if ((isr == 0) || ((nchan != 1) && (nchan != 2)))
+        {
+            Console.WriteLine(name + " appears to be corrupted!");
+            return 0;
+        }
         int width = bps / isr / nchan;
         if (width != 2)
             return 0;
@@ -178,7 +183,12 @@ public class ChunkFile
             new int [] {1, 22050, 1, 32000, 24000},
             new int [] {1, 22050, 2, 48000, 24000},
             new int [] {2, 44100, 1, 40000, 48000},
-            new int [] {2, 44100, 2, 64000, 48000}
+            new int [] {2, 44100, 2, 64000, 48000},
+
+            new int [] {5, 24000, 1, 32000, 24000},
+            new int [] {5, 24000, 2, 40000, 24000},
+            new int [] {6, 48000, 1, 48000, 48000},
+            new int [] {6, 48000, 2, 64000, 48000},
         };
 
         var paras = lofi;
@@ -291,6 +301,12 @@ public class ChunkBuilder
 
     public void AddChunkFile(ChunkFile chf)
     {
+        if (chf.orig_size == 0)
+        {
+            links[chf.name] = 0xffffffff;
+            return;
+        }
+
         uint link;
         // link to earlier hash if it's a dupe
         if (hash.TryGetValue(chf.md5, out link))
