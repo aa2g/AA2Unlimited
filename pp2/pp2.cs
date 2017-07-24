@@ -150,7 +150,7 @@ public class ChunkFile
         int bps = wav[28] | (((int)wav[29]) << 8) | (((int)wav[30]) << 16);
         if ((isr == 0) || ((nchan != 1) && (nchan != 2)))
         {
-            Console.WriteLine(name + " appears to be corrupted!");
+            Console.WriteLine(name + " appears to be corrupted! " + orig_size);
             return 0;
         }
         int width = bps / isr / nchan;
@@ -279,7 +279,7 @@ public class ChunkBuilder
     public ushort chpos;
 
     long last;
-    ChunkFile lastf;
+    ChunkFile lastf, currf;
 
     long totalu, totalc;
     long tosize;
@@ -331,6 +331,8 @@ public class ChunkBuilder
 
     public void AppendFile(Stream os, ChunkFile chf)
     {
+        Console.WriteLine("append file " + chf.name + " buffer " + buffer.Length);
+        currf = chf;
         if (chf.done)
         {
             Console.Write("!");
@@ -439,6 +441,7 @@ public class ChunkBuilder
         }
         if (chpos == 1)
         {
+            Console.WriteLine("flaggin " + lastf.name + " as alone!, current is " + currf.name + " buffer is " + buffer.Length);
             lastf.flags |= Flags.ALONE;
         }
 

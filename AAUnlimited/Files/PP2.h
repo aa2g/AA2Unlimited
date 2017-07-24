@@ -41,6 +41,8 @@ public:
 	PP2File::cacheEntry *PP2File::reallocCache(uint32_t, PP2File::cacheEntry *ce);
 	bool OPUS_decompress(int, int, int nchan, char *dst, size_t dstlen, char *src, size_t srclen);
 	uint32_t chunkSize(uint32_t chunk);
+	std::wstring name;
+	const std::wstring& getName(int idx);
 };
 
 

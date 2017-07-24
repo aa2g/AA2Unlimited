@@ -538,6 +538,7 @@ namespace Poser {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 			SetWindowText(hwndDlg, (LPWSTR)wparam);
 			if (thisPtr == NULL) return FALSE;
+			if (!CurrentSlider()) return FALSE;
 			int id = wparam;
 			if (id == hkTranslate) {
 				SendMessage(thisPtr->m_listOperation, LB_SETCURSEL, PoserController::SliderInfo::Translate, 0);

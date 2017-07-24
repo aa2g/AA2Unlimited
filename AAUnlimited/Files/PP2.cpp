@@ -27,6 +27,12 @@ using namespace std;
 
 PP2 g_PP2;
 
+const std::wstring & PP2File::getName(int idx) {
+	for (auto &e : names) {
+		if (e.second == idx)
+			return e.first;
+	}
+}
 bool PP2File::OPUS_decompress(int srate, int opusrate, int nchan, char *dst, size_t dstlen, char *src, size_t srclen)
 {
 	OpusDecoder *dec;
@@ -71,6 +77,7 @@ bool PP2File::OPUS_decompress(int srate, int opusrate, int nchan, char *dst, siz
 
 
 PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
+	name = wstring(fn);
 	FILE *sf = _wfopen(fn, L"rb");
 	ifstream f(sf);
 
@@ -206,6 +213,8 @@ void *PP2File::getCache(uint32_t idx) {
 		over.Offset = chunks[fe.chunk];
 		DWORD got = 0;
 		ReadFile(h, zbuf, sz, &got, &over);
+		assert(got == sz);
+
 		if (!ce) {
 			assert(!(fe.flags & FLAG_ALONE));
 			ret = GameAlloc(fe.osize);
@@ -280,6 +289,14 @@ void *PP2File::getCache(uint32_t idx) {
 
 	assert(fe.flags & FLAG_ZSTD);
 	int got = ZSTD_decompress(ret, fe.osize, ce->data, ce->csize);
+	if (got != fe.osize) {
+		LOGPRIO(Logger::Priority::CRIT_ERR) << std::dec
+			<< "Decompressed size mismatch for "
+			<< name << "/" << getName(idx)
+			<< "chunk " << fe.chunk << " chpos " << fe.chpos << " choff " << fe.off
+			<< " expected size " << fe.osize << "!=" << got << " from zstd\r\n";
+	}
+
 	assert(got == fe.osize);
 	return ret;
 }
