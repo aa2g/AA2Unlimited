@@ -282,7 +282,10 @@ local function buildtabs() return
 				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
 				gsdt("blur", iup.toggle {title = "Blur" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
-				gsdt("shaders", iup.toggle {title = "Shaders (tan/outline)" }),
+				gsdt("dynlight", iup.toggle {title = "DynLight shader" }),
+				gsdt("outline", iup.toggle {title = "Outline shader" }),
+
+				--gsdt("shaders", iup.toggle {title = "Shaders (tan/outline)" }),
 			}
 		},
 	}, iup.fill{}, launch()},
