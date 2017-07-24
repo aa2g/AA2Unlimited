@@ -66,11 +66,11 @@ void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
  * NPC -> PC interactive conversation tick event
  *******************/
 void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePreTick"](param, param->GetSubStruct());
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePreTick"](param, param->GetSubStruct());
 }
 
 void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
-	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePostTick"](param, param->GetSubStruct());
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePostTick"](param, param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
@@ -79,11 +79,11 @@ void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationSt
 *******************/
 
 void __stdcall NpcPcNonInteractivePreTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePreTick"](param->GetSubStruct());
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePreTick"](param->GetSubStruct());
 }
 
 void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePostTick"](param->GetSubStruct());
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePostTick"](param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
