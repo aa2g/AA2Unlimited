@@ -151,6 +151,7 @@ uint32_t PP2File::freeCache(uint32_t idx)
 	uint32_t sz = cache[idx]->csize;
 	HeapFree(pp2->HGet(), 0, cache[idx]);
 	pp2->cache_used -= sz;
+	pp2->cache_count--;
 	cache.erase(idx);
 	return sz;
 }
@@ -163,7 +164,9 @@ static char *GameAlloc(size_t sz) {
 PP2File::cacheEntry *PP2File::allocCache(uint32_t idx, size_t size) {
 	cacheEntry *ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(*ce));
 	pp2->cache_used += size;
+	pp2->cache_count++;
 	cache[idx] = ce;
+	score[idx]++;
 	ce->csize = size;
 	return ce;
 }
@@ -267,6 +270,7 @@ void *PP2File::getCache(uint32_t idx) {
 
 		void *aptr = HeapAlloc(pp2->HGet(), 0, fe.osize);
 		acache[idx] = aptr;
+		ascore[idx]++;
 		memcpy(aptr, ret, fe.osize);
 		pp2->acache_used += fe.osize;
 		return ret;
@@ -334,6 +338,9 @@ void PP2::CacheGC(size_t sz) {
 	int idx = 0;
 	long tsize = 0;
 
+	LOGPRIONC(Logger::Priority::SPAM) std::dec
+		<< "CacheGC: need to free " << sz/1024 << " KiB\r\n";
+
 	for (auto &p : pfiles) {
 		for (auto const& e : p.score) {
 			if (p.cache.find(e.first) == p.cache.end())
@@ -347,18 +354,23 @@ void PP2::CacheGC(size_t sz) {
 	sort(array.begin(), array.end());
 
 	LOGPRIONC(Logger::Priority::SPAM) std::dec
-		<< "CacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << tsize / 1024 << "KiB";
+		<< "CacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << cache_used / 1024 << "KiB in " << cache_count << " entries\r\n";
 
-	int dropped = 0;
+	size_t dropped = 0;
+	int fhit, lhit;
+	fhit = -1;
 	int nent = 0;
 	for (auto &a : array) {
+		if (fhit < 0)
+			fhit = a >> 32;
+		lhit = a >> 32;
 		dropped += pfiles[a&0xff].freeCache((a>>8) & 0xffffff);
 		nent++;
 		if (dropped > sz)
 			break;
 	}
 	LOGPRIONC(Logger::Priority::SPAM)
-		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB\r\n";
+		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB, hits" <<fhit<<","<<lhit<<"\r\n";
 }
 
 void PP2::ACacheGC(size_t sz) {
@@ -379,7 +391,7 @@ void PP2::ACacheGC(size_t sz) {
 	sort(array.begin(), array.end());
 
 	LOGPRIONC(Logger::Priority::SPAM) std::dec
-		<< "ACacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << acache_used / 1024 << "KIB";
+		<< "ACacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << acache_used / 1024 << "KIB\r\n";
 
 	int dropped = 0;
 	int nent = 0;

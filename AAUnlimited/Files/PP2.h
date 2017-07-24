@@ -48,6 +48,8 @@ class PP2 {
 public:;
 	std::vector<PP2File> pfiles;
 	size_t cache_used;
+	size_t cache_count;
+
 	size_t acache_used;
 	HANDLE PP2::HGet();
 
