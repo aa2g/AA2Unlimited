@@ -66,8 +66,10 @@ namespace Poser {
 
 	void LoadCharacterEnd() {
 		//g_PoserController.SetHidden(ExtClass::CharacterStruct::Models::SKELETON, "guide_", true);
-		g_PoserWindow.SyncBones();
-		g_PoserWindow.SyncOperation();
+		if (g_Config.bUseDialoguePoser || g_Config.bUseClothesPoser) {
+			g_PoserWindow.SyncBones();
+			g_PoserWindow.SyncOperation();
+		}
 	}
 
 	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
