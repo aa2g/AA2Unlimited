@@ -2,29 +2,36 @@
 
 local nocloseafterlaunch = true
 local reslist = {
-	"320x240",
-	"512x384",
-	"640x480",
-	"768x576",
+--	"320x240",
+--	"512x384",
+--	"640x480",
+--	"768x576",
 	"800x480",
 	"854x480",
-	"800x600",
+
+--	"800x600",
 	"960x600",
 	"1024x600",
-	"1024x768",
-	"1152x768",
+
+--	"1024x768",
+--	"1152x768",
+
 	"1280x720",
 	"1280x800",
+
 	"1280x854",
 	"1280x960",
 	"1366x768",
-	"1400x1050",
+
+--	"1400x1050",
 	"1440x900",
 	"1440x960",
-	"1600x1200",
+
+--	"1600x1200",
 	"1680x1050",
 	"1920x1080",
 	"1920x1200",
+
 	"2048x1080",
 	"2048x1538",
 	"2560x1600",
@@ -46,40 +53,45 @@ local gsdlib = require "launcher.gsd"
 local gsdconfig
 
 
+local function update_res(text)
+	text = text or "1280x720"
+	local x,y = text:match("^([0-9]+)x([0-9]+).*$")
+	if not x or not y then return end
+	x = tonumber(x)
+	y = tonumber(y)
+	if x< 100 or y < 100 or x > 10000 or y > 10000 then return end
+
+	local function gcd(m, n)
+		while m ~= 0 do
+			m, n = n%m, m
+		end
+		return n
+	end
+
+	factor = gcd(x,y)
+	local ax = x/factor
+	local ay = y/factor
+
+	if ax > 128 or ay > 128 then return end
+
+	gsdconfig.aspectx = ax
+	gsdconfig.aspecty = ay
+	gsdconfig.x = x
+	gsdconfig.y = y
+	gsdlib.save_gsd(gsdconfig)
+	_CONFIG["res_"..exe_type] = x .. "x" .. y
+	Config.save()
+end
 
 local function gsdres(elem)
 	elem.action = function(e,text,itno,state)
 		if state ~= 1 then return end
-		local x,y = text:match("^([0-9]+)x([0-9]+).*$")
-		if not x or not y then return end
-		x = tonumber(x)
-		y = tonumber(y)
-		if x< 100 or y < 100 or x > 10000 or y > 10000 then return end
-
-		local function gcd(m, n)
-		    while m ~= 0 do
-				m, n = n%m, m
-			end
-			return n
-		end
-
-		factor = gcd(x,y)
-		local ax = x/factor
-		local ay = y/factor
-
-		if ax > 128 or ay > 128 then return end
-
-		gsdconfig.aspectx = ax
-		gsdconfig.aspecty = ay
-		gsdconfig.x = x
-		gsdconfig.y = y
-		gsdlib.save_gsd(gsdconfig)
+		update_res(text)
 	end
 	elem.edit_cb = function(e,c,str)
 		elem:action(str, -1, 1)
 	end
-	local res = gsdconfig.x .. "x" .. gsdconfig.y
-	log("setting "..res)
+	local res = _CONFIG["res_" .. exe_type]
 	elem.valuestring = res
 	elem.value = res
 	return elem
@@ -406,6 +418,7 @@ end
 
 return function()
 	gsdconfig = gsdlib.load_gsd()
+	update_res(_CONFIG["res_"..exe_type])
 	iup.SetGlobal("UTF8MODE","YES")
 	dlg = iup.dialog {
 		iup.vbox {
