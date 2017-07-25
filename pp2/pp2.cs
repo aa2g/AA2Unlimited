@@ -104,6 +104,7 @@ public class ChunkFile
     public void GetData(ChunkBuilder cb, Stream os)
     {
         cb.FlushOnOverflow((int)orig_size, MAXSIZE, os);
+        cb.lastf = this;
         ushort chp = cb.chpos;
         chpos = chp;
         chunk_idx = cb.idx;
@@ -181,9 +182,9 @@ public class ChunkFile
         {
             //          f  sr  nchan kbps   osr    60/120 step
             new int [] {1, 22050, 1, 32000, 24000},
-            new int [] {1, 22050, 2, 48000, 24000},
+            new int [] {1, 22050, 2, 40000, 24000},
             new int [] {2, 44100, 1, 40000, 48000},
-            new int [] {2, 44100, 2, 64000, 48000},
+            new int [] {2, 44100, 2, 48000, 48000},
 
             new int [] {5, 24000, 1, 32000, 24000},
             new int [] {5, 24000, 2, 40000, 24000},
@@ -206,6 +207,10 @@ public class ChunkFile
             int osr = para[4];
             if (sr == isr && nch == nchan)
             {
+                if (Path.GetFileName(name).StartsWith("bgm"))
+                {
+                    kbps = 96 * 1024;
+                }
                 ctx = OPUS.opus_encoder_create(osr, nchan, (int)Application.Voip, out error);
                 if ((long)ctx == 0L)
                     throw new Exception("opus_encoder_create failed " + isr + ", " + nchan + " for "+name);
@@ -279,7 +284,7 @@ public class ChunkBuilder
     public ushort chpos;
 
     long last;
-    ChunkFile lastf, currf;
+    public ChunkFile lastf, currf;
 
     long totalu, totalc;
     long tosize;
@@ -331,7 +336,7 @@ public class ChunkBuilder
 
     public void AppendFile(Stream os, ChunkFile chf)
     {
-        Console.WriteLine("append file " + chf.name + " buffer " + buffer.Length);
+        //Console.WriteLine("append file " + chf.name + " buffer " + buffer.Length);
         currf = chf;
         if (chf.done)
         {
@@ -339,7 +344,6 @@ public class ChunkBuilder
         }
         if (chf.naked)
             FlushZstd(os);
-        lastf = chf;
         Console.Write(Path.GetExtension(chf.name).ToUpper()[1]);
         chf.GetData(this, os);
         chpos++;
@@ -441,7 +445,7 @@ public class ChunkBuilder
         }
         if (chpos == 1)
         {
-            Console.WriteLine("flaggin " + lastf.name + " as alone!, current is " + currf.name + " buffer is " + buffer.Length);
+            //Console.WriteLine("flaggin " + lastf.name + " as alone!, current is " + currf.name + " buffer is " + buffer.Length);
             lastf.flags |= Flags.ALONE;
         }
 

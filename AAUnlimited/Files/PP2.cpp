@@ -186,7 +186,7 @@ void *PP2File::getCache(uint32_t idx) {
 		ascore[idx]++;
 		if (acache.find(idx) != acache.end()) {
 			ret = GameAlloc(fe.osize);
-			memcpy(ret, acache[idx], files[idx].osize);
+			memcpy(ret, acache[idx], fe.osize);
 			return ret;
 		}
 	}
@@ -194,7 +194,9 @@ void *PP2File::getCache(uint32_t idx) {
 	// if not in cache, put it in there
 	if (cache.find(idx) == cache.end()) {
 		//DBG "Not found in cache " << idx << "\r\n";
-
+		if (fe.osize == 1698116) {
+			DBG "break!\r\n";
+		}
 		// trim the cache if needed
 		if ((pp2->cache_used / 1024/1024) > g_Config.PP2Cache)
 			pp2->CacheGC(pp2->cache_used / 4);
@@ -212,7 +214,8 @@ void *PP2File::getCache(uint32_t idx) {
 		OVERLAPPED over = { 0 };
 		over.Offset = chunks[fe.chunk];
 		DWORD got = 0;
-		ReadFile(h, zbuf, sz, &got, &over);
+		bool read_ok = ReadFile(h, zbuf, sz, &got, &over);
+		assert(read_ok);
 		assert(got == sz);
 
 		if (!ce) {
@@ -293,8 +296,8 @@ void *PP2File::getCache(uint32_t idx) {
 		LOGPRIO(Logger::Priority::CRIT_ERR) << std::dec
 			<< "Decompressed size mismatch for "
 			<< name << "/" << getName(idx)
-			<< "chunk " << fe.chunk << " chpos " << fe.chpos << " choff " << fe.off
-			<< " expected size " << fe.osize << "!=" << got << " from zstd\r\n";
+			<< "chunk " << fe.chunk << " begins at " << chunks[fe.chunk] << ", chpos " << fe.chpos << " choff " << fe.off
+			<< " expected size " << fe.osize << "!=" << got << " from zstd " << ZSTD_getDecompressedSize(ce->data, ce->csize) << "\r\n";
 	}
 
 	assert(got == fe.osize);
