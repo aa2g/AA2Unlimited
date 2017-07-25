@@ -8,6 +8,7 @@ local _M = {}
 function _M:load()
 	log("starting launcher")
 	if true then
+
 	local dlgproc = _BINDING.IsAAEdit and 0x2FD624 or 0x31C66C
 	g_hook_vptr(dlgproc, 4, function(orig, this, hdlg, msg, lparam, wparam)
 		--log.spam("winmsg %x %x %s/%x %x %x",this,hdlg,rmsg[msg] or "unk", msg,lparam,wparam)
@@ -22,8 +23,10 @@ function _M:load()
 	dlg()
 	end
 
+	if exe_type == "play" then
+		g_poke(0x032E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+	end
 
-	--_EVENTS.logger = nil
 end
 
 function _M:unload()

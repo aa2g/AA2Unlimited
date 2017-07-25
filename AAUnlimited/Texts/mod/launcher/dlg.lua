@@ -343,6 +343,7 @@ local function buildtabs() return
 				aaut("bSaveFileBackup", iup.toggle {title = "Backup the card before stripping" }),
 				aaut("bUsePP2", iup.toggle {title = "Use .pp2 resource loader" }),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader" }),
+				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)" }),
 			}
 		},
 	}, iup.fill{}, launch() },
