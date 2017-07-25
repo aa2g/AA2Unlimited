@@ -79,6 +79,10 @@ bool PP2File::OPUS_decompress(int srate, int opusrate, int nchan, char *dst, siz
 PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	name = wstring(fn);
 	FILE *sf = _wfopen(fn, L"rb");
+	if (!sf) {
+		LOGPRIONC(Logger::Priority::ERR) wstring(fn) << fn << " failed to open: " << strerror(errno) << "\r\n";
+
+	}
 	ifstream f(sf);
 
 	f.seekg(-4, f.end);
@@ -90,12 +94,16 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	f.read(buf, delta);
 	int usize = ZSTD_getDecompressedSize(buf, delta);
 	metabuf = (char*)malloc(usize);
-	ZSTD_decompress(metabuf, usize, buf, delta);
+	int got = ZSTD_decompress(metabuf, usize, buf, delta);
 	delete buf;
 
 #define INFOLEN 16
 	uint32_t *info = (uint32_t*)metabuf;
 	uint32_t version = info[0];
+	if (got < 0 || version != 0) {
+		LOGPRIONC(Logger::Priority::ERR) wstring(fn) << fn << " appears to be corrupt\r\n";
+		return;
+	}
 	uint32_t chcount = info[1];
 	uint32_t fcount = info[2];
 	uint32_t ncount = info[3];
@@ -334,6 +342,8 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 		if (*p == L'\\' || *p == '/')
 			paramArchive = p + 1;
 	auto path = (wstring(paramArchive) + L"/" + paramFile);
+	//DBG "@@@loading " << path << "\r\n";
+
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 	for (auto &p : pfiles) {
