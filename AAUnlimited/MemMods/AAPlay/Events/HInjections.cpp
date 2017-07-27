@@ -54,7 +54,7 @@ void TickInjection() {
 }
 
 void __stdcall FocusCameraEvent(ExtClass::Frame* bone) {
-	g_Lua[LUA_EVENTS_TABLE]["H"]["FocusCameraEvent"](bone);
+	//g_Lua[LUA_EVENTS_TABLE]["H"]["FocusCameraEvent"](bone);
 	Facecam::AdjustCamera(bone);
 }
 
