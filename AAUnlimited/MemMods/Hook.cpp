@@ -17,6 +17,8 @@ namespace HookControl {
 	const DWORD RELATIVE_WORD  = (DWORD)-2;
 	const DWORD ABSOLUTE_DWORD = (DWORD)-3;
 	const DWORD ABSOLUTE_WORD = (DWORD)-4;
+	const DWORD ANY_DWORD = (DWORD)-5;
+
 	bool IsHookControl(DWORD d) {
 		return d <= RELATIVE_DWORD && d >= ABSOLUTE_WORD;
 	}
@@ -47,7 +49,7 @@ DWORD WRelativeToAbsolute(BYTE* currLoc,WORD offset) {
 bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer_list<DWORD> newData, DWORD* hookedValue) {
 	using namespace HookControl;
 
-	int expectedSize = expected.size();
+	int expectedSize = 0;
 	//find out how many bytes newData fills
 	int newDataSize = 0;
 	{DWORD lastControl = 0;
@@ -64,27 +66,40 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 		else newDataSize++;
 	}
 	}
-	if(expectedSize != newDataSize) {
-		LOGPRIO(Logger::Priority::ERR) << "Mismatch between expected size and newData size\n";
-	}
-	int nBytes = max(expectedSize, newDataSize);
+	int nBytes = newDataSize;
 
 	Memrights writeRights(location,nBytes);
 	if (writeRights.good) {
 		//first, check if the expected bytes are found
 		BYTE* it = location;
 		bool err = false;
-		for(DWORD d : expected) {
-			if(*it++ != d) {
+
+		for (auto d = expected.begin(); d != expected.end(); d++) {
+			if (*d == ANY_DWORD) {
+				it += 4;
+				expectedSize += 4;
+				continue;
+			} else if (*it != *d) {
 				err = true;
 			}
+			it++;
+			expectedSize++;
 		}
-		if(err) {
+		if (expectedSize != newDataSize)
+			LOGPRIO(Logger::Priority::ERR) << std::dec << "Mismatch between expected size and newData size, " << expectedSize << "!=" << newDataSize << "\n";
+
+		if (err) {
 			LOGPRIO(Logger::Priority::WARN) << "Hook mismatch between expected and found data: expected {";
 			g_Logger << std::hex;
-			for (DWORD d : expected) g_Logger << d << " ";
+			for (auto d = expected.begin(); d != expected.end(); d++) {
+				if (*d == ANY_DWORD) {
+					g_Logger << "<any dword> ";
+					continue;
+				}
+				g_Logger << *d << " ";
+			}
 			g_Logger << "}, but found {";
-			for (unsigned int i = 0; i < expected.size(); i++)  {
+			for (unsigned int i = 0; i < expectedSize; i++)  {
 				g_Logger << location[i] << " ";
 			}
 			g_Logger << "}\r\n";
@@ -192,6 +207,8 @@ DWORD PatchIAT(DWORD *iat, void *newp)
 #include "MemMods/Shared/Events/FileDump.h"
 #include "MemMods/Shared/Events/HairMeshes.h"
 #include "MemMods/Shared/Events/MemAlloc.h"
+#include "MemMods/Shared/Events/GameTick.h"
+
 
 #include "MemMods/AAPlay/Events/HInjections.h"
 #include "MemMods/AAPlay/Events/PcConversation.h"
@@ -217,6 +234,7 @@ void InitializeHooks() {
 	{
 		using namespace SharedInjections;
 
+		GameTick::Initialize();
 		ArchiveFile::OpenFileInject();
 		if (bool(g_Config["bUseMeshTextureOverrides"])) {
 			MeshTexture::OverrideTextureListSizeInject();
@@ -244,9 +262,6 @@ void InitializeHooks() {
 
 		FileDump::FileDumpStartInject();
 		MemAlloc::MemAllocInject();
-
-//		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
-//			FixLocale::SetCP();
 	}
 
 	if (General::IsAAPlay) {
@@ -255,8 +270,6 @@ void InitializeHooks() {
 
 		using namespace PlayInjections;
 		HPlayInjections::TickInjection();
-		HPlayInjections::FocusCameraInjection();
-
 		PcConversation::StartInjection();
 		PcConversation::EndInjection();
 		PcConversation::TickInjection();	
