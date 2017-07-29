@@ -171,14 +171,6 @@ namespace Shared {
 
 	std::vector<std::pair<ExtClass::Frame*,D3DMATRIX>> g_xxMods[ExtClass::CharacterStruct::N_MODELS];
 	std::vector<Loc_BoneSaveDataV2> g_xxBoneParents[ExtClass::CharacterStruct::N_MODELS];
-
-	void XXFileModificationReset() {
-		for (int model = 0; model < ExtClass::CharacterStruct::N_MODELS; model++) {
-			g_xxMods[model].clear();
-			g_xxBoneParents[model].clear();
-		}
-	}
-
 	void XXFileModification(ExtClass::XXFile* xxFile, bool saveMods) {
 		using namespace ExtClass;
 		if (xxFile == NULL) return;

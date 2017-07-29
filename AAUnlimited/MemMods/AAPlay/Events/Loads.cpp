@@ -26,7 +26,6 @@ namespace {
 
 
 void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
-	Shared::XXFileModificationReset();
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::LoadCharacter(loadCharacter);
 	//Add the character to the conversation list

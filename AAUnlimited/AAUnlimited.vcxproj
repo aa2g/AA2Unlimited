@@ -324,8 +324,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
-    <TargetName>aau</TargetName>
+    <TargetName>AAUnlimitedDll</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -391,11 +390,10 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y $(SolutionDir)$(Configuration)\aau.dll c:\mega\aa2mini\aau
-cd $(ProjectDir)\Texts
-copy /Y *.lua c:\mega\aa2mini\aau
-xcopy /Y /E mod c:\mega\aa2mini\aau\mod</Command>
-      <Message>Copy .dll to Game Directory</Message>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

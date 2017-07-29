@@ -20,7 +20,7 @@ bEnableFacecam = true				; when enabled, pressing q locks the camera in the face
 
 bEnableHPosButtonReorder = true		; reorders the position buttons in multiple columns so they dont go out of the window and become unclickable
 
-bUseClothesPoser = true			; enables poser in cloth select screen
+bUseClothesPoser = true				; enables poser in cloth select screen
 bUseDialoguePoser = true			; enables poser in dialogue and sex scenes
 
 fPOVOffsetX = 0.0					;
@@ -30,6 +30,8 @@ fPOVOffsetZ = -0.75					;
 screenshotFormat = 0				; format to save game screenshots in
 									; 0 - BMP
 									; 1 - JPG
+									
+bTriggers = false					; experimental triggers system of custom AI.
 
 ;;;;;;;
 ; HAi ;

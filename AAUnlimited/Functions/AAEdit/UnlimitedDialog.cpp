@@ -27,6 +27,7 @@
 #include "Functions\Shared\Triggers\Expressions.h"
 #include "Files\Logger.h"
 #include "Files\ClothFile.h"
+#include "Files\Config.h"
 #include "resource.h"
 #include "defs.h"
 
@@ -138,10 +139,12 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 			BDDialog::DialogProc);
 		thisPtr->AddDialog(IDD_BODYSLIDER,&thisPtr->m_bsDialog,index++,TEXT("Body Slider"),
 			BSDialog::DialogProc);
-		thisPtr->AddDialog(IDD_TRIGGERS,&thisPtr->m_trDialog,index++,TEXT("Triggers"),
-			TRDialog::DialogProc);
-		thisPtr->AddDialog(IDD_MODULES,&thisPtr->m_mdDialog,index++,TEXT("Modules"),
-			MDDialog::DialogProc);
+		if (g_Config.bTriggers) {
+			thisPtr->AddDialog(IDD_TRIGGERS, &thisPtr->m_trDialog, index++, TEXT("Triggers"),
+				TRDialog::DialogProc);
+			thisPtr->AddDialog(IDD_MODULES, &thisPtr->m_mdDialog, index++, TEXT("Modules"),
+				MDDialog::DialogProc);
+		}
 
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
@@ -1467,16 +1470,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.1f, 0.1f
 			},
 			{ TEXT("Bottom Bone Width"),
-				{ { CharacterStruct::BODY, 0 },
-				  { CharacterStruct::SKIRT, 0 },
-				  { CharacterStruct::SKIRT, 1 }, },
+				{ { CharacterStruct::BODY, 0 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Bone Thickness"),
-				{ { CharacterStruct::BODY, 1 },
-				  { CharacterStruct::SKIRT, 2 },
-				  { CharacterStruct::SKIRT, 3 }, },
-			-0.5f, 0.5f
+				{ { CharacterStruct::BODY, 1 }  },
+				-0.5f, 0.5f
 			},
 			{ TEXT("Bottom Width"),
 				{ { CharacterStruct::SKELETON, 7 } },
