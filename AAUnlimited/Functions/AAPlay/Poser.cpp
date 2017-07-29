@@ -66,6 +66,7 @@ namespace Poser {
 
 	void LoadCharacterEnd() {
 		//g_PoserController.SetHidden(ExtClass::CharacterStruct::Models::SKELETON, "guide_", true);
+		if (!g_PoserController.IsActive()) return;
 		g_PoserWindow.SyncBones();
 		g_PoserWindow.SyncOperation();
 	}
