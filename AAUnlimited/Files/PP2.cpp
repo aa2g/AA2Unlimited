@@ -176,7 +176,14 @@ static char *GameAlloc(size_t sz) {
 
 
 PP2File::cacheEntry *PP2File::allocCache(uint32_t idx, size_t size) {
+	if ((pp2->cache_used / 1024 / 1024) > g_Config.PP2Cache)
+		pp2->CacheGC(pp2->cache_used / 4);
+
 	cacheEntry *ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(*ce));
+	if (!ce) {
+		pp2->OOM();
+		ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(*ce));
+	}
 	pp2->cache_used += size;
 	pp2->cache_count++;
 	cache[idx] = ce;
@@ -202,12 +209,7 @@ void *PP2File::getCache(uint32_t idx) {
 	// if not in cache, put it in there
 	if (cache.find(idx) == cache.end()) {
 		//DBG "Not found in cache " << idx << "\r\n";
-		if (fe.osize == 1698116) {
-			DBG "break!\r\n";
-		}
 		// trim the cache if needed
-		if ((pp2->cache_used / 1024/1024) > g_Config.PP2Cache)
-			pp2->CacheGC(pp2->cache_used / 4);
 
 		size_t sz = chunkSize(fe.chunk);
 		char *zbuf;
@@ -291,6 +293,10 @@ void *PP2File::getCache(uint32_t idx) {
 			pp2->ACacheGC(pp2->acache_used / 4);
 
 		void *aptr = HeapAlloc(pp2->HGet(), 0, fe.osize);
+		if (!aptr) {
+			pp2->OOM();
+			aptr = HeapAlloc(pp2->HGet(), 0, fe.osize);
+		}
 		acache[idx] = aptr;
 		ascore[idx]++;
 		memcpy(aptr, ret, fe.osize);
@@ -370,6 +376,17 @@ HANDLE PP2::HGet() {
 		*Shared::IllusionMemAllocHeap = HeapCreate(0, 0, 0);
 	return *Shared::IllusionMemAllocHeap;
 }
+
+void PP2::OOM() {
+	LOGPRIONC(Logger::Priority::CRIT_ERR) std::dec
+		<< "OOM: out of memory, trying emergency GC but this is bad\r\n";
+
+	CacheGC(-1);
+	ACacheGC(-1);
+	g_Config.PP2Cache /= 2;
+	g_Config.PP2AudioCache /= 2;
+}
+
 void PP2::CacheGC(size_t sz) {
 	vector<uint64_t> array;
 	int idx = 0;
