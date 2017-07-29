@@ -197,8 +197,8 @@ void Lua::bind() {
 	g_Lua[LUA_BINDING_TABLE]["GetPlayerConversation"] = &PlayerConversationPtr;
 
 	// Higher level triggers
-	using namespace Shared::Triggers;
-	g_Lua[LUA_BINDING_TABLE]["SafeAddCardPoints"] = &SafeAddCardPoints;
+	g_Lua[LUA_BINDING_TABLE]["SafeAddCardPoints"] = &Shared::Triggers::SafeAddCardPoints;
+	g_Lua[LUA_BINDING_TABLE]["SetFocusBone"] = &HCamera::SetFocusBone;
 
 	using namespace General;
 	g_Lua[LUA_BINDING_TABLE]["SetAAPlayPath"] = [](std::string p) { AAPlayPath = utf8.from_bytes(p); };

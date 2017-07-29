@@ -109,7 +109,7 @@ end
 local function saveval(of,n,v)
 	if type(v) == "function" then return end
 	if n ~= "mods" then
-		log(n)
+--		log(n)
 		of:write(string.format("%s=%q\n",n,v))
 	end
 end
@@ -261,4 +261,11 @@ function table.indexof(t,q)
 		if v == q then return idx end
 	end
 	return 0
+end
+
+function __DISPATCH_EVENT(name, arg1, ...)
+	if name ~= "plan" then
+		print("EVENT: ", name, arg1, ...)
+	end
+	return arg1
 end

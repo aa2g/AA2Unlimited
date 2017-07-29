@@ -5,6 +5,7 @@
 
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
+#include "Functions\AAPlay\GameState.h"
 #include "Functions\AAPlay\Globals.h"
 #include "Script/ScriptLua.h"
 
@@ -14,9 +15,7 @@ namespace NpcActions {
 using namespace ExtClass;
 
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
-	auto f = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["ClothesChangedEvent"];
-	if (f.exists())
-		return f(npc, newClothes);
+	newClothes = LUA_EVENT("clothes", newClothes, npc->m_seat);
 	return newClothes;
 }
 
@@ -70,10 +69,7 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
 	answerChar->m_lastConversationAnswerPercent = data.changedChance;
 
-	auto f = g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["NpcAnswerEvent"];
-	if (f.exists())
-		return f(answerChar, askingChar, originalReturn);
-
+	data.changedResponse = LUA_EVENT("answer", data.changedResponse, answerChar, askingChar);
 	return data.changedResponse;
 }
 
@@ -146,7 +142,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 	}
 	if (user == NULL) return;
 
-	g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["NpcMovingActionEvent"](user, params);
+	LUA_EVENT("move", params);
 
 	using namespace Shared::Triggers;
 
@@ -222,6 +218,8 @@ void NpcMovingActionInjection() {
 }
 
 bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
+	success = LUA_EVENT("plan", success, params);
+
 	//where unknownStruct is [m_moreUnknownData + 0x1C]
 	if (success) return success;
 
@@ -238,9 +236,6 @@ bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::Action
 		}
 	}
 	if (user == NULL) return success;
-
-	if (bool(g_Lua[LUA_EVENTS_TABLE]["NpcActions"]["NpcMovingActionPlanEvent"](params)))
-		return true;
 
 	//apply a forced action if queued
 	auto* inst = AAPlay::GetInstFromStruct(user);

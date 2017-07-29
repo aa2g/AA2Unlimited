@@ -11,9 +11,8 @@ namespace PlayInjections {
 
 
 BYTE __stdcall ClothesPickEvent(BYTE newClothes) {
-	auto f = g_Lua[LUA_EVENTS_TABLE]["PcActions"]["ClothesPickEvent"];
-	if (f.exists())
-		return f(newClothes);
+	LUA_EVENT("clothes", newClothes, NULL);
+	return newClothes;
 }
 
 

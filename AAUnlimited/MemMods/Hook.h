@@ -10,6 +10,8 @@ namespace HookControl {
 	const DWORD RELATIVE_WORD = (DWORD)-2;
 	const DWORD ABSOLUTE_DWORD = (DWORD)-3;
 	const DWORD ABSOLUTE_WORD = (DWORD)-4;
+	const DWORD ANY_DWORD = (DWORD)-5;
+
 	bool IsHookControl(DWORD d);
 };
 

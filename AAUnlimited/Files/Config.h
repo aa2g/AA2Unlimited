@@ -9,9 +9,6 @@ public:;
 	int screenshotFormat;
 	std::string sPoserHotKeys;
 	int legacyMode;
-	double fPOVOffsetZ;
-	double fPOVOffsetY;
-	double fPOVOffsetX;
 	bool bSaveFileBackup;
 	bool bSaveFileAutoRemove;
 	int savedFileUsage;
@@ -37,9 +34,6 @@ public:;
 		LUA_EXTCLASS(Config,
 			LUA_FIELD(screenshotFormat),
 			LUA_FIELD(sPoserHotKeys),
-			LUA_FIELD(fPOVOffsetX),
-			LUA_FIELD(fPOVOffsetY),
-			LUA_FIELD(fPOVOffsetZ),
 			LUA_FIELD(bSaveFileBackup),
 			LUA_FIELD(bSaveFileAutoRemove),
 			LUA_FIELD(savedFileUsage),

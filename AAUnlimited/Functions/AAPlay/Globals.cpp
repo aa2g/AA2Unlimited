@@ -48,8 +48,7 @@ void InitOnLoad() {
 		ThrowEvent(&data);
 
 		// ditto for lua
-//		g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
-		g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, false);
+		LUA_EVENT("load_card", seat, false);
 	}
 }
 
@@ -85,8 +84,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	data.card = seat;
 	ThrowEvent(&data);
 
-//	g_Lua[LUA_BINDING_TABLE]["Seats"][seat] = &g_characters[seat];
-	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardInitialize"](seat, true);
+	LUA_EVENT("load_card", seat, true);
 
 	//throw added to class event
 	CardAddedData cdata;
@@ -99,8 +97,8 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
-	g_Lua[LUA_EVENTS_TABLE]["Seats"]["CardDestroy"](seat);
-//	g_Lua[LUA_BINDING_TABLE]["Seats"][seat].clear();
+	LUA_EVENT("unload_card", seat);
+
 	//destroy
 	g_characters[seat].Reset();
 }

@@ -16,7 +16,6 @@ bUseHAi = true
 bUseShadowing = true				
 
 --when enabled, pressing q locks the camera in the face of the participants during h
-bEnableFacecam = true				
 
 --reorders the position buttons in multiple columns so they dont go out of the
 --window and become unclickable
@@ -28,10 +27,6 @@ bUseClothesPoser = true
 --enables poser in dialogue and sex scenes
 bUseDialoguePoser = true
 
---Offsets for the POV focus points
-fPOVOffsetX = 0.0
-fPOVOffsetY = 0.005
-fPOVOffsetZ = -0.75
 
 --format to save game screenshots in
 --0 - BMP
@@ -87,10 +82,10 @@ bUsePPeX = false
 bUsePP2 = true
 
 -- MB cache memory for general data
-PP2Cache = 256
+PP2Cache = 512
 
 -- MB cache memory for decompressed audio
-PP2AudioCache = 512
+PP2AudioCache = 256
 
 -- The modified launcher of MKIII decensor
 -- rewrites the string so that AS00_03_00_00_00.bmp - AS00_03_00_04_00.bmp
@@ -102,7 +97,7 @@ bUseMKIII = true
 mods = {
 	{ "fakereg" },
 	{ "fixlocale" },
-	{ "catchall" },
 	{ "makertrans" },
+	{ "facecam" }, 
 	{ "launcher" },
 }
