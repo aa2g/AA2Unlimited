@@ -25,10 +25,15 @@ function _M:load()
 	dlg()
 	end
 
+	-- some simple patches too easy to warrant custom module
 	if exe_type == "play" then
 		g_poke(0x0032E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
-
 	end
+
+	if exe_type == "edit" and Config.bUseAA2Face then
+		LoadLibraryA("..\\AAFaceDLL.DLL")
+	end
+
 
 end
 
