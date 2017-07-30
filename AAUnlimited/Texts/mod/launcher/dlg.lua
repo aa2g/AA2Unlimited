@@ -139,6 +139,8 @@ local function aauv(name, elem)
 	elem.action = function(e,n,s)
 		if not name:match("^s.*") then
 			Config[name] = tonumber(s)
+		else
+			Config[name] = s
 		end
 		if name:match("^fPOV.*") then
 			_BINDING.ApplyCameraAdjust()
