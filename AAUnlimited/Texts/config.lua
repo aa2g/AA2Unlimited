@@ -95,6 +95,7 @@ PP2AudioCache = 256
 -- actually is tga format. Sometimes it needs to be disabled for stuff which
 -- expects the BMP behavior of vanilla (SVII perhaps)
 bUseMKIII = true
+bUseAA2Face = true
 
 mods = {
 --	{ "fakereg" },

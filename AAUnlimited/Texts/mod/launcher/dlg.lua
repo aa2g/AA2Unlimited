@@ -348,6 +348,7 @@ local function buildtabs() return
 			title = "Toggles",
 			iup.vbox {
 				gap="3",
+				aaut("bUseAA2Face", iup.toggle {title = "Load AA2Face in edit (a must have)" }),
 				aaut("bUseAdditionalTanSlots", iup.toggle {title = "Additional tan slots (DANGEROUS)" }),
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
