@@ -22,6 +22,7 @@ public:;
 	bool bUseHAi;
 	bool bUsePPeX;
 	bool bUsePP2;
+	bool bTriggers;
 	int PP2Cache;
 	int PP2AudioCache;
 
@@ -47,6 +48,7 @@ public:;
 			LUA_FIELD(bUseHAi),
 			LUA_FIELD(bUsePPeX),
 			LUA_FIELD(bUsePP2),
+			LUA_FIELD(bTriggers),
 			LUA_FIELD(PP2Cache),
 			LUA_FIELD(PP2AudioCache),
 			LUA_FIELD(legacyMode)
