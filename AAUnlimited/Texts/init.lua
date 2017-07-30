@@ -164,6 +164,7 @@ end
 ---------------------------
 exe_type = _BINDING.IsAAEdit and "edit" or "play"
 Config.load("config")
+Config.load("localconfig")
 Config.load("savedconfig")
 -- _G.Config transparently binds Lua and C++ together
 setmetatable(Config, cfproxy)
