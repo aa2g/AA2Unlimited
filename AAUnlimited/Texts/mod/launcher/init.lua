@@ -1,4 +1,6 @@
-﻿require "memory"
+﻿--@INFO This launcher
+
+require "memory"
 require "strutil"
 
 local dlg = require "launcher.dlg"
@@ -24,7 +26,8 @@ function _M:load()
 	end
 
 	if exe_type == "play" then
-		g_poke(0x032E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+		g_poke(0x0032E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+
 	end
 
 end

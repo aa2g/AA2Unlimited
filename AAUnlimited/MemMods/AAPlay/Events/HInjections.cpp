@@ -7,13 +7,14 @@
 
 #include "Functions/AAPlay/HAi.h"
 #include "Functions/AAPlay/HButtonMove.h"
-#include "Functions/AAPlay/Facecam.h"
 #include "Functions/AAPlay/Poser.h"
 #include "Script/ScriptLua.h"
+#include "Files/Logger.h"
 
 namespace PlayInjections {
 namespace HPlayInjections {
 
+ExtClass::HInfo* loc_currentHInfo;
 
 bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
@@ -21,12 +22,20 @@ bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 //take note that these ticks might be called multiple times even after returning contScene = false
 bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	HAi::PreTick(hInfo);
-//	g_Lua[LUA_EVENTS_TABLE]["H"]["PreTick"](hInfo);
 	bool contScene = loc_OriginalTickFunction(hInfo);
-//	g_Lua[LUA_EVENTS_TABLE]["H"]["PostTick"](hInfo, contScene);
 	HAi::PostTick(hInfo,contScene);
 	HButtonMove::PostTick(hInfo,contScene);
-	Facecam::PostTick(hInfo,contScene);
+	if (contScene) {
+		if (!loc_currentHInfo)
+			LUA_EVENT("start_h", hInfo);
+		loc_currentHInfo = hInfo;
+	}
+	else {
+		if (loc_currentHInfo)
+			LUA_EVENT("end_h", hInfo);
+		loc_currentHInfo = NULL;
+	}
+	ExtClass::HCamera::PostTick(hInfo,contScene);
 	if (contScene) {
 		Poser::StartEvent(Poser::HMode);
 	}
@@ -51,36 +60,6 @@ void TickInjection() {
 		{ 0xE8, 0x03, 0x51, 0x04, 0x00 },						//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		(DWORD*)(&loc_OriginalTickFunction));						//save old function to call in our redirect function
-}
-
-void __stdcall FocusCameraEvent(ExtClass::Frame* bone) {
-	g_Lua[LUA_EVENTS_TABLE]["H"]["FocusCameraEvent"](bone);
-	Facecam::AdjustCamera(bone);
-}
-
-DWORD loc_OriginalFocusTickFunction;
-void __declspec(naked) FocusCameraRedirect() {
-	__asm {
-		push [esp+4]
-		call [loc_OriginalFocusTickFunction]
-		pushad
-		push eax
-		call FocusCameraEvent
-		popad
-		ret 4
-	}
-}
-
-void FocusCameraInjection() {
-	//called when q/w/e is pressed, return value is the bone struct that will be focused. one stack parameter
-	//AA2Play v12 FP v1.4.0a.exe+80111 - E8 0ABEF9FF           - call "AA2Play v12 FP v1.4.0a.exe"+1BF20{ this call determines where the camera goes }
-	DWORD address = General::GameBase + 0x80111;
-	DWORD redirectAddress = (DWORD)(&FocusCameraRedirect);
-	Hook((BYTE*)address,
-		{ 0xE8, 0x9A, 0xDD, 0xFF, 0xFF },						//expected values
-		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
-		(DWORD*)(&loc_OriginalFocusTickFunction));
-
 }
 
 }

@@ -85,7 +85,7 @@ function _M.load_gsd()
 			end
 			--log("loaded "..name.." with value "..tostring(val))
 			res[name] = val
-			log("loaded %s %s", name, tostring(val))
+--			log("loaded %s %s", name, tostring(val))
 			pos = pos + format:packsize()
 		end
 	end
@@ -96,7 +96,7 @@ end
 function _M.save_gsd(cfg)
 	_M.check_gsd(cfg)
 	local fn = host_path("data", "gsd.cfg")
-	log("saving gsd to "..fn)
+	--log("saving gsd to "..fn)
 	local f = io.open(fn, "w")
 	for _,v in ipairs(format) do
 		if type(v) == "string" then

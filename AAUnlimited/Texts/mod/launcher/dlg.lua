@@ -140,6 +140,9 @@ local function aauv(name, elem)
 		if not name:match("^s.*") then
 			Config[name] = tonumber(s)
 		end
+		if name:match("^fPOV.*") then
+			_BINDING.ApplyCameraAdjust()
+		end
 		Config.save()
 	end
 	elem.valuechanged_cb = function(e)
@@ -159,10 +162,7 @@ local function floatspinner(v,step)
 		spinauto="NO",
 		spin_cb = function(e,pos)
 			e.value = v + tonumber(pos - (1<<sshift)) * step
-		end,
-		valuechanged_cb = function(e,nval)
-			e.spinvalue = 1<<sshift
-			v = tonumber(e.value)
+			e:valuechanged_cb()
 		end,
 		mask=iup.MASK_FLOAT,
 		spinmin=0,
@@ -320,9 +320,12 @@ local function buildtabs() return
 				iup.label {title = "Card eye files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
 				iup.label {title = "Screenshot format", }, aaul("screenshotFormat", iup.list { ".BMP", ".JPG", ".PNG", dropdown="YES" }),
 				iup.label {title = "Poser hotkeys", padding=step }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
-				iup.label {title = "POV X",  }, aauv("fPOVOffsetX", floatspinner(0,0.1)),
-				iup.label {title = "POV Y", step },  aauv("fPOVOffsetY", floatspinner(0,0.1)),
-				iup.label {title = "POV Z", },  aauv("fPOVOffsetZ", floatspinner(0,0.1)),
+--[[				iup.label {title = "POV X Active",  }, aauv("fPOVOffsetXActive", floatspinner(0,0.1)),
+				iup.label {title = "POV Y Active", step },  aauv("fPOVOffsetYActive", floatspinner(0,0.1)),
+				iup.label {title = "POV Z Active", },  aauv("fPOVOffsetZActive", floatspinner(0,0.1)),
+				iup.label {title = "POV X Passive",  }, aauv("fPOVOffsetXPassive", floatspinner(0,0.1)),
+				iup.label {title = "POV Y Passive", step },  aauv("fPOVOffsetYPassive", floatspinner(0,0.1)),
+				iup.label {title = "POV Z Passive", },  aauv("fPOVOffsetZPassive", floatspinner(0,0.1)),]]
 				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=1024}),
 				iup.label {title = ".pp2 audio MB", },  aauv("PP2AudioCache", iup.text { spin="yes", spinmax=1024} ),
 			},
@@ -337,6 +340,7 @@ local function buildtabs() return
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "(evil) AI can force H on PC" }),
 				aaut("bUseShadowing", iup.toggle {title = "Game file shadowing" }),
 				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
+--				aaut("bEnableFacecam", iup.toggle {title = "Use POV facecam" }),
 				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
 				aaut("bUseDialoguePoser", iup.toggle {title = "Dialogue poser" }),
 				aaut("bSaveFileAutoRemove", iup.toggle {title = "Strip files from cards after extracting" }),

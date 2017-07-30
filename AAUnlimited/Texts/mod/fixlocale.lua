@@ -1,3 +1,5 @@
+--@INFO If needed, patches the game so that it does not depend on SJIS system codepage (ie builtin locale emulator)
+
 require "memory"
 
 local function patch_aaplay()

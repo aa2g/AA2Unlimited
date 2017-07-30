@@ -15,5 +15,6 @@ public:;
 
 #define LUA_EXTCLASS(n,...) g_Lua.ExtClass<LUA_CLASS>(#n, __VA_ARGS__)
 #define LUA_FIELD(n) #n, &LUA_CLASS::n
+#define LUA_EVENT(...) g_Lua["__DISPATCH_EVENT"](__VA_ARGS__)
 
 extern Lua g_Lua;

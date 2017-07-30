@@ -6,6 +6,8 @@
 
 namespace ExtClass {
 
+class HInfo;
+
 class HCamera {
 public:
 	DWORD m_unknown1;
@@ -33,6 +35,9 @@ public:
 		);
 	}
 #undef LUA_CLASS
+	static void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
+	static void SetFocusBone(ExtClass::Frame* bone, double x, double y, double z);
+
 
 	D3DMATRIX m_matrix; //used, but typically identity matrix. can be used to distort view
 };

@@ -56,6 +56,7 @@ public:;
 	HANDLE PP2::HGet();
 
 	PP2();
+	void OOM();
 	void CacheGC(size_t);
 	void ACacheGC(size_t);
 

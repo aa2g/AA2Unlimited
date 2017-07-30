@@ -1,3 +1,5 @@
+--@INFO Fakes registry so that game can run portably (data files relative to EXE)
+
 require "memory"
 
 
