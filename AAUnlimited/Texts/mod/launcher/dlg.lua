@@ -261,6 +261,17 @@ function repl:k_any(c)
 	return iup.CONTINUE
 end
 
+local function change_font(btn)
+	local fsel = iup.fontdlg{value=btn.font, title="Select game font"}
+	fsel:popup(iup.CENTERPARENT, iup.CENTERPARENT)
+	if (tonumber(fsel.status) == 1) then
+		local fn = tostring(fsel.value):match("^[^,]*")
+		btn.font = fn .. ", 9"
+		btn.title = fn
+		Config.sFont = fn
+		Config.save()
+	end
+end
 
 local function buildtabs() return
 	iup.tabs {
@@ -321,7 +332,7 @@ local function buildtabs() return
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
 				iup.label {title = "Card eye files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
 				iup.label {title = "Screenshot format", }, aaul("screenshotFormat", iup.list { ".BMP", ".JPG", ".PNG", dropdown="YES" }),
-				iup.label {title = "Poser hotkeys", padding=step }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
+				iup.label {title = "Poser hotkeys" }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
 --[[				iup.label {title = "POV X Active",  }, aauv("fPOVOffsetXActive", floatspinner(0,0.1)),
 				iup.label {title = "POV Y Active", step },  aauv("fPOVOffsetYActive", floatspinner(0,0.1)),
 				iup.label {title = "POV Z Active", },  aauv("fPOVOffsetZActive", floatspinner(0,0.1)),
@@ -330,6 +341,7 @@ local function buildtabs() return
 				iup.label {title = "POV Z Passive", },  aauv("fPOVOffsetZPassive", floatspinner(0,0.1)),]]
 				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=1024}),
 				iup.label {title = ".pp2 audio MB", },  aauv("PP2AudioCache", iup.text { spin="yes", spinmax=1024} ),
+--				iup.label {title = "Game font", padding=step}, iup.button {title=Config.sFont, font=Config.sFont .. ", 9", action=change_font},
 			},
 		},
 		iup.frame {

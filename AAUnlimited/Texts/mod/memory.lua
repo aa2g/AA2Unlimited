@@ -108,3 +108,7 @@ g_hook_func = g_wrap(hook_func)
 function malloc(n)
 	return _WIN32.LocalAlloc(0, n)
 end
+
+function free(m)
+	_WIN32.LocalFree(m)
+end

@@ -73,7 +73,7 @@ namespace Poser {
 	}
 
 	void LoadCharacterEnd() {
-		if (!g_PoserController.IsActive()) {
+		if (g_PoserController.IsActive()) {
 			g_PoserWindow.SyncBones();
 			g_PoserWindow.SyncOperation();
 		}

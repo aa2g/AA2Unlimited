@@ -36,6 +36,7 @@ screenshotFormat = 0
 --HAi should be activated at no prompt h done by evil npcs
 bHAiOnNoPromptH = true				
 
+sFont = "MS Gothic"
 ------------------
 -- Card Options --
 ------------------
@@ -101,5 +102,6 @@ mods = {
 	{ "makertrans" },
 	{ "facecam" }, 
 	{ "geass"},
+	{ "borderless" },
 	{ "launcher" },
 }
