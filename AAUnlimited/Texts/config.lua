@@ -102,6 +102,6 @@ mods = {
 	{ "makertrans" },
 	{ "facecam" }, 
 	{ "geass"},
-	{ "borderless" }
+	{ "borderless" },
 	{ "launcher" },
 }
