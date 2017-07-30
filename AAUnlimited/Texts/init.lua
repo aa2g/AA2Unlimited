@@ -188,6 +188,7 @@ setmetatable(_WIN32, {
 
 local modules = {}
 local mnames = {}
+local current_module
 
 function load_modules()
 
@@ -202,6 +203,7 @@ function load_modules()
 				log.error("Module %s failed: %s", mod[1], data)
 			else
 				if type(data) == "table" and data.load then
+					current_module = data
 					data.info = mod
 					log("Loaded %s", data.info[1])
 					table.insert(modules, data)
@@ -212,6 +214,7 @@ function load_modules()
 			end
 		end
 	end
+	current_module = nil
 end
 
 function load_module(mod)
@@ -282,6 +285,7 @@ end
 
 
 function add_event_handler(evname, v)
+	assert(current_module)
 	handlers[evname] = handlers[evname] or {}
 	table.insert(handlers[evname], v)
 end
