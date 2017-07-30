@@ -96,7 +96,7 @@ PP2AudioCache = 256
 bUseMKIII = true
 
 mods = {
-	{ "fakereg" },
+--	{ "fakereg" },
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "facecam" }, 
