@@ -1,3 +1,5 @@
+--@INFO Translates AA2Edit to english, replacement of TranslationLoader
+
 require "memory"
 require "strutil"
 local dict = require "makertrans.dict"

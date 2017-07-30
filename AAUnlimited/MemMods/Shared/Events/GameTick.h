@@ -4,8 +4,10 @@ namespace GameTick {
 void Initialize();
 
 typedef bool(*MsgFilterFunc)(MSG *);
+void RegisterMsgFilter(MsgFilterFunc);
 extern DWORD now;  // real time in ms since first tick in the game
 extern DWORD tick; // game time in ticks
+extern HANDLE *hwnd;
 
 /*
 #include <set>

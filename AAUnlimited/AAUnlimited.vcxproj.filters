@@ -325,9 +325,6 @@
     <None Include="Texts\init.lua">
       <Filter>Lua</Filter>
     </None>
-    <None Include="Texts\mod\catchall.lua">
-      <Filter>Lua</Filter>
-    </None>
     <None Include="Texts\mod\fixlocale.lua">
       <Filter>Lua</Filter>
     </None>
@@ -356,6 +353,12 @@
       <Filter>Lua\Launcher</Filter>
     </None>
     <None Include="Texts\mod\fakereg.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\facecam.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\geass.lua">
       <Filter>Lua</Filter>
     </None>
   </ItemGroup>

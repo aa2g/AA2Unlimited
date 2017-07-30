@@ -17,7 +17,13 @@ DWORD tick; // game time in ticks
 
 DWORD first_now;
 
+HANDLE *hwnd;
+
 std::vector<MsgFilterFunc> msg_filters;
+
+void RegisterMsgFilter(MsgFilterFunc f) {
+	msg_filters.push_back(f);
+}
 
 void __stdcall MsgFilter(void *ptr, MSG *msg) {
 	for (auto it : msg_filters) {
@@ -61,12 +67,14 @@ int __stdcall GameTick() {
 }
 
 void Initialize() {
+	hwnd = (HANDLE*)(General::GameBase + 0x34526C);
 	DWORD call_MsgHandler = General::GameBase + 0x429D;
 	DWORD call_GameTick = General::GameBase + 0x427C;
 
 	if (General::IsAAPlay) {
 		call_MsgHandler = General::GameBase + 0x44A1;
 		call_GameTick = General::GameBase + 0x44C2;
+		hwnd = (HANDLE*)(General::GameBase + 0x368274);
 	}
 
 	Hook((BYTE*)call_MsgHandler,

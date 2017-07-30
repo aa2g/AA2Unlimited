@@ -15,6 +15,7 @@
 #include "Functions/AAPlay/GameState.h"
 #include "Functions/Shared/Triggers/Actions.h"
 #include "MemMods/MemRightsLock.h"
+#include "MemMods/Shared/Events/GameTick.h"
 
 Lua g_Lua(true);
 
@@ -93,7 +94,8 @@ void Lua::bind() {
 	using namespace General;
 	g_Lua[LUA_BINDING_TABLE]["peek"] = lua_CFunction([](lua_State *L) {
 		// buf = peek(addr, len)
-		int addr = luaL_checkinteger(L, 1);
+		int addr = (int)lua_touserdata(L, 1);
+		if (addr == 0) addr = luaL_checkinteger(L, 1);
 		int scanmax = luaL_checkinteger(L, 2);	
 		char *p = (char*)addr;
 		int i = scanmax;
@@ -204,4 +206,18 @@ void Lua::bind() {
 	g_Lua[LUA_BINDING_TABLE]["SetAAPlayPath"] = [](std::string p) { AAPlayPath = utf8.from_bytes(p); };
 	g_Lua[LUA_BINDING_TABLE]["SetAAEditPath"] = [](std::string p) { AAEditPath = utf8.from_bytes(p); };
 
+	GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
+		if (m->hwnd != *GameTick::hwnd) return false;
+		const char *mstr = NULL;
+		switch (m->message) {
+		case WM_KEYDOWN: mstr = "keydown"; break;
+		case WM_KEYUP: mstr = "keyup"; break;
+		}
+		if (mstr) {
+			m->wParam = LUA_EVENT(mstr, m->wParam);
+			if (m->wParam == -1)
+				return true;
+		}
+		return false;
+	}));
 }

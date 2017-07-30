@@ -26,11 +26,13 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	HAi::PostTick(hInfo,contScene);
 	HButtonMove::PostTick(hInfo,contScene);
 	if (contScene) {
+		if (!loc_currentHInfo)
+			LUA_EVENT("start_h", hInfo);
 		loc_currentHInfo = hInfo;
-		LUA_EVENT("start_h", hInfo);
 	}
 	else {
-		LUA_EVENT("end_h", hInfo);
+		if (loc_currentHInfo)
+			LUA_EVENT("end_h", hInfo);
 		loc_currentHInfo = NULL;
 	}
 	ExtClass::HCamera::PostTick(hInfo,contScene);

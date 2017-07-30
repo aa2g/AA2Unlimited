@@ -1,4 +1,6 @@
-﻿require "memory"
+﻿--@INFO This launcher
+
+require "memory"
 require "strutil"
 
 local dlg = require "launcher.dlg"

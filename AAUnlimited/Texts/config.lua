@@ -73,7 +73,8 @@ legacyMode = 3
 --4: crit
 logPrio = 0
 
-sPoserHotKeys = "WER"
+-- (don't set, these are currently broken)
+sPoserHotKeys = ""
 
 -- load .ppx files
 bUsePPeX = false
@@ -99,5 +100,6 @@ mods = {
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "facecam" }, 
+	{ "geass"},
 	{ "launcher" },
 }

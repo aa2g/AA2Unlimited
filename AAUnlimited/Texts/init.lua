@@ -263,9 +263,40 @@ function table.indexof(t,q)
 	return 0
 end
 
+on = {}
+local handlers = {}
+
 function __DISPATCH_EVENT(name, arg1, ...)
 	if name ~= "plan" then
 		print("EVENT: ", name, arg1, ...)
 	end
+
+	for _,h in ipairs(handlers[name] or {}) do
+		local retv = h(arg1, ...)
+		arg1 = retv ~= nil and retv or arg1
+	end
+
 	return arg1
+end
+
+
+function add_event_handler(evname, v)
+	handlers[evname] = handlers[evname] or {}
+	table.insert(handlers[evname], v)
+end
+
+setmetatable(on, {
+	__newindex = function(t, evname, v)
+		add_event_handler(evname, v)
+	end
+})
+
+function hexdump(addr, size)
+	buf = peek(addr, size)
+	return buf:gsub("(.)", function(d)
+		return string.format("%02x ", string.byte(d))
+	end)
+end
+function tohex(n)
+	return string.format("%x",n)
 end

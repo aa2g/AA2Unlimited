@@ -260,7 +260,8 @@
     <None Include="resource.hm" />
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
-    <None Include="Texts\mod\catchall.lua" />
+    <None Include="Texts\mod\geass.lua" />
+    <None Include="Texts\mod\facecam.lua" />
     <None Include="Texts\mod\fakereg.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
