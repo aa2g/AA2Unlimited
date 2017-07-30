@@ -364,5 +364,8 @@
     <None Include="Texts\mod\font.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\borderless.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
