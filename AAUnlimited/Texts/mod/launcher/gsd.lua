@@ -20,8 +20,8 @@ local format = {
 	{ fullscreen=bool },
 	{ mipmap=byte },
 
-	"\x00\x00\x00",
-	--"\x01\x00\x02",
+	--"\x00\x00\x00",
+	"\x01\x00\x02",
 
 	{ sharp=bool },
 	{ bilinear=bool },
@@ -29,8 +29,8 @@ local format = {
 	{ fastrender=bool },
 	{ svp=bool },
 
-	--"\x00\x01\x00\x01\x00\x00\x00\x00\x00\x00",
-	zero:rep(10),
+	"\x00\x01\x00\x01\x00\x00\x00\x00\x00\x00",
+	--zero:rep(10),
 
 	{ blur=bool },
 	"\x00",
@@ -38,7 +38,7 @@ local format = {
 	"\x00",
 	{ rim=bool },
 
-	"\x00",
+	"\x01", -- shadowmap for body enable?
 	{ dynlight=bool },
 	 "\x00\x00",
 	{ outline=bool },
