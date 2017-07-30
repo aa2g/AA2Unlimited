@@ -69,7 +69,7 @@ int __stdcall GameTick() {
 void Initialize() {
 	hwnd = (HANDLE*)(General::GameBase + 0x34526C);
 	DWORD call_MsgHandler = General::GameBase + 0x429D;
-	DWORD call_GameTick = General::GameBase + 0x427C;
+	DWORD call_GameTick = General::GameBase + 0x42BE;
 
 	if (General::IsAAPlay) {
 		call_MsgHandler = General::GameBase + 0x44A1;
