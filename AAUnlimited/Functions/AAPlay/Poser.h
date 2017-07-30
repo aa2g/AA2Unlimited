@@ -26,7 +26,6 @@ namespace Poser {
 	public:
 		void Init();
 		void Hide();
-		void NewCharacter(int index);
 
 		HWND m_dialog;
 		HWND m_edCharacter;
@@ -70,6 +69,7 @@ namespace Poser {
 		UINT_PTR m_timer;
 		int m_curBone;
 
+		int GetCurrentModifier();
 		void ApplyIncrement(int axis, int sign);
 		void SyncOperation();
 		void SyncBones();
