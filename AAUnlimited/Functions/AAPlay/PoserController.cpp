@@ -124,6 +124,10 @@ namespace Poser {
 		m_roomSliders.clear();
 	}
 
+	void PoserController::SliderUpdate(int axis, int order, int position) {
+
+	}
+
 	void PoserController::SliderInfo::Apply() {
 		if (xxFrame) {
 			//note that somehow those frame manipulations dont quite work as expected;

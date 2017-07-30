@@ -38,6 +38,14 @@ namespace Poser {
 	PoserWindow g_PoserWindow;
 	PoserController g_PoserController;
 
+	struct SliderHelper {
+		int m_currentSlidingAxis;
+		PoserController::SliderInfo::Operation m_currentOperation;
+		D3DXVECTOR3 m_currentSlidingRotationAxisVector;
+		D3DXQUATERNION m_currentSlidingRotationBase;
+		PoserController::SliderInfo::TranslationScaleData m_translationScaleBase;
+	} loc_sliderHelper;
+
 	bool loc_syncing;
 
 	void StartEvent(EventType type) {
@@ -104,6 +112,7 @@ namespace Poser {
 		}
 		if (!m_timer)
 			m_timer = SetTimer(m_dialog, 1, 2000, NULL);
+		loc_sliderHelper.m_currentSlidingAxis = -1;
 		EnableWindow(g_PoserWindow.m_dialog, TRUE);
 		ShowWindow(m_dialog, SW_SHOW);
 		if (!g_PoserController.m_sliderCategories[PoseMods::Other].empty()) {
@@ -266,10 +275,39 @@ namespace Poser {
 			HWND wnd = (HWND)lparam;
 			if (wnd == NULL) break; //not slider control, but automatic scroll
 			if (!loc_syncing) {
-				thisPtr->SyncSlider();
 				PoserController::SliderInfo* current = g_PoserController.CurrentSlider();
-				if (current)
-					current->Apply();
+				if (current) {
+					int axis = wnd == thisPtr->m_sliderValueX ? X : wnd == thisPtr->m_sliderValueY ? Y : wnd == thisPtr->m_sliderValueZ ? Z : -1;
+					if (axis >= 0) {
+						int order = thisPtr->GetCurrentModifier();
+						if (axis != loc_sliderHelper.m_currentSlidingAxis) {
+							loc_sliderHelper.m_currentSlidingAxis = axis;
+							loc_sliderHelper.m_currentOperation = current->currentOperation;
+							if (current->currentOperation == PoserController::SliderInfo::Rotate) {
+								loc_sliderHelper.m_currentSlidingRotationAxisVector = *current->rotation.rotAxes[axis].vector();
+								loc_sliderHelper.m_currentSlidingRotationBase = current->getRotation();
+							}
+							else if (current->currentOperation == PoserController::SliderInfo::Translate) {
+								loc_sliderHelper.m_translationScaleBase = current->translate;
+							}
+							else {
+								loc_sliderHelper.m_translationScaleBase = current->scale;
+							}
+						}
+						if (loc_sliderHelper.m_currentOperation == PoserController::SliderInfo::Rotate) {
+							current->rotation.setRotationQuaternion(loc_sliderHelper.m_currentSlidingRotationBase);
+							current->rotation.rotateAxis(loc_sliderHelper.m_currentSlidingAxis, (float)(SendMessage(wnd, TBM_GETPOS, 0, 0) - 0x8000) / 114159 * order);
+						}
+						else if (loc_sliderHelper.m_currentOperation == PoserController::SliderInfo::Translate) {
+							current->translate.value[axis] = loc_sliderHelper.m_translationScaleBase.value[axis] + (float)(SendMessage(wnd, TBM_GETPOS, 0, 0) - 0x8000) / 0x10000 * order;
+						}
+						else if (loc_sliderHelper.m_currentOperation == PoserController::SliderInfo::Scale) {
+							current->scale.value[axis] = loc_sliderHelper.m_translationScaleBase.value[axis] + (float)(SendMessage(wnd, TBM_GETPOS, 0, 0) - 0x8000) / 0x10000 * order;
+						}
+						thisPtr->SyncSlider();
+						current->Apply();
+					}
+				}
 			}
 			break; }
 		case WM_TIMER: {
@@ -534,6 +572,13 @@ namespace Poser {
 				if (frame)
 					g_PoserController.SetHiddenFrame(frame, idx != 0);
 			}
+			else if (code == NM_RELEASEDCAPTURE && (LOWORD(wparam) == IDC_PPS_SLIDERVALUEX || LOWORD(wparam) == IDC_PPS_SLIDERVALUEY || LOWORD(wparam) == IDC_PPS_SLIDERVALUEZ)) {
+				HWND sliderHnd = LOWORD(wparam) == IDC_PPS_SLIDERVALUEX ? thisPtr->m_sliderValueX : LOWORD(wparam) == IDC_PPS_SLIDERVALUEY ? thisPtr->m_sliderValueY : thisPtr->m_sliderValueZ;
+				loc_syncing = true;
+				SendMessage(sliderHnd, TBM_SETPOS, TRUE, 0x8000);
+				loc_sliderHelper.m_currentSlidingAxis = -1;
+				loc_syncing = false;
+			}
 			break; }
 		case WM_HOTKEY: {
 			PoserWindow* thisPtr = (PoserWindow*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -571,16 +616,20 @@ namespace Poser {
 		return FALSE;
 	}
 
+	int PoserWindow::GetCurrentModifier() {
+		TCITEM tab;
+		TCHAR text[10];
+		tab.mask = TCIF_PARAM | TCIF_TEXT;
+		tab.pszText = text;
+		int index = TabCtrl_GetCurSel(m_tabModifiers);
+		TabCtrl_GetItem(m_tabModifiers, index, &tab);
+		return (int)tab.lParam;
+	}
+
 	void PoserWindow::ApplyIncrement(int axis, int sign) {
 		float increment = 0;
 		if (sign != 0) {
-			TCITEM tab;
-			TCHAR text[10];
-			tab.mask = TCIF_PARAM | TCIF_TEXT;
-			tab.pszText = text;
-			int index = TabCtrl_GetCurSel(m_tabModifiers);
-			TabCtrl_GetItem(m_tabModifiers, index, &tab);
-			g_PoserController.ApplyIncrement(axis, float(sign * (int)tab.lParam));
+			g_PoserController.ApplyIncrement(axis, float(sign * GetCurrentModifier()));
 		}
 		else {
 			g_PoserController.ApplyIncrement(axis, 0);
@@ -682,9 +731,6 @@ namespace Poser {
 		PoserController::SliderInfo* slider = g_PoserController.CurrentSlider();
 		if (!slider) return;
 		loc_syncing = true;
-		SendMessage(m_sliderValueX, TBM_SETPOS, TRUE, slider->toSlider(X));
-		SendMessage(m_sliderValueY, TBM_SETPOS, TRUE, slider->toSlider(Y));
-		SendMessage(m_sliderValueZ, TBM_SETPOS, TRUE, slider->toSlider(Z));
 		TCHAR number[52];
 		_snwprintf_s(number, 52, 16, TEXT("%.3f"), slider->getValue(X));
 		SendMessage(m_edValueX, WM_SETTEXT, 0, (LPARAM)number);
@@ -699,9 +745,6 @@ namespace Poser {
 		PoserController::SliderInfo* slider = g_PoserController.CurrentSlider();
 		if (!slider) return;
 		loc_syncing = true;
-		slider->setValueFromSlider(SendMessage(m_sliderValueX, TBM_GETPOS, 0, 0), X);
-		slider->setValueFromSlider(SendMessage(m_sliderValueY, TBM_GETPOS, 0, 0), Y);
-		slider->setValueFromSlider(SendMessage(m_sliderValueZ, TBM_GETPOS, 0, 0), Z);
 		TCHAR number[52];
 		float x, y, z;
 		if (slider->currentOperation == PoserController::SliderInfo::Rotate) {
