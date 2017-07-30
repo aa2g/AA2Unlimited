@@ -286,7 +286,7 @@ void NpcMovingActionInjection() {
 }
 
 bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
-	success = LUA_EVENT("plan", success, params);
+//	success = LUA_EVENT("plan", success, params);
 
 	//where unknownStruct is [m_moreUnknownData + 0x1C]
 	if (success) return success;
