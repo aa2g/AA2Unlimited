@@ -2,6 +2,12 @@ require "memory"
 
 local strbuf = malloc(4096)
 
+function strdup(s)
+	local nb = malloc(#s)
+	poke(nb, s)
+	return nb
+end
+
 function cp_to_unicode(cp, text)
 	local nconv = MultiByteToWideChar(cp, 0, text, #text, strbuf, 4096)
 	return peek(strbuf, nconv*2)
