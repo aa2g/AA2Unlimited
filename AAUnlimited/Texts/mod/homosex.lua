@@ -55,7 +55,11 @@ function _M:load()
     /*else
       result = 0;*/
 ]]
-	g_poke(0x96412, "\x00")
+
+	-- avoid null deref in dynamic_cast<GirlChara>
+	-- we simply don't do the dynamic cast, since the the subclass appears to be
+	-- plain subclass, not sideways
+	g_poke(0x8E122, "\x89\xc8\xeb\x01")
 end
 
 return _M
