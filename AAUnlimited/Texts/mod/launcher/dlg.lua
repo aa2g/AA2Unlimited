@@ -2,50 +2,20 @@
 
 local nocloseafterlaunch = true
 local reslist = {
---	"320x240",
---	"512x384",
---	"640x480",
---	"768x576",
-	"800x480",
-	"854x480",
-
---	"800x600",
-	"960x600",
-	"1024x600",
-
---	"1024x768",
---	"1152x768",
-
-	"1280x720",
-	"1280x800",
-
-	"1280x854",
-	"1280x960",
-	"1366x768",
-
---	"1400x1050",
-	"1440x900",
-	"1440x960",
-
---	"1600x1200",
-	"1680x1050",
-	"1920x1080",
-	"1920x1200",
-
-	"2048x1080",
-	"2048x1538",
-	"2560x1600",
-	"2560x2048",
-	"3840x2160",
-	"3840x1600",
-	"4096x1716",
-	"4096x2160"
+	"800x480","854x480","960x600","1024x600","1280x720","1280x800","1280x854","1280x960","1366x768",
+	"1440x900","1440x960","1600x900","1680x1050","1920x1080","1920x1200","2048x1080","2048x1536",
+	"2560x1600","2560x2048","3840x2160","3840x1600","4096x1716","4096x2160"
 }
 
 log("loading launcher")
 
 require "iuplua"
 require "iupluacontrols"
+local dlglist = require "launcher.dlglist"
+
+local ctrl = setmetatable({}, {__index=function(t,k)
+	return iup.GetDialogChild(dlg, k)
+end})
 
 
 local wantexit = false
@@ -155,7 +125,6 @@ local function aauv(name, elem)
 end
 
 
-local dlg
 local sshift = 16
 local function floatspinner(v,step)
 	return iup.text {
@@ -273,6 +242,8 @@ local function change_font(btn)
 	end
 end
 
+
+
 local function buildtabs() return
 	iup.tabs {
 	
@@ -309,8 +280,6 @@ local function buildtabs() return
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
 				gsdt("dynlight", iup.toggle {title = "DynLight shader" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
-
-				--gsdt("shaders", iup.toggle {title = "Shaders (tan/outline)" }),
 			}
 		},
 	}, iup.fill{}, launch()},
@@ -333,12 +302,6 @@ local function buildtabs() return
 				iup.label {title = "Card eye files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
 				iup.label {title = "Screenshot format", }, aaul("screenshotFormat", iup.list { ".BMP", ".JPG", ".PNG", dropdown="YES" }),
 				iup.label {title = "Poser hotkeys" }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
---[[				iup.label {title = "POV X Active",  }, aauv("fPOVOffsetXActive", floatspinner(0,0.1)),
-				iup.label {title = "POV Y Active", step },  aauv("fPOVOffsetYActive", floatspinner(0,0.1)),
-				iup.label {title = "POV Z Active", },  aauv("fPOVOffsetZActive", floatspinner(0,0.1)),
-				iup.label {title = "POV X Passive",  }, aauv("fPOVOffsetXPassive", floatspinner(0,0.1)),
-				iup.label {title = "POV Y Passive", step },  aauv("fPOVOffsetYPassive", floatspinner(0,0.1)),
-				iup.label {title = "POV Z Passive", },  aauv("fPOVOffsetZPassive", floatspinner(0,0.1)),]]
 				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=1024}),
 				iup.label {title = ".pp2 audio MB", },  aauv("PP2AudioCache", iup.text { spin="yes", spinmax=1024} ),
 --				iup.label {title = "Game font", padding=step}, iup.button {title=Config.sFont, font=Config.sFont .. ", 9", action=change_font},
@@ -355,7 +318,6 @@ local function buildtabs() return
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "(evil) AI can force H on PC" }),
 				aaut("bUseShadowing", iup.toggle {title = "Game file shadowing" }),
 				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
---				aaut("bEnableFacecam", iup.toggle {title = "Use POV facecam" }),
 				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
 				aaut("bUseDialoguePoser", iup.toggle {title = "Dialogue poser" }),
 				aaut("bSaveFileAutoRemove", iup.toggle {title = "Strip files from cards after extracting" }),
@@ -367,51 +329,7 @@ local function buildtabs() return
 		},
 	}, iup.fill{}, launch() },
 
---[[	iup.hbox {
-		tabtitle = "Mods",
-		iup.hbox {
-			iup.list {
-				"[x] fixlocale",
-				"[x] launcher",
-				"[x] catchall",
-				expand="yes",
-			},
-			iup.vbox {
-				normalizesize="HORIZONTAL",
-				iup.button{title="Enable"},
-				iup.button{title="Disable"},
-				iup.button{title="Move up"},
-				iup.button{title="Move down"},
-				iup.button{title="Add"},
-				iup.button{title="Delete"},
-			}
-		}
-	},
-
-	iup.hbox {
-		tabtitle = "Scripts",
-		iup.hbox {
-			iup.list {
-				"[x] fixlocale",
-				"[x] launcher",
-				"[x] catchall",
-				expand="yes",
-			},
-			iup.vbox {
-				normalizesize="HORIZONTAL",
-				iup.button{title="Enable"},
-				iup.button{title="Disable"},
-				iup.button{title="Move up"},
-				iup.button{title="Move down"},
-				iup.button{title="Add"},
-				iup.button{title="Delete"},
-				iup.button{title="Edit / Debug"},
-				iup.button{title="Reload"},
-
-			}
-		}
-	},
-]]
+	require("launcher.dlgmod")(),
 
 	canfocus = "no",
 	tabchange_cb = function(ot,nt)
@@ -435,7 +353,6 @@ local function buildtabs() return
 end
 
 
-
 return function()
 	gsdconfig = gsdlib.load_gsd()
 	update_res(_CONFIG["res_"..exe_type])
@@ -446,6 +363,7 @@ return function()
 		};
 		title = "AA2Unlimited 0.5 preview",
 	}
+
 	dlg.startfocus = buts[1]
 
 	function dlg:close_cb()

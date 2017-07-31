@@ -266,7 +266,10 @@
     <None Include="Texts\mod\facecam.lua" />
     <None Include="Texts\mod\fakereg.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
+    <None Include="Texts\mod\homosex.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
+    <None Include="Texts\mod\launcher\dlglist.lua" />
+    <None Include="Texts\mod\launcher\dlgmod.lua" />
     <None Include="Texts\mod\launcher\gsd.lua" />
     <None Include="Texts\mod\launcher\init.lua" />
     <None Include="Texts\mod\makertrans\dict.lua" />

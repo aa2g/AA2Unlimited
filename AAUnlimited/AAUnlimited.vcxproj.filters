@@ -367,5 +367,14 @@
     <None Include="Texts\mod\borderless.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\homosex.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\dlglist.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\dlgmod.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -99,8 +99,5 @@ function _M:load()
 	translate()
 end
 
-function _M:unload()
-	-- TODO reloading
-end
 
 return _M
