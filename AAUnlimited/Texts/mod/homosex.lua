@@ -31,7 +31,7 @@ function _M:load()
 .text:0047FBC0                 mov     ecx, [edi]
 .text:0047FBC2                 mov     eax, [ecx]
 ]]
-	g_poke(0x7FBdf, "\x02") -- yet another male check
+	g_poke(0x7FBBF, "\x02") -- yet another male check
 
 	-- Doesn't seem to do anything: 0008D333 8D88E400000005E00000003BC1→8B88E00000008B098079400074
 

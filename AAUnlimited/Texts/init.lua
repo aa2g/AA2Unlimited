@@ -364,8 +364,8 @@ function __DISPATCH_EVENT(name, arg1, ...)
 		print("EVENT: ", name, arg1, ...)
 	end
 
-	for _,h in ipairs((handlers[name] or {})[1]) do
-		local retv = h(arg1, ...)
+	for _,h in ipairs(handlers[name] or {}) do
+		local retv = h[1](arg1, ...)
 		arg1 = retv ~= nil and retv or arg1
 	end
 
