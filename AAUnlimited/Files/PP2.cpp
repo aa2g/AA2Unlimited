@@ -259,7 +259,7 @@ void *PP2File::getCache(uint32_t idx) {
 					}
 					assert(tce != NULL);
 					assert(tfe.off + tfe.osize <= tmplen);
-					tce->csize = ZSTD_compress(tce->data, worst, (void*)(tmp + tfe.off), tfe.osize, 3);
+					tce->csize = ZSTD_compress(tce->data, worst, (void*)(tmp + tfe.off), tfe.osize, 1);
 					//DBG i << " compressed to " << tce->csize << " from " << tfe.osize << "\r\n";
 					tce = reallocCache(i, tce);
 				}
@@ -331,7 +331,7 @@ void PP2::AddPath(const wstring &path) {
 	fh = FindFirstFile((path + L"\\*.pp2").c_str(), &fd);
 	if (fh == INVALID_HANDLE_VALUE)
 		return;
-	do {
+	do {	
 		AddArchive((path + L"\\" + fd.cFileName).c_str());
 	} while (FindNextFile(fh, &fd));
 
