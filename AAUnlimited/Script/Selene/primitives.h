@@ -33,6 +33,14 @@ struct is_primitive<int> {
     static constexpr bool value = true;
 };
 template <>
+struct is_primitive<DWORD> {
+	static constexpr bool value = true;
+};
+template <>
+struct is_primitive<BYTE> {
+	static constexpr bool value = true;
+};
+template <>
 struct is_primitive<unsigned int> {
     static constexpr bool value = true;
 };
@@ -228,6 +236,32 @@ inline unsigned int _check_get(_id<unsigned int>, lua_State *l, const int index)
     return res;
 }
 
+inline BYTE _check_get(_id<BYTE>, lua_State *l, const int index) {
+	int isNum = 0;
+
+	auto res = static_cast<unsigned>(lua_tointegerx(l, index, &isNum));
+	if (!isNum) {
+		throw GetParameterFromLuaTypeError{
+			[](lua_State *l, int index) {luaL_checkinteger(l, index); },
+			index
+		};
+	}
+	return res;
+}
+
+inline DWORD _check_get(_id<DWORD>, lua_State *l, const int index) {
+	int isNum = 0;
+	auto res = static_cast<unsigned>(lua_tointegerx(l, index, &isNum));
+	if (!isNum) {
+		throw GetParameterFromLuaTypeError{
+			[](lua_State *l, int index) {luaL_checkinteger(l, index); },
+			index
+		};
+	}
+	return res;
+}
+
+
 inline lua_Number _check_get(_id<lua_Number>, lua_State *l, const int index) {
     int isNum = 0;
     auto res = lua_tonumberx(l, index, &isNum);
@@ -317,6 +351,13 @@ T _pop(_id<T> t, lua_State *l) {
 
 inline void _push(lua_State *) {}
 
+template<typename T>
+inline void push_ud_typeid2(lua_State *l, T& ref, TypeID tid) {
+	push_ud_typeid(l, (void*)&ref, tid);
+}
+/*inline void push_ud_typeid2(lua_State *l, void *p, TypeID tid) {
+	return push_ud_typeid(l, p, tid);
+}*/
 inline void push_ud_typeid(lua_State *l, void *p, TypeID tid) {
 	MetatableRegistry::detail::_push_meta_table(l);
 	MetatableRegistry::detail::_push_typeinfo(l, tid);
@@ -349,7 +390,7 @@ inline typename std::enable_if<
     !is_primitive<typename std::decay<T>::type>::value
 >::type
 _push(lua_State *l, T& t) {
-    push_ud_typeid(l, t, typeid(T));
+    push_ud_typeid(l, (void*)&t, typeid(T*));
 }
 
 /*

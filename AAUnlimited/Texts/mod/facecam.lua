@@ -2,7 +2,7 @@
 
 local _M = {}
 
-local hinfo
+hinfo = false
 
 function on.keydown(k)
 
@@ -18,7 +18,7 @@ function on.start_h(hi)
 end
 
 function on.end_h()
-	hinfo = nil
+	hinfo = false
 end
 
 

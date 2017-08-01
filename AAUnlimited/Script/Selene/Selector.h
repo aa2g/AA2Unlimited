@@ -393,6 +393,12 @@ public:
         return detail::_pop(detail::_id<unsigned int>{}, _state);
     }
 
+	operator BYTE() const {
+		ResetStackOnScopeExit save(_state);
+		_evaluate_retrieve(1);
+		return detail::_pop(detail::_id<unsigned int>{}, _state);
+	}
+
     operator lua_Number() const {
         ResetStackOnScopeExit save(_state);
         _evaluate_retrieve(1);
