@@ -1,2 +1,1 @@
-#include "BaseAi.h"
-
+#include "StdAfx.h"

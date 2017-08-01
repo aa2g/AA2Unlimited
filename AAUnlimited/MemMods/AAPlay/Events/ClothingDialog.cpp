@@ -1,13 +1,4 @@
-#include "ClothingDialog.h"
-
-#include <Windows.h>
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "MemMods/Shared/Events/ArchiveFileOpen.h"
-
-#include "Functions\AAPlay\Poser.h"
-#include "Functions\AAPlay\GameState.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 namespace ClothingDialog {

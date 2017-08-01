@@ -1,13 +1,4 @@
-#include "NpcActions.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-
-#include "External\ExternalClasses\CharacterStruct.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
-#include "Functions\AAPlay\GameState.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Script/ScriptLua.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 namespace NpcActions {

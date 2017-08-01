@@ -1,6 +1,4 @@
-#include "CardData.h"
-
-#include "../../AddressRule.h"
+#include "StdAfx.h"
 
 namespace ExtVars {
 namespace AAEdit {

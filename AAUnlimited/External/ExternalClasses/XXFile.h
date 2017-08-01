@@ -38,7 +38,8 @@ public:
 	static inline void bindLua() {
 #define LUA_CLASS XXFile
 		LUA_EXTCLASS(XXFile,
-			LUA_FIELD(m_root)
+			LUA_FIELD(m_root),
+			LUA_FIELD(FindBone)
 		);
 		// TODO
 #undef LUA_CLASS

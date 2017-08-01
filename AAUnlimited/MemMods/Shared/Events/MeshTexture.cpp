@@ -1,15 +1,4 @@
-#include "MeshTexture.h"
-
-#include <d3d9.h>
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "Functions\Shared\Globals.h"
-#include "Functions\Shared\Overrides.h"
-#include "Functions\Shared\SpecialOverrides.h"
-#include "Functions\AAPlay\Poser.h"
-#include "Files\XXFile.h"
-#include "Functions\AAPlay\GameState.h"
+#include "StdAfx.h"
 
 /*
 * xx file textures are loaded in two steps. First, an array of mesh structs is created, each of which

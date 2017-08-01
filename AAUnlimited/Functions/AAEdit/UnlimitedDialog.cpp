@@ -1,35 +1,7 @@
-#include "UnlimitedDialog.h"
+#include "StdAfx.h"
 
-/*
- * TODO: break up this file. every single tab is defined in this file. its impossible to read if you dont know what youre searching for,
- * and even then its pretty spaghetti
- */
 
-#include <Windows.h>
-#include <CommCtrl.h>
-#include <queue>
-#include <set>
-#include <stdio.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
-#include "External\ExternalVariables\AAEdit\WindowData.h"
-#include "External\ExternalClasses\TextureStruct.h"
-#include "External\ExternalVariables\AAEdit\CardData.h"
-#include "External\ExternalVariables\AAEdit\RefreshTable.h"
-#include "External\AddressRule.h"
-#include "General\ModuleInfo.h"
-#include "General\Util.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\Shared\Globals.h"
-#include "Functions\Shared\Overrides.h"
-#include "Functions\Shared\Triggers\Triggers.h"
-#include "Functions\Shared\Triggers\Expressions.h"
-#include "Files\Logger.h"
-#include "Files\ClothFile.h"
-#include "Files\Config.h"
-#include "resource.h"
-#include "defs.h"
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \

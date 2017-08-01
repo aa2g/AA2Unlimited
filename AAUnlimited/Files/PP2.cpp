@@ -1,17 +1,6 @@
-#include "Functions/Shared/Globals.h"
-#include "PPeX.h"
-#include <stdint.h>
-#include <fstream>
-#include <iostream>
-#include <io.h>
-#include <algorithm>
-#include <cctype>
-#include <queue>
-#include "Files/Logger.h"
-#include "Files/Config.h"
-#include <assert.h>
+#include "StdAfx.h"
 #include "zstd.h"
-#include "PP2.h"
+#include "opus.h"
 
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 

@@ -1,15 +1,4 @@
-#include "PoserController.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <fstream>
-#include <Windows.h>
-
-#include "Files\ClothFile.h"
-#include "Files\PoseFile.h"
-#include "General\IllusionUtil.h"
-#include "General\Util.h"
+#include "StdAfx.h"
 
 namespace Poser {
 

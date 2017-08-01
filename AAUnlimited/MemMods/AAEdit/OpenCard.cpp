@@ -1,16 +1,4 @@
-#include "OpenCard.h"
-
-#include <Windows.h>
-#include <intrin.h>
-#include <algorithm>
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "General\Util.h"
-#include "Files\Config.h"
-#include "Files\Logger.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\AAEdit\UnlimitedDialog.h"
+#include "StdAfx.h"
 
 namespace EditInjections {
 namespace OpenCard {

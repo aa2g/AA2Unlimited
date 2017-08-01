@@ -1,11 +1,7 @@
-﻿#include "ModuleInfo.h"
-#include "Files/Logger.h"
+﻿#include "StdAfx.h"
 
 #pragma comment( lib, "version.lib" )
 
-#include <string>
-#include <sstream>
-#include "Script/ScriptLua.h"
 
 namespace General {
 

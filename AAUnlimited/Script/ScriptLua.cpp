@@ -1,21 +1,4 @@
-#include <Windows.h>
-
-#include <codecvt>
-#include "defs.h"
-#include "Files/Config.h"
-#include "Files/Logger.h"
-#include "ScriptLua.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses/HClasses/HInfo.h"
-#include "External/ExternalClasses/Frame.h"
-#include "External/ExternalClasses/ConversationStruct.h"
-#include "External/ExternalClasses/TimeData.h"
-#include "External/ExternalVariables/AAPlay/GameGlobals.h"
-#include "Functions/AAPlay/Globals.h"
-#include "Functions/AAPlay/GameState.h"
-#include "Functions/Shared/Triggers/Actions.h"
-#include "MemMods/MemRightsLock.h"
-#include "MemMods/Shared/Events/GameTick.h"
+#include "StdAfx.h"
 
 Lua g_Lua(true);
 

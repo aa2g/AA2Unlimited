@@ -1,6 +1,4 @@
-#include "Event.h"
-
-#include "Thread.h"
+#include "StdAfx.h"
 
 namespace Shared {
 	namespace Triggers {

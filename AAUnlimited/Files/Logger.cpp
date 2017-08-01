@@ -1,8 +1,4 @@
-#include <Windows.h>
-#include "Logger.h"
-#include "Script/ScriptLua.h"
-
-#include <string>
+#include "StdAfx.h"
 
 Logger g_Logger;
 

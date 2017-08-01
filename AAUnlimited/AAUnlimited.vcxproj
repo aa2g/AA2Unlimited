@@ -69,7 +69,9 @@
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
-    <ClCompile Include="Functions\AAUCardData.cpp" />
+    <ClCompile Include="Functions\AAUCardData.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="External\ExternalClasses\CharacterData.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterStruct.cpp" />
     <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
@@ -244,6 +246,7 @@
     <ClInclude Include="Script\Selene\traits.h" />
     <ClInclude Include="Script\Selene\Tuple.h" />
     <ClInclude Include="Script\Selene\util.h" />
+    <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -378,17 +381,20 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Custom</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>4800;4244;4018;4200;4996</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
