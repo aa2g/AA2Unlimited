@@ -43,6 +43,7 @@ public:
 #define LUA_CLASS HParticipant
 	static inline void bindLua() {
 		LUA_EXTCLASS(HParticipant,
+			LUA_FIELD(m_charPtr),
 			LUA_FIELD(m_shoesOffState),
 			LUA_FIELD(m_bClothesSlipped),
 			LUA_FIELD(m_clothesState),

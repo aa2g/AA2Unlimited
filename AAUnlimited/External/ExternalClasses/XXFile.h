@@ -4,6 +4,7 @@
 
 #include "Frame.h"
 #include "Animation.h"
+#include "Script/ScriptLua.h"
 
 
 namespace ExtClass {
@@ -34,6 +35,15 @@ public:
 	template<class Callback>
 	void EnumBonesPostOrder_sub(Callback& callback,Frame* bone);
 public:
+	static inline void bindLua() {
+#define LUA_CLASS XXFile
+		LUA_EXTCLASS(XXFile,
+			LUA_FIELD(m_root)
+		);
+		// TODO
+#undef LUA_CLASS
+	};
+
 	XXFile() = delete;
 	~XXFile() = delete;
 

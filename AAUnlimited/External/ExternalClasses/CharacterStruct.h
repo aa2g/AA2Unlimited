@@ -90,7 +90,8 @@ public:
 			LUA_FIELD(m_currClothSlot),
 			LUA_FIELD(m_currClothes),
 			LUA_FIELD(m_hStats),
-			LUA_FIELD(GetActivity)
+			LUA_FIELD(GetActivity),
+			LUA_FIELD(GetXXFile)
 		);
 	}
 #undef LUA_CLASS
@@ -124,7 +125,7 @@ public:
 		return *(CharacterNpcAiData**)(ptr);
 	}
 
-	inline XXFile* GetXXFile(Models target) {
+	inline XXFile* GetXXFile(int target) {
 		switch (target) {
 		case FACE:
 			return m_xxFace;
@@ -144,6 +145,10 @@ public:
 			DWORD rule[] {0x70, 4, 0};
 			return (XXFile*)ExtVars::ApplyRule(this, rule);
 			break; }
+		case TONGUE:
+			return m_xxTounge;
+			break;
+
 		default:
 			return NULL;
 		}
