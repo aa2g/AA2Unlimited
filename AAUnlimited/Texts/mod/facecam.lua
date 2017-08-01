@@ -2,7 +2,9 @@
 
 local _M = {}
 
-hinfo = false
+hinfo = hinfo or false
+
+local tohide = { 0, 3, 4, 5, 6, 10, 11}
 
 function on.keydown(k)
 
@@ -15,6 +17,15 @@ end
 
 function on.start_h(hi)
 	hinfo = hi
+end
+--hinfo.m_passiveParticipant.m_charPtr:GetXXFile(1).m_root:GetChild(0):GetChild(0).m_renderFlag  = 0
+function hideshow(part, flag)
+	flag = flag and 2 or 0
+	local part = part and hinfo.m_activeParticipant or hinfo.m_passiveParticipant
+	local cptr = part.m_charPtr
+	for _,v in ipairs(tohide) do
+		pcall(function() cptr:GetXXFile(v).m_root:GetChild(0):GetChild(0).m_renderFlag = flag end)
+	end
 end
 
 function on.end_h()
