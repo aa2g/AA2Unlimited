@@ -103,6 +103,12 @@ function hook_func(addr, fixbytes, nargs, f)
 	return orig
 end
 
+function callto(addr, addr2)
+	poke(addr, "\xe8" .. string.pack("<I", addr2-addr-5))
+end
+
+g_callto = g_wrap(callto)
+
 g_hook_func = g_wrap(hook_func)
 
 function malloc(n)
@@ -111,4 +117,15 @@ end
 
 function free(m)
 	_WIN32.LocalFree(m)
+end
+
+
+-- parses nasm output to opcodes
+function parse_asm(s)
+	local ret = bytes:gsub("%S+%s+(%S+)[^\n]*\n", function(r)
+        return r:gsub("(..)", function(x)
+                return string.char(tonumber(x, 16))
+        end)
+	end)
+	return ret
 end

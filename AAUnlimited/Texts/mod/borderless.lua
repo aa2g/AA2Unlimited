@@ -1,3 +1,5 @@
+--@INFO Faux fullscreen.
+
 require "memory"
 
 local _M = {}

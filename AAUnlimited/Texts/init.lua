@@ -1,5 +1,6 @@
 require "debug"
 
+
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
@@ -106,17 +107,37 @@ function Config.load(name)
 	setmetatable(_G, nil)
 end
 
+function table.dump(v, ores)
+	local res = ores or {}
+	local t = type(v)
+	if t == "function" then 
+		table.insert(res, "<function>")
+		return res
+	elseif t ~= "table" then 
+		table.insert(res, string.format("%q",v))
+		return res
+	end
+	table.insert(res, "{")
+	for tk,tv in pairs(v) do
+		table.insert(res, "[")
+		table.dump(tk, res)
+		table.insert(res, "]=")
+		table.dump(tv, res)
+		table.insert(res, ",")
+	end
+	table.insert(res, "}")
+	return res
+end
+
+
 local function saveval(of,n,v)
 	if type(v) == "function" then return end
-	if n ~= "mods" then
---		log(n)
-		of:write(string.format("%s=%q\n",n,v))
-	end
+	of:write(string.format("%s=%s\n",n,table.concat(table.dump(v))))
 end
 
 function Config.save(fn)
 	local fn = fn or aau_path("savedconfig.lua")
-	log("saving config to "..fn)
+	--log("saving config to "..fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
@@ -187,42 +208,124 @@ setmetatable(_WIN32, {
 })
 
 local modules = {}
+local init_pending = {}
 local mnames = {}
 local current_module
+local handlers = {}
+on = {}
 
-function load_modules()
-
-	Config.mods = Config.mods or {}
-	for i,mod in ipairs(Config.mods) do
-		log("Trying to load "..mod[1])
-		if not type(mod) == "table" then
-			log.error("invalid mod entry at index %d", i)
-		else
-			local ok, data = xpcall(require, debug.traceback, mod[1])
-			if not ok then
-				log.error("Module %s failed: %s", mod[1], data)
-			else
-				if type(data) == "table" and data.load then
-					current_module = data
-					data.info = mod
-					log("Loaded %s", data.info[1])
-					table.insert(modules, data)
-					modules[data.info[1]] = data
-				else
-					log.error("%s is not a valid module", mod[1])
-				end
+local function _load_module(mod)
+	current_module = mod
+	--log("Trying to load "..mod[1])
+	local ok, data = xpcall(require, debug.traceback, mod[1])
+	if not ok then
+		log.error("Module %s failed: %s", mod[1], data)
+	else
+		if type(data) == "table" and data.load then
+			data.info = mod
+			log("Loaded %s", data.info[1])
+			if init_pending then
+				table.insert(init_pending, data)
 			end
+			modules[data.info[1]] = data
+			current_module = nil
+			return data
+		else
+			log.error("%s is not a valid module", mod[1])
 		end
 	end
-	current_module = nil
+end
+
+function reload_module(n)
+	if module_can_unload(n) then
+		unload_module(n)
+	else
+		log("Module %s can't unload", n)
+	end
+	if not module_is_loaded(n) then
+		init_module(load_module(get_mod_info(n)))
+	end
 end
 
 function load_module(mod)
+	unlock_globals()
+	local ret = _load_module(mod)
+	lock_globals()
+	return ret
+end
+
+function unload_module(name)
+	log.spam("Unloading %s", name)
+	local mod = modules[name]
+	if not mod then return end
+	-- nuke all event handlers of a given module
+	for _,v in pairs(handlers) do
+		local i = 1
+		while i < #v do
+			if v[i][2] == mod then
+				table.remove(v, i)
+			else
+				i = i + 1
+			end
+		end
+	end
+
+	-- remove its lua space modules, and also submodules
+	for k,v in pairs(package.loaded) do
+		if k == name or k:find(name .. ".", 1, true) then
+			package.loaded[k] = nil
+		end
+	end
+
+	-- and from our list
+	modules[name] = nil
+
+	-- and this should nuke it for good
+	collectgarbage("collect")
+	collectgarbage("collect")
+end
+
+
+function load_modules()
+	Config.mods = Config.mods or {}
+	lock_globals()
+	print("rd stuff")
+	for f in readdir(aau_path("mod", "*")) do
+		local mname = f:match("^(.*)%.lua$") or f
+		if mname == f then
+			f = f .. "/init.lua"
+		end
+
+		-- we dont know about this module yet
+		if (not get_mod_info(mname)) and get_mod_desc(aau_path("mod",f)) then
+			table.insert(Config.mods, {mname, disabled=true})
+		end
+	end
+	unlock_globals()
+	for i,mod in ipairs(Config.mods) do
+		if not type(mod) == "table" then
+			log.error("invalid mod entry at index %d", i)
+		elseif not mod.disabled then
+			_load_module(mod)
+		end
+	end
+end
+
+function module_can_unload(mod)
+	return (modules[mod] or {}).unload
+end
+
+function module_is_loaded(mod)
+	return modules[mod]
+end
+
+function init_module(mod)
+	log("Initializing %s", mod.info[1])
 	local ok, msg = xpcall(mod.load, debug.traceback, table.unpack(mod.info))
 	if not ok then
 		log.error("Unable to initialize %s: %s", mod.info[1], msg)
 	else
-		log("Initialized %s", mod.info[1])
+		--log("Initialized %s", mod.info[1])
 	end
 end
 
@@ -240,10 +343,11 @@ end
 
 function init_modules()
 	lock_globals()
-	log("Initializing modules")
-	for _,mod in ipairs(modules) do
-		load_module(mod)
+	log.spam("Initializing modules")
+	for _,mod in ipairs(init_pending) do
+		init_module(mod)
 	end
+	init_pending = nil
 end
 
 function table.extend(a,b)
@@ -267,8 +371,6 @@ function table.indexof(t,q)
 	return 0
 end
 
-on = {}
-local handlers = {}
 
 function __DISPATCH_EVENT(name, arg1, ...)
 	if name ~= "plan" then
@@ -276,7 +378,7 @@ function __DISPATCH_EVENT(name, arg1, ...)
 	end
 
 	for _,h in ipairs(handlers[name] or {}) do
-		local retv = h(arg1, ...)
+		local retv = h[1](arg1, ...)
 		arg1 = retv ~= nil and retv or arg1
 	end
 
@@ -285,9 +387,9 @@ end
 
 
 function add_event_handler(evname, v)
-	assert(current_module)
+	assert(current_module, "event handlers can be installed only on module load (ie top level)")
 	handlers[evname] = handlers[evname] or {}
-	table.insert(handlers[evname], v)
+	table.insert(handlers[evname], {v, current_module})
 end
 
 setmetatable(on, {
@@ -304,4 +406,60 @@ function hexdump(addr, size)
 end
 function tohex(n)
 	return string.format("%x",n)
+end
+
+
+function readdir(path)
+	require "memory"
+	require "strutil"
+
+	local mem, fh
+	return function()
+		local ok
+		if not fh then
+			mem = malloc(592)
+			fh = FindFirstFileW(utf8_to_unicode(path), mem)
+			ok = fh ~= 0xffffffff
+		else
+			ok = FindNextFileW(fh, mem) ~= 0
+		end
+		if not ok then
+			CloseHandle(fh)
+			free(mem)
+			return nil
+		end
+		return unicode_to_utf8(peek(mem + 44, 256, "\0\0", 2))
+	end
+end
+
+function get_mod_desc(path)
+	local f = io.open(path)
+	if not f then
+		return
+	end
+	local ln = f:read("*l")
+	local desc = ln:match("^--@INFO (.*)")
+	f:close()
+	return desc
+end
+
+-- grabs all information about module just by its name
+function get_mod_info(n)
+	local mi
+	local idx
+	for i,v in ipairs(Config.mods) do
+		if v[1] == n then
+			mi = v
+			idx = i
+			break
+		end
+	end
+	if not mi then
+		return
+	end
+	local desc = get_mod_desc(aau_path("mod", n..".lua")) or get_mod_desc(aau_path("mod", n, "init.lua"))
+	if not desc then
+		return
+	end
+	return mi, desc, idx
 end

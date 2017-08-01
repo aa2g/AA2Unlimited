@@ -1,8 +1,7 @@
-﻿--@INFO This launcher
+--@INFO This launcher, should be always last in the list
 
 require "memory"
 require "strutil"
-
 local dlg = require "launcher.dlg"
 
 local _M = {}
@@ -34,11 +33,7 @@ function _M:load()
 		LoadLibraryA("..\\AAFaceDLL.DLL")
 	end
 
-
 end
 
-function _M:unload()
-	-- TODO reloading
-end
 
 return _M

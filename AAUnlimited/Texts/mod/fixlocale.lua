@@ -1,4 +1,4 @@
---@INFO If needed, patches the game so that it does not depend on SJIS system codepage (ie builtin locale emulator)
+--@INFO Removes the need for locale emulator.
 
 require "memory"
 
