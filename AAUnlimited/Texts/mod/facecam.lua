@@ -5,7 +5,11 @@ local _M = {}
 local hinfo
 
 function on.keydown(k)
-	print("got key", k)
+
+	print("got2 key", k)
+
+	if not hinfo then return k end
+	if key == 84 then return -1 end
 	return k
 end
 

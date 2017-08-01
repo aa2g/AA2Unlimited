@@ -77,14 +77,7 @@ end
 
 function mod:reload(n)
 	local n = n:sub(chk)
-	if module_can_unload(n) then
-		unload_module(n)
-	else
-		log("Module %s can't unload", n)
-	end
-	if not module_is_loaded(n) then
-		init_module(load_module(get_mod_info(n)))
-	end
+	reload_module(n)
 end
 
 

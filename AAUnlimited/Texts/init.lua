@@ -224,13 +224,26 @@ local function _load_module(mod)
 		if type(data) == "table" and data.load then
 			data.info = mod
 			log("Loaded %s", data.info[1])
-			table.insert(init_pending, data)
+			if init_pending then
+				table.insert(init_pending, data)
+			end
 			modules[data.info[1]] = data
 			current_module = nil
 			return data
 		else
 			log.error("%s is not a valid module", mod[1])
 		end
+	end
+end
+
+function reload_module(n)
+	if module_can_unload(n) then
+		unload_module(n)
+	else
+		log("Module %s can't unload", n)
+	end
+	if not module_is_loaded(n) then
+		init_module(load_module(get_mod_info(n)))
 	end
 end
 

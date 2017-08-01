@@ -2,64 +2,76 @@
 
 local _M = {}
 
+local save = {}
+
+local function patch(addr, bytes)
+	save[addr] = g_peek(addr, #bytes)
+	g_poke(addr, bytes)
+end
+
 function _M:load()
+	patch(0x7A2C4, "\x02") -- m/f check for ??
+	patch(0x7D8DD, "\xb8\x01\x00\x00\x00\x90\x90") -- male check for ??
+	patch(0x7FBBF, "\x02") -- m/f check for ??
+
+	-- linked list trickery to avoid assigning wrong H faces
+	patch(0x8DF25, parse_asm[[
+00000000  05E0000000        add eax,0xe0
+00000005  8B4804            mov ecx,[eax+0x4]
+00000008  8B09              mov ecx,[ecx]
+0000000A  80794001          cmp byte [ecx+0x40],0x1
+0000000E  7426              jz 0x36
+00000010  8D4804            lea ecx,[eax+0x4]
+00000013  8B31              mov esi,[ecx]
+00000015  807E4000          cmp byte [esi+0x40],0x0
+00000019  741B              jz 0x36
+0000001B  39C8              cmp eax,ecx
+0000001D  7409              jz 0x28
+0000001F  FF30              push dword [eax]
+00000021  FF31              push dword [ecx]
+00000023  8F00              pop dword [eax]
+00000025  8F01              pop dword [ecx]
+00000027  90                nop
+]])
+
+		
 --[[
-.text:0047A2AF                 cmp     byte ptr [edx+40h], 0
-.text:0047A2B3                 mov     [esp+2E9Ch+var_2E84], eax
-.text:0047A2B7                 jnz     loc_47A3AD
-.text:0047A2BD                 mov     ecx, [esp+2E9Ch+var_2E88]
-.text:0047A2C1                 cmp     byte ptr [ecx+40h], 0 --> 2
-.text:0047A2C5                 jnz     loc_47A3AD
-.text:0047A2CB                 mov     eax, [edi+9Ch]
-.text:0047A2D1                 mov     edx, ecx
-.text:0047A2D3                 mov     ecx, [esp+2E9Ch+var_2E70]
-]]
-	g_poke(0x7A2C4, "\x02") -- male check
-
---[[
-  grill = *(a1 + 76) == 1
-  (*(void (__stdcall **)(_DWORD, _DWORD, signed int))(grill, 0, -1);
-
-  rewrites that to just
-  grill = 1
-  (*(void (__stdcall **)(signed int, _DWORD, signed int))(**(_DWORD **)(a1 + 1556) + 16))(grill, 0, -1);
-]]
-	g_poke(0x7D8DD, "\xb8\x01\x00\x00\x00\x90\x90") -- mov eax, 1
-
---[[
-.text:0047FBBB                 cmp     [esp+esi+48h+var_14], 0 --> 2
-.text:0047FBC0                 mov     ecx, [edi]
-.text:0047FBC2                 mov     eax, [ecx]
-]]
-	g_poke(0x7FBBF, "\x02") -- yet another male check
-
-	-- Doesn't seem to do anything: 0008D333 8D88E400000005E00000003BC1→8B88E00000008B098079400074
-
-	g_poke(0x79280, "\x00") -- nop jmp; male check
-	g_poke(0x83191, "\x00") -- nop jmp
-
-	g_poke(0x8BC40, "\x00") -- male check for H expressions, ie read from H_Expression_State.lst not H_Expression_Male.lst
-
-
---[[
-    if ( result != -1
-      && *(_BYTE *)(**(_DWORD **)((char *)&v64 + 4 * v56 + 224 - (_DWORD)&v64 + *(_DWORD *)(v1 + 8)) + 64) != 0 )
-]]
-	g_poke(0x94BBB, "\x02") -- again male check, seems like for pitch?
-
---[[
-	again a male check for god knows what
-	removes the commented out code
-    /*if ( *(_BYTE *)(**(_DWORD **)(v8 + *(_DWORD *)(v13 + 8)) + 64) == 1 )*/
-      result = sub_49AE40(v11, 0, *(_BYTE *)(v13 + v5 + 44) != 0 ? 2 : 0);
-    /*else
-      result = 0;*/
+original:
+.text:0048DF25 8B 88 E4 00 00 00       mov     ecx, [eax+0E4h]
+.text:0048DF2B 8B 09                   mov     ecx, [ecx]
+.text:0048DF2D 80 79 40 01             cmp     byte ptr [ecx+40h], 1
+.text:0048DF31 74 27                   jz      short loc_48DF5A
+.text:0048DF33 8D 88 E4 00 00 00       lea     ecx, [eax+0E4h]
+.text:0048DF39 05 E0 00 00 00          add     eax, 0E0h
+.text:0048DF3E 3B C1                   cmp     eax, ecx
+.text:0048DF40 74 0A                   jz      short loc_48DF4C
+.text:0048DF42 8B 10                   mov     edx, [eax]
+.text:0048DF44 8B 31                   mov     esi, [ecx]
+.text:0048DF46 89 30                   mov     [eax], esi
+.text:0048DF48 89 11                   mov     [ecx], edx
+.text:0048DF4A 33 D2                   xor     edx, edx
+-- past this point kept as-is
+loc_48DF4C:
+.text:0048DF4C 8B 00                   mov     eax, [eax]
+.text:0048DF4E 89 50 08                mov     [eax+8], edx
+.text:0048DF51 8B 09                   mov     ecx, [ecx]
+.text:0048DF53 C7 41 08 01 00 00+      mov     dword ptr [ecx+8], 1
+loc_48DF5A:
 ]]
 
-	-- avoid null deref in dynamic_cast<GirlChara>
-	-- we simply don't do the dynamic cast, since the the subclass appears to be
-	-- plain subclass, not sideways
-	g_poke(0x8E122, "\x89\xc8\xeb\x01")
+	patch(0x79280, "\x00") -- m/f check for ??
+	patch(0x83191, "\x00") -- m/f check for ??
+	patch(0x8BC40, "\x00") -- m/f check for ?? H expressions? H_Expression_State.lst not H_Expression_Male.lst
+
+
+	patch(0x957BB, "\x02") -- m/f check for ?? expressions/sound again
+	patch(0x8E122, "\x89\xc8\xeb\x01") -- dynamic_cast<GirlClass> -> static_cast to prevent null deref
+end
+
+function _M:unload()
+	for k,v in ipairs do
+		g_poke(k,v)
+	end
 end
 
 return _M
