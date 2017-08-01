@@ -22,6 +22,7 @@
 #include "Files\Config.h"
 #include "Files\PoseFile.h"
 #include "Files\ClothFile.h"
+#include "Files\Logger.h"
 #include "resource.h"
 #include "defs.h"
 
@@ -76,6 +77,7 @@ namespace Poser {
 		if (g_PoserController.IsActive()) {
 			g_PoserWindow.SyncBones();
 			g_PoserWindow.SyncOperation();
+			g_PoserWindow.SyncStyles();
 		}
 	}
 
@@ -179,6 +181,9 @@ namespace Poser {
 			thisPtr->m_chkShowGuides = GetDlgItem(hwndDlg, IDC_PPS_CHKSHOWGUIDES);
 			thisPtr->m_tabModifiers = GetDlgItem(hwndDlg, IDC_PPS_TABMODIFIERS);
 			thisPtr->m_tabShowHide = GetDlgItem(hwndDlg, IDC_PPS_TABSHOWHIDE);
+			thisPtr->m_listStyles = GetDlgItem(hwndDlg, IDC_PPS_LISTSTYLES);
+			LOGPRIO(Logger::Priority::INFO) << "thisPtr->m_listStyles: ";
+			LOGPRIO(Logger::Priority::INFO) << thisPtr->m_listStyles << "\n";
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
@@ -223,6 +228,8 @@ namespace Poser {
 			SendMessage(thisPtr->m_spinBlushLines, UDM_SETRANGE, 0, MAKELPARAM(12, 0));
 
 			SendMessage(thisPtr->m_chkShowGuides, BM_SETCHECK, g_PoserController.ShowGuides() ? BST_CHECKED : BST_UNCHECKED, 0);
+
+			SendMessage(thisPtr->m_listStyles, LB_SETCURSEL, 0, 0);
 
 			TCITEM tab;
 #define makeTab(data,text) tab.mask = TCIF_TEXT | TCIF_PARAM; tab.pszText = L#text; tab.lParam = data;
@@ -430,6 +437,7 @@ namespace Poser {
 						}
 					}
 					thisPtr->SyncList();
+					thisPtr->SyncStyles();
 				}
 
 				return TRUE; }
@@ -555,6 +563,16 @@ namespace Poser {
 					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
 						CurrentSlider()->setCurrentOperation(PoserController::SliderInfo::Operation(res));
+						thisPtr->SyncList();
+					}
+					break; }
+				case (IDC_PPS_LISTSTYLES): {
+					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+					if (res != LB_ERR) {
+						CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
+						if (card->IsValid()) {
+							card->m_cardData.SwitchActiveCardStyle(res, card->m_char->m_charData);
+						}
 						thisPtr->SyncList();
 					}
 					break; }
@@ -766,6 +784,17 @@ namespace Poser {
 		_snwprintf_s(number, 52, 16, TEXT("%.3f"), z);
 		SendMessage(m_edValueZ, WM_SETTEXT, 0, (LPARAM)number);
 		loc_syncing = false;
+	}
+
+	void PoserWindow::SyncStyles() {
+		CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
+		if (!card->IsValid()) return;
+		//SendMessage(this->m_listStyles, LB_RESETCONTENT, 0, 0);
+		auto styles = card->m_cardData.m_styles;
+		for (int i = 0; i < styles.size(); i++) {
+			SendMessage(this->m_listStyles, LB_ADDSTRING, 0, LPARAM(styles[i].m_name));
+		}
+		SendMessage(this->m_listStyles, LB_SETCURSEL, card->m_cardData.GetCurrAAUSet(), 0);
 	}
 
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
