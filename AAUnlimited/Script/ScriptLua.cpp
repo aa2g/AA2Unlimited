@@ -1,26 +1,14 @@
-#include <Windows.h>
-
-#include <codecvt>
-#include "defs.h"
-#include "Files/Config.h"
-#include "Files/Logger.h"
-#include "ScriptLua.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses/HClasses/HInfo.h"
-#include "External/ExternalClasses/Frame.h"
-#include "External/ExternalClasses/ConversationStruct.h"
-#include "External/ExternalClasses/TimeData.h"
-#include "External/ExternalVariables/AAPlay/GameGlobals.h"
-#include "Functions/AAPlay/Globals.h"
-#include "Functions/AAPlay/GameState.h"
-#include "Functions/Shared/Triggers/Actions.h"
-#include "MemMods/MemRightsLock.h"
-#include "MemMods/Shared/Events/GameTick.h"
+#include "StdAfx.h"
 
 Lua g_Lua(true);
 
 Lua::Lua(bool libs) : sel::State(libs) {
 }
+
+struct D3DMATRIX_Lua : D3DMATRIX {
+	inline float get(unsigned i, unsigned j) { return (i < 4 && j < 4) ? m[i][j] : 0; }
+	inline void set(unsigned i, unsigned j, float v) { if (i < 4 && j < 4) m[i][j] = v; }
+};
 
 // direct assembly code callback, stdcall/thiscall
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
@@ -71,6 +59,7 @@ void Lua::bind() {
 	// General
 	Frame::bindLua();
 	TimeData::bindLua();
+	XXFile::bindLua();
 
 	// Character/interaction
 	CharacterActivity::bindLua();
@@ -89,6 +78,12 @@ void Lua::bind() {
 	HParticipant::bindLua();
 	HPosButtonList::bindLua();
 	HStatistics::bindLua();
+
+	// Helper wrapper classes
+	g_Lua.ExtClass<D3DMATRIX_Lua>("D3DMATRIX",
+		"get", &D3DMATRIX_Lua::get,
+		"set", &D3DMATRIX_Lua::set);
+
 
 	// Very low level utilities
 	using namespace General;
@@ -145,7 +140,7 @@ void Lua::bind() {
 		}
 		size_t nbytes = (lua_gettop(L)-2)*4;
 		void *ptr = (void*)(addr);
-		int saved_eax, saved_edx;
+		DWORD saved_eax, saved_edx;
 		__asm {
 			mov eax, addr
 			mov edx, _this
@@ -220,4 +215,5 @@ void Lua::bind() {
 		}
 		return false;
 	}));
+
 }

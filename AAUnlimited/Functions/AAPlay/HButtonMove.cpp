@@ -1,6 +1,4 @@
-#include "HButtonMove.h"
-
-#include "Files\Config.h"
+#include "StdAfx.h"
 
 namespace HButtonMove {
 

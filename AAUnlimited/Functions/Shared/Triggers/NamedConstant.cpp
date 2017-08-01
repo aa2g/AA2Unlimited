@@ -1,8 +1,4 @@
-#include "NamedConstant.h"
-#include "External\ExternalClasses\ConversationStruct.h"
-#include "External\ExternalClasses\TimeData.h"
-#include "External\ExternalClasses\CharacterData.h"
-#include "Functions\Shared\Triggers\Event.h"
+#include "StdAfx.h"
 
 
 

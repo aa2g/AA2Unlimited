@@ -1,11 +1,4 @@
-#include "GuiSlider.h"
-
-#include <Windows.h>
-#include <CommCtrl.h>
-
-#include "resource.h"
-#include "General\ModuleInfo.h"
-#include "General\Util.h"
+#include "StdAfx.h"
 
 GuiSlider::GuiSlider() : m_parent(NULL) {}
 

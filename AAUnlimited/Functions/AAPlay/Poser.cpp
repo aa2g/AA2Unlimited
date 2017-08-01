@@ -1,31 +1,4 @@
-#include "Poser.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <string>
-#include <vector>
-#include <deque>
-#include <map>
-#include <CommCtrl.h>
-#include <Strsafe.h>
-#include <fstream>
-#include <Commctrl.h>
-
-#include "External\AddressRule.h"
-#include "External\ExternalClasses\Frame.h"
-#include "External\ExternalClasses\XXFileFace.h"
-#include "General\IllusionUtil.h"
-#include "General\Util.h"
-#include "Functions\Shared\Globals.h"
-#include "Functions\AAPlay\GameState.h"
-#include "Files\PoseMods.h"
-#include "Files\Config.h"
-#include "Files\PoseFile.h"
-#include "Files\ClothFile.h"
-#include "resource.h"
-#include "defs.h"
-
-#include "PoserController.h"
+#include "StdAfx.h"
 #include "3rdparty\picojson\picojson.h"
 
 namespace Poser {

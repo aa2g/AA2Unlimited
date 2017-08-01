@@ -1,4 +1,7 @@
-#include "XXFile.h"
+#include "StdAfx.h"
+
+
+
 
 namespace {
 	const char* param_string;

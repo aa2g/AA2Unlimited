@@ -1,13 +1,7 @@
-#include "Time.h"
+#include "StdAfx.h"
 
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "Functions\Shared\Triggers\Event.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions/AAPlay/GameState.h"
-#include "Script/ScriptLua.h"
+
+
 
 
 namespace PlayInjections {

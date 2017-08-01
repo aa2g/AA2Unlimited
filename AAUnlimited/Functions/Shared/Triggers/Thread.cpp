@@ -1,8 +1,7 @@
-#include "Thread.h"
+#include "StdAfx.h"
 
-#include "Triggers.h"
-#include "Files\Logger.h"
-#include "Functions\AAPlay\Globals.h"
+
+
 
 namespace Shared {
 namespace Triggers {

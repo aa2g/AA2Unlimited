@@ -1,6 +1,4 @@
-#include "General/ModuleInfo.h"
-#include "MemMods/Hook.h"
-#include "MemMods/MemRightsLock.h"
+#include "StdAfx.h"
 
 
 namespace SharedInjections {

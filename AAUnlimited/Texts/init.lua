@@ -199,7 +199,8 @@ setmetatable(_WIN32, {
 			local got = _BINDING.GetProcAddress(v,k)
 			if got then
 				_WIN32[k] = function(...)
-					return _BINDING.proc_invoke(got,nil,...)
+					local ret1, ret2 = _BINDING.proc_invoke(got,nil,...)
+					return ret1 & 0xffffffff, ret2 & 0xffffffff
 				end
 				return _WIN32[k]
 			end
@@ -289,8 +290,9 @@ end
 function load_modules()
 	Config.mods = Config.mods or {}
 	lock_globals()
-	print("rd stuff")
+	log("rd stuff %s", aau_path("mod","*"))
 	for f in readdir(aau_path("mod", "*")) do
+		log("scan %s", f)
 		local mname = f:match("^(.*)%.lua$") or f
 		if mname == f then
 			f = f .. "/init.lua"
@@ -420,6 +422,7 @@ function readdir(path)
 			mem = malloc(592)
 			fh = FindFirstFileW(utf8_to_unicode(path), mem)
 			ok = fh ~= 0xffffffff
+			log("got fh %x",fh,ok,"isok")
 		else
 			ok = FindNextFileW(fh, mem) ~= 0
 		end
@@ -445,6 +448,7 @@ end
 
 -- grabs all information about module just by its name
 function get_mod_info(n)
+	log("modinfo %s", n)
 	local mi
 	local idx
 	for i,v in ipairs(Config.mods) do

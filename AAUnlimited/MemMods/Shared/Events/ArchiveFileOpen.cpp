@@ -1,16 +1,4 @@
-#include "ArchiveFileOpen.h"
-
-#include <Windows.h>
-
-#include "Files\Config.h"
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "Functions\Shared\Overrides.h"
-#include "Functions\Shared\SpecialOverrides.h"
-#include "Functions\Shared\Shadowing.h"
-#include "Functions\AAPlay\Poser.h"
-#include "Files/PPeX.h"
-#include "Files/PP2.h"
+#include "StdAfx.h"
 
 namespace SharedInjections {
 namespace ArchiveFile {

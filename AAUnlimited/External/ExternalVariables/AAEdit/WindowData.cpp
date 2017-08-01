@@ -1,6 +1,7 @@
-#include "WindowData.h"
+#include "StdAfx.h"
 
-#include "General\ModuleInfo.h"
+
+
 
 namespace ExtVars {
 namespace AAEdit {

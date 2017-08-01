@@ -1,7 +1,5 @@
-#include "TanSlotUnlimited.h"
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses.h"
+#include "StdAfx.h"
+
 
 /*
  * For the most part, this is the same as the AAPlay version (they compiled the same code i guess, just some registers are different),

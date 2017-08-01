@@ -64,7 +64,7 @@ loc_48DF5A:
 	patch(0x8BC40, "\x00") -- m/f check for ?? H expressions? H_Expression_State.lst not H_Expression_Male.lst
 
 
-	patch(0x957BB, "\x02") -- m/f check for ?? expressions/sound again
+	patch(0x957BB, "\x02") -- m/f check for ?? expressions/sound again ??
 	patch(0x8E122, "\x89\xc8\xeb\x01") -- dynamic_cast<GirlClass> -> static_cast to prevent null deref
 end
 

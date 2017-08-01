@@ -1,5 +1,6 @@
 #pragma once
 #include <codecvt>
+#include <string>
 #include "lua.hpp"
 #include "Selene/selene.h"
 #include "defs.h"

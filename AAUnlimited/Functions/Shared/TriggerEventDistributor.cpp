@@ -1,9 +1,7 @@
-#include "TriggerEventDistributor.h"
+#include "StdAfx.h"
 
-#include "Triggers\Thread.h"
-#include "Files\Config.h"
 
-#include <vector>
+
 
 namespace Shared {
 

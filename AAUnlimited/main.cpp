@@ -1,14 +1,4 @@
-#include <Windows.h>
-#include "Files/Logger.h"
-#include "Files/Config.h"
-#include "General/ModuleInfo.h"
-#include "MemMods/Hook.h"
-#include "Script/ScriptLua.h"
-#include "Files/PPeX.h"
-#include "Files/PP2.h"
-#include "defs.h"
-
-#include <time.h>
+#include "StdAfx.h"
 
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,

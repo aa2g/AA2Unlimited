@@ -1,9 +1,4 @@
-#include "FileDump.h"
-
-#include "Files\Config.h"
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "Functions\Shared\Overrides.h"
+#include "StdAfx.h"
 
 namespace SharedInjections {
 namespace FileDump {

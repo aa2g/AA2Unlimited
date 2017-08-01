@@ -1,16 +1,4 @@
-#include "Loads.h"
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "External\ExternalClasses\CharacterStruct.h"
-
-#include "Functions\Shared\Overrides.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\AAPlay\Poser.h"
-//#include "Functions/AAPlay/Facecam.h"
-#include "Functions/AAPlay/GameState.h"
-
-#include "Functions\Shared\TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 using namespace Shared::Triggers;
 

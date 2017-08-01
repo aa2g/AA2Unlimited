@@ -1,2 +1,3 @@
-#include "TextureStruct.h"
+#include "StdAfx.h"
+
 

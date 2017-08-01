@@ -1,9 +1,4 @@
-#include <Windows.h>
-#include <initializer_list>
-
-#include "Files/Logger.h"
-#include "Files/Config.h"
-#include "MemRightsLock.h"
+#include "StdAfx.h"
 
 /*
  * Can be used as newData DWORD parameters of the hook function; if used, the parameter
@@ -13,11 +8,11 @@ namespace HookControl {
 	/*
 	 * The following DWORD will be a relative offset of given size
 	 */
-	const DWORD RELATIVE_DWORD = (DWORD)-1;
+/*	const DWORD RELATIVE_DWORD = (DWORD)-1;
 	const DWORD RELATIVE_WORD  = (DWORD)-2;
 	const DWORD ABSOLUTE_DWORD = (DWORD)-3;
 	const DWORD ABSOLUTE_WORD = (DWORD)-4;
-	const DWORD ANY_DWORD = (DWORD)-5;
+	const DWORD ANY_DWORD = (DWORD)-5;*/
 
 	bool IsHookControl(DWORD d) {
 		return d <= RELATIVE_DWORD && d >= ABSOLUTE_WORD;
@@ -154,7 +149,7 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 	}
 }
 
-void InsertRedirectCall(void* redirectFunction, void* toCall, int offset = -1) {
+void InsertRedirectCall(void* redirectFunction, void* toCall, int offset) {
 	BYTE* funcIt = (BYTE*)redirectFunction;
 	BYTE firstOp = *funcIt;
 	if (firstOp == 0xE9) {
