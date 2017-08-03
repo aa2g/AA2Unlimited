@@ -5,6 +5,7 @@
 #include "Selene/selene.h"
 #include "defs.h"
 
+struct D3DMATRIX_Lua;
 static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
 class Lua : public sel::State {

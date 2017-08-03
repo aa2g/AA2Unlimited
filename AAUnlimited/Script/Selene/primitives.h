@@ -351,10 +351,12 @@ T _pop(_id<T> t, lua_State *l) {
 
 inline void _push(lua_State *) {}
 
+/*
 template<typename T>
 inline void push_ud_typeid2(lua_State *l, T& ref, TypeID tid) {
 	push_ud_typeid(l, (void*)&ref, tid);
 }
+*/
 /*inline void push_ud_typeid2(lua_State *l, void *p, TypeID tid) {
 	return push_ud_typeid(l, p, tid);
 }*/
@@ -385,6 +387,7 @@ inline void _push(lua_State *l, T* t) {
   }
 }
 
+/*
 template <typename T>
 inline typename std::enable_if<
     !is_primitive<typename std::decay<T>::type>::value
@@ -392,6 +395,7 @@ inline typename std::enable_if<
 _push(lua_State *l, T& t) {
     push_ud_typeid(l, (void*)&t, typeid(T*));
 }
+*/
 
 /*
 template <typename T>

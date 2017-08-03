@@ -6,8 +6,8 @@ Lua::Lua(bool libs) : sel::State(libs) {
 }
 
 struct D3DMATRIX_Lua : D3DMATRIX {
-	inline float get(unsigned i, unsigned j) { return (i < 4 && j < 4) ? m[i][j] : 0; }
-	inline void set(unsigned i, unsigned j, float v) { if (i < 4 && j < 4) m[i][j] = v; }
+	inline float get(unsigned i, unsigned j) { i--; j--; return (i < 4 && j < 4) ? m[i][j] : 0; }
+	inline void set(unsigned i, unsigned j, float v) { i--; j--; if (i < 4 && j < 4) m[i][j] = v; }
 };
 
 // direct assembly code callback, stdcall/thiscall

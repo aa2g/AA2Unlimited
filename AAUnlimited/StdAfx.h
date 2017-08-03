@@ -46,6 +46,7 @@
 
 #include "lua.hpp"
 #include "Script/Selene/selene.h"
+#include "Script/glua.h"
 #include "Script/ScriptLua.h"
 
 #include "defs.h"

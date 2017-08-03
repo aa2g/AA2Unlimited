@@ -122,10 +122,11 @@ end
 
 -- parses nasm output to opcodes
 function parse_asm(s)
-	local ret = bytes:gsub("%S+%s+(%S+)[^\n]*\n", function(r)
+	local ret = s:gsub("%S+%s+(%S+)[^\n]*\n", function(r)
         return r:gsub("(..)", function(x)
                 return string.char(tonumber(x, 16))
         end)
 	end)
+	log("asm parsed %d", #ret)
 	return ret
 end

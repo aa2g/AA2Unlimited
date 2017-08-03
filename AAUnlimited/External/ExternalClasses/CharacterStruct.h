@@ -91,10 +91,16 @@ public:
 			LUA_FIELD(m_currClothes),
 			LUA_FIELD(m_hStats),
 			LUA_FIELD(GetActivity),
-			LUA_FIELD(GetXXFile)
+			LUA_FIELD(GetXXFile),
+			LUA_FIELD(GetBone)
 		);
 	}
 #undef LUA_CLASS
+	inline Frame *GetBone(unsigned idx) {
+		if (m_bonePtrArray + idx >= m_bonePtrArrayEnd)
+			return NULL;
+		return m_bonePtrArray[idx];
+	}
 
 	inline IllusionArray<CharacterRelation>* GetRelations() {
 		BYTE* ptr = (BYTE*)m_moreData;

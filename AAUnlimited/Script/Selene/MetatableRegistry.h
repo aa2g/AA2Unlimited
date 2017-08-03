@@ -79,6 +79,7 @@ static inline int PushNewMetatable(lua_State *state, TypeID type, const std::str
     lua_settable(state, -3);
 
     if (typex) {
+	    printf("registering meta for %d\n", type);
     	detail::_push_typeinfo(state, type);
 	typ = lua_allocatetypex(state);
 	lua_pushinteger(state, typ);
@@ -158,6 +159,7 @@ static inline bool IsType(lua_State *state, TypeID type, const int index) {
 
     if(lua_getmetatable(state, index)) {
         detail::_get_metatable(state, type);
+	    printf("getting metatable for type=%d %d\n", type, lua_isnil(state, -1));
         equal = lua_istable(state, -1) && lua_rawequal(state, -1, -2);
         lua_pop(state, 2);
     } else {

@@ -61,17 +61,19 @@ public:
 		return &m_children[n];
 	}
 
+	inline D3DMATRIX_Lua *GetMatrix(unsigned n) {
+		if (n > 4)
+			return NULL;
+		return (D3DMATRIX_Lua*)((&m_matrix1) + n);
+	}
+
 	static inline void bindLua() {
 #define LUA_CLASS Frame
 		LUA_EXTCLASS(Frame,
 			LUA_FIELD(m_parent),
 			LUA_FIELD(GetChild),
 			LUA_FIELD(m_nChildren),
-			LUA_FIELD(m_matrix1),
-			LUA_FIELD(m_matrix2),
-			LUA_FIELD(m_matrix3),
-			LUA_FIELD(m_matrix4),
-			LUA_FIELD(m_matrix5),
+			LUA_FIELD(GetMatrix),
 			LUA_FIELD(m_renderFlag)
 		);
 #undef LUA_CLASS

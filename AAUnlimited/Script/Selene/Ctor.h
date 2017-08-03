@@ -14,6 +14,7 @@ public:
     Ctor(lua_State *l,
          const std::string &metatable_name)
          : _ctor([metatable_name](lua_State *state, Args... args) {
+	     printf("inside ctor!\n");
              void *addr = lua_newuserdata(state, sizeof(T));
              new(addr) T(args...);
              luaL_setmetatable(state, metatable_name.c_str());

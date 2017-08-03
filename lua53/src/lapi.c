@@ -722,6 +722,19 @@ LUA_API void lua_createtable (lua_State *L, int narray, int nrec) {
 }
 
 
+#if defined(LUA_TYPEEXTENSION)
+LUA_API int lua_getmetatablex (lua_State *L, int x) {
+  Table *mt;
+  lua_lock(L);
+  api_check(L, x >= 0 && x < G(L)->usedttx, "invalid typex value");
+  mt = G(L)->mtx[x];
+  sethvalue(L, L->top, mt);
+  api_incr_top(L);
+  lua_unlock(L);
+  return 1;
+}
+#endif
+
 LUA_API int lua_getmetatable (lua_State *L, int objindex) {
   const TValue *obj;
   Table *mt;
@@ -875,6 +888,7 @@ LUA_API void lua_rawsetp (lua_State *L, int idx, const void *p) {
   lua_unlock(L);
 }
 
+#if defined(LUA_TYPEEXTENSION)
 LUA_API int lua_setmetatablex (lua_State *L, int x) {
   Table *mt;
   lua_lock(L);
@@ -891,6 +905,7 @@ LUA_API int lua_setmetatablex (lua_State *L, int x) {
   lua_unlock(L);
   return 1;
 }
+#endif
 
 LUA_API int lua_setmetatable (lua_State *L, int objindex) {
   TValue *obj;

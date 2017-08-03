@@ -220,6 +220,7 @@
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="Functions\Shared\Shadowing.h" />
+    <ClInclude Include="Script\glua.h" />
     <ClInclude Include="Script\ScriptLua.h" />
     <ClInclude Include="Script\Selene\BaseFun.h" />
     <ClInclude Include="Script\Selene\Class.h" />
@@ -404,7 +405,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Release;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Release</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>
