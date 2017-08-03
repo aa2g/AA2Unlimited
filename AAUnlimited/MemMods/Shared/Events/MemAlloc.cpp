@@ -1,11 +1,4 @@
-#include <Windows.h>
-
-#include "MemAlloc.h"
-#include "Files\Config.h"
-#include "Files\PP2.h"
-#include "MemMods\Hook.h"
-#include "MemMods\MemRightsLock.h"
-#include "General\ModuleInfo.h"
+#include "StdAfx.h"
 
 
 namespace SharedInjections {

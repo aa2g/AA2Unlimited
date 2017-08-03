@@ -1,11 +1,4 @@
-#include "PcConversation.h"
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses.h"
-#include "Functions/AAPlay/HAi.h"
-#include "Functions/AAPlay/Poser.h"
-#include "Functions/AAPlay/GameState.h"
-#include "Functions/Shared/TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 /*

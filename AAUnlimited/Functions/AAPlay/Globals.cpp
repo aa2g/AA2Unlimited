@@ -1,8 +1,4 @@
-#include "Globals.h"
-#include "General\ModuleInfo.h"
-
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 using namespace Shared::Triggers;
 

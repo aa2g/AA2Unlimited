@@ -1,10 +1,4 @@
-#include <tuple>
-
-#include "PcActions.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "Script/ScriptLua.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 	namespace PcActions {

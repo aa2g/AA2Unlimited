@@ -1,11 +1,4 @@
-#include "General/ModuleInfo.h"
-#include "MemMods/Hook.h"
-#include <stdint.h>
-#include <map>
-#include <set>
-#include <vector>
-#include "GameTick.h"
-#include "Script/ScriptLua.h"
+#include "StdAfx.h"
 
 
 namespace GameTick {

@@ -1,15 +1,4 @@
-#include "HInjections.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses.h"
-#include "External/ExternalClasses/Frame.h"
-
-#include "Functions/AAPlay/HAi.h"
-#include "Functions/AAPlay/HButtonMove.h"
-#include "Functions/AAPlay/Poser.h"
-#include "Script/ScriptLua.h"
-#include "Files/Logger.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 namespace HPlayInjections {

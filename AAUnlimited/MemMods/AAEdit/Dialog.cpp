@@ -1,15 +1,4 @@
-#include "Dialog.h"
-
-#include <Windows.h>
-#include <Windowsx.h>
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-
-#include "External\ExternalVariables\AAEdit\WindowData.h"
-#include "Functions\AAEdit\UnlimitedDialog.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Files\Logger.h"
+#include "StdAfx.h"
 
 /*
  * These are similar to the AAFace versions.

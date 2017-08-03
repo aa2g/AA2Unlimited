@@ -56,10 +56,23 @@ public:
 	BYTE m_renderFlag; //0: show, 2: dont show?
 	BYTE m_unknown5[0x40EA];
 
+	inline Frame* GetChild(int n) {
+		if (n >= m_nChildren) return NULL;
+		return &m_children[n];
+	}
+
 	static inline void bindLua() {
 #define LUA_CLASS Frame
 		LUA_EXTCLASS(Frame,
-			LUA_FIELD(m_parent)
+			LUA_FIELD(m_parent),
+			LUA_FIELD(GetChild),
+			LUA_FIELD(m_nChildren),
+			LUA_FIELD(m_matrix1),
+			LUA_FIELD(m_matrix2),
+			LUA_FIELD(m_matrix3),
+			LUA_FIELD(m_matrix4),
+			LUA_FIELD(m_matrix5),
+			LUA_FIELD(m_renderFlag)
 		);
 #undef LUA_CLASS
 	};

@@ -1,8 +1,4 @@
-#include "ModuleFile.h"
-
-#include "Logger.h"
-#include "Functions\Serialize.h"
-#include "General\Util.h"
+#include "StdAfx.h"
 using namespace Serialize;
 
 ModuleFile::ModuleFile(const Shared::Triggers::Module& mod)

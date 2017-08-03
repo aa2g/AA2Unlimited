@@ -1,4 +1,4 @@
-#include "CharacterData.h"
+#include "StdAfx.h"
 
 namespace ExtClass {
 	void CardStyleData::CopyCharacterData(CharacterData * data)

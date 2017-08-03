@@ -1,11 +1,4 @@
-#include "Actions.h"
-
-#include "Thread.h"
-
-#include "Files\Logger.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\AAPlay\GameState.h"
-#include "External\AddressRule.h"
+#include "StdAfx.h"
 
 namespace Shared {
 	namespace Triggers {

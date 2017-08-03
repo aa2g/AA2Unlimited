@@ -1,6 +1,7 @@
-#include "Value.h"
+#include "StdAfx.h"
 
-#include "Files\Logger.h"
+
+
 
 namespace Shared {
 namespace Triggers {

@@ -1,7 +1,5 @@
-#include "HGUIButton.h"
-#include "General/ModuleInfo.h"
-#include "MemMods/MemRightsLock.h"
- 
+#include "StdAfx.h"
+
 namespace ExtClass {
 
 	void (HGUIButton::*HGUIButton::vmptrRefreshState)() = NULL;

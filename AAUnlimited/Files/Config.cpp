@@ -1,3 +1,3 @@
-#include "Config.h"
+#include "StdAfx.h"
 
 Config g_Config;

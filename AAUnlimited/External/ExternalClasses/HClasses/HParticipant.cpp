@@ -1,4 +1,4 @@
-#include "HParticipant.h"
+#include "StdAfx.h"
 
 namespace ExtClass {
 

@@ -1,13 +1,4 @@
-#include "HAi.h"
-
-#include <vector>
-#include <string>
-#include <array>
-
-#include "General\Util.h"
-#include "Files\Config.h"
-#include "Files\Logger.h"
-#include "HAis\ForceAi.h"
+#include "StdAfx.h"
 
 using namespace ExtClass;
 

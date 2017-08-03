@@ -1,10 +1,5 @@
-#pragma once
+#include "StdAfx.h"
 
-#include <regex>
-
-#include "Overrides.h" //for g_currentCard
-#include "General\Util.h"
-#include "Functions\Shared\Globals.h"
 
 namespace Shared {
 

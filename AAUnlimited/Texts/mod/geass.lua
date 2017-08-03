@@ -1,4 +1,4 @@
---@INFO Reimplements frontier pack cheats (right click for geass)
+--@INFO Reimplements JS3 FP cheats
 
 local _M = {}
 
@@ -14,6 +14,9 @@ function on.answer(resp, answering, asking)
 end
 
 function _M.load()
+end
+
+function _M.unload()
 end
 
 return _M

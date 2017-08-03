@@ -1,11 +1,4 @@
-#include "OverrideFile.h"
-
-#include <Shlwapi.h>
-
-#include "General\Util.h"
-#include "General\ModuleInfo.h"
-#include "Files\Logger.h"
-#include "defs.h"
+#include "StdAfx.h"
 
 
 OverrideFile::OverrideFile() : m_good(false) {

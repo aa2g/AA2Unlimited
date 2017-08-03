@@ -1,13 +1,5 @@
-#include "ScreenCapture.h"
+#include "StdAfx.h"
 
-#include <Windows.h>
-#include <GdiPlus.h>
-
-#include "Files/Config.h"
-#include "Files/Logger.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
 
 #pragma comment(lib, "Gdiplus.lib")
 

@@ -69,7 +69,9 @@
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
-    <ClCompile Include="Functions\AAUCardData.cpp" />
+    <ClCompile Include="Functions\AAUCardData.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="External\ExternalClasses\CharacterData.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterStruct.cpp" />
     <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
@@ -244,6 +246,7 @@
     <ClInclude Include="Script\Selene\traits.h" />
     <ClInclude Include="Script\Selene\Tuple.h" />
     <ClInclude Include="Script\Selene\util.h" />
+    <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -266,7 +269,10 @@
     <None Include="Texts\mod\facecam.lua" />
     <None Include="Texts\mod\fakereg.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
+    <None Include="Texts\mod\homosex.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
+    <None Include="Texts\mod\launcher\dlglist.lua" />
+    <None Include="Texts\mod\launcher\dlgmod.lua" />
     <None Include="Texts\mod\launcher\gsd.lua" />
     <None Include="Texts\mod\launcher\init.lua" />
     <None Include="Texts\mod\makertrans\dict.lua" />
@@ -329,7 +335,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
     <TargetName>$(ProjectName)</TargetName>
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
   </PropertyGroup>
@@ -375,25 +381,30 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Custom</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>4800;4244;4018;4200;4996</DisableSpecificWarnings>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Release;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Release</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Command>

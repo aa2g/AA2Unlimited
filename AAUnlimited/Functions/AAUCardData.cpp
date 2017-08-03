@@ -1,9 +1,5 @@
 #include "AAUCardData.h"
 
-#include <limits>
-#include <algorithm>
-#include <intrin.h>
-#include <sstream>
 
 #include "defs.h"
 #include "Serialize.h"

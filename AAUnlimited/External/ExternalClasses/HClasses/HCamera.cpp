@@ -1,10 +1,4 @@
-#include "Files\Config.h"
-#include "External\ExternalClasses\HClasses\HInfo.h"
-#include "External\ExternalClasses\Frame.h"
-#include "General\ModuleInfo.h"
-#include "Files\Logger.h"
-#include "Functions\Shared\Globals.h"
-#include "HCamera.h"
+#include "StdAfx.h"
 
 namespace ExtClass {
 ExtClass::Frame* loc_focusBone = NULL;

@@ -1,4 +1,5 @@
-#include "Slider.h"
+#include "StdAfx.h"
+
 
 
 namespace Shared {

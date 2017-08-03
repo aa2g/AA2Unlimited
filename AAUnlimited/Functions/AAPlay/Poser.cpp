@@ -27,6 +27,7 @@
 #include "defs.h"
 
 #include "PoserController.h"
+#include "StdAfx.h"
 #include "3rdparty\picojson\picojson.h"
 
 namespace Poser {
@@ -182,8 +183,6 @@ namespace Poser {
 			thisPtr->m_tabModifiers = GetDlgItem(hwndDlg, IDC_PPS_TABMODIFIERS);
 			thisPtr->m_tabShowHide = GetDlgItem(hwndDlg, IDC_PPS_TABSHOWHIDE);
 			thisPtr->m_listStyles = GetDlgItem(hwndDlg, IDC_PPS_LISTSTYLES);
-			LOGPRIO(Logger::Priority::INFO) << "thisPtr->m_listStyles: ";
-			LOGPRIO(Logger::Priority::INFO) << thisPtr->m_listStyles << "\n";
 			SetWindowPos(thisPtr->m_dialog, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 
@@ -567,8 +566,9 @@ namespace Poser {
 					}
 					break; }
 				case (IDC_PPS_LISTSTYLES): {
-					LRESULT res = SendMessage(thisPtr->m_listOperation, LB_GETCURSEL, 0, 0);
+					LRESULT res = SendMessage(thisPtr->m_listStyles, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
+						LOGPRIO(Logger::Priority::INFO) << "res: " << res << "\n";
 						CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
 						if (card->IsValid()) {
 							card->m_cardData.SwitchActiveCardStyle(res, card->m_char->m_charData);
@@ -789,7 +789,7 @@ namespace Poser {
 	void PoserWindow::SyncStyles() {
 		CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
 		if (!card->IsValid()) return;
-		//SendMessage(this->m_listStyles, LB_RESETCONTENT, 0, 0);
+		SendMessage(this->m_listStyles, LB_RESETCONTENT, 0, 0);
 		auto styles = card->m_cardData.m_styles;
 		for (int i = 0; i < styles.size(); i++) {
 			SendMessage(this->m_listStyles, LB_ADDSTRING, 0, LPARAM(styles[i].m_name));

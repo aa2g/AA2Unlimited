@@ -1,15 +1,5 @@
-#include "Functions/Shared/Globals.h"
-#include "PPeX.h"
-#include <stdint.h>
-#include <fstream>
-#include <iostream>
-#include <io.h>
-#include <algorithm>
-#include <cctype>
-#include "Files/Logger.h"
-#include "Files/Config.h"
-#include <assert.h>
-#include "zstd.h"
+#include "StdAfx.h"
+
 
 using namespace std;
 

@@ -1,7 +1,7 @@
-#include "Util.h"
+#include "StdAfx.h"
 
-#include "Functions\Shared\Globals.h"
-#include <Windows.h>
+
+
 
 
 namespace General {

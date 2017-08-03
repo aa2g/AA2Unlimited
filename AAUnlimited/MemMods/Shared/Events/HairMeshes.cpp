@@ -1,17 +1,4 @@
-#include "HairMeshes.h"
-
-#include <Windows.h>
-#include <vector>
-
-#include "Functions\Shared\Globals.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Files\Config.h"
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "External\ExternalClasses\CharacterStruct.h"
-#include "Functions\Shared\Overrides.h"
-#include "Functions\AAPlay\GameState.h"
+#include "StdAfx.h"
 
 namespace SharedInjections {
 namespace HairMeshes {

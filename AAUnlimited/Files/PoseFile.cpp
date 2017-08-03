@@ -1,6 +1,4 @@
-#include "PoseFile.h"
-
-#include <fstream>
+#include "StdAfx.h"
 
 PoseFile::PoseFile() : pose(0), frame(0) {}
 
