@@ -568,7 +568,6 @@ namespace Poser {
 				case (IDC_PPS_LISTSTYLES): {
 					LRESULT res = SendMessage(thisPtr->m_listStyles, LB_GETCURSEL, 0, 0);
 					if (res != LB_ERR) {
-						LOGPRIO(Logger::Priority::INFO) << "res: " << res << "\n";
 						CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
 						if (card->IsValid()) {
 							card->m_cardData.SwitchActiveCardStyle(res, card->m_char->m_charData);
