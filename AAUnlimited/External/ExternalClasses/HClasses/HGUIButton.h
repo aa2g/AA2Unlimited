@@ -40,23 +40,20 @@ public:
 	BYTE m_mouseHover;
 #define LUA_CLASS HGUIButton
 	static inline void bindLua() {
-		LUA_EXTCLASS(HGUIButton,
-			LUA_FIELD(m_mouseHover),
-			LUA_FIELD(m_posBottom),
-			LUA_FIELD(m_posRight),
-			LUA_FIELD(m_posTop),
-			LUA_FIELD(m_posLeft),
-			LUA_FIELD(m_renderY),
-			LUA_FIELD(m_renderX),
-			LUA_FIELD(m_state),
-			LUA_FIELD(m_bInvalid),
-			LUA_FIELD(m_bActive),
-			LUA_FIELD(m_opacity),
-			LUA_FIELD(m_bVisible),
-			LUA_FIELD(m_bClicked),
-			LUA_FIELD(m_categoryButton),
-			LUA_FIELD(Press)
-		);
+	LUA_BIND(m_bClicked)
+	LUA_BIND(m_bVisible)
+	LUA_BIND(m_opacity)
+	LUA_BIND(m_bActive)
+	LUA_BIND(m_categoryButton)
+	LUA_BIND(m_bInvalid)
+	LUA_BIND(m_state)
+	LUA_BIND(m_renderX)
+	LUA_BIND(m_renderY)
+	LUA_BIND(m_posLeft)
+	LUA_BIND(m_posTop)
+	LUA_BIND(m_posRight)
+	LUA_BIND(m_posBottom)
+	LUA_MGETTER0(Press)
 	}
 #undef LUA_CLASS
 protected:
@@ -72,7 +69,7 @@ public:
 	HGUIButton() = delete;
 	~HGUIButton() = delete;
 
-	void Press();
+	int Press();
 
 
 	static void InitializeHooks();

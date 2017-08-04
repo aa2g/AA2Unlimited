@@ -9,12 +9,14 @@ namespace ExtClass {
 /*
  * Marks Button as Pressed. The next time this buttons state is polled, it will be set to pressed afterwards
  */
-void HGUIButton::Press()
+int HGUIButton::Press()
 {
-	for (int i = 0; i < 5; i++) if (PressedButton[i] == NULL) {
-		PressedButton[i] = this;
-		break;
-	}
+	for (int i = 0; i < 5; i++)
+		if (PressedButton[i] == NULL) {
+			PressedButton[i] = this;
+			return i;
+		}
+	return -1;
 }
 
 void HGUIButton::HookedRefreshState()

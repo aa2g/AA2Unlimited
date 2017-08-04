@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "3rdparty\picojson\picojson.h"
+#include "Files/PoseMods.h"
+#include "Strsafe.h"
 
 namespace Poser {
 

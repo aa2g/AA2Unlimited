@@ -116,23 +116,23 @@ namespace Shared {
 			((NpcResponseData*)eventData)->changedChance = params[0].iVal;
 		}
 
-		void SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
-			if (pointKind < 0 || pointKind > 3) return;
+		int SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
+			if (pointKind < 0 || pointKind > 3) return 0;
 			CharInstData* cardFrom = &AAPlay::g_characters[iCardFrom];
 			CharInstData* cardTowards = &AAPlay::g_characters[iCardTowards];
-			if (!cardFrom->IsValid()) return;
-			if (!cardTowards->IsValid()) return;
-			if (cardFrom == cardTowards) return;
+			if (!cardFrom->IsValid()) return 0;
+			if (!cardTowards->IsValid()) return 0;
+			if (cardFrom == cardTowards) return 0;
 
 			auto* ptrRel = cardFrom->m_char->GetRelations();
 			auto* rel = ptrRel->m_start;
-			if (ptrRel == NULL) return;
+			if (ptrRel == NULL) return 0;
 			for (rel; rel != ptrRel->m_end; rel++) {
 				if (rel->m_targetSeat == iCardTowards) {
 					break;
 				}
 			}
-			if (rel == ptrRel->m_end) return;
+			if (rel == ptrRel->m_end) return 0;
 
 			switch (pointKind) {
 			case 0:
@@ -151,6 +151,7 @@ namespace Shared {
 			}
 
 			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
+			return 1;
 		}
 
 		//int cardFrom, int cardTowards, int nPoints

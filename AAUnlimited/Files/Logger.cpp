@@ -16,7 +16,7 @@ void Logger::luaFlush()
 
 	// Note that we can't use fancy selene templating in here, because that
 	// by itself uses logger, ie if something goes awry, it would loop.
-	lua_State *L = g_Lua._l;
+	lua_State *L = g_Lua.L();
 	lua_getglobal(L, LUA_EVENTS_TABLE);
 	if (!lua_isnil(L, -1)) {
 		lua_getfield(L, -1, "logger");

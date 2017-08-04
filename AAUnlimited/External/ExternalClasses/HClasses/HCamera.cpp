@@ -24,11 +24,12 @@ void HCamera::PostTick(ExtClass::HInfo* hInfo, bool running) {
 	cam->m_matrix = mat;
 }
 
-void HCamera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z) {
+int HCamera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z) {
 	loc_focusBone = bone;
 	loc_focusOffset.x = x;
 	loc_focusOffset.y = y;
 	loc_focusOffset.z = z;
+	return 1;
 }
 
 }

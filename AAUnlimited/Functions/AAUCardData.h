@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <d3d9.h>
+
 
 #include "TextureImage.h"
 #include "OverrideFile.h"
@@ -35,7 +35,7 @@ public:
 		MODIFY_FRAME = 1, MODIFY_BONE = 2
 	};
 	static const int CurrentVersion = 2;
-public:
+
 	AAUCardData();
 	~AAUCardData();
 
@@ -206,7 +206,7 @@ public:
 
 	struct CardStyle;
 	std::vector<CardStyle> m_styles;
-private:
+
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 
@@ -277,7 +277,7 @@ private:
 	std::vector<SavedFile> m_savedFiles;
 
 
-private:
+
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
 

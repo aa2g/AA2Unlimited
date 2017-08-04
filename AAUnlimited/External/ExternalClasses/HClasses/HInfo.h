@@ -98,13 +98,19 @@ public:
 	}
 	static inline void bindLua() {
 #define LUA_CLASS HInfo
-		LUA_EXTCLASS(HInfo,
-			LUA_FIELD(m_activeParticipant),
-			LUA_FIELD(m_passiveParticipant),
-			LUA_FIELD(GetCamera),
-			LUA_FIELD(GetHPosData),
-			LUA_FIELD(GetHPosition)
-		);
+		LUA_BIND(m_positionInfo)
+		LUA_BIND(m_nPosChanges)
+		LUA_BIND(m_speed)
+		LUA_BIND(m_activeParticipant)
+		LUA_BIND(m_passiveParticipant)
+		LUA_BIND(m_currPosition)
+		LUA_BIND(m_btnMale)
+		LUA_BIND(m_btnSkirt)
+		LUA_BIND(m_btnShoe)
+		LUA_BIND(m_btnUnderwear)
+		LUA_MGETTER2(GetHPosition)
+		LUA_MGETTER1(GetHPosData)
+		LUA_MGETTER0(GetCamera)
 #undef LUA_CLASS
 	};
 	HInfo() = delete;

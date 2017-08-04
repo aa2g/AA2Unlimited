@@ -90,8 +90,9 @@ public:
 		// The functions we want to bind are too snow-flakeish, so we have to do that
 		// by hand.
 		auto b = g_Lua[LUA_BINDING_TABLE];
-		b["setlogprio"] = ([](int n) {
-			g_Logger.SetPriority(Logger::Priority(n));
+		b["setlogprio"] = LUA_LAMBDA0({
+			g_Logger.SetPriority(Logger::Priority(int(s.get(1))));
+			return 0;
 		});
 
 		b["logger"] = lua_CFunction([](lua_State *L) {

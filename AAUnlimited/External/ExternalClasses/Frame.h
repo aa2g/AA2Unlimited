@@ -61,21 +61,25 @@ public:
 		return &m_children[n];
 	}
 
-	inline D3DMATRIX_Lua *GetMatrix(unsigned n) {
-		if (n > 4)
-			return NULL;
-		return (D3DMATRIX_Lua*)((&m_matrix1) + n);
-	}
-
 	static inline void bindLua() {
 #define LUA_CLASS Frame
-		LUA_EXTCLASS(Frame,
-			LUA_FIELD(m_parent),
-			LUA_FIELD(GetChild),
-			LUA_FIELD(m_nChildren),
-			LUA_FIELD(GetMatrix),
-			LUA_FIELD(m_renderFlag)
-		);
+		LUA_BINDSTRP(m_name)
+		//LUA_BINDARRE(m_children,, _self->m_nChildren)
+		LUA_BIND(m_parent)
+		LUA_BINDARRE(m_matrix1,.m[0], 16)
+		LUA_BINDARRE(m_matrix2,.m[0], 16)
+		LUA_BINDARRE(m_matrix3,.m[0], 16)
+		LUA_BINDARRE(m_matrix4,.m[0], 16)
+		LUA_BINDARRE(m_matrix5,.m[0], 16)
+
+		LUA_BINDARR(m_frameFlags)
+		LUA_BIND(m_nSubmeshes)
+		LUA_BIND(m_subMeshFlags)
+
+		LUA_BIND(m_nBones)
+		LUA_BINDARREP(m_bones,,_self->m_nBones)
+		LUA_BIND(m_xxPartOf)
+		LUA_BIND(m_renderFlag)
 #undef LUA_CLASS
 	};
 };

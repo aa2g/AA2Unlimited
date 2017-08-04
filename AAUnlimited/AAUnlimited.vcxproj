@@ -221,32 +221,8 @@
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="Functions\Shared\Shadowing.h" />
     <ClInclude Include="Script\glua.h" />
+    <ClInclude Include="Script\gluam.h" />
     <ClInclude Include="Script\ScriptLua.h" />
-    <ClInclude Include="Script\Selene\BaseFun.h" />
-    <ClInclude Include="Script\Selene\Class.h" />
-    <ClInclude Include="Script\Selene\ClassFun.h" />
-    <ClInclude Include="Script\Selene\Ctor.h" />
-    <ClInclude Include="Script\Selene\Dtor.h" />
-    <ClInclude Include="Script\Selene\ExceptionHandler.h" />
-    <ClInclude Include="Script\Selene\ExceptionTypes.h" />
-    <ClInclude Include="Script\Selene\ExtClass.h" />
-    <ClInclude Include="Script\Selene\Fun.h" />
-    <ClInclude Include="Script\Selene\function.h" />
-    <ClInclude Include="Script\Selene\LuaName.h" />
-    <ClInclude Include="Script\Selene\LuaRef.h" />
-    <ClInclude Include="Script\Selene\MetatableRegistry.h" />
-    <ClInclude Include="Script\Selene\Obj.h" />
-    <ClInclude Include="Script\Selene\ObjFun.h" />
-    <ClInclude Include="Script\Selene\primitives.h" />
-    <ClInclude Include="Script\Selene\references.h" />
-    <ClInclude Include="Script\Selene\Registry.h" />
-    <ClInclude Include="Script\Selene\ResourceHandler.h" />
-    <ClInclude Include="Script\Selene\Selector.h" />
-    <ClInclude Include="Script\Selene\selene.h" />
-    <ClInclude Include="Script\Selene\State.h" />
-    <ClInclude Include="Script\Selene\traits.h" />
-    <ClInclude Include="Script\Selene\Tuple.h" />
-    <ClInclude Include="Script\Selene\util.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -395,7 +371,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <MinimalRebuild>true</MinimalRebuild>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

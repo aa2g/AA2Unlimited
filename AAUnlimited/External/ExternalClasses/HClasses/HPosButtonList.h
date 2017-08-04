@@ -32,10 +32,8 @@ public:
 
 #define LUA_CLASS HPosButtonList
 	static inline void bindLua() {
-		LUA_EXTCLASS(HPosButtonList,
-			LUA_FIELD(GetButtonCount),
-			LUA_FIELD(GetButton)
-		);
+		LUA_MGETTER0(GetButtonCount)
+		LUA_MGETTER1(GetButton)
 	}
 #undef LUA_CLASS
 

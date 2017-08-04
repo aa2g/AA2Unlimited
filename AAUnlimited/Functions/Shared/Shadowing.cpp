@@ -1,4 +1,6 @@
 #include "StdAfx.h"
+#include <shlwapi.h>
+#include <strsafe.h>
 
 
 #pragma comment(lib, "Shlwapi.lib")

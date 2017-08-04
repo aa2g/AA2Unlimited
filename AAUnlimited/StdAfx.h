@@ -3,49 +3,31 @@
 #define _USE_MATH_DEFINES
 
 #include <windows.h>
-#include <limits>
-#include <algorithm>
-#include <intrin.h>
-#include <sstream>
-#include <mutex>
-#include <stdint.h>
-#include <thread>
-#include <algorithm>
-#include <array>
-#include <assert.h>
-#include <cctype>
-#include <codecvt>
-#include <Commctrl.h>
-#include <CommCtrl.h>
+#include <Windowsx.h>
 #include <d3d9.h>
-#include <deque>
-#include <fstream>
-#include <GdiPlus.h>
-#include <initializer_list>
-#include <intrin.h>
-#include <io.h>
-#include <iostream>
+
 #include <limits>
-#include <map>
-#include <math.h>
-#include <queue>
-#include <regex>
-#include <set>
-#include <Shlwapi.h>
-#include <sstream>
-#include <stack>
 #include <stdint.h>
 #include <stdio.h>
-#include <string>
-#include <Strsafe.h>
+#include <assert.h>
 #include <time.h>
-#include <tuple>
+
+#include <sstream>
+#include <fstream>
+#include <iostream>
+#include <limits>
+
+#include <initializer_list>
+#include <map>
+#include <queue>
+#include <array>
+#include <deque>
+#include <set>
+#include <stack>
 #include <vector>
-#include <Windows.h>
-#include <Windowsx.h>
+#include <string>
 
 #include "lua.hpp"
-#include "Script/Selene/selene.h"
 #include "Script/glua.h"
 #include "Script/ScriptLua.h"
 
@@ -87,7 +69,7 @@
 #include "Files/Logger.h"
 #include "Files/ModuleFile.h"
 #include "Files/PoseFile.h"
-#include "Files/PoseMods.h"
+//#include "Files/PoseMods.h"
 #include "Files/PP2.h"
 #include "Files/PPeX.h"
 #include "Files/XXFile.h"

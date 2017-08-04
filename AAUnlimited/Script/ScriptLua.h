@@ -1,22 +1,24 @@
 #pragma once
-#include <codecvt>
-#include <string>
 #include "lua.hpp"
-#include "Selene/selene.h"
+#include "glua.h"
 #include "defs.h"
 
-struct D3DMATRIX_Lua;
-static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
-
-class Lua : public sel::State {
-public:;
-	Lua(bool libs);
-	void bind();
+struct Lua : public GLua::State {
+	void bindLua();
 	void init();
+	bool Load(std::wstring path);
+	~Lua() = delete;
+	Lua() = delete;
 };
 
-#define LUA_EXTCLASS(n,...) g_Lua.ExtClass<LUA_CLASS>(#n, __VA_ARGS__)
-#define LUA_FIELD(n) #n, &LUA_CLASS::n
-#define LUA_EVENT(...) g_Lua["__DISPATCH_EVENT"](__VA_ARGS__)
+#define LUA_GLOBAL g_Lua
+extern Lua& LUA_GLOBAL;
+#define LUA_L LUA_GLOBAL.L()
 
-extern Lua g_Lua;
+#define LUA_EVENT(...) LUA_GLOBAL["__DISPATCH_EVENT"](__VA_ARGS__)
+#define LUA_LAMBDA(fn) GLua::Function([](auto &s) {fn;return 1;})
+#define LUA_LAMBDA0(fn) GLua::Function([](auto &s) {fn;return 0;})
+#define LUA_LAMBDA_L(fn) lua_CFunction([](lua_State *L) fn)
+
+// More fancy macros
+#include "gluam.h"

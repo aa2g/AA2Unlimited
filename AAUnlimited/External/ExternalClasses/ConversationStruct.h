@@ -63,17 +63,16 @@ public:
 	ConversationSubStruct() = delete;
 	~ConversationSubStruct() = delete;
 	static inline void bindLua() {
-#define LUA_CLASS ConversationSubStruct
-		LUA_EXTCLASS(ConversationSubStruct,
-			LUA_FIELD(m_playerAnswer),
-			LUA_FIELD(m_conversationAnswerId),
-			LUA_FIELD(m_conversationId),
-			LUA_FIELD(m_conversationState),
-			LUA_FIELD(m_npcTalkState),
-			LUA_FIELD(m_response),
-			LUA_FIELD(m_bCurrentlyAnswering),
-			LUA_FIELD(m_bStartH)
-		);
+#define LUA_CLASS ExtClass::ConversationSubStruct
+		LUA_BIND(m_playerAnswer)
+		LUA_BIND(m_conversationAnswerId)
+		LUA_BIND(m_conversationId)
+		LUA_BIND(m_conversationState)
+		LUA_BIND(m_npcTalkState)
+		LUA_BIND(m_response)
+		LUA_BIND(m_bCurrentlyAnswering)
+		LUA_BIND(m_bStartH)
+		// TODO other substructs
 	}
 #undef LUA_CLASS
 };
@@ -113,12 +112,10 @@ public:
 public:
 	NpcPcInteractiveConversationStruct() = delete;
 	~NpcPcInteractiveConversationStruct() = delete;
-#define LUA_CLASS NpcPcInteractiveConversationStruct
+#define LUA_CLASS ExtClass::NpcPcInteractiveConversationStruct
 	static inline void bindLua() {
-		LUA_EXTCLASS(NpcPcInteractiveConversationStruct,
-			LUA_FIELD(m_askWaitTime),
-			LUA_FIELD(m_answerWaitTime)
-		);
+		LUA_BIND(m_askWaitTime)
+		LUA_BIND(m_answerWaitTime)
 	}
 #undef LUA_CLASS
 };
@@ -228,12 +225,10 @@ class PcConversationStruct {
 
 public:
 	static inline void bindLua() {
-#define LUA_CLASS PcConversationStruct
-		LUA_EXTCLASS(PcConversationStruct,
-			LUA_FIELD(m_loopMax),
-			LUA_FIELD(m_loopCounter),
-			LUA_FIELD(m_currentConversation)
-		);
+#define LUA_CLASS ExtClass::PcConversationStruct
+		LUA_BIND(m_loopMax)
+		LUA_BIND(m_loopCounter)
+		LUA_BIND(m_currentConversation)
 #undef LUA_CLASS
 	};
 };

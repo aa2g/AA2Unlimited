@@ -7,7 +7,7 @@ extern class Config
 {
 public:;
 	int screenshotFormat;
-	std::string sPoserHotKeys;
+	char sPoserHotKeys[16];
 	int legacyMode;
 	bool bSaveFileBackup;
 	bool bSaveFileAutoRemove;
@@ -26,33 +26,33 @@ public:;
 	int PP2Cache;
 	int PP2AudioCache;
 
-	inline auto operator[](const char *name) const {
-		return g_Lua[LUA_CONFIG_TABLE][name];
+	auto operator[](const char *name) const {
+		LUA_SCOPE;
+		return g_Lua[LUA_CONFIG_TABLE][name].get();
 	}
 
 	static inline void bindLua() {
+		LUA_SCOPE;
 #define LUA_CLASS Config
-		LUA_EXTCLASS(Config,
-			LUA_FIELD(screenshotFormat),
-			LUA_FIELD(sPoserHotKeys),
-			LUA_FIELD(bSaveFileBackup),
-			LUA_FIELD(bSaveFileAutoRemove),
-			LUA_FIELD(savedFileUsage),
-			LUA_FIELD(savedEyeTextureUsage),
-			LUA_FIELD(bHAiOnNoPromptH),
-			LUA_FIELD(bUseDialoguePoser),
-			LUA_FIELD(bUseClothesPoser),
-			LUA_FIELD(bEnableHPosButtonReorder),
-			LUA_FIELD(bEnableFacecam),
-			LUA_FIELD(bUseShadowing),
-			LUA_FIELD(bUseHAi),
-			LUA_FIELD(bUsePPeX),
-			LUA_FIELD(bUsePP2),
-			LUA_FIELD(bTriggers),
-			LUA_FIELD(PP2Cache),
-			LUA_FIELD(PP2AudioCache),
-			LUA_FIELD(legacyMode)
-		);
+			LUA_BIND(screenshotFormat)
+			LUA_BINDSTR(sPoserHotKeys)
+			LUA_BIND(bSaveFileBackup)
+			LUA_BIND(bSaveFileAutoRemove)
+			LUA_BIND(savedFileUsage)
+			LUA_BIND(savedEyeTextureUsage)
+			LUA_BIND(bHAiOnNoPromptH)
+			LUA_BIND(bUseDialoguePoser)
+			LUA_BIND(bUseClothesPoser)
+			LUA_BIND(bEnableHPosButtonReorder)
+			LUA_BIND(bEnableFacecam)
+			LUA_BIND(bUseShadowing)
+			LUA_BIND(bUseHAi)
+			LUA_BIND(bUsePPeX)
+			LUA_BIND(bUsePP2)
+			LUA_BIND(bTriggers)
+			LUA_BIND(PP2Cache)
+			LUA_BIND(PP2AudioCache)
+			LUA_BIND(legacyMode)
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;
 	}

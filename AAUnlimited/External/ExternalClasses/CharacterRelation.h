@@ -34,24 +34,22 @@ public:
 	CharacterRelation() = delete;
 	~CharacterRelation() = delete;
 	static inline void bindLua() {
-#define LUA_CLASS CharacterRelation
-		LUA_EXTCLASS(CharacterRelation,
-			LUA_FIELD(m_poin),
-			LUA_FIELD(m_hate),
-			LUA_FIELD(m_dislike),
-			LUA_FIELD(m_like),
-			LUA_FIELD(m_love),
-			LUA_FIELD(m_hateCount),
-			LUA_FIELD(m_dislikeCount),
-			LUA_FIELD(m_likeCount),
-			LUA_FIELD(m_loveCount),
-			LUA_FIELD(m_hatePoints),
-			LUA_FIELD(m_dislikePoints),
-			LUA_FIELD(m_likePoints),
-			LUA_FIELD(m_lovePoints),
-			LUA_FIELD(m_targetSeat)
-		);
-		// TBD: arrays for backlog
+#define LUA_CLASS ExtClass::CharacterRelation
+			LUA_BIND(m_poin)
+			LUA_BIND(m_hate)
+			LUA_BIND(m_dislike)
+			LUA_BIND(m_like)
+			LUA_BIND(m_love)
+			LUA_BIND(m_hateCount)
+			LUA_BIND(m_dislikeCount)
+			LUA_BIND(m_likeCount)
+			LUA_BIND(m_loveCount)
+			LUA_BIND(m_hatePoints)
+			LUA_BIND(m_dislikePoints)
+			LUA_BIND(m_likePoints)
+			LUA_BIND(m_lovePoints)
+			LUA_BIND(m_targetSeat)
+			LUA_BINDARRE(m_actionBacklog,,_self->m_actionBacklog.GetSize())
 	}
 #undef LUA_CLASS
 };

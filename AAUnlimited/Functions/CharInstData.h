@@ -22,14 +22,12 @@ public:
 		ExtClass::CharacterActivity* target2;
 		DWORD unknown2; //always 1, though initialized to 2
 		static inline void bindLua() {
-#define LUA_CLASS ActionParamStruct
-			LUA_EXTCLASS(ActionParamStruct,
-				LUA_FIELD(conversationId),
-				LUA_FIELD(movementType),
-				LUA_FIELD(roomTarget),
-				LUA_FIELD(target1),
-				LUA_FIELD(target2)
-			);
+#define LUA_CLASS CharInstData::ActionParamStruct
+			LUA_BIND(conversationId)
+			LUA_BIND(movementType)
+			LUA_BIND(roomTarget)
+			LUA_BIND(target1)
+			LUA_BIND(target2)
 		}
 #undef LUA_CLASS
 	};

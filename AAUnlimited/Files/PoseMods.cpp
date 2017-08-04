@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "PoseMods.h"
 
 PoseMods::PoseMods(std::wstring path) {
 	std::ifstream in(path);

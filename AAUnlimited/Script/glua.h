@@ -1,564 +1,478 @@
-// glua is a simple, no-frills C++ template glue for lua. it's designed for
-// performance, not necessarily safety of use
-//
-// values lifted from tables, return values of function calls and everything
-// else are cached on Lua stack, and casted to C++ value on-demand. This means
-// the stack gets constantly polluted and one needs to manage scopes, especially
-// in loops.
-//
-// void print_passwd() {
-//   GLua::Scope scope(lua);
-//   auto io = lua["io"];
-//   auto file = io["open"]("/etc/passwd", "rb");
-//   auto read = file["read"];
-//   while (1) {
-//      // without a private scope there, stack would overflow with previous
-//      // contents of 'ln'
-//   	GLua::Scope scope(lua);
-//      auto ln = read(file, "*l")
-//      if (!ln) break;
-//      std::cout << got << "\n"
-//   }; // next iteration, 'ln' contents are invalid because it's scoped.
-//   // scope gets destroyed
-// }
-//
-//   
+#pragma once
 
-#define S printf("line %d top %d\n", __LINE__, top());
+#include <string.h>
+#include <assert.h>
 
-#include <type_traits>
-#include <locale>
-#include <codecvt>
-#include <typeinfo>
-#include <functional>
-#include <tuple>
+#include "lua.hpp"
 
-namespace GLua_detail {
-	template <typename T> struct string { static constexpr bool value = false; };
-	template <>struct string<const char *> { static constexpr bool value = true; };
-	template <>struct string<const wchar_t *> { static constexpr bool value = true; };
-	template <>struct string<std::string> { static constexpr bool value = true; };
-	template <>struct string<std::wstring> { static constexpr bool value = true; };
+namespace GLua {
 
-	template <typename T>
-	class callable
-	{
-		typedef char one;
-		typedef long two;
-		template <typename C> static one test( decltype(&C::operator()));
-		template <typename C> static two test(...);    
-		public:
-		enum { value = sizeof(test<T>(0)) == sizeof(char) };
-	};
-
-	template <typename T>
-	struct lambda : public lambda<decltype(&T::operator())> {};
-
-	template <typename T, typename Ret, typename... Args>
-	struct lambda<Ret(T::*)(Args...) const> {
-		using f = Ret(*)(Args...);
-	};
+static const int ACCESOR = 0;
+static const int METHOD = 1;
 
 
-}
+static const int RIDX_DELTA = 1<<16;
+static const int METHOD_FLAG = 1<<24;
+struct Value;
+struct State;
 
-struct GLua {
-	using type_id = std::reference_wrapper<const std::type_info>;
-	static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
+typedef int (*Function)(State &);
+
+template<typename T>
+struct Index {
+	T key;
 	lua_State *L;
-
-	// Representions of Lua values with two-way autocasts. These simply
-	// assume the lua type is convertible with the C++ counterpart, otherwise
-	// lua_to* behavior is to be expected. The only exception is casts to
-	// std::string, which result "" strings for lua non-strings.
-
-	// Narrow for integers
-	struct Integer {
-		lua_Integer i;
-		template <class T,
-			 typename std::enable_if<std::is_integral<T>::value,int>::type=0>
-		inline Integer(T v) : i(v) {}
-		template <typename T>
-		inline operator T() const { return (T)i; }
-	};
-
-	// Otherwise it becomes float
-	struct Number {
-		lua_Number n;
-		template <class T,
-			 typename std::enable_if<std::is_floating_point<T>::value, int>::type=0>
-		inline Number(T v) : n(v) {}
-		template <typename T>
-		inline operator T() const { return (T)n; }
-	};
-
-	// All strings become utf8
-	class String {
-	public:;
-		std::string ss;
-		const char *s;
-
-		inline String(const String &src) : ss(src.ss), s(src.s) {
-			// if the char str points to where it came from,
-			// make it point to our copy
-			if (src.ss.c_str() == s)
-				s = ss.c_str();
-		};
-
-		template <class T,
-			 typename std::enable_if<std::is_convertible<T,std::string>::value, int>::type=0>
-		inline String(T v) : ss(v) {
-			s = ss.c_str();
+	int tab;
+	inline int get_tab() {
+		int t = tab;
+		if (t < 0) {
+			lua_pushglobaltable(L);
+			t = lua_gettop(L);
 		}
-
-		template <class T,
-			 typename std::enable_if<std::is_convertible<T,std::wstring>::value, int>::type=0>
-		inline String(T v) { ss = utf8.to_bytes(v); s = ss.c_str(); }
-
-		inline String(lua_State *L, int idx = -1) {
-			size_t sz = 0;
-			s = lua_tolstring(L, idx, &sz);
-			ss = std::string(s?s:"", sz);
-		}
-
-
-
-
-		inline operator const char*() const { 
-			// ?Return POD string ONLY if it came to us from Lua.
-			//return (s != (ss.c_str()))?s:NULL;
-			if (!s) return NULL;
-			return ss.c_str();
-		}
-		inline operator std::string() const { return ss; }
-		inline operator std::wstring() const { return std::wstring(utf8.from_bytes(ss)); }
-		inline void pushto(lua_State *L) {
-			lua_pushlstring(L, ss.c_str(), ss.size());
-		}
-	};
-
-
-	// Index is cross-dependent with Value, so we need it declare forward,
-	// and implement outside
-	struct Value;
-
-	template<typename T>
-	struct Index {
-		T key;
-		GLua &g;
-		int tab;
-
-		inline int gtab()
-		{
-			int t = tab;
-			if (t < 0) {
-				lua_pushglobaltable(g.L);
-				t = g.top();
-			}
-			return t;
-		}
-
-		// assingment to a table
-		template<typename V>
-		inline V const& operator=(V const &v);
-
-		// get value represented by this table index
-		inline Value get();
-	       
-		// read from a table
-		template<typename V>
-		inline operator V() {
-			return get();
-		}
-
-		// calls invoke the cast, and forwards arguments
-		template <typename... Ts>
-		inline Value operator()(const Ts&... values);
-	      
-		template<typename K>
-		Value operator[](K key);
-	};
-
-
-	struct Value {
-		public:;
-		GLua &G;
-		int idx;
-		inline Value(GLua &g) : G(g), idx(0) {};
-		inline Value(GLua &g, int i) : G(g), idx(i) {};
-
-		template <class T,
-			 typename std::enable_if<std::is_integral<T>::value,int>::type=0>
-		inline operator T() const {
-			return Integer(lua_tointeger(G.L, idx));
-		}
-
-		template <class T,
-			 typename std::enable_if<std::is_floating_point<T>::value, int>::type=0>
-		inline operator T() const { return Number(lua_tonumber(G.L, idx)); }
-
-		template <class T,
-			 typename std::enable_if<GLua_detail::string<typename std::decay<T>::type>::value, int>::type=0>
-		inline operator T() const { return String(G.L, idx); }
-
-		inline operator bool() const { if (!idx) return false; return lua_toboolean(G.L, idx); }
-
-		template <class T,
-			 typename std::enable_if<std::is_pointer<T>::value,int>::type=0>
-		inline operator T() const { if (!idx) return 0; return (T)lua_topointer(G.L, idx); }
-
-		template <typename... Ts>
-		inline Value operator()(const Ts&... values) const {
-			int top = G.top();
-			lua_pushcfunction(G.L, G.errh);
-			G.push(*this);
-			G.push(values...);
-			int nargs = G.top() - top - 2;
-			if (lua_pcall(G.L, nargs, 1, top+1) != LUA_OK)
-				return G.pop(2);
-			lua_remove(G.L, top+1);
-			return G.get();
-		}
-
-		template <typename T>
-		inline Index<T> operator [](T key) {
-			return {key,G,idx};
-		}
-
-		Value pop(int n = 1) { return G.pop(n); }
-	};
-
-	// finds or creates type, non-specialized.
-	int find_type_by_id(size_t hash, const char *name = 0) {
-		int typex;
-		if (lua_rawgeti(L, LUA_REGISTRYINDEX, hash) == LUA_TNIL && name) {
-			pop();
-			typex = lua_allocatetypex(L);
-			luaL_newmetatable(L, name);
-			// index handler
-			pushv([](lua_State *L) {
-				lua_getmetatable(L, 1);
-				lua_pushvalue(L, 2);
-				int typ = lua_rawget(L, -2); 
-				// invoke getter
-				if (typ != LUA_TFUNCTION)
-					return 0;
-				if (!lua_getupvalue(L, -1, 1))
-					return 0;
-
-				// its a function to call, just return it
-				if (!lua_toboolean(L, -1)) {
-					lua_pop(L, 1);
-					return 1;
-				}
-				lua_pop(L, 1); // pop upvalue, leaving function
-				lua_pushvalue(L, 1); // object
-				// otherwise a getter
-				lua_call(L, 1, 1);
-				return 1;
-			});
-			lua_setfield(L, -2, "__index");
-
-			// newindex handler
-			pushv([](lua_State *L) {
-				lua_getmetatable(L, 1);
-				lua_pushvalue(L, 2);
-				// invoke getter
-				lua_rawget(L, -2); // fn
-				lua_pushvalue(L, 1); // object
-				lua_pushvalue(L, 3); // new value
-				// otherwise a getter
-				lua_call(L, 2, 0);
-				return 0;
-			});
-			lua_setfield(L, -2, "__newindex");
-
-			lua_pushinteger(L, typex);
-			lua_setfield(L, -2, "__typex");
-
-			// map hash_code -> typex in registry, too
-			lua_pushinteger(L, typex);
-			lua_rawseti(L, LUA_REGISTRYINDEX, hash);
-
-			lua_setmetatablex(L, typex);
-		} else {
-			typex = lua_tointeger(L, -1);
-			pop();
-		}
-		return typex;
+		return t;
 	}
 
-	// leaves metatable on stack
-	void bind_type(size_t hash, const char *name = 0) {
-		lua_getmetatablex(L, find_type_by_id(hash, name));
+	// assingment to a table
+	template<typename V>
+	inline V const& operator=(V const &v);
+
+	// get value represented by this table index
+	inline Value get();
+       
+	// read from a table
+	template<typename V>
+	inline operator V() {
+		return get();
 	}
 
-	inline void pushuv(void **p, const std::type_info& tid) {
-		if (!*p) {
-			lua_pushnil(L);
-			return;
-		}
-		lua_pushlightuserdatax(L, *p, find_type_by_id(tid.hash_code(), tid.name()));
-	}
+	// calls invoke the cast, and forwards arguments
+	template <typename... Ts>
+	inline Value operator()(const Ts&... values);
+      
+	template<typename K>
+	Index<K> operator[](K key);
 
-	// remove all qualifiers, and turn non-pointers into ones
-	template <class T,
-	typename std::enable_if<
-		(!GLua_detail::string<typename std::decay<T>::type>::value) &&
-		(!std::is_arithmetic<T>::value) &&
-		(!GLua_detail::callable<T>::value)
-	, int>::type=0>
-	inline void pushv(T &v) {
-		using TT = typename std::remove_cv<T>::type;
-		if (std::is_pointer<T>::value) {
-			pushuv((void**)&v,typeid(TT));
-		} else {
-			auto p = (void*)&v;
-			pushuv(&p,typeid(TT*));
-		}
-	}
+};
 
-	template <class T,
-	typename std::enable_if<
-		GLua_detail::callable<T>::value
-	, int>::type=0>
-	inline void pushv(T lambda) {
-		pushv((typename GLua_detail::lambda<T>::f)(lambda));
-	}
-	template <int idx, typename Tup> void get_arg(int delta, Tup &args) { }
-	template <int idx, typename Tup, typename Current, typename... Args>
-	void get_arg(int delta, Tup &args) {
-		std::get<idx>(args) = get(idx+delta);
-		get_arg<idx+1, Tup, Args...>(delta, args);
-	}
+struct Value {
+	lua_State *L;
+	int idx;
+	inline operator const char *() const { return lua_tostring(L, idx); }
+	inline operator long() const { return lua_tointeger(L, idx); }
+	inline operator int() const { return lua_tointeger(L, idx); }
+	inline operator short() const { return lua_tointeger(L, idx); }
+	inline operator char() const { return lua_tointeger(L, idx); }
+	inline operator unsigned long() const { return lua_tointeger(L, idx); }
+	inline operator unsigned int() const { return lua_tointeger(L, idx); }
+	inline operator unsigned short() const { return lua_tointeger(L, idx); }
+	inline operator unsigned char() const { return lua_tointeger(L, idx); }
+	inline operator double() const { return lua_tonumber(L, idx); }
+	inline operator float() const { return lua_tonumber(L, idx); }
+	inline operator bool() const { return lua_toboolean(L, idx); }
 
-	// freestanding and lambdas
-	template <typename Ret, typename... Args>
-	inline void pushv(Ret (*fun)(Args...)) {
-		lua_pushboolean(L, 0);
-		lua_pushlightuserdata(L, this);
-		lua_pushlightuserdata(L, (void*)(fun));
+	template <class T>
+	inline operator T*() const { if (!idx) return 0; return (T*)lua_touserdata(L, idx); }
 
-		lua_pushcclosure(L, lua_CFunction([](lua_State *L) {
-			using Tup = std::tuple<typename std::remove_reference<Args>::type...>;
-			GLua *self = (GLua*)lua_touserdata(L, lua_upvalueindex(2));
-			Tup args;
-			self->get_arg<0, Tup, Args...>(1, args);
-			auto tfn = (decltype(fun))lua_touserdata(L, lua_upvalueindex(3));
-			auto temp = std::experimental::apply(tfn, args);
-			self->pushv(temp);
-			return int(1);
-		}), 3);
-	}
-
-	// brutally cast one type to another
-	template <typename T, typename F>
-	inline T anycast(F f) {
-		union {
-			F ff;
-			T tt;
-		} u;
-		u.ff = f;
-		return u.tt;
-	}
-	
-	// member functions
-	template <class C, typename Ret, typename... Args>
-	inline void pushv(Ret(C::*fun)(Args...)) {
-		lua_pushboolean(L, 0);
-		lua_pushlightuserdata(L, this);
-		lua_pushlightuserdata(L, anycast<void*>(fun));
-		lua_pushcclosure(L, lua_CFunction([](lua_State *L) {
-			using Tup = std::tuple<typename std::remove_reference<Args>::type...>;
-			GLua *self = (GLua*)lua_touserdata(L, lua_upvalueindex(2));
-			C *obj = (C*)lua_touserdata(self->L, 1);
-			auto tfun = self->anycast<Ret(C::*)(Args...)>(lua_touserdata(L, lua_upvalueindex(3)));
-			Tup args;
-			self->get_arg<0, Tup, Args...>(2, args);
-			auto temp = std::experimental::apply([=](const Args&... args){
-				return (obj->*tfun)(args...);
-			}, args);
-			self->pushv(temp);
-			return int(1);
-		}), 3);
-	}
-
-	template <class T, class C>
-	C *getclass(T C::*);
-
-	// getter: fn(obj)
-	// setter: fn(obj,nval)
-	template <class T, class C>
-	inline void pushv(T C::*mem) {
-		lua_pushboolean(L, 1);
-		lua_pushlightuserdata(L, this);
-		lua_pushlightuserdata(L, anycast<void*>(mem));
-		lua_pushcclosure(L, lua_CFunction([](lua_State *L) {
-			GLua *self = (GLua*)lua_touserdata(L, lua_upvalueindex(2));
-			C *obj = (C*)lua_touserdata(L, 1);
-			auto tmem = self->anycast<T C::*>(lua_touserdata(L, lua_upvalueindex(3)));
-
-			// getter (obj)
-			if (self->top() == 1) {
-				// getter
-				self->pushv(obj->*tmem);
-				return 1;
-			}
-			// setter (obj,val)
-			obj->*tmem = self->get();
-			return 0;
-		}), 3);
-	}
-
-	inline void pushv(lua_CFunction cf) {
-		lua_pushcfunction(L, cf);
-	}
-
-	inline void pushv() { lua_pushnil(L); }
-	inline void pushv(Value v) { assert(v.idx != 0); lua_pushvalue(L, v.idx); }
-	inline void pushv(const Number n) { lua_pushnumber(L, n); }
-	inline void pushv(const Integer n) {
-		lua_pushinteger(L, n); }
-	inline void pushv(String s) { s.pushto(L); }
-
-	// bool would eat other types via its implicit casts otherwise, so
-	// we have to constrain it to being canonical type
-	template <class T, typename std::enable_if<std::is_same<T,bool>::value,int>::type=0>
-	inline void pushv(bool b) { lua_pushboolean(L, b); }
-
-	// ellipsis for push
-	inline void push() {};
-
-	template <typename T, typename... Ts>
-	inline void push(const T &value, const Ts&... values) {
-		pushv(value);
-		push(values...);
-	}
-
-	inline Value pop(int n = 1) { lua_pop(L, n); return Value(*this); }
-	inline int top() { return lua_gettop(L); }
-	inline void top(int n) { return lua_settop(L, n); }
-
-
-	inline Value get(int idx = -1) {
-		Value v(*this);
-		v.idx = idx;
-		if (idx < 0)
-			v.idx = top() + 1 + idx;
-		return v;
-	}
-
-	inline void close() {
-		lua_close(L);
-		L = 0;
-	}
-
-	inline ~GLua() {
-		close();
-	}
-
-	struct Scope {
-		struct GLua &parent;
-		int stack;
-		inline Scope(GLua &p) : parent(p) {
-			stack = parent.top();
-		}
-		inline ~Scope() {
-			parent.top(stack);
-		}
-	};
-
-
-	// Operators
-	//
-	inline Value eval(String code) {
-		if (luaL_loadstring(L, code) == LUA_ERRSYNTAX) {
-			{
-				Scope s(*this);
-				errh(L);
-			}
-			return pop();
-		}
-		return get()();
-	}
+	inline bool isnil() { return lua_isnil(L, idx); }
+	inline int type() { return lua_type(L, idx); }
 
 	template <typename T>
 	inline Index<T> operator [](T key) {
-		return {key,*this,-1};
+		return {key,L,idx};
 	}
 
-	// When a tabindex is placed as function call argument somewhere.
+	template <typename... Ts>
+	inline Value operator()(const Ts&... values) const;
+
+};
+
+struct State {
+	// We are mere shadow over lua's L. A bit awkward, but saves us
+	// the trouble of remembering our own `*this` in callbacks.
+
+	State() = delete;
+	~State() = delete;
+	static State& make(lua_State *L) {
+		return *((State*)L);
+	}
+	static State& make() {
+		lua_State *L = luaL_newstate();
+		luaL_openlibs(L);
+		printf("making new state %p\n", L);
+		return *((State*)L);
+	}
+
+	inline lua_State *L() {
+		return (lua_State*)this;
+	}
+
+	// Integers
+	inline State& pushi(lua_Integer i) {
+		lua_pushinteger(L(), i); return *this;
+	}
+	inline State& pushu(unsigned long u) {
+		lua_pushinteger(L(), u); return *this;
+	}
+
+	inline auto& push(char c) { return pushi(c); }
+	inline auto& push(short c) { return pushi(c); }
+	inline auto& push(int c) { return pushi(c); }
+	inline auto& push(long c) { return pushi(c); }
+
+	inline auto& push(unsigned char c) { return pushu(c); }
+	inline auto& push(unsigned short c) { return pushu(c); }
+	inline auto& push(unsigned int c) { return pushu(c); }
+	inline auto& push(unsigned long c) { return pushu(c); }
+
+	inline auto& push(float f) { lua_pushnumber(L(), f);  return *this; }
+	inline auto& push(double f) { lua_pushnumber(L(), f);  return *this; }
+	inline auto& push(bool b) {
+		lua_pushboolean(L(), b);  return *this;
+	}
+
+	inline auto& nil() {
+		lua_pushnil(L());
+		return *this;
+	}
+
+	// Strings
+	inline auto& push(const char *s) {
+		if (s == 0) return nil();
+		lua_pushstring(L(), s);
+		return *this;
+	}
+	inline auto& pushlstring(const char *s, size_t n) {
+		if (s == 0) return nil();
+		lua_pushlstring(L(), s, n);
+		return *this;
+	}
+
+	// Closure
+
+	inline auto& push(lua_CFunction c) {
+		if (c == 0) return nil();
+		lua_pushcfunction(L(), c);
+		return *this;
+	}
+
+	inline auto& push(Function c) {
+		if (c == 0) return nil();
+		lua_pushcfunction(L(), lua_CFunction(c));
+		return *this;
+	}
+
+
+#if 0	
+	// remove const
+	template <class T>
+	inline State& push(const T v) {
+		return push((T)v);
+	}
+#endif
+
+	// remove reference and turn to pointer
+	template <class T>
+	inline State& push(const T &p) {
+		printf("pushing pod\n");
+		return push((T*)(&p));
+	}
+
+	// push pointers to class instances and record their typeid
 	template <typename T>
-	inline void pushv(Index<T> v) {
-		auto dummy = Value(v);
+	inline State& push(T *p) {
+		if (p == 0) return nil();
+		int tid = push_type(*this, type_id<T>());
+		pop();
+		lua_pushlightuserdatax(L(), p, tid);
+		return *this;
 	}
 
+	inline auto& push(Value &v) { lua_pushvalue(L(), v.idx); return *this; }
 
+	inline int pushmulti(int n) { return n; };
+	template <typename T, typename... Ts>
+	inline int pushmulti(int n, const T &value, const Ts&... values) {
+		push(value);
+		return pushmulti(n + 1, values...);
+	}
 
-	lua_CFunction errh = [](lua_State *L) {
-		fprintf(stderr, "Lua error: %s\n", lua_tostring(L, -1));
-		return 1;
+	inline auto& pop(int n = 1) {
+		lua_pop(L(), n);
+		return *this;
+	}
+
+	template <class T>
+	inline auto &setname(const char *n) {
+		push_type(*this, type_id<T>());
+		field("__name", -1, n);
+		return pop();
+	}
+
+	// Bind a class<T> method
+/*	template <class T, class F>
+	inline auto& bind(int kind, const char *name, F lam) {
+		if (0) { int ret = lam(*this); (void)ret; }
+		return bind<T>(kind, name, (lua_CFunction)(lam));
+	}*/
+	template <class T>
+	inline auto& bind(int kind, const char *name, int (*handler)(State &s)) {
+		return bind<T>(kind, name, (lua_CFunction)(handler));
+	}
+	template <class T>
+	inline auto& bind(int kind, const char *name, lua_CFunction handler) {
+		push_type(*this, type_id<T>());
+
+		push(name);
+
+		int nup = kind == ACCESOR;
+		if (nup) nil();
+		lua_pushcclosure(L(), handler, nup);
+
+		lua_rawset(L(), -3);
+
+		return *this;
+	}
+
+	// Free-standing functions
+	template <class F>
+	inline Value bind(F lam) {
+		if (0) { int ret = lam(*this); (void)ret; }
+		push((lua_CFunction)(lam));
+		return get();
+	}
+
+	template<typename T>
+	inline int type_id() {
+		static int id;
+		if (!id) id = lua_allocatetypex(L());
+		return id;
 	};
 
-	std::string errmsg;
-
-/*	template <class T, class C>
-	C *getclass(T C::*);*/
-
-	// bind member functions, typeid by containing class typeid
-	template <class T, class C>
-	inline void bind(const char *clsn, const char *n, T C::*mem) {
-		const std::type_info& tid = typeid(C*);
-		bind_type(tid.hash_code(), clsn);
-		pushv(mem);
-		lua_setfield(L, -2, n);
+	static int push_type(State &s, int t) {
+		printf("pushing type %d\n", t);
+		lua_State *L = s.L();
+		if (lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_LAST + RIDX_DELTA + t) != LUA_TNIL)
+			return t;
 		lua_pop(L, 1);
+
+		lua_newtable(L);
+
+		lua_pushvalue(L, -1);
+		lua_rawseti(L, LUA_REGISTRYINDEX, LUA_RIDX_LAST + RIDX_DELTA + t);
+
+		s.push(__index);
+		lua_setfield(L, -2, "__index");
+		s.push(__newindex);
+		lua_setfield(L, -2, "__newindex");
+
+		lua_pushvalue(L, -1);
+		lua_setmetatable(L, -2);
+
+		lua_pushvalue(L, -1);
+		lua_setmetatablex(L, t);
+		return t;
 	}
 
-	// free-standing functions, we have to trust name on this
-	template <class T>
-	inline void bind(const char *clsn, const char *n, T fun) {
-		luaL_newmetatable(L, clsn);
-		pushv(fun);
-		lua_setfield(L, -2, n);
+	static int __index(lua_State *L) {
+		lua_getmetatable(L, 1);
+		lua_pushvalue(L, 2);
+		if (lua_rawget(L, -2) != LUA_TFUNCTION)
+			luaL_argerror(L, 2, "unexpected field read");
+
+
+		// They're looking for a method fn value, not getter result
+		if (!lua_getupvalue(L, -1, 1)) {
+
+			return 1;
+		}
 		lua_pop(L, 1);
-		S
+
+		lua_pushvalue(L, 1); // obj
+		lua_call(L, 1, 1);
+		return 1;
 	}
 
+	static int __newindex(lua_State *L) {
+		lua_getmetatable(L, 1);
+		lua_pushvalue(L, 2);
+		if (lua_rawget(L, -2) != LUA_TFUNCTION)
+			luaL_argerror(L, 2, "unexpected field write");
+
+		lua_pushvalue(L, 1);
+		lua_pushvalue(L, 3);
+		lua_call(L, 2, 1);
+		return 1;
+	}
+
+
+	inline int top() { return lua_gettop(L()); }
+	inline State& top(int n) { lua_settop(L(), n); return *this; }
+
+	inline auto& global(const char *s) {
+		lua_getglobal(L(), s);
+		return *this;
+	}
+	inline auto& field(const char *s, int idx = -1) {
+		lua_getfield(L(), idx, s);
+		return *this;
+	}
+
+	template <typename T>
+	inline auto& field(const char *s, int idx, T val) {
+		lua_pushvalue(L(), idx);
+		lua_pushstring(L(), s);
+		push(val);
+		lua_rawset(L(), -3);
+		return pop();
+	}
+
+
+	template <typename T>
+	inline auto& global(const char *s, T v) {
+		push(v);
+		lua_setglobal(L(), s);
+		return *this;
+	}
+
+	static int traceback(lua_State *L) {
+		const char *msg = lua_tostring(L, -1);
+		luaL_traceback(L, L, msg, 1);
+		return 1;
+	}
+
+	bool isnil(int idx = -1) {
+		return lua_isnil(L(), idx);
+	}
+
+	template <typename... Ts>
+	auto& call(const Ts&... values) {
+		lua_State *L = this->L();
+		assert(!lua_isnil(L, -1));
+		lua_pushcfunction(L, traceback);
+		lua_insert(L, -2);
+		int nargs = pushmulti(0,values...);
+		if (lua_pcall(L, nargs, 1, top() - nargs - 1) != LUA_OK) {
+			const char *msg = lua_tostring(L, -1);
+			pop(2);
+			throw msg;
+		}
+		lua_remove(L, -2);
+		return *this;
+	}
+
+	inline auto& eval(const char *code) {
+		if (luaL_loadstring(L(), code) == LUA_ERRSYNTAX) {
+			traceback(L());
+			const char *msg = lua_tostring(L(), -1);
+			pop();
+			throw msg;
+		}
+		call();
+		return *this;
+	}
+
+	inline Value get(int idx = -1) {
+		return Value {L(), idx < 0 ? (top() + 1 + idx) : idx};
+	}
+
+	inline const char *gets(size_t *sz, int idx = -1) {
+		return lua_tolstring(L(), idx, sz);
+	}
+
+	inline int gets(int idx, char *buf, size_t limit) {
+		size_t sz;
+		const char *s = lua_tolstring(L(), idx, &sz);
+		if (!s) return -1;
+		sz++;
+		if (sz > limit) sz = limit;
+		::memcpy(buf, s, limit);
+		return sz;
+	}
+
+
+	static const int one = 1;
+	static const int zero = 0;
+
+	template <typename T>
+	inline Index<T> operator [](T key) {
+		return {key,L(),-1};
+	}
+};
+
+static inline State& newstate() {
+	State &s = State::make();
+	printf("got %p\n", &s);
+	return s;
+}
+
+struct Scope {
+	struct State &parent;
+	int stack;
+	inline Scope(State &p) : parent(p) {
+		stack = parent.top();
+	}
+	inline ~Scope() {
+		parent.top(stack);
+	}
 };
 
 template<typename T>
 template<typename V>
-inline V const& GLua::Index<T>::operator=(V const &v)
+inline V const& Index<T>::operator=(V const &v)
 {
-	int t = gtab();
-	g.pushv(key);
-	g.pushv(v);
-	lua_settable(g.L, t);
-	if (tab < 0) g.pop();
+	auto& s = State::make(L);
+	int t = get_tab();
+	s.push(key);
+	s.push(v);
+	printf("setting value\n");
+	lua_settable(L, t);
+	if (tab < 0) lua_pop(L, 1);
 	return v;
 }
 
-template<typename T>
-inline GLua::Value GLua::Index<T>::get()
-{
-	int t = gtab();
-	g.pushv(key);
-	//printf("getting %s from %d\n", key, t);
-	lua_gettable(g.L, t);
-	if (tab < 0) lua_remove(g.L, -2); // remove globals
-	return g.get();
-}
 
 template<typename T>
-template <typename... Ts>
-inline GLua::Value GLua::Index<T>::operator()(const Ts&... values) {
-	return (GLua::Value(*this))(values...);
+inline Value Index<T>::get() {
+	int t = get_tab();
+	auto& s = State::make(L);
+	s.push(key);
+	lua_gettable(L, t);
+	if (tab < 0) lua_remove(L, -2); // remove globals
+	return {L, lua_gettop(L)};
 }
 
 template<typename T>
 template<typename K>
-GLua::Value GLua::Index<T>::operator[](K key) {
-	return (GLua::Value(*this))[key];
+inline Index<K> Index<T>::operator[](K key) {
+	return get()[key];
 }
+
+template<typename T>
+template <typename... Ts>
+inline Value Index<T>::operator()(const Ts&... values) {
+	return get()(values...);
+}
+
+template <typename... Ts>
+inline Value Value::operator()(const Ts&... values) const {
+	auto& s = State::make(L);
+	s.call(values...);
+	return s.get();
+}
+
+
+}
+// Basic macro used to generate class method/member bindings
+#define GLUA_BIND(G, typ, kls, var, fun) { \
+	G.bind<kls>(GLua::typ, #var, [](auto &_gl) { \
+		lua_State *_L = _gl.L(); \
+		(void)_L; \
+		(void)_gl; \
+		kls *_self = _gl.get(1); \
+		(void)_self; \
+		fun; \
+		return 0; \
+	}); \
+}
+
 

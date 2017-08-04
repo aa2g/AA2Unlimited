@@ -17,7 +17,7 @@ BOOL WINAPI DllMain(
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
 		g_Lua.init();
 
-		while (!g_Lua.Load(utf8.to_bytes(General::BuildAAUPath(LUA_FILE_PATH)))) {
+		while (!g_Lua.Load(General::BuildAAUPath(LUA_FILE_PATH))) {
 			switch (MessageBox(NULL, L"Lua bootstrap script failed (see logfile.txt)", L"Error", MB_ICONERROR | MB_ABORTRETRYIGNORE)) {
 			case IDABORT:
 				// Kill it
@@ -30,7 +30,7 @@ BOOL WINAPI DllMain(
 
 		// Now give chance to lua to run early. This loads that side of config, but
 		// doesn't do anything with the game yet, for that we must wait for inithooks.
-		g_Lua.bind();
+		g_Lua.bindLua();
 		SetDllDirectory(General::BuildAAUPath(L"lib").c_str());
 		g_Lua["load_modules"]();
 

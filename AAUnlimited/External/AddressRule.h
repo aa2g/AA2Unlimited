@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Windows.h>
-
 #include "General\ModuleInfo.h"
 
 namespace ExtVars {

@@ -1,18 +1,14 @@
 #include "StdAfx.h"
 
-Lua g_Lua(true);
+#include <codecvt>
+#include <string>
 
-Lua::Lua(bool libs) : sel::State(libs) {
-}
-
-struct D3DMATRIX_Lua : D3DMATRIX {
-	inline float get(unsigned i, unsigned j) { i--; j--; return (i < 4 && j < 4) ? m[i][j] : 0; }
-	inline void set(unsigned i, unsigned j, float v) { i--; j--; if (i < 4 && j < 4) m[i][j] = v; }
-};
+static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
+Lua& g_Lua = (Lua&)GLua::newstate();
 
 // direct assembly code callback, stdcall/thiscall
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
-	lua_State *L = g_Lua._l;
+	lua_State *L = LUA_GLOBAL.L();
 	lua_getglobal(L, LUA_EVENTS_TABLE);
 	lua_getfield(L, -1, "callback");
 	lua_rawgeti(L, -1, idx);
@@ -31,29 +27,41 @@ int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
 	return ret;
 }
 
-void Lua::init() {
-	HandleExceptionsWith([](int n, std::string msg, std::exception_ptr) {
-		LOGPRIONC(Logger::Priority::ERR) msg << "\r\n";
-	});
+bool Lua::Load(std::wstring wpath) {
+	const char *path = utf8.to_bytes(wpath).c_str();
+	if (luaL_loadfile(L(), path) != LUA_OK || lua_pcall(L(),0,0,0) != LUA_OK) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) "Bootstrap failed with error " << lua_tostring(L(), -1) << "\r\n";
+		lua_pop(L(), 1);
+		return false;
+	}
+	return true;
+}
 
-	g_Lua(LUA_BINDING_TABLE " = {}");
-	g_Lua(LUA_EVENTS_TABLE " = {}");
+void Lua::init() {
+	LUA_SCOPE;
+
+	g_Lua.eval(LUA_BINDING_TABLE " = {}");
+	g_Lua.eval(LUA_EVENTS_TABLE " = {}");
 	g_Logger.bindLua();
 	g_Config.bindLua();
 
 
 	using namespace General;
-	g_Lua[LUA_BINDING_TABLE]["GameBase"] = unsigned(GameBase);
-	g_Lua[LUA_BINDING_TABLE]["IsAAPlay"] = IsAAPlay;
-	g_Lua[LUA_BINDING_TABLE]["IsAAEdit"] = IsAAEdit;
-	g_Lua[LUA_BINDING_TABLE]["GameExeName"] = utf8.to_bytes(GameExeName);
+	auto _BINDING = g_Lua[LUA_BINDING_TABLE].get();
+	_BINDING["GameBase"] = utf8.to_bytes(GameBase).c_str();
+	_BINDING["IsAAPlay"] = IsAAPlay;
+	_BINDING["IsAAEdit"] = IsAAEdit;
+	_BINDING["GameExeName"] = utf8.to_bytes(GameExeName).c_str();
 
-	g_Lua[LUA_BINDING_TABLE]["GetAAEditPath"] = []() { return utf8.to_bytes(AAEditPath); };
-	g_Lua[LUA_BINDING_TABLE]["GetAAPlayPath"] = []() { return utf8.to_bytes(AAPlayPath); };
-	g_Lua[LUA_BINDING_TABLE]["GetAAUPath"] = []() { return utf8.to_bytes(AAUPath); };
+	_BINDING["GetAAEditPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAEditPath).c_str()).one; };
+	_BINDING["GetAAPlayPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAPlayPath).c_str()).one; };
+	_BINDING["GetAAUPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAPlayPath).c_str()).one; };
 }
 
-void Lua::bind() {
+void Lua::bindLua() {
+	LUA_SCOPE;
+	auto _BINDING = g_Lua[LUA_BINDING_TABLE].get();
+
 	using namespace ExtClass;
 
 	// General
@@ -79,15 +87,9 @@ void Lua::bind() {
 	HPosButtonList::bindLua();
 	HStatistics::bindLua();
 
-	// Helper wrapper classes
-	g_Lua.ExtClass<D3DMATRIX_Lua>("D3DMATRIX",
-		"get", &D3DMATRIX_Lua::get,
-		"set", &D3DMATRIX_Lua::set);
-
-
 	// Very low level utilities
 	using namespace General;
-	g_Lua[LUA_BINDING_TABLE]["peek"] = lua_CFunction([](lua_State *L) {
+	_BINDING["peek"] = lua_CFunction([](lua_State *L) {
 		// buf = peek(addr, len)
 		int addr = (int)lua_touserdata(L, 1);
 		if (addr == 0) addr = luaL_checkinteger(L, 1);
@@ -114,7 +116,7 @@ void Lua::bind() {
 		return 1;
 	});
 
-	g_Lua[LUA_BINDING_TABLE]["poke"] = lua_CFunction([](lua_State *L) {
+	_BINDING["poke"] = lua_CFunction([](lua_State *L) {
 		// poke(addr, buf)
 		int addr = luaL_checkinteger(L, 1);
 		size_t nbytes;
@@ -125,7 +127,7 @@ void Lua::bind() {
 		return 0;
 	});
 
-	g_Lua[LUA_BINDING_TABLE]["proc_invoke"] = lua_CFunction([](lua_State *L) {
+	_BINDING["proc_invoke"] = lua_CFunction([](lua_State *L) {
 		// eax, edx = proc_invoke(addr, args...), stdcall/thiscall only
 		DWORD *argbuf = (DWORD*)alloca((lua_gettop(L) - 2)*4);
 		int addr = luaL_checkinteger(L, 1);
@@ -159,12 +161,12 @@ void Lua::bind() {
 		lua_pushinteger(L, saved_edx);
 		return 2;
 	});
-	g_Lua[LUA_BINDING_TABLE]["callback"] = int(&callback_ptr);
-	g_Lua[LUA_BINDING_TABLE]["x_pages"] = [](int size) {
-		void *d = VirtualAlloc(0, size, MEM_COMMIT, PAGE_EXECUTE_READ);
-		return int(d);
-	};
-	g_Lua[LUA_BINDING_TABLE]["GetProcAddress"] = lua_CFunction([](lua_State *L) {
+	_BINDING["callback"] = DWORD(&callback_ptr);
+	_BINDING["x_pages"] = LUA_LAMBDA({
+		void *d = VirtualAlloc(0, s.get(1), MEM_COMMIT, PAGE_EXECUTE_READ);
+		s.push(DWORD(d));
+	});
+	_BINDING["GetProcAddress"] = LUA_LAMBDA_L({
 		if (lua_gettop(L) < 2) return 0;
 		void *res = GetProcAddress(GetModuleHandleA(lua_tostring(L, 1)), lua_tostring(L, 2));
 		lua_pushinteger(L, int(res));
@@ -173,33 +175,43 @@ void Lua::bind() {
 
 	// Low level triggers
 	using namespace AAPlay;
-	g_Lua[LUA_BINDING_TABLE]["ApplyRelationshipPoints"] = &ApplyRelationshipPoints;
-	g_Lua[LUA_BINDING_TABLE]["GetCharacter"] = [](int idx) {
+	_BINDING["GetCharacter"] = LUA_LAMBDA({
+		int idx = s.get(1);
 		if ((idx < 0) || (idx > 25) || !g_characters[idx].IsValid())
-			return decltype(g_characters[0].m_char)(0);
-		return g_characters[idx].m_char;
-	};
+			return 0;
+		s.push(g_characters[idx].m_char);
+	});
 
 	using namespace ExtVars::AAPlay;
-	g_Lua[LUA_BINDING_TABLE]["GetGameTimeData"] = []() {
-		return GameTimeData();
-	};
-	g_Lua[LUA_BINDING_TABLE]["GetPlayerCharacter"] = []() {
-		return *PlayerCharacterPtr();
-	};
-	g_Lua[LUA_BINDING_TABLE]["SetPlayerCharacter"] = [](ExtClass::CharacterStruct *np) {
-		*PlayerCharacterPtr() = np;
-	};
+	_BINDING["GetGameTimeData"] = LUA_LAMBDA({
+		s.push(GameTimeData());
+	});
+	_BINDING["GetPlayerCharacter"] = LUA_LAMBDA({
+		s.push(*PlayerCharacterPtr());
+	});
+	_BINDING["SetPlayerCharacter"] = LUA_LAMBDA0({
+		*PlayerCharacterPtr() = s.get(1);
+	});
 
-	g_Lua[LUA_BINDING_TABLE]["GetPlayerConversation"] = &PlayerConversationPtr;
+//	_BINDING["GetPlayerConversation"] = &PlayerConversationPtr;
 
 	// Higher level triggers
-	g_Lua[LUA_BINDING_TABLE]["SafeAddCardPoints"] = &Shared::Triggers::SafeAddCardPoints;
-	g_Lua[LUA_BINDING_TABLE]["SetFocusBone"] = &HCamera::SetFocusBone;
+	_BINDING["SafeAddCardPoints"] = LUA_LAMBDA0({
+		Shared::Triggers::SafeAddCardPoints(s.get(1), s.get(2), s.get(3), s.get(4));
+	});
+
+	_BINDING["SetFocusBone"] = LUA_LAMBDA0({
+		HCamera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4));
+	});
 
 	using namespace General;
-	g_Lua[LUA_BINDING_TABLE]["SetAAPlayPath"] = [](std::string p) { AAPlayPath = utf8.from_bytes(p); };
-	g_Lua[LUA_BINDING_TABLE]["SetAAEditPath"] = [](std::string p) { AAEditPath = utf8.from_bytes(p); };
+	_BINDING["SetAAPlayPath"] = LUA_LAMBDA0({
+		AAPlayPath = utf8.from_bytes((const char*)s.get(1));
+	});
+	_BINDING["SetAAEditPath"] = LUA_LAMBDA0({
+		AAEditPath = utf8.from_bytes((const char*)s.get(1));
+		return 0;
+	});
 
 	GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
 		if (m->hwnd != *GameTick::hwnd) return false;

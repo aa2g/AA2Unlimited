@@ -34,7 +34,17 @@ public:
 	BYTE m_unknown5[0x14];
 	wchar_t m_fileName[8]; //h_xx_x\0: seems to be unique to each scene. Could be used to identify semantics of this position
 	BYTE m_unknown6[0x1C];
-
+	static inline void bindLua() {
+#define LUA_CLASS HPosData
+	LUA_BIND(m_type)
+	LUA_BIND(m_climaxOptions)
+	LUA_BIND(m_priority)
+	LUA_BIND(m_preferenceFlags)
+	LUA_BIND(m_creamPosition)
+	LUA_BIND(m_yaoiAllowance)
+	LUA_BIND(m_yuriAllowance)
+#undef LUA_CLASS
+	}
 	HPosData() = delete;
 	~HPosData() = delete;
 };

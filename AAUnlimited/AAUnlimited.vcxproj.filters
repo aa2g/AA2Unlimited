@@ -14,9 +14,6 @@
     <Filter Include="ExternalData\ExternalClasses\H-Classes">
       <UniqueIdentifier>{1893b2a4-e3b4-4021-8cf3-5c4a13e39b47}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Selene">
-      <UniqueIdentifier>{a24df515-57d1-4ca0-ba72-5a2736ad8882}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Lua">
       <UniqueIdentifier>{50d94dc6-2751-4aed-96b7-ed5153d2401e}</UniqueIdentifier>
     </Filter>
@@ -222,82 +219,7 @@
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
     <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
     <ClInclude Include="Script\ScriptLua.h" />
-    <ClInclude Include="Script\Selene\BaseFun.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Class.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\ClassFun.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Ctor.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Dtor.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\ExceptionHandler.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\ExceptionTypes.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Fun.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\function.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\LuaName.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\LuaRef.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\MetatableRegistry.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Obj.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\ObjFun.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\primitives.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\references.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Registry.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\ResourceHandler.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Selector.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\selene.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\State.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\traits.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\Tuple.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
-    <ClInclude Include="Script\Selene\util.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
     <ClInclude Include="defs.h" />
-    <ClInclude Include="Script\Selene\ExtClass.h">
-      <Filter>Selene</Filter>
-    </ClInclude>
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
     <ClInclude Include="Files\PP2.h" />
@@ -305,6 +227,7 @@
     <ClInclude Include="MemMods\Shared\Events\GameTick.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Script\glua.h" />
+    <ClInclude Include="Script\gluam.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
