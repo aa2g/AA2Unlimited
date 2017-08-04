@@ -92,14 +92,13 @@ struct State {
 
 	State() = delete;
 	~State() = delete;
-	static State& make(lua_State *L) {
-		return *((State*)L);
+	static State* make(lua_State *L) {
+		return (State*)L;
 	}
-	static State& make() {
+	static State* make() {
 		lua_State *L = luaL_newstate();
 		luaL_openlibs(L);
-		printf("making new state %p\n", L);
-		return *((State*)L);
+		return (State*)L;
 	}
 
 	inline lua_State *L() {
@@ -229,6 +228,7 @@ struct State {
 		lua_pushcclosure(L(), handler, nup);
 
 		lua_rawset(L(), -3);
+		pop();
 
 		return *this;
 	}
@@ -249,7 +249,6 @@ struct State {
 	};
 
 	static int push_type(State &s, int t) {
-		printf("pushing type %d\n", t);
 		lua_State *L = s.L();
 		if (lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_LAST + RIDX_DELTA + t) != LUA_TNIL)
 			return t;
@@ -277,14 +276,12 @@ struct State {
 		lua_getmetatable(L, 1);
 		lua_pushvalue(L, 2);
 		if (lua_rawget(L, -2) != LUA_TFUNCTION)
-			luaL_argerror(L, 2, "unexpected field read");
+			return 0;
 
 
 		// They're looking for a method fn value, not getter result
-		if (!lua_getupvalue(L, -1, 1)) {
-
+		if (!lua_getupvalue(L, -1, 1))
 			return 1;
-		}
 		lua_pop(L, 1);
 
 		lua_pushvalue(L, 1); // obj
@@ -399,20 +396,18 @@ struct State {
 	}
 };
 
-static inline State& newstate() {
-	State &s = State::make();
-	printf("got %p\n", &s);
-	return s;
+static inline State* newstate() {
+	return State::make();
 }
 
 struct Scope {
-	struct State &parent;
+	struct State *parent;
 	int stack;
-	inline Scope(State &p) : parent(p) {
-		stack = parent.top();
+	inline Scope(State *p) : parent(p) {
+		stack = parent->top();
 	}
 	inline ~Scope() {
-		parent.top(stack);
+		parent->top(stack);
 	}
 };
 
@@ -420,11 +415,10 @@ template<typename T>
 template<typename V>
 inline V const& Index<T>::operator=(V const &v)
 {
-	auto& s = State::make(L);
+	auto s = State::make(L);
 	int t = get_tab();
-	s.push(key);
-	s.push(v);
-	printf("setting value\n");
+	s->push(key);
+	s->push(v);
 	lua_settable(L, t);
 	if (tab < 0) lua_pop(L, 1);
 	return v;
@@ -434,8 +428,8 @@ inline V const& Index<T>::operator=(V const &v)
 template<typename T>
 inline Value Index<T>::get() {
 	int t = get_tab();
-	auto& s = State::make(L);
-	s.push(key);
+	auto *s = State::make(L);
+	s->push(key);
 	lua_gettable(L, t);
 	if (tab < 0) lua_remove(L, -2); // remove globals
 	return {L, lua_gettop(L)};
@@ -455,9 +449,9 @@ inline Value Index<T>::operator()(const Ts&... values) {
 
 template <typename... Ts>
 inline Value Value::operator()(const Ts&... values) const {
-	auto& s = State::make(L);
-	s.call(values...);
-	return s.get();
+	auto *s = State::make(L);
+	s->call(values...);
+	return s->get();
 }
 
 

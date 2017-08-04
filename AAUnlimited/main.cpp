@@ -14,6 +14,7 @@ BOOL WINAPI DllMain(
 			return FALSE;
 		}
 
+		g_Lua_p = (Lua*)GLua::newstate();
 		g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
 		g_Lua.init();
 

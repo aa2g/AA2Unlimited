@@ -90,8 +90,6 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
         LUA_BINDARREP(var,,LUA_ARRAYLEN(_self->var))
 
 
-#define LUA_SCOPE GLua::Scope scope(LUA_GLOBAL)
-
 #define LUA_XSTR(a) LUA_STR(a)
 #define LUA_STR(a) #a
 #define LUA_NAME LUA_GLOBAL.setname<LUA_CLASS>(LUA_XSTR(LUA_CLASS))

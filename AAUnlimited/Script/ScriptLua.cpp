@@ -4,7 +4,13 @@
 #include <string>
 
 static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
-Lua& g_Lua = (Lua&)GLua::newstate();
+Lua *g_Lua_p;
+
+static const char *to_utf8(std::wstring &ws) {
+	static std::string s;
+	s = utf8.to_bytes(ws);
+	return s.c_str();
+}
 
 // direct assembly code callback, stdcall/thiscall
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
@@ -28,8 +34,8 @@ int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
 }
 
 bool Lua::Load(std::wstring wpath) {
-	const char *path = utf8.to_bytes(wpath).c_str();
-	if (luaL_loadfile(L(), path) != LUA_OK || lua_pcall(L(),0,0,0) != LUA_OK) {
+	LOGPRIONC(Logger::Priority::SPAM) "Bootstrapping lua from " << wpath << "\r\n";
+	if (luaL_loadfile(L(), to_utf8(wpath)) != LUA_OK || lua_pcall(L(),0,0,0) != LUA_OK) {
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Bootstrap failed with error " << lua_tostring(L(), -1) << "\r\n";
 		lua_pop(L(), 1);
 		return false;
@@ -48,14 +54,23 @@ void Lua::init() {
 
 	using namespace General;
 	auto _BINDING = g_Lua[LUA_BINDING_TABLE].get();
-	_BINDING["GameBase"] = utf8.to_bytes(GameBase).c_str();
+	_BINDING["GameBase"] = DWORD(GameBase);
 	_BINDING["IsAAPlay"] = IsAAPlay;
 	_BINDING["IsAAEdit"] = IsAAEdit;
-	_BINDING["GameExeName"] = utf8.to_bytes(GameExeName).c_str();
+	_BINDING["GameExeName"] = to_utf8(GameExeName);
 
-	_BINDING["GetAAEditPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAEditPath).c_str()).one; };
-	_BINDING["GetAAPlayPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAPlayPath).c_str()).one; };
-	_BINDING["GetAAUPath"] = [](auto &s) { return s.push(utf8.to_bytes(AAPlayPath).c_str()).one; };
+	_BINDING["GetAAEditPath"] = GLua::Function([](auto &s) {
+		s.push(to_utf8(AAEditPath));
+		return 1;
+	});
+	_BINDING["GetAAPlayPath"] = GLua::Function([](auto &s) {
+		s.push(to_utf8(AAPlayPath));
+		return 1;
+	});
+	_BINDING["GetAAUPath"] = GLua::Function([](auto &s) {
+		s.push(to_utf8(AAUPath));
+		return 1;
+	});
 }
 
 void Lua::bindLua() {
@@ -73,8 +88,8 @@ void Lua::bindLua() {
 	CharacterActivity::bindLua();
 	CharacterData::bindLua();
 	CharacterRelation::bindLua();
-	CharacterStruct::bindLua();
-	ConversationSubStruct::bindLua();
+//	CharacterStruct::bindLua();
+//	ConversationSubStruct::bindLua();
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
