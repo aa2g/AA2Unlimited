@@ -88,8 +88,8 @@ void Lua::bindLua() {
 	CharacterActivity::bindLua();
 	CharacterData::bindLua();
 	CharacterRelation::bindLua();
-//	CharacterStruct::bindLua();
-//	ConversationSubStruct::bindLua();
+	CharacterStruct::bindLua();
+	ConversationSubStruct::bindLua();
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
