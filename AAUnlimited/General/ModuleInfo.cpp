@@ -1,5 +1,7 @@
 ﻿#include "StdAfx.h"
 
+// CAVEAT: None of these functions can use logger!
+
 #pragma comment( lib, "version.lib" )
 
 
@@ -24,7 +26,7 @@ namespace {
 	wchar_t AAEditProductName[] = L"ジンコウガクエン２ きゃらめいく";
 }
 
-bool Initialize() {
+bool InitializeExeType() {
 		//try to check the resource file to figure out where we are
 
 	{
@@ -100,7 +102,7 @@ bool Initialize() {
 
 // This is very early init (pre-hooks), when we still can't make assumptions about
 // where the game actually is, but AAU internals (ie lua) can run already.
-bool InitializeAAU() {
+bool EarlyInit() {
 	//get name of exe we are in
 	{
 		TCHAR buffer[512];

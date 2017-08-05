@@ -18,8 +18,8 @@ extern std::wstring AAPlayPath;
 extern std::wstring AAUPath;
 extern std::wstring GameExeName; //name of the exe we are hooked to
 
-bool Initialize();
-bool InitializeAAU();
+bool InitializeExeType();
+bool EarlyInit();
 bool InitializePaths();
 
 // CAVEAT: The returned strings are static, so that extracted c_strs() can be relied on
