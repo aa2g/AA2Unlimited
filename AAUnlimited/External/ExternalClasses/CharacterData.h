@@ -133,6 +133,39 @@ namespace ExtClass {
 			DWORD hairColor;
 		};
 		struct Clothes {
+			static inline void bindLua() {
+#define LUA_CLASS CharacterDataTypes::Clothes
+			LUA_BIND(slot)
+			LUA_BIND(skirtLength)
+			LUA_BIND(socks)
+			LUA_BIND(indoorShoes)
+			LUA_BIND(outdoorShoes)
+			LUA_BIND(isOnePiece)
+			LUA_BIND(hasUnderwear)
+			LUA_BIND(hasSkirt)
+			LUA_BIND(unknown13)
+			LUA_BIND(colorTop1)
+			LUA_BIND(colorTop2)
+			LUA_BIND(colorTop3)
+			LUA_BIND(colorTop4)
+			LUA_BIND(colorBottom1)
+			LUA_BIND(colorBottom2)
+			LUA_BIND(colorUnderwear)
+			LUA_BIND(colorSocks)
+			LUA_BIND(colorIndoorShoes)
+			LUA_BIND(colorOutdoorShoes)
+			LUA_BIND(textureBottom1)
+			LUA_BIND(textureUnderwear)
+			LUA_BIND(textureBottom1Hue)
+			LUA_BIND(textureBottom1Lightness)
+			LUA_BIND(shadowBottom1Hue)
+			LUA_BIND(shadowBottom1Lightness)
+			LUA_BIND(textureUnderwearHue)
+			LUA_BIND(textureUnderwearLightness)
+			LUA_BIND(shadowUnderwearHue)
+			LUA_BIND(shadowUnderwearLightness)
+#undef LUA_CLASS
+			}
 			DWORD slot;
 			BYTE skirtLength;
 			BYTE socks;
@@ -207,6 +240,26 @@ namespace ExtClass {
 		FaceDetails m_faceDetails;
 		Hair m_hair;
 		struct Character {
+#define LUA_CLASS ExtClass::CharacterData::Character
+			static inline void bindLua()
+			{
+			LUA_BIND(intelligence)
+			LUA_BIND(intelligenceClassRank)
+			LUA_BIND(intelligenceValue)
+			LUA_BIND(strength)
+			LUA_BIND(strengthClassRank)
+			LUA_BIND(strengthValue)
+			LUA_BIND(clubClassRanking)
+			LUA_BIND(clubValue)
+			LUA_BIND(sociability)
+			LUA_BIND(fightingStyle)
+			LUA_BIND(virtue)
+			LUA_BIND(orientation)
+			LUA_BIND(h_experience)
+			LUA_BIND(a_h_experience)
+#undef LUA_CLASS
+			}
+
 			BYTE intelligence;
 			BYTE intelligenceClassRank; //higher is better. assumed, taken from reiedit
 			BYTE unknown9[2]; //i assume these are padding
@@ -236,17 +289,29 @@ namespace ExtClass {
 		char m_item3[260];
 		Clothes m_clothes[4];
 	public:
-#define LUA_CLASS CharacterData
-		static inline void bindLua() {
-			LUA_EXTCLASS(CharacterData,
-				LUA_FIELD(m_voicePitch),
-				LUA_FIELD(m_faceSlot),
-				LUA_FIELD(m_club),
-				LUA_FIELD(m_bPersonality),
-				LUA_FIELD(m_gender),
-				LUA_FIELD(GetPreferenceFlags)
-			);
-			// TBD: a lot
+#define LUA_CLASS ExtClass::CharacterData
+		static inline void bindLua()
+		{
+			// more sub-structs todo
+			Character::bindLua();
+			Clothes::bindLua();
+
+			LUA_NAME;
+			LUA_BINDP(m_character);
+			LUA_BIND(m_voicePitch);
+			LUA_BINDARR(m_traitBools);
+			LUA_BIND(m_faceSlot);
+			LUA_BIND(m_club);
+			LUA_BIND(m_bPersonality);
+			LUA_BIND(m_gender);
+			LUA_METHOD(GetPreferenceFlags, { return _gl.push(_self->GetPreferenceFlags()).one; });
+			LUA_BINDARR(m_preferenceBools);
+			LUA_BINDARR(m_pregnancyRisks);
+			LUA_BINDARR(m_hCompatibility);
+			LUA_BINDSTR(m_item1);
+			LUA_BINDSTR(m_item2);
+			LUA_BINDSTR(m_item3);
+			LUA_BINDARRP(m_clothes);
 		}
 #undef LUA_CLASS
 

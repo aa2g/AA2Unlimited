@@ -35,17 +35,24 @@ public:
 	CharacterStruct* m_thisChar;
 	BYTE m_unknown10[0x20];
 	static inline void bindLua() {
-#define LUA_CLASS CharacterActivity
-		LUA_EXTCLASS(CharacterActivity,
-			LUA_FIELD(m_thisChar),
-			LUA_FIELD(m_idleAnimationProgress),
-			LUA_FIELD(m_lastConversationAnswer),
-			LUA_FIELD(m_lastConversationAnswerPercent),
-			LUA_FIELD(m_lastConversationSuccess),
-			LUA_FIELD(m_currRoomTarget),
-			LUA_FIELD(m_currConversationId),
-			LUA_FIELD(m_currentMovementType)
-		);
+#define LUA_CLASS ExtClass::CharacterActivity
+		LUA_BIND(m_animLocked)
+		LUA_BIND(m_loading)
+		LUA_BIND(m_thisChar)
+		LUA_BIND(m_isInConversation)
+		LUA_BIND(m_conversationLoading)
+		LUA_BIND(m_currentlyTalking)
+		LUA_BIND(m_currentMovementType)
+		LUA_BIND(m_currConversationId)
+		LUA_BIND(m_currRoomTarget)
+
+		LUA_BIND(m_lastConversationSuccess)
+		LUA_BIND(m_lastConversationAnswerPercent)
+		LUA_BIND(m_lastConversationAnswer)
+
+		LUA_BIND(m_idleAnimationProgress)
+
+		LUA_BIND(m_thisChar)
 #undef LUA_CLASS
 	};
 };

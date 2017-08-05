@@ -1,21 +1,27 @@
 #pragma once
-#include <codecvt>
-#include <string>
 #include "lua.hpp"
-#include "Selene/selene.h"
+#include "glua.h"
 #include "defs.h"
 
-static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
-
-class Lua : public sel::State {
-public:;
-	Lua(bool libs);
-	void bind();
+struct Lua : public GLua::State {
+	void bindLua();
 	void init();
+	bool Load(std::wstring path);
 };
 
-#define LUA_EXTCLASS(n,...) g_Lua.ExtClass<LUA_CLASS>(#n, __VA_ARGS__)
-#define LUA_FIELD(n) #n, &LUA_CLASS::n
-#define LUA_EVENT(...) g_Lua["__DISPATCH_EVENT"](__VA_ARGS__)
+static_assert(sizeof(Lua) == sizeof(GLua::State), "Lua state must not have instance members");
 
-extern Lua g_Lua;
+#define g_Lua (*g_Lua_p)
+#define LUA_GLOBAL g_Lua
+extern Lua *g_Lua_p;
+#define LUA_L LUA_GLOBAL.L()
+
+#define LUA_EVENT(...) LUA_GLOBAL["__DISPATCH_EVENT"](__VA_ARGS__)
+#define LUA_LAMBDA(fn) GLua::Function([](auto &s) {fn;return 1;})
+#define LUA_LAMBDA0(fn) GLua::Function([](auto &s) {fn;return 0;})
+#define LUA_LAMBDA_L(fn) lua_CFunction([](lua_State *L) {fn;return 1;})
+
+#define LUA_SCOPE GLua::Scope scope(g_Lua_p)
+
+// More fancy macros
+#include "gluam.h"

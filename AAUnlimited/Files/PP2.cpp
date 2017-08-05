@@ -1,6 +1,8 @@
+
 #include "StdAfx.h"
 #include "zstd.h"
 #include "opus.h"
+#include <io.h>
 
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 

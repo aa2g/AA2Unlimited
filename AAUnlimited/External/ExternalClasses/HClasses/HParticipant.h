@@ -40,26 +40,24 @@ public:
 public:
 	HParticipant() = delete;
 	~HParticipant() = delete;
-#define LUA_CLASS HParticipant
+#define LUA_CLASS ExtClass::HParticipant
 	static inline void bindLua() {
-		LUA_EXTCLASS(HParticipant,
-			LUA_FIELD(m_charPtr),
-			LUA_FIELD(m_shoesOffState),
-			LUA_FIELD(m_bClothesSlipped),
-			LUA_FIELD(m_clothesState),
-			LUA_FIELD(m_nCremeOn3),
-			LUA_FIELD(m_nCremeOnBack),
-			LUA_FIELD(m_nCremeOn2),
-			LUA_FIELD(m_nCremeOn1),
-			LUA_FIELD(m_nCremeOnFront),
-			LUA_FIELD(m_nClimedOutside),
+	LUA_BIND(m_charPtr)
+	LUA_BIND(m_shoesOffState)
+	LUA_BIND(m_bClothesSlipped)
+	LUA_BIND(m_clothesState)
+	LUA_BIND(m_nCremeOn3)
+	LUA_BIND(m_nCremeOnBack)
+	LUA_BIND(m_nCremeOn2)
+	LUA_BIND(m_nCremeOn1)
+	LUA_BIND(m_nCremeOnFront)
+	LUA_BIND(m_nClimedOutside)
 
-			LUA_FIELD(m_nPosChanges),
-			LUA_FIELD(m_nClimTogether),
-			LUA_FIELD(m_nClim),
-			LUA_FIELD(m_nClimedInRear),
-			LUA_FIELD(m_nClimedInFront)
-		);
+	LUA_BIND(m_nPosChanges)
+	LUA_BIND(m_nClimTogether)
+	LUA_BIND(m_nClim)
+	LUA_BIND(m_nClimedInRear)
+	LUA_BIND(m_nClimedInFront)
 	}
 #undef LUA_CLASS
 };

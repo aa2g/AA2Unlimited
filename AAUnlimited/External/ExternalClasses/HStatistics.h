@@ -38,17 +38,30 @@ public:
 
 #define LUA_CLASS HStatistics
 	static inline void bindLua() {
-		LUA_EXTCLASS(HStatistics,
-			LUA_FIELD(m_victoryCount),
-			LUA_FIELD(m_classesSkipped),
-			LUA_FIELD(m_winningOverSomeoneCount),
-			LUA_FIELD(m_partnerCount),
-			LUA_FIELD(m_rejectCount),
-			LUA_FIELD(m_academicGrade),
-			LUA_FIELD(m_sportGrade),
-			LUA_FIELD(m_clubGrade)
-		);
-		// TBD: arrays
+		LUA_BIND(m_victoryCount)
+		LUA_BIND(m_classesSkipped)
+		LUA_BIND(m_winningOverSomeoneCount)
+		LUA_BIND(m_partnerCount)
+		LUA_BIND(m_rejectCount)
+		LUA_BIND(m_academicGrade)
+		LUA_BIND(m_sportGrade)
+		LUA_BIND(m_clubGrade)
+
+		// TODO check these are actually strings
+		LUA_BINDSTR(m_firstHPartner)
+		LUA_BINDSTR(m_firstAnalPartner)
+		LUA_BINDSTR(m_latestHPartner)
+
+		LUA_BINDARR(m_totalH)
+		LUA_BINDARR(m_vaginalH)
+		LUA_BINDARR(m_analH)
+		LUA_BINDARR(m_condomsUsed)
+		LUA_BINDARR(m_climaxCount)
+		LUA_BINDARR(m_simultaneousClimax)
+		LUA_BINDARR(m_totalCum)
+		LUA_BINDARR(m_cumInVagina)
+		LUA_BINDARR(m_cumInAnal)
+
 	}
 #undef LUA_CLASS
 

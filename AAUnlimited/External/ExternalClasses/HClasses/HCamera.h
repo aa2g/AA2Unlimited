@@ -22,21 +22,21 @@ public:
 	float m_yShift;
 	float m_xShift;
 
-#define LUA_CLASS HCamera
+#define LUA_CLASS ExtClass::HCamera
 	static inline void bindLua() {
-		LUA_EXTCLASS(HCamera,
-			LUA_FIELD(m_xShift),
-			LUA_FIELD(m_yShift),
-			LUA_FIELD(m_zShift),
-			LUA_FIELD(m_fov),
-			LUA_FIELD(m_zRotRad),
-			LUA_FIELD(m_yRotRad),
-			LUA_FIELD(m_xRotRad)
-		);
+	LUA_BIND(m_xShift)
+	LUA_BIND(m_yShift)
+	LUA_BIND(m_zShift)
+	LUA_BIND(m_distToMid)
+	LUA_BIND(m_fov)
+	LUA_BIND(m_zRotRad)
+	LUA_BIND(m_yRotRad)
+	LUA_BIND(m_xRotRad)
+	LUA_BINDARRE(m_matrix, .m[0], 16)
 	}
 #undef LUA_CLASS
 	static void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
-	static void SetFocusBone(ExtClass::Frame* bone, double x, double y, double z);
+	static int SetFocusBone(ExtClass::Frame* bone, double x, double y, double z);
 
 
 	D3DMATRIX m_matrix; //used, but typically identity matrix. can be used to distort view

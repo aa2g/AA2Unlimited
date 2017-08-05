@@ -254,6 +254,9 @@ LUA_API int (lua_rawgetp) (lua_State *L, int idx, const void *p);
 LUA_API void  (lua_createtable) (lua_State *L, int narr, int nrec);
 LUA_API void *(lua_newuserdata) (lua_State *L, size_t sz);
 LUA_API int   (lua_getmetatable) (lua_State *L, int objindex);
+#if defined(LUA_TYPEEXTENSION)
+LUA_API int   (lua_getmetatablex) (lua_State *L, int typex);
+#endif
 LUA_API int  (lua_getuservalue) (lua_State *L, int idx);
 
 

@@ -37,13 +37,11 @@ public:
 	int day;			//0=sunday, 1=monday ... 6 = saturday
 	int nDays;			//total amount of days passed
 
-#define LUA_CLASS TimeData
+#define LUA_CLASS ExtClass::TimeData
 	static inline void bindLua() {
-		LUA_EXTCLASS(TimeData,
-			LUA_FIELD(currentPeriod),
-			LUA_FIELD(day),
-			LUA_FIELD(nDays)
-		);
+		LUA_BIND(currentPeriod)
+		LUA_BIND(day)
+		LUA_BIND(nDays)
 	}
 #undef LUA_CLASS
 };

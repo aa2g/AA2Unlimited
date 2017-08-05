@@ -77,7 +77,7 @@ inline const Action* Action::FromId(int id) {
 	return &g_Actions[id-1];
 }
 
-void SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards);
+int SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards);
 
 }
 }

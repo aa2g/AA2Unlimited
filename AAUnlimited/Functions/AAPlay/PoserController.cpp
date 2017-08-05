@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Files/PoseMods.h"
 
 namespace Poser {
 

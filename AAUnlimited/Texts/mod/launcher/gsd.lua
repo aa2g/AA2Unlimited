@@ -10,7 +10,7 @@ local format = {
 	{ x=int },
 	{ y=int },
 
-	"\x02", -- originally \x02
+	{ zoom=byte },
 
 	{ aspectx=byte },
 	{ aspecty=byte },
