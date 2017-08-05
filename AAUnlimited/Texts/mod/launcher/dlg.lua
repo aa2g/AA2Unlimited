@@ -261,8 +261,9 @@ local function buildtabs() return
 				padding="x8",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER" ,
 				iup.label {title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
+				iup.label {title = "UI stretch:", }, gsdl("zoom",iup.list { "0", "1", "2", dropdown="YES"}),
 				iup.label {title = "Antialiasing:",}, gsdl("aa", iup.list { 
-					"None", "2xMSAA", "4xMSAA", "8xCSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
+					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
 					"None", "256", "512", "1024", dropdown="YES" }),
 				iup.label {title = "Mipmap level:", }, gsdl("mipmap", iup.list { "None", "Normal", "Best", dropdown="YES" }),
@@ -361,7 +362,7 @@ return function()
 		iup.vbox {
 			buildtabs(),
 		};
-		title = "AA2Unlimited 0.5 preview",
+		title = "AA2Unlimited " .. AAU_VERSION,
 	}
 
 	dlg.startfocus = buts[1]
