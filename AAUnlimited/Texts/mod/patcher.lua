@@ -120,7 +120,6 @@ rundll32 AAUnlimitedDLL.dll,_AA2UPatcher@16 /e edit.exe
 	local play = _BINDING.GetAAPlayPath()
 	local edit = _BINDING.GetAAEditPath()
 
-	iup.Message("args", arg)
 
 	local _, play, edit, dopatch = iup.GetParam("AA2U "..AAU_VERSION.." game patcher", nil, [[
 Select files to patch %t
