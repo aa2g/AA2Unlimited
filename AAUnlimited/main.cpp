@@ -3,13 +3,17 @@
 #include <Dbghelp.h>
 #include "General\ModuleInfo.h"
 
-
-static BOOL bootstrap()
+// Needs: EarlyInit. Note that you can't log until you call InitLua.
+static void InitLogger()
 {
-	SetDllDirectory(General::BuildAAUPath(L"lib").c_str());
-
-	g_Lua_p = (Lua*)GLua::newstate();
 	g_Logger.Initialize(General::BuildAAUPath(LOGGER_FILE_PATH).c_str(), Logger::Priority::SPAM);
+	SetDllDirectory(General::BuildAAUPath(L"lib").c_str());
+}
+
+// Needs: EarlyInit, Logger
+static BOOL InitLua()
+{
+	g_Lua_p = (Lua*)GLua::newstate();
 	g_Lua.init();
 
 	while (!g_Lua.Load(General::BuildAAUPath(LUA_FILE_PATH))) {
@@ -26,11 +30,18 @@ static BOOL bootstrap()
 	return TRUE;
 }
 
-static const char *startup()
+// Last step before handing control over
+static const char *NormalInit()
 {
 	srand(time(NULL));
+	InitLogger();
 
-	if (!bootstrap())
+	if (!General::InitializeExeType()) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
+		return NULL;
+	}
+
+	if (!InitLua())
 		return NULL;
 
 	// Now give chance to lua to run early. This loads that side of config, but
@@ -39,13 +50,9 @@ static const char *startup()
 	LOGPRIONC(Logger::Priority::SPAM) "Base API bound\r\n";
 	g_Lua["load_modules"]();
 
+	// Will load paths from registry only if lua didn't change those
 	General::InitializePaths();
 
-	// Now initialize the rest
-	if (!General::Initialize()) {
-		LOGPRIONC(Logger::Priority::CRIT_ERR) "General init failed, bail\r\n";
-		return NULL;
-	}
 	InitializeHooks();
 	LOGPRIONC(Logger::Priority::SPAM) "Memory hooks initialized.\r\n";
 
@@ -96,7 +103,7 @@ BOOL WINAPI DllMain(
 {
 	if (fdwReason == DLL_PROCESS_ATTACH) {
 		General::DllInst = hinstDLL;
-		if (!General::InitializeAAU())
+		if (!General::EarlyInit())
 			return FALSE;
 	}
 	return TRUE;
@@ -112,7 +119,7 @@ IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 	SetErrorMode(0);
 	SetUnhandledExceptionFilter(panic);
 
-	const char *d3d = startup();
+	const char *d3d = NormalInit();
 	//if (!d3d)
 		d3d = "d3d9.dll";
 	HMODULE h = LoadLibraryA(d3d);
@@ -128,7 +135,8 @@ IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 
 extern "C" __declspec(dllexport)
 void WINAPI CALLBACK AA2UPatcher(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow) {
-	bootstrap();
+	InitLogger();
+	InitLua();
 	General::InitializePaths();
 	try {
 		g_Lua["require"]("patcher")((const char*)lpszCmdLine, nCmdShow);

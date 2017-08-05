@@ -10,7 +10,7 @@ local format = {
 	{ x=int },
 	{ y=int },
 
-	{ zoom=byte },
+	{ zoom=bool },
 
 	{ aspectx=byte },
 	{ aspecty=byte },

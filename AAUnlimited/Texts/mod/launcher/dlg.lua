@@ -261,7 +261,6 @@ local function buildtabs() return
 				padding="x8",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER" ,
 				iup.label {title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
-				iup.label {title = "UI stretch:", }, gsdl("zoom",iup.list { "0", "1", "2", dropdown="YES"}),
 				iup.label {title = "Antialiasing:",}, gsdl("aa", iup.list { 
 					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
@@ -273,13 +272,14 @@ local function buildtabs() return
 			title = "Toggles",
 			iup.vbox {
 				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
+				gsdt("zoom", iup.toggle {title = "4:3 edit background" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
-				gsdt("sharp", iup.toggle {title = "Smooth textures" }),
+				gsdt("sharp", iup.toggle {title = "Blured textures" }),
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering" }),
 				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
 				gsdt("blur", iup.toggle {title = "Blur" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
-				gsdt("dynlight", iup.toggle {title = "DynLight shader" }),
+				gsdt("dynlight", iup.toggle {title = "Lightning shader" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
 			}
 		},

@@ -8,6 +8,9 @@ Logger::Logger() : currPrio(Priority::ERR), filter(Priority::SPAM) {
 
 void Logger::luaFlush()
 {
+	if (!g_Lua_p)
+		return;
+
 	// Lua can't survive on multiple threads. If the log entry comes in from different
 	// thread, it will live on recorded in the buffer. Main thread picks it up
 	// at some point later.
@@ -44,6 +47,7 @@ void Logger::Initialize(const TCHAR * file, Priority prio) {
 
 Logger::~Logger()
 {
+	assert(g_Lua_p);
 	luaFlush();
 	outfile.close();
 }
