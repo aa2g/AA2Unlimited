@@ -137,7 +137,7 @@ end
 
 function Config.save(fn)
 	local fn = fn or aau_path("savedconfig.lua")
-	log("saving config to "..fn)
+	--log("saving config to "..fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
