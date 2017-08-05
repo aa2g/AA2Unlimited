@@ -115,7 +115,6 @@
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
-    <ClCompile Include="dllmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />

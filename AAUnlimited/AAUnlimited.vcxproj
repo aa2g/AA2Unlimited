@@ -27,7 +27,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />

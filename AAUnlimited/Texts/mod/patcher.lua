@@ -1,6 +1,6 @@
 
 
-local function do_patch(isplay,path,unpatch)
+local function do_patch(isplay,path,unpatch,dll)
 	local rdsize = 0x6daa2
 	-- all rva offsets are real file offset + this much
 	local delta = 0x1800
@@ -60,7 +60,7 @@ local function do_patch(isplay,path,unpatch)
 	end
 
 	-- otherwise we be patchin'
-	local dllpath = _BINDING.GetAAUPath() .. "AAUnlimitedDLL.dll" .. "\0"
+	local dllpath = dll .. "\0"
 	local symbol = (aaplay and "\x02" or "\x09") .. "\x00_AA2Unlimited@4\0"
 
 	pf:write(string.pack("<IIII", rdsize + #dllpath + #symbol, val1, val2, roff))
@@ -83,6 +83,8 @@ local function do_patch(isplay,path,unpatch)
 end
 
 return function(arg,showcmd)
+	require "iuplua"
+	require "iupluacontrols"
 	local meta = getmetatable(io.stdin)
 	function meta:get32(pos, word)
 		self:seek('set',pos)
@@ -93,10 +95,33 @@ return function(arg,showcmd)
 		self:write(string.pack("<I", word))
 	end
 
+	local switch, exe, dll = arg:match("^/(.?) *([^ ]*) *(.*)")
+	if switch == "P" then
+		return do_patch(true, exe, false, dll)
+	elseif switch == 'p' then
+		return do_patch(true, exe, true, dll)
+	elseif switch == 'E' then
+		return do_patch(false, exe, false, dll)
+	elseif switch == 'e' then
+		return do_patch(false, exe, true, dll)
+	elseif switch then
+		iup.Message("Usage", [[
+To patch:
+rundll32 AAUnlimitedDLL.dll,_AA2UPatcher@16 /P play.exe path\to\aau.dll
+rundll32 AAUnlimitedDLL.dll,_AA2UPatcher@16 /E edit.exe path\to\aau.dll
+
+To unpatch:
+rundll32 AAUnlimitedDLL.dll,_AA2UPatcher@16 /p play.exe
+rundll32 AAUnlimitedDLL.dll,_AA2UPatcher@16 /e edit.exe
+	]])
+		return
+	end
+
 	local play = _BINDING.GetAAPlayPath()
 	local edit = _BINDING.GetAAEditPath()
-	require "iuplua"
-	require "iupluacontrols"
+
+	iup.Message("args", arg)
+
 	local _, play, edit, dopatch = iup.GetParam("AA2U "..AAU_VERSION.." game patcher", nil, [[
 Select files to patch %t
 AA2 Play: %f[OPEN|*.exe|]]..play..[[|YES|NO]
@@ -108,8 +133,8 @@ Mode: %b[Unpatch - AAU will be disabled (if present),Patch - AAU will be enabled
 	local dllpath = _BINDING.GetAAUPath() .. "AAUnlimitedDLL.dll" .. "\0"
 
 	local ok, msg = pcall(function()
-		do_patch(true, play, dopatch == 0)
-		do_patch(false, edit, dopatch == 0)
+		do_patch(true, play, dopatch == 0,_BINDING.GetAAUPath() .. "AAUnlimitedDLL.dll")
+		do_patch(false, edit, dopatch == 0,_BINDING.GetAAUPath() .. "AAUnlimitedDLL.dll")
 	end)
 	if not ok then
 		iup.Message("Patcher failed with", msg)

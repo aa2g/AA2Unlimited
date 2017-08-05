@@ -131,7 +131,7 @@ void WINAPI CALLBACK AA2UPatcher(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, 
 	bootstrap();
 	General::InitializePaths();
 	try {
-		g_Lua["require"]("patcher")(lpszCmdLine, nCmdShow);
+		g_Lua["require"]("patcher")((const char*)lpszCmdLine, nCmdShow);
 	}
 	catch (const char *msg) {
 		LOGPRIONC(Logger::Priority::CRIT_ERR) msg;
