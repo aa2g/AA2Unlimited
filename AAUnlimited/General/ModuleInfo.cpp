@@ -25,72 +25,7 @@ namespace {
 }
 
 bool Initialize() {
-	if (AAPlayPath.size() > 0 && AAEditPath.size() > 0)
-		return true;
-
-	// find paths in registry
-	{
-		wchar_t buffer[512];
-		DWORD keyType;
-		DWORD outSize;
-		LONG res;
-
-		//aaplay path
-		HKEY playKey;
-
-		res = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\illusion\\AA2Play"), 0, KEY_READ, &playKey);
-		if (res != ERROR_SUCCESS) {
-			MessageBox(NULL, TEXT("Could not find AAPlay path in registry"), TEXT("Critical Error"), 0);
-			return false;
-		}
-		outSize = sizeof(buffer);
-		RegQueryValueEx(playKey, TEXT("INSTALLDIR"), NULL, &keyType, (BYTE*)buffer, &outSize);
-		outSize /= 2;
-		if (keyType != REG_SZ || outSize < 2) {
-			MessageBox(NULL, TEXT("Could not find AAPlay INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
-			return false;
-		}
-		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
-		AAPlayPath = std::wstring((TCHAR*)buffer);
-		if (buffer[outSize - 2] != L'\\') AAPlayPath.push_back(L'\\');
-
-		//aaedit path
-		HKEY editKey;
-
-		res = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\illusion\\AA2Edit"), 0, KEY_READ, &editKey);
-		if (res != ERROR_SUCCESS) {
-			MessageBox(NULL, TEXT("Could not find AAEdit path in registry"), TEXT("Critical Error"), 0);
-			return false;
-		}
-		outSize = sizeof(buffer);
-		RegQueryValueEx(editKey, TEXT("INSTALLDIR"), NULL, &keyType, (BYTE*)buffer, &outSize);
-		outSize /= 2;
-		if (keyType != REG_SZ || outSize < 2) {
-			MessageBox(NULL, TEXT("Could not find AAEdit INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
-			return false;
-		}
-		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
-		AAEditPath = std::wstring((TCHAR*)buffer);
-		if (buffer[outSize - 2] != L'\\') AAEditPath.push_back(L'\\');
-
-	}
-
-	return true;
-}
-
-// This is very early init (pre-hooks), when we still can't make assumptions about
-// where the game actually is, but AAU internals (ie lua) can run already.
-bool InitializeAAU() {
-	//get name of exe we are in
-	{
-		TCHAR buffer[512];
-		GetModuleFileName(GetModuleHandle(NULL), buffer, 512);
-		GameExeName = buffer;
-	}
-
-	GameBase = (DWORD)GetModuleHandle(NULL);
-
-	//try to check the resource file to figure out where we are
+		//try to check the resource file to figure out where we are
 
 	{
 		std::wstringstream resourceInfo(L""); //keps additional information in case of fail
@@ -160,6 +95,19 @@ bool InitializeAAU() {
 		}
 	}
 
+	return true;
+}
+
+// This is very early init (pre-hooks), when we still can't make assumptions about
+// where the game actually is, but AAU internals (ie lua) can run already.
+bool InitializeAAU() {
+	//get name of exe we are in
+	{
+		TCHAR buffer[512];
+		GetModuleFileName(GetModuleHandle(NULL), buffer, 512);
+		GameExeName = buffer;
+	}
+
 	// wherever the DLL sits we consider home for AAU-specific files
 	{
 		TCHAR buffer[512];
@@ -167,7 +115,63 @@ bool InitializeAAU() {
 		AAUPath = buffer;
 		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
 	}
+
+	GameBase = (DWORD)GetModuleHandle(NULL);
+	return TRUE;
 }
 
+bool InitializePaths()
+{
+	if (AAPlayPath.size() > 0 && AAEditPath.size() > 0)
+		return true;
+
+	// find paths in registry
+	{
+		wchar_t buffer[512];
+		DWORD keyType;
+		DWORD outSize;
+		LONG res;
+
+		//aaplay path
+		HKEY playKey;
+
+		res = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\illusion\\AA2Play"), 0, KEY_READ, &playKey);
+		if (res != ERROR_SUCCESS) {
+			MessageBox(NULL, TEXT("Could not find AAPlay path in registry"), TEXT("Critical Error"), 0);
+			return false;
+		}
+		outSize = sizeof(buffer);
+		RegQueryValueEx(playKey, TEXT("INSTALLDIR"), NULL, &keyType, (BYTE*)buffer, &outSize);
+		outSize /= 2;
+		if (keyType != REG_SZ || outSize < 2) {
+			MessageBox(NULL, TEXT("Could not find AAPlay INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
+			return false;
+		}
+		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
+		AAPlayPath = std::wstring((TCHAR*)buffer);
+		if (buffer[outSize - 2] != L'\\') AAPlayPath.push_back(L'\\');
+
+		//aaedit path
+		HKEY editKey;
+
+		res = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\illusion\\AA2Edit"), 0, KEY_READ, &editKey);
+		if (res != ERROR_SUCCESS) {
+			MessageBox(NULL, TEXT("Could not find AAEdit path in registry"), TEXT("Critical Error"), 0);
+			return false;
+		}
+		outSize = sizeof(buffer);
+		RegQueryValueEx(editKey, TEXT("INSTALLDIR"), NULL, &keyType, (BYTE*)buffer, &outSize);
+		outSize /= 2;
+		if (keyType != REG_SZ || outSize < 2) {
+			MessageBox(NULL, TEXT("Could not find AAEdit INSTALLDIR key in registry"), TEXT("Critical Error"), 0);
+			return false;
+		}
+		if (buffer[outSize - 1] != '\0') { buffer[outSize] = '\0'; outSize++; }
+		AAEditPath = std::wstring((TCHAR*)buffer);
+		if (buffer[outSize - 2] != L'\\') AAEditPath.push_back(L'\\');
+
+	}
+	return TRUE;
+}
 
 }

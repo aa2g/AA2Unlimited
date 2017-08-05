@@ -1,3 +1,8 @@
+function poke(...)
+	local ret = _BINDING.poke(...)
+	FlushInstructionCache(-1, 0, 0)
+end
+
 function peek_dword(addr)
 	return string.unpack("<I4", _BINDING.peek(addr, 4))
 end

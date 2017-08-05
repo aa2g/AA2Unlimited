@@ -1,6 +1,6 @@
 require "debug"
 
-
+AAU_VERSION = "0.5 preview"
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
@@ -290,9 +290,7 @@ end
 function load_modules()
 	Config.mods = Config.mods or {}
 	lock_globals()
-	log("rd stuff %s", aau_path("mod","*"))
 	for f in readdir(aau_path("mod", "*")) do
-		log("scan %s", f)
 		local mname = f:match("^(.*)%.lua$") or f
 		if mname == f then
 			f = f .. "/init.lua"
@@ -467,3 +465,4 @@ function get_mod_info(n)
 	end
 	return mi, desc, idx
 end
+
