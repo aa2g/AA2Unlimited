@@ -21,9 +21,9 @@ void Logger::luaFlush()
 	if (!lua_isnil(L, -1)) {
 		lua_getfield(L, -1, "logger");
 		auto ostr = outbuf.str();
-		lua_pushlstring(L, ostr.c_str(), ostr.length());
+		lua_pushlstring(L, ostr.c_str(), ostr.size());
 		if (lua_pcall(L, 1, 1, 0) == LUA_OK && lua_toboolean(L, -1))
-			outbuf.str("");
+			outbuf.flush();
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
@@ -44,6 +44,7 @@ void Logger::Initialize(const TCHAR * file, Priority prio) {
 
 Logger::~Logger()
 {
+	luaFlush();
 	outfile.close();
 }
 
