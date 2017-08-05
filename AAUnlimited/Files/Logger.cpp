@@ -47,8 +47,6 @@ void Logger::Initialize(const TCHAR * file, Priority prio) {
 
 Logger::~Logger()
 {
-	assert(g_Lua_p);
-	luaFlush();
 	outfile.close();
 }
 
