@@ -231,7 +231,8 @@ void InitializeHooks() {
 
 		GameTick::Initialize();
 		ArchiveFile::OpenFileInject();
-		if (bool(g_Config["bUseMeshTextureOverrides"])) {
+		if (g_Config.getb("bUseMeshTextureOverrides")) {
+			LOGPRIO(Logger::Priority::SPAM) << "Mesh texture override init" << "\n";
 			MeshTexture::OverrideTextureListSizeInject();
 			MeshTexture::OverrideTextureListNameInject();
 			MeshTexture::OverrideStartInject();
@@ -275,7 +276,7 @@ void InitializeHooks() {
 		Loads::SaveFileLoadInjection();
 		Loads::TransferInInjection();
 		Loads::TransferOutInjection();
-		if (bool(g_Config["bUseAdditionalTanSlots"])) {
+		if (g_Config.getb("bUseAdditionalTanSlots")) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
 			TanSlotUnlimit::LoadLoopEndInject();
@@ -297,7 +298,7 @@ void InitializeHooks() {
 	}
 	else if (General::IsAAEdit) {
 		using namespace EditInjections;
-		if (bool(g_Config["bUseAdditionalTanSlots"])) {
+		if (g_Config.getb("bUseAdditionalTanSlots")) {
 			TanSlotUnlimit::LoadLoopStartInject();
 			TanSlotUnlimit::LoadLoopPaPointerInject();
 			TanSlotUnlimit::LoadLoopEndInject();

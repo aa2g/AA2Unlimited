@@ -5,18 +5,13 @@ AAU_VERSION = "0.5 preview"
 -- C++ interfacing globals
 ---------------------------
 assert(_BINDING)
-_EVENTS = _EVENTS or {}
-_EVENTS.Config = _EVENTS.Config or {}
+assert(_BINDING.setlogprio, "C++ logger missing")
+assert(_BINDING.logger, "C++ logger missing")
 _CONFIG = _CONFIG or {}
-_BINDING.Seats = {}
-_EVENTS.Seats = {}
-_EVENTS.H = {}
-_EVENTS.Convo = {}
-_EVENTS.NpcActions = {}
-_EVENTS.PcActions = {}
-_EVENTS.Time = {}
 _WIN32 = {}
-
+__LOGGER = function(msg)
+	return false -- keep it for later
+end
 
 
 ---------------------------
@@ -40,7 +35,6 @@ end
 ---------------------------
 -- logger
 ---------------------------
-assert(_BINDING.logger, "C++ logger missing")
 log = {}
 
 -- XREF: match enum Files/logger.h
@@ -56,18 +50,6 @@ for prio,name in ipairs { "spam", "info", "warn", "error", "crit" } do
 	})
 end
 
--- empty logger hook
-function _EVENTS.logger(...)
-	return false, ...
-end
-
--- fictional config field via config event
-function _EVENTS.Config.logPrio(v)
-	_BINDING.setlogprio(v)
-	return v
-end
-
-
 ---------------------------
 -- config processing
 ---------------------------
@@ -76,9 +58,7 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
-	if _EVENTS.Config and _EVENTS.Config[k] then
-		v = _EVENTS.Config[k](v)
-	end
+	log("going to set %s to %s",k,tostring(v))
 	if v ~= nil then
 		-- if setting a binding fails, its not a C++ setting
 		if not pcall(function() _BINDING.Config[k] = v end) then
@@ -137,16 +117,15 @@ end
 
 function Config.save(fn)
 	local fn = fn or aau_path("savedconfig.lua")
-	--log("saving config to "..fn)
+	log("saving config to "..fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
 		saveval(f,k,v)
 	end
 	for k,v in pairs(getmetatable(_BINDING.Config)) do
-		local n = k:match("^get_(.*)")
-		if n then
-			saveval(f,n,_BINDING.Config[n])
+		if not k:match("^__.*") then
+			saveval(f,k,_BINDING.Config[k])
 		end
 	end
 	f:close()

@@ -14,6 +14,8 @@ static void InitLogger()
 static BOOL InitLua()
 {
 	g_Lua_p = (Lua*)GLua::newstate();
+
+	// bind stuff
 	g_Lua.init();
 
 	while (!g_Lua.Load(General::BuildAAUPath(LUA_FILE_PATH))) {
@@ -53,6 +55,7 @@ static const char *NormalInit()
 	// Will load paths from registry only if lua didn't change those
 	General::InitializePaths();
 
+	LOGPRIONC(Logger::Priority::SPAM) "cfg test" << g_Config.getb("bUseMeshTextureOverrides") << "\r\n";
 	InitializeHooks();
 	LOGPRIONC(Logger::Priority::SPAM) "Memory hooks initialized.\r\n";
 
@@ -65,7 +68,7 @@ static const char *NormalInit()
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
 	}
 
-	return g_Config["pathD3D9"];
+	return g_Config.gets("pathD3D9");
 }
 
 static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
@@ -109,10 +112,15 @@ BOOL WINAPI DllMain(
 	return TRUE;
 }
 
+
+
 extern "C" __declspec(dllexport)
 IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 {
+	static std::mutex mutex;
 	static IDirect3D9* (WINAPI *orig)(UINT SDKVersion);
+	std::lock_guard<std::mutex> guard(mutex);
+
 	if (orig)
 		return orig(SDKVersion);
 
