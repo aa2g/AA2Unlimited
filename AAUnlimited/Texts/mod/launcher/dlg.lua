@@ -327,6 +327,7 @@ local function buildtabs() return
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI" }),
+				aaut("bTriggers", iup.toggle {title = "Triggers and Modules" }),
 				aaut("bUseShadowing", iup.toggle {title = ".pp file shadowing/sets" }),
 				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
 				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
