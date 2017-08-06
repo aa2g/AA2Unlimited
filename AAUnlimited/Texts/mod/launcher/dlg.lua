@@ -248,6 +248,7 @@ local function buildtabs() return
 	iup.tabs {
 	
 	iup.vbox {
+		ngap="8",
 		tabtitle = "Graphics",
 		alignment="acenter",
 		iup.fill{},
@@ -257,11 +258,11 @@ local function buildtabs() return
 		iup.frame {
 			title = "Output",
 			iup.gridbox {
-				nmargin="x2",
+				nmargin="16x18",
 				padding="x8",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER" ,
 				iup.label {title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
-				iup.label {title = "Antialiasing:",}, gsdl("aa", iup.list { 
+				iup.label {title = "Antialiasing*:",}, gsdl("aa", iup.list { 
 					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
 					"None", "256", "512", "1024", dropdown="YES" }),
@@ -271,21 +272,31 @@ local function buildtabs() return
 		iup.frame {
 			title = "Toggles",
 			iup.vbox {
-				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
-				gsdt("zoom", iup.toggle {title = "4:3 edit background" }),
-				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
-				gsdt("sharp", iup.toggle {title = "Blured textures" }),
+			nmargin="8x",
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering" }),
-				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
-				gsdt("blur", iup.toggle {title = "Blur" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
 				gsdt("dynlight", iup.toggle {title = "Lightning shader" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
+				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
+				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
+				gsdt("zoom", iup.toggle {title = "4:3 edit background" }),
+				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
+				gsdt("sharp", iup.toggle {title = "Blur textures**" }),
+				gsdt("blur", iup.toggle {title = "Blur output" }),
 			}
 		},
-	}, iup.fill{}, launch()},
+	},
+	iup.fill{},
+	iup.label{title="* Selecting unsupported AA => defaults to 8xQ CSAA\n** Blur options may make sense only if you can't afford AA"},
+
+	iup.fill{},
+	
+	launch()
+	
+	},
 
 	iup.vbox { 
+		ngap="8",
 		alignment="acenter",
 		tabtitle = "AA2Unlimited",
 		iup.fill{},
@@ -295,8 +306,8 @@ local function buildtabs() return
 		iup.frame {
 			title = "Settings",
 			iup.gridbox {
-				padding="3x3",
-				nmargin="x4",
+				padding="4x7",
+				nmargin="x8",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
@@ -311,18 +322,17 @@ local function buildtabs() return
 		iup.frame {
 			title = "Toggles",
 			iup.vbox {
-				gap="3",
-				aaut("bUseAA2Face", iup.toggle {title = "Load AA2Face in edit (a must have)" }),
-				aaut("bUseAdditionalTanSlots", iup.toggle {title = "Additional tan slots (DANGEROUS)" }),
+				gap="1",
+				aaut("bUseAA2Face", iup.toggle {title = "Enable AA2Face in AA2Edit" }),
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
-				aaut("bHAiOnNoPromptH", iup.toggle {title = "(evil) AI can force H on PC" }),
-				aaut("bUseShadowing", iup.toggle {title = "Game file shadowing" }),
+				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI" }),
+				aaut("bUseShadowing", iup.toggle {title = ".pp file shadowing/sets" }),
 				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
 				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
 				aaut("bUseDialoguePoser", iup.toggle {title = "Dialogue poser" }),
-				aaut("bSaveFileAutoRemove", iup.toggle {title = "Strip files from cards after extracting" }),
-				aaut("bSaveFileBackup", iup.toggle {title = "Backup the card before stripping" }),
+				aaut("bSaveFileAutoRemove", iup.toggle {title = "Demod modcards after extracting" }),
+				aaut("bSaveFileBackup", iup.toggle {title = "Backup modcards before de-modding" }),
 				aaut("bUsePP2", iup.toggle {title = "Use .pp2 resource loader" }),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)" }),
@@ -367,6 +377,7 @@ return function()
 	dlg.startfocus = buts[1]
 
 	function dlg:close_cb()
+		log("Exit requested, so force-exiting")
 		os.exit(0)
 	end
 
