@@ -40,7 +40,7 @@ void AddTimer(int when, void *fn) {
 int __stdcall GameTick() {
 	if (tick == 0) {
 		first_now = GetTickCount();
-		LUA_EVENT("first_tick", (DWORD)(*hwnd));
+		LUA_EVENT_NORET("first_tick", (DWORD)(*hwnd));
 	}
 	now = GetTickCount() - first_now;
 	tick++;

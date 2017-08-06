@@ -44,7 +44,7 @@ void InitOnLoad() {
 		ThrowEvent(&data);
 
 		// ditto for lua
-		LUA_EVENT("load_card", seat, false);
+		LUA_EVENT_NORET("load_card", seat, false);
 	}
 }
 
@@ -93,7 +93,7 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
-	LUA_EVENT("unload_card", seat);
+	LUA_EVENT_NORET("unload_card", seat);
 
 	//destroy
 	g_characters[seat].Reset();

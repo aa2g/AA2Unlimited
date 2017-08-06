@@ -7,7 +7,7 @@ using namespace ExtClass;
 
 
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
-	newClothes = LUA_EVENT("clothes", newClothes, npc->m_seat);
+	LUA_EVENT("clothes", newClothes, npc->m_seat);
 	return newClothes;
 }
 
@@ -48,7 +48,7 @@ void ClothesChangeInjection() {
 
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
 {
-	result = LUA_EVENT("answer", result, answerChar, askingChar);
+	LUA_EVENT("answer", result, answerChar, askingChar);
 	return result;
 }
 
@@ -67,7 +67,7 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
 	answerChar->m_lastConversationAnswerPercent = data.changedChance;
 
-	data.changedResponse = LUA_EVENT("answer", data.changedResponse, answerChar, askingChar);
+	LUA_EVENT("answer", data.changedResponse, answerChar, askingChar);
 	return data.changedResponse;
 }
 
@@ -201,7 +201,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 	}
 	if (user == NULL) return;
 
-	LUA_EVENT("move", params);
+	LUA_EVENT_NORET("move", params);
 
 	using namespace Shared::Triggers;
 
