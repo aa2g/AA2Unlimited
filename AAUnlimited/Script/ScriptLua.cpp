@@ -34,12 +34,12 @@ int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
 }
 
 bool Lua::Load(std::wstring wpath) {
-	LOGPRIONC(Logger::Priority::SPAM) "Bootstrapping lua from " << wpath << "\r\n";
 	if (luaL_loadfile(L(), to_utf8(wpath)) != LUA_OK || lua_pcall(L(),0,0,0) != LUA_OK) {
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Bootstrap failed with error " << lua_tostring(L(), -1) << "\r\n";
 		lua_pop(L(), 1);
 		return false;
 	}
+	LOGPRIONC(Logger::Priority::SPAM) "Bootstrapped lua from " << wpath << "\r\n";
 	return true;
 }
 
@@ -54,6 +54,7 @@ void Lua::init() {
 
 	using namespace General;
 	auto _BINDING = g_Lua[LUA_BINDING_TABLE].get();
+	_BINDING["Config"] = &g_Config;
 	_BINDING["GameBase"] = DWORD(GameBase);
 	_BINDING["IsAAPlay"] = IsAAPlay;
 	_BINDING["IsAAEdit"] = IsAAEdit;

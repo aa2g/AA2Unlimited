@@ -353,7 +353,6 @@ local function buildtabs() return
 
 end
 
-
 return function()
 	gsdconfig = gsdlib.load_gsd()
 	update_res(_CONFIG["res_"..exe_type])
@@ -372,7 +371,7 @@ return function()
 	end
 
 	dlg:showxy(iup.CENTER, iup.CENTER)
-	_EVENTS.logger = function(buf)
+	__LOGGER = function(buf)
 		console.append = buf
 		--console.scrolltopos = #console.value
 		--iup.SetFocus(repl)

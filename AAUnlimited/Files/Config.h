@@ -26,9 +26,25 @@ public:;
 	int PP2Cache;
 	int PP2AudioCache;
 
-	auto operator[](const char *name) const {
+	// templates can't deduce on return type, so we must do it like this
+	const char *gets(const char *name) {
 		LUA_SCOPE;
-		return g_Lua[LUA_CONFIG_TABLE][name].get();
+		return g_Lua[LUA_CONFIG_TABLE][name];
+	}
+
+	const bool getb(const char *name) {
+		LUA_SCOPE;
+		return g_Lua[LUA_CONFIG_TABLE][name];
+	}
+
+	const int geti(const char *name) {
+		LUA_SCOPE;
+		return g_Lua[LUA_CONFIG_TABLE][name];
+	}
+
+	const float getf(const char *name) {
+		LUA_SCOPE;
+		return g_Lua[LUA_CONFIG_TABLE][name];
 	}
 
 	static inline void bindLua() {

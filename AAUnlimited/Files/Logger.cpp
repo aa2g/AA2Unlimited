@@ -8,6 +8,7 @@ Logger::Logger() : currPrio(Priority::ERR), filter(Priority::SPAM) {
 
 void Logger::luaFlush()
 {
+
 	if (!g_Lua_p)
 		return;
 
@@ -17,19 +18,28 @@ void Logger::luaFlush()
 	if (std::this_thread::get_id() != tid)
 		return;
 
+	// Prevent inadvert loops caused by logging from the logger event
+	static int in_flush;
+	if (in_flush) {
+		return;
+	}
+	in_flush = 1;
+
+
 	// Note that we can't use fancy selene templating in here, because that
 	// by itself uses logger, ie if something goes awry, it would loop.
 	lua_State *L = g_Lua.L();
-	lua_getglobal(L, LUA_EVENTS_TABLE);
-	if (!lua_isnil(L, -1)) {
-		lua_getfield(L, -1, "logger");
-		auto ostr = outbuf.str();
-		lua_pushlstring(L, ostr.c_str(), ostr.size());
-		if (lua_pcall(L, 1, 1, 0) == LUA_OK && lua_toboolean(L, -1))
-			outbuf.flush();
-		lua_pop(L, 1);
+	lua_getglobal(L, "__LOGGER");
+	auto ostr = outbuf.str();
+	lua_pushlstring(L, ostr.c_str(), ostr.size());
+	if (lua_pcall(L, 1, 1, 0) == LUA_OK) {
+		if (lua_toboolean(L, -1)) {
+			outbuf.str("");
+		}
 	}
+	// pop error or bool
 	lua_pop(L, 1);
+	in_flush = 0;
 }
 
 Logger::Logger(const TCHAR * file,Priority prio) : currPrio(Priority::ERR),filter(prio)
