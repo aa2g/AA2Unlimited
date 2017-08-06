@@ -237,7 +237,7 @@ void Lua::bindLua() {
 		case WM_KEYUP: mstr = "keyup"; break;
 		}
 		if (mstr) {
-			m->wParam = LUA_EVENT(mstr, m->wParam);
+			LUA_EVENT(mstr, m->wParam);
 			if (m->wParam == -1)
 				return true;
 		}

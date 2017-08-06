@@ -5,7 +5,7 @@ namespace PlayInjections {
 
 
 BYTE __stdcall ClothesPickEvent(BYTE newClothes) {
-	LUA_EVENT("clothes", newClothes, NULL);
+	LUA_EVENT("clothes", newClothes);
 	return newClothes;
 }
 

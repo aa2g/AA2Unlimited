@@ -13,13 +13,13 @@ namespace PcConversation {
 
 // TODO - both these events get passed some interesting arguments we currently ignore
 void __stdcall StartEvent() {
-	LUA_EVENT("convo", true);
+	LUA_EVENT_NORET("convo", true);
 	Shared::GameState::setIsPcConversation(true);
 	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall EndEvent() {
-	LUA_EVENT("convo", false);
+	LUA_EVENT_NORET("convo", false);
 	Shared::GameState::setIsPcConversation(false);
 	data.state = -1;
 	Shared::Triggers::ThrowEvent(&data);
@@ -86,7 +86,7 @@ void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversa
  * Parameter type is whatever it currently is
  ********************/
 void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
-	LUA_EVENT("convo_npc_answer", param->GetSubStruct());
+	LUA_EVENT_NORET("convo_npc_answer", param->GetSubStruct());
 }
 
 /*******************
@@ -94,7 +94,7 @@ void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
  * Parameter type is whatever it currently is
  *******************/
 void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
-	LUA_EVENT("convo_pc_answer", param->GetSubStruct());
+	LUA_EVENT_NORET("convo_pc_answer", param->GetSubStruct());
 	HAi::ConversationPcResponse(param);
 }
 
