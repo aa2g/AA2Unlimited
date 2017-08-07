@@ -235,6 +235,7 @@ void Lua::bindLua() {
 		switch (m->message) {
 		case WM_KEYDOWN: mstr = "keydown"; break;
 		case WM_KEYUP: mstr = "keyup"; break;
+		case WM_CHAR: mstr = "char"; break;
 		}
 		if (mstr) {
 			LUA_EVENT(mstr, m->wParam);
