@@ -85,7 +85,7 @@ static BOOL WINAPI MyFN(HANDLE h, LPWIN32_FIND_DATAW data) {
 		if (ppf_it == PPFileList.end())
 			return FALSE;
 		wcscpy(data->cFileName, (*ppf_it).c_str());
-		data->dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
+		data->dwFileAttributes = FILE_ATTRIBUTE_ARCHIVE;
 		ppf_it++;
 		return TRUE;
 	}
@@ -109,7 +109,7 @@ static HANDLE WINAPI MyFF(const wchar_t *path, LPWIN32_FIND_DATAW data) {
 	if (h == INVALID_HANDLE_VALUE) {
 		ppf_handle = h = PPF_HANDLE;
 		if (!MyFN(h, data))
-			return INVALID_HANDLE_VALUE;
+			return (ppf_handle = INVALID_HANDLE_VALUE);
 	}
 
 	ppf_handle = h;

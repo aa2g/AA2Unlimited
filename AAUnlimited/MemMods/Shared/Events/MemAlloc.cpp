@@ -34,6 +34,7 @@ void MemAllocInject() {
 	PatchIAT(iat_HeapSize, &InjectedHeapSize);
 	PatchIAT(iat_HeapAlloc, &InjectedHeapAlloc);
 	PatchIAT(iat_HeapFree, &InjectedHeapFree);
+
 }
 }
 }

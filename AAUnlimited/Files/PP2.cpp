@@ -3,6 +3,7 @@
 #include "zstd.h"
 #include "opus.h"
 #include <io.h>
+#include <windows.h>
 
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 
@@ -366,9 +367,35 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 
 PP2::PP2() {};
 HANDLE PP2::HGet() {
+	static int config;
+
 	if (!*Shared::IllusionMemAllocHeap)
 		*Shared::IllusionMemAllocHeap = HeapCreate(0, 0, 0);
-	return *Shared::IllusionMemAllocHeap;
+	HANDLE h = *Shared::IllusionMemAllocHeap;
+
+	if (!config) {
+		config = 1;
+		ULONG HeapInformation;
+		
+		HeapInformation = 2;
+		HeapSetInformation(h,
+			HeapCompatibilityInformation,
+			&HeapInformation,
+			sizeof(HeapInformation));
+
+		HeapInformation = 2;
+		HeapSetInformation(GetProcessHeap(),
+			HeapCompatibilityInformation,
+			&HeapInformation,
+			sizeof(HeapInformation));
+
+		HeapInformation = 2;
+		HeapSetInformation((HANDLE)_get_heap_handle(),
+			HeapCompatibilityInformation,
+			&HeapInformation,
+			sizeof(HeapInformation));
+	}
+	return h;
 }
 
 void PP2::OOM() {
@@ -379,6 +406,12 @@ void PP2::OOM() {
 	ACacheGC(-1);
 	g_Config.PP2Cache /= 2;
 	g_Config.PP2AudioCache /= 2;
+}
+
+
+static void defrag_heap() {
+	ULONG info[2] = { 1, 0 };
+	HeapSetInformation(NULL, (HEAP_INFORMATION_CLASS)3, info, 8);
 }
 
 void PP2::CacheGC(size_t sz) {
@@ -417,6 +450,7 @@ void PP2::CacheGC(size_t sz) {
 		if (dropped > sz)
 			break;
 	}
+	defrag_heap();
 	LOGPRIONC(Logger::Priority::SPAM)
 		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB, hits" <<fhit<<","<<lhit<<"\r\n";
 }
@@ -456,6 +490,8 @@ void PP2::ACacheGC(size_t sz) {
 		if (dropped > sz)
 			break;
 	}
+	defrag_heap();
 	LOGPRIONC(Logger::Priority::SPAM)
 		"ACacheGC: Freed " << nent << " uncompressed audio cache entries, " << dropped / 1024 << "KiB\r\n";
 }
+
