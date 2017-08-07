@@ -33,9 +33,9 @@ local function do_patch(isplay,path,unpatch,dll)
 		return
 	end
 
-	pf:seek("set", 0x248)
-	local rsize, val1, val2, roff = string.unpack("<IIII", pf:read(16))
-	pf:seek("set", 0x248)
+	local hdr = 0x248
+
+	local rsize, val1, val2, roff = string.unpack("<IIII", pf:readat(hdr, 16))
 
 	if math.abs(rsize - rdsize) > 256 then
 		iup.Message("Failure", path .. " doesn't appear to be AA2 play/edit exe file.\n"..
@@ -45,7 +45,7 @@ local function do_patch(isplay,path,unpatch,dll)
 
 	local ispatched = rsize ~= rdsize
 	if unpatch and ispatched then
-		pf:write(string.pack("<IIII", rdsize, val1, val2, roff))
+		pf:writeat(hdr, string.pack("<IIII", rdsize, val1, val2, roff))
 		pf:put32(dllpos, dllexpect)
 		pf:put32(namepos, nameexpect)
 		iup.Message("Unpatch success", path .. " unpatched, should be whatever it was originally.")
@@ -63,21 +63,20 @@ local function do_patch(isplay,path,unpatch,dll)
 	local dllpath = dll .. "\0"
 	local symbol = (aaplay and "\x02" or "\x09") .. "\x00_AA2Unlimited@4\0"
 
-	pf:write(string.pack("<IIII", rdsize + #dllpath + #symbol, val1, val2, roff))
+	pf:writeat(hdr, string.pack("<IIII", rdsize + #dllpath + #symbol, val1, val2, roff))
 
 	local scratchpos = rdsize + roff
-	pf:seek("set", scratchpos)
-	pf:write(dllpath .. symbol)
+	pf:writeat(scratchpos, dllpath .. symbol)
 
 	pf:put32(dllpos, scratchpos + delta)
 	pf:put32(namepos, scratchpos + delta + #dllpath)
 	if isplay then
 		-- permanently patch out the annoying features (codepage check, cd check)
-		pf:seek("set",0x21b145)
-		pf:write("\x90\x90")
-		pf:seek("set",0x1236)
-		pf:write("\xeb")
+		pf:writeat(0x21b145,"\x90\x90")
+		pf:writeat(0x1236,"\xeb")
 	end
+	-- bigaddr enable
+	pf:writeat(0x136, "\x22")
 	pf:close()
 	iup.Message("Patch success.", path .. " patched to load " .. dllpath)
 end
@@ -86,13 +85,22 @@ return function(arg,showcmd)
 	require "iuplua"
 	require "iupluacontrols"
 	local meta = getmetatable(io.stdin)
-	function meta:get32(pos, word)
+	function meta:readat(pos, n)
+		assert(type(pos)=="number")
 		self:seek('set',pos)
-		return string.unpack("<I", self:read(4))
+		return self:read(n)
+	end
+	function meta:writeat(pos, data)
+		assert(type(pos)=="number")
+		assert(data)
+		self:seek('set',pos)
+		return self:write(data)
+	end
+	function meta:get32(pos)
+		return string.unpack("<I", self:readat(pos, 4))
 	end
 	function meta:put32(pos, word)
-		self:seek('set',pos)
-		self:write(string.pack("<I", word))
+		self:writeat(pos, string.pack("<I", word))
 	end
 
 	local switch, exe, dll = arg:match("^/(.?) *([^ ]*) *(.*)")
@@ -139,19 +147,4 @@ Mode: %b[Unpatch - AAU will be disabled (if present),Patch - AAU will be enabled
 		iup.Message("Patcher failed with", msg)
 	end
 
---[[
-	local pf, msg = io.open(play, "r+b")
-	if msg then iup.Message("Failed", msg) end
-
-	local p = patches.play
-	local symbol = "\x02\x00_AA2Unlimited@4\0"
-	pf:seek("set", p.scratchpos)
-	pf:write(dllpath)
-	pf:write(symbol)
-
-
-
-	pf:put32(p.dllpos, p.scratchpos + delta)
-	pf:put32(p.namepos, p.scratchpos + delta + #dllpath)
-	pf:close()]]
 end

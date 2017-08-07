@@ -357,8 +357,13 @@ function __DISPATCH_EVENT(name, arg1, ...)
 	end
 
 	for _,h in ipairs(handlers[name] or {}) do
-		local retv = h[1](arg1, ...)
-		arg1 = retv ~= nil and retv or arg1
+		local ok, msg = pcall(function(...)
+			local retv = h[1](arg1, ...)
+			arg1 = retv ~= nil and retv or arg1
+		end, ...)
+		if not ok then
+			log.error("Event dispatch failed: %s", msg)
+		end
 	end
 
 	return arg1
