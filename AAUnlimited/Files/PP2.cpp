@@ -120,7 +120,10 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 			idx = *linkto;
 		len &= 0x7fff;
 		p += 2;
-		names.emplace(wstring((wchar_t*)p, len / 2), idx);
+		wstring tfn((wchar_t*)p, len / 2);
+		names.emplace(tfn, idx);
+		tfn.resize(tfn.find_first_of(L"/"));
+		SharedInjections::ArchiveFile::RegisterPP(tfn.c_str());
 		p += len;
 	}
 

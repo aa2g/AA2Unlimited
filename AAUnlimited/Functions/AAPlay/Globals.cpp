@@ -10,6 +10,8 @@ CharInstData g_characters[25];
 CharInstData g_previewChar;
 
 void InitOnLoad() {
+	LUA_EVENT_NORET("save_load", false);
+
 	for(int i = 0; i < 25; i++) {
 		g_characters[i].Reset();
 	}
@@ -46,6 +48,7 @@ void InitOnLoad() {
 		// ditto for lua
 		LUA_EVENT_NORET("load_card", seat, false);
 	}
+	LUA_EVENT_NORET("save_load", true);
 }
 
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
