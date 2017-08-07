@@ -269,7 +269,7 @@ end
 function load_modules()
 	Config.mods = Config.mods or {}
 	lock_globals()
-	for f in readdir(aau_path("mod", "*")) do
+	for f in readdir(aau_path() .. "mod\\*") do
 		local mname = f:match("^(.*)%.lua$") or f
 		if mname == f then
 			f = f .. "/init.lua"
@@ -402,9 +402,9 @@ function readdir(path)
 		local ok
 		if not fh then
 			mem = malloc(592)
-			fh = FindFirstFileW(utf8_to_unicode(path), mem)
+			local pa = utf8_to_unicode(path .. "\0")
+			fh = FindFirstFileW(pa, mem)
 			ok = fh ~= 0xffffffff
-			log("got fh %x",fh,ok,"isok")
 		else
 			ok = FindNextFileW(fh, mem) ~= 0
 		end
