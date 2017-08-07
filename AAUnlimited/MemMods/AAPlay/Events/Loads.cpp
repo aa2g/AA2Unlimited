@@ -20,6 +20,7 @@ void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
 	}
+	LUA_EVENT_NORET("hipoly", loadCharacter);
 	//throw high poly event
 	HiPolyInitData data;
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
