@@ -60,8 +60,8 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
 // extended array reference. sub can be used for partial keying / cherrypicking into sub-structs.
 // limit is to customize array bounds (can refer to other members via _self->)
 #define LUA_BINDARRE(var,sub,limit) \
-GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
-        size_t _idx = _gl.get(2); \
+GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
+        unsigned _idx = _gl.get(2); \
         if (_idx >= limit) return 0; \
         if (_gl.top() == 2) { \
                 _gl.push(_self->var sub[_idx]); \
@@ -75,8 +75,8 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
 // bind a struct embedded array. BINDARR won't work, because its
 // setter would have to return unwrapped arrays difficult to deal with
 #define LUA_BINDARREP(var,sub,limit) \
-GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
-        size_t _idx = _gl.get(2); \
+GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
+        unsigned _idx = _gl.get(2); \
         if (_idx >= limit) return 0; \
         _gl.push(&_self->var[_idx]); \
         return 1; \
