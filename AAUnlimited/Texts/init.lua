@@ -195,7 +195,7 @@ local handlers = {}
 on = {}
 
 local function _load_module(mod)
-	current_module = mod
+	current_module = mod[1]
 	--log("Trying to load "..mod[1])
 	local ok, data = xpcall(require, debug.traceback, mod[1])
 	if not ok then
@@ -239,10 +239,11 @@ function unload_module(name)
 	local mod = modules[name]
 	if not mod then return end
 	-- nuke all event handlers of a given module
-	for _,v in pairs(handlers) do
+	for evn,v in pairs(handlers) do
 		local i = 1
 		while i < #v do
 			if v[i][2] == mod then
+				log("[%s] removing handler %d for %s", name, i, evn)
 				table.remove(v, i)
 			else
 				i = i + 1
