@@ -26,7 +26,11 @@ function _M:load()
 
 	-- some simple patches too easy to warrant custom module
 	if exe_type == "play" then
-		g_poke(0x0032E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+		g_poke(0x32E48A, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+		g_poke(0x216510, "\xb8\x01\x00\x00\x00\xc3")
+	else
+		g_poke(0x30D552, Config.bUseMKIII and "t\0g\0a\0" or "b\0m\0p\0")
+		g_poke(0x1F8A90, "\xb8\x01\x00\x00\x00\xc3")
 	end
 
 	if exe_type == "edit" and Config.bUseAA2Face then
