@@ -273,7 +273,8 @@ struct State {
 	}
 
 	static int __index(lua_State *L) {
-		lua_getmetatable(L, 1);
+		if (!lua_getmetatable(L, 1))
+			return 0;
 		lua_pushvalue(L, 2);
 		if (lua_rawget(L, -2) != LUA_TFUNCTION)
 			return 0;
@@ -290,7 +291,8 @@ struct State {
 	}
 
 	static int __newindex(lua_State *L) {
-		lua_getmetatable(L, 1);
+		if (!lua_getmetatable(L, 1))
+			return 0;
 		lua_pushvalue(L, 2);
 		if (lua_rawget(L, -2) != LUA_TFUNCTION)
 			luaL_argerror(L, 2, "unexpected field write");
