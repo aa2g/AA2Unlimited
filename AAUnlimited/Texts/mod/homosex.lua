@@ -46,7 +46,7 @@ function _M:load()
 	assert(self)
 	mcfg = self
 	mcfg.opts = mcfg.opts or {1,1,1,1,1,1,1,1}
-	patch()
+	do_patch()
 end
 
 function _M:config()
