@@ -46,11 +46,19 @@ static const char *NormalInit()
 	if (!InitLua())
 		return NULL;
 
+	LUA_SCOPE;
+
 	// Now give chance to lua to run early. This loads that side of config, but
 	// doesn't do anything with the game yet, for that we must wait for inithooks.
 	g_Lua.bindLua();
 	LOGPRIONC(Logger::Priority::SPAM) "Base API bound\r\n";
-	g_Lua["load_modules"]();
+	try {
+		g_Lua["load_modules"]();
+	}
+	catch (const char *err) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) err;
+		return NULL;
+	}
 
 	// Will load paths from registry only if lua didn't change those
 	General::InitializePaths();
@@ -61,7 +69,14 @@ static const char *NormalInit()
 
 	// And run rest of lua
 	g_Logger.luaFlush(); // make lua see pending log entries
-	g_Lua["init_modules"]();
+	try {
+		g_Lua["init_modules"]();
+	}
+	catch (const char *err) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) err;
+		return NULL;
+	}
+
 	if (g_Config.bUsePPeX)
 		g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
 	if (g_Config.bUsePP2) {
