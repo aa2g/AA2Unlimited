@@ -566,6 +566,7 @@ LUA_API int lua_allocatetypex (lua_State *L) {
   global_State *g = G(L);
   luaM_growvector(L, g->mtx, g->usedttx, g->sizemtx, struct Table *, MAX_INT,
                      "type extensions");
+  g->mtx[g->usedttx] = NULL;
   return g->usedttx++;
 }
 
@@ -728,10 +729,14 @@ LUA_API int lua_getmetatablex (lua_State *L, int x) {
   lua_lock(L);
   api_check(L, x >= 0 && x < G(L)->usedttx, "invalid typex value");
   mt = G(L)->mtx[x];
-  sethvalue(L, L->top, mt);
-  api_incr_top(L);
+  int res = 0;
+  if (mt) {
+	  sethvalue(L, L->top, mt);
+	  api_incr_top(L);
+	  res = 1;
+  }
   lua_unlock(L);
-  return 1;
+  return res;
 }
 #endif
 
