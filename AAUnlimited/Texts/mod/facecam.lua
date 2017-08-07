@@ -3,17 +3,27 @@
 local _M = {}
 local cfg
 
--- key controls
-local UP = 1
-local DOWN = 0
-local LEFT = 0
-local RIGHT = 0
+local step = 0.05
+-- default offset
+local def = {
+	x = 0,
+	y = 0,
+	z = 0
+}
 
-local PGUP = 0
-local PGDN = 0
+local INS = 96
+local DEL = 110
+
+local MIN = 109
+local PLUS = 107
+
+local DIV = 111
+local MUL = 106
+
+local SEVEN = 103
 
 local activate = 'a'
-local reset = 'r'
+local reset = 'qwer'
 
 --local
 hinfo = hinfo or false
@@ -22,22 +32,56 @@ local tohide = { 0, 3, 4, 5, 6, 10, 11}
 
 local current = nil
 local eye = nil
-local center = {0,0,0}
-local xyz = {0,0,0,xrot=0,yrot=0}
+local center = {x=0,y=0,z=0}
+local xyz
+
+--local
+function fetch_rot()
+	if not hinfo then return end
+	--log("fetch_rot")
+	-- must be in facecam mode to fetch something meaningful!
+	if current == nil then return end
+	local cam = hinfo:GetCamera()
+	xyz.xrot = cam.m_xRotRad
+	xyz.yrot = cam.m_yRotRad
+end
+
+--local
+function load_hpos_settings()
+	if not hinfo then return end
+	if current == nil then return end
+	--log("load_hpos")
+	local pos = tostring(hinfo.m_currPosition) .. ((current and "_active") or "_passive")
+	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi}
+	cfg[pos] = xyz
+end
 
 --local
 function update_eye()
-	SetFocusBone(eye, xyz[1] + center[1], xyz[2] + center[2], xyz[3] + center[3])
+	--log("update eye", current, eye)
+	SetFocusBone(eye, xyz.x + center.x, xyz.y + center.y, xyz.z + center.z)
 	local cam = hinfo:GetCamera()
 	cam.m_xRotRad = xyz.xrot
 	cam.m_yRotRad = xyz.yrot
 end
 
+--local
+function restore_camera()
+	--log("restoring camera")
+	SetFocusBone(nil, 0,0,0)	
+	local cam = hinfo:GetCamera()
+	for i,v in ipairs {1.0,0,0,0,0,1.0,0,0,0,0,1.0,0,0,0,0,1.0} do
+		cam:m_matrix(i-1, v)
+	end
+end
+
+
 -- find eyes center
 --local
 function set_eye_focus(who)
+	--log("set eye", who)
 	if who == nil then
-		update_eye()
+		restore_camera()
 		return
 	end
 	local part = who and hinfo.m_activeParticipant or hinfo.m_passiveParticipant
@@ -65,13 +109,18 @@ function set_eye_focus(who)
 	x = x/2 + lx
 	y = y/2 + ly
 	z = z/2 + lz
-	center = {x,y,z}
+	center = {
+		x=x,
+		y=y,
+		z=z
+	}
 	eye = cptr:m_bonePtrArray(0)
+	update_eye()
 end
 
 --local
 function hide_heda(who, hide)
-	log("hide heda %s %s", who, hide)
+	--log("hide heda %s %s", who, hide)
 	local flag = hide and 2 or 0
 	local part = who and hinfo.m_activeParticipant or hinfo.m_passiveParticipant
 	local cptr = part.m_charPtr
@@ -82,6 +131,7 @@ end
 
 --local
 function set_status(current)
+	--log("set_status", current)
 	if current == nil then
 		hide_heda(true,false)
 		hide_heda(false,false)
@@ -97,14 +147,69 @@ function on.char(k)
 	if not hinfo then return k end
 	local chr = string.char(k)
 	if chr == activate then
-		current = not current
-	elseif chr == reset then
+		fetch_rot()
+		if current == nil then
+			current = true
+		else
+			current = not current
+		end
+	elseif reset:find(chr,1,true) then
+		fetch_rot()
 		current = nil
 	else
 		return k
 	end
+	-- save previous pos settings
+	Config.save()
+	load_hpos_settings()
 	set_status(current)
 	return k
+end
+
+function on.keydown(k)
+	if (not hinfo) or (current == nil) then return k end
+	if k == PLUS then
+		xyz.y = xyz.y - step
+	elseif k == MIN then
+		xyz.y = xyz.y + step
+
+	elseif k == DEL then
+		xyz.x = xyz.x - step
+	elseif k == INS then
+		xyz.x = xyz.x + step
+
+	elseif k == DIV then
+		xyz.z = xyz.z - step
+	elseif k == MUL then
+		xyz.z = xyz.z + step
+
+	elseif k == SEVEN then
+		xyz.x = 0
+		xyz.y = 0
+		xyz.z = 0
+		xyz.xrot = 0
+		xyz.yrot = math.pi
+		-- note, no fetch_rot coz we force 0
+		update_eye()
+		return k
+	else return k end
+	--log("keydown! %f %f %f", xyz.x, xyz.y, xyz.z)
+	fetch_rot()
+	update_eye()
+	return k
+end
+
+-- this fires after the pos is actually changed
+function on.change_h(hi, currpos, active, passive, aface, pface)
+	Config.save()
+	if current ~= nil then
+		--log("change h!")
+		--[[
+			fetch_rot() ??
+			load_hpos_settings() ??
+			]]
+		set_status(current)
+	end
 end
 
 function on.start_h(hi)
@@ -112,25 +217,49 @@ function on.start_h(hi)
 end
 
 
-function on.hipoly()
+--[[function on.hipoly()
 	if not hinfo then return end
 	set_status(current)
-end
+end]]
 
 function on.end_h()
 	if not hinfo then return end
+	fetch_rot()
+	Config.save()
 	set_status(nil)
 	hinfo = false
 end
 
-
--- support reloading
-function _M.load()
-	cfg = info.cfg or {}
-	info.cfg = cfg
+local function on_hposchange(arg)
+	fetch_rot()
+	Config.save()
+--	log("injected hpos change! %d", arg)
+	return arg
 end
 
-function _M.unload()
+local function on_hposchange2(arg)
+	load_hpos_settings()
+--	log("injected hpos change2! %d", arg)
+	return arg
+end
+
+local orig_hook
+-- support reloading
+function _M:load()
+	cfg = self.cfg or {}
+	self.cfg = cfg
+	-- tu, hackanon
+	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
+		arg = on_hposchange(arg)
+		local ret = proc_invoke(orig, this, arg)
+		ret = on_hposchange2(ret)
+		return ret
+	end)
+end
+
+function _M:unload()
+	g_poke_dword(0x326FC4, orig_hook)
+	Config.save()
 end
 
 return _M

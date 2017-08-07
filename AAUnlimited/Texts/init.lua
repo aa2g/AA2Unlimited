@@ -240,9 +240,15 @@ function unload_module(name)
 	if not mod then return end
 	-- nuke all event handlers of a given module
 	for evn,v in pairs(handlers) do
+		log("scanning owners of %s", evn)
 		local i = 1
-		while i < #v do
-			if v[i][2] == mod then
+		while i <= #v do
+			if not v[i] then
+				log("break skip")
+				break
+			end
+			log("print id %d owner %s", i, v[i][2])
+			if v[i][2] == name then
 				log("[%s] removing handler %d for %s", name, i, evn)
 				table.remove(v, i)
 			else
@@ -301,7 +307,7 @@ end
 
 function init_module(mod)
 	log("Initializing %s", mod.info[1])
-	local ok, msg = xpcall(mod.load, debug.traceback, table.unpack(mod.info))
+	local ok, msg = xpcall(mod.load, debug.traceback, mod.info)
 	if not ok then
 		log.error("Unable to initialize %s: %s", mod.info[1], msg)
 	else

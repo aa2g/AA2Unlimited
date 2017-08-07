@@ -4,6 +4,11 @@ namespace PlayInjections {
 namespace HPlayInjections {
 
 ExtClass::HInfo* loc_currentHInfo;
+ExtClass::CharacterStruct* loc_activeChar = NULL;
+ExtClass::CharacterStruct* loc_passiveChar = NULL;
+ExtClass::XXFile* loc_passiveFaceXX = NULL;
+ExtClass::XXFile* loc_activeFaceXX = NULL;
+DWORD loc_currPos = -1;
 
 bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
@@ -23,7 +28,33 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		if (loc_currentHInfo)
 			LUA_EVENT_NORET("end_h", hInfo);
 		loc_currentHInfo = NULL;
+
+		loc_currPos = -1;
+		loc_activeChar = NULL;
+		loc_passiveChar = NULL;
+		loc_activeFaceXX = NULL;
+		loc_passiveFaceXX = NULL;
 	}
+	if (loc_currentHInfo) {
+		auto active = hInfo->m_activeParticipant->m_charPtr;
+		auto passive = hInfo->m_passiveParticipant->m_charPtr;
+		if (
+			(loc_activeChar != active) ||
+			(loc_passiveChar != passive) ||
+			(active->m_xxFace != loc_activeFaceXX) ||
+			(passive->m_xxFace != loc_passiveFaceXX) ||
+			(loc_currPos != hInfo->m_currPosition)) {
+
+			LUA_EVENT_NORET("change_h", hInfo, loc_currPos, loc_activeChar, loc_passiveChar, loc_activeFaceXX, loc_passiveFaceXX);
+			//LUA_EVENT_NORET("change_h", hInfo, (loc_activeChar != active), (loc_passiveChar != passive), (active->m_xxFace != loc_activeFaceXX), (passive->m_xxFace != loc_passiveFaceXX), (loc_currPos != hInfo->m_currPosition))
+			loc_currPos = hInfo->m_currPosition;
+			loc_activeChar = active;
+			loc_passiveChar = passive;
+			loc_activeFaceXX = active->m_xxFace;
+			loc_passiveFaceXX = passive->m_xxFace;
+		}
+	}
+
 	ExtClass::HCamera::PostTick(hInfo,contScene);
 	if (contScene) {
 		Poser::StartEvent(Poser::HMode);
