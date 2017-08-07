@@ -85,6 +85,7 @@ static BOOL WINAPI MyFN(HANDLE h, LPWIN32_FIND_DATAW data) {
 		if (ppf_it == PPFileList.end())
 			return FALSE;
 		wcscpy(data->cFileName, (*ppf_it).c_str());
+		data->dwFileAttributes = FILE_ATTRIBUTE_NORMAL;
 		ppf_it++;
 		return TRUE;
 	}
