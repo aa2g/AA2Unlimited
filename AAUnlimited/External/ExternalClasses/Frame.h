@@ -64,7 +64,7 @@ public:
 	static inline void bindLua() {
 #define LUA_CLASS Frame
 		LUA_BINDSTRP(m_name)
-		//LUA_BINDARRE(m_children,, _self->m_nChildren)
+		LUA_BINDARREP(m_children,, _self->m_nChildren)
 		LUA_BIND(m_parent)
 		LUA_BINDARRE(m_matrix1,.m[0], 16)
 		LUA_BINDARRE(m_matrix2,.m[0], 16)
