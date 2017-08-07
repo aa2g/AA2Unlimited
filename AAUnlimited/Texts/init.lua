@@ -284,7 +284,7 @@ function load_modules()
 
 		-- we dont know about this module yet
 		if (not get_mod_info(mname)) and get_mod_desc(aau_path("mod",f)) then
-			table.insert(Config.mods, {mname, disabled=true})
+			table.insert(Config.mods, 1, {mname, disabled=true})
 		end
 	end
 	unlock_globals()

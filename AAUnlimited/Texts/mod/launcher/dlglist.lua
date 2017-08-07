@@ -8,7 +8,7 @@ return function(handlers, list)
 	local down = iup.button{title="Move down", active=false}
 	--[[local add = iup.button{title="Add"}
 	local del = iup.button{title="Delete", active=false}]]
-	local edit, reload
+	local edit, reload, config
 
 
 	local selected
@@ -42,11 +42,14 @@ return function(handlers, list)
 		text = text or self[idx]
 		selected = text
 		selected_idx = idx
-		local is_active, canreload = handlers:select(text)
+		local is_active, canreload, canconfig = handlers:select(text)
 		disable.active = is_active and "yes" or "no"
 		enable.active = is_active and "no" or "yes"
 		if reload then
 			reload.active = canreload and "yes" or "no"
+		end
+		if config then
+			config.active = canconfig and "yes" or "no"
 		end
 	end
 
@@ -108,6 +111,13 @@ return function(handlers, list)
 		end
 	end
 
+	if handlers.config then
+		config = iup.button{title="Settings", active="no"}
+		function config:action()
+			handlers:config(selected)
+		end
+	end
+
 	list.expand = true
 	return iup.hbox {
 		list, 
@@ -120,7 +130,8 @@ return function(handlers, list)
 			--[[add,
 			del,]]
 			edit,
-			reload
+			reload,
+			config
 		}
 	}
 end

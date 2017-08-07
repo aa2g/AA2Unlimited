@@ -20,7 +20,7 @@ function mod:select(n)
 	local n = n:sub(chk)
 	local info, d = get_mod_info(n)
 	desc.title = d
-	return not info.disabled, module_can_unload(n)
+	return not info.disabled, module_can_unload(n), (module_is_loaded(n) or {}).config
 end
 
 --[[
@@ -78,6 +78,14 @@ end
 function mod:reload(n)
 	local n = n:sub(chk)
 	reload_module(n)
+end
+
+function mod:config(n)
+	local n = n:sub(chk)
+	local mi = module_is_loaded(n)
+	if mi and mi.config then
+		mi.config(mi.info)
+	end
 end
 
 

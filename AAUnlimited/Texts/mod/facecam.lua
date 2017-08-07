@@ -1,9 +1,9 @@
 --@INFO Implements POV facecam (camera tracks eye bones)
 
 local _M = {}
-local cfg
+local cfg -- config for positions
+local mcfg -- module config
 
-local step = 0.05
 -- default offset
 local def = {
 	x = 0,
@@ -21,9 +21,6 @@ local DIV = 111
 local MUL = 106
 
 local SEVEN = 103
-
-local activate = 'a'
-local reset = 'qwer'
 
 --local
 hinfo = hinfo or false
@@ -44,6 +41,7 @@ function fetch_rot()
 	local cam = hinfo:GetCamera()
 	xyz.xrot = cam.m_xRotRad
 	xyz.yrot = cam.m_yRotRad
+	xyz.zrot = cam.m_zRotRad
 end
 
 --local
@@ -52,23 +50,24 @@ function load_hpos_settings()
 	if current == nil then return end
 	--log("load_hpos")
 	local pos = tostring(hinfo.m_currPosition) .. ((current and "_active") or "_passive")
-	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi}
+	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi,zrot=0}
 	cfg[pos] = xyz
 end
 
 --local
 function update_eye()
 	--log("update eye", current, eye)
-	SetFocusBone(eye, xyz.x + center.x, xyz.y + center.y, xyz.z + center.z)
+	SetFocusBone(eye, xyz.x + center.x, xyz.y + center.y, xyz.z + center.z, mcfg.zunlock)
 	local cam = hinfo:GetCamera()
 	cam.m_xRotRad = xyz.xrot
 	cam.m_yRotRad = xyz.yrot
+	cam.m_zRotRad = xyz.zrot
 end
 
 --local
 function restore_camera()
 	--log("restoring camera")
-	SetFocusBone(nil, 0,0,0)	
+	SetFocusBone(nil)	
 	local cam = hinfo:GetCamera()
 	for i,v in ipairs {1.0,0,0,0,0,1.0,0,0,0,0,1.0,0,0,0,0,1.0} do
 		cam:m_matrix(i-1, v)
@@ -131,6 +130,7 @@ end
 
 --local
 function set_status(current)
+	if not hinfo then return end
 	--log("set_status", current)
 	if current == nil then
 		hide_heda(true,false)
@@ -146,14 +146,14 @@ end
 function on.char(k)
 	if not hinfo then return k end
 	local chr = string.char(k)
-	if chr == activate then
+	if chr == mcfg.activate then
 		fetch_rot()
 		if current == nil then
 			current = true
 		else
 			current = not current
 		end
-	elseif reset:find(chr,1,true) then
+	elseif mcfg.reset:find(chr,1,true) then
 		fetch_rot()
 		current = nil
 	else
@@ -168,6 +168,7 @@ end
 
 function on.keydown(k)
 	if (not hinfo) or (current == nil) then return k end
+	local step = mcfg.step
 	if k == PLUS then
 		xyz.y = xyz.y - step
 	elseif k == MIN then
@@ -189,6 +190,7 @@ function on.keydown(k)
 		xyz.z = 0
 		xyz.xrot = 0
 		xyz.yrot = math.pi
+		xyz.zrot = 0
 		-- note, no fetch_rot coz we force 0
 		update_eye()
 		return k
@@ -246,8 +248,14 @@ end
 local orig_hook
 -- support reloading
 function _M:load()
+	assert(self)
+	mcfg = self
 	cfg = self.cfg or {}
 	self.cfg = cfg
+	self.activate = self.activate or 'a'
+	self.reset = self.reset or 'qwer'
+	self.zunlock = self.zunlock or false
+	self.step = self.step or 0.05
 	-- tu, hackanon
 	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
 		arg = on_hposchange(arg)
@@ -260,6 +268,25 @@ end
 function _M:unload()
 	g_poke_dword(0x326FC4, orig_hook)
 	Config.save()
+end
+
+function _M:config()
+	require "iuplua"
+	require "iupluacontrols"
+	local okay, akey, rkeys, z, step = iup.GetParam("Configure Facecam", nil, [[
+Activate key: %s{alphanum key to enter facecam}
+Reset keys: %s{any of these keys reset facecam}
+Allow z axis: %b{Descent mode}
+Offset step: %r[0.01,0.5,0.01]{Eye offset. Use numpad Ins,Del,+,-,*,/}
+]], self.activate, self.reset, self.zunlock and 1 or 0, self.step)
+	if okay then
+		self.activate = akey
+		self.reset = rkeys
+		self.zunlock = z == 1
+		self.step = step
+		set_status(current)
+		Config.save()
+	end
 end
 
 return _M

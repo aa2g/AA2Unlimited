@@ -217,7 +217,7 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["SetFocusBone"] = LUA_LAMBDA0({
-		HCamera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4));
+		HCamera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
 	});
 
 	using namespace General;

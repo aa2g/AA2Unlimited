@@ -3,13 +3,15 @@
 namespace ExtClass {
 ExtClass::Frame* loc_focusBone = NULL;
 D3DXVECTOR3 loc_focusOffset{ 0,0,0 };
+static bool loc_zunlock;
 
 void HCamera::PostTick(ExtClass::HInfo* hInfo, bool running) {
 	if (!(running && loc_focusBone))
 		return;
 	ExtClass::HCamera* cam = hInfo->GetCamera();
-	cam->m_zRotRad = 0;
 	cam->m_distToMid = 0;
+	if (!loc_zunlock)
+		cam->m_zRotRad = 0;
 
 	cam->m_xShift = 0;
 	cam->m_yShift = 0;
@@ -24,7 +26,8 @@ void HCamera::PostTick(ExtClass::HInfo* hInfo, bool running) {
 	cam->m_matrix = mat;
 }
 
-int HCamera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z) {
+int HCamera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z, bool zunlock) {
+	loc_zunlock = zunlock;
 	loc_focusBone = bone;
 	loc_focusOffset.x = x;
 	loc_focusOffset.y = y;
