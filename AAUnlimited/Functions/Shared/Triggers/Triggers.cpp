@@ -1,11 +1,7 @@
-#include "Triggers.h"
+#include "StdAfx.h"
 
-#include <queue>
-#include <stack>
 
-#include "Files\Logger.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
-#include "Thread.h"
+
 
 namespace Shared {
 namespace Triggers {

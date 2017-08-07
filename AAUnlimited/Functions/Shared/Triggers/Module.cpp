@@ -1,6 +1,4 @@
-#include "Module.h"
-
-#include <queue>
+#include "StdAfx.h"
 
 namespace Shared {
 namespace Triggers {

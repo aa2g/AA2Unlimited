@@ -14,6 +14,15 @@
     <Filter Include="ExternalData\ExternalClasses\H-Classes">
       <UniqueIdentifier>{1893b2a4-e3b4-4021-8cf3-5c4a13e39b47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua">
+      <UniqueIdentifier>{50d94dc6-2751-4aed-96b7-ed5153d2401e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua\Launcher">
+      <UniqueIdentifier>{f8591d55-7743-4c1e-8fd3-d1e62a291960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua\makertrans">
+      <UniqueIdentifier>{d8182a1c-5e55-438b-b8ce-b6f1e98b13d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -60,8 +69,6 @@
     <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Events\FileDump.cpp" />
-    <ClCompile Include="Functions\AAPlay\Facecam.cpp" />
-    <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\CardData.cpp" />
     <ClCompile Include="MemMods\Shared\Events\HairMeshes.cpp" />
     <ClCompile Include="Functions\AAPlay\Globals.cpp" />
@@ -102,6 +109,12 @@
     <ClCompile Include="Functions\Shared\Triggers\Module.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
+    <ClCompile Include="Script\ScriptLua.cpp" />
+    <ClCompile Include="Files\PPeX.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\MemAlloc.cpp" />
+    <ClCompile Include="Files\PP2.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -132,7 +145,6 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\WindowData.h" />
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="MemMods\AAEdit\Dialog.h" />
-    <ClInclude Include="config.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="General\Util.h" />
@@ -153,8 +165,6 @@
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Events\FileDump.h" />
     <ClInclude Include="External\AddressRule.h" />
-    <ClInclude Include="Functions\AAPlay\Facecam.h" />
-    <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
     <ClInclude Include="External\ExternalClasses\XXFile.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\CardData.h" />
     <ClInclude Include="MemMods\Shared\Events\HairMeshes.h" />
@@ -208,6 +218,16 @@
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
     <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
+    <ClInclude Include="Script\ScriptLua.h" />
+    <ClInclude Include="defs.h" />
+    <ClInclude Include="Files\PPeX.h" />
+    <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
+    <ClInclude Include="Files\PP2.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
+    <ClInclude Include="MemMods\Shared\Events\GameTick.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="Script\glua.h" />
+    <ClInclude Include="Script\gluam.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -224,5 +244,65 @@
     <None Include="resource.hm" />
     <None Include="Cheat Engine Tables\AA2Edit.CT" />
     <None Include="Cheat Engine Tables\AA2Play v12 FP v1.4.0a.CT" />
+    <None Include="Texts\config.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\init.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\fixlocale.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\memory.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\init.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\dlg.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\nocd.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\strutil.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\makertrans\dict.lua">
+      <Filter>Lua\makertrans</Filter>
+    </None>
+    <None Include="Texts\mod\makertrans\init.lua">
+      <Filter>Lua\makertrans</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\gsd.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\fakereg.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\facecam.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\geass.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\font.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\borderless.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\homosex.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\dlglist.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\launcher\dlgmod.lua">
+      <Filter>Lua\Launcher</Filter>
+    </None>
+    <None Include="Texts\mod\patcher.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

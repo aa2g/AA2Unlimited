@@ -1,15 +1,5 @@
-#include "PoserController.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <fstream>
-#include <Windows.h>
-
-#include "Files\ClothFile.h"
-#include "Files\PoseFile.h"
-#include "General\IllusionUtil.h"
-#include "General\Util.h"
+#include "StdAfx.h"
+#include "Files/PoseMods.h"
 
 namespace Poser {
 
@@ -122,6 +112,10 @@ namespace Poser {
 		m_characters.clear();
 		m_currentCharacter = 0;
 		m_roomSliders.clear();
+	}
+
+	void PoserController::SliderUpdate(int axis, int order, int position) {
+
 	}
 
 	void PoserController::SliderInfo::Apply() {

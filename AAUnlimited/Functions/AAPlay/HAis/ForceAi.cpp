@@ -1,7 +1,4 @@
-#include "ForceAi.h"
-
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Files\Logger.h"
+#include "StdAfx.h"
 
 using namespace ExtClass;
 

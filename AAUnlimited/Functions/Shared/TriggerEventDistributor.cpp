@@ -1,9 +1,7 @@
-#include "TriggerEventDistributor.h"
+#include "StdAfx.h"
 
-#include "Triggers\Thread.h"
-#include "Files\Config.h"
 
-#include <vector>
+
 
 namespace Shared {
 
@@ -11,7 +9,7 @@ namespace Shared {
 
 		namespace STUPIDNAME {
 			std::vector<Trigger*> loc_triggers[N_EVENTS];
-			bool loc_bTriggersEnabled = g_Config.GetKeyValue(Config::TRIGGERS).bVal;
+			bool loc_bTriggersEnabled = g_Config.bTriggers;
 		}
 
 		using namespace STUPIDNAME;

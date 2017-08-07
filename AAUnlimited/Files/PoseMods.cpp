@@ -1,10 +1,5 @@
+#include "StdAfx.h"
 #include "PoseMods.h"
-
-#include <map>
-#include <fstream>
-#include <algorithm>
-
-#include "Logger.h"
 
 PoseMods::PoseMods(std::wstring path) {
 	std::ifstream in(path);

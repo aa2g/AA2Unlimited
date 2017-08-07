@@ -1,13 +1,11 @@
-#include "PcActions.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
-namespace PcActions {
+	namespace PcActions {
 
 
 BYTE __stdcall ClothesPickEvent(BYTE newClothes) {
+	LUA_EVENT("clothes", newClothes);
 	return newClothes;
 }
 

@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <string>
 
-#include <config.h>
+#include "defs.h"
 
 namespace General {
 
@@ -18,49 +18,61 @@ extern std::wstring AAPlayPath;
 extern std::wstring AAUPath;
 extern std::wstring GameExeName; //name of the exe we are hooked to
 
-bool Initialize();
+bool InitializeExeType();
+bool EarlyInit();
+bool InitializePaths();
+
+// CAVEAT: The returned strings are static, so that extracted c_strs() can be relied on
+// at least until next call of the same function.
 
 inline std::wstring BuildAAUPath(const TCHAR* file) {
-	std::wstring retVal(AAUPath);
+	static std::wstring retVal;
+	retVal = AAUPath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 
 //subpath should not start with a backslash
 inline std::wstring BuildPlayPath(const TCHAR* subpath, const TCHAR* file) {
-	std::wstring retVal(AAPlayPath);
+	static std::wstring retVal;
+	retVal = AAPlayPath;
 	if (subpath != NULL) retVal += subpath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 inline std::wstring BuildPlayPath(const TCHAR* file) {
-	std::wstring retVal(AAPlayPath);
+	static std::wstring retVal;
+	retVal = AAPlayPath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 
 //subpath should not start with a backslash
 inline std::wstring BuildEditPath(const TCHAR* subpath, const TCHAR* file) {
-	std::wstring retVal(AAEditPath);
+	static std::wstring retVal;
+	retVal = AAEditPath;
 	if (subpath != NULL) retVal += subpath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 inline std::wstring BuildEditPath(const TCHAR* file) {
-	std::wstring retVal(AAEditPath);
+	static std::wstring retVal;
+	retVal = AAEditPath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 
 inline std::wstring BuildOverridePath(const TCHAR* subpath, const TCHAR* file) {
-	std::wstring retVal(AAEditPath);
+	static std::wstring retVal;
+	retVal = AAEditPath;
 	retVal += OVERRIDE_PATH;
 	if (subpath != NULL) retVal += subpath;
 	if (file != NULL) retVal += file;
 	return retVal;
 }
 inline std::wstring BuildOverridePath(const TCHAR* file) {
-	std::wstring retVal(AAEditPath);
+	static std::wstring retVal;
+	retVal = AAEditPath;
 	retVal += OVERRIDE_PATH;
 	if (file != NULL) retVal += file;
 	return retVal;

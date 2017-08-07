@@ -1,6 +1,4 @@
-#include "Buffer.h"
-
-#include <Windows.h>
+#include "StdAfx.h"
 
 namespace General {
 

@@ -1,8 +1,4 @@
-#include "GameGlobals.h"
-
-#include "External\ExternalClasses\CharacterStruct.h"
-#include "..\..\AddressRule.h"
-#include "General\ModuleInfo.h"
+#include "StdAfx.h"
 
 namespace ExtVars {
 namespace AAPlay {
@@ -40,6 +36,7 @@ ExtClass::TimeData* GameTimeData() {
 	return (ExtClass::TimeData*)
 		ApplyRule(offsets);
 }
+
 
 }
 }

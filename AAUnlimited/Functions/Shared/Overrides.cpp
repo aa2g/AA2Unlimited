@@ -1,23 +1,4 @@
-#include "Overrides.h"
-
-#include <Windows.h>
-#include <algorithm>
-
-#include "Files\Logger.h"
-#include "Files\Config.h"
-#include "General\Util.h"
-#include "General\IllusionUtil.h"
-#include "General\ModuleInfo.h"
-#include "Functions\CharInstData.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\TextureImage.h"
-#include "Functions\AAUCardData.h"
-#include "Functions\Shared\Globals.h"
-#include "Functions\Shared\Slider.h"
-#include "External\ExternalClasses\CharacterStruct.h"
-#include "MemMods\AAPlay\Events\ClothingDialog.h"
-#include "Functions\AAPlay\GameState.h"
+#include "StdAfx.h"
 
 namespace Shared {
 
@@ -105,7 +86,7 @@ namespace Shared {
 		if (eyeTexture.size() > 0) {
 			//if usage is 2, texture should be dumped from the buffer directly
 			const std::vector<BYTE>& fileSave = g_currentChar->m_cardData.GetEyeTextureBuffer(leftRight);
-			if (fileSave.size() > 0 && g_Config.GetKeyValue(Config::SAVED_EYE_TEXTURE_USAGE).iVal == 2) {
+			if (fileSave.size() > 0 && g_Config.savedEyeTextureUsage == 2) {
 				loc_dumpTexture = true;
 				loc_textureBuffer = &fileSave;
 			}

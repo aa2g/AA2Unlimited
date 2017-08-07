@@ -5,6 +5,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDebug|Win32">
+      <Configuration>ReleaseDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDebug|x64">
+      <Configuration>ReleaseDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -21,11 +29,14 @@
   <ItemGroup>
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
+    <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
+    <ClCompile Include="Files\PP2.cpp" />
+    <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
@@ -35,7 +46,6 @@
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\CardData.cpp" />
     <ClCompile Include="External\ExternalVariables\AAPlay\GameGlobals.cpp" />
-    <ClCompile Include="Functions\AAPlay\Facecam.cpp" />
     <ClCompile Include="Functions\AAPlay\Globals.cpp" />
     <ClCompile Include="Functions\AAPlay\HAis\ForceAi.cpp" />
     <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
@@ -44,7 +54,6 @@
     <ClCompile Include="Functions\Shared\Overrides.cpp" />
     <ClCompile Include="Functions\Shared\Slider.cpp" />
     <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
-    <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="Functions\Shared\TriggerEventDistributor.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Actions.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Event.cpp" />
@@ -68,7 +77,10 @@
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
-    <ClCompile Include="Functions\AAUCardData.cpp" />
+    <ClCompile Include="Functions\AAUCardData.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="External\ExternalClasses\CharacterData.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterStruct.cpp" />
     <ClCompile Include="External\ExternalClasses\ConversationStruct.cpp" />
@@ -100,11 +112,14 @@
     <ClCompile Include="Functions\Shared\Shadowing.cpp" />
     <ClCompile Include="MemMods\Shared\Events\FileDump.cpp" />
     <ClCompile Include="MemMods\Shared\Events\FrameManipulationTest.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
     <ClCompile Include="MemMods\Shared\Events\HairMeshes.cpp" />
+    <ClCompile Include="MemMods\Shared\Events\MemAlloc.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
     <ClCompile Include="Files\PoseMods.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
+    <ClCompile Include="Script\ScriptLua.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
@@ -114,6 +129,7 @@
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
+    <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
@@ -124,6 +140,8 @@
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Files\PoseFile.h" />
+    <ClInclude Include="Files\PP2.h" />
+    <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="Files\XXFile.h" />
     <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />
@@ -134,7 +152,6 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\CardData.h" />
     <ClInclude Include="External\ExternalVariables\AAPlay\GameGlobals.h" />
     <ClInclude Include="External\AddressRule.h" />
-    <ClInclude Include="Functions\AAPlay\Facecam.h" />
     <ClInclude Include="Functions\AAPlay\Globals.h" />
     <ClInclude Include="Functions\AAPlay\HAis\ForceAi.h" />
     <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
@@ -144,7 +161,6 @@
     <ClInclude Include="Functions\Shared\Overrides.h" />
     <ClInclude Include="Functions\Shared\Slider.h" />
     <ClInclude Include="Functions\Shared\SpecialOverrides.h" />
-    <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
     <ClInclude Include="Functions\Shared\TriggerEventDistributor.h" />
     <ClInclude Include="Functions\Shared\Triggers\Actions.h" />
     <ClInclude Include="Functions\Shared\Triggers\Event.h" />
@@ -166,7 +182,7 @@
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
-    <ClInclude Include="config.h" />
+    <ClInclude Include="defs.h" />
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="Functions\AAEdit\Globals.h" />
     <ClInclude Include="Functions\Shared\Globals.h" />
@@ -200,7 +216,9 @@
     <ClInclude Include="Functions\OverrideFile.h" />
     <ClInclude Include="MemMods\Shared\Events\FileDump.h" />
     <ClInclude Include="MemMods\Shared\Events\FrameManipulationTest.h" />
+    <ClInclude Include="MemMods\Shared\Events\GameTick.h" />
     <ClInclude Include="MemMods\Shared\Events\HairMeshes.h" />
+    <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
     <ClInclude Include="Files\PoseMods.h" />
@@ -211,6 +229,10 @@
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="Functions\Shared\Shadowing.h" />
+    <ClInclude Include="Script\glua.h" />
+    <ClInclude Include="Script\gluam.h" />
+    <ClInclude Include="Script\ScriptLua.h" />
+    <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -225,6 +247,26 @@
     <None Include="Cheat Engine Tables\AA2Edit.CT" />
     <None Include="Cheat Engine Tables\AA2Play v12 FP v1.4.0a.CT" />
     <None Include="resource.hm" />
+    <None Include="Texts\config.lua" />
+    <None Include="Texts\init.lua" />
+    <None Include="Texts\mod\borderless.lua" />
+    <None Include="Texts\mod\font.lua" />
+    <None Include="Texts\mod\geass.lua" />
+    <None Include="Texts\mod\facecam.lua" />
+    <None Include="Texts\mod\fakereg.lua" />
+    <None Include="Texts\mod\fixlocale.lua" />
+    <None Include="Texts\mod\homosex.lua" />
+    <None Include="Texts\mod\launcher\dlg.lua" />
+    <None Include="Texts\mod\launcher\dlglist.lua" />
+    <None Include="Texts\mod\launcher\dlgmod.lua" />
+    <None Include="Texts\mod\launcher\gsd.lua" />
+    <None Include="Texts\mod\launcher\init.lua" />
+    <None Include="Texts\mod\makertrans\dict.lua" />
+    <None Include="Texts\mod\makertrans\init.lua" />
+    <None Include="Texts\mod\memory.lua" />
+    <None Include="Texts\mod\nocd.lua" />
+    <None Include="Texts\mod\patcher.lua" />
+    <None Include="Texts\mod\strutil.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
@@ -243,7 +285,14 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -253,6 +302,20 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
@@ -270,26 +333,55 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <TargetName>$(ProjectName)</TargetName>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <TargetName>$(ProjectName)</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+    <CustomBuildBeforeTargets />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
+      <SDLCheck>false</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Debug;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>dbgcore.lib;dbghelp.lib;libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>cd $(SolutionDir)$(Configuration)\
@@ -311,26 +403,129 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
+      <WarningLevel>Level1</WarningLevel>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <CompileAsManaged>false</CompileAsManaged>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>dbghelp.lib;libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Release;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Release</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <ShowProgress>NotSet</ShowProgress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <SectionAlignment>
+      </SectionAlignment>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <LargeAddressAware>true</LargeAddressAware>
+      <TerminalServerAware>false</TerminalServerAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <FixedBaseAddress>true</FixedBaseAddress>
+      <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>cd $(SolutionDir) &amp;&amp; postbuild.bat $(Configuration) || (exit 0)</Command>
+      <Outputs>dummy_to_always_trigger</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <AdditionalDependencies>dbghelp.lib;libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\Debug;$(SolutionDir)\Release;$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Release;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Release</AdditionalLibraryDirectories>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>cd $(SolutionDir) &amp;&amp; postbuild.bat $(Configuration) || (exit 0)</Command>
+      <Outputs>dummy_to_always_trigger</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>cd $(SolutionDir)$(Configuration)\
-xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
-      <Message>Copy .dll to Game Directory</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>

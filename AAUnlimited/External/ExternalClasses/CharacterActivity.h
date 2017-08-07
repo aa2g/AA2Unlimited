@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -33,6 +34,27 @@ public:
 	BYTE m_unknown9[0x40];
 	CharacterStruct* m_thisChar;
 	BYTE m_unknown10[0x20];
+	static inline void bindLua() {
+#define LUA_CLASS ExtClass::CharacterActivity
+		LUA_BIND(m_animLocked)
+		LUA_BIND(m_loading)
+		LUA_BIND(m_thisChar)
+		LUA_BIND(m_isInConversation)
+		LUA_BIND(m_conversationLoading)
+		LUA_BIND(m_currentlyTalking)
+		LUA_BIND(m_currentMovementType)
+		LUA_BIND(m_currConversationId)
+		LUA_BIND(m_currRoomTarget)
+
+		LUA_BIND(m_lastConversationSuccess)
+		LUA_BIND(m_lastConversationAnswerPercent)
+		LUA_BIND(m_lastConversationAnswer)
+
+		LUA_BIND(m_idleAnimationProgress)
+
+		LUA_BIND(m_thisChar)
+#undef LUA_CLASS
+	};
 };
 
 static_assert(sizeof(CharacterActivity) == 0x104,"size mismatch");

@@ -1,16 +1,4 @@
-#include "OpenCard.h"
-
-#include <Windows.h>
-#include <intrin.h>
-#include <algorithm>
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "General\Util.h"
-#include "Files\Config.h"
-#include "Files\Logger.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\AAEdit\UnlimitedDialog.h"
+#include "StdAfx.h"
 
 namespace EditInjections {
 namespace OpenCard {
@@ -78,14 +66,14 @@ void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
 
 	bool dumped = aauData.DumpSavedOverrideFiles();
 
-	if(!suc || !dumped || !g_Config.GetKeyValue(Config::SAVED_FILE_REMOVE).bVal) {
+	if(!suc || !dumped || !g_Config.bSaveFileAutoRemove) {
 		//not an aau card
 		CloseHandle(hFile);
 		delete[] fileBuffer;
 		return;
 	}
 	
-	if(g_Config.GetKeyValue(Config::SAVED_FILE_BACKUP).bVal) {
+	if(g_Config.bSaveFileBackup) {
 		//do a backup
 		const wchar_t* filePart = General::FindFileInPath(card);
 		std::wstring backupName(card,filePart);

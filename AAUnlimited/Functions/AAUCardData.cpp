@@ -1,11 +1,7 @@
 #include "AAUCardData.h"
 
-#include <limits>
-#include <algorithm>
-#include <intrin.h>
-#include <sstream>
 
-#include "config.h"
+#include "defs.h"
 #include "Serialize.h"
 #include "Functions\Shared\Slider.h"
 #include "General\ModuleInfo.h"
@@ -64,12 +60,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			m_version = ReadData<int>(buffer, size);
 		}
 		if (m_version == 1) {
-			if (g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 0) {
+			if (g_Config.legacyMode == 0) {
 				LOGPRIO(Logger::Priority::INFO) << "a aau card version " << m_version << " was read and ignored due to legacy mode settings.\r\n";
 				this->Reset();
 				return;
 			}
-			else if (g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 2) {
+			else if (g_Config.legacyMode == 2) {
 				//treat as version 2 card
 				m_version = 2;
 			}
@@ -263,7 +259,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 	}
 
 
-	if (m_version == 1 && g_Config.GetKeyValue(Config::LEGACY_MODE).iVal == 3) {
+	if (m_version == 1 && g_Config.legacyMode == 3) {
 		ConvertToNewVersion();
 	}
 	m_version = 2;
@@ -1174,7 +1170,7 @@ void AAUCardData::SaveOverrideFiles() {
 
 bool AAUCardData::DumpSavedOverrideFiles() {
 	if (m_savedFiles.size() == 0) return false;
-	int mode = g_Config.GetKeyValue(Config::SAVED_FILE_USAGE).iVal;
+	int mode = g_Config.savedFileUsage;
 	if (mode == 3) return false; //if 3, do not extract
 
 	// look for which files to extract

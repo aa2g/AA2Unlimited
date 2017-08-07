@@ -1,4 +1,4 @@
-#include "HInfo.h"
+#include "StdAfx.h"
 
 namespace ExtClass {
 

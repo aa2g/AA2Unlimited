@@ -1,10 +1,9 @@
-﻿#include "ModuleInfo.h"
-#include "Files/Logger.h"
+﻿#include "StdAfx.h"
+
+// CAVEAT: None of these functions can use logger!
 
 #pragma comment( lib, "version.lib" )
 
-#include <string>
-#include <sstream>
 
 namespace General {
 
@@ -27,8 +26,106 @@ namespace {
 	wchar_t AAEditProductName[] = L"ジンコウガクエン２ きゃらめいく";
 }
 
-bool Initialize() {
+bool InitializeExeType() {
+		//try to check the resource file to figure out where we are
+
+	{
+		std::wstringstream resourceInfo(L""); //keps additional information in case of fail
+		DWORD legacy;
+		DWORD size = GetFileVersionInfoSize(GameExeName.c_str(), &legacy);
+		if (size == 0) {
+			int error = GetLastError();
+			resourceInfo << L"Failed to load version resource (error " + error << L")";
+		}
+		else {
+			BYTE* buffer = new BYTE[size];
+			GetFileVersionInfo(GameExeName.c_str(), NULL, size, buffer);
+			VS_FIXEDFILEINFO* info = NULL;
+			UINT infoSize;
+			VerQueryValue(buffer, TEXT("\\"), (void**)&info, &infoSize);
+			wchar_t* strFileVersion = NULL;
+			UINT strFileVersionLength;
+			wchar_t* strProductName = NULL;
+			UINT strProductNameLength;
+			//note: version is japanese (0411), codepage unicode (04B0)
+			BOOL suc = TRUE;
+			suc = suc && VerQueryValue(buffer, TEXT("\\StringFileInfo\\041104b0\\FileVersion"), (void**)&strFileVersion, &strFileVersionLength);
+			suc = suc && VerQueryValue(buffer, TEXT("\\StringFileInfo\\041104b0\\ProductName"), (void**)&strProductName, &strProductNameLength);
+			if (suc) {
+				bool editVersion = false, editName = false,
+					playVersion = false, playName = false;
+				if (wcscmp(AAPlayVersion, strFileVersion) == 0) playVersion = true;
+				if (wcscmp(AAEditVersion, strFileVersion) == 0) editVersion = true;
+				if (wcscmp(AAPlayProductName, strProductName) == 0) playName = true;
+				if (wcscmp(AAPlayASUProductName, strProductName) == 0) playName = true;
+				if (wcscmp(AAEditProductName, strProductName) == 0) editName = true;
+				if (editVersion && editName) IsAAEdit = true;
+				else if (playVersion && playName) IsAAPlay = true;
+				else {
+					resourceInfo << L"Resource data unconclusive:\r\n\tVersion: " << strFileVersion;
+					if (editVersion) resourceInfo << L" (Version of AAEdit)";
+					else if (playVersion) resourceInfo << L" (Version of AAPlay)";
+					else				  resourceInfo << L" (unknown version number; expected " << AAPlayVersion << L" for play or " << AAEditVersion << L" for edit)";
+					resourceInfo << L"\r\n\tProduct Name: " << strProductName;
+					if (editName) resourceInfo << L" (Name of AAEdit)";
+					else if (playName) resourceInfo << L" (Name of AAPlay)";
+					else			   resourceInfo << L" (unknown Name; expected " << AAPlayProductName << L" for play or " << AAEditProductName << L" for edit)";
+				}
+			}
+			delete[] buffer;
+		}
+
+		if (!IsAAEdit && !IsAAPlay) {
+			std::wstringstream msg(L"Resource Analysis was inconclusive. Information:\r\n");
+			msg << resourceInfo.str() << L"\r\n\r\n";
+			msg << L"With that, we do not know which program we were injected into. If YOU know, you may now choose manually where we are.\r\n"
+				L"Keep in mind that a wrong choice will crash the Program. To choose are we in AAPlay?:\r\n"
+				L"Press YES if we are in AAPLAY (the Game)\r\n"
+				L"Press NO if we are in AAEDIT (the Maker)\r\n"
+				L"Press CANCEL to abort\r\n";
+			int ret = MessageBoxW(NULL, msg.str().c_str(), L"Resource Analysis failed", MB_YESNOCANCEL);
+			if (ret == IDYES) {
+				IsAAPlay = true;
+			}
+			else if (ret == IDNO) {
+				IsAAEdit = true;
+			}
+			else {
+				//failed
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+// This is very early init (pre-hooks), when we still can't make assumptions about
+// where the game actually is, but AAU internals (ie lua) can run already.
+bool EarlyInit() {
+	//get name of exe we are in
+	{
+		TCHAR buffer[512];
+		GetModuleFileName(GetModuleHandle(NULL), buffer, 512);
+		GameExeName = buffer;
+	}
+
+	// wherever the DLL sits we consider home for AAU-specific files
+	{
+		TCHAR buffer[512];
+		GetModuleFileName(General::DllInst, buffer, 512);
+		AAUPath = buffer;
+		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
+	}
+
 	GameBase = (DWORD)GetModuleHandle(NULL);
+	return TRUE;
+}
+
+bool InitializePaths()
+{
+	if (AAPlayPath.size() > 0 && AAEditPath.size() > 0)
+		return true;
 
 	// find paths in registry
 	{
@@ -76,94 +173,7 @@ bool Initialize() {
 		if (buffer[outSize - 2] != L'\\') AAEditPath.push_back(L'\\');
 
 	}
-
-	//get name of exe we are in
-	{
-		TCHAR buffer[512];
-		GetModuleFileName(GetModuleHandle(NULL), buffer, 512);
-		GameExeName = buffer;
-	}
-
-	//try to check the resource file to figure out where we are
-	
-	{
-		std::wstringstream resourceInfo(L""); //keps additional information in case of fail
-		DWORD legacy;
-		DWORD size = GetFileVersionInfoSize(GameExeName.c_str(), &legacy);
-		if (size == 0) {
-			int error = GetLastError();
-			resourceInfo << L"Failed to load version resource (error " + error << L")";
-		}
-		else {
-			BYTE* buffer = new BYTE[size];
-			GetFileVersionInfo(GameExeName.c_str(), NULL, size, buffer);
-			VS_FIXEDFILEINFO* info = NULL;
-			UINT infoSize;
-			VerQueryValue(buffer, TEXT("\\"), (void**)&info, &infoSize);
-			wchar_t* strFileVersion = NULL;
-			UINT strFileVersionLength;
-			wchar_t* strProductName = NULL;
-			UINT strProductNameLength;
-			//note: version is japanese (0411), codepage unicode (04B0)
-			BOOL suc = TRUE;
-			suc = suc && VerQueryValue(buffer, TEXT("\\StringFileInfo\\041104b0\\FileVersion"), (void**)&strFileVersion, &strFileVersionLength);
-			suc = suc && VerQueryValue(buffer, TEXT("\\StringFileInfo\\041104b0\\ProductName"), (void**)&strProductName, &strProductNameLength);
-			if (suc) {
-				bool editVersion = false, editName = false,
-					playVersion = false, playName = false;
-				if (wcscmp(AAPlayVersion, strFileVersion) == 0) playVersion = true;
-				if (wcscmp(AAEditVersion, strFileVersion) == 0) editVersion = true;
-				if (wcscmp(AAPlayProductName, strProductName) == 0) playName = true;
-				if (wcscmp(AAPlayASUProductName, strProductName) == 0) playName = true;
-				if (wcscmp(AAEditProductName, strProductName) == 0) editName = true;
-				if (editVersion && editName) IsAAEdit = true;
-				else if (playVersion && playName) IsAAPlay = true;
-				else {
-					resourceInfo << L"Resource data unconclusive:\r\n\tVersion: " << strFileVersion;
-					if		(editVersion) resourceInfo << L" (Version of AAEdit)";
-					else if (playVersion) resourceInfo << L" (Version of AAPlay)";
-					else				  resourceInfo << L" (unknown version number; expected " << AAPlayVersion << L" for play or " << AAEditVersion << L" for edit)";
-					resourceInfo << L"\r\n\tProduct Name: " << strProductName;
-					if		(editName) resourceInfo << L" (Name of AAEdit)";
-					else if (playName) resourceInfo << L" (Name of AAPlay)";
-					else			   resourceInfo << L" (unknown Name; expected " << AAPlayProductName << L" for play or " << AAEditProductName << L" for edit)";
-				}
-			}
-			delete[] buffer;
-		}
-
-		if (!IsAAEdit && !IsAAPlay) {
-			std::wstringstream msg(L"Resource Analysis was inconclusive. Information:\r\n");
-			msg << resourceInfo.str() << L"\r\n\r\n";
-			msg << L"With that, we do not know which program we were injected into. If YOU know, you may now choose manually where we are.\r\n"
-				L"Keep in mind that a wrong choice will crash the Program. To choose are we in AAPlay?:\r\n"
-				L"Press YES if we are in AAPLAY (the Game)\r\n"
-				L"Press NO if we are in AAEDIT (the Maker)\r\n"
-				L"Press CANCEL to abort\r\n";
-			int ret = MessageBoxW(NULL, msg.str().c_str(), L"Resource Analysis failed", MB_YESNOCANCEL);
-			if (ret == IDYES) {
-				IsAAPlay = true;
-			}
-			else if (ret == IDNO) {
-				IsAAEdit = true;
-			}
-			else {
-				//failed
-				return false;
-			}
-		}
-	}
-
-	// wherever the DLL sits we consider home for AAU-specific files
-	{
-		TCHAR buffer[512];
-		GetModuleFileName(General::DllInst, buffer, 512);
-		AAUPath = buffer;
-		AAUPath.resize(AAUPath.find_last_of(L"/\\") + 1);
-	}
-
-	return true;
+	return TRUE;
 }
-
 
 }

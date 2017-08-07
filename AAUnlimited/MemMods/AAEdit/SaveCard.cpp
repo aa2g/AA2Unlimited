@@ -1,15 +1,5 @@
-#include "SaveCard.h"
+#include "StdAfx.h"
 
-#include <Windows.h>
-
-#include "External\AddressRule.h"
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "General\Buffer.h"
-#include "General\Util.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\AAEdit\UnlimitedDialog.h"
-#include "Files\Logger.h"
 
 namespace EditInjections {
 namespace SaveCard {

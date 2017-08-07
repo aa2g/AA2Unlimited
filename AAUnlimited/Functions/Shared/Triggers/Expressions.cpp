@@ -1,11 +1,4 @@
-#include "Expressions.h"
-
-#include "Thread.h"
-#include "Functions\AAPlay\Globals.h"
-#include "General\Util.h"
-#include "External\ExternalClasses\ConversationStruct.h"
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Functions/AAPlay/GameState.h"
+#include "StdAfx.h"
 
 namespace Shared {
 	namespace Triggers {

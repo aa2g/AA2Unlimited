@@ -1,11 +1,4 @@
-#include "PcConversation.h"
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses.h"
-#include "Functions/AAPlay/HAi.h"
-#include "Functions/AAPlay/Poser.h"
-#include "Functions/AAPlay/GameState.h"
-#include "Functions/Shared/TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 /*
@@ -18,12 +11,15 @@ namespace PcConversation {
  * Start / End Event
  ********************/
 
+// TODO - both these events get passed some interesting arguments we currently ignore
 void __stdcall StartEvent() {
+	LUA_EVENT_NORET("convo", true);
 	Shared::GameState::setIsPcConversation(true);
 	Poser::StartEvent(Poser::NpcInteraction);
 }
 
 void __stdcall EndEvent() {
+	LUA_EVENT_NORET("convo", false);
 	Shared::GameState::setIsPcConversation(false);
 	data.state = -1;
 	Shared::Triggers::ThrowEvent(&data);
@@ -64,9 +60,11 @@ void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
  * NPC -> PC interactive conversation tick event
  *******************/
 void __stdcall NpcPcInteractivePreTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePreTick"](param, param->GetSubStruct());
 }
 
 void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationStruct* param) {
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcInteractivePostTick"](param, param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
@@ -75,10 +73,11 @@ void __stdcall NpcPcInteractivePostTick(ExtClass::NpcPcInteractiveConversationSt
 *******************/
 
 void __stdcall NpcPcNonInteractivePreTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
-
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePreTick"](param->GetSubStruct());
 }
 
 void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
+//	g_Lua[LUA_EVENTS_TABLE]["Convo"]["NpcPcNonInteractivePostTick"](param->GetSubStruct());
 	HAi::ConversationTickPost(param);
 }
 
@@ -87,7 +86,7 @@ void __stdcall NpcPcNonInteractivePostTick(ExtClass::NpcPcNonInteractiveConversa
  * Parameter type is whatever it currently is
  ********************/
 void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
-
+	LUA_EVENT_NORET("convo_npc_answer", param->GetSubStruct());
 }
 
 /*******************
@@ -95,6 +94,7 @@ void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
  * Parameter type is whatever it currently is
  *******************/
 void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
+	LUA_EVENT_NORET("convo_pc_answer", param->GetSubStruct());
 	HAi::ConversationPcResponse(param);
 }
 

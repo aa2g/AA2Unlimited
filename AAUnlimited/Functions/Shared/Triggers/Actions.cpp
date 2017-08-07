@@ -1,11 +1,4 @@
-#include "Actions.h"
-
-#include "Thread.h"
-
-#include "Files\Logger.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\AAPlay\GameState.h"
-#include "External\AddressRule.h"
+#include "StdAfx.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -123,43 +116,42 @@ namespace Shared {
 			((NpcResponseData*)eventData)->changedChance = params[0].iVal;
 		}
 
-		namespace {
-			void SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
-				if (pointKind < 0 || pointKind > 3) return;
-				CharInstData* cardFrom = &AAPlay::g_characters[iCardFrom];
-				CharInstData* cardTowards = &AAPlay::g_characters[iCardTowards];
-				if (!cardFrom->IsValid()) return;
-				if (!cardTowards->IsValid()) return;
-				if (cardFrom == cardTowards) return;
+		int SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
+			if (pointKind < 0 || pointKind > 3) return 0;
+			CharInstData* cardFrom = &AAPlay::g_characters[iCardFrom];
+			CharInstData* cardTowards = &AAPlay::g_characters[iCardTowards];
+			if (!cardFrom->IsValid()) return 0;
+			if (!cardTowards->IsValid()) return 0;
+			if (cardFrom == cardTowards) return 0;
 
-				auto* ptrRel = cardFrom->m_char->GetRelations();
-				auto* rel = ptrRel->m_start;
-				if (ptrRel == NULL) return;
-				for (rel; rel != ptrRel->m_end; rel++) {
-					if (rel->m_targetSeat == iCardTowards) {
-						break;
-					}
-				}
-				if (rel == ptrRel->m_end) return;
-
-				switch (pointKind) {
-				case 0:
-					rel->m_lovePoints += nPoints;
-					break;
-				case 1:
-					rel->m_likePoints += nPoints;
-					break;
-				case 2:
-					rel->m_dislikePoints += nPoints;
-					break;
-				case 3:
-					rel->m_hatePoints += nPoints;
-				default:
+			auto* ptrRel = cardFrom->m_char->GetRelations();
+			auto* rel = ptrRel->m_start;
+			if (ptrRel == NULL) return 0;
+			for (rel; rel != ptrRel->m_end; rel++) {
+				if (rel->m_targetSeat == iCardTowards) {
 					break;
 				}
-
-				AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
 			}
+			if (rel == ptrRel->m_end) return 0;
+
+			switch (pointKind) {
+			case 0:
+				rel->m_lovePoints += nPoints;
+				break;
+			case 1:
+				rel->m_likePoints += nPoints;
+				break;
+			case 2:
+				rel->m_dislikePoints += nPoints;
+				break;
+			case 3:
+				rel->m_hatePoints += nPoints;
+			default:
+				break;
+			}
+
+			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
+			return 1;
 		}
 
 		//int cardFrom, int cardTowards, int nPoints

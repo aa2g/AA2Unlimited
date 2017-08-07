@@ -190,13 +190,6 @@ namespace Poser {
 				}
 			}
 
-			inline void setValueFromSlider(int sldVal, int axis) {
-				if (currentOperation == Rotate)
-					setValue(axis, rotation.minEuler[axis] + (rotation.maxEuler[axis] - rotation.minEuler[axis]) / 0x10000 * sldVal);
-				else
-					setValue(axis, getCurrentOperationData()->rangeMin(axis) + (getCurrentOperationData()->rangeMax(axis) - getCurrentOperationData()->rangeMin(axis)) / 0x10000 * sldVal);
-			}
-
 			inline int toSlider(int axis) {
 				float coeff = 0x10000 / getCurrentOperationRange(axis);
 				return int(coeff * (getValue(axis) - getCurrentOperationRangeMin(axis)));
@@ -429,6 +422,7 @@ namespace Poser {
 		void GenSliderInfo();
 		void UpdateUI();
 
+		void SliderUpdate(int axis, int order, int position);
 		inline void ApplyIncrement(int axis, float order) {
 			CurrentSlider()->increment(order, axis);
 		}
