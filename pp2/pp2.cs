@@ -40,7 +40,7 @@ public class DirEntry : IReadFile
 // This can be easily interfac-ied, needs to give only .GetData(), .GetMeta() & .naked
 public class ChunkFile
 {
-    const int MAXSIZE = 32 * 1024 * 1024;
+    const int MAXSIZE = 16 * 1024 * 1024;
     // helper fields
     public bool done, naked; // no zstd, and no chunk grouping
     public IReadFile pp;
@@ -74,9 +74,9 @@ public class ChunkFile
     public ChunkFile(IReadFile _pp, string parent, uint size)
     {
         pp = _pp;
-        name = (parent + "/" + pp.Name).ToLower();
+        name = (parent + "/" + pp.Name);
 
-        if (name.EndsWith(".wav"))
+        if (name.ToLower().EndsWith(".wav"))
         {
             var tmp = new byte[44];
             pp.CreateReadStream().Read(tmp, 0, 44);
