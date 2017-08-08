@@ -1,4 +1,4 @@
---@INFO Registry faker (onedir/portable only)
+--@INFO Registry faker for onedir. Needs restart.
 
 require "memory"
 
@@ -10,7 +10,7 @@ _BINDING.SetAAEditPath(fakepath)
 
 local _M = {}
 
-function _M.load()
+function on.launch()
 	local query = 0x2C4000
 	local close = 0x2C4004
 	local open = 0x2C4008
@@ -46,6 +46,9 @@ function _M.load()
 		return proc_invoke(orig, this, hk)
 	end)
 
+end
+
+function _M.load()
 end
 
 return _M

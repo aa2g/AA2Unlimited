@@ -20,7 +20,11 @@ local clearicon = {
 
 local _M = {}
 
-local function translate()
+function on.launch()
+	if not _BINDING.IsAAEdit then
+		return
+	end
+
 	local mem = malloc(4096)
 	local transtab = {}
 	local count = 0
@@ -93,10 +97,6 @@ local function translate()
 end
 
 function _M:load()
-	if not _BINDING.IsAAEdit then
-		return
-	end
-	translate()
 end
 
 

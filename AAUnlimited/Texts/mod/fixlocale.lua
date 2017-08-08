@@ -15,16 +15,20 @@ local function patch_aaplay()
 	poke(p+128, fixcp .. "\x68" .. string.pack("<I4", g_xchg_dword(0x002E3190, p+128)) .. "\xC3")
 end
 
+function on.launch()
+	if (_BINDING.IsAAPlay) then
+		patch_aaplay()
+	end
+end
+
 
 local _M={}
 
-function _M:load(mod, level)
-	level = level or 1
+function _M:load()
+	-- TODO, make level configurable
+	local level = 1
 	-- not emulated, nor japanese system (langid 17)
 	if (level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
-		if (_BINDING.IsAAPlay) then
-			patch_aaplay()
-		end
 		SetThreadLocale(1041)
 	end
 end

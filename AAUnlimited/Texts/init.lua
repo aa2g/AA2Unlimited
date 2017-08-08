@@ -166,6 +166,7 @@ exe_type = _BINDING.IsAAEdit and "edit" or "play"
 Config.load("config")
 Config.load("localconfig")
 Config.load("savedconfig")
+Config.load("forcedconfig")
 -- _G.Config transparently binds Lua and C++ together
 setmetatable(Config, cfproxy)
 
@@ -334,6 +335,7 @@ function init_modules()
 		init_module(mod)
 	end
 	init_pending = nil
+	require "patches"
 end
 
 function table.extend(a,b)
@@ -457,3 +459,8 @@ function get_mod_info(n)
 	return mi, desc, idx
 end
 
+
+function alert(msg)
+	require "iup"
+	iup.Message("Alert", msg)
+end
