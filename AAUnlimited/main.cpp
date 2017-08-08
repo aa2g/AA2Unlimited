@@ -2,6 +2,7 @@
 
 #include <Dbghelp.h>
 #include "General\ModuleInfo.h"
+#include "Functions/RenderWrap.h"
 
 // Needs: EarlyInit. Note that you can't log until you call InitLua.
 static void InitLogger()
@@ -143,9 +144,15 @@ IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 	SetUnhandledExceptionFilter(panic);
 
 	const char *d3d = NormalInit();
-	//if (!d3d)
+	if (!d3d)
 		d3d = "d3d9.dll";
-	HMODULE h = LoadLibraryA(d3d);
+	DWORD ptr = 0;
+	LUA_EVENT("d3d9_preload", ptr);
+	HMODULE h;
+	if (ptr)
+		h = (HMODULE)ptr;
+	else
+		h = LoadLibraryA(d3d);
 	if (!h)
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Failed to load " << d3d << " crash imminent\r\n";
 
@@ -153,7 +160,8 @@ IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 	if (!orig)
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Failed to get Direct3DCreate9 constructor, crash imminent\r\n";
 
-	return orig(SDKVersion);
+	LUA_EVENT_NORET("launch");
+	return (IDirect3D9*)Render::WrapInterface(orig(SDKVersion));
 }
 
 extern "C" __declspec(dllexport)
