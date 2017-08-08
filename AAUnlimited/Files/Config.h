@@ -13,6 +13,7 @@ public:;
 	bool bSaveFileAutoRemove;
 	int savedFileUsage;
 	int savedEyeTextureUsage;
+	bool bLogPPAccess;
 	bool bHAiOnNoPromptH;
 	bool bUseDialoguePoser;
 	bool bUseClothesPoser;
@@ -52,6 +53,7 @@ public:;
 #define LUA_CLASS Config
 			LUA_BIND(screenshotFormat)
 			LUA_BINDSTR(sPoserHotKeys)
+			LUA_BIND(bLogPPAccess)
 			LUA_BIND(bSaveFileBackup)
 			LUA_BIND(bSaveFileAutoRemove)
 			LUA_BIND(savedFileUsage)
