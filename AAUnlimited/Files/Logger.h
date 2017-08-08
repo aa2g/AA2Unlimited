@@ -7,6 +7,7 @@
 
 #include "Script/ScriptLua.h"
 
+#define LOGSPAM if(g_Logger.FilterPriority(Logger::Priority::SPAM)) g_Logger
 #define LOGPRIONC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << 
 #define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIG__ ": " <<
 #define LOGPRIO(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << \
@@ -38,7 +39,7 @@ public:
 	std::thread::id tid;
 
 	template<typename T>
-	Logger& operator<<(const T& p) {
+	Logger& operator<<(const T &p) {
 		std::unique_lock<std::mutex> lock(mutex);
 		if (outfile.good() && currPrio >= filter) {
 			outfile << p;
@@ -48,6 +49,7 @@ public:
 		outfile.flush();
 		return *this;
 	}
+
 	void luaFlush();
 	template<>
 	Logger& operator<<(const Priority& prio) {

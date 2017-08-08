@@ -10,27 +10,77 @@ namespace ArchiveFile {
 * else, the function is aborted and the results from this function are used.
 */
 bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	bool ret;
-	ret = Poser::OverrideFile(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::HairRedirect(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	if (g_Config.bUseShadowing) {
-		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
-		if (ret) return true;
-	}
-	if (g_Config.bUsePPeX)
-		ret = g_PPeX.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer);
-	if (g_Config.bUsePP2)
-		ret = g_PP2.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer);
+	static wchar_t arch[1024];
+	static wchar_t file[1024];
 
-	return ret;
+	const wchar_t *orig_paramArchive = arch;
+	const wchar_t *orig_paramFile = file;
+	const char *provider = NULL;
+	const char *rewriter = "";
+	const char *rewriter2 = "";
+
+	if (Poser::OverrideFile(paramArchive, paramFile, readBytes, outBuffer)) {
+		provider = "overridefile";
+		goto done;
+	}
+
+	// NOTE: return value implies the name was rewritten
+	if (Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer)) {
+		rewriter = "replace";
+	}
+
+	if (Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer)) {
+		provider = "tanoverride";
+		goto done;
+	}
+
+	if (Shared::HairRedirect(paramArchive, paramFile, readBytes, outBuffer)) {
+		rewriter2 = ",hairredirect";
+	}
+
+	if (Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer)) {
+		provider = "archiveoverride";
+		goto done;
+	}
+
+
+	if (g_Config.bUseShadowing) {
+		if (Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "shadowed";
+			goto done;
+		}
+	}
+
+	if (g_Config.bUsePPeX) {
+		if (g_PPeX.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "ppex";
+			goto done;
+		}
+	}
+
+	if (g_Config.bUsePP2) {
+		if (g_PP2.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "pp2";
+			goto done;
+		}
+	}
+
+done:;
+	if (g_Config.bLogPPAccess) {
+		LOGPRIONC(Logger::Priority::SPAM) "OpenFileEvent " <<
+			"provider=" << (provider?provider:"pp") << " " <<
+			"archive=" << std::wstring(*paramArchive) << " " <<
+			"file=" << std::wstring(*paramFile);
+		if ((*paramArchive != orig_paramArchive) || (orig_paramFile != *paramFile)) {
+			LOGSPAM << "rewriter=" << rewriter << rewriter2 << " " <<
+				" origarchive=" << std::wstring(orig_paramArchive) << " origfile=" << std::wstring(orig_paramFile);
+		}
+		if (provider)
+			LOGSPAM << " size=" << std::dec << *readBytes;
+		LOGSPAM << "\r\n";
+	}
+
+	return provider != NULL;
 }
 
 DWORD OpenFileNormalExit;
