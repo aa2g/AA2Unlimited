@@ -51,6 +51,12 @@
     <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
     <ClCompile Include="Functions\AAPlay\HButtonMove.cpp" />
+    <ClCompile Include="Functions\Render.cpp" />
+    <ClCompile Include="Functions\RenderWrap.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Functions\Shared\Overrides.cpp" />
     <ClCompile Include="Functions\Shared\Slider.cpp" />
     <ClCompile Include="Functions\Shared\SpecialOverrides.cpp" />
@@ -157,6 +163,8 @@
     <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
     <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
     <ClInclude Include="Functions\AAPlay\HButtonMove.h" />
+    <ClInclude Include="Functions\Render.h" />
+    <ClInclude Include="Functions\RenderWrap.h" />
     <ClInclude Include="Functions\Serialize.h" />
     <ClInclude Include="Functions\Shared\Overrides.h" />
     <ClInclude Include="Functions\Shared\Slider.h" />
@@ -249,6 +257,7 @@
     <None Include="resource.hm" />
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
+    <None Include="Texts\mod\aaface\init.lua" />
     <None Include="Texts\mod\borderless.lua" />
     <None Include="Texts\mod\font.lua" />
     <None Include="Texts\mod\geass.lua" />
@@ -266,7 +275,10 @@
     <None Include="Texts\mod\memory.lua" />
     <None Include="Texts\mod\nocd.lua" />
     <None Include="Texts\mod\patcher.lua" />
+    <None Include="Texts\mod\patches.lua" />
+    <None Include="Texts\mod\reshade.lua" />
     <None Include="Texts\mod\strutil.lua" />
+    <None Include="Texts\mod\win10fix.lua" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
@@ -379,7 +391,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutDir);$(TargetName);$(SolutionDir)\3rdparty\zstd\build\VS2010\bin\Win32_Debug;$(SolutionDir)\3rdparty\opus\win32\VS2015\Win32\Debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>dbgcore.lib;dbghelp.lib;libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dbghelp.lib;libzstd_static.lib;opus.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
     </Link>

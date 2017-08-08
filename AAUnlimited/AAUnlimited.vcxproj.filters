@@ -23,6 +23,9 @@
     <Filter Include="Lua\makertrans">
       <UniqueIdentifier>{d8182a1c-5e55-438b-b8ce-b6f1e98b13d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\aaface">
+      <UniqueIdentifier>{4ccd2800-a7eb-49d9-9c6b-c86e52fa201e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -115,6 +118,8 @@
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
     <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
+    <ClCompile Include="Functions\Render.cpp" />
+    <ClCompile Include="Functions\RenderWrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -228,6 +233,8 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Script\glua.h" />
     <ClInclude Include="Script\gluam.h" />
+    <ClInclude Include="Functions\Render.h" />
+    <ClInclude Include="Functions\RenderWrap.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -302,6 +309,18 @@
       <Filter>Lua\Launcher</Filter>
     </None>
     <None Include="Texts\mod\patcher.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\reshade.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\win10fix.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\aaface\init.lua">
+      <Filter>Lua\aaface</Filter>
+    </None>
+    <None Include="Texts\mod\patches.lua">
       <Filter>Lua</Filter>
     </None>
   </ItemGroup>
