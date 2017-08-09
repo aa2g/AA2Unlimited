@@ -1,6 +1,7 @@
 #define INITGUID
 
 #define QSIZE 1024*1024
+#define QLIMIT 768*1024
 
 #include <windows.h>
 #include <d3d9.h>
@@ -88,13 +89,21 @@ static void tickdump(DWORD now) {
 #else
 
 #define WRAPCALL(x) { \
-	std::unique_lock<std::mutex> lock(mainthread); \
-	return x; \
+	if (!g_Config.bMTRenderer) return x; \
+    while (play < record) Sleep(1); \
+	{ \
+std::unique_lock<std::mutex> lock(mainthread); \
+return x; \
+	} \
 }
 
 #define WRAPCALLV(x) { \
-	std::unique_lock<std::mutex> lock(mainthread); \
-	return x; \
+	if (!g_Config.bMTRenderer) return x; \
+	while (play < record) Sleep(1); \
+	{ \
+std::unique_lock<std::mutex> lock(mainthread); \
+return x; \
+	} \
 }
 
 #define DWRAPCALL(x) { \
@@ -116,8 +125,8 @@ public:;
 
 	std::thread worker;
 	std::condition_variable condition;
-	size_t play;
-	size_t record;
+	volatile size_t play;
+	volatile size_t record;
 	bool exiting;
 	char buf[QSIZE];
 
@@ -127,8 +136,11 @@ public:;
 		ref = 1;
 		exiting = false;
 
+		if (!g_Config.bMTRenderer)
+			return;
+
 		std::thread w([this] {
-			LOGSPAM << "Worker thread running\n";
+//			LOGSPAM << "Worker thread running\n";
 			for (;;)
 				if (this->render_thread())
 					return;
@@ -138,23 +150,17 @@ public:;
 
 #define SIZEOF(base,mem) (intptr_t(&mem) - intptr_t(base) + sizeof(mem))
 	bool render_thread() {
-		LOGSPAM << "inside replay\n";
-		play = record = 0;
-		{
-			std::unique_lock<std::mutex> lock(workq);
-			// these are lingering entries because only now 'record' cache has propagated
-			while (play < record)
-				play += replay_work();
+		while (play == record && (!exiting))
+			Sleep(1);
+		if (exiting)
+			return true;
 
-			play = record = 0;
-			condition.wait(lock, [this] { return exiting || (play < record); });
-			if (exiting) return true;
-			mainthread.lock();
-		}
-		// Now we grab the queue and run it
+		mainthread.lock();
 		while (play < record)
 			play += replay_work();
-		// Now give chance to main thread to run, if its stuck on some dx call
+		if (record > QLIMIT) {
+			play = record = 0;
+		}
 		mainthread.unlock();
 		return false;
 	}
@@ -164,16 +170,16 @@ public:;
 		WorkItem *wi = (WorkItem*)(buf + play);
 		switch (wi->op) {
 		case PIXEL_SHADER:
-			SetPixelShader(wi->p);
+			orig->SetPixelShader(wi->p);
 			return SIZEOF(wi, wi->p);
 		case VERTEX_SHADER:
-			SetVertexShader(wi->v);
+			orig->SetVertexShader(wi->v);
 			return SIZEOF(wi, wi->v);
 		case VERTEX_SHADER_CONST:
-			SetVertexShaderConstantF(wi->c.StartRegister, wi->c.data, wi->c.Vector4fCount);
+			orig->SetVertexShaderConstantF(wi->c.StartRegister, wi->c.data, wi->c.Vector4fCount);
 			return SIZEOF(wi, wi->c) + wi->c.Vector4fCount * 4;
 		case PIXEL_SHADER_CONST:
-			SetPixelShaderConstantF(wi->c.StartRegister, wi->c.data, wi->c.Vector4fCount);
+			orig->SetPixelShaderConstantF(wi->c.StartRegister, wi->c.data, wi->c.Vector4fCount);
 			return SIZEOF(wi, wi->c) + wi->c.Vector4fCount * 4;
 		case DRAW_PRIMITIVES:
 			orig->DrawIndexedPrimitive(wi->d.PrimitiveType, wi->d.BaseVertexIndex, wi->d.MinVertexIndex, wi->d.NumVertices, wi->d.startIndex, wi->d.primCount);
@@ -188,42 +194,29 @@ public:;
 		nprim += primCount;
 		drawcalls++;
 
-		while (g_Config.bMTRenderer) {
-			{
-				std::unique_lock<std::mutex> lock(workq);
-				WorkItem *wi = (WorkItem*)(buf + record);
-				size_t nrecord = record + SIZEOF(wi, wi->d);
-				if (nrecord > QSIZE) break;
-				wi->d.PrimitiveType = PrimitiveType;
-				wi->d.BaseVertexIndex = BaseVertexIndex;
-				wi->d.MinVertexIndex = MinVertexIndex;
-				wi->d.NumVertices = NumVertices;
-				wi->d.startIndex = startIndex;
-				wi->d.primCount = primCount;
-				record = nrecord;
-			}
-			condition.notify_one();
+		if (g_Config.bMTRenderer && record < QLIMIT) {
+			WorkItem *wi = (WorkItem*)(buf + record);
+			wi->op = DRAW_PRIMITIVES;
+			wi->d.PrimitiveType = PrimitiveType;
+			wi->d.BaseVertexIndex = BaseVertexIndex;
+			wi->d.MinVertexIndex = MinVertexIndex;
+			wi->d.NumVertices = NumVertices;
+			wi->d.startIndex = startIndex;
+			wi->d.primCount = primCount;
+			record += SIZEOF(wi, wi->d);
 			return NOERROR;
 		}
 
 		WRAPCALL(orig->DrawIndexedPrimitive(PrimitiveType, BaseVertexIndex, MinVertexIndex, NumVertices, startIndex, primCount));
-		return D3D_OK;
 	}
 
 	HRESULT WINAPI SetPixelShader(IDirect3DPixelShader9* pShader)
 	{
-		while (g_Config.bMTRenderer) {
-			{
-				std::unique_lock<std::mutex> lock(workq);
-				WorkItem *wi = (WorkItem*)(buf + record);
-				size_t nrecord = record + SIZEOF(wi, wi->p);
-				if (nrecord > QSIZE) break;
-
-				wi->op = PIXEL_SHADER;
-				wi->p = pShader;
-				record = nrecord;
-			}
-			condition.notify_one();
+		if (g_Config.bMTRenderer && record < QLIMIT) {
+			WorkItem *wi = (WorkItem*)(buf + record);
+			wi->op = PIXEL_SHADER;
+			wi->p = pShader;
+			record += SIZEOF(wi, wi->p);
 			return NOERROR;
 		}
 		WRAPCALL(orig->SetPixelShader(pShader));
@@ -231,18 +224,11 @@ public:;
 
 	HRESULT WINAPI SetVertexShader(IDirect3DVertexShader9* pShader)
 	{
-		while (g_Config.bMTRenderer) {
-			{
-				std::unique_lock<std::mutex> lock(workq);
-				WorkItem *wi = (WorkItem*)(buf + record);
-				size_t nrecord = record + SIZEOF(wi, wi->v);
-				if (nrecord > QSIZE) break;
-
-				wi->op = VERTEX_SHADER;
-				wi->v = pShader;
-				record = nrecord;
-			}
-			condition.notify_one();
+		if (g_Config.bMTRenderer && record < QLIMIT) {
+			WorkItem *wi = (WorkItem*)(buf + record);
+			wi->op = VERTEX_SHADER;
+			wi->v = pShader;
+			record += SIZEOF(wi, wi->v);
 			return NOERROR;
 		}
 		WRAPCALL(orig->SetVertexShader(pShader));
@@ -250,20 +236,13 @@ public:;
 
 	HRESULT WINAPI SetVertexShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
-		while (g_Config.bMTRenderer) {
-			{
-				std::unique_lock<std::mutex> lock(workq);
-				WorkItem *wi = (WorkItem*)(buf + record);
-				size_t nrecord = record + SIZEOF(wi, wi->c) + Vector4fCount * 4;
-				if (nrecord > QSIZE) break;
-
-				wi->op = VERTEX_SHADER_CONST;
-				wi->c.StartRegister = StartRegister;
-				wi->c.Vector4fCount = Vector4fCount;
-				memcpy(wi->c.data, pConstantData, Vector4fCount * 4);
-				record = nrecord;
-			}
-			condition.notify_one();
+		if (g_Config.bMTRenderer && record < QLIMIT) {
+			WorkItem *wi = (WorkItem*)(buf + record);
+			wi->op = VERTEX_SHADER_CONST;
+			wi->c.StartRegister = StartRegister;
+			wi->c.Vector4fCount = Vector4fCount;
+			memcpy(wi->c.data, pConstantData, Vector4fCount * 4);
+			record += SIZEOF(wi, wi->c) + Vector4fCount * 4;
 			return NOERROR;
 		}
 		WRAPCALL(orig->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount));
@@ -271,20 +250,13 @@ public:;
 
 	HRESULT WINAPI SetPixelShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
-		while (g_Config.bMTRenderer) {
-			{
-				std::unique_lock<std::mutex> lock(workq);
-				WorkItem *wi = (WorkItem*)(buf + record);
-				size_t nrecord = record + SIZEOF(wi, wi->c) + Vector4fCount * 4;
-				if (nrecord < QSIZE) break;
-
-				wi->op = PIXEL_SHADER_CONST;
-				wi->c.StartRegister = StartRegister;
-				wi->c.Vector4fCount = Vector4fCount;
-				memcpy(wi->c.data, pConstantData, Vector4fCount * 4);
-				record += nrecord;
-			}
-			condition.notify_one();
+		if (g_Config.bMTRenderer && record < QLIMIT) {
+			WorkItem *wi = (WorkItem*)(buf + record);
+			wi->op = PIXEL_SHADER_CONST;
+			wi->c.StartRegister = StartRegister;
+			wi->c.Vector4fCount = Vector4fCount;
+			memcpy(wi->c.data, pConstantData, Vector4fCount * 4);
+			record += SIZEOF(wi, wi->c) + Vector4fCount * 4;
 			return NOERROR;
 		}
 		WRAPCALL(orig->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount));
@@ -320,7 +292,7 @@ public:;
 	ULONG WINAPI Release(void) {
 		ULONG count = orig->Release();
 		if (!count) {
-			LOGSPAM << "Releasing! ref=" << ref << "\n";
+//			LOGSPAM << "Releasing! ref=" << ref << "\n";
 			delete this;
 		}
 		return count;
@@ -958,7 +930,7 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
-		LOGSPAM << "D3d behavior :" << std::hex << BehaviorFlags << "\n";
+//		LOGSPAM << "D3d behavior :" << std::hex << BehaviorFlags << "\n";
 /*		BehaviorFlags &= ~D3DCREATE_DISABLE_PSGP_THREADING;
 		BehaviorFlags |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
 		BehaviorFlags &= ~D3DCREATE_SOFTWARE_VERTEXPROCESSING;*/
