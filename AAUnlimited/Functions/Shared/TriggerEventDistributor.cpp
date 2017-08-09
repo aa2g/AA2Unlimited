@@ -9,7 +9,6 @@ namespace Shared {
 
 		namespace STUPIDNAME {
 			std::vector<Trigger*> loc_triggers[N_EVENTS];
-			bool loc_bTriggersEnabled = g_Config.bTriggers;
 		}
 
 		using namespace STUPIDNAME;
@@ -34,7 +33,7 @@ namespace Shared {
 		}
 
 		void ThrowEvent(EventData* data) {
-			if (loc_bTriggersEnabled) {
+			if (g_Config.bTriggers) {
 				for (auto& trigger : loc_triggers[data->GetId() - 1]) {
 					Thread thread;
 					thread.eventData = data;
