@@ -6,6 +6,7 @@
 extern class Config
 {
 public:;
+	bool bMTRenderer;
 	int screenshotFormat;
 	char sPoserHotKeys[16];
 	int legacyMode;
@@ -51,6 +52,7 @@ public:;
 	static inline void bindLua() {
 		LUA_SCOPE;
 #define LUA_CLASS Config
+			LUA_BIND(bMTRenderer)
 			LUA_BIND(screenshotFormat)
 			LUA_BINDSTR(sPoserHotKeys)
 			LUA_BIND(bLogPPAccess)

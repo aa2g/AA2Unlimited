@@ -131,14 +131,14 @@ BOOL WINAPI DllMain(
 
 
 extern "C" __declspec(dllexport)
-IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
+void* WINAPI AA2Unlimited(UINT SDKVersion)
 {
 	static std::mutex mutex;
 	static IDirect3D9* (WINAPI *orig)(UINT SDKVersion);
 	std::lock_guard<std::mutex> guard(mutex);
 
 	if (orig)
-		return orig(SDKVersion);
+		return Render::Wrap(orig(SDKVersion));
 
 	SetErrorMode(0);
 	SetUnhandledExceptionFilter(panic);
@@ -161,7 +161,7 @@ IDirect3D9* WINAPI AA2Unlimited(UINT SDKVersion)
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Failed to get Direct3DCreate9 constructor, crash imminent\r\n";
 
 	LUA_EVENT_NORET("launch");
-	return (IDirect3D9*)Render::WrapInterface(orig(SDKVersion));
+	return Render::Wrap(orig(SDKVersion));
 }
 
 extern "C" __declspec(dllexport)
