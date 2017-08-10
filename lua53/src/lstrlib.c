@@ -603,7 +603,6 @@ static void reprepstate (MatchState *ms) {
   lua_assert(ms->matchdepth == MAXCCALLS);
 }
 
-
 static int str_find_aux (lua_State *L, int find) {
   size_t ls, lp;
   const char *s = luaL_checklstring(L, 1, &ls);

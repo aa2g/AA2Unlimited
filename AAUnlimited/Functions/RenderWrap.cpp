@@ -264,6 +264,9 @@ public:;
 
 
 	virtual ~AAUIDirect3DDevice9(void) {
+		if (!g_Config.bMTRenderer)
+			return;
+
 		{
 			std::unique_lock<std::mutex> lock(workq);
 			exiting = true;
