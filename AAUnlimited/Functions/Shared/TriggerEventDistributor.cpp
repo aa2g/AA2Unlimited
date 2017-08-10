@@ -34,7 +34,8 @@ namespace Shared {
 
 		void ThrowEvent(EventData* data) {
 			if (g_Config.bTriggers) {
-				for (auto& trigger : loc_triggers[data->GetId() - 1]) {
+				auto eventType = data->GetId() - 1;
+				for (auto& trigger : loc_triggers[eventType]) {
 					Thread thread;
 					thread.eventData = data;
 					thread.ExecuteTrigger(trigger);
