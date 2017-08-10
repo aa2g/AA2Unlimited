@@ -1,12 +1,10 @@
-#include "General/ModuleInfo.h"
-#include "MemMods/Hook.h"
-#include "MemMods/MemRightsLock.h"
+#include "StdAfx.h"
 
 
 namespace SharedInjections {
 namespace FixLocale {
 
-BOOL IsEmulated() {
+int IsEmulated() {
 	return GetACP() == 932;
 }
 

@@ -11,6 +11,7 @@
 #include "CharacterActivity.h"
 #include "HStatistics.h"
 #include "XXFile.h"
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -80,6 +81,45 @@ public:
 	CharacterStruct() = delete;
 	~CharacterStruct() = delete;
 
+#define LUA_CLASS ExtClass::CharacterStruct
+	static inline void bindLua() {
+	LUA_BIND(m_charData)
+	LUA_BIND(m_seat)
+	LUA_BIND(m_bClothesOn)
+	LUA_BIND(m_currClothSlot)
+	LUA_BIND(m_currClothes)
+	LUA_BIND(m_xxFace)
+	LUA_BIND(m_xxGlasses)
+	LUA_BINDARR(m_xxHairs)
+	LUA_BIND(m_xxTounge)
+	LUA_BIND(m_xxSkeleton)
+	LUA_BIND(m_xxBody)
+	LUA_BIND(m_xxLegs)
+	LUA_BINDARRE(m_bonePtrArray,,_self->m_bonePtrArrayEnd-_self->m_bonePtrArray)
+	LUA_BIND(m_hStats)
+
+	LUA_MGETTER0(GetActivity)
+	LUA_MGETTER1(GetXXFile)
+	LUA_MGETTER1(GetRelation)
+	LUA_MGETTER1(GetLover)
+	LUA_MGETTER0(GetNpcReactData)
+	LUA_MGETTER0(GetNpcAiData)
+
+	}
+#undef LUA_CLASS
+	inline CharacterRelation *GetRelation(int idx) {
+		auto &rel = *GetRelations();
+		if (idx >= rel.GetSize())
+			return NULL;
+		return &rel[idx];
+	}
+	inline LoverData *GetLover(int idx) {
+		auto &rel = *GetLovers();
+		if (idx >= rel.GetSize())
+			return NULL;
+		return &rel[idx];
+	}
+
 	inline IllusionArray<CharacterRelation>* GetRelations() {
 		BYTE* ptr = (BYTE*)m_moreData;
 		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A14);
@@ -109,7 +149,7 @@ public:
 		return *(CharacterNpcAiData**)(ptr);
 	}
 
-	inline XXFile* GetXXFile(Models target) {
+	inline XXFile* GetXXFile(int target) {
 		switch (target) {
 		case FACE:
 			return m_xxFace;
@@ -129,6 +169,10 @@ public:
 			DWORD rule[] {0x70, 4, 0};
 			return (XXFile*)ExtVars::ApplyRule(this, rule);
 			break; }
+		case TONGUE:
+			return m_xxTounge;
+			break;
+
 		default:
 			return NULL;
 		}

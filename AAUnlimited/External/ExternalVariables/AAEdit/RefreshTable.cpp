@@ -1,7 +1,5 @@
-#include "RefreshTable.h"
+#include "StdAfx.h"
 
-#include "WindowData.h"
-#include "General\ModuleInfo.h"
 
 namespace ExtVars {
 namespace AAEdit {

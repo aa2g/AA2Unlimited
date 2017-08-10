@@ -1,9 +1,15 @@
 #pragma once
 #include <fstream>
+#include <sstream>
 #include <Windows.h>
+#include <mutex>
+#include <thread>
 
+#include "Script/ScriptLua.h"
+
+#define LOGSPAM if(g_Logger.FilterPriority(Logger::Priority::SPAM)) g_Logger
 #define LOGPRIONC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << 
-#define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIC __ ": " <<
+#define LOGPRIOC(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << __FUNCSIG__ ": " <<
 #define LOGPRIO(prio) if(g_Logger.FilterPriority(prio)) g_Logger << prio << \
 	(g_Logger.FilterPriority(Logger::Priority::SPAM) ? ("[" __FUNCSIG__ "]:\r\n\t") : "")
 
@@ -15,7 +21,7 @@
  * will be performed.
  */
 
-class Logger
+extern class Logger
 {
 public:
 	enum class Priority {
@@ -30,16 +36,21 @@ public:
 	Logger(const TCHAR* file,Priority prio);
 	~Logger();
 	void Initialize(const TCHAR * file, Priority prio);
+	std::thread::id tid;
 
 	template<typename T>
-	Logger& operator<<(const T& p) {
+	Logger& operator<<(const T &p) {
+		std::unique_lock<std::mutex> lock(mutex);
 		if (outfile.good() && currPrio >= filter) {
 			outfile << p;
+			outbuf << p;
 		}
+		luaFlush();
 		outfile.flush();
 		return *this;
 	}
 
+	void luaFlush();
 	template<>
 	Logger& operator<<(const Priority& prio) {
 		currPrio = prio;
@@ -63,7 +74,9 @@ public:
 		return *this;
 	}
 
+	std::mutex mutex;
 	Logger& operator<<(const std::wstring& str) {
+		std::unique_lock<std::mutex> lock(mutex);
 		std::string cstr(str.begin(),str.end());
 		outfile << cstr.c_str();
 		outfile.flush();
@@ -75,13 +88,33 @@ public:
 		return *this;
 	}
 
+	static inline void bindLua() {
+		// The functions we want to bind are too snow-flakeish, so we have to do that
+		// by hand.
+		auto b = g_Lua[LUA_BINDING_TABLE].get();
+		b["setlogprio"] = LUA_LAMBDA0({
+			g_Logger.SetPriority(Logger::Priority(int(s.get(1))));
+			return 0;
+		});
+
+		b["logger"] = lua_CFunction([](lua_State *L) {
+			Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+			int top = lua_gettop(L);
+			for (int i = 2; i <= top; i++) {
+				g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+			}
+			return 0;
+		});
+	}
+
 	void SetPriority(Priority prio);
 	//returns true if the logger would print messages for the given priority
 	bool FilterPriority(Priority prio);
 private:
 	std::ofstream outfile;
+	std::ostringstream outbuf;
 	Priority filter;
 	Priority currPrio;
-};
+} g_Logger;
 
-extern Logger g_Logger;
+

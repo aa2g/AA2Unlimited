@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -37,7 +38,24 @@ public:
 	DWORD m_posRight;		//where you have to click
 	DWORD m_posBottom;		//to activate it
 	BYTE m_mouseHover;
-
+#define LUA_CLASS HGUIButton
+	static inline void bindLua() {
+	LUA_BIND(m_bClicked)
+	LUA_BIND(m_bVisible)
+	LUA_BIND(m_opacity)
+	LUA_BIND(m_bActive)
+	LUA_BIND(m_categoryButton)
+	LUA_BIND(m_bInvalid)
+	LUA_BIND(m_state)
+	LUA_BIND(m_renderX)
+	LUA_BIND(m_renderY)
+	LUA_BIND(m_posLeft)
+	LUA_BIND(m_posTop)
+	LUA_BIND(m_posRight)
+	LUA_BIND(m_posBottom)
+	LUA_MGETTER0(Press)
+	}
+#undef LUA_CLASS
 protected:
 	static HGUIButton* PressedButton[5]; //used for Press() function
 
@@ -51,7 +69,7 @@ public:
 	HGUIButton() = delete;
 	~HGUIButton() = delete;
 
-	void Press();
+	int Press();
 
 
 	static void InitializeHooks();

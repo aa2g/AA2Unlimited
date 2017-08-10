@@ -1,8 +1,4 @@
-#include "Globals.h"
-#include "General\ModuleInfo.h"
-
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 using namespace Shared::Triggers;
 
@@ -14,6 +10,8 @@ CharInstData g_characters[25];
 CharInstData g_previewChar;
 
 void InitOnLoad() {
+	LUA_EVENT_NORET("save_load", false);
+
 	for(int i = 0; i < 25; i++) {
 		g_characters[i].Reset();
 	}
@@ -46,7 +44,11 @@ void InitOnLoad() {
 		CardInitializeData data;
 		data.card = seat;
 		ThrowEvent(&data);
+
+		// ditto for lua
+		LUA_EVENT_NORET("load_card", seat, false);
 	}
+	LUA_EVENT_NORET("save_load", true);
 }
 
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
@@ -80,6 +82,9 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardInitializeData data;
 	data.card = seat;
 	ThrowEvent(&data);
+
+	LUA_EVENT("load_card", seat, true);
+
 	//throw added to class event
 	CardAddedData cdata;
 	cdata.card = seat;
@@ -91,6 +96,8 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	CardDestroyData data;
 	data.card = seat;
 	ThrowEvent(&data);
+	LUA_EVENT_NORET("unload_card", seat);
+
 	//destroy
 	g_characters[seat].Reset();
 }
@@ -120,6 +127,7 @@ void ApplyRelationshipPoints(ExtClass::CharacterStruct* characterFrom,ExtClass::
 	AA2Play v12 FP v1.4.0a.exe+142938 - E8 132F0000           - call "AA2Play v12 FP v1.4.0a.exe"+145850 { ->AA2Play v12 FP v1.4.0a.exe+145850 }
 	AA2Play v12 FP v1.4.0a.exe+14293D - C6 43 2C 00           - mov byte ptr [ebx+2C],00 { 0 }
 	*/
+
 	void* unknownStruct = (void*)characterFrom->m_moreData;
 	
 	void  (__stdcall *firstFunc)(void* structAbove,ExtClass::CharacterRelation* relation);

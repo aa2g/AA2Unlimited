@@ -1,6 +1,6 @@
 namespace SharedInjections {
 namespace FixLocale {
-BOOL IsEmulated();
+int IsEmulated();
 void SetCP();
 void PatchAA2Play();
 }

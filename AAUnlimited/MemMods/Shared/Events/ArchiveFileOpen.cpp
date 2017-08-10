@@ -1,39 +1,86 @@
-#include "ArchiveFileOpen.h"
-
-#include <Windows.h>
-
-#include "Files\Config.h"
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "Functions\Shared\Overrides.h"
-#include "Functions\Shared\SpecialOverrides.h"
-#include "Functions\Shared\Shadowing.h"
-#include "Functions\AAPlay\Poser.h"
+#include "StdAfx.h"
 
 namespace SharedInjections {
 namespace ArchiveFile {
+
+
 
 /*
 * If false is returned, the original function will be executed.
 * else, the function is aborted and the results from this function are used.
 */
 bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	bool ret;
-	ret = Poser::OverrideFile(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::HairRedirect(paramArchive, paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	ret = Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer);
-	if (ret) return true;
-	if (g_Config.GetKeyValue(Config::USE_SHADOWING).bVal) {
-		ret = Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer);
-		if (ret) return true;
+	static wchar_t arch[1024];
+	static wchar_t file[1024];
+
+	const wchar_t *orig_paramArchive = arch;
+	const wchar_t *orig_paramFile = file;
+	const char *provider = NULL;
+	const char *rewriter = "";
+	const char *rewriter2 = "";
+
+	if (Poser::OverrideFile(paramArchive, paramFile, readBytes, outBuffer)) {
+		provider = "overridefile";
+		goto done;
 	}
-	return false;
+
+	// NOTE: return value implies the name was rewritten
+	if (Shared::ArchiveReplaceRules(paramArchive, paramFile, readBytes, outBuffer)) {
+		rewriter = "replace";
+	}
+
+	if (Shared::TanOverride(paramArchive, paramFile, readBytes, outBuffer)) {
+		provider = "tanoverride";
+		goto done;
+	}
+
+	if (Shared::HairRedirect(paramArchive, paramFile, readBytes, outBuffer)) {
+		rewriter2 = ",hairredirect";
+	}
+
+	if (Shared::ArchiveOverrideRules(*paramArchive, *paramFile, readBytes, outBuffer)) {
+		provider = "archiveoverride";
+		goto done;
+	}
+
+
+	if (g_Config.bUseShadowing) {
+		if (Shared::OpenShadowedFile(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "shadowed";
+			goto done;
+		}
+	}
+
+	if (g_Config.bUsePPeX) {
+		if (g_PPeX.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "ppex";
+			goto done;
+		}
+	}
+
+	if (g_Config.bUsePP2) {
+		if (g_PP2.ArchiveDecompress(*paramArchive, *paramFile, readBytes, outBuffer)) {
+			provider = "pp2";
+			goto done;
+		}
+	}
+
+done:;
+	if (g_Config.bLogPPAccess) {
+		LOGPRIONC(Logger::Priority::SPAM) "OpenFileEvent " <<
+			"provider=" << (provider?provider:"pp") << " " <<
+			"archive=" << std::wstring(*paramArchive) << " " <<
+			"file=" << std::wstring(*paramFile);
+		if ((*paramArchive != orig_paramArchive) || (orig_paramFile != *paramFile)) {
+			LOGSPAM << "rewriter=" << rewriter << rewriter2 << " " <<
+				" origarchive=" << std::wstring(orig_paramArchive) << " origfile=" << std::wstring(orig_paramFile);
+		}
+		if (provider)
+			LOGSPAM << " size=" << std::dec << *readBytes;
+		LOGSPAM << "\r\n";
+	}
+
+	return provider != NULL;
 }
 
 DWORD OpenFileNormalExit;
@@ -58,6 +105,78 @@ void __declspec(naked) OpenFileRedirect() {
 		and esp, -8
 		jmp[OpenFileNormalExit]
 	}
+}
+
+
+
+#define PPF_HANDLE ((HANDLE)-2)
+std::set<std::wstring> PPFileList;
+std::set<std::wstring>::iterator ppf_it;
+HANDLE ppf_handle = INVALID_HANDLE_VALUE;
+
+void RegisterPP(const wchar_t *name) {
+	PPFileList.insert(name);
+}
+
+static BOOL WINAPI MyFC(HANDLE h) {
+	if (h == ppf_handle) {
+		ppf_handle = INVALID_HANDLE_VALUE;
+		if (h == PPF_HANDLE)
+			return TRUE;
+	}
+	return FindClose(h);
+}
+
+static BOOL WINAPI MyFN(HANDLE h, LPWIN32_FIND_DATAW data) {
+	if (h == ppf_handle) {
+		// We'll interject, but not just yet, wait for normal file list to finish
+		if (h != PPF_HANDLE && ppf_it == PPFileList.begin() && FindNextFileW(h, data))
+			return TRUE;
+		if (ppf_it == PPFileList.end())
+			return FALSE;
+		wcscpy(data->cFileName, (*ppf_it).c_str());
+		data->dwFileAttributes = FILE_ATTRIBUTE_ARCHIVE;
+		ppf_it++;
+		return TRUE;
+	}
+	return FindNextFileW(h, data);
+}
+
+static bool is_pp_path(const wchar_t *path) {
+	int pplen = wcslen(path);
+	if (pplen < 5)
+		return false;
+	return !wcscmp(path + pplen - 4, L"*.pp");
+}
+
+static HANDLE WINAPI MyFF(const wchar_t *path, LPWIN32_FIND_DATAW data) {
+	HANDLE h = FindFirstFileW(path, data);
+	if (!is_pp_path(path))
+		return h;
+
+	ppf_it = PPFileList.begin();
+
+	if (h == INVALID_HANDLE_VALUE) {
+		ppf_handle = h = PPF_HANDLE;
+		if (!MyFN(h, data))
+			return (ppf_handle = INVALID_HANDLE_VALUE);
+	}
+
+	ppf_handle = h;
+	return h;
+}
+
+void DirScanInject()
+{
+	DWORD *ffaddr = (DWORD*)(General::GameBase + 0x2E31E0);
+	if (General::IsAAEdit)
+		ffaddr = (DWORD*)(General::GameBase + 0x2C41E0);
+
+	Memrights rights(ffaddr, 12);
+
+	ffaddr[0] = (DWORD)&MyFC;
+	ffaddr[1] = (DWORD)&MyFF;
+	ffaddr[2] = (DWORD)&MyFN;
 }
 
 void OpenFileInject() {

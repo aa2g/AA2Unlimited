@@ -26,7 +26,6 @@ namespace Poser {
 	public:
 		void Init();
 		void Hide();
-		void NewCharacter(int index);
 
 		HWND m_dialog;
 		HWND m_edCharacter;
@@ -67,15 +66,18 @@ namespace Poser {
 		HWND m_chkShowGuides;
 		HWND m_tabModifiers;
 		HWND m_tabShowHide;
+		HWND m_listStyles;
 		UINT_PTR m_timer;
 		int m_curBone;
 
+		int GetCurrentModifier();
 		void ApplyIncrement(int axis, int sign);
 		void SyncOperation();
 		void SyncBones();
 		void SyncEdit();
 		void SyncList();
 		void SyncSlider();
+		void SyncStyles();
 		void LoadPose(const TCHAR* path);
 		void SavePose(const TCHAR* path);
 		void LoadCloth(std::vector<BYTE> &file);

@@ -36,6 +36,14 @@ public:
 						//4 = first break, 5 = sports, 6 = second break, 7 = club, 8 = end, 9 = home again)
 	int day;			//0=sunday, 1=monday ... 6 = saturday
 	int nDays;			//total amount of days passed
+
+#define LUA_CLASS ExtClass::TimeData
+	static inline void bindLua() {
+		LUA_BIND(currentPeriod)
+		LUA_BIND(day)
+		LUA_BIND(nDays)
+	}
+#undef LUA_CLASS
 };
 
 #pragma pack(pop)

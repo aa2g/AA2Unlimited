@@ -1,22 +1,6 @@
-#include "Triggers.h"
-
-#include <Windows.h>
-#include <CommCtrl.h>
-#include <queue>
+#include "stdafx.h"
 
 #pragma comment(lib, "comctl32.lib")
-
-#include "resource.h"
-#include "Files\ModuleFile.h"
-#include "Functions\Serialize.h"
-#include "General\Util.h"
-#include "Functions\AAEdit\Globals.h"
-#include "Functions\Shared\Triggers\Value.h"
-#include "Functions\Shared\Triggers\NamedConstant.h"
-#include "Functions\Shared\Triggers\Expressions.h"
-#include "Functions\Shared\Triggers\Actions.h"
-#include "Functions\Shared\Triggers\Triggers.h"
-
 
 namespace AAEdit {
 

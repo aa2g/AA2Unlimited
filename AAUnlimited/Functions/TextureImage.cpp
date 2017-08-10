@@ -1,11 +1,5 @@
-#include "TextureImage.h"
+#include "StdAfx.h"
 
-#include <Windows.h>
-#include <string>
-
-#include "General\ModuleInfo.h"
-#include "Files\Logger.h"
-#include "config.h"
 
 
 TextureImage::TextureImage() {

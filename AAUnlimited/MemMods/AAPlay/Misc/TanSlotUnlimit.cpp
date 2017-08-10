@@ -1,7 +1,5 @@
-#include "TanSlotUnlimit.h"
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "External/ExternalClasses.h"
+#include "StdAfx.h"
+
 
 //
 #define TAN_MAX_SLOT 255

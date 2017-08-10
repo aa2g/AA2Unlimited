@@ -1,9 +1,7 @@
-#include "TriggerEventDistributor.h"
+#include "StdAfx.h"
 
-#include "Triggers\Thread.h"
-#include "Files\Config.h"
 
-#include <vector>
+
 
 namespace Shared {
 
@@ -11,7 +9,6 @@ namespace Shared {
 
 		namespace STUPIDNAME {
 			std::vector<Trigger*> loc_triggers[N_EVENTS];
-			bool loc_bTriggersEnabled = g_Config.GetKeyValue(Config::TRIGGERS).bVal;
 		}
 
 		using namespace STUPIDNAME;
@@ -36,8 +33,9 @@ namespace Shared {
 		}
 
 		void ThrowEvent(EventData* data) {
-			if (loc_bTriggersEnabled) {
-				for (auto& trigger : loc_triggers[data->GetId() - 1]) {
+			if (g_Config.bTriggers) {
+				auto eventType = data->GetId() - 1;
+				for (auto& trigger : loc_triggers[eventType]) {
 					Thread thread;
 					thread.eventData = data;
 					thread.ExecuteTrigger(trigger);

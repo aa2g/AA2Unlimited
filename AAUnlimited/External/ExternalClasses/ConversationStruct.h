@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "Script/ScriptLua.h"
 
 namespace ExtClass {
 
@@ -61,6 +62,19 @@ public:
 	inline DWORD GetConversationKind() { return *(DWORD*)((BYTE*)(this) + 0x839C); }
 	ConversationSubStruct() = delete;
 	~ConversationSubStruct() = delete;
+	static inline void bindLua() {
+#define LUA_CLASS ExtClass::ConversationSubStruct
+		LUA_BIND(m_playerAnswer)
+		LUA_BIND(m_conversationAnswerId)
+		LUA_BIND(m_conversationId)
+		LUA_BIND(m_conversationState)
+		LUA_BIND(m_npcTalkState)
+		LUA_BIND(m_response)
+		LUA_BIND(m_bCurrentlyAnswering)
+		LUA_BIND(m_bStartH)
+		// TODO other substructs
+	}
+#undef LUA_CLASS
 };
 
 static_assert(sizeof(ConversationSubStruct) == 0x50, "Invalid size");
@@ -98,7 +112,12 @@ public:
 public:
 	NpcPcInteractiveConversationStruct() = delete;
 	~NpcPcInteractiveConversationStruct() = delete;
-
+#define LUA_CLASS ExtClass::NpcPcInteractiveConversationStruct
+	static inline void bindLua() {
+		LUA_BIND(m_askWaitTime)
+		LUA_BIND(m_answerWaitTime)
+	}
+#undef LUA_CLASS
 };
 
 class NpcPcNonInteractiveConversationStruct : public BaseConversationStruct {
@@ -203,6 +222,15 @@ class PcConversationStruct {
 
 	PcConversationStruct() = delete;
 	~PcConversationStruct() = delete;
+
+public:
+	static inline void bindLua() {
+#define LUA_CLASS ExtClass::PcConversationStruct
+		LUA_BIND(m_loopMax)
+		LUA_BIND(m_loopCounter)
+		LUA_BIND(m_currentConversation)
+#undef LUA_CLASS
+	};
 };
 
 

@@ -1,12 +1,8 @@
-#include "Time.h"
+#include "StdAfx.h"
 
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-#include "Functions\Shared\Triggers\Event.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
-#include "External\ExternalVariables\AAPlay\GameGlobals.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions/AAPlay/GameState.h"
+
+
+
 
 namespace PlayInjections {
 namespace Time {
@@ -22,6 +18,7 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 
 	data.oldPeriod = oldPeriod;
 	data.newPeriod = ExtVars::AAPlay::GameTimeData()->currentPeriod;
+	LUA_EVENT("period", ExtVars::AAPlay::GameTimeData()->currentPeriod, oldPeriod);
 	Shared::GameState::setIsOverriding(false);
 	Shared::Triggers::ThrowEvent(&data);
 }
@@ -33,8 +30,8 @@ void __declspec(naked) PeriodChangeRedirect() {
 		mov eax,[edi+0x20]
 		mov eax,[eax+0x20]
 		push eax //save old period
-
 		push [esp+8] //push original function argument
+
 		call [loc_PeriodChangeOriginalFunction]
 		push eax //save return value for later
 

@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <d3d9.h>
+#include "Script/ScriptLua.h"
 
 #include "Bone.h"
 
@@ -54,6 +55,33 @@ public:
 	BYTE m_unknown4[0x9]; //there are several flags here. dont know what they do. some crash if changed.
 	BYTE m_renderFlag; //0: show, 2: dont show?
 	BYTE m_unknown5[0x40EA];
+
+	inline Frame* GetChild(int n) {
+		if (n >= m_nChildren) return NULL;
+		return &m_children[n];
+	}
+
+	static inline void bindLua() {
+#define LUA_CLASS Frame
+		LUA_BINDSTRP(m_name)
+		LUA_BINDARREP(m_children,, _self->m_nChildren)
+		LUA_BIND(m_parent)
+		LUA_BINDARRE(m_matrix1,.m[0], 16)
+		LUA_BINDARRE(m_matrix2,.m[0], 16)
+		LUA_BINDARRE(m_matrix3,.m[0], 16)
+		LUA_BINDARRE(m_matrix4,.m[0], 16)
+		LUA_BINDARRE(m_matrix5,.m[0], 16)
+
+		LUA_BINDARR(m_frameFlags)
+		LUA_BIND(m_nSubmeshes)
+		LUA_BIND(m_subMeshFlags)
+
+		LUA_BIND(m_nBones)
+		LUA_BINDARREP(m_bones,,_self->m_nBones)
+		LUA_BIND(m_xxPartOf)
+		LUA_BIND(m_renderFlag)
+#undef LUA_CLASS
+	};
 };
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");

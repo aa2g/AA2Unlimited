@@ -8,6 +8,7 @@
 
 namespace Shared {
 
+extern HANDLE *IllusionMemAllocHeap;
 void* __stdcall IllusionMemAlloc(size_t size);
 void __stdcall IllusionDeleteXXFile(ExtClass::XXFile* file, ExtClass::CharacterStruct* owner);
 

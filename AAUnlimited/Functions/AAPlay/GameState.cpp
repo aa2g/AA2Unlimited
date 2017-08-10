@@ -1,4 +1,4 @@
-#include "GameState.h"
+#include "StdAfx.h"
 
 using namespace Shared::GameState;
 

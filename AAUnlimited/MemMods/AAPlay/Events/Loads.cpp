@@ -1,16 +1,4 @@
-#include "Loads.h"
-
-#include "MemMods\Hook.h"
-#include "General\ModuleInfo.h"
-#include "External\ExternalClasses\CharacterStruct.h"
-
-#include "Functions\Shared\Overrides.h"
-#include "Functions\AAPlay\Globals.h"
-#include "Functions\AAPlay\Poser.h"
-#include "Functions/AAPlay/Facecam.h"
-#include "Functions/AAPlay/GameState.h"
-
-#include "Functions\Shared\TriggerEventDistributor.h"
+#include "StdAfx.h"
 
 using namespace Shared::Triggers;
 
@@ -32,6 +20,7 @@ void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
 	}
+	LUA_EVENT_NORET("hipoly", loadCharacter);
 	//throw high poly event
 	HiPolyInitData data;
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
@@ -51,7 +40,7 @@ void __stdcall HiPolyLoadEndEvent() {
 
 void __stdcall SaveLoadEvent() {
 	AAPlay::InitOnLoad();
-	Facecam::Cleanup();
+//	Facecam::Cleanup();
 }
 
 void __stdcall TransferInEvent(ExtClass::CharacterStruct* character) {

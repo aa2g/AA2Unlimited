@@ -1,4 +1,6 @@
-#include "XXFile.h"
+#include "StdAfx.h"
+
+
 
 
 DWORD FileFormats::XXFile::ReadObjectLength(BYTE * file) {

@@ -1,6 +1,4 @@
-#include "Globals.h"
-
-#include "General\ModuleInfo.h"
+#include "StdAfx.h"
 
 namespace AAEdit {
 

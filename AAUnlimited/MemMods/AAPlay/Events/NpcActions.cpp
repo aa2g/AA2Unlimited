@@ -1,19 +1,13 @@
-#include "NpcActions.h"
-
-#include "MemMods/Hook.h"
-#include "General/ModuleInfo.h"
-
-#include "External\ExternalClasses\CharacterStruct.h"
-#include "Functions\Shared\TriggerEventDistributor.h"
-#include "Functions\AAPlay\Globals.h"
+#include "StdAfx.h"
 
 namespace PlayInjections {
 namespace NpcActions {
 
-
 using namespace ExtClass;
 
+
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
+	LUA_EVENT("clothes", newClothes, npc->m_seat);
 	return newClothes;
 }
 
@@ -52,6 +46,12 @@ void ClothesChangeInjection() {
 		NULL);
 }
 
+DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
+{
+	LUA_EVENT("answer", result, answerChar, askingChar);
+	return result;
+}
+
 int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* askingChar, void* unknownStruct, DWORD unknownParameter, int originalReturn) {
 	using namespace Shared::Triggers;
 	using namespace AAPlay;
@@ -66,6 +66,8 @@ int __stdcall NpcAnswerEvent(CharacterActivity* answerChar, CharacterActivity* a
 	ThrowEvent(&data);
 	originalReturn = data.changedResponse; //after potential modifications in triggers, percentage and response goes back to answerChar Activity
 	answerChar->m_lastConversationAnswerPercent = data.changedChance;
+
+	LUA_EVENT("answer", data.changedResponse, answerChar, askingChar);
 	return data.changedResponse;
 }
 
@@ -95,6 +97,39 @@ void __declspec(naked) NpcAnswerRedirect() {
 	
 }
 
+DWORD orig_answer2;
+DWORD orig_answer3;
+
+void __declspec(naked) NpcAnswerRedirect2() {
+	__asm {
+		pushad
+		push[eax + 444]
+		push[eax + 440]
+		call[orig_answer2]
+		push eax
+		call NpcAnswerEvent2
+		mov[esp + 28], eax
+		popad
+		ret
+	}
+}
+
+void __declspec(naked) NpcAnswerRedirect3() {
+	__asm {
+		pushad
+		push[eax + 444]
+		push[eax + 440]
+		call[orig_answer3]
+		push eax
+		call NpcAnswerEvent2
+		mov[esp + 28], eax
+		popad
+		ret
+	}
+}
+
+
+
 void NpcAnswerInjection() {
 	/*
 	AA2Play v12 FP v1.4.0a.exe+3C7CC - E8 2FB41400           - call "AA2Play v12 FP v1.4.0a.exe"+187C00{ ->AA2Play v12 FP v1.4.0a.exe+187C00 }
@@ -122,6 +157,34 @@ void NpcAnswerInjection() {
 		{ 0xE8, 0x47, 0x81, 0xFE, 0xFF },								//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&loc_NpcAnswerOriginalFunction);
+
+	
+
+
+	orig_answer2 = General::GameBase + 0x187FB0;
+	
+	address = General::GameBase + 0x165A52;
+	Hook((BYTE*)address,
+	{ 0xE8, 0x59, 0x25, 0x02, 0x00 },								//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&NpcAnswerRedirect2},	//redirect to our function
+		NULL);
+
+
+
+	
+	orig_answer3 = General::GameBase + 0x187EA0;
+
+	address = General::GameBase + 0xBA687;
+	Hook((BYTE*)address,
+	{ 0xE8, 0x14, 0xD8, 0x0C, 0x00 },								//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&NpcAnswerRedirect3 },	//redirect to our function
+		NULL);
+	address = General::GameBase + 0x165BF5;
+	Hook((BYTE*)address,
+	{ 0xE8, 0xA6, 0x22, 0x02, 0x00 },								//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&NpcAnswerRedirect3 },	//redirect to our function
+		NULL);
+
 }
 
 void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionParamStruct* params) {
@@ -137,6 +200,8 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 		}
 	}
 	if (user == NULL) return;
+
+	LUA_EVENT_NORET("move", params);
 
 	using namespace Shared::Triggers;
 
@@ -212,6 +277,8 @@ void NpcMovingActionInjection() {
 }
 
 bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
+//	success = LUA_EVENT("plan", success, params);
+
 	//where unknownStruct is [m_moreUnknownData + 0x1C]
 	if (success) return success;
 

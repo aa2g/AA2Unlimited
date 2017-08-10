@@ -1,11 +1,7 @@
-#include "Shadowing.h"
+#include "StdAfx.h"
+#include <shlwapi.h>
+#include <strsafe.h>
 
-#include "Functions\AAUCardData.h"
-#include "Functions\Shared\Globals.h"
-#include "General\Util.h"
-
-#include "Shlwapi.h"
-#include "Strsafe.h"
 
 #pragma comment(lib, "Shlwapi.lib")
 

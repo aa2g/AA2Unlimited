@@ -117,7 +117,7 @@ D3DXVECTOR3 FindEyeOffset(ExtClass::CharacterStruct* character) {
 }
 
 void PostTick(ExtClass::HInfo* hInfo, bool notEnd) {
-	if (g_Config.GetKeyValue(Config::USE_H_FACECAM).bVal == false) return;
+	if (g_Config.bEnableFacecam) return;
 	if (!notEnd) {
 		RestoreCamera();
 		Cleanup();
@@ -254,9 +254,9 @@ void AdjustCamera(ExtClass::Frame* bone) {
 		}
 		if(toFocus != NULL) {
 			loc_focusBone = toFocus->m_bonePtrArray[0];
-			loc_focusOffset.x += g_Config.GetKeyValue(Config::POV_OFFSET_X).fVal;
-			loc_focusOffset.y += g_Config.GetKeyValue(Config::POV_OFFSET_Y).fVal;
-			loc_focusOffset.z += g_Config.GetKeyValue(Config::POV_OFFSET_Z).fVal;
+			loc_focusOffset.x += g_Config.fPOVOffsetX;
+			loc_focusOffset.y += g_Config.fPOVOffsetY;
+			loc_focusOffset.z += g_Config.fPOVOffsetZ;
 
 
 			loc_hinfo->GetCamera()->m_yRotRad = M_PI; //put this to pi cause its reversed for some reason

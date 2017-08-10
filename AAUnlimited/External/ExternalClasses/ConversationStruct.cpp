@@ -1,4 +1,4 @@
-#include "ConversationStruct.h"
+#include "StdAfx.h"
 
 
 namespace ExtClass {
