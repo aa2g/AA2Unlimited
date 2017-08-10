@@ -90,7 +90,7 @@ namespace Triggers {
 		inline bool IsInitalized() { return bInitialized; }
 		inline bool IsBroken() { return broken; }
 
-		Trigger() : bInitialized(false) {}
+		Trigger() : bInitialized(false), broken(false) {}
 		~Trigger();
 	private:
 		bool broken;
