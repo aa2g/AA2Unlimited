@@ -12,6 +12,7 @@ mod\playtrans.lua
 mod\reshade.lua
 mod\strutil.lua
 mod\win10fix.lua
+mod\wined3d.lua
 mod\aaface\init.lua
 mod\launcher\dlg.lua
 mod\launcher\dlglist.lua
@@ -20,4 +21,4 @@ mod\launcher\gsd.lua
 mod\launcher\init.lua
 mod\makertrans\dict.lua
 mod\makertrans\init.lua
-22 File(s) copied
+23 File(s) copied
