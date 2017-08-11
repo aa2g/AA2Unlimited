@@ -81,6 +81,7 @@ static const char *NormalInit()
 	if (g_Config.bUsePPeX)
 		g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
 	if (g_Config.bUsePP2) {
+		g_PP2.Init();
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
 	}
 
@@ -130,10 +131,11 @@ BOOL WINAPI DllMain(
 
 
 
+static std::mutex mutex;
+
 extern "C" __declspec(dllexport)
 void* WINAPI AA2Unlimited(UINT SDKVersion)
 {
-	static std::mutex mutex;
 	static IDirect3D9* (WINAPI *orig)(UINT SDKVersion);
 	std::lock_guard<std::mutex> guard(mutex);
 

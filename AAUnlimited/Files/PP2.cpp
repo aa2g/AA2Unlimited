@@ -1,21 +1,14 @@
-
 #include "StdAfx.h"
 #include "zstd.h"
 #include "opus.h"
 #include <io.h>
 #include <windows.h>
 
+#include "MD5.h"
+
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 
 using namespace std;
-//const wchar_t *currname;
-
-
-#define FLAG_OPUS 0x400
-#define FLAG_ZSTD 0x800
-#define FLAG_ALONE 0x1000
-#define INIT_SCORE 0
-#define SRATE 44100
 
 PP2 g_PP2;
 
@@ -89,36 +82,77 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	int got = ZSTD_decompress(metabuf, usize, buf, delta);
 	delete buf;
 
-#define INFOLEN 16
-	uint32_t *info = (uint32_t*)metabuf;
-	uint32_t version = info[0];
-	if (got < 0 || version != 0) {
+	char *p;
+	headerInfo *h = (headerInfo *)metabuf;
+	hdr = *h;
+	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << std::dec
+		<< " version " << int(h->version)
+		<< ", " << int(h->nchunks) << " chunks, "
+		<< int(h->nfiles) << " files, " << h->nnames << " names" << "\r\n";
+
+
+	if (h->version == 0) {
+		chunks = new chunkInfo[h->nchunks]();
+		files = new fileInfo[h->nfiles]();
+		uint32_t *offs = (uint32_t*)(metabuf + sizeof(headerInfo));
+		// NOTE: last chunk is dummy one
+		for (int i = 0; i < h->nchunks; i++) {
+			chunks[i].offset = offs[i];
+			chunks[i].usize = -1;
+			chunks[i].firstfile = 0xdeadbabe;
+			/*
+			chunks[i].usize = 0;
+			chunks[i].nfiles = 0;
+			chunks[i].firstfile = 0;*/
+		}
+		V1fileEntry *v1f = (V1fileEntry*)(&offs[h->nchunks]);
+		for (int i = 0; i < h->nfiles; i++) {
+			files[i].chpos = v1f[i].off;
+			files[i].chunk = v1f[i].chunk;
+			files[i].flags = v1f[i].flags;
+			files[i].osize = v1f[i].osize;
+
+			if (v1f[i].off == 0)
+				chunks[v1f[i].chunk].firstfile = i;
+		}
+		for (int i = 0; i < h->nchunks-1; i++) {
+			assert(chunks[i].firstfile < h->nfiles);
+		}
+		p = (char*)(&v1f[h->nfiles]);
+	}
+	else if (h->version == 2) {
+		chunks = decltype(chunks)(metabuf + sizeof(headerInfo));
+		files = decltype(files)(metabuf + sizeof(headerInfo) + sizeof(chunkInfo) * h->nchunks);
+		p = (char*)(&files[h->nfiles]);
+	}
+	else {
 		LOGPRIONC(Logger::Priority::ERR) wstring(fn) << fn << " appears to be corrupt\r\n";
 		return;
 	}
-	uint32_t chcount = info[1];
-	uint32_t fcount = info[2];
-	uint32_t ncount = info[3];
 
-
-	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << std::dec
-		<< " version " << int(version)
-		<< ", " << int(chcount) << " chunks, "
-		<< int(fcount) << " files, " << ncount << " names" << "\r\n";
-
-	chunks = (uint32_t*)(metabuf + INFOLEN); 
-	files = (fileEntry*)(metabuf + INFOLEN + chcount * sizeof(chunks[0]));
-
-	char *p = (char*)&files[fcount];
+//	md5s = new uint64_t[h->nfiles];
 	size_t metalen = p - metabuf;
 
-	for (uint32_t i = 0; i < ncount; i++) {
-		uint32_t *linkto = (uint32_t*)p;
-		uint32_t idx = i;
+	for (uint32_t i = 0; i < h->nnames; i++) {
+		uint32_t idx, linkto = *((uint32_t*)p);
+		idx = i;
+		if (h->version == 2) {
+			p += 4;
+			idx= linkto;
+		}
+		char *hash = p;
 		p += 8;
 		uint16_t len = *((uint16_t*)p);
-		if (len & 0x8000)
-			idx = *linkto;
+
+		if (len & 0x8000) {
+			idx = linkto;
+		}
+#if 0
+		else {
+			::memcpy(&md5s[idx], hash, 8);
+		}
+#endif
+
 		len &= 0x7fff;
 		p += 2;
 		wstring tfn((wchar_t*)p, len / 2);
@@ -131,67 +165,112 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 		p += len;
 	}
 
+
+	cache = new std::atomic<cacheEntry *>[h->nfiles]();
+	score = new uint32_t[h->nfiles]();
+
 	// trimp the buffer w/o names
-	metabuf = (char*)realloc(metabuf, metalen);
-	chunks = (uint32_t*)(metabuf + INFOLEN);
-	assert(chunks[0] == 0);
-	files = (fileEntry*)(metabuf + INFOLEN + chcount * sizeof(chunks[0]));
+	if (h->version == 2)
+		metabuf = (char*)realloc(metabuf, p - metabuf);
+	else {
+		free(metabuf);
+		metabuf = NULL;
+	}
 
 	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << std::dec <<
-		" metadata trimmed to " << int(metalen/1024) << "kb\r\n";
-	h = HANDLE(_get_osfhandle(_fileno(sf)));
+		" metadata size " << int(metalen/1024) << "kb\r\n";
+	this->h = HANDLE(_get_osfhandle(_fileno(sf)));
 }
 
 
 uint32_t PP2File::chunkSize(uint32_t chunk) {
-	return chunks[chunk + 1] - chunks[chunk];
+	return chunks[chunk + 1].offset - chunks[chunk].offset;
 }
 
-PP2File::cacheEntry *PP2File::reallocCache(uint32_t idx, PP2File::cacheEntry *ce) {
+PP2File::cacheEntry *PP2File::reallocCache(PP2File::cacheEntry *ce) {
 	size_t old = HeapSize(pp2->HGet(), 0, (void*)ce) - sizeof(*ce);
 	cacheEntry *nce = (cacheEntry*)HeapReAlloc(pp2->HGet(), 0, (void*)ce, ce->csize + sizeof(*ce));
-	pp2->cache_used -= old;
-	pp2->cache_used += ce->csize;
-	cache[idx] = nce;
 	return nce;
+}
+
+uint32_t PP2File::rawfreeCache(cacheEntry *ce)
+{
+	uint32_t freed = ce->csize;
+	pp2->cache_used -= freed;
+	pp2->cache_count--;
+	HeapFree(pp2->HGet(), 0, ce);
+	return freed;
 }
 
 uint32_t PP2File::freeCache(uint32_t idx)
 {
-	//DBG "Freecache " << idx << "\r\n";
-	assert(cache.find(idx) != cache.end());
-	uint32_t sz = cache[idx]->csize;
-	HeapFree(pp2->HGet(), 0, cache[idx]);
-	pp2->cache_used -= sz;
-	pp2->cache_count--;
-	cache.erase(idx);
-	return sz;
+	assert(idx < hdr.nfiles);
+	cacheEntry *ce = cache[idx].exchange(0);
+	if (!ce) {
+		// The entry is already free
+		return 0;
+	}
+	return rawfreeCache(ce);
 }
 
-static char *GameAlloc(size_t sz) {
+char *PP2File::GameAlloc(size_t sz) {
 	return (char*)Shared::IllusionMemAlloc(sz);
 }
 
-
-PP2File::cacheEntry *PP2File::allocCache(uint32_t idx, size_t size) {
-	if ((pp2->cache_used / 1024 / 1024) > g_Config.PP2Cache)
-		pp2->CacheGC(pp2->cache_used / 4);
-
-	cacheEntry *ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(*ce));
-	if (!ce) {
-		pp2->OOM();
-		ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(*ce));
-	}
-	pp2->cache_used += size;
-	pp2->cache_count++;
-	cache[idx] = ce;
-	score[idx]++;
+PP2File::cacheEntry *PP2File::rawallocCache(size_t size) {
+	auto ce = (cacheEntry*)HeapAlloc(pp2->HGet(), 0, size + sizeof(cacheEntry));
 	ce->csize = size;
 	return ce;
 }
+PP2File::cacheEntry *PP2File::allocCache(uint32_t idx, size_t size) {
+	auto ce = rawallocCache(size);
+	pp2->cache_used += size;
+	pp2->cache_count++;
+	assert(!cache[idx].load());
+	cache[idx].store(ce);
+	return ce;
+}
+
+void PP2::compressWorker(workItem wi) {
+	PP2File *arch = wi.archive;
+	assert(wi.chunk < arch->hdr.nchunks);
+	uint32_t fidx = arch->chunks[wi.chunk].firstfile;
+	assert(fidx < arch->hdr.nfiles);
+
+	// walk the files in a chunk
+	for (uint32_t i = fidx; arch->files[i].chunk == wi.chunk; i++) {
+		auto &tfe = arch->files[i];
+		// this particular file is already cached
+		if (arch->cache[i].load())
+			continue;
+
+		uint32_t worst = ZSTD_compressBound(tfe.osize);
+		PP2File::cacheEntry *nce, *tce = arch->rawallocCache(worst);
+		int got = ZSTD_compress(tce->data, worst, wi.buf + tfe.chpos, tfe.osize, 3);
+
+		assert(got >= 0);
+		tce->csize = got;
+
+		nce = arch->reallocCache(tce);
+
+		assert(!arch->cache[i].load());
+		arch->cache[i].store(nce);
+
+		cache_used += nce->csize;
+		cache_count++;
+	}
+	bufmutex.lock();
+	bufused -= arch->chunks[wi.chunk].usize;
+	assert(arch->buffers[wi.chunk] == wi.buf);
+	int ndel = arch->buffers.erase(wi.chunk);
+	assert(ndel == 1);
+	delete wi.buf;
+	bufmutex.unlock();
+}
 
 void *PP2File::getCache(uint32_t idx) {
-	fileEntry &fe = files[idx];
+	bool buflocked = false;
+	fileInfo &fe = files[idx];
 	cacheEntry *ce = NULL;
 	char *ret = NULL;
 
@@ -204,83 +283,104 @@ void *PP2File::getCache(uint32_t idx) {
 		}
 	}
 
-	// if not in cache, put it in there
-	if (cache.find(idx) == cache.end()) {
-		//DBG "Not found in cache " << idx << "\r\n";
-		// trim the cache if needed
+	score[idx]++;
 
+	ce = cache[idx].load();
+
+	// if not in cache, put it in there
+	while (!ce) {
+		pp2->GC();
+
+		chunkInfo &ch = chunks[fe.chunk];
+		// if we have a work buffer, just use that, but don't
+		// put it into cache just yet
+		{
+			std::unique_lock<std::mutex> lock(pp2->bufmutex);
+			if (buffers.find(fe.chunk) != buffers.end()) {
+				assert(!(fe.flags & FLAG_OPUS));
+				ret = GameAlloc(fe.osize);
+				char *buf = buffers[fe.chunk];
+				memcpy(ret, buf + fe.chpos, fe.osize);
+
+				return ret;
+			}
+		}
+
+		// compressed chunk size
 		size_t sz = chunkSize(fe.chunk);
 		char *zbuf;
+
+		// if the file is alone in chunk, the compressed chunk itself
+		// becomes a cache entry
 		if (fe.flags & FLAG_ALONE) {
-			ce = allocCache(idx, sz);
+			ce = allocCache(idx, sz); // cache[idx] = ce now
 			zbuf = ce->data;
 		}
 		else {
+			// otherwise allocate special buffer
 			zbuf = new char[sz];
 		}
 
+		// now read in the chunk
 		OVERLAPPED over = { 0 };
-		over.Offset = chunks[fe.chunk];
-		DWORD got = 0;
-		bool read_ok = ReadFile(h, zbuf, sz, &got, &over);
+		over.Offset = ch.offset;
+		DWORD rgot = 0;
+		bool read_ok = ReadFile(h, zbuf, sz, &rgot, &over);
 		assert(read_ok);
-		assert(got == sz);
+		assert(rgot == sz);
 
-		if (!ce) {
-			assert(!(fe.flags & FLAG_ALONE));
-			ret = GameAlloc(fe.osize);
-			size_t tmplen = ZSTD_getDecompressedSize(zbuf, sz);
-			char *tmp = new char[tmplen];
-			assert(fe.flags & FLAG_ZSTD);
-			int got = ZSTD_decompress(tmp, tmplen, zbuf, sz);
-			assert(got == tmplen);
-			delete zbuf;
-			uint32_t i = idx - fe.chpos;
-			assert(files[i].off == 0);
-			uint32_t ichunk = files[i].chunk;
-			do {
-				if (cache.find(i) == cache.end()) {
-					auto &tfe = files[i];
-					assert(tfe.chunk == ichunk);
-					/*DBG "Recomp " << std::dec
-						<< tfe.chunk << ","
-						<< tfe.chpos << ","
-						<< i << ","
-						<< files[i].off << ","
-						<< files[i].osize << ","
-						<< tmplen << "\r\n";*/
+		// if its unique snowflake (FLAG_ALONE), we're done here
+		if (ce) 
+			break;
 
-					uint32_t worst = ZSTD_compressBound(tfe.osize);
-					auto tce = allocCache(i, worst);
-					if (i == idx) {
-						memcpy(ret, tmp + tfe.off, tfe.osize);
-					}
-					assert(tce != NULL);
-					assert(tfe.off + tfe.osize <= tmplen);
-					tce->csize = ZSTD_compress(tce->data, worst, (void*)(tmp + tfe.off), tfe.osize, 1);
-					//DBG i << " compressed to " << tce->csize << " from " << tfe.osize << "\r\n";
-					tce = reallocCache(i, tce);
-				}
-			} while ((files[i].off + files[i++].osize) < tmplen);
-			i--;
-			assert(files[i].off + files[i].osize == tmplen);
+		assert(!(fe.flags & FLAG_ALONE));
+
+		// otherwise decompress the chunk and pull
+		// the file entry we need
+		ret = GameAlloc(fe.osize);
+		size_t tmplen = (ch.usize!=-1)?ch.usize:ZSTD_getDecompressedSize(zbuf, sz);
+		ch.usize = tmplen;
+
+		char *tmp = new char[tmplen];
+		assert(fe.flags & FLAG_ZSTD);
+		int got = ZSTD_decompress(tmp, tmplen, zbuf, sz);
+		assert(got == tmplen);
+		delete zbuf;
+
+		// copy the data
+		memcpy(ret, tmp + fe.chpos, fe.osize);
+
+		// now kick the worker thread to start recompressing
+		// the entries again
+
+		// If too much of buffers is in use, do not cache this,
+		// we'll try again at some other time
+		pp2->bufmutex.lock();
+		if ((pp2->bufused/1024/1024) > (g_Config.PP2Buffers)) {
 			delete tmp;
+			LOGPRIO(Logger::Priority::WARN) << std::dec
+				<< "Cache buffer trashing (used " << (pp2->bufused/1024) << "KiB) index " << idx << "\r\n";
+			pp2->bufmutex.unlock();
+			return ret;
 		}
-	} {
-		//DBG "Found in cache " << std::dec << idx << "\r\n";
+		buffers[fe.chunk] = tmp;
+		pp2->bufused += tmplen;
+		pp2->bufmutex.unlock();
+
+		{
+			std::unique_lock<std::mutex> lock(pp2->workmutex);
+//			pp2->compressWorker({ this, fe.chunk, tmp });
+			pp2->work.push({ this, fe.chunk, tmp });
+		}
+		pp2->work_condition.notify_one();
+		return ret;
 	}
 
-	// decompressed during load
-	if (ret)
-		return ret;
-
-	// decompress from cache
+	// Allocate result
 	ret = GameAlloc(fe.osize);
-	
-	if (!ce)
-		ce = cache[idx];
+
+	// Make sure we have something to fill it with
 	assert(ce);
-	score[idx]++;
 
 	if (fe.flags & FLAG_OPUS) {
 		int wshift = fe.flags & 3;
@@ -302,13 +402,16 @@ void *PP2File::getCache(uint32_t idx) {
 		return ret;
 	}
 
+	// TODO: non-zstd files
 	assert(fe.flags & FLAG_ZSTD);
+//	pp2->gc_mutex.lock();
 	int got = ZSTD_decompress(ret, fe.osize, ce->data, ce->csize);
+//	pp2->gc_mutex.unlock();
 	if (got != fe.osize) {
 		LOGPRIO(Logger::Priority::CRIT_ERR) << std::dec
 			<< "Decompressed size mismatch for "
 			<< name << "/" << getName(idx)
-			<< "chunk " << fe.chunk << " begins at " << chunks[fe.chunk] << ", chpos " << fe.chpos << " choff " << fe.off
+			<< "chunk " << fe.chunk << " begins at " << chunks[fe.chunk].offset << ", chpos " << fe.chpos 
 			<< " expected size " << fe.osize << "!=" << got << " from zstd " << ZSTD_getDecompressedSize(ce->data, ce->csize) << "\r\n";
 	}
 
@@ -350,18 +453,24 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
-	for (auto &p : pfiles) {
+	for (auto &&p : pfiles) {
 		if (p.names.find(path) == p.names.end())
 			continue;
 		auto fidx = p.names[path];
 		if (fidx == 0xffffffff) {
 			*readBytes = 0;
-			*outBuffer = (BYTE*)GameAlloc(0);
+			*outBuffer = (BYTE*)p.GameAlloc(0);
 			return true;
 		}
 		*readBytes = p.files[fidx].osize;
 		*outBuffer = (BYTE*)p.getCache(fidx);
-		
+#if 0
+		std::wstring outf(L"out/");
+		FILE *fo = _wfopen((outf + paramArchive + L"_" + paramFile).c_str(), L"wb");
+		fwrite(*outBuffer, 1, *readBytes, fo);
+		fclose(fo);
+#endif
+
 		return true;
 	}
 
@@ -369,9 +478,40 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 }
 
 PP2::PP2() {};
+
+PP2::~PP2() {
+	{
+		std::unique_lock<std::mutex> lock(workmutex);
+		stopping = true;
+	}
+	work_condition.notify_all();
+	for (auto &w : workers)
+		w.join();
+};
+
+void PP2::Init() {
+	for (int i = 0; i < 8; i++) {
+		workers.emplace_back([this] {
+			for (;;) {
+				workItem wi;
+				{
+					std::unique_lock<std::mutex> lock(workmutex);
+					work_condition.wait(lock, [this] {return this->stopping || !this->work.empty(); });
+					if (this->stopping/* && this->work.empty()*/)
+						return;
+					wi = work.front();
+					work.pop();
+				}
+				compressWorker(wi);
+			}
+		});
+	}
+}
+
+
+
 HANDLE PP2::HGet() {
 	static int config;
-
 	if (!*Shared::IllusionMemAllocHeap)
 		*Shared::IllusionMemAllocHeap = HeapCreate(0, 0, 0);
 	HANDLE h = *Shared::IllusionMemAllocHeap;
@@ -401,6 +541,13 @@ HANDLE PP2::HGet() {
 	return h;
 }
 
+void PP2::GC() {
+	if (((cache_used/1024/1024 + *Shared::IllusionMemUsed/1024/1024 + bufused/1024/1024)) > g_Config.PP2Cache)
+		CacheGC(cache_used / 4);
+	if ((acache_used / 1024 / 1024) > g_Config.PP2AudioCache)
+		ACacheGC(acache_used / 4);
+}
+
 void PP2::OOM() {
 	LOGPRIONC(Logger::Priority::CRIT_ERR) std::dec
 		<< "OOM: out of memory, trying emergency GC but this is bad\r\n";
@@ -418,21 +565,27 @@ static void defrag_heap() {
 }
 
 void PP2::CacheGC(size_t sz) {
+//	std::unique_lock<std::shared_mutex> lock(gc_mutex);
+
 	vector<uint64_t> array;
 	int idx = 0;
 	long tsize = 0;
 
+
+	defrag_heap();
 	LOGPRIONC(Logger::Priority::SPAM) std::dec
 		<< "CacheGC: need to free " << sz/1024 << " KiB\r\n";
 
-	for (auto &p : pfiles) {
-		for (auto const& e : p.score) {
-			if (p.cache.find(e.first) == p.cache.end())
+	for (auto &&p : pfiles) {
+		for (int i = 0; i < p.hdr.nfiles; i++) {
+			auto ce = p.cache[i].load();
+			if (!ce)
 				continue;
-			tsize += p.cache[e.first]->csize;
-			uint64_t v = ((uint64_t)e.second << 32) | ((uint64_t)e.first << 8) | idx;
+			tsize += ce->csize;
+			uint64_t v = ((uint64_t)p.score[i] << 32) | ((uint64_t)i << 8) | idx;
 			array.push_back(v);
 		}
+		// global pp2 index
 		idx++;
 	}
 	sort(array.begin(), array.end());
@@ -444,26 +597,31 @@ void PP2::CacheGC(size_t sz) {
 	int fhit, lhit;
 	fhit = -1;
 	int nent = 0;
+
 	for (auto &a : array) {
+		int pfile = a & 0xff;
 		if (fhit < 0)
 			fhit = a >> 32;
 		lhit = a >> 32;
-		dropped += pfiles[a&0xff].freeCache((a>>8) & 0xffffff);
+		dropped += pfiles[pfile].freeCache((a>>8) & 0xffffff);
 		nent++;
 		if (dropped > sz)
 			break;
 	}
 	defrag_heap();
 	LOGPRIONC(Logger::Priority::SPAM)
-		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB, hits" <<fhit<<","<<lhit<<"\r\n";
+		"CacheGC: Freed " << nent << " compressed cache entries, " << dropped / 1024 << "KiB, illusion cache " << (*Shared::IllusionMemUsed/1024) << "KiB\r\n";
 }
 
 void PP2::ACacheGC(size_t sz) {
+	//std::unique_lock<std::shared_mutex> lock(gc_mutex);
+
 	vector<uint64_t> array;
 	int idx = 0;
 	long tsize = 0;
 
-	for (auto &p : pfiles) {
+	defrag_heap();
+	for (auto &&p : pfiles) {
 		for (auto const& e : p.ascore) {
 			if (p.acache.find(e.first) == p.acache.end())
 				continue;

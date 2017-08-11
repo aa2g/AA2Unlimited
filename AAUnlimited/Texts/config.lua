@@ -83,11 +83,12 @@ bUsePPeX = false
 -- load .pp2 files
 bUsePP2 = true
 
--- MB cache memory for general data
-PP2Cache = 512
+-- MB cache memory for general data, includes data allocated by game itself
+PP2Cache = 2000
 
 -- MB cache memory for decompressed audio
 PP2AudioCache = 256
+PP2Buffers = 256
 
 -- The modified launcher of MKIII decensor
 -- rewrites the string so that AS00_03_00_00_00.bmp - AS00_03_00_04_00.bmp

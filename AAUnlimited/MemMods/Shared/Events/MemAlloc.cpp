@@ -12,6 +12,7 @@ static SIZE_T __stdcall InjectedHeapSize(HANDLE hHeap, DWORD dwFlags, LPCVOID lp
 }
 
 static LPVOID __stdcall InjectedHeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes) {
+	dwFlags &= ~1;
 	return HeapAlloc(hHeap, dwFlags, dwBytes);
 }
 
