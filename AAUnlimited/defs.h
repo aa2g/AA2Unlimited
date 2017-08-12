@@ -8,6 +8,7 @@
 #define POSEMOD_FILE_PATH TEXT("poserframes.txt")
 
 #define OVERRIDE_PATH TEXT("data\\override\\")
+#define CLASS_SAVES_PATH TEXT("data\\save\\class\\")
 
 #define HAIR_HIGHLIGHT_PATH TEXT("hair_highlights\\")
 #define TAN_PATH TEXT("tan\\")

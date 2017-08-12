@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-
+#include "Files\PersistentStorage.h"
 namespace SharedInjections {
 namespace ArchiveFile {
 

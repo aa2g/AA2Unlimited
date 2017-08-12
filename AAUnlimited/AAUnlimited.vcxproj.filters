@@ -120,6 +120,8 @@
     <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
     <ClCompile Include="Functions\Render.cpp" />
     <ClCompile Include="Functions\RenderWrap.cpp" />
+    <ClCompile Include="Files\PersistentStorage.cpp" />
+    <ClCompile Include="Hooks\WinAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -235,6 +237,8 @@
     <ClInclude Include="Script\gluam.h" />
     <ClInclude Include="Functions\Render.h" />
     <ClInclude Include="Functions\RenderWrap.h" />
+    <ClInclude Include="Files\PersistentStorage.h" />
+    <ClInclude Include="Hooks\WinAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
