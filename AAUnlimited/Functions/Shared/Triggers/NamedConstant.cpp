@@ -522,11 +522,11 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 				TEXT("I_SAW_SOMEONE_HAVE_H"), TEXT("I_SAW_SOMEONE_HAVE_H"), TEXT("I_SAW_SOMEONE_HAVE_H"),
 				Value(ExtClass::ConversationId::I_SAW_SOMEONE_HAVE_H)
 		},
-		//{ //free slot
-		//	101, NCONSTCAT_CONVERSATIONS,
-		//		TEXT(""), TEXT(""), TEXT(""),
-		//		Value(ExtClass::ConversationId::)
-		//},
+		{ //free slot
+			101, NCONSTCAT_CONVERSATIONS,
+				TEXT("INVALID"), TEXT("INVALID"), TEXT("INVALID"),
+				Value(0)
+		},
 		{
 			102, NCONSTCAT_CONVERSATIONS,
 				TEXT("DO_NOT_GET_INVOLVED"), TEXT("DO_NOT_GET_INVOLVED"), TEXT("DO_NOT_GET_INVOLVED"),
@@ -907,11 +907,11 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			Value(ExtClass::PregnancyRisk::PREGRISK_DANGEROUS)
 		},
 		//Events
-		//{
-		//	177, NCONSTCAT_EVENT_TYPE,
-		//	TEXT("Invalid"), TEXT("INVALID"), TEXT(""),
-		//	Value(Shared::Triggers::Events::INVALID)
-		//},
+		{
+			177, NCONSTCAT_EVENT_TYPE,
+			TEXT("INVALID"), TEXT("INVALID"), TEXT("INVALID"),
+			Value(Shared::Triggers::Events::INVALID)
+		},
 		{
 			178, NCONSTCAT_EVENT_TYPE,
 			TEXT("Clothes Changed"), TEXT("CLOTHES_CHANGED"), TEXT("Whenever a character changes clothes, either in the changing room or by entering the next period. (Not yet implemented)"),
