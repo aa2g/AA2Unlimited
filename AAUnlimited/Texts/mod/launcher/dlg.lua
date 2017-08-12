@@ -259,7 +259,7 @@ local function buildtabs() return
 			title = "Output",
 			iup.gridbox {
 				nmargin="16x18",
-				padding="x8",
+				padding="x10",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER" ,
 				iup.label {title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
 				iup.label {title = "Antialiasing*:",}, gsdl("aa", iup.list { 
@@ -279,6 +279,7 @@ local function buildtabs() return
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background" }),
+				aaut("bDrawFPS", iup.toggle {title = "Show FPS" }),
 				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
 				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
 				gsdt("sharp", iup.toggle {title = "Blur textures**" }),

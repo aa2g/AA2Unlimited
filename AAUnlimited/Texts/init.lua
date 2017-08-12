@@ -58,7 +58,6 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
-	log("going to set %s to %s",k,tostring(v))
 	if v ~= nil then
 		-- if setting a binding fails, its not a C++ setting
 		if not pcall(function() _BINDING.Config[k] = v end) then
@@ -117,7 +116,7 @@ end
 
 function Config.save(fn)
 	local fn = fn or aau_path("savedconfig.lua")
-	log("saving config to "..fn)
+--	log("saving config to "..fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
@@ -418,7 +417,7 @@ function readdir(path)
 			ok = FindNextFileW(fh, mem) ~= 0
 		end
 		if not ok then
-			CloseHandle(fh)
+			FindClose(fh)
 			free(mem)
 			return nil
 		end
@@ -439,7 +438,6 @@ end
 
 -- grabs all information about module just by its name
 function get_mod_info(n)
-	log("modinfo %s", n)
 	local mi
 	local idx
 	for i,v in ipairs(Config.mods) do

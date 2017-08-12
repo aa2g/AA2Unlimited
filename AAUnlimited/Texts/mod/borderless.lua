@@ -5,6 +5,10 @@ require "memory"
 local _M = {}
 
 function on.first_tick(hwnd)
+	tex=_BINDING.CreateTexture(64,64)
+	tex:Clear(0x80808080)
+	tex:Draw(0,0)
+
 	local rect = malloc(16)
 	GetWindowRect(GetDesktopWindow(), rect)
 	local screenw, screenh = string.unpack("<II", peek(rect+8, 8))
