@@ -78,7 +78,11 @@ public:
 	Logger& operator<<(const std::wstring& str) {
 		std::unique_lock<std::mutex> lock(mutex);
 		std::string cstr(str.begin(),str.end());
-		outfile << cstr.c_str();
+		if (outfile.good() && currPrio >= filter) {
+			outfile << cstr.c_str();
+			outbuf << cstr.c_str();
+		}
+		luaFlush();
 		outfile.flush();
 		return *this;
 	}

@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Functions/Render.h"
 
 #include <codecvt>
 #include <string>
@@ -102,6 +103,8 @@ void Lua::bindLua() {
 	HParticipant::bindLua();
 	HPosButtonList::bindLua();
 	HStatistics::bindLua();
+
+	Render::bindLua();
 
 	// Very low level utilities
 	using namespace General;

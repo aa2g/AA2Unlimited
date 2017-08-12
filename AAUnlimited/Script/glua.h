@@ -340,6 +340,8 @@ struct State {
 	}
 
 	bool isnil(int idx = -1) {
+		if (idx > 0 && idx > top())
+			return true;
 		return lua_isnil(L(), idx);
 	}
 
