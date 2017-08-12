@@ -232,6 +232,7 @@ void InitializeHooks() {
 		GameTick::Initialize();
 		ArchiveFile::OpenFileInject();
 		ArchiveFile::DirScanInject();
+		ArchiveFile::CreateFileInject();
 		if (g_Config.getb("bUseMeshTextureOverrides")) {
 			LOGPRIO(Logger::Priority::SPAM) << "Mesh texture override init" << "\n";
 			MeshTexture::OverrideTextureListSizeInject();
