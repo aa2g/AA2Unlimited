@@ -8,7 +8,6 @@ namespace ArchiveFile {
 
 void OpenFileInject();
 void DirScanInject();
-void CreateFileInject();
 void RegisterPP(const wchar_t*);
 
 

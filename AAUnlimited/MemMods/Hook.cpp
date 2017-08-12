@@ -203,6 +203,7 @@ DWORD PatchIAT(DWORD *iat, void *newp)
 #include "MemMods/Shared/Events/HairMeshes.h"
 #include "MemMods/Shared/Events/MemAlloc.h"
 #include "MemMods/Shared/Events/GameTick.h"
+#include "Hooks\WinAPI.h"
 
 
 #include "MemMods/AAPlay/Events/HInjections.h"
@@ -232,7 +233,7 @@ void InitializeHooks() {
 		GameTick::Initialize();
 		ArchiveFile::OpenFileInject();
 		ArchiveFile::DirScanInject();
-		ArchiveFile::CreateFileInject();
+		WinAPI::CreateFileInject();
 		if (g_Config.getb("bUseMeshTextureOverrides")) {
 			LOGPRIO(Logger::Priority::SPAM) << "Mesh texture override init" << "\n";
 			MeshTexture::OverrideTextureListSizeInject();
