@@ -490,7 +490,10 @@ PP2::~PP2() {
 };
 
 void PP2::Init() {
-	for (int i = 0; i < 8; i++) {
+	int nthreads = std::thread::hardware_concurrency();
+	if (!nthreads)
+		nthreads = 4;
+	for (int i = 0; i < nthreads; i++) {
 		workers.emplace_back([this] {
 			for (;;) {
 				workItem wi;
