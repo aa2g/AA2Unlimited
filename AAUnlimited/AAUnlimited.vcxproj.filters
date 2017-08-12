@@ -326,5 +326,11 @@
     <None Include="Texts\mod\wined3d.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\dx.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\com.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
