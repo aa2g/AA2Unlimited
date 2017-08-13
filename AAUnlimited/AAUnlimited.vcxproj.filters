@@ -336,5 +336,8 @@
     <None Include="Texts\mod\com.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\unlocks.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

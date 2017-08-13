@@ -1,4 +1,4 @@
---@INFO Unlocks hue and sliders in editor.
+--@INFO Unlocks hue and slider limits.
 
 local offsets = {
 	-- unlocks hue
@@ -49,7 +49,7 @@ local offsets = {
 	},
 
 	-- cmp eax, 100 -> nop
-	-- most likely slider values clamp
+	-- body slider ui value clamp
 	["\x3B\xC0\x90"] = {
 		0x00016A4A,
 		0x0001C801,
@@ -88,8 +88,15 @@ local offsets = {
 		0x00022742,
 		0x0002274B,
 	},
-	["\x3A\xD2\x90"] = {
-		-- NOT YET IMPLEMENTED
+
+	-- Patch in jumps over the body of functions in charge
+	-- of disabling trait buttons, thus bypassing trait limit
+	["\xe9\x90\x00\x00\x00"] = {
+		0x0002F216,
+	},
+
+	["\xe9\x88\x00\x00\x00"] = {
+		0x0002f0d3
 	}
 }
 
