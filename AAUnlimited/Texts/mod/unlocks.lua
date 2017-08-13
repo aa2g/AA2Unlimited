@@ -100,7 +100,30 @@ local offsets = {
 	-- H pref (when over 2)
 	["\xe9\x88\x00\x00\x00"] = {
 		0x0002f0d3
+	},
+
+
+--[[
+	-- Unknown slider (?) clamp to 100
+	["\x3a\xc0"] = {
+		0x0002044B
+		0x00020456
+		0x0002049D
+		0x000204A8
+	},
+
+	-- Unknown slider 2 (?) clamp to 100
+	["\x3A\xD2\x90"] = {
+		0x000278CB,
+		0x000278D7,
+		0x00027916,
+		0x00027922,
+		0x0002799C,
+		0x000279A8,
+		0x00027A06,
+		0x00027A12	
 	}
+	]]
 }
 
 local _M = {}
