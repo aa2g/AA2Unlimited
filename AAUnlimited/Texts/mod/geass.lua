@@ -18,7 +18,7 @@ end
 
 function _M:load()
 	opts = self
-	self.key = self.key or 2
+	self.key = self.key or 1
 end
 
 function _M:unload()
