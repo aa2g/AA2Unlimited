@@ -138,3 +138,10 @@ function parse_asm(s)
 	log("asm parsed %d", #ret)
 	return ret
 end
+
+function f_patch(bytes, offs)
+	offs = offs + 0xc00
+	local save = g_peek(offs, #bytes)
+	g_poke(offs, bytes)
+	return save
+end
