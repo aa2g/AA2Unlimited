@@ -4,8 +4,6 @@
 #include <io.h>
 #include <windows.h>
 
-#include "MD5.h"
-
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 
 using namespace std;
