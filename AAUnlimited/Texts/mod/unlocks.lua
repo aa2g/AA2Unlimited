@@ -1,4 +1,4 @@
---@INFO Unlocks hue and slider limits.
+--@INFO Unlocks hue, slider, trait and H-pref limits.
 
 local offsets = {
 	-- unlocks hue
@@ -90,11 +90,14 @@ local offsets = {
 	},
 
 	-- Patch in jumps over the body of functions in charge
-	-- of disabling trait buttons, thus bypassing trait limit
+	-- of disabling buttons of
+
+	-- Trait (when over 2)
 	["\xe9\x90\x00\x00\x00"] = {
 		0x0002F216,
 	},
 
+	-- H pref (when over 2)
 	["\xe9\x88\x00\x00\x00"] = {
 		0x0002f0d3
 	}
@@ -123,8 +126,6 @@ function _M:unload()
 		f_patch(bytes,offs)
 	end
 	save = {}
-
-	do_unpatch()
 end
 
 return _M
