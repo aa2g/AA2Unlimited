@@ -1,10 +1,16 @@
 #include "StdAfx.h"
 
+// Illusion heap is forced to process one to reduce fragmentation
+// of address space. Set this to 0 to use separate heaps for debugging.
+#define SHARED_HEAP 1
 
 namespace MemAlloc {
 static DWORD *iat_HeapAlloc;
 static DWORD *iat_HeapFree;
 static DWORD *iat_HeapSize;
+static DWORD *iat_HeapReAlloc;
+static DWORD *iat_HeapDestroy;
+
 
 static void dumpheap1(HANDLE h, const char *hn) {
 	size_t commited = 0, uncommited = 0, busy = 0, overhead = 0, entries = 0;
@@ -35,7 +41,9 @@ static void dumpheap1(HANDLE h, const char *hn) {
 void dumpheap() {
 	LOGPRIONC(Logger::Priority::SPAM) "----- DUMPING HEAP -----\n";
 
+#if !SHARED_HEAP
 	dumpheap1(*Shared::IllusionMemAllocHeap, "IllusionHeap");
+#endif
 	dumpheap1(GetProcessHeap(), "ProcessHeap");
 	if (g_Lua_p) {
 		LUA_SCOPE;
@@ -55,17 +63,37 @@ static LPVOID __stdcall InjectedHeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dw
 	return HeapAlloc(hHeap, dwFlags, dwBytes);
 }
 
+static LPVOID __stdcall InjectedHeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes) {
+	dwFlags &= ~1;
+	return HeapReAlloc(hHeap, dwFlags, lpMem, dwBytes);
+}
+
+static BOOL __stdcall InjectedHeapDestroy(HANDLE hHeap) {
+	if (*Shared::IllusionMemAllocHeap == hHeap) {
+		LOGPRIONC(Logger::Priority::SPAM) "Destroying IllusionHeap\n";
+		dumpheap();
+		return TRUE;
+	}
+	return HeapDestroy(hHeap);
+}
+
 static BOOL __stdcall InjectedHeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem) {
 	return HeapFree(hHeap, dwFlags, lpMem);
 }
 
 void Init() {
 	if (General::IsAAEdit) {
+		iat_HeapReAlloc = (DWORD*)(General::GameBase + 0x4C40D8);
+		iat_HeapDestroy = (DWORD*)(General::GameBase + 0x4C40DC);
+
 		iat_HeapSize = (DWORD*)(General::GameBase + 0x4C423C);
 		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x4C4244);
 		iat_HeapFree = (DWORD*)(General::GameBase + 0x4C4248);
 	}
 	else if (General::IsAAPlay) {
+		iat_HeapReAlloc = (DWORD*)(General::GameBase + 0x4E30D8);
+		iat_HeapDestroy = (DWORD*)(General::GameBase + 0x4E30DC);
+
 		iat_HeapSize = (DWORD*)(General::GameBase + 0x2E324C);
 		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x2E3254);
 		iat_HeapFree = (DWORD*)(General::GameBase + 0x2E3258);
@@ -75,10 +103,7 @@ void Init() {
 	PatchIAT(iat_HeapAlloc, &InjectedHeapAlloc);
 	PatchIAT(iat_HeapFree, &InjectedHeapFree);
 
-	// Illusion heap is forced to process one to reduce fragmentation
-	// of address space. Comment this out to use separate heaps
-	// for debugging.
-#if 1
+#if SHARED_HEAP
 	*Shared::IllusionMemAllocHeap = (HANDLE)_get_heap_handle();
 #endif
 }

@@ -1,6 +1,9 @@
 --@INFO Unlocks hue, slider, trait and H-pref limits.
 
 local offsets = {
+
+	-- Editor logic patches (saving/loading/applying)
+
 	-- unlocks hue
 	["\x67\x01"] = {
 		0x0002058A,
@@ -90,7 +93,7 @@ local offsets = {
 	},
 
 	-- Patch in jumps over the body of functions in charge
-	-- of disabling buttons of
+	-- of disabling buttons of:
 
 	-- Trait (when over 2)
 	["\xe9\x90\x00\x00\x00"] = {
@@ -103,13 +106,12 @@ local offsets = {
 	},
 
 
---[[
 	-- Unknown slider (?) clamp to 100
 	["\x3a\xc0"] = {
-		0x0002044B
-		0x00020456
-		0x0002049D
-		0x000204A8
+		0x0002044B,
+		0x00020456,
+		0x0002049D,
+		0x000204A8,
 	},
 
 	-- Unknown slider 2 (?) clamp to 100
@@ -121,33 +123,84 @@ local offsets = {
 		0x0002799C,
 		0x000279A8,
 		0x00027A06,
-		0x00027A12	
-	}
+		0x00027A12,
+	},
+
+
+
+	-------- UI patches
+
+	--[[
+	-- char name limit 6 -> 255
+	["\xff"] = {
+		0x0002C334,
+		0x0002C346,
+	},
+
+	-- item text limit 26 -> 255
+	["\xff"] = {
+		0x000305B2,
+		0x000305C4,
+		0x000305D6,
+	},
 	]]
+
+	-- clamp hue to 360 instead of 40
+	--[[ not needed, see below
+	["\xb9\x67\x01\x00\x00\x90"] = {
+		0xD5F2E,
+	}]]
+
+	-- force all hues sliders and their text field limits to 360
+	["\xBB\x67\x01\x00\x00"] = {
+		0xD5BB9
+	}
 }
 
 local _M = {}
-local mcfg
 
 local save = {}
+
+function set_hue_range()
+end
 
 function _M:load()
 	if exe_type == "play" then
 		-- play has only the hue patch
 		f_patch("\x67\x01", 0x12C0B0)
-	elseif exe_type == "edit" then
-		for bytes, offs in pairs(offsets) do
-			for _, off in ipairs(offs) do
-				save[off] = f_patch(bytes, off)
-			end
+		return
+	end
+
+	send_msg = g_hook_vptr(0x002C43E0, 4, function(orig, this, hdlg, msg, wparam, lparam)
+		-- slider range - something asking for 100, make it 255
+		if msg == 0x408 and wparam == 1 and lparam == 100 then
+			--log("OVERRIDE 100->255 %x %x %x %x %x %x", orig,this,hdlg,msg,wparam,lparam)
+			lparam = 255 
+		end
+
+		-- text field size, 6 and 26 -> 255
+		if msg == 0xc5 and (wparam == 26) or (wparam == 6) then
+			wparam = 255
+		end
+
+
+		local ret = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
+		return ret
+	end)
+
+	for bytes, offs in pairs(offsets) do
+		for _, off in ipairs(offs) do
+			save[off] = f_patch(bytes, off)
 		end
 	end
+
 end
 
 function _M:unload()
 	for offs,bytes in ipairs(save) do
 		f_patch(bytes,offs)
 	end
+	g_poke_dword(0x002C43E0, send_msg)
 	save = {}
 end
 
