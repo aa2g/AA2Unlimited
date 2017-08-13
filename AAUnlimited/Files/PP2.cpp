@@ -198,7 +198,9 @@ uint32_t PP2File::rawfreeCache(cacheEntry *ce)
 	uint32_t freed = ce->csize;
 	pp2->cache_used -= freed;
 	pp2->cache_count--;
-	HeapFree(pp2->HGet(), 0, ce);
+	if (!HeapFree(pp2->HGet(), 0, ce)) {
+		LOGPRIO(Logger::Priority::CRIT_ERR) << "Memleak " << ce->csize << " bytes! HeapFree failed for " << ce << "\n";
+	}
 	return freed;
 }
 
@@ -387,14 +389,17 @@ void *PP2File::getCache(uint32_t idx) {
 		int wavrate = ((fe.flags & 4) ? 12000 : 11025) << wshift;
 		int opusrate = 12000 << wshift;
 		OPUS_decompress(wavrate, opusrate, (fe.flags>>4)&0xf, ret, fe.osize, ce->data, ce->csize);
-		if ((pp2->acache_used / 1024 / 1024) > g_Config.PP2AudioCache)
+		if ((pp2->acache_used / 1024 / 1024) > g_Config.PP2AudioCache) {
 			pp2->ACacheGC(pp2->acache_used / 4);
+			MemAlloc::dumpheap();
+		}
 
 		void *aptr = HeapAlloc(pp2->HGet(), 0, fe.osize);
 		if (!aptr) {
 			pp2->OOM();
 			aptr = HeapAlloc(pp2->HGet(), 0, fe.osize);
 		}
+		assert(!acache[idx]);
 		acache[idx] = aptr;
 		ascore[idx]++;
 		memcpy(aptr, ret, fe.osize);
@@ -427,7 +432,7 @@ void PP2::AddPath(const wstring &path) {
 		LOGPRIO(Logger::Priority::ERR) << "Config not enabled\r\n";
 		return;
 	}
-	LOGPRIONC(Logger::Priority::INFO) "Adding path " << path << "\r\n";
+	LOGPRIONC(Logger::Priority::INFO) "PP2 adding search path " << path << "\\*.pp2\r\n";
 
 	fh = FindFirstFile((path + L"\\*.pp2").c_str(), &fd);
 	if (fh == INVALID_HANDLE_VALUE)
@@ -490,6 +495,7 @@ PP2::~PP2() {
 };
 
 void PP2::Init() {
+	MemAlloc::dumpheap();
 	int nthreads = std::thread::hardware_concurrency();
 	if (!nthreads)
 		nthreads = 4;
@@ -544,11 +550,18 @@ HANDLE PP2::HGet() {
 	return h;
 }
 
-void PP2::GC() {
-	if (((cache_used/1024/1024 + *Shared::IllusionMemUsed/1024/1024 + bufused/1024/1024)) > g_Config.PP2Cache)
+void  PP2::GC() {
+	bool ret = false;
+	if (((cache_used / 1024 / 1024 + *Shared::IllusionMemUsed / 1024 / 1024 + bufused / 1024 / 1024)) > g_Config.PP2Cache) {
 		CacheGC(cache_used / 4);
-	if ((acache_used / 1024 / 1024) > g_Config.PP2AudioCache)
+		ret = 1;
+	}
+	if ((acache_used / 1024 / 1024) > g_Config.PP2AudioCache) {
 		ACacheGC(acache_used / 4);
+		ret = 1;
+	}
+	if (ret || ((GameTick::now % 10000) == 1))
+		MemAlloc::dumpheap();
 }
 
 void PP2::OOM() {

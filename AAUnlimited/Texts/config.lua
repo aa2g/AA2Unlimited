@@ -72,7 +72,7 @@ legacyMode = 3
 --2: warn
 --3: err
 --4: crit
-logPrio = 0
+logPrio = 1
 
 -- (don't set, these are currently broken)
 sPoserHotKeys = ""

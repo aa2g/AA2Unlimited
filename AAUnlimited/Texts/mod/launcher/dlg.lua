@@ -166,7 +166,7 @@ local console = iup.text {
 	multiline="yes",
 	wordwrap="yes",
 	expand="yes", readonly="yes", canfocus="no",
-	value="Console activated\r\n"
+	value=""
 }
 
 
@@ -275,7 +275,7 @@ local function buildtabs() return
 			nmargin="8x",
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
-				gsdt("dynlight", iup.toggle {title = "Lightning shader" }),
+				gsdt("dynlight", iup.toggle {title = "Draw skin textures" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background" }),

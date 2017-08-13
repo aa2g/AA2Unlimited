@@ -9,6 +9,11 @@ namespace Time {
 
 
 void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
+	auto timedata = ExtVars::AAPlay::GameTimeData();
+	LOGPRIO(Logger::Priority::SPAM) << "Period changed to " << timedata->currentPeriod << "\n";
+	if (timedata->currentPeriod == 1) {
+		LOGPRIO(Logger::Priority::INFO) << "Day has changed, day of week " << timedata->day << ", " << timedata->nDays << " total days.\n";
+	}
 	Shared::Triggers::PeriodEndsData data;
 	do {
 		//assigns a random filled seat as the triggering card
@@ -17,8 +22,8 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 	} while (!AAPlay::g_characters[data.card].IsValid());
 
 	data.oldPeriod = oldPeriod;
-	data.newPeriod = ExtVars::AAPlay::GameTimeData()->currentPeriod;
-	LUA_EVENT("period", ExtVars::AAPlay::GameTimeData()->currentPeriod, oldPeriod);
+	data.newPeriod = timedata->currentPeriod;
+	LUA_EVENT("period", timedata->currentPeriod, oldPeriod);
 	Shared::GameState::setIsOverriding(false);
 	Shared::Triggers::ThrowEvent(&data);
 }

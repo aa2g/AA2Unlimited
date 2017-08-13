@@ -7,6 +7,7 @@ AAU_VERSION = "0.5 preview"
 assert(_BINDING)
 assert(_BINDING.setlogprio, "C++ logger missing")
 assert(_BINDING.logger, "C++ logger missing")
+	_BINDING.setlogprio(1)
 _CONFIG = _CONFIG or {}
 _WIN32 = {}
 __LOGGER = function(msg)
@@ -19,7 +20,7 @@ end
 ---------------------------
 function check(x,a,b,...)
 	if a == nil then
-		log.warn(x .. "failed with: " .. b)
+		log.spam(x .. " failed with:  " .. b)
 	end
 	return a,b,...
 end
@@ -80,9 +81,9 @@ function Config.load(name)
 	setmetatable(_G, cfproxy)
 
 	local ret, msg = xpcall(ch, function()
-		log.spam("Config failed with " .. debug.traceback(err))
+		log.error("Config %s failed with %s", lua, debug.traceback(err))
 	end)
-
+	_BINDING.setlogprio(_CONFIG.logPrio)
 	setmetatable(_G, nil)
 end
 
@@ -458,7 +459,7 @@ function get_mod_info(n)
 end
 
 
-function alert(msg)
-	require "iup"
-	iup.Message("Alert", msg)
+function alert(who, msg)
+	require "iuplua"
+	iup.Message(who, msg)
 end

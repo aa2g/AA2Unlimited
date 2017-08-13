@@ -260,6 +260,7 @@ function _M:load()
 	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
 		arg = on_hposchange(arg)
 		local ret = proc_invoke(orig, this, arg)
+		log("(tbd generalize this inject) hpos change %x %x %d", this, arg, ret)
 		ret = on_hposchange2(ret)
 		return ret
 	end)

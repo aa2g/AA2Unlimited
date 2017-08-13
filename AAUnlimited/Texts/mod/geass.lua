@@ -1,4 +1,4 @@
---@INFO Reimplements JS3 FP cheats
+--@INFO Right click to force action cheat.
 
 local _M = {}
 

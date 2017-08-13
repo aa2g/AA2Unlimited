@@ -148,13 +148,13 @@ void NpcAnswerInjection() {
 
 	address = General::GameBase + 0x5B3DB;
 	Hook((BYTE*)address,
-		{ 0xE8, 0x20, 0xC7, 0x12, 0x00 },								//expected values
+		{ 0xE8, HookControl::ANY_DWORD },								//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 
 	address = General::GameBase + 0x19FAB4;
 	Hook((BYTE*)address,
-		{ 0xE8, 0x47, 0x81, 0xFE, 0xFF },								//expected values
+		{ 0xE8, HookControl::ANY_DWORD },								//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&loc_NpcAnswerOriginalFunction);
 

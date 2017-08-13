@@ -1,4 +1,4 @@
---@INFO Opengl renderer
+--@INFO Opengl renderer (needs game restart)
 
 local _M = {}
 
@@ -23,7 +23,7 @@ function on.d3d9_preload(prev)
 		setvar("SampleCount", sc)
 	end
 	if prev ~= 0 then
-		alert("wined3d must be first of all d3d hooks (move it up)")
+		alert("wined3d", "D3D conflict, this one must be first one to load and is mutually exclusive with win10fix")
 		os.exit(1)
 	end
 	return LoadLibraryA("wined3d9.dll")

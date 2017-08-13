@@ -18,6 +18,7 @@
 
 
 #define FRAME_MASK 15
+#define TEST_DISABLE
 namespace Render {
 
 DWORD frameno;
@@ -252,6 +253,7 @@ public:;
 	}
 	HRESULT WINAPI DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount)
 	{
+		TEST_DISABLE;
 		nvert += NumVertices;
 		nprim += primCount;
 		drawcalls++;
@@ -298,6 +300,7 @@ public:;
 
 	HRESULT WINAPI SetVertexShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
+		TEST_DISABLE;
 		if (g_Config.bMTRenderer && record < QLIMIT) {
 			WorkItem *wi = (WorkItem*)(buf + record);
 			wi->op = VERTEX_SHADER_CONST;
@@ -312,6 +315,7 @@ public:;
 
 	HRESULT WINAPI SetPixelShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
+		TEST_DISABLE;
 		if (g_Config.bMTRenderer && record < QLIMIT) {
 			WorkItem *wi = (WorkItem*)(buf + record);
 			wi->op = PIXEL_SHADER_CONST;

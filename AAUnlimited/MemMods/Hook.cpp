@@ -224,7 +224,6 @@ DWORD PatchIAT(DWORD *iat, void *newp)
 
 void InitializeHooks() {
 	ExtVars::InitializeExtVars();
-	Shared::Init();
 
 	//shared
 	{
@@ -260,7 +259,6 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
-		MemAlloc::MemAllocInject();
 	}
 
 	if (General::IsAAPlay) {

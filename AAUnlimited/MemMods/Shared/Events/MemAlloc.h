@@ -2,8 +2,8 @@
 
 #include <Windows.h>
 
-namespace SharedInjections {
-	namespace MemAlloc {
-		void MemAllocInject();
-	}
+namespace MemAlloc {
+	void Init();
+	void dumpheap();
 }
+

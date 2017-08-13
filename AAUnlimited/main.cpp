@@ -125,6 +125,8 @@ BOOL WINAPI DllMain(
 		General::DllInst = hinstDLL;
 		if (!General::EarlyInit())
 			return FALSE;
+		Shared::Init();
+		MemAlloc::Init();
 	}
 	return TRUE;
 }
@@ -163,6 +165,11 @@ void* WINAPI AA2Unlimited(UINT SDKVersion)
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Failed to get Direct3DCreate9 constructor, crash imminent\r\n";
 
 	LUA_EVENT_NORET("launch");
+
+	char buf[1024];
+
+	GetModuleFileNameA(h, buf, sizeof buf);
+	LOGPRIONC(Logger::Priority::INFO) "Using " << buf << " for graphics rendering.\n";
 	return Render::Wrap(orig(SDKVersion));
 }
 
