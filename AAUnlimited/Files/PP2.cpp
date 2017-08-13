@@ -483,6 +483,8 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 PP2::PP2() {};
 
 PP2::~PP2() {
+	if (!g_Config.bUsePP2)
+		return;
 	{
 		std::unique_lock<std::mutex> lock(workmutex);
 		stopping = true;
@@ -493,6 +495,9 @@ PP2::~PP2() {
 };
 
 void PP2::Init() {
+	if (!g_Config.bUsePP2)
+		return;
+
 	MemAlloc::dumpheap();
 	int nthreads = std::thread::hardware_concurrency();
 	if (!nthreads)
