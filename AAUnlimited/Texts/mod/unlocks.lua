@@ -113,7 +113,12 @@ local offsets = {
 		0x0002049D,
 		0x000204A8,
 	},
-
+	-- Remove check for trait count.
+	["\xeb"] = {
+		0x0002EC47,
+		0x0002EDA1,
+	},
+	
 	-- Unknown slider 2 (?) clamp to 100
 	["\x3A\xD2\x90"] = {
 		0x000278CB,
