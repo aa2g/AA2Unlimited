@@ -1,4 +1,4 @@
---@INFO Reimplements JS3 FP cheats
+--@INFO Absolute Obedience Cheat
 
 local _M = {}
 
