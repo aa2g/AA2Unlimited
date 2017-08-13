@@ -1,6 +1,6 @@
 require "debug"
 
-AAU_VERSION = "0.5 preview"
+AAU_VERSION = "0.5 beta "
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
@@ -12,6 +12,10 @@ _CONFIG = _CONFIG or {}
 _WIN32 = {}
 __LOGGER = function(msg)
 	return false -- keep it for later
+end
+local _, ver = pcall(dofile, _BINDING.GetAAUPath() .. "version.lua")
+if ver then
+	AAU_VERSION = AAU_VERSION .. " " .. ver
 end
 
 
