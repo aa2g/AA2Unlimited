@@ -81,7 +81,7 @@ sPoserHotKeys = ""
 bUsePPeX = false
 
 -- load .pp2 files
-bUsePP2 = true
+bUsePP2 = false
 
 -- MB cache memory for general data, includes data allocated by game itself
 PP2Cache = 800

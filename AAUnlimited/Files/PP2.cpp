@@ -482,7 +482,10 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 
 PP2::PP2() {};
 
+// Brute workaround for win7 bugs
 PP2::~PP2() {
+	ExitProcess(0);
+#if 0
 	if (!g_Config.bUsePP2)
 		return;
 	{
@@ -492,6 +495,7 @@ PP2::~PP2() {
 	work_condition.notify_all();
 	for (auto &w : workers)
 		w.join();
+#endif
 };
 
 void PP2::Init() {
@@ -509,7 +513,7 @@ void PP2::Init() {
 				{
 					std::unique_lock<std::mutex> lock(workmutex);
 					work_condition.wait(lock, [this] {return this->stopping || !this->work.empty(); });
-					if (this->stopping/* && this->work.empty()*/)
+					if (this->stopping && this->work.empty())
 						return;
 					wi = work.front();
 					work.pop();
