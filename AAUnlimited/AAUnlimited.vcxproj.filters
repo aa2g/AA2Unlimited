@@ -342,5 +342,8 @@
     <None Include="Texts\mod\playtrans.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\stats.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

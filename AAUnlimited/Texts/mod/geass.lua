@@ -5,22 +5,24 @@ local _M = {}
 local keys = { 0x01, 0x02, 0x04, 0x10, 0x11, 0x12 }
 local opts
 
-function on.answer(resp, answering, asking)
-	-- not everyone, not us either
-	if (opts.everyone == 0) and (asking.m_thisChar ~= GetPlayerCharacter()) then
+function on.answer(resp, as)
+	-- weird undocumented states
+	if resp > 1 then
+		info("GEASS: Unknown response", resp)
 		return resp
 	end
 
-	-- activation key is down
-	if (GetAsyncKeyState(keys[opts.key + 1]) & 0x8000) ~= 0 then
-		print("GEASS: forcing NPC answer to yes")
-		resp = true
-	end
+	local ispc = as.askingChar.m_thisChar == GetPlayerCharacter()
+	local active = (GetAsyncKeyState(keys[opts.key + 1]) & 0x8000) ~= 0
 
-	if opts.chance == 1 then
-		answering.m_lastConversationAnswerPercent = 999
+	if active and (opts.everyone == 1 or ispc) then
+		resp = 1
+		info("GEASS: forcing NPC answer to yes")
+		if opts.chance == 1 then
+			as.answerChar.m_lastConversationAnswerPercent = 999
+			info("GEASS: forcing NPC answer chance to 999%%")
+		end
 	end
-
 	return resp
 end
 

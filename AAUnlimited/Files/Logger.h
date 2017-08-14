@@ -102,10 +102,16 @@ public:
 		});
 
 		b["logger"] = lua_CFunction([](lua_State *L) {
-			Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+			int ip = luaL_checkinteger(L, 1);
+			Logger::Priority prio = (Logger::Priority)ip;
 			int top = lua_gettop(L);
 			for (int i = 2; i <= top; i++) {
-				g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+				if (ip < 0) {
+					g_Logger << luaL_checkstring(L, i);
+				}
+				else {
+					g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+				}
 			}
 			return 0;
 		});

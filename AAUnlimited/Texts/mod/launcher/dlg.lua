@@ -1,5 +1,6 @@
 -- this file is a mess and always will be. keep function _only_ to gui.
 
+local confont="Courier, 10"
 local nocloseafterlaunch = true
 local reslist = {
 	"800x480","854x480","960x600","1024x600","1280x720","1280x800","1280x854","1280x960","1366x768",
@@ -166,7 +167,8 @@ local console = iup.text {
 	multiline="yes",
 	wordwrap="yes",
 	expand="yes", readonly="yes", canfocus="no",
-	value=""
+	value="",
+	font=confont,
 }
 
 
@@ -175,7 +177,8 @@ function console:map_cb()
 end
 
 local repl = iup.text {
-	expand="horizontal"
+	expand="horizontal",
+	font=confont,
 }
 
 function console:getfocus_cb()
@@ -185,6 +188,11 @@ end
 local historypos=1
 local history = {}
 local function evalrepl(v)
+	if v == "clear" then
+		console.value = ""
+		return
+	end
+
 	local ch, err = load("return "..v)
 	if not ch then
 		ch, err = load(v)

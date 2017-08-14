@@ -43,8 +43,8 @@ end
 log = {}
 
 -- XREF: match enum Files/logger.h
-for prio,name in ipairs { "spam", "info", "warn", "error", "crit" } do
-	local p = prio-1
+for prio,name in ipairs { "raw", "spam", "info", "warn", "error", "crit" } do
+	local p = prio-2
 	log[name] = function(...)
 		return _BINDING.logger(p, string.format(...))
 	end
@@ -63,6 +63,9 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
+	if k == "logPrio" then
+		_BINDING.setlogprio(v)
+	end
 	if v ~= nil then
 		-- if setting a binding fails, its not a C++ setting
 		if not pcall(function() _BINDING.Config[k] = v end) then
@@ -153,13 +156,30 @@ package.path = aau_path("lib", "?.lua") .. ";" .. package.path
 package.path = aau_path("lib", "?", "init.lua") .. ";" .. package.path
 
 stdio_print = print
+info = function(...)
+	local res = {}
+	for i,v in ipairs {...} do
+		res[i] = tostring(v)
+	end
+	local msg = table.concat(res, "\t")
+	log.info(msg)
+end
 print = function(...)
 	local res = {}
 	for i,v in ipairs {...} do
 		res[i] = tostring(v)
 	end
-	local msg = table.concat(res, " ")
+	local msg = table.concat(res, "\t")
 	log.spam(msg)
+end
+
+function raw_print(...)
+	local res = {}
+	for i,v in ipairs {...} do
+		res[i] = tostring(v)
+	end
+	local msg = table.concat(res, "\t")
+	log.raw(msg)
 end
 
 
@@ -245,14 +265,14 @@ function unload_module(name)
 	if not mod then return end
 	-- nuke all event handlers of a given module
 	for evn,v in pairs(handlers) do
-		log("scanning owners of %s", evn)
+		--log("scanning owners of %s", evn)
 		local i = 1
 		while i <= #v do
 			if not v[i] then
-				log("break skip")
+				--log("break skip")
 				break
 			end
-			log("print id %d owner %s", i, v[i][2])
+			--log("print id %d owner %s", i, v[i][2])
 			if v[i][2] == name then
 				log("[%s] removing handler %d for %s", name, i, evn)
 				table.remove(v, i)
@@ -303,7 +323,7 @@ function load_modules()
 end
 
 function module_can_unload(mod)
-	print("can unload ",mod, ((modules[mod] or {}).info or {}).unload)
+	--print("can unload ",mod, ((modules[mod] or {}).info or {}).unload)
 	return (modules[mod] or {}).unload
 end
 
@@ -464,7 +484,13 @@ function get_mod_info(n)
 	return mi, desc, idx
 end
 
-
+getmetatable("").__mod = function(o,p)
+	if type(p) == "table" then
+		return o:format(table.unpack(p))
+	else
+		return o:format(p)
+	end
+end
 function alert(who, msg)
 	require "iuplua"
 	iup.Message(who, msg)

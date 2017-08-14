@@ -95,6 +95,7 @@ void Lua::bindLua() {
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
+	PlayInjections::NpcActions::AnswerStruct::bindLua();
 
 	// H
 	HCamera::bindLua();

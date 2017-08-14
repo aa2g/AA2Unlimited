@@ -55,7 +55,7 @@ public:
 	BYTE m_unknown6[4];
 	DWORD m_conversationState; //some are a series of animations and text; this one indicates where in the conversation the npc is
 	DWORD m_unknown7;
-	DWORD m_conversationId; //unique identifier of the kind of conversation going on
+	DWORD m_conversationId; //unique  identifier of the kind of conversation going on
 	DWORD m_conversationAnswerId; //after the npc made a positive or negative answer, this id will be what he answers with.
 	DWORD m_playerAnswer; //0 = positive, 1 = negative
 public:
@@ -192,6 +192,7 @@ enum ConversationId {
 	NO_PROMPT_H = 99,
 	AFTER_DATE_H = 101,
 	FOLLOW_ME_H = 102,
+
 	DATE_GREETING = 103,
 	CHANGE_CLOTHES = 105,
 	STALK = 106,
