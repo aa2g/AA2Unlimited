@@ -40,6 +40,8 @@ function _M:load()
 
 end
 
+function _M:unload() end
+
 function _M:config()
 	if not self then return end
 	require "iuplua"

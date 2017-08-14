@@ -303,6 +303,7 @@ function load_modules()
 end
 
 function module_can_unload(mod)
+	print("can unload ",mod, ((modules[mod] or {}).info or {}).unload)
 	return (modules[mod] or {}).unload
 end
 
@@ -371,6 +372,7 @@ function __DISPATCH_EVENT(name, arg1, ...)
 
 	for _,h in ipairs(handlers[name] or {}) do
 		local ok, msg = pcall(function(...)
+			print(" dispatching to", h[2])
 			local retv = h[1](arg1, ...)
 			arg1 = retv ~= nil and retv or arg1
 		end, ...)

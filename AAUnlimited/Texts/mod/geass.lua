@@ -14,7 +14,7 @@ function on.answer(resp, answering, asking)
 	-- activation key is down
 	if (GetAsyncKeyState(keys[opts.key + 1]) & 0x8000) ~= 0 then
 		print("GEASS: forcing NPC answer to yes")
-		return true
+		resp = true
 	end
 
 	if opts.chance == 1 then

@@ -50,6 +50,8 @@ function mod:disable(n)
 	local n = n:sub(chk)
 	if module_can_unload(n) then
 		unload_module(n)
+	else
+		alert(n, "For disable to take effect you need to restart the launcher.")
 	end
 
 	get_mod_info(n).disabled = true
