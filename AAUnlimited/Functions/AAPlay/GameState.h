@@ -41,5 +41,7 @@ namespace Shared {
 		{
 			return ExtVars::AAPlay::PlayerConversationPtr();
 		}
+
+		std::wstring getCurrentClassSaveName();
 	}
 }

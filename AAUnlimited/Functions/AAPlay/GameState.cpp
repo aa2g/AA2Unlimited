@@ -15,7 +15,7 @@ struct GameStateStruct {
 		m_isMenuMode = false;
 		m_isHighPolyLoaded = false;
 		m_PCConversationState = -1;
-		m_className = L"";
+		m_classSaveName = L"";
 		m_char[0] = nullptr;
 		m_char[1] = nullptr;
 	}
@@ -25,7 +25,7 @@ struct GameStateStruct {
 	bool m_isPcConversation;			//true if PC is in conversation mode
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
-	std::wstring m_className;
+	std::wstring m_classSaveName;
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
@@ -138,4 +138,13 @@ void Shared::GameState::setPlayerCharacter(int seat) {
 		auto currentChar = getPlayerCharacter();
 		*currentChar = getCharacters()[seat];
 	}
+}
+
+std::wstring Shared::GameState::getCurrentClassSaveName()
+{
+	static const DWORD saveNameOffset[]{ 0x376164, 0x28, 0x64 };
+	auto className = std::wstring((wchar_t*)ExtVars::ApplyRule(saveNameOffset));
+	loc_gameState.m_classSaveName = className.substr(0, className.size() - 4);
+
+	return loc_gameState.m_classSaveName;
 }
