@@ -21,7 +21,8 @@ function get_relations(seat)
 	if not char then return nil end
 	local res = {}
 	for rel in char_relations(char) do
-		res[rel.m_targetSeat] = { rel.m_lovePoints, rel.m_likePoints, rel.m_dislikePoints, rel.m_hatePoints }
+--		res[rel.m_targetSeat] = { rel.m_lovePoints, rel.m_likePoints, rel.m_dislikePoints, rel.m_hatePoints }
+		res[rel.m_targetSeat] = { rel.m_loveCount, rel.m_likeCount, rel.m_dislikeCount, rel.m_hateCount }
 	end
 	return res
 end
