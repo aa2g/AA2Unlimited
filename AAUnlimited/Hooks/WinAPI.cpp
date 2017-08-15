@@ -15,13 +15,16 @@ namespace SharedInjections {
 		{
 			HANDLE h = CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
-			if (General::CastToString(lpFileName).find(".sav") != std::string::npos) { //class savefile
-																					   //extract the filename
+			if (General::CastToString(lpFileName).find(".sav") != std::string::npos) {
+				//extract the filename
+
 				std::wstring filename = std::wstring(lpFileName);
 				filename = filename.substr(filename.find(CLASS_SAVES_PATH) + std::wcslen(CLASS_SAVES_PATH));
+
 				if (dwDesiredAccess == GENERIC_WRITE) {	//game saved
-					PersistentStorage::ClassStorage cs(filename);
-					cs.save();
+					auto filenameNoExt = filename.substr(0, filename.size() - 4);
+					auto storage = PersistentStorage::ClassStorage::getStorage(filenameNoExt);
+					storage.save();
 				}
 			}
 

@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Files\PersistentStorage.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -638,56 +639,42 @@ namespace Shared {
 			int card = params[0].iVal;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto& storage = inst->m_cardData.GetCardStorage();
-			auto it = storage.find(*params[1].strVal);
-			if (it != storage.end() && it->second.type == TYPE_INT) {
-				return it->second;
-			}
-			else {
-				return params[2];
-			}
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getCardInt(inst, *params[1].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[2].iVal);
 		}
 		//float(int, string, float)
 		Value Thread::GetCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto& storage = inst->m_cardData.GetCardStorage();
-			auto it = storage.find(*params[1].strVal);
-			if (it != storage.end() && it->second.type == TYPE_FLOAT) {
-				return it->second;
-			}
-			else {
-				return params[2];
-			}
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getCardFloat(inst, *params[1].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[2].fVal);
 		}
 		//string(int, string, string)
 		Value Thread::GetCardStorageString(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto& storage = inst->m_cardData.GetCardStorage();
-			auto it = storage.find(*params[1].strVal);
-			if (it != storage.end() && it->second.type == TYPE_STRING) {
-				return it->second;
-			}
-			else {
-				return params[2];
-			}
+
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getCardString(inst, *params[1].strVal);
+			if (result.isValid) return Value(General::CastToWString(result.value));
+			else return Value(*params[2].strVal);
 		}
 		//bool(int, string, bool)
 		Value Thread::GetCardStorageBool(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto& storage = inst->m_cardData.GetCardStorage();
-			auto it = storage.find(*params[1].strVal);
-			if (it != storage.end() && it->second.type == TYPE_BOOL) {
-				return it->second;
-			}
-			else {
-				return params[2];
-			}
+
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getCardBool(inst, *params[1].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[2].bVal);
 		}
 		//int(int, int)
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {

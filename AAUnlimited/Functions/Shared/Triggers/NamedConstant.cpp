@@ -945,7 +945,7 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			184, NCONSTCAT_EVENT_TYPE,
-			TEXT("A Period Ends"), TEXT("PERIOD_ENDS"), TEXT("After a period ends, including lessions themselves"),
+			TEXT("A Period Ends"), TEXT("PERIOD_ENDS"), TEXT("After a period ends, including lessons themselves"),
 			Value(Shared::Triggers::Events::PERIOD_ENDS)
 		},
 		{
@@ -978,11 +978,6 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("PC conversation state updated"), TEXT("PC_CONVERSATION_STATE_UPDATED"), TEXT("PC Conversation state updated"),
 			Value(Shared::Triggers::Events::PC_CONVERSATION_STATE_UPDATED)
 		},
-		//{
-		//	191, NCONSTCAT_EVENT_TYPE,
-		//	TEXT("PC conversation ended"), TEXT("PC_CONVERSATION_ENDED"), TEXT("PC conversation ended"),
-		//	Value(Shared::Triggers::Events::PC_CONVERSATION_ENDED)
-		//},
 		
 	},
 	{ //BOOL

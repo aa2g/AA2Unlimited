@@ -1,9 +1,9 @@
 #include "StdAfx.h"
+#include "Files\PersistentStorage.h"
 
 namespace Shared {
 	namespace Triggers {
-
-
+		
 		void Thread::ShouldNotBeImplemented(std::vector<Value>& params) {
 			MessageBox(NULL, TEXT("This message should not have been executed."), TEXT("Error"), 0);
 		}
@@ -501,6 +501,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardInt(inst, *params[1].strVal, params[2].iVal);
 		}
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
@@ -508,6 +510,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardFloat(inst, *params[1].strVal, params[2].fVal);
 		}
 		//int card, string keyname, string value
 		void Thread::SetCardStorageString(std::vector<Value>& params) {
@@ -515,6 +519,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardString(inst, *params[1].strVal, General::CastToString(*params[2].strVal));
 		}
 		//int card, string keyname, bool value
 		void Thread::SetCardStorageBool(std::vector<Value>& params) {
@@ -522,6 +528,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardBool(inst, *params[1].strVal, params[2].bVal);
 		}
 
 		//int card, string keyname
