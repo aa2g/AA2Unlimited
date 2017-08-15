@@ -294,7 +294,7 @@ namespace Poser {
 					}
 					else {
 						SliderInfo info;
-						info.descr = /*propPrefixTrans + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix), L"") + suffixTrans;
+						info.descr = /*propPrefixTrans + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix) - 1, L"") + suffixTrans;
 						info.frameName = General::CastToWStringN(trans->m_name, trans->m_nameBufferSize);
 						info.Reset();
 						info.xxFrame = trans;
@@ -302,7 +302,7 @@ namespace Poser {
 						info.category = PoseMods::FrameCategory::Prop;
 						map[General::CastToString(info.descr)] = info;
 
-						info.descr = /*propPrefixRot + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix), L"") + suffixRot;
+						info.descr = /*propPrefixRot + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix) - 1, L"") + suffixRot;
 						info.frameName = General::CastToWStringN(rot->m_name, rot->m_nameBufferSize);
 						info.xxFrame = rot;
 						map[General::CastToString(info.descr)] = info;
