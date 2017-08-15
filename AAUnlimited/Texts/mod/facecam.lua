@@ -1,4 +1,4 @@
---@INFO Implements POV facecam (camera tracks eye bones)
+--@INFO POV facecam (camera tracks eye bones)
 
 local _M = {}
 local cfg -- config for positions

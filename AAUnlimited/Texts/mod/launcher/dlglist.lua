@@ -35,6 +35,24 @@ return function(handlers, list)
 		end
 	end]]
 
+	function list:dblclick_cb(idx,text)
+--		idx = tonumber(idx)
+		text = text or self[idx]
+		local state
+		self[idx], state = handlers:toggle(text or self[idx])
+		list.value = selected_idx
+		disable.active = state and "yes" or "no"
+		enable.active = state and "no" or "yes"
+	end
+
+	function list:k_any(c)
+		if c == iup.K_SP then
+			list:dblclick_cb(selected_idx, selected)
+			return iup.IGNORE 
+		end
+		return iup.CONTINUE
+	end
+
 	function list:action(text,idx,state)
 --		config_buttons()
 		idx = tonumber(idx)
@@ -68,15 +86,15 @@ return function(handlers, list)
 		iup.SetFocus(list)
 	end]]
 	function disable:action()
-		list[selected_idx] = handlers:disable(selected)
+		list[selected_idx] = handlers:toggle(selected, false)
 		list.value = selected_idx
 		disable.active = "no"
 		enable.active = "yes"
 		iup.SetFocus(list)
 	end
 	function enable:action()
-		handlers:enable(selected)
-		list[selected_idx] = handlers:enable(selected)
+--		handlers:enable(selected)
+		list[selected_idx] = handlers:toggle(selected, true)
 		list.value = selected_idx
 		enable.active = "no"
 		disable.active = "yes"

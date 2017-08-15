@@ -1,4 +1,4 @@
---@INFO Faux fullscreen.
+--@INFO Faux fullscreen
 
 require "memory"
 

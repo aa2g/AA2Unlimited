@@ -284,6 +284,9 @@
     <None Include="Texts\mod\patcher.lua" />
     <None Include="Texts\mod\patches.lua" />
     <None Include="Texts\mod\playtrans.lua" />
+    <None Include="Texts\mod\poser\dlg.lua" />
+    <None Include="Texts\mod\poser\init.lua" />
+    <None Include="Texts\mod\poser\signals.lua" />
     <None Include="Texts\mod\reshade.lua" />
     <None Include="Texts\mod\stats.lua" />
     <None Include="Texts\mod\strutil.lua" />

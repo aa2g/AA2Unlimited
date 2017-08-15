@@ -1,4 +1,4 @@
---@INFO Sideloads win10 low FPS fix (needs game restart)
+--@INFO Win10 low FPS fix (needs game restart)
 
 local _M = {}
 

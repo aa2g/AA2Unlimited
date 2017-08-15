@@ -1,4 +1,4 @@
---@INFO Removes the need for locale emulator.
+--@INFO Removes the need for locale emulator
 
 require "memory"
 

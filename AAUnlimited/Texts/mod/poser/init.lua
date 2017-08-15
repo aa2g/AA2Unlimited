@@ -1,4 +1,4 @@
---@INFO Poser
+--@INFO Poser (doesn't work, only UI mockup)
 
 require "iuplua"
 require "iupluacontrols"

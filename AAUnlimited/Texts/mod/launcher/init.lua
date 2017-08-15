@@ -1,4 +1,4 @@
---@INFO This launcher, should be always last in the list
+--@INFO This launcher, should be always last
 
 require "memory"
 require "strutil"

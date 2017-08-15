@@ -1,4 +1,4 @@
---@INFO Cute girls (male)
+--@INFO Enable role swap, M2M sex, F2F stats
 
 local _M = {}
 

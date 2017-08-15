@@ -1,4 +1,4 @@
---@INFO Dump stats command
+--@INFO Dump relationship stats commands
 
 local _M = {}
 

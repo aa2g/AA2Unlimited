@@ -1,4 +1,4 @@
---@INFO Translates AA2Edit to english, replacement of TranslationLoader
+--@INFO Translates AA2Edit to english
 
 require "memory"
 require "strutil"

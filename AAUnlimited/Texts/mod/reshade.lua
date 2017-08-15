@@ -1,4 +1,4 @@
---@INFO Sideloads reshade
+--@INFO Sideloads ReShade.me / SweetFX
 require "memory"
 require "strutil"
 

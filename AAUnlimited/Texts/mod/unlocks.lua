@@ -1,4 +1,4 @@
---@INFO Unlocks hue, slider, trait and H-pref limits.
+--@INFO Hue, slider, trait and H-pref limits.
 
 local offsets = {
 

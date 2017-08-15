@@ -26,6 +26,9 @@
     <Filter Include="Lua\aaface">
       <UniqueIdentifier>{4ccd2800-a7eb-49d9-9c6b-c86e52fa201e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\poser">
+      <UniqueIdentifier>{f7683d3e-1e54-4a5f-9217-5d526870f631}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -344,6 +347,15 @@
     </None>
     <None Include="Texts\mod\stats.lua">
       <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\poser\dlg.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\init.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\signals.lua">
+      <Filter>Lua\poser</Filter>
     </None>
   </ItemGroup>
 </Project>
