@@ -4,6 +4,7 @@
 namespace EditInjections {
 namespace SaveCard {
 
+using namespace ExtClass;
 
 void __stdcall AddUnlimitData(wchar_t* fileName) {
 	const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
@@ -140,6 +141,24 @@ void AddUnlimitDataInject() {
 	{ 0xE8, 0xEB, 0xA2, 0x10, 0x00 },						//expected values
 	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&AddUnlimitDataOriginalFunction);
+}
+
+// This function is called by the editor right before the card is saved.
+// Tts job is to translate CharacterStruct to the in-png format.
+// This allows us to fiddle with the data without giving the editor a chance to do something about it.
+bool (__stdcall *JustBeforeSaveOriginal)(DWORD _this, CharacterStruct *chr, BYTE **outbuf, DWORD *outlen);
+bool __stdcall JustBeforeSaveRedirect(DWORD _this, CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
+	LUA_EVENT_NORET("save_card", chr);
+	return JustBeforeSaveOriginal(_this, chr, outbuf, outlen);
+}
+
+void JustBeforeSaveInject() {
+	DWORD address = General::GameBase + 0x12628b;
+	Hook((BYTE*)address,
+	{ 0xE8, HookControl::ANY_DWORD },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&JustBeforeSaveRedirect},	//redirect to our function
+		(DWORD*)&JustBeforeSaveOriginal);
+
 }
 
 

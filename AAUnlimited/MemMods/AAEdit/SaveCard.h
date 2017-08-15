@@ -6,6 +6,7 @@ namespace SaveCard {
 
 
 void AddUnlimitDataInject();
+void JustBeforeSaveInject();
 
 
 }

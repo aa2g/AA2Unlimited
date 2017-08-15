@@ -308,6 +308,7 @@ void InitializeHooks() {
 		}
 
 		SaveCard::AddUnlimitDataInject();
+		SaveCard::JustBeforeSaveInject();
 		OpenCard::ReadUnlimitDataInject();
 		OpenCard::PreviewCardInject();
 

@@ -125,8 +125,10 @@ BOOL WINAPI DllMain(
 		General::DllInst = hinstDLL;
 		if (!General::EarlyInit())
 			return FALSE;
-		Shared::Init();
-		MemAlloc::Init();
+		if (General::IsAAEdit || General::IsAAPlay) {
+			Shared::Init();
+			MemAlloc::Init();
+		}
 	}
 	return TRUE;
 }
