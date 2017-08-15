@@ -6,6 +6,20 @@ local _M = {
 	floating = false
 }
 
+-- IUP fonts:
+-- The string is parsed and the font typeface, style and size are set
+-- according to the parsed values, as if cdCanvasFont was called.
+-- The native font string is cleared when a font is set using cdCanvasFont.
+
+-- The common format definition is similar to the the Pango library Font
+-- Description, used by GTK+2. It is defined as having 3 parts:
+-- <font family>, <font styles> <font size>. For ex: "Times, Bold 18",
+-- or "Arial,Helvetica, Italic Underline -24". The supported styles include:
+-- Bold, Italic, Underline and Strikeout. Underline, Strikeout, and negative
+-- pixel values are not supported by the standard Pango Font Description.
+-- The Pango format include many other definitions not supported by the
+-- CD format, they are just ignored.
+
 local dialogsliders
 local dialogposes
 local dialogs
@@ -46,40 +60,39 @@ local function listfilter()
 	}
 end
 
-local function slider()
-	return iup.hbox {
-		iup.label { title = "X" , size = "12x10" },
-		iup.text {},
-		iup.flatbutton { title = "0", font = "Courier", size = "12x10", border = "yes" },
-		iup.flatbutton { title = "-", font = "Courier", size = "12x10", border = "yes" },
-		iup.flatbutton { title = "+", font = "Courier", size = "12x10", border = "yes" },
-		iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, value = 0 },
+local function slider(label)
+	local step = 0.01
+	
+	local incremented = signals.signal()
+	local textbox = iup.text {}
+	
+	local control = iup.hbox {
+		iup.label { title = label },
+		textbox,
+		iup.flatbutton { title = "0", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0) end },
+		iup.flatbutton { title = "-", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(-0.01) end },
+		iup.flatbutton { title = "+", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0.01) end },
+		iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = step, value = 0, valuechanged_cb = function(self) incremented(self.value) end },
 		alignment = "acenter",
-		gap = 3
+		gap = 3,
+		incremented = incremented
 	}
+	
+	incremented.connect(textbox, "value")
+	
+	return control
 end
 
-local function shapecontrols(shapelist, rowsize)
+local function shapecontrols(title, shapelist, rowsize)
 	local controls = {}
 	for _, s in ipairs(shapelist) do
-		table.insert(controls, iup.flatbutton { title = s, toggle ="yes" })
+		table.insert(controls, iup.flatbutton { title = s, toggle ="yes", padding = 3 })
 	end
 	table.insert(controls, iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = #shapelist - 1, visiblecolumns = 1 })
 	
-	local rows = {}
-	local a, b = 1, math.min(rowsize, #controls)
-	while b <= #controls do
-		table.insert(rows, iup.hbox { unpack(controls, a, b) })
-		a = a + rowsize
-		if b >= #controls then
-			break
-		end
-		b = math.min(b + rowsize, #controls)
-	end
-	
 	local norm = iup.normalizer { unpack(controls) }
 	norm.normalize = "horizontal"
-	return iup.radio { iup.vbox { unpack(rows) } }
+	return iup.frame { title = title, iup.radio { iup.gridbox { numdiv = rowsize, unpack(controls) } } }
 end
 
 dialogsliders = iup.dialog {
@@ -107,16 +120,15 @@ dialogsliders = iup.dialog {
 				alignment = "acenter",
 				gap = 3
 			},
-			slider(),
-			slider(),
-			slider(),
+			slider("X"),
+			slider("Y"),
+			slider("Z"),
 			iup.hbox {
-				shapecontrols({ ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, 4),
-				shapecontrols({ "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2)
+				shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, 4),
+				shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2)
 			}
 		},
 		--gap = 3,
-		--k_any = hotkey_cb
 	},
 	title = "Sliders"
 }
@@ -137,7 +149,6 @@ dialogposes = iup.dialog {
 		}
 	},
 	title = "Poses",
-	--k_any = hotkey_cb
 }
 
 function _M.togglevisible()
@@ -168,7 +179,6 @@ function _M.updatefloating(d)
 end
 
 function _M.hotkey_cb(dialog, k, ...)
-	print(dialog, "-", k, "-", ...)
 	if k == iup.K_F12 then
 		_M.togglevisible()
 	end
