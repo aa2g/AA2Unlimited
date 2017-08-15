@@ -159,8 +159,8 @@ namespace Poser {
 		static const char prefixTrans[]{ "pose_tr_" };
 		static const char prefixRot[]{ "pose_rot_" };
 		static const char propFramePrefix[]{ "AS00_N_Prop" };
-		static const char propPrefixTrans[]{ "prop_tr_" };
-		static const char propPrefixRot[]{ "prop_rot_" };
+		static const std::wstring propPrefixTrans( L"t_" );
+		static const std::wstring propPrefixRot( L"r_" );
 		static const std::wstring suffixTrans(L" TR");
 		static const std::wstring suffixRot(L" ROT");
 
@@ -294,7 +294,7 @@ namespace Poser {
 					}
 					else {
 						SliderInfo info;
-						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
+						info.descr = /*propPrefixTrans + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix), L"") + suffixTrans;
 						info.frameName = General::CastToWStringN(trans->m_name, trans->m_nameBufferSize);
 						info.Reset();
 						info.xxFrame = trans;
@@ -302,7 +302,7 @@ namespace Poser {
 						info.category = PoseMods::FrameCategory::Prop;
 						map[General::CastToString(info.descr)] = info;
 
-						info.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
+						info.descr = /*propPrefixRot + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix), L"") + suffixRot;
 						info.frameName = General::CastToWStringN(rot->m_name, rot->m_nameBufferSize);
 						info.xxFrame = rot;
 						map[General::CastToString(info.descr)] = info;
