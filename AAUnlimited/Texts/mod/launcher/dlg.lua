@@ -1,5 +1,6 @@
 -- this file is a mess and always will be. keep function _only_ to gui.
 
+local confont="Courier, 10"
 local nocloseafterlaunch = true
 local reslist = {
 	"800x480","854x480","960x600","1024x600","1280x720","1280x800","1280x854","1280x960","1366x768",
@@ -166,7 +167,8 @@ local console = iup.text {
 	multiline="yes",
 	wordwrap="yes",
 	expand="yes", readonly="yes", canfocus="no",
-	value="Console activated\r\n"
+	value="",
+	font=confont,
 }
 
 
@@ -175,7 +177,8 @@ function console:map_cb()
 end
 
 local repl = iup.text {
-	expand="horizontal"
+	expand="horizontal",
+	font=confont,
 }
 
 function console:getfocus_cb()
@@ -185,6 +188,11 @@ end
 local historypos=1
 local history = {}
 local function evalrepl(v)
+	if v == "clear" then
+		console.value = ""
+		return
+	end
+
 	local ch, err = load("return "..v)
 	if not ch then
 		ch, err = load(v)
@@ -259,7 +267,7 @@ local function buildtabs() return
 			title = "Output",
 			iup.gridbox {
 				nmargin="16x18",
-				padding="x8",
+				padding="x10",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER" ,
 				iup.label {title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
 				iup.label {title = "Antialiasing*:",}, gsdl("aa", iup.list { 
@@ -275,10 +283,11 @@ local function buildtabs() return
 			nmargin="8x",
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting" }),
-				gsdt("dynlight", iup.toggle {title = "Lightning shader" }),
+				gsdt("dynlight", iup.toggle {title = "Draw skin textures" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background" }),
+				aaut("bDrawFPS", iup.toggle {title = "Show FPS" }),
 				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
 				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
 				gsdt("sharp", iup.toggle {title = "Blur textures**" }),
@@ -306,16 +315,17 @@ local function buildtabs() return
 		iup.frame {
 			title = "Settings",
 			iup.gridbox {
-				padding="4x7",
-				nmargin="x8",
+				padding="4x6",
+				nmargin="x2",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
 				iup.label {title = "Card eye files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
 				iup.label {title = "Screenshot format", }, aaul("screenshotFormat", iup.list { ".BMP", ".JPG", ".PNG", dropdown="YES" }),
 				iup.label {title = "Poser hotkeys" }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
-				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=1024}),
-				iup.label {title = ".pp2 audio MB", },  aauv("PP2AudioCache", iup.text { spin="yes", spinmax=1024} ),
+				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=4096}),
+				iup.label {title = ".pp2 audio MB", },  aauv("PP2AudioCache", iup.text { spin="yes", spinmax=4096} ),
+				iup.label {title = ".pp2 buffers MB", },  aauv("PP2Buffers", iup.text { spin="yes", spinmax=4096} ),
 --				iup.label {title = "Game font", padding=step}, iup.button {title=Config.sFont, font=Config.sFont .. ", 9", action=change_font},
 			},
 		},

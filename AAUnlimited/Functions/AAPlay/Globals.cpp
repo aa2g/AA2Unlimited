@@ -48,13 +48,17 @@ void InitOnLoad() {
 		// ditto for lua
 		LUA_EVENT_NORET("load_card", seat, false);
 	}
+	LOGPRIONC(Logger::Priority::INFO) "Loaded class with " << (idxCharacter) << " cards in it.\r\n";
+
 	LUA_EVENT_NORET("save_load", true);
 }
 
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
-	g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	bool modded = g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	if (modded)
+		LOGPRIO(Logger::Priority::INFO) << std::dec << "Loaded modcard into seat " << seat << "\n";
 	
 	//get chrOffset
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();

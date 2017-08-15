@@ -78,7 +78,11 @@ public:
 	Logger& operator<<(const std::wstring& str) {
 		std::unique_lock<std::mutex> lock(mutex);
 		std::string cstr(str.begin(),str.end());
-		outfile << cstr.c_str();
+		if (outfile.good() && currPrio >= filter) {
+			outfile << cstr.c_str();
+			outbuf << cstr.c_str();
+		}
+		luaFlush();
 		outfile.flush();
 		return *this;
 	}
@@ -98,10 +102,16 @@ public:
 		});
 
 		b["logger"] = lua_CFunction([](lua_State *L) {
-			Logger::Priority prio = (Logger::Priority)luaL_checkinteger(L, 1);
+			int ip = luaL_checkinteger(L, 1);
+			Logger::Priority prio = (Logger::Priority)ip;
 			int top = lua_gettop(L);
 			for (int i = 2; i <= top; i++) {
-				g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+				if (ip < 0) {
+					g_Logger << luaL_checkstring(L, i);
+				}
+				else {
+					g_Logger << prio << luaL_checkstring(L, i) << "\r\n";
+				}
 			}
 			return 0;
 		});

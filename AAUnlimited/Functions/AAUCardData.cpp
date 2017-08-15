@@ -61,7 +61,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		}
 		if (m_version == 1) {
 			if (g_Config.legacyMode == 0) {
-				LOGPRIO(Logger::Priority::INFO) << "a aau card version " << m_version << " was read and ignored due to legacy mode settings.\r\n";
+				LOGPRIO(Logger::Priority::INFO) << "An aau card version " << m_version << " was read and ignored due to legacy mode settings.\r\n";
 				this->Reset();
 				return;
 			}
@@ -1341,7 +1341,7 @@ void AAUCardData::ConvertToNewVersion() {
 				std::wstring& toChange = relPath;
 				std::wstring temp = toChange;
 				toChange = path.substr(wcslen(OVERRIDE_PATH));
-				LOGPRIO(Logger::Priority::INFO) << "truncating path " << temp << " to " << toChange << "\r\n";
+				LOGPRIO(Logger::Priority::INFO) << "Truncating path " << temp << " to " << toChange << "\r\n";
 			}
 			else {
 				//path does not match with override folder; move files in there.

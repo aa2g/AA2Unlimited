@@ -26,6 +26,9 @@
     <Filter Include="Lua\aaface">
       <UniqueIdentifier>{4ccd2800-a7eb-49d9-9c6b-c86e52fa201e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\poser">
+      <UniqueIdentifier>{f7683d3e-1e54-4a5f-9217-5d526870f631}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -120,6 +123,8 @@
     <ClCompile Include="MemMods\Shared\Events\GameTick.cpp" />
     <ClCompile Include="Functions\Render.cpp" />
     <ClCompile Include="Functions\RenderWrap.cpp" />
+    <ClCompile Include="Files\PersistentStorage.cpp" />
+    <ClCompile Include="Hooks\WinAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -235,6 +240,8 @@
     <ClInclude Include="Script\gluam.h" />
     <ClInclude Include="Functions\Render.h" />
     <ClInclude Include="Functions\RenderWrap.h" />
+    <ClInclude Include="Files\PersistentStorage.h" />
+    <ClInclude Include="Hooks\WinAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -325,6 +332,30 @@
     </None>
     <None Include="Texts\mod\wined3d.lua">
       <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\dx.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\com.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\unlocks.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\playtrans.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\stats.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\poser\dlg.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\init.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\signals.lua">
+      <Filter>Lua\poser</Filter>
     </None>
   </ItemGroup>
 </Project>

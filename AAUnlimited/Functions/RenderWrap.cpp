@@ -1,3 +1,6 @@
+// This file is ugly, because DX is ugly. I'm totally not to blame --ez
+
+
 #define INITGUID
 
 #define QSIZE 1024*1024
@@ -11,10 +14,18 @@
 #include "MemMods/MemRightsLock.h"
 #include "Files/Logger.h"
 #include "Files/Config.h"
+#include "Render.h"
 
-DWORD tickmap[1024];
-DWORD again = 0;
-DWORD nvert, nprim, drawcalls=1;
+
+#define FRAME_MASK 15
+#define TEST_DISABLE
+namespace Render {
+
+DWORD frameno;
+
+static DWORD tickmap[1024];
+static DWORD again = 0;
+static DWORD nvert, nprim, drawcalls=1;
 
 enum {
 	VERTEX_SHADER,
@@ -115,9 +126,12 @@ return x; \
 /*#define WRAPCALL(x) return x;
 #define WRAPCALLV(x) x;*/
 
-namespace Render {
+
+IDirect3DDevice9 *d3dev;
+
 class AAUIDirect3DDevice9 : public IDirect3DDevice9 {
 public:;
+	DWORD render_begin;
 	ULONG ref;
 	IDirect3DDevice9 *orig;
 	std::mutex mainthread;
@@ -129,12 +143,61 @@ public:;
 	volatile size_t record;
 	bool exiting;
 	char buf[QSIZE];
+	IUnknown *font;
+	void *(WINAPI *DrawText)(IUnknown *, void*, LPCTSTR, int, LPRECT, DWORD, D3DCOLOR);
+	double real_time;
+
+	void DrawFPS() {
+		RECT rekt = { 0,0,256,64 };
+		wchar_t buf[64];
+
+		// every FRAME_MASK
+		if ((frameno & FRAME_MASK) == 0) {
+			DWORD now = GetTickCount();
+			real_time = (real_time + (now - render_begin)) / 2.0;
+			render_begin = now;
+		}
+
+		_swprintf(buf, L"%02.2lf", 1000.0 * (FRAME_MASK + 1) / (real_time + 1));
+		//, real_time / (FRAME_MASK+1)
+		DrawText(font, 0, buf, -1, &rekt, DT_LEFT, 0xFFFFFFFF);
+	}
+
+	void MakeFont() {
+		// fuck you microsoft for the d3dx9 SDK stupidity, no way im installing that shit
+		font = 0;
+		HMODULE hm = GetModuleHandleA("d3dx9_42");
+		void *(WINAPI *D3DXCreateFont)(
+			IDirect3DDevice9 *pDevice,
+			INT               Height,
+			UINT              Width,
+			UINT              Weight,
+			UINT              MipLevels,
+			BOOL              Italic,
+			DWORD             CharSet,
+			DWORD             OutputPrecision,
+			DWORD             Quality,
+			DWORD             PitchAndFamily,
+			LPCTSTR           pFacename,
+			IUnknown        **ppFont
+			);
+		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
+
+		D3DXCreateFont(orig, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial", &font);
+
+		if (!font) return;
+
+		DrawText = decltype(DrawText)(((void***)font)[0][15]);
+	}
 
 	AAUIDirect3DDevice9(IDirect3DDevice9* old) {
 		play = record = 0;
 		orig = old;
 		ref = 1;
 		exiting = false;
+
+		MakeFont();
 
 		if (!g_Config.bMTRenderer)
 			return;
@@ -190,6 +253,7 @@ public:;
 	}
 	HRESULT WINAPI DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, INT BaseVertexIndex, UINT MinVertexIndex, UINT NumVertices, UINT startIndex, UINT primCount)
 	{
+		TEST_DISABLE;
 		nvert += NumVertices;
 		nprim += primCount;
 		drawcalls++;
@@ -236,6 +300,7 @@ public:;
 
 	HRESULT WINAPI SetVertexShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
+		TEST_DISABLE;
 		if (g_Config.bMTRenderer && record < QLIMIT) {
 			WorkItem *wi = (WorkItem*)(buf + record);
 			wi->op = VERTEX_SHADER_CONST;
@@ -250,6 +315,7 @@ public:;
 
 	HRESULT WINAPI SetPixelShaderConstantF(UINT StartRegister, CONST float* pConstantData, UINT Vector4fCount)
 	{
+		TEST_DISABLE;
 		if (g_Config.bMTRenderer && record < QLIMIT) {
 			WorkItem *wi = (WorkItem*)(buf + record);
 			wi->op = PIXEL_SHADER_CONST;
@@ -296,6 +362,8 @@ public:;
 		ULONG count = orig->Release();
 		if (!count) {
 //			LOGSPAM << "Releasing! ref=" << ref << "\n";
+			if (font)
+				font->Release();
 			delete this;
 		}
 		return count;
@@ -500,6 +568,10 @@ public:;
 
 	HRESULT WINAPI EndScene(void)
 	{
+		onEndScene();
+		if (font && g_Config.bDrawFPS)
+			DrawFPS();
+		frameno++;
 		WRAPCALL(orig->EndScene());
 	}
 
@@ -941,8 +1013,9 @@ public:;
 
 		HRESULT hres = orig->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 		auto pret = *ppReturnedDeviceInterface;
+		d3dev = new AAUIDirect3DDevice9(pret);
 		if (hres == D3D_OK)
-			*ppReturnedDeviceInterface = new AAUIDirect3DDevice9(pret);
+			*ppReturnedDeviceInterface = d3dev;
 		return hres;
 	}
 };

@@ -116,11 +116,14 @@ g_callto = g_wrap(callto)
 
 g_hook_func = g_wrap(hook_func)
 
+_alloced = 0
 function malloc(n)
+	_alloced = _alloced + n
 	return _WIN32.LocalAlloc(0, n)
 end
 
 function free(m)
+	_alloced = _alloced - _WIN32.LocalSize(m)
 	_WIN32.LocalFree(m)
 end
 
@@ -134,4 +137,11 @@ function parse_asm(s)
 	end)
 	log("asm parsed %d", #ret)
 	return ret
+end
+
+function f_patch(bytes, offs)
+	offs = offs + 0xc00
+	local save = g_peek(offs, #bytes)
+	g_poke(offs, bytes)
+	return save
 end

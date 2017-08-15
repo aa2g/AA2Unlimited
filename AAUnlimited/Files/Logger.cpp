@@ -62,7 +62,7 @@ Logger::~Logger()
 
 void Logger::SetPriority(Priority prio) {
 	filter = prio;
-	*this << "------- applied priority " << prio << " -------\r\n";
+//	*this << "------- applied priority " << prio << " -------\r\n";
 }
 
 /* Returns true if the given priority is covered by the current priority, or else false */

@@ -1,4 +1,4 @@
---@INFO Sideloads reshade
+--@INFO Sideloads ReShade.me / SweetFX
 require "memory"
 require "strutil"
 
@@ -31,5 +31,7 @@ end
 
 function _M:load()
 end
+
+function _M:unload() end
 
 return _M

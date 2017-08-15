@@ -1,4 +1,4 @@
---@INFO Registry faker for onedir. Needs restart.
+--@INFO Fakes registry to make game portable
 
 require "memory"
 

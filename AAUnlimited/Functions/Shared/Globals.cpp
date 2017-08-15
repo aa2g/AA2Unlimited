@@ -4,7 +4,7 @@ namespace Shared {
 
 
 HANDLE *IllusionMemAllocHeap;
-DWORD *IllusionMemUsed;
+size_t *IllusionMemUsed;
 void* __stdcall IllusionMemAlloc(size_t size) {
 	*IllusionMemUsed += size;
 	if (!*IllusionMemAllocHeap)
@@ -38,7 +38,7 @@ void Init() {
 		//call AA2Edit.exe+1FE160 <-- memory alloc function, only parameter is eax = size
 		//IllusionMemAllocProc = General::GameBase + 0x1FE160;
 		IllusionMemAllocHeap = (HANDLE*)(General::GameBase + 0x383640);
-		IllusionMemUsed = (DWORD*)(General::GameBase + 0x38363C);
+		IllusionMemUsed = (size_t*)(General::GameBase + 0x38363C);
 
 
 		//AA2Edit.exe+213EB8 - FF 25 C0443901        - jmp dword ptr[AA2Edit.exe+2C44C0]{ ->->d3dx9_42.dll+1A3ED8 }
@@ -56,7 +56,7 @@ void Init() {
 		//"AA2Play v12 FP v1.4.0a.exe"+21BCA0  <-- memory alloc function, only parameter is eax = size
 		//IllusionMemAllocProc = General::GameBase + 0x21BCA0;
 		IllusionMemAllocHeap = (HANDLE*)(General::GameBase + 0x3A6744);
-		IllusionMemUsed = (DWORD*)(General::GameBase + 0x3A6740);
+		IllusionMemUsed = (size_t*)(General::GameBase + 0x3A6740);
 
 		//AA2Play v12 FP v1.4.0a.exe+2320D0 - FF 25 D8344501        - jmp dword ptr ["AA2Play v12 FP v1.4.0a.exe"+2E34D8] { ->->d3dx9_42.dll+1A3ED8 }
 		/**(DWORD*)(&D3DXMatrixMultiply) = General::GameBase + 0x2320D0;

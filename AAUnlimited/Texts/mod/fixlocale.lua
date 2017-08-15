@@ -1,4 +1,4 @@
---@INFO Removes the need for locale emulator.
+--@INFO Removes the need for locale emulator
 
 require "memory"
 
@@ -31,6 +31,9 @@ function _M:load()
 	if (level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
 		SetThreadLocale(1041)
 	end
+end
+
+function _M:unload()
 end
 
 return _M

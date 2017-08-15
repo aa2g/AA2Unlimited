@@ -11,8 +11,8 @@ class CharacterStruct;
 class CharacterActivity {
 public:
 	DWORD m_virtualTable;
-	BYTE m_unknown1[0x10];
-	BYTE m_animLocked;	//?
+	BYTE m_unknown1[0x10]; // +4
+	BYTE m_animLocked;	//? // +20
 	BYTE m_loading; //statue or conversation loading?
 	BYTE m_unknown2[3];
 	BYTE m_isInConversation;

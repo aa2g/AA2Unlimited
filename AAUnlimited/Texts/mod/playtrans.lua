@@ -1,4 +1,6 @@
-local stringrefs = {
+--@INFO Club/Place translations for AA2Play.exe
+
+local dict = {
 
 [0x2D154] = "None",
 [0xF054] = "None",
@@ -21,34 +23,34 @@ local stringrefs = {
 [0xF4EE5] = "Fine arts",
 [0xDC198] = "fine arts",
 [0xF4F27] = "Culture",
-[0xDC23B] = "Culture",
+[0xDC23C] = "Culture",
 [0xF4F47] = "Other",
 [0xDC2EA] = "Other",
 
 [0xE1206] = "Outside Station",
 [0xE100E] = "School route",
 [0xE0FE4] = "School gates",
-[0xE1053] = "Lockers",
+[0xE1054] = "Lockers",
 [0xE107E] = "Outside classroom",
 [0xE10EE] = "Classroom",
 [0xE10E0] = "Library",
 [0xE1142] = "Courtyard",
-[0xE1061] = "Outside lounge",
+[0xE1062] = "Outside lounge",
 [0xE10C4] = "Teachers lounge",
 [0xE10D2] = "Infirmary",
 [0xE108C] = "Rooftop access",
-[0xE1117] = "Rooftop",
+[0xE1118] = "Rooftop",
 [0xE1126] = "Outside counsel",
 [0xE1134] = "Outside cafeteria",
 [0xE11F8] = "Cafeteria",
 [0xE1070] = "Outside toilets",
 [0xE10FC] = "Mens Toilets",
 [0xE110A] = "Girls Toilets",
-[0xE11E9] = "Outside dojo",
+[0xE11EA] = "Outside dojo",
 [0xE1196] = "Dojo",
 [0xE11DC] = "Behind Dojo",
 [0xE1000] = "Outside gymnasium",
-[0xE11A4] = "Gymnaisum",
+[0xE11A4] = "Gymnasium",
 [0xE116C] = "Swimming pool",
 [0xE117A] = "Track",
 [0xE1188] = "Sports facility",
@@ -64,18 +66,46 @@ local stringrefs = {
 [0xE115E] = "3rd floor passage",
 [0xE11B2] = "Arts room",
 [0xE11C0] = "Multipurpose room",
-
 }
 
-return function()
-	local buf = PagesX(16384)
-	local str = ""
-	for k,v in pairs(stringrefs) do
-		GPokeD(k, buf + #str)
-		str = str .. v:gsub(".", "%1\x00") .. "\x00\x00"
+local _M = {}
+
+local save = {}
+local stringbuf
+
+function _M:load()
+	if exe_type ~= "play" then return end
+
+	-- translate the strings from utf8 to unicode
+	local buf = ""
+	local rel = {}
+	for k,v in pairs(dict) do
+		rel[k] = #buf
+		buf = buf .. utf8_to_unicode(v) .. "\x00\x00"
 	end
-	Poke(buf, str)
+
+	-- copy it to their own memory page
+	stringbuf = malloc(#buf)
+	poke(stringbuf, buf)
+
+	for ptr, off in pairs(rel) do
+		local orig = g_peek_dword(ptr)
+		if ((orig >> 16) ~= 0x0072) then
+			log.error("playtrans: Invalid pointer %x at %x for '%s'", orig, ptr, dict[ptr])
+		else
+			g_poke_dword(ptr, stringbuf + off)
+			save[ptr] = orig
+		end
+	end
 end
 
+function _M:unload()
+	for ptr,old in ipairs(save) do
+		g_poke_dword(ptr, old)
+	end
+	free(stringbuf)
+	save = {}
+	stringbuf = nil
+end
 
-
+return _M

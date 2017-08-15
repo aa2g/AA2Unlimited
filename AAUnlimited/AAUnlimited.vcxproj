@@ -34,6 +34,7 @@
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
+    <ClCompile Include="Files\PersistentStorage.cpp" />
     <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
@@ -56,6 +57,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Functions\Shared\Overrides.cpp" />
     <ClCompile Include="Functions\Shared\Slider.cpp" />
@@ -73,6 +75,7 @@
     <ClCompile Include="Functions\XXObjectFile.cpp" />
     <ClCompile Include="General\GuiSlider.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
+    <ClCompile Include="Hooks\WinAPI.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
@@ -145,6 +148,7 @@
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\ModuleFile.h" />
+    <ClInclude Include="Files\PersistentStorage.h" />
     <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\PP2.h" />
     <ClInclude Include="Files\PPeX.h" />
@@ -183,6 +187,7 @@
     <ClInclude Include="General\DirectXStructs.h" />
     <ClInclude Include="General\GuiSlider.h" />
     <ClInclude Include="General\IllusionUtil.h" />
+    <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
     <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
@@ -259,6 +264,8 @@
     <None Include="Texts\init.lua" />
     <None Include="Texts\mod\aaface\init.lua" />
     <None Include="Texts\mod\borderless.lua" />
+    <None Include="Texts\mod\com.lua" />
+    <None Include="Texts\mod\dx.lua" />
     <None Include="Texts\mod\font.lua" />
     <None Include="Texts\mod\geass.lua" />
     <None Include="Texts\mod\facecam.lua" />
@@ -276,8 +283,14 @@
     <None Include="Texts\mod\nocd.lua" />
     <None Include="Texts\mod\patcher.lua" />
     <None Include="Texts\mod\patches.lua" />
+    <None Include="Texts\mod\playtrans.lua" />
+    <None Include="Texts\mod\poser\dlg.lua" />
+    <None Include="Texts\mod\poser\init.lua" />
+    <None Include="Texts\mod\poser\signals.lua" />
     <None Include="Texts\mod\reshade.lua" />
+    <None Include="Texts\mod\stats.lua" />
     <None Include="Texts\mod\strutil.lua" />
+    <None Include="Texts\mod\unlocks.lua" />
     <None Include="Texts\mod\win10fix.lua" />
     <None Include="Texts\mod\wined3d.lua" />
   </ItemGroup>
@@ -431,13 +444,13 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
+      <OmitFramePointers>false</OmitFramePointers>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>false</FloatingPointExceptions>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -462,6 +475,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
       <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -473,6 +487,12 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <Command>cd $(SolutionDir) &amp;&amp; postbuild.bat $(Configuration) || (exit 0)</Command>
       <Outputs>dummy_to_always_trigger</Outputs>
     </CustomBuildStep>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName)$(TargetExt).embed.manifest</OutputManifestFile>
+    </Manifest>
+    <ManifestResourceCompile>
+      <ResourceOutputFileName>$(IntDir)$(TargetName)$(TargetExt).embed.manifest.res</ResourceOutputFileName>
+    </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <ClCompile>
@@ -487,7 +507,9 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -498,6 +520,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PostBuildEvent>
       <Command>

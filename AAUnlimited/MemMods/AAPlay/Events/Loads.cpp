@@ -258,7 +258,7 @@ void TransferOutInjection() {
 	DWORD address = General::GameBase + 0xEC3D1;
 	DWORD redirectAddress = (DWORD)(&TransferOutRedirect);
 	Hook((BYTE*)address,
-		{ 0xE8, 0x2F, 0xAA, 0x01, 0x00 },							//expected values
+		{ 0xE8, HookControl::ANY_DWORD },							//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&TransferOutOriginalFunc);
 }

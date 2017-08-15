@@ -22,8 +22,14 @@ function sjis_to_unicode(text)
 	return cp_to_unicode(932, text)
 end
 
+-- use lua's unicode support, so that we can call this early on
 function utf8_to_unicode(text)
-	return cp_to_unicode(65001, text)
+	local res = {}
+	for _, c in utf8.codes(text) do
+		table.insert(res, string.pack("<H", c))
+	end
+	return table.concat(res)
+--	return cp_to_unicode(65001, text)
 end
 
 function unicode_to_utf8(text)

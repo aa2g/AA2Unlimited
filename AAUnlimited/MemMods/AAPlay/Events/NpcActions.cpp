@@ -1,9 +1,158 @@
 #include "StdAfx.h"
 
+
 namespace PlayInjections {
 namespace NpcActions {
 
 using namespace ExtClass;
+
+DWORD AnswerAddress, AnswerLowAddress;
+
+void __stdcall Answer(AnswerStruct*);
+DWORD __stdcall AnswerLow(AnswerStruct*);
+
+// Wraps a call to our custom handler, redirect jump is pointed into here
+void __declspec(naked) WrapAnswer() {
+	__asm {
+		pushad
+		push esi
+		call Answer
+		popad
+		mov eax, 1
+		ret
+	}
+}
+
+// This calls the original answer function we patched
+void CallAnswer(AnswerStruct *as) {
+	__asm {
+		mov esi, as
+		pushad
+		call goback
+		jmp skip
+goback:
+		// part of function we destroyed
+		push ecx
+		mov  eax, [esi + 440]
+		// Original function
+		jmp [AnswerAddress]
+skip:
+		popad
+	}
+}
+
+// Wraps a call to our custom handler, redirect jump is pointed into here
+void __declspec(naked) WrapAnswerLow() {
+	__asm {
+		pushad
+		push edx
+		call AnswerLow
+		mov[esp + 28], eax
+		popad
+		ret
+	}
+}
+
+// This calls the original answer (low chance) function we patched. It returns bool we need.
+DWORD CallAnswerLow(AnswerStruct *as) {
+	DWORD ret;
+	__asm {
+		mov edx, as
+		pushad
+		call goback
+		jmp skip
+goback:
+		// part of function we destroyed
+		push -1
+		push 0x006d53c8
+		// Original function
+		jmp [AnswerLowAddress]
+skip:
+		mov[esp + 28], eax
+		popad
+		mov ret, eax
+	}
+	return ret;
+}
+///////////////////////////////////////////////
+
+
+
+// When this routine is called, the roll result (0 or 1) is in as->answer
+// and roll number in ->answerChar->m_lastConversationAnswerPercent.
+// Now if you want to change the outcome of a roll, do it BEFORE CallAnswer - that one
+// acts on the actual data of the answer.
+//
+// Acting on it after will change dialog result, but scores will be applied by CallAnswer
+// with the original unmodified answer data.
+//
+void __stdcall Answer(AnswerStruct *as) {
+
+	LUA_EVENT("answer", as->answer, as);
+
+	CallAnswer(as);
+
+	using namespace Shared::Triggers;
+	using namespace AAPlay;
+	NpcResponseData data;
+	data.card = GetSeatFromStruct(as->answerChar->m_thisChar);
+	data.answeredTowards = GetSeatFromStruct(as->askingChar->m_thisChar);
+	data.originalResponse = as->answer;
+	data.changedResponse = as->answer;
+	data.conversationId = as->askingChar->m_currConversationId; //this id is not set for the answerChar in case of minna
+	data.originalChance = as->answerChar->m_lastConversationAnswerPercent;
+	data.changedChance = data.originalChance;
+	ThrowEvent(&data);
+
+	as->answerChar->m_lastConversationAnswerPercent = data.changedChance;
+
+	// we can't just carry over because the data is DWORD (with potential deaf=2 state), not bool.
+	// plaster over it only if something actually wants it changed.
+	if (data.changedResponse != data.originalResponse)
+		as->answer = data.changedResponse;
+
+	LUA_EVENT("answer_after", as->answer, as);
+}
+
+// Some speculation what this does:
+// This routine is called to apply modifiers for the case when roll below chance of 100% succeeds.
+//
+// Numerous mood (?) biases are applied in that case and can override the answer back to failure or
+// unknown state 2. It returns answer value, which is shoveled into as->answer by the caller, but in some cases
+// offset by 1 (!), thus final as->answer becomes 2 or 3, not 1.
+// In other cases, it is implicitly assumed success (since this branch is success rolls).
+//
+// Answer() is called just right after this, picks up value from as->answer and proapgates further into
+// character structs. If AnswerLow() function isn't called, chances were either above 100
+// (and as->answer later is implicit 1), or the roll didn't succeed in which case as->answer became
+// implicit 0, in both cases Answer() has a chance to change the outcome.
+//
+DWORD __stdcall AnswerLow(AnswerStruct *as) {
+	bool override = false;
+	LUA_EVENT("answer_lucky", override, as);
+	if (override)
+		return as->answer;
+	return CallAnswerLow(as);
+}
+
+
+void NpcAnswerInjection() {
+
+	// Answer
+	AnswerAddress = General::GameBase + 0x188A85;
+	Hook((BYTE*)AnswerAddress-5,
+	{ 0x51, 0x8b, 0x86, 0xb8, 0x01, 0x00, 0x00},
+	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswer, 0x90, 0x90}, NULL);
+
+	// AnswerLow
+	AnswerLowAddress = General::GameBase + 0x18F045;
+	Hook((BYTE*)AnswerLowAddress - 5,
+	{ 0x6a, 0xff, 0x68, 0xc8, 0x53, 0x6d, 0x00 },
+	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswerLow, 0x90, 0x90 }, NULL);
+}
+
+	
+///////////////////////////////////////////////
 
 
 BYTE __stdcall ClothesChangedEvent(ExtClass::CharacterStruct* npc, BYTE newClothes) {
@@ -46,6 +195,8 @@ void ClothesChangeInjection() {
 		NULL);
 }
 
+
+#if 0
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
 {
 	LUA_EVENT("answer", result, answerChar, askingChar);
@@ -148,13 +299,13 @@ void NpcAnswerInjection() {
 
 	address = General::GameBase + 0x5B3DB;
 	Hook((BYTE*)address,
-		{ 0xE8, 0x20, 0xC7, 0x12, 0x00 },								//expected values
+		{ 0xE8, HookControl::ANY_DWORD },								//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 
 	address = General::GameBase + 0x19FAB4;
 	Hook((BYTE*)address,
-		{ 0xE8, 0x47, 0x81, 0xFE, 0xFF },								//expected values
+		{ 0xE8, HookControl::ANY_DWORD },								//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&loc_NpcAnswerOriginalFunction);
 
@@ -186,6 +337,8 @@ void NpcAnswerInjection() {
 		NULL);
 
 }
+
+#endif
 
 void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionParamStruct* params) {
 

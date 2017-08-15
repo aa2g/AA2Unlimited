@@ -40,6 +40,7 @@ void AddTimer(int when, void *fn) {
 int __stdcall GameTick() {
 	if (tick == 0) {
 		first_now = GetTickCount();
+		LOGPRIONC(Logger::Priority::INFO) "Entering main game event loop\n";
 		LUA_EVENT_NORET("first_tick", (DWORD)(*hwnd));
 	}
 	now = GetTickCount() - first_now;

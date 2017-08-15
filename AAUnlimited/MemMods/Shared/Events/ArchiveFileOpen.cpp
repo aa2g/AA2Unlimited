@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-
+#include "Files\PersistentStorage.h"
 namespace SharedInjections {
 namespace ArchiveFile {
 
@@ -10,11 +10,8 @@ namespace ArchiveFile {
 * else, the function is aborted and the results from this function are used.
 */
 bool __stdcall OpenFileEvent(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	static wchar_t arch[1024];
-	static wchar_t file[1024];
-
-	const wchar_t *orig_paramArchive = arch;
-	const wchar_t *orig_paramFile = file;
+	const wchar_t *orig_paramArchive = *paramArchive;
+	const wchar_t *orig_paramFile = *paramFile;
 	const char *provider = NULL;
 	const char *rewriter = "";
 	const char *rewriter2 = "";
@@ -72,7 +69,7 @@ done:;
 			"archive=" << std::wstring(*paramArchive) << " " <<
 			"file=" << std::wstring(*paramFile);
 		if ((*paramArchive != orig_paramArchive) || (orig_paramFile != *paramFile)) {
-			LOGSPAM << "rewriter=" << rewriter << rewriter2 << " " <<
+			LOGSPAM << " rewriter=" << rewriter << rewriter2 << " " <<
 				" origarchive=" << std::wstring(orig_paramArchive) << " origfile=" << std::wstring(orig_paramFile);
 		}
 		if (provider)

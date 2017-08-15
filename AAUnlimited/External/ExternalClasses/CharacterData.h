@@ -304,6 +304,9 @@ namespace ExtClass {
 			LUA_BIND(m_club);
 			LUA_BIND(m_bPersonality);
 			LUA_BIND(m_gender);
+			LUA_BINDSTR(m_forename);
+			LUA_BINDSTR(m_surname);
+			LUA_BINDSTR(m_description);;
 			LUA_METHOD(GetPreferenceFlags, { return _gl.push(_self->GetPreferenceFlags()).one; });
 			LUA_BINDARR(m_preferenceBools);
 			LUA_BINDARR(m_pregnancyRisks);

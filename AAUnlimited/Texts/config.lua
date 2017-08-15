@@ -72,7 +72,7 @@ legacyMode = 3
 --2: warn
 --3: err
 --4: crit
-logPrio = 0
+logPrio = 1
 
 -- (don't set, these are currently broken)
 sPoserHotKeys = ""
@@ -81,13 +81,14 @@ sPoserHotKeys = ""
 bUsePPeX = false
 
 -- load .pp2 files
-bUsePP2 = true
+bUsePP2 = false
 
--- MB cache memory for general data
-PP2Cache = 512
+-- MB cache memory for general data, includes data allocated by game itself
+PP2Cache = 800
 
 -- MB cache memory for decompressed audio
-PP2AudioCache = 256
+PP2AudioCache = 200
+PP2Buffers = 100
 
 -- The modified launcher of MKIII decensor
 -- rewrites the string so that AS00_03_00_00_00.bmp - AS00_03_00_04_00.bmp

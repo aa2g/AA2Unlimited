@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Functions/Render.h"
 
 #include <codecvt>
 #include <string>
@@ -94,6 +95,7 @@ void Lua::bindLua() {
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
+	PlayInjections::NpcActions::AnswerStruct::bindLua();
 
 	// H
 	HCamera::bindLua();
@@ -102,6 +104,8 @@ void Lua::bindLua() {
 	HParticipant::bindLua();
 	HPosButtonList::bindLua();
 	HStatistics::bindLua();
+
+	Render::bindLua();
 
 	// Very low level utilities
 	using namespace General;
@@ -152,8 +156,11 @@ void Lua::bindLua() {
 			if (lua_type(L, i) == LUA_TSTRING) {
 				argbuf[i - 3] = (DWORD)lua_tostring(L, i);
 			}
-			else {
+			else if (lua_type(L, i) == LUA_TNUMBER) {
 				argbuf[i - 3] = lua_tointeger(L, i);
+			}
+			else {
+				argbuf[i - 3] = (DWORD)lua_topointer(L, i);
 			}
 		}
 		size_t nbytes = (lua_gettop(L)-2)*4;

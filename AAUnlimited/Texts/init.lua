@@ -1,16 +1,21 @@
 require "debug"
 
-AAU_VERSION = "0.5 preview"
+AAU_VERSION = "0.5 beta "
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
 assert(_BINDING)
 assert(_BINDING.setlogprio, "C++ logger missing")
 assert(_BINDING.logger, "C++ logger missing")
+	_BINDING.setlogprio(1)
 _CONFIG = _CONFIG or {}
 _WIN32 = {}
 __LOGGER = function(msg)
 	return false -- keep it for later
+end
+local _, ver = pcall(dofile, _BINDING.GetAAUPath() .. "version.lua")
+if ver then
+	AAU_VERSION = AAU_VERSION .. " " .. ver
 end
 
 
@@ -19,7 +24,7 @@ end
 ---------------------------
 function check(x,a,b,...)
 	if a == nil then
-		log.warn(x .. "failed with: " .. b)
+		log.spam(x .. " failed with:  " .. b)
 	end
 	return a,b,...
 end
@@ -38,8 +43,8 @@ end
 log = {}
 
 -- XREF: match enum Files/logger.h
-for prio,name in ipairs { "spam", "info", "warn", "error", "crit" } do
-	local p = prio-1
+for prio,name in ipairs { "raw", "spam", "info", "warn", "error", "crit" } do
+	local p = prio-2
 	log[name] = function(...)
 		return _BINDING.logger(p, string.format(...))
 	end
@@ -58,7 +63,9 @@ function cfproxy:__index(k)
 	return _CONFIG[k] or _BINDING.Config[k]
 end
 function cfproxy:__newindex(k,v)
-	log("going to set %s to %s",k,tostring(v))
+	if k == "logPrio" then
+		_BINDING.setlogprio(v)
+	end
 	if v ~= nil then
 		-- if setting a binding fails, its not a C++ setting
 		if not pcall(function() _BINDING.Config[k] = v end) then
@@ -81,9 +88,9 @@ function Config.load(name)
 	setmetatable(_G, cfproxy)
 
 	local ret, msg = xpcall(ch, function()
-		log.spam("Config failed with " .. debug.traceback(err))
+		log.error("Config %s failed with %s", lua, debug.traceback(err))
 	end)
-
+	_BINDING.setlogprio(_CONFIG.logPrio)
 	setmetatable(_G, nil)
 end
 
@@ -117,7 +124,7 @@ end
 
 function Config.save(fn)
 	local fn = fn or aau_path("savedconfig.lua")
-	log("saving config to "..fn)
+--	log("saving config to "..fn)
 
 	local f = io.open(fn, "w+")
 	for k,v in pairs(_CONFIG) do
@@ -149,13 +156,30 @@ package.path = aau_path("lib", "?.lua") .. ";" .. package.path
 package.path = aau_path("lib", "?", "init.lua") .. ";" .. package.path
 
 stdio_print = print
+info = function(...)
+	local res = {}
+	for i,v in ipairs {...} do
+		res[i] = tostring(v)
+	end
+	local msg = table.concat(res, "\t")
+	log.info(msg)
+end
 print = function(...)
 	local res = {}
 	for i,v in ipairs {...} do
 		res[i] = tostring(v)
 	end
-	local msg = table.concat(res, " ")
+	local msg = table.concat(res, "\t")
 	log.spam(msg)
+end
+
+function raw_print(...)
+	local res = {}
+	for i,v in ipairs {...} do
+		res[i] = tostring(v)
+	end
+	local msg = table.concat(res, "\t")
+	log.raw(msg)
 end
 
 
@@ -241,14 +265,14 @@ function unload_module(name)
 	if not mod then return end
 	-- nuke all event handlers of a given module
 	for evn,v in pairs(handlers) do
-		log("scanning owners of %s", evn)
+		--log("scanning owners of %s", evn)
 		local i = 1
 		while i <= #v do
 			if not v[i] then
-				log("break skip")
+				--log("break skip")
 				break
 			end
-			log("print id %d owner %s", i, v[i][2])
+			--log("print id %d owner %s", i, v[i][2])
 			if v[i][2] == name then
 				log("[%s] removing handler %d for %s", name, i, evn)
 				table.remove(v, i)
@@ -299,6 +323,7 @@ function load_modules()
 end
 
 function module_can_unload(mod)
+	--print("can unload ",mod, ((modules[mod] or {}).info or {}).unload)
 	return (modules[mod] or {}).unload
 end
 
@@ -367,6 +392,7 @@ function __DISPATCH_EVENT(name, arg1, ...)
 
 	for _,h in ipairs(handlers[name] or {}) do
 		local ok, msg = pcall(function(...)
+			print(" dispatching to", h[2])
 			local retv = h[1](arg1, ...)
 			arg1 = retv ~= nil and retv or arg1
 		end, ...)
@@ -418,7 +444,7 @@ function readdir(path)
 			ok = FindNextFileW(fh, mem) ~= 0
 		end
 		if not ok then
-			CloseHandle(fh)
+			FindClose(fh)
 			free(mem)
 			return nil
 		end
@@ -439,7 +465,6 @@ end
 
 -- grabs all information about module just by its name
 function get_mod_info(n)
-	log("modinfo %s", n)
 	local mi
 	local idx
 	for i,v in ipairs(Config.mods) do
@@ -459,8 +484,14 @@ function get_mod_info(n)
 	return mi, desc, idx
 end
 
-
-function alert(msg)
-	require "iup"
-	iup.Message("Alert", msg)
+getmetatable("").__mod = function(o,p)
+	if type(p) == "table" then
+		return o:format(table.unpack(p))
+	else
+		return o:format(p)
+	end
+end
+function alert(who, msg)
+	require "iuplua"
+	iup.Message(who, msg)
 end
