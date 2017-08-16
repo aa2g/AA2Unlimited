@@ -85,6 +85,7 @@ void Initialize() {
 	{ 0xe8, HookControl::ANY_DWORD },
 	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&GameTick },
 		(DWORD*)&orig_GameTick);
+
 }
 
 
