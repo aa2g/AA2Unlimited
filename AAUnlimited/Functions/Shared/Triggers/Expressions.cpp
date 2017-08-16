@@ -1460,6 +1460,12 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetEventID
 				},
+				{
+					64, EXPRCAT_CHARPROP,
+					TEXT("Find Style"), TEXT("%p ::Style( %p )"), TEXT("Find Style index by name."),
+					{ (TYPE_INT), TYPE_STRING }, (TYPE_INT),
+					&Thread::FindStyle
+				},
 			},
 
 			{ //BOOL
