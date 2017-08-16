@@ -33,6 +33,7 @@ static BOOL InitLua()
 	return TRUE;
 }
 
+
 // Last step before handing control over
 static const char *NormalInit()
 {
@@ -61,6 +62,22 @@ static const char *NormalInit()
 		return NULL;
 	}
 
+	HANDLE hActCtx;
+	ACTCTX actCtx;
+	ULONG_PTR cookie;
+
+	if (g_Config.bUseVisualStyles) {
+		ZeroMemory(&actCtx, sizeof(actCtx));
+		actCtx.cbSize = sizeof(actCtx);
+		actCtx.hModule = General::DllInst;
+		actCtx.lpResourceName = MAKEINTRESOURCE(2);
+		actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
+
+		hActCtx = CreateActCtx(&actCtx);
+		ActivateActCtx(hActCtx, &cookie);
+	}
+
+
 	// Will load paths from registry only if lua didn't change those
 	General::InitializePaths();
 
@@ -83,6 +100,11 @@ static const char *NormalInit()
 	if (g_Config.bUsePP2) {
 		g_PP2.Init();
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
+	}
+
+	if (g_Config.bUseVisualStyles && General::IsAAEdit) {
+		DeactivateActCtx(0, cookie);
+		ReleaseActCtx(hActCtx);
 	}
 
 	return g_Config.gets("pathD3D9");
@@ -113,7 +135,9 @@ static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
+
 /////////////////////// EXPORTS
+
 
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,

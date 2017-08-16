@@ -315,8 +315,8 @@ local function buildtabs() return
 		iup.frame {
 			title = "Settings",
 			iup.gridbox {
-				padding="4x6",
-				nmargin="x2",
+				padding="4x7",
+				nmargin="x3",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
@@ -333,6 +333,7 @@ local function buildtabs() return
 			title = "Toggles",
 			iup.vbox {
 				gap="1",
+				aaut("bUseVisualStyles", iup.toggle {title = "Use ux theme" }),
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI" }),

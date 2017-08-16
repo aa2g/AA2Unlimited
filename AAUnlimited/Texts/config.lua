@@ -1,3 +1,6 @@
+-- Flat UI (but not in maker)
+bUseVisualStyles = true
+
 --load more than 6 tan slots. currently crashes.
 bUseAdditionalTanSlots = false		
 
