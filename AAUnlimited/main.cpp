@@ -57,10 +57,10 @@ static const char *NormalInit()
 		hActCtx = CreateActCtx(&actCtx);
 		ActivateActCtx(hActCtx, &cookie);
 
-		if (!General::InitializeExeType()) {
-			LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
-			return NULL;
-		}
+	}
+	if (!General::InitializeExeType()) {
+		LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
+		return NULL;
 	}
 
 	LUA_SCOPE;
