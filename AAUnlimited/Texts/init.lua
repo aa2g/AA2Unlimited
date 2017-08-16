@@ -536,3 +536,9 @@ function mod_edit_config(mod, opts, title)
 	end
 end
 
+function is_key_pressed(key)
+	log.info("keypressed: %d", key)
+	if key == nil then return false end
+	if key < 0 then return false end
+	return (GetAsyncKeyState(key) & 0x8000) ~= 0
+end

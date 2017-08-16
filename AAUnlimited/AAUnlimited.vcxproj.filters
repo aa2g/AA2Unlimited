@@ -125,6 +125,7 @@
     <ClCompile Include="Functions\RenderWrap.cpp" />
     <ClCompile Include="Files\PersistentStorage.cpp" />
     <ClCompile Include="Hooks\WinAPI.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\UiEvent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -242,6 +243,7 @@
     <ClInclude Include="Functions\RenderWrap.h" />
     <ClInclude Include="Files\PersistentStorage.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\UiEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
@@ -356,6 +358,9 @@
     </None>
     <None Include="Texts\mod\poser\signals.lua">
       <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\jizou.lua">
+      <Filter>Lua</Filter>
     </None>
   </ItemGroup>
 </Project>
