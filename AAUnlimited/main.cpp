@@ -40,13 +40,28 @@ static const char *NormalInit()
 	srand(time(NULL));
 	InitLogger();
 
-	if (!General::InitializeExeType()) {
-		LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
-		return NULL;
-	}
+	HANDLE hActCtx;
+	ACTCTX actCtx;
+	ULONG_PTR cookie;
 
 	if (!InitLua())
 		return NULL;
+
+	if (g_Config.bUseVisualStyles) {
+		ZeroMemory(&actCtx, sizeof(actCtx));
+		actCtx.cbSize = sizeof(actCtx);
+		actCtx.hModule = General::DllInst;
+		actCtx.lpResourceName = MAKEINTRESOURCE(2);
+		actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
+
+		hActCtx = CreateActCtx(&actCtx);
+		ActivateActCtx(hActCtx, &cookie);
+
+		if (!General::InitializeExeType()) {
+			LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
+			return NULL;
+		}
+	}
 
 	LUA_SCOPE;
 
@@ -61,22 +76,6 @@ static const char *NormalInit()
 		LOGPRIONC(Logger::Priority::CRIT_ERR) err;
 		return NULL;
 	}
-
-	HANDLE hActCtx;
-	ACTCTX actCtx;
-	ULONG_PTR cookie;
-
-	if (g_Config.bUseVisualStyles) {
-		ZeroMemory(&actCtx, sizeof(actCtx));
-		actCtx.cbSize = sizeof(actCtx);
-		actCtx.hModule = General::DllInst;
-		actCtx.lpResourceName = MAKEINTRESOURCE(2);
-		actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
-
-		hActCtx = CreateActCtx(&actCtx);
-		ActivateActCtx(hActCtx, &cookie);
-	}
-
 
 	// Will load paths from registry only if lua didn't change those
 	General::InitializePaths();
