@@ -172,7 +172,7 @@ function _M.updatefloating(d)
 	d = d or dialogs
 	if not d then return end
 	local parent = 0
-	if _M.opts.floating == 0 then parent = _M.parentHWND end
+	if _M.opts.floating == 0 or _M.opts.forcefullscreen then parent = _M.parentHWND end
 	for _,v in ipairs(d) do
 		SetParent(v.hwnd, parent)
 	end

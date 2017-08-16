@@ -1,4 +1,4 @@
---@INFO Poser (doesn't work, only UI mockup)
+--@INFO Poser
 
 require "iuplua"
 require "iupluacontrols"
@@ -10,6 +10,16 @@ local signals = require "poser.signals"
 
 function on.first_tick(hwnd)
 	dlg.parentHWND = hwnd
+
+	local rect = malloc(16)
+	GetWindowRect(GetDesktopWindow(), rect)
+	local screenw, screenh = string.unpack("<II", peek(rect+8, 8))
+
+	GetClientRect(hwnd, rect)
+	local left, top, right, bottom = string.unpack("<IIII", peek(rect, 16))
+	if right == screenw and bottom == screenh then
+		opts.forcefullscreen = true
+	end
 end
 
 function on.keydown(k)
