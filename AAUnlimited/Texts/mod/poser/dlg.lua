@@ -64,7 +64,10 @@ local function slider(label)
 	local step = 0.01
 	
 	local incremented = signals.signal()
+	local slidestarted = signals.signal()
+	local slidestopped = signals.signal()
 	local textbox = iup.text {}
+	local sliding = false
 	
 	local control = iup.hbox {
 		iup.label { title = label },
@@ -72,10 +75,30 @@ local function slider(label)
 		iup.flatbutton { title = "0", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0) end },
 		iup.flatbutton { title = "-", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(-0.01) end },
 		iup.flatbutton { title = "+", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0.01) end },
-		iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = step, value = 0, valuechanged_cb = function(self) incremented(self.value) end },
+		iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = step, value = 0,
+			mousemove_cb = function(self)
+				if not sliding then
+					sliding = true
+					slidestarted()
+				end
+				incremented(self.value)
+			end,
+			button_press_cb = function(self)
+				print("button press")
+				incremented(self.value)
+				self.value = 0
+			end,
+			button_release_cb = function(self)
+				self.value = 0
+				sliding = false
+				slidestopped()
+			end,
+		},
 		alignment = "acenter",
 		gap = 3,
-		incremented = incremented
+		incremented = incremented,
+		slidestarted = slidestarted,
+		slidestopped = slidestopped,
 	}
 	
 	incremented.connect(textbox, "value")
@@ -88,11 +111,57 @@ local function shapecontrols(title, shapelist, rowsize)
 	for _, s in ipairs(shapelist) do
 		table.insert(controls, iup.flatbutton { title = s, toggle ="yes", padding = 3 })
 	end
-	table.insert(controls, iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = #shapelist - 1, visiblecolumns = 1 })
+	local open = iup.label { title = "Open" }
+	local spin = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9, visiblecolumns = 1 }
 	
 	local norm = iup.normalizer { unpack(controls) }
 	norm.normalize = "horizontal"
-	return iup.frame { title = title, iup.radio { iup.gridbox { numdiv = rowsize, unpack(controls) } } }
+	return iup.frame { title = title, 
+		iup.vbox {
+			iup.radio {
+				iup.gridbox { numdiv = rowsize, unpack(controls) },
+				expand = "yes"
+			},
+			iup.hbox {
+				open,
+				spin,
+				alignment = "acenter",
+				gap = 3,
+			},
+			alignment = "aright",
+			gap = 3,
+		}
+	}
+end
+
+local function facecontrols()
+	local leyebrows = iup.label { title = "Eyebrow", alignment = "aright:acenter" }
+	local lblush1 = iup.label { title = "Blush", alignment = "aright:acenter" }
+	local lblush2 = iup.label { title = "Blush (lines)", alignment = "aright:acenter" }
+	local ldimeyes = iup.label { title = "Dim Eyes", alignment = "aright:acenter" }
+	local ltears = iup.label { title = "Tears", alignment = "aright:acenter" }
+	local leyetracking = iup.label { title = "Eye Tracking", alignment = "aright:acenter" }
+	local lyogurt = iup.label { title = "Yogurt", alignment = "aright:acenter" }
+	local eyebrows = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1 }
+	local blush1 = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 12, visiblecolumns = 1 }
+	local blush2 = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 12, visiblecolumns = 1 }
+	local dimeyes = iup.toggle { }
+	local tears = iup.toggle { }
+	local eyetracking = iup.toggle { }
+	local yogurt = iup.toggle { }
+	local lnorm = iup.normalizer { leyebrows, lblush1, lblush2, ldimeyes, ltears, leyetracking }
+	lnorm.normalize = "horizontal"
+	return iup.frame {
+		title = "Face (more)",
+		iup.gridbox { numdiv = 4,
+			ldimeyes, dimeyes, leyebrows, eyebrows,
+			ltears, tears, lblush1, blush1,
+			leyetracking, eyetracking, lblush2, blush2,
+			lyogurt, yogurt,
+			gapcol = 3, gaplin = 3
+		},
+		expand = "yes"
+	}
 end
 
 dialogsliders = iup.dialog {
@@ -116,7 +185,7 @@ dialogsliders = iup.dialog {
 						iup.flatbutton { title = "x100", toggle = "yes", border = "yes", padding = 3 },
 					}
 				},
-				iup.toggle { title = "Show" },
+				iup.flatbutton { title = "Show", toggle = "yes", border = "yes", padding = 3 },
 				alignment = "acenter",
 				gap = 3
 			},
@@ -125,34 +194,67 @@ dialogsliders = iup.dialog {
 			slider("Z"),
 			iup.hbox {
 				shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, 4),
-				shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2)
+				shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2),
+				facecontrols(),
+				expand = "yes",
 			}
 		},
 		--gap = 3,
 	},
-	title = "Sliders"
+	maxbox = "no",
+	minbox = "no",
 }
 
 dialogposes = iup.dialog {
-	iup.vbox {
-		listfilter(),
-		iup.button { title = "Load", expand = "horizontal" },
-		iup.button { title = "Save", expand = "horizontal" },
-		iup.button { title = "Delete", expand = "horizontal" },
-		iup.hbox { 
-			iup.label { title = "Clip" },
-			iup.text {},
-			iup.label { title = "Frame" },
-			iup.text {},
-			gap = 3,
-			alignment = "acenter"
-		}
+	iup.tabs {
+		iup.vbox {
+			listfilter(),
+			iup.button { title = "Load Pose", expand = "horizontal" },
+			iup.button { title = "Save Pose", expand = "horizontal" },
+			iup.button { title = "Delete Pose", expand = "horizontal" },
+			iup.hbox { 
+				iup.label { title = "Clip" },
+				iup.text {},
+				iup.label { title = "Frame" },
+				iup.text {},
+				gap = 3,
+				alignment = "acenter"
+			},
+			tabtitle = "Poses"
+		},
+		iup.vbox {
+			listfilter(),
+			iup.button { title = "Load Scene", expand = "horizontal" },
+			iup.button { title = "Save Scene", expand = "horizontal" },
+			iup.button { title = "Delete Scene", expand = "horizontal" },
+			iup.hbox { 
+				iup.label { title = "Clip" },
+				iup.text {},
+				iup.label { title = "Frame" },
+				iup.text {},
+				gap = 3,
+				alignment = "acenter"
+			},
+			tabtitle = "Scenes"
+		},
 	},
-	title = "Poses",
+	maxbox = "no",
+	minbox = "no",
+}
+
+dialogcharacters = iup.dialog {
+	iup.vbox {
+		iup.label { title = "Character" },
+		iup.list { expand = "horizontal" },
+		iup.label { title = "Style" },
+		iup.list { expand = "horizontal" },
+	},
+	maxbox = "no",
+	minbox = "no",
 }
 
 function _M.togglevisible()
-	dialogs = dialogs or { dialogsliders, dialogposes }
+	dialogs = dialogs or { dialogcharacters, dialogposes, dialogsliders }
 	if not _M.visible then
 		for _,v in ipairs(dialogs) do
 			v:map()
