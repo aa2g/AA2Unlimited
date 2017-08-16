@@ -214,6 +214,8 @@ DWORD PatchIAT(DWORD *iat, void *newp)
 #include "MemMods/AAPlay/Events/ClothingDialog.h"
 #include "MemMods/AAPlay/Events/NpcActions.h"
 #include "MemMods/AAPlay/Events/ScreenCapture.h"
+#include "MemMods/AAPlay/Events/UiEvent.h"
+
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAEdit/SaveCard.h"
@@ -266,6 +268,9 @@ void InitializeHooks() {
 		HGUIButton::InitializeHooks();
 
 		using namespace PlayInjections;
+
+		UIEvent::Inject();
+
 		HPlayInjections::TickInjection();
 		PcConversation::StartInjection();
 		PcConversation::EndInjection();

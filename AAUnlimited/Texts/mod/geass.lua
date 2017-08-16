@@ -2,8 +2,12 @@
 
 local _M = {}
 
-local keys = { 0x01, 0x02, 0x04, 0x10, 0x11, 0x12 }
-local opts
+local keys = { 0x02, 0x04, 0x10, 0x11, 0x12 }
+local opts = {
+	{"key", 1, "Activation Key: %l|None|Right Mouse Button|Middle Mouse Button|Shift Key|Control Key|Alt Key|"},
+	{"everyone", 0, "Geass for everyone: %b"},
+	{"chance", 0, "Force 999%% chance: %b"},
+}
 
 function on.answer(resp, as)
 	-- weird undocumented states
@@ -13,7 +17,7 @@ function on.answer(resp, as)
 	end
 
 	local ispc = as.askingChar.m_thisChar == GetPlayerCharacter()
-	local active = (GetAsyncKeyState(keys[opts.key + 1]) & 0x8000) ~= 0
+	local active = is_key_pressed(keys[opts.key])
 
 	if active and (opts.everyone == 1 or ispc) then
 		resp = 1
@@ -27,36 +31,14 @@ function on.answer(resp, as)
 end
 
 function _M:load()
-	opts = self
-	self.key = self.key or 1
-	self.everyone = self.everyone or 0
-	self.chance = self.chance or 0
+	mod_load_config(self, opts)
 end
 
 function _M:unload()
 end
 
 function _M:config()
-	log("config geass")
-	if not self then
-		log("not having self?")
-		return
-	end
-	require "iuplua"
-	require "iupluacontrols"
-
-	local ok, newkey, everyone, chance = iup.GetParam("Set the activation key for Geass", nil, [[
-Activation Key: %l|Left Mouse Button|Right Mouse Button|Middle Mouse Button|Shift Key|Control Key|Alt Key|
-Geass for everyone: %b
-Force 999%% chance: %b
-]], self.key, self.everyone, self.chance)
-	if ok then
-		self.key = newkey
-		self.everyone = everyone
-		self.chance = chance
-	end
-
-	Config.save()
+	mod_edit_config(self, opts, "Set geass options")
 end
 
 return _M
