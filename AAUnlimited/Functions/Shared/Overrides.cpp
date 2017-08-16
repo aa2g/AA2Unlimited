@@ -172,6 +172,12 @@ namespace Shared {
 
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
+
+		// Leaving skirts out of preset sliders was an old oversight.
+		// Thus let's cheat and consider all the body bones in the skirt
+		if (model == ExtClass::CharacterStruct::SKIRT)
+			model = ExtClass::CharacterStruct::BODY;
+
 		if(model <= ExtClass::CharacterStruct::N_MODELS) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderFrameRuleMap(model);
 			if(saveMods) {
@@ -295,6 +301,12 @@ namespace Shared {
 
 			ExtClass::CharacterStruct::Models model;
 			model = General::GetModelFromName(xxFile->m_name);
+
+			// Leaving skirts out of preset sliders was an old oversight.
+			// Thus let's cheat and consider all the body bones in the skirt
+			if (model == ExtClass::CharacterStruct::SKIRT)
+				model = ExtClass::CharacterStruct::BODY;
+
 			if (model <= ExtClass::CharacterStruct::N_MODELS) {
 				smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
 			}
