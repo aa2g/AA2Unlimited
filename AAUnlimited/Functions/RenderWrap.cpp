@@ -568,9 +568,13 @@ public:;
 
 	HRESULT WINAPI EndScene(void)
 	{
-		onEndScene();
-		if (font && g_Config.bDrawFPS)
-			DrawFPS();
+		//onEndScene();
+		if (font && g_Config.bDrawFPS) {
+			D3DVIEWPORT9 vp;
+			GetViewport(&vp);
+			if (vp.Width > 256)
+				DrawFPS();
+		}
 		frameno++;
 		WRAPCALL(orig->EndScene());
 	}
