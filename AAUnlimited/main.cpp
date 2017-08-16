@@ -33,19 +33,35 @@ static BOOL InitLua()
 	return TRUE;
 }
 
+
 // Last step before handing control over
 static const char *NormalInit()
 {
 	srand(time(NULL));
 	InitLogger();
 
-	if (!General::InitializeExeType()) {
-		LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
-		return NULL;
-	}
+	HANDLE hActCtx;
+	ACTCTX actCtx;
+	ULONG_PTR cookie;
 
 	if (!InitLua())
 		return NULL;
+
+	if (g_Config.bUseVisualStyles) {
+		ZeroMemory(&actCtx, sizeof(actCtx));
+		actCtx.cbSize = sizeof(actCtx);
+		actCtx.hModule = General::DllInst;
+		actCtx.lpResourceName = MAKEINTRESOURCE(2);
+		actCtx.dwFlags = ACTCTX_FLAG_HMODULE_VALID | ACTCTX_FLAG_RESOURCE_NAME_VALID;
+
+		hActCtx = CreateActCtx(&actCtx);
+		ActivateActCtx(hActCtx, &cookie);
+
+		if (!General::InitializeExeType()) {
+			LOGPRIONC(Logger::Priority::CRIT_ERR) "Can't determine exe type, bail\r\n";
+			return NULL;
+		}
+	}
 
 	LUA_SCOPE;
 
@@ -85,6 +101,11 @@ static const char *NormalInit()
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
 	}
 
+	if (g_Config.bUseVisualStyles && General::IsAAEdit) {
+		DeactivateActCtx(0, cookie);
+		ReleaseActCtx(hActCtx);
+	}
+
 	return g_Config.gets("pathD3D9");
 }
 
@@ -113,7 +134,9 @@ static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
+
 /////////////////////// EXPORTS
+
 
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,
@@ -125,8 +148,10 @@ BOOL WINAPI DllMain(
 		General::DllInst = hinstDLL;
 		if (!General::EarlyInit())
 			return FALSE;
-		Shared::Init();
-		MemAlloc::Init();
+		if (General::IsAAEdit || General::IsAAPlay) {
+			Shared::Init();
+			MemAlloc::Init();
+		}
 	}
 	return TRUE;
 }

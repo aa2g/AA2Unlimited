@@ -140,8 +140,13 @@ function parse_asm(s)
 end
 
 function f_patch(bytes, offs)
-	offs = offs + 0xc00
+	if offs >= 0 then
+		offs = offs + 0xc00
+	else
+		offs = -offs
+	end
 	local save = g_peek(offs, #bytes)
+	log.spam("f_patch %x, %s=> %s", offs, hexdump(save), hexdump(bytes))
 	g_poke(offs, bytes)
 	return save
 end

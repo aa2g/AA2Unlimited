@@ -82,6 +82,7 @@
     <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ScreenCapture.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Time.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\UiEvent.cpp" />
     <ClCompile Include="MemMods\Shared\Events\ArchiveFileOpen.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
     <ClCompile Include="Functions\Shared\Globals.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Time.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\UiEvent.h" />
     <ClInclude Include="MemMods\Shared\Events\ArchiveFileOpen.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="External\ExternalVariables.h" />
@@ -272,6 +274,7 @@
     <None Include="Texts\mod\fakereg.lua" />
     <None Include="Texts\mod\fixlocale.lua" />
     <None Include="Texts\mod\homosex.lua" />
+    <None Include="Texts\mod\jizou.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
     <None Include="Texts\mod\launcher\dlglist.lua" />
     <None Include="Texts\mod\launcher\dlgmod.lua" />
@@ -311,7 +314,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'" Label="Configuration">
@@ -380,7 +383,7 @@
     <TargetName>$(ProjectName)</TargetName>
     <CustomBuildBeforeTargets>
     </CustomBuildBeforeTargets>
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
@@ -471,7 +474,6 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       </SectionAlignment>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LargeAddressAware>true</LargeAddressAware>
-      <TerminalServerAware>false</TerminalServerAware>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <FixedBaseAddress>true</FixedBaseAddress>
       <DelayLoadDLLs>lua53.dll;dbghelp.lib</DelayLoadDLLs>
@@ -489,6 +491,8 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
     </CustomBuildStep>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName)$(TargetExt).embed.manifest</OutputManifestFile>
+      <GenerateCategoryTags>true</GenerateCategoryTags>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
     </Manifest>
     <ManifestResourceCompile>
       <ResourceOutputFileName>$(IntDir)$(TargetName)$(TargetExt).embed.manifest.res</ResourceOutputFileName>

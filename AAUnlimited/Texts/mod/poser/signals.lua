@@ -11,7 +11,7 @@ local function newmetaconnector(self)
 			for k,v in pairs(self) do
 				for _,slot in ipairs(v) do
 					target = k[slot]
-					if target.isconnector or type(target) == "function" then
+					if type(target) == "function" or target.isconnector then
 						target(...)
 					else
 						--try setting the property

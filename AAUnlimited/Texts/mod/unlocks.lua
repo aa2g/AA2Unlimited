@@ -1,17 +1,74 @@
---@INFO Hue, slider, trait and H-pref limits.
+--@INFO Hue,sliders,trait&pref,M2M H,role swap
 
-local offsets = {
+-- This script unites virtually all unlocks of known "snowflake" launchers,
+-- that is, frontier and ASU (both play and exe), plus some additional features
+-- in edit (preserve rainbow, sliders).
 
-	-- Editor logic patches (saving/loading/applying)
+-- For ease of use, offsets can be an in-memory offset (when negative), or disk-file
+-- offset (when positive).  We translate those to in-memory offsets when applying
+-- in either case.
 
-	-- unlocks hue
+-- When adding a patch, please make sure it doesn't collide with some snowflaked
+-- launcher (ie generating corrupt opcodes). Either put here the exact same thing
+-- the snowflake has, or move it to other code path.
+--
+-- If the patch affects gameplay, add a bool config button for it, too. The script
+-- ensures that the game can be live patched/unpatched via script settings.
+--
+-- The patch tables are only for tiny in-place opcode replacements, *not* for detours
+-- to undecipherable assembler code blobs on the side.
+--
+-- There are other facilities better suited to that end - on.* events and g_hook_*.
+-- These allow you to route the code path to Lua, do your thing in script, and call
+-- the original function from Lua, too.
+--
+-- To try out patches on the fly, you can just type f_patch("\xAA\xBB...", 0xfileoff..)
+-- in the console for patching the memory in live session. It returns the original
+-- memory contents, too.
+
+-----------------------------------------------------------------
+-- Configurable IG patches
+local patches = {}
+local options = {
+	-- name, default, dialog
+	{"homosex", 0, "Enable homosex: %b"},
+	{"roleswap", 1, "Enable H position role swap: %b"},
+}
+
+-- "Are they both girls" check before spawning role swap button
+patches.roleswap = {
+	["\x39\xc0\x90"] = {
+		-0x7D8DE,
+	},
+}
+
+-- "Is a boy" check when inviting/forcing for sex
+patches.homosex = {
+	["\xff"] = {
+		-0x7A2C4,
+	}
+}
+
+-----------------------------------------------------------------
+-- RMB key to save as rainbow
+local RAINBOW_KEY = 2
+
+patches.play = {
+	-- hue onload check
+	["\x67\x01"] = {
+		0x12C0B0
+	},
+}
+
+
+patches.edit = {
+	-- nop out hue check
 	["\x67\x01"] = {
 		0x0002058A,
 		0x0011A5A0,
 	},
 
-	-- cmp cl, 100 -> nop
-	-- this is for byte value checks on card load
+	-- this is for byte value checks for sliders on card load
 	["\x3A\xC9\x90"] = {
 		0x0001CBE9,
 		0x0001CBF5,
@@ -95,31 +152,30 @@ local offsets = {
 	-- Patch in jumps over the body of functions in charge
 	-- of disabling buttons of:
 
-	-- Trait (when over 2)
+	-- H pref (when over 2)
 	["\xe9\x90\x00\x00\x00"] = {
 		0x0002F216,
 	},
 
-	-- H pref (when over 2)
+	-- Traits (when over 2)
 	["\xe9\x88\x00\x00\x00"] = {
 		0x0002f0d3
 	},
 
 
-	-- Unknown slider (?) clamp to 100
+	-- Remove check for trait and H-pref count on initial load.
+	["\xeb"] = {
+		0x0002EC47,
+		0x0002EDA1,
+	},
+	
+	-- More slider clamps
 	["\x3a\xc0"] = {
 		0x0002044B,
 		0x00020456,
 		0x0002049D,
 		0x000204A8,
 	},
-	-- Remove check for trait count.
-	["\xeb"] = {
-		0x0002EC47,
-		0x0002EDA1,
-	},
-	
-	-- Unknown slider 2 (?) clamp to 100
 	["\x3A\xD2\x90"] = {
 		0x000278CB,
 		0x000278D7,
@@ -131,82 +187,99 @@ local offsets = {
 		0x00027A12,
 	},
 
-
-
-	-------- UI patches
-
-	--[[
-	-- char name limit 6 -> 255
-	["\xff"] = {
-		0x0002C334,
-		0x0002C346,
-	},
-
-	-- item text limit 26 -> 255
-	["\xff"] = {
-		0x000305B2,
-		0x000305C4,
-		0x000305D6,
-	},
-	]]
-
-	-- clamp hue to 360 instead of 40
-	--[[ not needed, see below
-	["\xb9\x67\x01\x00\x00\x90"] = {
-		0xD5F2E,
-	}]]
-
-	-- force all hues sliders and their text field limits to 360
+	-- force all hues sliders and their text field limits to 0..359, not 0..40
 	["\xBB\x67\x01\x00\x00"] = {
 		0xD5BB9
-	}
+	},
+
+	-- Don't remove rainbow, if present
+	["\xeb\x05"] = {
+		0x00123422,
+	},
 }
 
 local _M = {}
 
 local save = {}
+local psave = {}
 
-function set_hue_range()
+local function unapply_patchset()
+	for offs,bytes in pairs(psave) do
+		f_patch(bytes,offs)
+	end
+	psave = {}
+end
+
+local function apply_patchset()
+	if exe_type ~= "play" then return end
+	for name, set in pairs(patches) do
+		if options[name] == 1 then
+			for bytes, offs in pairs(set) do
+				for _, off in ipairs(offs) do
+					psave[off] = f_patch(bytes, off)
+				end
+			end
+		end
+	end
 end
 
 function _M:load()
-	if exe_type == "play" then
-		-- play has only the hue patch
-		f_patch("\x67\x01", 0x12C0B0)
-		return
+	mod_load_config(self, options)
+
+	if exe_type == "edit" then
+		send_msg = g_hook_vptr(0x002C43E0, 4, function(orig, this, hdlg, msg, wparam, lparam)
+			-- slider range - something asking for 100, make it 255
+			if msg == 0x408 and wparam == 1 and lparam == 100 then
+				--log("OVERRIDE 100->255 %x %x %x %x %x %x", orig,this,hdlg,msg,wparam,lparam)
+				lparam = 255 
+			end
+
+			-- text field size, 6 and 26 -> 255
+			if msg == 0xc5 and (wparam == 26) or (wparam == 6) then
+				wparam = 255
+			end
+
+
+			local ret = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
+			return ret
+		end)
 	end
 
-	send_msg = g_hook_vptr(0x002C43E0, 4, function(orig, this, hdlg, msg, wparam, lparam)
-		-- slider range - something asking for 100, make it 255
-		if msg == 0x408 and wparam == 1 and lparam == 100 then
-			--log("OVERRIDE 100->255 %x %x %x %x %x %x", orig,this,hdlg,msg,wparam,lparam)
-			lparam = 255 
-		end
-
-		-- text field size, 6 and 26 -> 255
-		if msg == 0xc5 and (wparam == 26) or (wparam == 6) then
-			wparam = 255
-		end
-
-
-		local ret = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
-		return ret
-	end)
-
-	for bytes, offs in pairs(offsets) do
+	-- some mandatory patches
+	for bytes, offs in pairs(patches[exe_type]) do
 		for _, off in ipairs(offs) do
 			save[off] = f_patch(bytes, off)
 		end
 	end
 
+	apply_patchset()
+end
+
+-- just before the saving card, add rainbow
+function on.save_card(char)
+	if (GetAsyncKeyState(RAINBOW_KEY) & 0x8000) ~= 0 then
+		info("Rainbow applied")
+		char.m_charData:m_traitBools(38, 1)
+	end
+	return char
+end
+
+
+function _M:config()
+	mod_edit_config(self, options, "Configure unlocks")
+	unapply_patchset()
+	apply_patchset()
 end
 
 function _M:unload()
 	for offs,bytes in ipairs(save) do
 		f_patch(bytes,offs)
 	end
-	g_poke_dword(0x002C43E0, send_msg)
 	save = {}
+	if exe_type == "edit" then
+		g_poke_dword(0x002C43E0, send_msg)
+	end
+	unapply_patchset()
 end
 
 return _M

@@ -162,7 +162,7 @@ info = function(...)
 		res[i] = tostring(v)
 	end
 	local msg = table.concat(res, "\t")
-	log.info(msg)
+	log.info("%s", msg)
 end
 print = function(...)
 	local res = {}
@@ -170,7 +170,7 @@ print = function(...)
 		res[i] = tostring(v)
 	end
 	local msg = table.concat(res, "\t")
-	log.spam(msg)
+	log.spam("%s", msg)
 end
 
 function raw_print(...)
@@ -179,7 +179,7 @@ function raw_print(...)
 		res[i] = tostring(v)
 	end
 	local msg = table.concat(res, "\t")
-	log.raw(msg)
+	log.raw("%s", msg)
 end
 
 
@@ -418,7 +418,11 @@ setmetatable(on, {
 })
 
 function hexdump(addr, size)
-	buf = peek(addr, size)
+	if type(addr) ~= "string" then
+		buf = peek(addr, size)
+	else
+		buf = addr
+	end
 	return buf:gsub("(.)", function(d)
 		return string.format("%02x ", string.byte(d))
 	end)
@@ -494,4 +498,46 @@ end
 function alert(who, msg)
 	require "iuplua"
 	iup.Message(who, msg)
+end
+
+function mod_load_config(mod, opts)
+	setmetatable(opts, {__index=mod, __newindex=mod})
+	for _,v in ipairs(opts) do
+		local optn = v[1]
+		if optn then
+			if opts[optn] == nil then
+				opts[optn] = v[2]
+			end
+		end
+	end
+end
+
+function mod_edit_config(mod, opts, title)
+	if not mod then return end
+	require "iuplua"
+	require "iupluacontrols"
+	local vars = {}
+	local varnames = {}
+	local fmt = {}
+	for _,v in ipairs(opts) do
+		local optn = v[1]
+		if optn then
+			table.insert(vars, opts[optn])
+			table.insert(varnames, optn)
+		end
+		table.insert(fmt, v[3])
+	end
+	local res = {iup.GetParam(title, nil, table.concat(fmt, "\n").."\n", table.unpack(vars))}
+	if res[1] then
+		for i, name in ipairs(varnames) do
+			opts[name] = res[i+1]
+		end
+		Config.save()
+	end
+end
+
+function is_key_pressed(key)
+	if key == nil then return false end
+	if key < 0 then return false end
+	return (GetAsyncKeyState(key) & 0x8000) ~= 0
 end

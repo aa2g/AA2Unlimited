@@ -83,6 +83,7 @@ public:
 
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
+	LUA_NAME;
 	LUA_BIND(m_charData)
 	LUA_BIND(m_seat)
 	LUA_BIND(m_bClothesOn)
