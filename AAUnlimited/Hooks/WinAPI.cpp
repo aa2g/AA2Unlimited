@@ -148,8 +148,11 @@ BOOL WINAPI MyExists(
 	_In_ LPCTSTR path
 ) {
 	LOGPRIONC(Logger::Priority::SPAM) "PathFileExistsW(" << std::wstring(path) << ")\n";
-
-	return PathFileExistsW(path);
+	if (PathFileExistsW(path))
+		return TRUE;
+	if (g_PP2.FExists(path))
+		return TRUE;
+	return FALSE;
 }
 
 

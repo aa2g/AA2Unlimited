@@ -6,13 +6,13 @@
 #include <Shlwapi.h>
 
 
-#define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
+#define DBG LOGPRIONC(Logger::Priority::SPAM) dec <<
 
 using namespace std;
 
 PP2 g_PP2;
 
-const std::wstring & PP2File::getName(int idx) {
+const wstring & PP2File::getName(int idx) {
 	for (auto &e : names) {
 		if (e.second == idx)
 			return e.first;
@@ -85,7 +85,7 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	char *p;
 	headerInfo *h = (headerInfo *)metabuf;
 	hdr = *h;
-	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << std::dec
+	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << dec
 		<< " version " << int(h->version)
 		<< ", " << int(h->nchunks) << " chunks, "
 		<< int(h->nfiles) << " files, " << h->nnames << " names" << "\r\n";
@@ -164,7 +164,7 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	}
 
 
-	cache = new std::atomic<cacheEntry *>[h->nfiles]();
+	cache = new atomic<cacheEntry *>[h->nfiles]();
 	score = new uint32_t[h->nfiles]();
 
 	// trimp the buffer w/o names
@@ -175,7 +175,7 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 		metabuf = NULL;
 	}
 
-	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << std::dec <<
+	LOGPRIONC(Logger::Priority::SPAM) wstring(fn) << dec <<
 		" metadata size " << int(metalen/1024) << "kb\r\n";
 	this->h = HANDLE(_get_osfhandle(_fileno(sf)));
 }
@@ -295,7 +295,7 @@ void *PP2File::getCache(uint32_t idx) {
 		// if we have a work buffer, just use that, but don't
 		// put it into cache just yet
 		{
-			std::unique_lock<std::mutex> lock(pp2->bufmutex);
+			unique_lock<mutex> lock(pp2->bufmutex);
 			if (buffers.find(fe.chunk) != buffers.end()) {
 				assert(!(fe.flags & FLAG_OPUS));
 				ret = GameAlloc(fe.osize);
@@ -358,7 +358,7 @@ void *PP2File::getCache(uint32_t idx) {
 		pp2->bufmutex.lock();
 		if ((pp2->bufused/1024/1024) > (g_Config.PP2Buffers)) {
 			delete tmp;
-			LOGPRIO(Logger::Priority::WARN) << std::dec
+			LOGPRIO(Logger::Priority::WARN) << dec
 				<< "Cache buffer trashing (used " << (pp2->bufused/1024) << "KiB) index " << idx << "\r\n";
 			pp2->bufmutex.unlock();
 			return ret;
@@ -368,7 +368,7 @@ void *PP2File::getCache(uint32_t idx) {
 		pp2->bufmutex.unlock();
 
 		{
-			std::unique_lock<std::mutex> lock(pp2->workmutex);
+			unique_lock<mutex> lock(pp2->workmutex);
 //			pp2->compressWorker({ this, fe.chunk, tmp });
 			pp2->work.push({ this, fe.chunk, tmp });
 		}
@@ -411,7 +411,7 @@ void *PP2File::getCache(uint32_t idx) {
 	int got = ZSTD_decompress(ret, fe.osize, ce->data, ce->csize);
 //	pp2->gc_mutex.unlock();
 	if (got != fe.osize) {
-		LOGPRIO(Logger::Priority::CRIT_ERR) << std::dec
+		LOGPRIO(Logger::Priority::CRIT_ERR) << dec
 			<< "Decompressed size mismatch for "
 			<< name << "/" << getName(idx)
 			<< "chunk " << fe.chunk << " begins at " << chunks[fe.chunk].offset << ", chpos " << fe.chpos 
@@ -429,21 +429,40 @@ static bool is_pp_path(const wchar_t *path) {
 	return !wcscmp(path + pplen - 4, L"*.pp");
 }
 
-std::set<std::wstring> *PP2::FList(const wchar_t *path) {
+static bool strip_data_path(wstring &path) {
+	replace(path.begin(), path.end(), '\\', '/');
+
+	size_t pos = path.rfind(L"/data/");
+	if (pos == path.npos)
+		return false;
+
+	path = path.substr(pos + 6);
+	return true;
+}
+
+bool PP2::FExists(const wchar_t *path) {
+	wstring pa(path);
+	if (!strip_data_path(pa))
+		return false;
+	for (auto &pp : pfiles) {
+		if (pp.names.find(pa) != pp.names.end())
+			return true;
+	}
+	return false;
+}
+
+
+set<wstring> *PP2::FList(const wchar_t *path) {
 	if (!g_Config.bUsePP2)
 		return 0;
 	if (is_pp_path(path))
 		return &pplist;
 
-	std::wstring mask(path);
-	std::replace(mask.begin(), mask.end(), '\\', '/');
-
-	size_t pos = mask.rfind(L"/data/");
-	if (pos == mask.npos)
+	wstring mask(path);
+	if (!strip_data_path(mask))
 		return 0;
 
-	mask = mask.substr(pos + 6);
-	static std::map<std::wstring,std::set<std::wstring> *> cache;
+	static map<wstring,set<wstring> *> cache;
 
 	// too wild
 	if (mask[0] == '*')
@@ -454,7 +473,7 @@ std::set<std::wstring> *PP2::FList(const wchar_t *path) {
 		return 0;
 	if (cache[mask])
 		return cache[mask];
-	auto thelist = new std::set<std::wstring>();
+	auto thelist = new set<wstring>();
 	cache[mask] = thelist;
 
 	// strip the search mask
@@ -462,7 +481,7 @@ std::set<std::wstring> *PP2::FList(const wchar_t *path) {
 		for (auto &e : pp.names) {
 			if (PathMatchSpec(e.first.c_str(), mask.c_str())) {
 				// respond only with last component
-				std::wstring got(e.first.substr(e.first.find_last_of('/') + 1));
+				wstring got(e.first.substr(e.first.find_last_of('/') + 1));
 				thelist->insert(got);
 			}
 		}
@@ -470,7 +489,7 @@ std::set<std::wstring> *PP2::FList(const wchar_t *path) {
 	if (thelist->size() == 0)
 		return 0;
 
-	LOGPRIONC(Logger::Priority::SPAM) std::dec
+	LOGPRIONC(Logger::Priority::SPAM) dec
 		<< "Produced dirlist of " << thelist->size() << " items\n";
 
 	return thelist;
@@ -494,13 +513,14 @@ void PP2::AddPath(const wstring &path) {
 
 }
 
+
 void PP2::AddArchive(const wchar_t *fn) {
 	LOGPRIONC(Logger::Priority::INFO) "Adding .pp2 archive " << wstring(fn) << "\r\n";
 	pfiles.emplace_back(this, fn);
 }
 
 bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	std::wstring path;
+	wstring path;
 
 	if (paramArchive && paramArchive[0]) {
 		//currname = paramFile;
@@ -512,13 +532,8 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 	}
 	else {
 		path = paramFile;
-		std::replace(path.begin(), path.end(), '\\', '/');
-
-		size_t pos = path.rfind(L"/data/");
-		if (pos == path.npos)
+		if (!strip_data_path(path))
 			return false;
-
-		path = path.substr(pos + 6);
 	}
 
 	//DBG "@@@loading " << path << "\r\n";
@@ -541,7 +556,7 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 			prof.write((char*)(&GameTick::tick), 4);
 		}
 #if 0
-		std::wstring outf(L"out/");
+		wstring outf(L"out/");
 		FILE *fo = _wfopen((outf + paramArchive + L"_" + paramFile).c_str(), L"wb");
 		fwrite(*outBuffer, 1, *readBytes, fo);
 		fclose(fo);
@@ -561,7 +576,7 @@ PP2::~PP2() {
 	if (!g_Config.bUsePP2)
 		return;
 	{
-		std::unique_lock<std::mutex> lock(workmutex);
+		unique_lock<mutex> lock(workmutex);
 		stopping = true;
 	}
 	work_condition.notify_all();
@@ -580,14 +595,14 @@ void PP2::Init() {
 		int pos = prof.tellp();
 		prof.seekp(pos - (pos % 12));
 		// start game marker
-		LOGPRIONC(Logger::Priority::INFO) std::dec
+		LOGPRIONC(Logger::Priority::INFO) dec
 			<< "PP2Prof: seeking to " << pos << "\r\n";
 
 		prof.write("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12);
 	}
 
 	MemAlloc::dumpheap();
-	int nthreads = std::thread::hardware_concurrency();
+	int nthreads = thread::hardware_concurrency();
 	if (!nthreads)
 		nthreads = 4;
 	for (int i = 0; i < nthreads; i++) {
@@ -595,7 +610,7 @@ void PP2::Init() {
 			for (;;) {
 				workItem wi;
 				{
-					std::unique_lock<std::mutex> lock(workmutex);
+					unique_lock<mutex> lock(workmutex);
 					work_condition.wait(lock, [this] {return this->stopping || !this->work.empty(); });
 					if (this->stopping && this->work.empty())
 						return;
@@ -656,7 +671,7 @@ void  PP2::GC() {
 }
 
 void PP2::OOM() {
-	LOGPRIONC(Logger::Priority::CRIT_ERR) std::dec
+	LOGPRIONC(Logger::Priority::CRIT_ERR) dec
 		<< "OOM: out of memory, trying emergency GC but this is bad\r\n";
 
 	CacheGC(-1);
@@ -672,7 +687,7 @@ static void defrag_heap() {
 }
 
 void PP2::CacheGC(size_t sz) {
-//	std::unique_lock<std::shared_mutex> lock(gc_mutex);
+//	unique_lock<shared_mutex> lock(gc_mutex);
 
 	vector<uint64_t> array;
 	int idx = 0;
@@ -680,7 +695,7 @@ void PP2::CacheGC(size_t sz) {
 
 
 	defrag_heap();
-	LOGPRIONC(Logger::Priority::SPAM) std::dec
+	LOGPRIONC(Logger::Priority::SPAM) dec
 		<< "CacheGC: need to free " << sz/1024 << " KiB\r\n";
 
 	for (auto &&p : pfiles) {
@@ -697,7 +712,7 @@ void PP2::CacheGC(size_t sz) {
 	}
 	sort(array.begin(), array.end());
 
-	LOGPRIONC(Logger::Priority::SPAM) std::dec
+	LOGPRIONC(Logger::Priority::SPAM) dec
 		<< "CacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << cache_used / 1024 << "KiB in " << cache_count << " entries\r\n";
 
 	size_t dropped = 0;
@@ -721,7 +736,7 @@ void PP2::CacheGC(size_t sz) {
 }
 
 void PP2::ACacheGC(size_t sz) {
-	//std::unique_lock<std::shared_mutex> lock(gc_mutex);
+	//unique_lock<shared_mutex> lock(gc_mutex);
 
 	vector<uint64_t> array;
 	int idx = 0;
@@ -740,7 +755,7 @@ void PP2::ACacheGC(size_t sz) {
 	}
 	sort(array.begin(), array.end());
 
-	LOGPRIONC(Logger::Priority::SPAM) std::dec
+	LOGPRIONC(Logger::Priority::SPAM) dec
 		<< "ACacheGC: usage " << array.size() << " entries, counted size is " << tsize / 1024 << "KiB" << ", accounted usage is " << acache_used / 1024 << "KIB\r\n";
 
 	int dropped = 0;
