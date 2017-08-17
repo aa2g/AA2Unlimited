@@ -441,6 +441,9 @@ static bool strip_data_path(wstring &path) {
 }
 
 bool PP2::FExists(const wchar_t *path) {
+	if (!g_Config.bUsePP2)
+		return false;
+
 	wstring pa(path);
 	if (!strip_data_path(pa))
 		return false;
