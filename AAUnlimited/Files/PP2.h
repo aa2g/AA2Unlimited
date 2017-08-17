@@ -177,6 +177,9 @@ public:;
 	void AddArchive(const wchar_t *fn);
 	void AddPath(const std::wstring &path);
 
+	std::set<std::wstring> pplist;
+	std::set<std::wstring> *FList(const wchar_t*);
+
 	bool ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer);
 };
 

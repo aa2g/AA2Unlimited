@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
-#define NEW_HOOK 0
+#define NEW_HOOK 1
+#define REGRESSIONS 1
 
 namespace PlayInjections {
 namespace NpcActions {
@@ -11,7 +12,7 @@ using namespace ExtClass;
 DWORD AnswerAddress, AnswerLowAddress;
 
 void __stdcall Answer(AnswerStruct*);
-DWORD __stdcall AnswerLow(AnswerStruct*);
+BYTE __stdcall AnswerLow(AnswerStruct*);
 
 // Wraps a call to our custom handler, redirect jump is pointed into here
 void __declspec(naked) WrapAnswer() {
@@ -20,7 +21,7 @@ void __declspec(naked) WrapAnswer() {
 		push esi
 		call Answer
 		popad
-		mov eax, 1
+		mov al, 1
 		ret
 	}
 }
@@ -56,8 +57,8 @@ void __declspec(naked) WrapAnswerLow() {
 }
 
 // This calls the original answer (low chance) function we patched. It returns bool we need.
-DWORD CallAnswerLow(AnswerStruct *as) {
-	DWORD ret;
+BYTE CallAnswerLow(AnswerStruct *as) {
+	BYTE retv;
 	__asm {
 		mov edx, as
 		pushad
@@ -65,16 +66,16 @@ DWORD CallAnswerLow(AnswerStruct *as) {
 		jmp skip
 goback:
 		// part of function we destroyed
-		push -1
+		push 0xffffffff
 		push 0x006d53c8
 		// Original function
 		jmp [AnswerLowAddress]
 skip:
-		mov[esp + 28], eax
+		mov[esp + 28], al
 		popad
-		mov ret, eax
+		mov retv, al
 	}
-	return ret;
+	return retv;
 }
 ///////////////////////////////////////////////
 
@@ -94,6 +95,7 @@ void __stdcall Answer(AnswerStruct *as) {
 
 	CallAnswer(as);
 
+#if REGRESSIONS
 	using namespace Shared::Triggers;
 	using namespace AAPlay;
 	NpcResponseData data;
@@ -112,8 +114,8 @@ void __stdcall Answer(AnswerStruct *as) {
 	// plaster over it only if something actually wants it changed.
 	if (data.changedResponse != data.originalResponse)
 		as->answer = data.changedResponse;
-
 	LUA_EVENT("answer_after", as->answer, as);
+#endif
 }
 
 // Some speculation what this does:
@@ -129,11 +131,13 @@ void __stdcall Answer(AnswerStruct *as) {
 // (and as->answer later is implicit 1), or the roll didn't succeed in which case as->answer became
 // implicit 0, in both cases Answer() has a chance to change the outcome.
 //
-DWORD __stdcall AnswerLow(AnswerStruct *as) {
+BYTE __stdcall AnswerLow(AnswerStruct *as) {
 	int override = -1;
+#if REGRESSIONS
 	LUA_EVENT("answer_lucky", override, as);
 	if (override != -1)
 		return override;
+#endif
 	return CallAnswerLow(as);
 }
 

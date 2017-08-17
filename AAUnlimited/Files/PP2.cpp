@@ -3,6 +3,8 @@
 #include "opus.h"
 #include <io.h>
 #include <windows.h>
+#include <Shlwapi.h>
+
 
 #define DBG LOGPRIONC(Logger::Priority::SPAM) std::dec <<
 
@@ -152,11 +154,12 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 		p += 2;
 		wstring tfn((wchar_t*)p, len / 2);
 		wstring low(tfn);
-		transform(low.begin(), low.end(), low.begin(), ::tolower);
+//		transform(low.begin(), low.end(), low.begin(), ::tolower);
 
 		names.emplace(low, fidx);
 		tfn.resize(tfn.find_first_of(L"/"));
-		SharedInjections::WinAPI::RegisterPP(tfn.c_str());
+		pp2->pplist.insert(tfn);
+//		SharedInjections::WinAPI::RegisterPP(tfn.c_str());
 		p += len;
 	}
 
@@ -419,6 +422,59 @@ void *PP2File::getCache(uint32_t idx) {
 	return ret;
 }
 
+static bool is_pp_path(const wchar_t *path) {
+	int pplen = wcslen(path);
+	if (pplen < 5)
+		return false;
+	return !wcscmp(path + pplen - 4, L"*.pp");
+}
+
+std::set<std::wstring> *PP2::FList(const wchar_t *path) {
+	if (!g_Config.bUsePP2)
+		return 0;
+	if (is_pp_path(path))
+		return &pplist;
+
+	std::wstring mask(path);
+	std::replace(mask.begin(), mask.end(), '\\', '/');
+
+	size_t pos = mask.rfind(L"/data/");
+	if (pos == mask.npos)
+		return 0;
+
+	mask = mask.substr(pos + 6);
+	static std::map<std::wstring,std::set<std::wstring> *> cache;
+
+	// too wild
+	if (mask[0] == '*')
+		return 0;
+	if (mask.size() < 4)
+		return 0;
+	if (mask.substr(0, 4) == L"save")
+		return 0;
+	if (cache[mask])
+		return cache[mask];
+	auto thelist = new std::set<std::wstring>();
+	cache[mask] = thelist;
+
+	// strip the search mask
+	for (auto &pp : pfiles) {
+		for (auto &e : pp.names) {
+			if (PathMatchSpec(e.first.c_str(), mask.c_str())) {
+				// respond only with last component
+				std::wstring got(e.first.substr(e.first.find_last_of('/') + 1));
+				thelist->insert(got);
+			}
+		}
+	}
+	if (thelist->size() == 0)
+		return 0;
+
+	LOGPRIONC(Logger::Priority::SPAM) std::dec
+		<< "Produced dirlist of " << thelist->size() << " items\n";
+
+	return thelist;
+}
 
 void PP2::AddPath(const wstring &path) {
 	WIN32_FIND_DATA fd;
@@ -446,17 +502,28 @@ void PP2::AddArchive(const wchar_t *fn) {
 bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	std::wstring path;
 
-	if (paramArchive) {
+	if (paramArchive && paramArchive[0]) {
 		//currname = paramFile;
 		for (wchar_t *p = (wchar_t*)paramArchive; *p; p++)
 			if (*p == L'\\' || *p == '/')
 				paramArchive = p + 1;
 		path = wstring(paramArchive) + L"/";
+		path += paramFile;
 	}
-	path += paramFile;
+	else {
+		path = paramFile;
+		std::replace(path.begin(), path.end(), '\\', '/');
+
+		size_t pos = path.rfind(L"/data/");
+		if (pos == path.npos)
+			return false;
+
+		path = path.substr(pos + 6);
+	}
+
 	//DBG "@@@loading " << path << "\r\n";
 
-	transform(path.begin(), path.end(), path.begin(), ::tolower);
+//	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 	for (auto &&p : pfiles) {
 		if (p.names.find(path) == p.names.end())
@@ -508,7 +575,7 @@ void PP2::Init() {
 		return;
 
 	if (g_Config.PP2Profiling) {
-		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.binary);
+		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.in | prof.binary);
 		// start writing on 12 byte boundary
 		int pos = prof.tellp();
 		prof.seekp(pos - (pos % 12));

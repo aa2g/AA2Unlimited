@@ -3,9 +3,8 @@
 namespace SharedInjections {
 	namespace WinAPI {
 		
-		void CreateFileInject();
-		void DirScanInject();
-		void RegisterPP(const wchar_t*);
+		void Inject();
+		void *patch_iat(char *func, void *to);
 
 	}
 }

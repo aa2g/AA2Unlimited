@@ -374,7 +374,7 @@ public class ChunkBuilder
         int clen;
         fixed (byte* pcbuf = cbuf)
         {
-            clen = (int)ZSTD.ZSTD_compress(new IntPtr(pcbuf), (IntPtr)cbuf.Length, input, (IntPtr)input.Length, 22);
+            clen = (int)ZSTD.ZSTD_compress(new IntPtr(pcbuf), (IntPtr)cbuf.Length, input, (IntPtr)input.Length, 3);
         }
         var res = new MemoryStream();
         res.Write(cbuf, 0, clen);
