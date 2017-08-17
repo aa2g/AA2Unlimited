@@ -1,17 +1,10 @@
 #include "StdAfx.h"
 #include "Functions/Render.h"
 
-#include <codecvt>
 #include <string>
 
-static std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 Lua *g_Lua_p;
-
-static const char *to_utf8(std::wstring &ws) {
-	static std::string s;
-	s = utf8.to_bytes(ws);
-	return s.c_str();
-}
+using namespace General;
 
 // direct assembly code callback, stdcall/thiscall
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {

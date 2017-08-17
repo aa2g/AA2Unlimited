@@ -24,10 +24,10 @@ public class DirEntry : IReadFile
 {
     public string Name { get; set; }
     public string fp;
-    public DirEntry(string fullpath)
+    public DirEntry(string name, string realpath)
     {
-        Name = Path.GetFileName(fullpath);
-        fp = fullpath;
+        Name = name;
+        fp = realpath;
     }
     public Stream CreateReadStream()
     {
@@ -556,9 +556,27 @@ class pp2
                     var plain = Path.GetFileName(f);
                     if (r.Match(plain).Success)
                     {
-                        chb.AddChunkFile(new ChunkFile(new DirEntry(f), pdirn, size));
+                        chb.AddChunkFile(new ChunkFile(new DirEntry(Path.GetFileName(f), f), pdirn, size));
                     }
                 }
+            }
+        }
+    }
+
+    static void process_textures(ChunkBuilder chb, String bdir, Regex r)
+    {
+        foreach (var f in Directory.GetFiles(bdir, "*.*", SearchOption.AllDirectories))
+        {
+            var fn = f.Substring(bdir.Length + 1).Replace("\\", "/");
+            var fi = new System.IO.FileInfo(f);
+            if ((fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                continue;
+            uint size = (uint)fi.Length;
+            if (r.Match(fn).Success)
+            {
+//                Console.WriteLine();
+
+                chb.AddChunkFile(new ChunkFile(new DirEntry(fn, f), "texture", size));
             }
         }
     }
@@ -579,7 +597,12 @@ class pp2
         if (trail == "AA2_MAKE" || trail == "AA2_PLAY")
         {
             process_unpacked_tree(chb, args.Skip(2), r);
-        } else
+        }
+        else if (trail == "texture")
+        {
+            process_textures(chb, args[2], r);
+        }
+        else
         {
 
             process_pp_files(chb, args.Skip(2), r);

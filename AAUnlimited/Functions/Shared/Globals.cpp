@@ -12,6 +12,13 @@ void* __stdcall IllusionMemAlloc(size_t size) {
 	return HeapAlloc(*IllusionMemAllocHeap, HEAP_ZERO_MEMORY, size);
 }
 
+void __stdcall IllusionMemFree(void *mem) {
+	size_t sz = HeapSize(*IllusionMemAllocHeap, 0, mem);
+	*IllusionMemUsed -= sz;
+	HeapFree(*IllusionMemAllocHeap, 0, mem);
+}
+
+
 D3DMATRIX* (__stdcall *D3DXMatrixMultiply)(D3DMATRIX *pOut,const D3DMATRIX *pM1,const D3DMATRIX *pM2);
 D3DXVECTOR4* (__stdcall *D3DXVec3Transform)(D3DXVECTOR4 *pOut,const D3DXVECTOR3 *pV,const D3DMATRIX  *pM);
 D3DXQUATERNION* (__stdcall *D3DXQuaternionRotationYawPitchRoll)(D3DXQUATERNION *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);

@@ -49,6 +49,7 @@ public:
 		uint32_t chpos;		// position of file in a chunk (ie offset)
 		uint32_t osize;		// decompressed size
 		uint32_t flags;		// flags (compression type)
+		uint64_t hash;		// first 8 bytes of md5 hash
 	};
 	const uint32_t FLAG_OPUS = 0x400;
 	const uint32_t FLAG_ZSTD = 0x800;
@@ -65,7 +66,6 @@ public:
 	// third table, names[]
 	struct nameInfo {
 		uint32_t file;		// file this name refers to
-		uint64_t hash;		// first 8 bytes of md5 hash
 		uint16_t namelen;	// byte size of name (no terminating \0)
 		wchar_t name[0];	// name[namelen]
 	};
@@ -147,6 +147,7 @@ public:;
 		uint32_t chunk;
 		char *buf;
 	};
+	std::ofstream prof;
 	std::mutex bufmutex;
 	std::atomic<size_t> bufused;
 	std::mutex workmutex;

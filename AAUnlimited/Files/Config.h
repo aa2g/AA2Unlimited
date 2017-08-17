@@ -30,6 +30,7 @@ public:;
 	unsigned PP2Buffers;
 	bool bDrawFPS;
 	bool bUseVisualStyles;
+	bool PP2Profiling;
 
 	// templates can't deduce on return type, so we must do it like this
 	const char *gets(const char *name) {
@@ -79,6 +80,8 @@ public:;
 			LUA_BIND(legacyMode)
 			LUA_BIND(bDrawFPS)
 			LUA_BIND(bUseVisualStyles)
+			LUA_BIND(PP2Profiling)
+
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;
 	}

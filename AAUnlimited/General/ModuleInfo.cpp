@@ -1,4 +1,5 @@
 ﻿#include "StdAfx.h"
+#include <codecvt>
 
 // CAVEAT: None of these functions can use logger!
 
@@ -18,6 +19,15 @@ std::wstring AAPlayPath;
 std::wstring AAUPath;
 std::wstring GameExeName;
 std::wstringstream resourceInfo;
+
+std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
+
+const char *to_utf8(std::wstring &ws)
+{
+	static std::string s;
+	s = utf8.to_bytes(ws);
+	return s.c_str();
+}
 
 namespace {
 	wchar_t AAPlayVersion[] = L"2.0.1";

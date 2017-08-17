@@ -11,6 +11,7 @@ namespace Shared {
 extern size_t *IllusionMemUsed;
 extern HANDLE *IllusionMemAllocHeap;
 void* __stdcall IllusionMemAlloc(size_t size);
+void __stdcall IllusionMemFree(void *);
 void __stdcall IllusionDeleteXXFile(ExtClass::XXFile* file, ExtClass::CharacterStruct* owner);
 
 //direct x functions

@@ -137,5 +137,7 @@
 #include "MemMods/Shared/Events/MeshTexture.h"
 #include "MemMods/Shared/Misc/EyeTexture.h"
 #include "MemMods/Shared/Misc/FixLocale.h"
+#include "Hooks/WinAPI.h"
+
 #include "resource.h"
 

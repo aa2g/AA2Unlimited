@@ -50,4 +50,4 @@ DWORD WRelativeToAbsolute(BYTE* currLoc, WORD offset);
 
 void InitializeHooks();
 
-DWORD PatchIAT(DWORD *iat, void *newp);
+DWORD PatchIAT(void *iat, void *newp);

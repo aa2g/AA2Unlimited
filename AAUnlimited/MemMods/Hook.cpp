@@ -180,8 +180,9 @@ void InsertRedirectCall(void* redirectFunction, void* toCall, int offset) {
 	*(DWORD*)(funcIt) = DWAbsoluteToRelative(funcIt, (DWORD)toCall);
 }
 
-DWORD PatchIAT(DWORD *iat, void *newp)
+DWORD PatchIAT(void *piat, void *newp)
 {
+	DWORD *iat = (DWORD*)piat;
 	Memrights r(iat, 4);
 	DWORD orig = *iat;
 	*iat = (DWORD)newp;
@@ -233,7 +234,7 @@ void InitializeHooks() {
 
 		GameTick::Initialize();
 		ArchiveFile::OpenFileInject();
-		ArchiveFile::DirScanInject();
+		WinAPI::DirScanInject();
 		WinAPI::CreateFileInject();
 		if (g_Config.getb("bUseMeshTextureOverrides")) {
 			LOGPRIO(Logger::Priority::SPAM) << "Mesh texture override init" << "\n";

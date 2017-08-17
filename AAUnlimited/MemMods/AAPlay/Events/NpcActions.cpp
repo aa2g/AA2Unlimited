@@ -128,10 +128,10 @@ void __stdcall Answer(AnswerStruct *as) {
 // implicit 0, in both cases Answer() has a chance to change the outcome.
 //
 DWORD __stdcall AnswerLow(AnswerStruct *as) {
-	bool override = false;
+	int override = -1;
 	LUA_EVENT("answer_lucky", override, as);
-	if (override)
-		return as->answer;
+	if (override != -1)
+		return override;
 	return CallAnswerLow(as);
 }
 

@@ -132,24 +132,21 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 	size_t metalen = p - metabuf;
 
 	for (uint32_t i = 0; i < h->nnames; i++) {
-		uint32_t idx, linkto = *((uint32_t*)p);
-		idx = i;
-		if (h->version == 2) {
-			p += 4;
-			idx= linkto;
+		uint32_t fidx;
+		if (h->version == 0) {
+			if (i < h->nfiles) {
+				fidx = i;
+				files[i].hash = *((uint64_t*)p);
+			} 
+			else
+				fidx = *((uint32_t*)p);
+			p += 8;
 		}
-		char *hash = p;
-		p += 8;
-		uint16_t len = *((uint16_t*)p);
-
-		if (len & 0x8000) {
-			idx = linkto;
-		}
-#if 0
 		else {
-			::memcpy(&md5s[idx], hash, 8);
+			fidx = *((uint32_t*)p);
+			p += 4;
 		}
-#endif
+		uint16_t len = *((uint16_t*)p);
 
 		len &= 0x7fff;
 		p += 2;
@@ -157,9 +154,9 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 		wstring low(tfn);
 		transform(low.begin(), low.end(), low.begin(), ::tolower);
 
-		names.emplace(low, idx);
+		names.emplace(low, fidx);
 		tfn.resize(tfn.find_first_of(L"/"));
-		SharedInjections::ArchiveFile::RegisterPP(tfn.c_str());
+		SharedInjections::WinAPI::RegisterPP(tfn.c_str());
 		p += len;
 	}
 
@@ -447,11 +444,16 @@ void PP2::AddArchive(const wchar_t *fn) {
 }
 
 bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	//currname = paramFile;
-	for (wchar_t *p = (wchar_t*)paramArchive; *p; p++)
-		if (*p == L'\\' || *p == '/')
-			paramArchive = p + 1;
-	auto path = (wstring(paramArchive) + L"/" + paramFile);
+	std::wstring path;
+
+	if (paramArchive) {
+		//currname = paramFile;
+		for (wchar_t *p = (wchar_t*)paramArchive; *p; p++)
+			if (*p == L'\\' || *p == '/')
+				paramArchive = p + 1;
+		path = wstring(paramArchive) + L"/";
+	}
+	path += paramFile;
 	//DBG "@@@loading " << path << "\r\n";
 
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
@@ -467,13 +469,16 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 		}
 		*readBytes = p.files[fidx].osize;
 		*outBuffer = (BYTE*)p.getCache(fidx);
+		if (g_Config.PP2Profiling) {
+			prof.write((char*)(&p.files[fidx].hash), 8);
+			prof.write((char*)(&GameTick::tick), 4);
+		}
 #if 0
 		std::wstring outf(L"out/");
 		FILE *fo = _wfopen((outf + paramArchive + L"_" + paramFile).c_str(), L"wb");
 		fwrite(*outBuffer, 1, *readBytes, fo);
 		fclose(fo);
 #endif
-
 		return true;
 	}
 
@@ -501,6 +506,18 @@ PP2::~PP2() {
 void PP2::Init() {
 	if (!g_Config.bUsePP2)
 		return;
+
+	if (g_Config.PP2Profiling) {
+		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.binary);
+		// start writing on 12 byte boundary
+		int pos = prof.tellp();
+		prof.seekp(pos - (pos % 12));
+		// start game marker
+		LOGPRIONC(Logger::Priority::INFO) std::dec
+			<< "PP2Prof: seeking to " << pos << "\r\n";
+
+		prof.write("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12);
+	}
 
 	MemAlloc::dumpheap();
 	int nthreads = std::thread::hardware_concurrency();

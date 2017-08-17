@@ -1,3 +1,269 @@
+
+#include "StdAfx.h"
+#include "Files\PersistentStorage.h"
+
+#if 1
+namespace SharedInjections {
+namespace ArchiveFile {
+
+DWORD OpenFileAddress;
+
+// This structure seems to be subclassed from std::wstring of MSVC 2008,
+// along with atomic counter and custom allocator.
+// We do only as much to please its own vtable, since the refcount
+// is pinned high and buffer large, they never touch the memory.
+struct IllusionString {
+	IllusionString(wchar_t *s) {
+		ptr = buf;
+		if (!s) s = L"";
+		set(s);
+		if (General::IsAAPlay)
+			vtable = (void**)(General::GameBase + 0x392738);
+		else
+			vtable = (void**)(General::GameBase + 0x36f638);
+		refcount = 999;
+		alloc = 1023;
+	}
+	wchar_t *ptr;
+	void **vtable;
+	size_t size;
+	size_t alloc;
+	size_t refcount;
+	wchar_t buf[1024];
+	wchar_t *set(wchar_t *s) {
+		wcscpy(buf, s);
+		size = wcslen(s);
+		return buf;
+	}
+/*	static IllusionString *get(wchar_t **s) {
+		if (!*s)
+			return 0;
+		return (IllusionString*)(((BYTE*)(*s)) - 20);
+	}*/
+};
+
+// Calls the original open function
+BYTE *CallOpenFile(void *_this, wchar_t **fname, DWORD *outsize, wchar_t **archive) {
+	BYTE *retv;
+	__asm {
+		mov ecx, _this
+		mov eax, fname
+		mov edx, outsize
+		push archive
+		push edx
+		call gocall
+		jmp skip
+gocall:
+		sub esp, 8
+		push ebx
+		mov ebx, [esp + 14h]
+		jmp[OpenFileAddress]
+skip:
+		add esp, 8
+		mov retv, eax
+	}
+	return retv;
+}
+
+
+wchar_t *get_basepath(wchar_t *s) {
+	wchar_t *p = wcsrchr(s, '\\');
+	if (!p) return s;
+	s = p + 1;
+	p = wcsrchr(s, '/');
+	if (!p) return s;
+	return p + 1;
+}
+
+
+BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readBytes, wchar_t** paramArchive) {
+	/*
+	IllusionString *archive = IllusionString::get(paramArchive);
+	IllusionString *file = IllusionString::get(paramFile);
+
+	if (file)
+		LOGPRIONC(Logger::Priority::SPAM) std::hex << "vtable is " << file->vtable << "\r\n";*/
+
+	if (readBytes)
+		*readBytes = 0;
+	wchar_t *orig_archive = *paramArchive;
+	wchar_t *orig_file = *paramFile;
+
+	if (orig_archive && orig_archive[0])
+		orig_file = get_basepath(orig_file);
+
+	wchar_t *parchive = orig_archive;
+	wchar_t *pfile = orig_file;
+
+	const char *provider = NULL;
+	const char *rewriter = "";
+	const char *rewriter2 = "";
+	BYTE *outBuffer = NULL;
+
+	// The following can't cope with nil archive (yet?)
+	if (!parchive)
+		goto skip;
+
+
+	if (Poser::OverrideFile(&parchive, &pfile, readBytes, &outBuffer)) {
+		provider = "overridefile";
+		goto done;
+	}
+
+	if (Shared::ArchiveReplaceRules(&parchive, &pfile, readBytes, &outBuffer)) {
+		rewriter = "replace";
+	}
+
+	if (Shared::TanOverride(&parchive, &pfile, readBytes, &outBuffer)) {
+		provider = "tanoverride";
+		goto done;
+	}
+
+	if (Shared::HairRedirect(&parchive, &pfile, readBytes, &outBuffer)) {
+		rewriter2 = ",hairredirect";
+	}
+
+	if (Shared::ArchiveOverrideRules(parchive, pfile, readBytes, &outBuffer)) {
+		provider = "archiveoverride";
+		goto done;
+	}
+
+	if (g_Config.bUseShadowing) {
+		if (Shared::OpenShadowedFile(parchive, pfile, readBytes, &outBuffer)) {
+			provider = "shadowed";
+			goto done;
+		}
+	}
+
+	if (g_Config.bUsePPeX) {
+		if (g_PPeX.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
+			provider = "ppex";
+			goto done;
+		}
+	}
+
+skip:;
+	if (g_Config.bUsePP2) {
+		if (g_PP2.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
+			provider = "pp2";
+			goto done;
+		}
+	}
+
+done:;
+
+	// If no provider got us the file, call the games original
+	if (!provider) {
+		IllusionString archive(parchive);
+		IllusionString file(pfile);
+
+		outBuffer = CallOpenFile(_this, &file.ptr, readBytes, &archive.ptr);
+	}
+
+	if (g_Config.bLogPPAccess) {
+		LOGPRIONC(Logger::Priority::SPAM) "OpenFileEvent " <<
+			"provider=" << (provider ? provider : "pp") << " " <<
+			"archive=" << std::wstring(parchive?parchive:L"<none>") << " " <<
+			"nfile=" << std::wstring(pfile);
+		if ((parchive != orig_archive) || (orig_file != pfile)) {
+			if (!orig_archive)
+				orig_archive = L"<none>";
+			LOGSPAM << " rewriter=" << rewriter << rewriter2 << " " <<
+				" origarchive=" << std::wstring(orig_archive) << " origfile=" << std::wstring(orig_file);
+		}
+		LOGSPAM << " size=" << std::dec << *readBytes;
+		LOGSPAM << "\r\n";
+	}
+	return outBuffer;
+}
+
+class padstr {
+	int padding;
+	std::wstring s;
+};
+
+class AudioClass {
+public:;
+	   virtual void dummy();
+	   virtual void dummy2();
+	   virtual void dummy3();
+	   virtual void init_sound_buffer(int a2, BYTE *buf, DWORD, wchar_t **bn, int a6, int a7, int a8, int a9, int a10);
+
+	   void load_audio(int a2, wchar_t **archive, void *ppcls, wchar_t **fname, int a6, int a7, int a8, int a9, int a10) {
+		   DWORD outSize;
+		   wchar_t *p = *fname;
+		   BYTE *buf = OpenFileEvent(ppcls, fname, &outSize, archive);
+		   if (buf) {
+			   IllusionString fn(get_basepath(*fname));
+			   init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
+			   Shared::IllusionMemFree(buf);
+		   }
+		   else if (p) {
+			   p = p + wcslen(p) - 4;
+			   if (wcscmp(p, L".wav")) return;
+			   wcscpy(p, L".ogg");
+			   LOGPRIONC(Logger::Priority::SPAM) "audio open failed, retrying with" << p << "\n";
+			   BYTE *buf = OpenFileEvent(ppcls, fname, &outSize, archive);
+			   if (!buf) return;
+
+			   IllusionString fn(get_basepath(*fname));
+			   init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
+			   Shared::IllusionMemFree(buf);
+		   }
+	   }
+};
+
+// Target of the injected jump, just converts the usercall convention
+void __declspec(naked) RedirOpenTarget() {
+	__asm {
+		push [esp + 8]
+		push [esp + 8]
+		push eax
+		push ecx
+		call OpenFileEvent
+		ret
+	}
+}
+
+void __declspec(naked) RedirAudioTarget() {
+	__asm {
+		push[esp + 8]
+		push[esp + 8]
+		push eax
+		push ecx
+		call OpenFileEvent
+		ret
+	}
+}
+
+void OpenFileInject() {
+	auto ah = &AudioClass::load_audio;
+	void *h;
+	memcpy(&h, &ah, 4);
+
+	if (General::IsAAPlay) {
+		OpenFileAddress = General::GameBase + 0x1D0B28;
+		PatchIAT((void*)(General::GameBase + 0x335110), h);
+		PatchIAT((void*)(General::GameBase + 0x3351B0), h);
+	}
+	else if (General::IsAAEdit) {
+		OpenFileAddress = General::GameBase + 0x1B32C8;
+		PatchIAT((void*)(General::GameBase + 0x313A50), h);
+		PatchIAT((void*)(General::GameBase + 0x313AF0), h);
+
+	}
+	Hook((BYTE*)OpenFileAddress - 8,
+	{ 0x83, 0xec, 0x08, 0x53, 0x8b, 0x5c, 0x24, 0x14 },
+	{ 0x90, 0x90, 0x90, 0xe9, HookControl::RELATIVE_DWORD, (DWORD)&RedirOpenTarget },
+		NULL);
+}
+
+}
+}
+
+
+#else
+
 #include "StdAfx.h"
 #include "Files\PersistentStorage.h"
 namespace SharedInjections {
@@ -229,3 +495,5 @@ void OpenFileInject() {
 
 }
 }
+
+#endif
