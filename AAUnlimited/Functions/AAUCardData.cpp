@@ -1200,7 +1200,7 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 			std::wstringstream warningMessage;
 			warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
 			warningMessage << fullPath << TEXT("This cards files will not be extracted. Blame the guy who made the card");
-			MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING);
+			MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING | MB_TASKMODAL);
 			return false;
 		}
 		if (!General::FileExists(fullPath.c_str()))
@@ -1221,7 +1221,7 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 				std::wstringstream warningMessage;
 				warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
 				warningMessage << m_styles[m_currCardStyle].m_eyeTextures[i].texName << TEXT("This cards files will not be extracted. Blame the guy who made the card");
-				MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING);
+				MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING | MB_TASKMODAL);
 				return false;
 			}
 			std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), m_styles[m_currCardStyle].m_eyeTextures[i].texName.c_str());
@@ -1265,7 +1265,7 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		}
 		text << TEXT("These files are probably required for the card to work properly.\r\n"
 			"Do you want to extract these files now?");
-		int res = MessageBox(NULL, text.str().c_str(), TEXT("Info"), MB_YESNO);
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Info"), MB_YESNO | MB_TASKMODAL);
 		if (res != IDYES) {
 			//doesnt want to extract, abort
 			return false;
