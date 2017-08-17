@@ -1,11 +1,13 @@
 #include "StdAfx.h"
 
+#define NEW_HOOK 0
 
 namespace PlayInjections {
 namespace NpcActions {
 
 using namespace ExtClass;
 
+#if NEW_HOOK
 DWORD AnswerAddress, AnswerLowAddress;
 
 void __stdcall Answer(AnswerStruct*);
@@ -151,6 +153,7 @@ void NpcAnswerInjection() {
 	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswerLow, 0x90, 0x90 }, NULL);
 }
 
+#endif
 	
 ///////////////////////////////////////////////
 
@@ -196,7 +199,7 @@ void ClothesChangeInjection() {
 }
 
 
-#if 0
+#if !NEW_HOOK
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
 {
 	LUA_EVENT("answer", result, answerChar, askingChar);
