@@ -362,5 +362,8 @@
     <None Include="Texts\mod\jizou.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\opt.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

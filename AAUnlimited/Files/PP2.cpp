@@ -522,27 +522,7 @@ void PP2::AddArchive(const wchar_t *fn) {
 	pfiles.emplace_back(this, fn);
 }
 
-bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
-	wstring path;
-
-	if (paramArchive && paramArchive[0]) {
-		//currname = paramFile;
-		for (wchar_t *p = (wchar_t*)paramArchive; *p; p++)
-			if (*p == L'\\' || *p == '/')
-				paramArchive = p + 1;
-		path = wstring(paramArchive) + L"/";
-		path += paramFile;
-	}
-	else {
-		path = paramFile;
-		if (!strip_data_path(path))
-			return false;
-	}
-
-	//DBG "@@@loading " << path << "\r\n";
-
-//	transform(path.begin(), path.end(), path.begin(), ::tolower);
-
+bool PP2::LoadFile(wstring path, DWORD* readBytes, BYTE** outBuffer) {
 	for (auto &&p : pfiles) {
 		if (p.names.find(path) == p.names.end())
 			continue;
@@ -566,8 +546,32 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 #endif
 		return true;
 	}
-
 	return false;
+}
+
+bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
+	wstring path;
+
+	if (paramArchive && paramArchive[0]) {
+		//currname = paramFile;
+		for (wchar_t *p = (wchar_t*)paramArchive; *p; p++)
+			if (*p == L'\\' || *p == '/')
+				paramArchive = p + 1;
+		path = wstring(paramArchive) + L"/";
+		path += paramFile;
+	}
+	else {
+		path = paramFile;
+		if (!strip_data_path(path))
+			return false;
+	}
+
+	if (!LoadFile(path, readBytes, outBuffer)) {
+		// try again with lower case this time
+		transform(path.begin(), path.end(), path.begin(), ::tolower);
+		return LoadFile(path, readBytes, outBuffer);
+	}
+	return true;
 }
 
 PP2::PP2() {};

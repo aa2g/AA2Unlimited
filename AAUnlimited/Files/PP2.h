@@ -182,6 +182,7 @@ public:;
 	bool FExists(const wchar_t*);
 
 	bool ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer);
+	bool LoadFile(std::wstring path, DWORD* readBytes, BYTE** outBuffer);
 };
 
 extern PP2 g_PP2;
