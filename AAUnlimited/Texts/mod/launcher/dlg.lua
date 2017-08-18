@@ -192,6 +192,7 @@ local function evalrepl(v)
 		console.value = ""
 		return
 	end
+	log.info("Output of %s", v)
 
 	local ch, err = load("return "..v)
 	if not ch then
@@ -205,7 +206,7 @@ local function evalrepl(v)
 		log.error("%s", ret[2])
 	else
 		if #ret > 1 then
-			print(table.unpack(ret,2))
+			raw_print(table.unpack(ret,2))
 		end
 	end
 end

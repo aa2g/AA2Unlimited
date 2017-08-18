@@ -40,7 +40,8 @@ public:
 	void* m_somePointer;
 	BYTE m_unknown2[12];
 	int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24
-	BYTE m_unknown3[2];
+	BYTE m_boobs; // weird female boobs state. girls generally have some, boys dont.
+	BYTE m_clothState;
 	BYTE m_bClothesOn;
 	BYTE m_currClothSlot;
 	BYTE m_currClothes;
@@ -84,8 +85,14 @@ public:
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
 	LUA_NAME;
+	LUA_BINDARR(m_unknown1)
+	LUA_BINDARR(m_unknown2)
+	LUA_BINDARR(m_unknown5)
+	LUA_BINDARR(m_unknown6)
 	LUA_BIND(m_charData)
 	LUA_BIND(m_seat)
+	LUA_BIND(m_boobs)
+	LUA_BIND(m_clothState)
 	LUA_BIND(m_bClothesOn)
 	LUA_BIND(m_currClothSlot)
 	LUA_BIND(m_currClothes)

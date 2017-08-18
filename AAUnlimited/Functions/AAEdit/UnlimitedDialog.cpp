@@ -163,15 +163,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				return TRUE;
 			}
 		}
-		if (!g_currChar.IsValid()) {
-			const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
-			const DWORD maleRule[]{ 0x353254, 0x30, 0 };
-			AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
-			if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
-		}
-		if (g_currChar.IsValid()) {
+		if (g_currChar.Editable())
 			AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
-		}
 		break; }
 	}
 	return FALSE;
@@ -218,13 +211,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			//get current selection text
 			int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 			//remove this rule
-			if (!g_currChar.IsValid()) {
-				const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
-				const DWORD maleRule[]{ 0x353254, 0x30, 0 };
-				AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
-				if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
-			}
-			if (g_currChar.IsValid()) {
+			if (g_currChar.Editable()) {
 				g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
 				g_currChar.m_cardData.RemoveCardStyle(sel);
 			}
@@ -242,13 +229,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				TCHAR buf[256];
 				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
 
-				if (!g_currChar.IsValid()) {
-					const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
-					const DWORD maleRule[]{ 0x353254, 0x30, 0 };
-					AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
-					if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
-				}
-				if (g_currChar.IsValid()) {
+				if (g_currChar.Editable()) {
 					AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 					AAEdit::g_currChar.m_cardData.CopyCardStyle(buf, g_currChar.m_char->m_charData);
 				}
@@ -299,14 +280,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if (wnd == thisPtr->m_lbAAuSets) {
 				int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
-					if (!g_currChar.IsValid()) {
-						const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
-						const DWORD maleRule[]{ 0x353254, 0x30, 0 };
-						AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
-						if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
-					}
-
-					if (g_currChar.IsValid()) {
+					if (g_currChar.Editable()) {
 						AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}

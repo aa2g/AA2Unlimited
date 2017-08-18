@@ -8,5 +8,4 @@ namespace AAEdit {
 
 extern CharInstData g_currChar;
 
-
 }

@@ -92,5 +92,9 @@ GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
 
 #define LUA_XSTR(a) LUA_STR(a)
 #define LUA_STR(a) #a
-#define LUA_NAME LUA_GLOBAL.setname<LUA_CLASS>(LUA_XSTR(LUA_CLASS))
-
+#define LUA_NAME \
+	LUA_GLOBAL.setname<LUA_CLASS>(LUA_XSTR(LUA_CLASS)); \
+	LUA_METHOD(dump, { \
+		_gl.pushlstring((const char*)_self, sizeof(*_self)); \
+		return 1; \
+	});

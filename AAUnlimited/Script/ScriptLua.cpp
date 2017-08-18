@@ -88,6 +88,8 @@ void Lua::bindLua() {
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
+	CharInstData::bindLua();
+
 	PlayInjections::NpcActions::AnswerStruct::bindLua();
 
 	// H
@@ -203,6 +205,12 @@ void Lua::bindLua() {
 		s.push(GameTimeData());
 	});
 	_BINDING["GetPlayerCharacter"] = LUA_LAMBDA({
+		if (General::IsAAEdit) {
+			if (!AAEdit::g_currChar.Editable())
+				return 0;
+			s.push(AAEdit::g_currChar.m_char);
+			return 1;
+		}
 		s.push(*PlayerCharacterPtr());
 	});
 	_BINDING["SetPlayerCharacter"] = LUA_LAMBDA0({

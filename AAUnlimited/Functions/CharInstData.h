@@ -37,6 +37,15 @@ public:
 	CharInstData();
 	~CharInstData();
 
+	static inline void bindLua() {
+#define LUA_CLASS CharInstData
+		LUA_NAME;
+		LUA_BIND(m_char);
+#undef LUA_CLASS
+	}
+
+
+
 	ExtClass::CharacterStruct* m_char;
 	AAUCardData m_cardData;
 
@@ -48,7 +57,13 @@ public:
 
 	void Reset();
 	inline bool IsValid() { return m_char != NULL; }
-
+	inline bool Editable() {
+		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
+		const DWORD maleRule[]{ 0x353254, 0x30, 0 };
+		m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
+		if (m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
+		return m_char != NULL;
+	}
 
 };
 
