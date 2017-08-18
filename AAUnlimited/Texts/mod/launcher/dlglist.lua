@@ -88,16 +88,16 @@ return function(handlers, list)
 	function disable:action()
 		list[selected_idx] = handlers:toggle(selected, false)
 		list.value = selected_idx
-		disable.active = "no"
-		enable.active = "yes"
+		list:action(selected, selected_idx,1)
 		iup.SetFocus(list)
 	end
 	function enable:action()
 --		handlers:enable(selected)
 		list[selected_idx] = handlers:toggle(selected, true)
 		list.value = selected_idx
-		enable.active = "no"
-		disable.active = "yes"
+--[[		enable.active = "no"
+		disable.active = "yes"]]
+		list:action(selected, selected_idx,1)
 		iup.SetFocus(list)
 	end
 	function up:action()
