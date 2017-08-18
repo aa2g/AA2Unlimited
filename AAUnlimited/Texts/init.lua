@@ -553,8 +553,8 @@ function strdiff(a,b)
 	return res
 end
 
-function p(...)
+function p(t)
 	local pl = require 'pl.pretty'
-	local r = pl.write(...)
+	local r = pl.write(t)
 	return r
 end

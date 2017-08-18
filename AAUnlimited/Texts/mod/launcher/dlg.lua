@@ -222,6 +222,7 @@ function repl:k_any(c)
 		if historypos > 0 then
 			historypos = historypos - 1
 			repl.value = history[historypos] or ""
+			repl.caretpos = 999
 		end
 		save_history()
 		return iup.IGNORE
@@ -230,6 +231,7 @@ function repl:k_any(c)
 		if historypos <= #history then
 			historypos = historypos + 1
 			repl.value = history[historypos] or ""
+			repl.caretpos = 999
 		end
 		save_history()
 		return iup.IGNORE
