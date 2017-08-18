@@ -261,6 +261,8 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
+		using namespace PlayInjections;
+		Loads::HiPolyLoadsInjection();
 	}
 
 	if (General::IsAAPlay) {
@@ -278,7 +280,6 @@ void InitializeHooks() {
 		PcConversation::NpcAnswerInjection();
 		PcConversation::PcAnswerInjection();
 
-		Loads::HiPolyLoadsInjection();
 		Loads::SaveFileLoadInjection();
 		Loads::TransferInInjection();
 		Loads::TransferOutInjection();

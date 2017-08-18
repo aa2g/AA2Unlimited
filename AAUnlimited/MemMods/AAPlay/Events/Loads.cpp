@@ -12,30 +12,120 @@ namespace {
 	int loc_hiPolyLoaded;
 }
 
+using namespace ExtClass;
 
-void __stdcall HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter) {
+static DWORD OrigLoadMale, OrigLoadFemale;
+static DWORD OrigUpdateMale, OrigUpdateFemale;
+
+void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD cloth, DWORD partial) {
+	// Remove once they can cope
+	if (!General::IsAAPlay) return;
+
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	Poser::LoadCharacter(loadCharacter);
 	//Add the character to the conversation list
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
 	}
-	LUA_EVENT_NORET("hipoly", loadCharacter);
 	//throw high poly event
 	HiPolyInitData data;
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
 	loc_hiPolyLoaded = data.card;
 	ThrowEvent(&data);
-	
-} 
 
-void __stdcall HiPolyLoadEndEvent() {
+}
+
+void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
+	// Remove once they can cope
+	if (!General::IsAAPlay) return;
+
 	Shared::MeshTextureCharLoadEnd();
 	Poser::LoadCharacterEnd();
 	//throw high poly end event
 	HiPolyEndData data;
 	data.card = loc_hiPolyLoaded;
 	ThrowEvent(&data);
+}
+
+// wraps the calls to original load character events
+DWORD __stdcall CallOrigLoad(DWORD who, void *_this, DWORD cloth, int a3, DWORD a4, DWORD partial) {
+	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+
+	LUA_EVENT_NORET("char_load", loadCharacter, cloth, a3, a4, partial);
+	HiPolyLoadStartEvent(loadCharacter, cloth, partial);
+
+	DWORD retv;
+
+	__asm {
+		lea eax, [who]
+		push dword ptr [eax+20]
+		push dword ptr [eax+16]
+		push dword ptr [eax+12]
+		push dword ptr [eax+8]
+		mov ecx, [eax+4]
+		call dword ptr [eax]
+		mov retv, eax
+	}
+
+	LUA_EVENT_NORET("char_load_end", loadCharacter, cloth, a3, a4, partial);
+	HiPolyLoadEndEvent(loadCharacter);
+	return retv;
+}
+
+// wraps the calls to original load character events
+DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, DWORD a, DWORD b) {
+	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+
+	LUA_EVENT_NORET("char_update", loadCharacter, a, b);
+
+	HiPolyLoadStartEvent(loadCharacter, a, b);
+
+	DWORD retv;
+
+	__asm {
+		lea eax, [who]
+		push dword ptr[eax + 12]
+		push dword ptr[eax + 8]
+		mov ecx, [eax + 4]
+		call dword ptr[eax]
+		mov retv, eax
+	}
+
+	HiPolyLoadEndEvent(loadCharacter);
+	LUA_EVENT_NORET("char_update_end", loadCharacter, a, b);
+
+	return retv;
+}
+
+class HiPolyLoader {
+public:;
+virtual DWORD __thiscall LoadMale(DWORD a2, DWORD a3, DWORD a4, DWORD a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
+virtual DWORD __thiscall LoadFemale(DWORD a2, DWORD a3, DWORD a4, DWORD a5) { return CallOrigLoad(OrigLoadFemale, this, a2, a3, a4, a5); }
+virtual DWORD UpdateMale(DWORD a2, DWORD a3) { return CallOrigUpdate(OrigUpdateMale, this, a2, a3); }
+virtual DWORD UpdateFemale(DWORD a2, DWORD a3) { return CallOrigUpdate(OrigUpdateFemale, this, a2, a3); }
+};
+
+
+void HiPolyLoadsInjection() {
+	DWORD female, male;
+	if (General::IsAAPlay) {
+		female = 0x32D260;
+		male = 0x32CD80;
+	}
+	else if (General::IsAAEdit) {
+		female = 0x30C328;
+		male = 0x30BE48;
+	}
+	HiPolyLoader dummy;
+	auto fns = *((void***)(&dummy));
+	female += General::GameBase;
+	male += General::GameBase;
+
+	OrigLoadMale = PatchIAT((void*)male, fns[0]);
+	OrigLoadFemale = PatchIAT((void*)female, fns[1]);
+	OrigUpdateMale = PatchIAT((void*)(male+4), fns[2]);
+	OrigUpdateFemale = PatchIAT((void*)(female+4), fns[3]);
+
 }
 
 void __stdcall SaveLoadEvent() {
@@ -51,6 +141,7 @@ void __stdcall TransferOutEvent(ExtClass::CharacterStruct* character) {
 	AAPlay::RemoveTransferedCharacter(character);
 }
 
+#if 0
 void __declspec(naked) HiPolyLoadsStartRedirect() {
 	__asm {
 		pushad
@@ -163,6 +254,7 @@ void HiPolyLoadsInjection() {
 		NULL);
 	
 }
+#endif
 
 DWORD SaveFileLoadOriginalFunc;
 void __declspec(naked) SaveFileLoadRedirect() {

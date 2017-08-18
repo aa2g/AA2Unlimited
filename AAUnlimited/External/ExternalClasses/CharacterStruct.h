@@ -34,7 +34,17 @@ public:
 	};
 
 public:
-	void* m_virtualTable;
+//	void* m_virtualTable;
+
+	////////////////////// begin unrelated fields
+
+	// original IG vtable
+	virtual void construct();
+	virtual DWORD Load(DWORD cloth, DWORD a3, DWORD a4, DWORD partial);
+	virtual DWORD Update(DWORD a2, DWORD a3);
+
+	////////////////////// end unrelated fields
+
 	BYTE m_unknown1[0x24];
 	CharacterData* m_charData;
 	void* m_somePointer;
@@ -85,6 +95,14 @@ public:
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
 	LUA_NAME;
+	LUA_METHOD(Load, {
+		//__debugbreak();
+		return _gl.push(_self->Load(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5))).one;
+	});
+	LUA_METHOD(Update, {
+		//__debugbreak();
+		return _gl.push(_self->Update(_gl.get(2), _gl.get(3))).one;
+	});
 	LUA_BINDSTR(m_unknown1)
 	LUA_BINDSTR(m_unknown2)
 	LUA_BINDSTR(m_unknown5)
