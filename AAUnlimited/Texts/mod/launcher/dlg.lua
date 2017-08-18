@@ -209,6 +209,12 @@ local function evalrepl(v)
 			raw_print(table.unpack(ret,2))
 		end
 	end
+	raw_print("\n")
+end
+local function save_history()
+	Config.repl_pos = historypos
+	Config.repl_history = history
+	Config.save()
 end
 
 function repl:k_any(c)
@@ -217,6 +223,7 @@ function repl:k_any(c)
 			historypos = historypos - 1
 			repl.value = history[historypos] or ""
 		end
+		save_history()
 		return iup.IGNORE
 	end
 	if c == iup.K_DOWN then
@@ -224,6 +231,7 @@ function repl:k_any(c)
 			historypos = historypos + 1
 			repl.value = history[historypos] or ""
 		end
+		save_history()
 		return iup.IGNORE
 	end
 	if c == 13 then
@@ -234,6 +242,7 @@ function repl:k_any(c)
 		evalrepl(v)
 		repl.value = ""
 		historypos = #history + 1
+		save_history()
 		return iup.IGNORE
 	end
 	return iup.CONTINUE
@@ -376,6 +385,9 @@ local function buildtabs() return
 end
 
 return function()
+	historypos=Config.repl_pos or 1
+	history = Config.repl_history or {}
+
 	gsdconfig = gsdlib.load_gsd()
 	update_res(_CONFIG["res_"..exe_type])
 	iup.SetGlobal("UTF8MODE","YES")

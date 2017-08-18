@@ -29,6 +29,9 @@
     <Filter Include="Lua\poser">
       <UniqueIdentifier>{f7683d3e-1e54-4a5f-9217-5d526870f631}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\pl">
+      <UniqueIdentifier>{fc673826-81e7-4924-84cc-c00b7e904890}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -364,6 +367,123 @@
     </None>
     <None Include="Texts\mod\opt.lua">
       <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\pl\app.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\array2d.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\class.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\compat.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\comprehension.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\config.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\data.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\Date.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\dir.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\file.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\func.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\import_into.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\init.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\input.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\lapp.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\lexer.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\List.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\luabalanced.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\Map.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\MultiMap.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\operator.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\OrderedMap.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\path.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\permute.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\pretty.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\seq.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\Set.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\sip.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\strict.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\stringio.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\stringx.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\tablex.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\template.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\test.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\text.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\types.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\url.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\utils.lua">
+      <Filter>Lua\pl</Filter>
+    </None>
+    <None Include="Texts\mod\pl\xml.lua">
+      <Filter>Lua\pl</Filter>
     </None>
   </ItemGroup>
 </Project>

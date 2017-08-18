@@ -57,6 +57,7 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
         return 1; \
 });
 
+
 // extended array reference. sub can be used for partial keying / cherrypicking into sub-structs.
 // limit is to customize array bounds (can refer to other members via _self->)
 #define LUA_BINDARRE(var,sub,limit) \

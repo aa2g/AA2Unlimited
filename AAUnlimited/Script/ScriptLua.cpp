@@ -134,6 +134,8 @@ void Lua::bindLua() {
 	_BINDING["poke"] = lua_CFunction([](lua_State *L) {
 		// poke(addr, buf)
 		int addr = luaL_checkinteger(L, 1);
+		if (!addr)
+			addr = (int)lua_topointer(L, 1);
 		size_t nbytes;
 		const char *buf = luaL_checklstring(L, 2, &nbytes);
 		void *ptr = (void*)(addr);

@@ -164,6 +164,7 @@ info = function(...)
 	local msg = table.concat(res, "\t")
 	log.info("%s", msg)
 end
+
 print = function(...)
 	local res = {}
 	for i,v in ipairs {...} do
@@ -540,4 +541,20 @@ function is_key_pressed(key)
 	if key == nil then return false end
 	if key < 0 then return false end
 	return (GetAsyncKeyState(key) & 0x8000) ~= 0
+end
+
+function strdiff(a,b)
+	local res = {}
+	for i=1,math.min(#a,#b) do
+		if a:byte(i) ~= a:byte(i) then
+			table.insert(res, i)
+		end
+	end
+	return res
+end
+
+function p(...)
+	local pl = require 'pl.pretty'
+	local r = pl.write(...)
+	return r
 end

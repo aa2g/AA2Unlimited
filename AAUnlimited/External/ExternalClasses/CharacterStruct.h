@@ -85,10 +85,10 @@ public:
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
 	LUA_NAME;
-	LUA_BINDARR(m_unknown1)
-	LUA_BINDARR(m_unknown2)
-	LUA_BINDARR(m_unknown5)
-	LUA_BINDARR(m_unknown6)
+	LUA_BINDSTR(m_unknown1)
+	LUA_BINDSTR(m_unknown2)
+	LUA_BINDSTR(m_unknown5)
+	LUA_BINDSTR(m_unknown6)
 	LUA_BIND(m_charData)
 	LUA_BIND(m_seat)
 	LUA_BIND(m_boobs)
