@@ -385,6 +385,11 @@ struct State {
 		return *this;
 	}
 
+	inline auto& newtable() {
+		lua_newtable(L());
+		return get();
+	}
+
 	inline Value get(int idx = -1) {
 		return Value {L(), idx < 0 ? (top() + 1 + idx) : idx};
 	}
