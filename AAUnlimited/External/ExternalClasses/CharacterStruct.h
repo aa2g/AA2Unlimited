@@ -36,17 +36,21 @@ public:
 public:
 //	void* m_virtualTable;
 
+	// Known caveats:
+	// - Despawn must be called in reverse-spawn order
+	// - Materials will be all over place, the clones must be same "family"
+
 	// original game vtable
-	virtual CharacterStruct *Unload(int free); // destroys the character, 1 frees it too i think
-	virtual DWORD Load(DWORD cloth, DWORD a3, DWORD a4, DWORD partial); // 1
-	virtual DWORD Update(DWORD a2, DWORD a3); // 2
-	virtual DWORD fn3();
-	virtual DWORD fn4();
-	virtual DWORD fn5();
-	virtual DWORD fn6();
-	virtual DWORD fn7();
-	virtual DWORD fn8();
-	virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int nanim, int z0, int z1);
+	/* #0 */ virtual DWORD Destroy(int free); // destroys the character, 1 frees it too i think
+	/* #1 */ virtual DWORD Spawn(BYTE clothstate, BYTE a3, BYTE light, BYTE partial); // Loads character on scene
+	/* #2 */ virtual DWORD Update(BYTE clothstate, BYTE playormake); // second argument indicates if maker/play pp
+	/* #3 */ virtual DWORD fn3();
+	/* #4 */ virtual DWORD Despawn(); // removes the character from scene
+	/* #5 */ virtual DWORD fn5();
+	/* #6 */ virtual DWORD Despawn2(); // called together with Despawn, frees memory?
+	/* #7 */ virtual DWORD fn7();
+	/* #8 */ virtual DWORD fn8();
+	/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
 
 	BYTE m_unknown1[0x24];
 	CharacterData* m_charData;
@@ -98,12 +102,12 @@ public:
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
 	LUA_NAME;
-	LUA_METHOD(Unload, {
-		return _gl.push(_self->Unload(_gl.get(1))).one;
+	LUA_METHOD(Destroy, {
+		return _gl.push(_self->Destroy(_gl.get(1))).one;
 	});
-	LUA_METHOD(Load, {
+	LUA_METHOD(Spawn, {
 		//__debugbreak();
-		return _gl.push(_self->Load(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5))).one;
+		return _gl.push(_self->Spawn(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5))).one;
 	});
 	LUA_METHOD(Update, {
 		//__debugbreak();
@@ -116,6 +120,10 @@ public:
 		std::wstring aw = General::utf8.from_bytes(a);
 		std::wstring bw = General::utf8.from_bytes(b);
 		return _gl.push(_self->Skeleton(aw.c_str(),bw.c_str(),_gl.get(4),0,0)).one;
+	});
+	LUA_METHOD(Despawn, {
+		_gl.push(_self->Despawn());
+		_gl.push(_self->Despawn2());
 	});
 	LUA_BINDSTR(m_unknown1)
 	LUA_BINDSTR(m_unknown2)

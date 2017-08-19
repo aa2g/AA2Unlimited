@@ -20,8 +20,9 @@ using namespace ExtClass;
 
 static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
+static DWORD OrigDespawnMale, OrigDespawnFemale;
 
-void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD cloth, DWORD partial) {
+void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
@@ -52,10 +53,10 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 }
 
 // wraps the calls to original load character events
-DWORD __stdcall CallOrigLoad(DWORD who, void *_this, DWORD cloth, int a3, DWORD a4, DWORD partial) {
+DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a4, BYTE partial) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 
-	LUA_EVENT_NORET("char_load", loadCharacter, cloth, a3, a4, partial);
+	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
 	HiPolyLoadStartEvent(loadCharacter, cloth, partial);
 
 	DWORD retv;
@@ -71,13 +72,13 @@ DWORD __stdcall CallOrigLoad(DWORD who, void *_this, DWORD cloth, int a3, DWORD 
 		mov retv, eax
 	}
 
-	LUA_EVENT_NORET("char_load_end", loadCharacter, cloth, a3, a4, partial);
+	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
 	HiPolyLoadEndEvent(loadCharacter);
 	return retv;
 }
 
 // wraps the calls to original load character events
-DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, DWORD a, DWORD b) {
+DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 
 	LUA_EVENT_NORET("char_update", loadCharacter, a, b);
@@ -96,10 +97,30 @@ DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, DWORD a, DWORD b) {
 	}
 
 	HiPolyLoadEndEvent(loadCharacter);
-	LUA_EVENT_NORET("char_update_end", loadCharacter, a, b);
+	LUA_EVENT_NORET("char_update_end", loadCharacter, retv, a, b);
 
 	return retv;
 }
+
+DWORD __stdcall CallOrigDespawn(DWORD who, void *_this) {
+	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+
+	LUA_EVENT_NORET("char_despawn", loadCharacter);
+
+	DWORD retv;
+
+	__asm {
+		lea eax, [who]
+		mov ecx, [eax + 4]
+		call dword ptr[eax]
+		mov retv, eax
+	}
+
+	LUA_EVENT_NORET("char_despawn_after", loadCharacter, retv);
+
+	return retv;
+}
+
 
 void __declspec(naked) QueryBoobGravity() {
 	__asm {
@@ -128,14 +149,16 @@ no_override:
 
 class HiPolyLoader {
 public:;
-virtual DWORD __thiscall LoadMale(DWORD a2, DWORD a3, DWORD a4, DWORD a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
-virtual DWORD __thiscall LoadFemale(DWORD a2, DWORD a3, DWORD a4, DWORD a5) { return CallOrigLoad(OrigLoadFemale, this, a2, a3, a4, a5); }
-virtual DWORD UpdateMale(DWORD a2, DWORD a3) { return CallOrigUpdate(OrigUpdateMale, this, a2, a3); }
-virtual DWORD UpdateFemale(DWORD a2, DWORD a3) { return CallOrigUpdate(OrigUpdateFemale, this, a2, a3); }
+virtual BYTE LoadMale(BYTE a2, BYTE a3, BYTE a4, BYTE a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
+virtual BYTE LoadFemale(BYTE a2, BYTE a3, BYTE a4, BYTE a5) { return CallOrigLoad(OrigLoadFemale, this, a2, a3, a4, a5); }
+virtual BYTE UpdateMale(BYTE a2, BYTE a3) { return CallOrigUpdate(OrigUpdateMale, this, a2, a3); }
+virtual BYTE UpdateFemale(BYTE a2, BYTE a3) { return CallOrigUpdate(OrigUpdateFemale, this, a2, a3); }
+virtual BYTE DespawnMale() { return CallOrigDespawn(OrigDespawnMale, this); }
+virtual BYTE DespawnFemale() { return CallOrigDespawn(OrigDespawnFemale, this); }
 };
 
-
 void HiPolyLoadsInjection() {
+
 	DWORD female, male, boobs, skirt;
 	if (General::IsAAPlay) {
 		female =0x32D260;
@@ -160,10 +183,22 @@ void HiPolyLoadsInjection() {
 	skirt += General::GameBase;
 
 	// patch the vtable, save original pointers
+
+	// #0 unused
+	// #1
 	OrigLoadMale = PatchIAT((void*)male, fns[0]);
 	OrigLoadFemale = PatchIAT((void*)female, fns[1]);
+
+	// #2
 	OrigUpdateMale = PatchIAT((void*)(male+4), fns[2]);
 	OrigUpdateFemale = PatchIAT((void*)(female+4), fns[3]);
+
+	// #3 unused
+	// #4
+	OrigDespawnMale = PatchIAT((void*)(male + 12), fns[4]);
+	OrigDespawnFemale = PatchIAT((void*)(female + 12), fns[5]);
+
+	// #5 and more unused
 
 	// inject calls in place of skirt/boob queries
 	Hook((BYTE*)boobs,
