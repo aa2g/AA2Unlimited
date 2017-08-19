@@ -201,6 +201,14 @@ void Lua::bindLua() {
 
 	// Low level triggers
 	using namespace AAPlay;
+	using namespace PlayInjections::Loads;
+	_BINDING["SetLoadOverrides"] = LUA_LAMBDA({
+		s.push(g_skirtOffOverride);
+		s.push(g_boobGravityOverride);
+		g_skirtOffOverride = s.get(1);
+		g_boobGravityOverride = s.get(2);
+		return 2;
+	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
 		int idx = s.get(1);
 		if ((idx < 0) || (idx > 25) || !g_characters[idx].IsValid())

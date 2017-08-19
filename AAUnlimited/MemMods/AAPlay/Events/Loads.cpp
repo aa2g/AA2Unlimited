@@ -3,11 +3,15 @@
 using namespace Shared::Triggers;
 
 namespace PlayInjections {
-/*
- * Events for the Loading of stuff, such as hi-poly models, lo-poly models etc
- */
 namespace Loads {
 
+// these can force boob gravity and skirt state regardless of clothing state
+// you can update these on HiPolyLoadStartEvent, and restore back to 2 on EndEvent
+BYTE g_skirtOffOverride = 2; // 0 - have skirt, 1 - noskirt, 2 - original (cloth state dependent)
+BYTE g_boobGravityOverride = 2; // 0 - saggy, 1 bra, 2 - original (cloth state dependent)
+
+
+//////////////////////////
 namespace {
 	int loc_hiPolyLoaded;
 }
@@ -97,6 +101,31 @@ DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, DWORD a, DWORD b) {
 	return retv;
 }
 
+void __declspec(naked) QueryBoobGravity() {
+	__asm {
+		mov     ebx, [esi+0F84h]
+		mov cl, g_boobGravityOverride
+		test cl, 2
+		jnz no_override
+		mov al, cl
+no_override:
+		ret
+	}
+}
+
+void __declspec(naked) QuerySkirt() {
+	__asm {
+		mov cl, g_skirtOffOverride
+		test cl, 2
+		jnz no_override
+		ret
+no_override:
+		test dl, dl
+		setz cl
+		ret
+	}
+}
+
 class HiPolyLoader {
 public:;
 virtual DWORD __thiscall LoadMale(DWORD a2, DWORD a3, DWORD a4, DWORD a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
@@ -107,24 +136,46 @@ virtual DWORD UpdateFemale(DWORD a2, DWORD a3) { return CallOrigUpdate(OrigUpdat
 
 
 void HiPolyLoadsInjection() {
-	DWORD female, male;
+	DWORD female, male, boobs, skirt;
 	if (General::IsAAPlay) {
-		female = 0x32D260;
-		male = 0x32CD80;
+		female =0x32D260;
+		male =  0x32CD80;
+		boobs = 0x12DA8B;
+		skirt = 0x1132B1;
 	}
 	else if (General::IsAAEdit) {
-		female = 0x30C328;
-		male = 0x30BE48;
+		female =0x30C328;
+		male =  0x30BE48;
+		boobs = 0x11BF7B;
+		skirt = 0x101C31;
 	}
+
+	// dummy vtable to force stdcall
 	HiPolyLoader dummy;
 	auto fns = *((void***)(&dummy));
+
 	female += General::GameBase;
 	male += General::GameBase;
+	boobs += General::GameBase;
+	skirt += General::GameBase;
 
+	// patch the vtable, save original pointers
 	OrigLoadMale = PatchIAT((void*)male, fns[0]);
 	OrigLoadFemale = PatchIAT((void*)female, fns[1]);
 	OrigUpdateMale = PatchIAT((void*)(male+4), fns[2]);
 	OrigUpdateFemale = PatchIAT((void*)(female+4), fns[3]);
+
+	// inject calls in place of skirt/boob queries
+	Hook((BYTE*)boobs,
+	{ 0x8B, 0x9E, 0x84, 0x0F, 0x00, 0x00 },							//expected values
+	{ 0x90, 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&QueryBoobGravity},	//redirect to our function
+		NULL);
+
+	Hook((BYTE*)skirt,
+	{ 0x84, 0xd2, 0x0F, 0x94, 0xC1 },							//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&QuerySkirt },	//redirect to our function
+		NULL);
+
 
 }
 
