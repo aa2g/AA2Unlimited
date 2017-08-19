@@ -57,6 +57,7 @@ local backup
 local exempts = {
 	[11]=true,
 	[12]=true,
+	[20]=true,
 }
 function _M:load()
 	if exe_type == "edit" then
