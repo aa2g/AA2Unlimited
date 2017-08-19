@@ -202,9 +202,19 @@ struct State {
 
 	template <class T>
 	inline auto &setname(const char *n) {
+		push(type_id<T>());
+		lua_setfield(L(), LUA_REGISTRYINDEX, n);
 		push_type(*this, type_id<T>());
 		field("__name", -1, n);
 		return pop();
+	}
+
+	inline State& cast(const char *name, void *p) {
+		lua_getfield(L(), LUA_REGISTRYINDEX, name);
+		int tid = get();
+		pop();
+		lua_pushlightuserdatax(L(), p, tid);
+		return *this;
 	}
 
 	// Bind a class<T> method
@@ -255,6 +265,9 @@ struct State {
 		lua_pop(L, 1);
 
 		lua_newtable(L);
+
+/*		lua_pushinteger(L, t);
+		lua_setfield(L, -2, "__type");*/
 
 		lua_pushvalue(L, -1);
 		lua_rawseti(L, LUA_REGISTRYINDEX, LUA_RIDX_LAST + RIDX_DELTA + t);
@@ -311,13 +324,13 @@ struct State {
 		lua_getglobal(L(), s);
 		return *this;
 	}
-	inline auto& field(const char *s, int idx = -1) {
+	inline State& field(const char *s, int idx = -1) {
 		lua_getfield(L(), idx, s);
 		return *this;
 	}
 
 	template <typename T>
-	inline auto& field(const char *s, int idx, T val) {
+	inline State& field(const char *s, int idx, T val) {
 		lua_pushvalue(L(), idx);
 		lua_pushstring(L(), s);
 		push(val);

@@ -485,5 +485,8 @@
     <None Include="Texts\mod\pl\xml.lua">
       <Filter>Lua\pl</Filter>
     </None>
+    <None Include="Texts\mod\charex.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

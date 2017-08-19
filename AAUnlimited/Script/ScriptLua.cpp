@@ -66,6 +66,10 @@ void Lua::init() {
 		s.push(to_utf8(AAUPath));
 		return 1;
 	});
+	_BINDING["cast"] = GLua::Function([](auto &s) {
+		s.cast(s.get(1), (void*)int(s.get(2)));
+		return 1;
+	});
 }
 
 void Lua::bindLua() {
