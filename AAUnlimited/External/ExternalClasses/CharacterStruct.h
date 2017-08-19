@@ -36,14 +36,17 @@ public:
 public:
 //	void* m_virtualTable;
 
-	////////////////////// begin unrelated fields
-
-	// original IG vtable
-	virtual void construct();
-	virtual DWORD Load(DWORD cloth, DWORD a3, DWORD a4, DWORD partial);
-	virtual DWORD Update(DWORD a2, DWORD a3);
-
-	////////////////////// end unrelated fields
+	// original game vtable
+	virtual CharacterStruct *Unload(int free); // destroys the character, 1 frees it too i think
+	virtual DWORD Load(DWORD cloth, DWORD a3, DWORD a4, DWORD partial); // 1
+	virtual DWORD Update(DWORD a2, DWORD a3); // 2
+	virtual DWORD fn3();
+	virtual DWORD fn4();
+	virtual DWORD fn5();
+	virtual DWORD fn6();
+	virtual DWORD fn7();
+	virtual DWORD fn8();
+	virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int nanim, int z0, int z1);
 
 	BYTE m_unknown1[0x24];
 	CharacterData* m_charData;
@@ -95,6 +98,9 @@ public:
 #define LUA_CLASS ExtClass::CharacterStruct
 	static inline void bindLua() {
 	LUA_NAME;
+	LUA_METHOD(Unload, {
+		return _gl.push(_self->Unload(_gl.get(1))).one;
+	});
 	LUA_METHOD(Load, {
 		//__debugbreak();
 		return _gl.push(_self->Load(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5))).one;
@@ -102,6 +108,14 @@ public:
 	LUA_METHOD(Update, {
 		//__debugbreak();
 		return _gl.push(_self->Update(_gl.get(2), _gl.get(3))).one;
+	});
+	LUA_METHOD(Skeleton, {
+		//__debugbreak();
+		const char *a = _gl.get(2);
+		const char *b = _gl.get(3);
+		std::wstring aw = General::utf8.from_bytes(a);
+		std::wstring bw = General::utf8.from_bytes(b);
+		return _gl.push(_self->Skeleton(aw.c_str(),bw.c_str(),_gl.get(4),0,0)).one;
 	});
 	LUA_BINDSTR(m_unknown1)
 	LUA_BINDSTR(m_unknown2)

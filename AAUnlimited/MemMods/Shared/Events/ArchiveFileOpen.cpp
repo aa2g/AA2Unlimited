@@ -91,6 +91,8 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 
 	if (orig_archive && orig_archive[0])
 		orig_file = get_basepath(orig_file);
+	//if (!wcscmp(orig_file, L"H_Style.lst"))
+//		__debugbreak();
 
 	wchar_t *parchive = orig_archive;
 	wchar_t *pfile = orig_file;
@@ -187,29 +189,31 @@ public:;
 	   virtual void dummy();
 	   virtual void dummy2();
 	   virtual void dummy3();
-	   virtual void init_sound_buffer(int a2, BYTE *buf, DWORD, wchar_t **bn, int a6, int a7, int a8, int a9, int a10);
+	   virtual int init_sound_buffer(int a2, BYTE *buf, DWORD, wchar_t **bn, int a6, int a7, int a8, int a9, int a10);
 
-	   void load_audio(int a2, wchar_t **archive, void *ppcls, wchar_t **fname, int a6, int a7, int a8, int a9, int a10) {
+	   int load_audio(int a2, wchar_t **archive, void *ppcls, wchar_t **fname, int a6, int a7, int a8, int a9, int a10) {
+		   int ret = 0x80004005;
 		   DWORD outSize;
 		   wchar_t *p = *fname;
 		   BYTE *buf = OpenFileEvent(ppcls, fname, &outSize, archive);
 		   if (buf) {
 			   IllusionString fn(get_basepath(*fname));
-			   init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
+			   ret = init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
 			   Shared::IllusionMemFree(buf);
 		   }
 		   else if (p) {
 			   p = p + wcslen(p) - 4;
-			   if (wcscmp(p, L".wav")) return;
+			   if (wcscmp(p, L".wav")) return 0x80004005;
 			   wcscpy(p, L".ogg");
-			   LOGPRIONC(Logger::Priority::SPAM) "audio open failed, retrying with" << p << "\n";
+//			   LOGPRIONC(Logger::Priority::SPAM) "audio open failed, retrying with" << p << "\n";
 			   BYTE *buf = OpenFileEvent(ppcls, fname, &outSize, archive);
-			   if (!buf) return;
+			   if (!buf) return 0x80004005;
 
 			   IllusionString fn(get_basepath(*fname));
-			   init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
+			   ret = init_sound_buffer(a2, buf, outSize, &fn.ptr, a6, a7, a8, a9, a10);
 			   Shared::IllusionMemFree(buf);
 		   }
+		   return ret;
 	   }
 };
 

@@ -551,6 +551,7 @@ bool PP2::LoadFile(wstring path, DWORD* readBytes, BYTE** outBuffer) {
 
 bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer) {
 	wstring path;
+	int ppos = 0;
 
 	if (paramArchive && paramArchive[0]) {
 		//currname = paramFile;
@@ -558,6 +559,7 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 			if (*p == L'\\' || *p == '/')
 				paramArchive = p + 1;
 		path = wstring(paramArchive) + L"/";
+		ppos = path.length();
 		path += paramFile;
 	}
 	else {
@@ -566,12 +568,21 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 			return false;
 	}
 
-	if (!LoadFile(path, readBytes, outBuffer)) {
-		// try again with lower case this time
-		transform(path.begin(), path.end(), path.begin(), ::tolower);
-		return LoadFile(path, readBytes, outBuffer);
-	}
-	return true;
+	if (LoadFile(path, readBytes, outBuffer))
+		return true;
+
+	// no? common mod breakage is uppercased first letter
+	path[ppos] = ::toupper(path[ppos]);
+	if (LoadFile(path, readBytes, outBuffer))
+		return true;
+
+	// try again with lower case this time
+	transform(path.begin(), path.end(), path.begin(), ::tolower);
+
+	if (LoadFile(path, readBytes, outBuffer))
+		return true;
+
+	return false;
 }
 
 PP2::PP2() {};
