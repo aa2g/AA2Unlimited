@@ -151,8 +151,10 @@ void Lua::bindLua() {
 	_BINDING["proc_invoke"] = lua_CFunction([](lua_State *L) {
 		// eax, edx = proc_invoke(addr, args...), stdcall/thiscall only
 		DWORD *argbuf = (DWORD*)alloca((lua_gettop(L) - 2)*4);
-		int addr = luaL_checkinteger(L, 1);
+		int addr = lua_tointeger(L, 1);
+		if (!addr) addr = (int)lua_topointer(L, 1);
 		int _this = lua_tointeger(L, 2);
+		if (!_this) _this = (int)lua_topointer(L, 2);
 		for (int i = 3; i <= lua_gettop(L); i++) {
 			if (lua_type(L, i) == LUA_TSTRING) {
 				argbuf[i - 3] = (DWORD)lua_tostring(L, i);

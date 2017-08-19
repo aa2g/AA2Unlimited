@@ -45,6 +45,10 @@ local vtable = {
 	0
 }
 
+local origs = {
+
+}
+
 
 local _M = {}
 local vtaddr
@@ -64,15 +68,25 @@ function _M:load()
 	log("hooked female vtable")
 	for idx, arity in ipairs(vtable) do
 		local i = idx-1
-		g_hook_vptr(vtaddr + i*4, arity, function(orig, this, ...)
-			local argstr = table.concat({...}, ",")
+		origs[i] = g_hook_vptr(vtaddr + i*4, arity, function(orig, this, ...)
+			local artab = {...}
+			local argstr = table.concat(artab, ",")
 			if not exempts[i] then
-				log.info("female vtable %x.%s(%s) " % {this,names[i+1] or i, argstr})
+				log.info("female vtable %x.%s(%s) " % {this,(names[i+1] or "" ).."#"..i, argstr})
 			end
-			--if i == 9 then return end
+			if i == 9 then
+				log.info('-> vtcall(GetPlayerCharacter(), 9, utf8_to_unicode(%q), utf8_to_unicode(%q), %d,0,0)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
+				local rt = proc_invoke(orig, this, ...)
+				log.info("result = %x", rt)
+				return rt
+			end
 			return proc_invoke(orig, this, ...)
 		end)
 	end
+end
+
+function vtcall(obj,fn,...)
+	return proc_invoke(origs[fn], obj, ...)
 end
 
 function _M:unload()

@@ -33,6 +33,9 @@ function utf8_to_unicode(text)
 end
 
 function unicode_to_utf8(text)
+	if type(text) == "number" then
+		text = peek(text, 256, "\x00\x00", 2)
+	end
 	return unicode_to_cp(65001, text)
 end
 

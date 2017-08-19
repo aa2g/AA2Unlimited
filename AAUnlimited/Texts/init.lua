@@ -424,9 +424,10 @@ function hexdump(addr, size)
 	else
 		buf = addr
 	end
-	return buf:gsub("(.)", function(d)
+	local rt = buf:gsub("(.)", function(d)
 		return string.format("%02x ", string.byte(d))
 	end)
+	return rt
 end
 function tohex(n)
 	return string.format("%x",n)
