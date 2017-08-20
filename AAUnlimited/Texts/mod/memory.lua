@@ -150,3 +150,33 @@ function f_patch(bytes, offs)
 	g_poke(offs, bytes)
 	return save
 end
+
+function fixptr(p)
+	if type(p) ~= "number" then
+		p = tostring(p)
+		local h = p:match(".-([0-9A-F]+)$")
+		return tonumber(h, 16)
+	end
+	return p
+end
+
+function peek_walk(ptr,...)
+	ptr = fixptr(ptr)
+	for idx, off in ipairs {...} do
+		ptr = peek_dword(ptr + off)
+		if not ptr then break end
+	end
+	return ptr
+end
+
+function poke_walk(val,ptr,...)
+	ptr = fixptr(ptr)
+	local rules = {...}
+	for idx, off in ipairs(rules) do
+		if idx==#rules then
+			return xchg_dword(ptr + off, val)
+		end
+		ptr = peek_dword(ptr + off)
+		if not ptr then break end
+	end
+end

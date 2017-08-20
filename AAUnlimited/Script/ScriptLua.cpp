@@ -113,6 +113,11 @@ void Lua::bindLua() {
 		int addr = (int)lua_touserdata(L, 1);
 		if (addr == 0) addr = luaL_checkinteger(L, 1);
 		int scanmax = luaL_checkinteger(L, 2);	
+		char *buf = (char*)alloca(scanmax);
+		SIZE_T gotread;
+
+		if (!ReadProcessMemory(GetCurrentProcess(), (void*)addr, buf, scanmax, &gotread))
+			return 0;
 		char *p = (char*)addr;
 		int i = scanmax;
 
@@ -144,8 +149,10 @@ void Lua::bindLua() {
 		const char *buf = luaL_checklstring(L, 2, &nbytes);
 		void *ptr = (void*)(addr);
 		Memrights unprotect(ptr, nbytes);
-		memcpy(ptr, buf, nbytes);
-		return 0;
+		SIZE_T wrote = 0;
+		WriteProcessMemory(GetCurrentProcess(), ptr, buf, nbytes, &wrote);
+		lua_pushinteger(L, wrote);
+		return 1;
 	});
 
 	_BINDING["proc_invoke"] = lua_CFunction([](lua_State *L) {

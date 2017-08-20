@@ -210,10 +210,15 @@ struct State {
 	}
 
 	inline State& cast(const char *name, void *p) {
-		lua_getfield(L(), LUA_REGISTRYINDEX, name);
-		int tid = get();
-		pop();
-		lua_pushlightuserdatax(L(), p, tid);
+		if (name) {
+			lua_getfield(L(), LUA_REGISTRYINDEX, name);
+			int tid = get();
+			pop();
+			lua_pushlightuserdatax(L(), p, tid);
+		}
+		else {
+			lua_pushlightuserdata(L(), p);
+		}
 		return *this;
 	}
 
