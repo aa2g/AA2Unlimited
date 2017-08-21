@@ -86,7 +86,9 @@ public:
 	Frame** m_bonePtrArray; //note that this is an array of only certain frequently used frames with a fixed position; the bone might be NULL thought.
 							//first one is neck (focused on q press), second one is spin (focused on w press), 10th (0x24 offset) is tears
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
-	BYTE m_unknown7[0xDB4];
+	BYTE m_unknown7[0xD78];
+	BYTE m_lovers[0x19];	//array of lovers, by seat
+	BYTE m_unknown7_1[0x23];
 	void* m_somedata;
 	void* m_moreUnknownData;
 	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
