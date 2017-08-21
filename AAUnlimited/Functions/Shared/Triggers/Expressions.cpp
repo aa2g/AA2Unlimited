@@ -625,13 +625,25 @@ namespace Shared {
 			CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
 			if (!towardsInst->IsValid()) return Value(0);
 
-			//we just have to look if this struct exists at all
-			auto* relations = cardInst->m_char->GetLovers();
-			auto* it = relations->m_start;
-			for (it; it != relations->m_end; it++) {
-				if (it->m_targetSeat == cardTowards) break;
+			return Value((bool)cardInst->m_char->m_lovers[cardTowards]);
+		}
+
+		//bool(int)
+		Value Thread::GetHasLovers(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[card];
+			if (!instance->IsValid()) {
+				return Value(false);
 			}
-			return Value(it == relations->m_end);
+			else {
+				for (int i = 0; i < 25; i++) {
+					CharInstData* target = &AAPlay::g_characters[i];
+					if (target->IsValid()) {
+						if (instance->m_char->m_lovers[i]) return Value(true);
+					}
+				}
+				return Value(false);
+			}
 		}
 
 		//int(int, string, int)
@@ -702,7 +714,7 @@ namespace Shared {
 		}
 
 		//int(string)
-		Value Thread::FindStyle(std::vector<Value>& params) {
+		Value Thread::GetStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			std::wstring* styleName = params[1].strVal;
 			if (!AAPlay::g_characters[seat].m_char) {
@@ -710,7 +722,7 @@ namespace Shared {
 			}
 			return Value(AAPlay::g_characters[seat].m_cardData.FindStyleIdxByName(styleName));
 		}
-
+		
 		//bool(int)
 		Value Thread::GetSexExperience(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -1464,7 +1476,7 @@ namespace Shared {
 					64, EXPRCAT_CHARPROP,
 					TEXT("Find Style"), TEXT("%p ::Style( %p )"), TEXT("Find Style index by name."),
 					{ (TYPE_INT), TYPE_STRING }, (TYPE_INT),
-					&Thread::FindStyle
+					&Thread::GetStyle
 				},
 			},
 
@@ -1692,6 +1704,12 @@ namespace Shared {
 					TEXT("Sex Experience: Anal"), TEXT("%p ::AnalXP"), TEXT("Returns true if the character is not an anal virgin."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetAnalSexExperience
+				},
+				{
+					37, EXPRCAT_CHARPROP,
+					TEXT("Has Lovers"), TEXT("%p ::HasLovers"), TEXT("Returns true if the character is in at least one rleationship."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetHasLovers
 				},
 			},
 			{ //FLOAT

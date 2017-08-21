@@ -52,7 +52,8 @@ public:
 	/* #8 */ virtual DWORD fn8();
 	/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
 
-	BYTE m_unknown1[0x24];
+	BYTE m_unknown0[0x4];	//probably a pointer somewhere
+	DWORD m_unknown1[0x8];	//these too
 	CharacterData* m_charData;
 	void* m_somePointer;
 	BYTE m_unknown2[12];
@@ -82,7 +83,9 @@ public:
 	Frame** m_bonePtrArray; //note that this is an array of only certain frequently used frames with a fixed position; the bone might be NULL thought.
 							//first one is neck (focused on q press), second one is spin (focused on w press), 10th (0x24 offset) is tears
 	Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
-	BYTE m_unknown7[0xDB4];
+	BYTE m_unknown7[0xD78];
+	BYTE m_lovers[0x19];	//array of lovers, by seat
+	BYTE m_unknown7_1[0x23];
 	void* m_somedata;
 	void* m_moreUnknownData;
 	void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
