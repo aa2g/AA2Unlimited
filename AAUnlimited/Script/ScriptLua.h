@@ -3,6 +3,8 @@
 #include "glua.h"
 #include "defs.h"
 
+#include <string>
+
 struct Lua : public GLua::State {
 	void bindLua();
 	void init();

@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Files/PoseMods.h"
 
+#include <cmath>
 #include <string.h>
 
 namespace Poser {
@@ -159,126 +160,142 @@ namespace Poser {
 		if (m_sliders.count(name)) {
 			return m_sliders.at(name);
 		}
-		else if (m_targetBodyFrames.count(name)) {
-			return FrameMod(m_targetBodyFrames.at(name), name);
-		}
 		return 0;
 	}
 
+	static const char prefix[]{ "pose_" };
+	static const char prefixTrans[]{ "pose_tr_" };
+	static const char prefixRot[]{ "pose_rot_" };
+	static const char propFramePrefix[]{ "AS00_N_Prop" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
-		if (xxFile == nullptr || m_loadCharacter == nullptr) return;
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
-		if (model == ExtClass::CharacterStruct::SKELETON || model == ExtClass::CharacterStruct::FACE ||
-			model == ExtClass::CharacterStruct::TONGUE || model == ExtClass::CharacterStruct::SKIRT) {
-			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
-				if (bone->m_nBones) {
-					for (size_t i = 0; i < bone->m_nBones; i++) {
-						m_loadCharacter->m_targetBodyBones.push_back(&bone->m_bones[i]);
-					}
+
+		if (model == ExtClass::CharacterStruct::H3DROOM)
+			FrameModRoom(xxFile);
+		
+		if (m_loadCharacter == nullptr) return;
+		if (model == ExtClass::CharacterStruct::SKELETON)
+			m_loadCharacter->FrameModSkeleton(xxFile);
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE)
+			m_loadCharacter->FrameModFace(xxFile);
+		else
+			m_loadCharacter->FrameModSkirt(xxFile);
+
+		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
+			for (unsigned int i = 0; i < frame->m_nBones; i++) {
+				ExtClass::Bone* bone = &frame->m_bones[i];
+				ExtClass::Frame* boneFrame = bone->GetFrame();
+				if (boneFrame != NULL && strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
+					bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
 				}
-				else {
-					m_loadCharacter->m_targetBodyFrames.emplace(bone->m_name, bone);
-				}
-			});
+			}
+		});
+	}
+
+	void FrameModInsertFrame(ExtClass::Frame** frame, const char* prefix) {
+		//make copy of the bone first
+		ExtClass::Frame* newMatch = (ExtClass::Frame*)Shared::IllusionMemAlloc(sizeof(ExtClass::Frame));
+		memcpy_s(newMatch, sizeof(ExtClass::Frame), (*frame), sizeof(ExtClass::Frame));
+
+		//turn match into a copy of the root for now, since there are a lot of members i dont know
+		memcpy_s((*frame), sizeof(ExtClass::Frame), (*frame)->m_xxPartOf->m_root, sizeof(ExtClass::Frame));
+
+		//change parent and child stuff
+		(*frame)->m_parent = newMatch->m_parent;
+		(*frame)->m_nChildren = 1;
+		(*frame)->m_children = newMatch;
+		newMatch->m_parent = *frame;
+		for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
+			newMatch->m_children[i].m_parent = newMatch;
+		}
+
+		//change name
+		int namelength = newMatch->m_nameBufferSize + strlen(prefix);
+		(*frame)->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+		(*frame)->m_nameBufferSize = namelength;
+		strcpy_s((*frame)->m_name, (*frame)->m_nameBufferSize, prefix);
+		strcat_s((*frame)->m_name, (*frame)->m_nameBufferSize, newMatch->m_name);
+		*frame = newMatch;
+	};
+	
+	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** transFrame, ExtClass::Frame** rotFrame) {
+		ExtClass::Frame* frame = *origFrame;
+		*transFrame = frame;
+		FrameModInsertFrame(&frame, prefixTrans);
+		*rotFrame = frame;
+		FrameModInsertFrame(&frame, prefixRot);
+		*origFrame = frame;
+	}
+
+	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree) {
+		PoserController::SliderInfo* slider;
+		ExtClass::Frame* transFrame;
+		ExtClass::Frame* rotFrame;
+
+		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
+			FrameMod(&frame, &transFrame, &rotFrame);
+
+			slider = GetSlider(frame->m_name);
+			if (!slider) {
+				slider = new SliderInfo;
+				slider->frame[0] = transFrame;
+				slider->frame[1] = rotFrame;
+				slider->Reset();
+				slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+				slider->Apply();
+				m_sliders.emplace(std::string(frame->m_name), slider);
+			}
+			slider = nullptr;
+
+			return true;
+		});
+	}
+
+	void PoserController::PoserCharacter::FrameModSkeleton(ExtClass::XXFile* xxFile) {
+		ExtClass::Frame* root = xxFile->m_root;
+		ExtClass::Frame* world = root->FindFrame("a01_N_Zentai_010");
+
+		if (world) {
+			FrameModTree(world);
+		}
+
+		ExtClass::Frame* dankon = root->FindFrame("a00_N_Dankon_01");
+		if (dankon) {
+			FrameModTree(dankon);
 		}
 	}
 
-	PoserController::SliderInfo* PoserController::PoserCharacter::FrameMod(ExtClass::Frame* frame, const std::string& origName) {
-		static const char prefix[]{ "pose_" };
-		static const char prefixTrans[]{ "pose_tr_" };
-		static const char prefixRot[]{ "pose_rot_" };
-		static const char propFramePrefix[]{ "AS00_N_Prop" };
+	void PoserController::PoserCharacter::FrameModFace(ExtClass::XXFile* xxFile) {
+		std::queue<std::string> targets;
+		targets.push("A00_O_mimi");
+		targets.push("A00_J_mayumaba");
+		targets.push("A00_J_kao");
+		targets.push("A00_J_sita00");
 
-		auto InsertFrame = [](ExtClass::Frame** frame, const char* prefix) {
-			//make copy of the bone first
-			ExtClass::Frame* newMatch = (ExtClass::Frame*)Shared::IllusionMemAlloc(sizeof(ExtClass::Frame));
-			memcpy_s(newMatch, sizeof(ExtClass::Frame), (*frame), sizeof(ExtClass::Frame));
-
-			//turn match into a copy of the root for now, since there are a lot of members i dont know
-			memcpy_s((*frame), sizeof(ExtClass::Frame), (*frame)->m_xxPartOf->m_root, sizeof(ExtClass::Frame));
-
-			//change parent and child stuff
-			(*frame)->m_parent = newMatch->m_parent;
-			(*frame)->m_nChildren = 1;
-			(*frame)->m_children = newMatch;
-			newMatch->m_parent = *frame;
-			for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
-				newMatch->m_children[i].m_parent = newMatch;
-			}
-
-			//change name
-			int namelength = newMatch->m_nameBufferSize + strlen(prefix);
-			(*frame)->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-			(*frame)->m_nameBufferSize = namelength;
-			strcpy_s((*frame)->m_name, (*frame)->m_nameBufferSize, prefix);
-			strcat_s((*frame)->m_name, (*frame)->m_nameBufferSize, newMatch->m_name);
-			*frame = newMatch;
-		};
-
-		ExtClass::Frame* transFrame = frame;
-		InsertFrame(&frame, prefixTrans);
-		ExtClass::Frame* rotFrame = frame;
-		InsertFrame(&frame, prefixRot);
-
-		//now, frames that represent a mesh have a bunch of bones; each bone has a pointer to its frame (more precisely,
-		//its frames matrix2), which it uses to position its mesh. after this, those pointers will point to the artificial matrizes,
-		//so we have to change that as well
-		for (auto bone : m_targetBodyBones) {
-			ExtClass::Frame* boneFrame = bone->GetFrame();
-			if (boneFrame != NULL && strncmp(boneFrame->m_name, prefix, sizeof(prefix) - 1) == 0) {
-				bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
-			}
+		ExtClass::Frame* root = xxFile->m_root;
+		ExtClass::Frame* t;;
+		std::string tn;
+		while (!targets.empty()) {
+			tn = targets.front();
+			t = root->FindFrame(tn.c_str());
+			if (t)
+				FrameModTree(t);
+			targets.pop();
 		}
-
-		SliderInfo* slider = new SliderInfo;
-		slider->frame[0] = transFrame;
-		slider->frame[1] = rotFrame;
-		slider->Reset();
-		slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-		slider->Apply();
-
-		m_sliders.emplace(std::string(origName), slider);
-
-		return slider;
 	}
 
+	void PoserController::PoserCharacter::FrameModSkirt(ExtClass::XXFile* xxFile) {
+		ExtClass::Frame* root = xxFile->m_root;
+		ExtClass::Frame* sukato = root->FindFrame("A00_N_sukato");
 
+		if (sukato) {
+			FrameModTree(sukato);
+		}
+	}
 
+	void PoserController::FrameModRoom(ExtClass::XXFile* xxFile) {
 
-
-
-
-
-			/*
-			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
-
-				//make copy of the bone first
-				Frame* trans, *rot;
-				Frame* child = nullptr;
-				InsertFrame(bone, &child, prefixTrans);
-				trans = bone;
-				bone = child;
-				InsertFrame(bone, &child, prefixRot);
-				rot = bone;
-
-				auto match = m_roomSliders.find(bone->m_name);
-				if (match != m_roomSliders.end()) {
-					match->second.xxFrame = bone;
-					match->second.Apply();
-				}
-				else {
-				}
-			});
-			*/
-
-			/*if (General::StartsWith(bone->m_name, "guide_")) {
-				auto match = sliders.find(bone->m_name + 6);
-				if (match != sliders.end()) {
-					match->second->guide = bone;
-					SetHiddenFrame(bone, !m_showGuides);
-				}
-			}*/
-
+	}
 
 	void PoserController::AddCharacter(ExtClass::CharacterStruct* charStruct) {
 		PoserCharacter* character = nullptr;

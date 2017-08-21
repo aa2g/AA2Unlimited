@@ -308,21 +308,21 @@ namespace Poser {
 					slider->frame[1] = nullptr;
 					slider->guide = nullptr;
 				}
-				m_targetBodyFrames.clear();
 			}
 
 			Face GetFace() {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
 
-			PoserController::SliderInfo* FrameMod(ExtClass::Frame* frame, const std::string& name);
+			void FrameModTree(ExtClass::Frame* tree);
+			void FrameModSkeleton(ExtClass::XXFile* xxFile);
+			void FrameModFace(ExtClass::XXFile* xxFile);
+			void FrameModSkirt(ExtClass::XXFile* xxFile);
 			SliderInfo* GetSlider(const char* name);
 			SliderInfo* GetSlider(const std::string& name);
 
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
-			std::unordered_map<std::string, ExtClass::Frame*> m_targetBodyFrames;
-			std::vector<ExtClass::Bone*> m_targetBodyBones;
 
 #define LUA_MGETTERP(var, pointer) \
 GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
@@ -399,6 +399,7 @@ GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
 		picojson::value poseToJson(PoserCharacter* c);
 
 		void FrameModEvent(ExtClass::XXFile* xxFile);
+		void FrameModRoom(ExtClass::XXFile* xxFile);
 
 		std::wstring GetOverride(const std::wstring& file);
 		void SetOverride(const std::wstring& file, const std::wstring& override);

@@ -149,7 +149,6 @@ namespace Poser {
 
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		if (xxFile) {
-			LUA_EVENT_NORET("poserframemod", xxFile->m_name);
 			g_PoserController.FrameModEvent(xxFile);
 		}
 	}
