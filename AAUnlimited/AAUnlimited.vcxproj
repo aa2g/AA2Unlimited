@@ -464,6 +464,10 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
     <PostBuildEvent>
       <Message>Copy .dll to Game Directory</Message>
     </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>cd $(SolutionDir) &amp;&amp; postbuild.bat $(Configuration) || (exit 0)</Command>
+      <Outputs>dummy_to_always_trigger</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
