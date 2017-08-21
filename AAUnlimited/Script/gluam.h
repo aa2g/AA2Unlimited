@@ -10,12 +10,23 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
 	_self->var = _gl.get(2); \
 });
 
+// Bind pointer accessor function
+#define LUA_BINDE(var, accessor) \
+GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
+	if (_gl.top() == 1) { \
+		_gl.push(accessor); \
+		return 1; \
+	} \
+	accessor = _gl.get(2); \
+});
+
 // Bind as a pointer to POD. Getter only.
 #define LUA_BINDP(var) \
 GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
 	_gl.push(&_self->var); \
 	return 1; \
 });
+
 
 // Custom method
 #define LUA_METHOD(var, fn) \
@@ -79,7 +90,7 @@ GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
 GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
         unsigned _idx = _gl.get(2); \
         if (_idx >= limit) return 0; \
-        _gl.push(&_self->var[_idx]); \
+        _gl.push(&_self->var sub[_idx]); \
         return 1; \
 });
 

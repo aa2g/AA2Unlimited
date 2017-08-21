@@ -82,6 +82,7 @@ void Lua::bindLua() {
 	Frame::bindLua();
 	TimeData::bindLua();
 	XXFile::bindLua();
+	XXFileFace::bindLua();
 
 	// Character/interaction
 	CharacterActivity::bindLua();
@@ -210,11 +211,15 @@ void Lua::bindLua() {
 	using namespace AAPlay;
 	using namespace PlayInjections::Loads;
 	_BINDING["SetLoadOverrides"] = LUA_LAMBDA({
+		s.top(3);
 		s.push(g_skirtOffOverride);
 		s.push(g_boobGravityOverride);
-		g_skirtOffOverride = s.get(1);
-		g_boobGravityOverride = s.get(2);
-		return 2;
+		s.push(g_eyeTracking);
+
+		if (!s.isnil(1)) g_skirtOffOverride = s.get(1);
+		if (!s.isnil(2)) g_boobGravityOverride = s.get(2);
+		if (!s.isnil(3)) g_eyeTracking = s.get(3);
+		return 3;
 	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
 		int idx = s.get(1);

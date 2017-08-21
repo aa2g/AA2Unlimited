@@ -43,5 +43,19 @@ public:
 	BYTE m_unknown7[0x1C768];
 	// lock eye tracking
 	bool m_eyeTracking;
+
+	static inline void bindLua() {
+#define LUA_CLASS XXFileFace
+		LUA_NAME;
+		LUA_BIND(m_mouth);
+		LUA_BIND(m_eye);
+		LUA_BIND(m_eyebrow);
+		LUA_BIND(m_eyeOpen);
+		LUA_BIND(m_mouthOpen);
+		LUA_BIND(m_eyeTracking);
+		LUA_BINDE(BlushLines, *(_self->GetBlushLines()));
+		LUA_BINDE(Blush, *(_self->GetBlush()));
+#undef LUA_CLASS
+	};
 };
 

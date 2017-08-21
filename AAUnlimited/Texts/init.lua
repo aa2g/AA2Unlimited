@@ -418,17 +418,6 @@ setmetatable(on, {
 	end
 })
 
-function hexdump(addr, size)
-	if type(addr) ~= "string" then
-		buf = peek(addr, size)
-	else
-		buf = addr
-	end
-	local rt = buf:gsub("(.)", function(d)
-		return string.format("%02x ", string.byte(d))
-	end)
-	return rt
-end
 function tohex(n)
 	return string.format("%x",n)
 end
