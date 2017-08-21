@@ -179,6 +179,7 @@ void HiPolyLoadsInjection() {
 		male =  0x32CD80;
 		boobs = 0x12DA8B;
 		skirt = 0x1132B1;
+		eye = 0x1CB809;
 	}
 	else if (General::IsAAEdit) {
 		female =0x30C328;
