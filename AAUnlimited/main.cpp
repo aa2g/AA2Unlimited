@@ -86,6 +86,10 @@ static const char *NormalInit()
 
 	// And run rest of lua
 	g_Logger.luaFlush(); // make lua see pending log entries
+
+	if (g_Config.bUsePP2)
+		g_PP2.Init();
+
 	try {
 		g_Lua["init_modules"]();
 	}
@@ -96,10 +100,8 @@ static const char *NormalInit()
 
 	if (g_Config.bUsePPeX)
 		g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
-	if (g_Config.bUsePP2) {
-		g_PP2.Init();
+	if (g_Config.bUsePP2)
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
-	}
 
 	if (g_Config.bUseVisualStyles && General::IsAAEdit) {
 		DeactivateActCtx(0, cookie);

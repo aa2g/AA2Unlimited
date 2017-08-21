@@ -63,6 +63,7 @@ struct Value {
 	inline operator short() const { return lua_tointeger(L, idx); }
 	inline operator char() const { return lua_tointeger(L, idx); }
 	inline operator unsigned long() const { return lua_tointeger(L, idx); }
+	inline operator unsigned long long() const { return lua_tointeger(L, idx); }
 	inline operator unsigned int() const { return lua_tointeger(L, idx); }
 	inline operator unsigned short() const { return lua_tointeger(L, idx); }
 	inline operator unsigned char() const { return lua_tointeger(L, idx); }
@@ -122,6 +123,9 @@ struct State {
 	inline auto& push(unsigned short c) { return pushu(c); }
 	inline auto& push(unsigned int c) { return pushu(c); }
 	inline auto& push(unsigned long c) { return pushu(c); }
+	inline State& push(unsigned long long u) {
+		lua_pushinteger(L(), u); return *this;
+	}
 
 	inline auto& push(float f) { lua_pushnumber(L(), f);  return *this; }
 	inline auto& push(double f) { lua_pushnumber(L(), f);  return *this; }
@@ -136,6 +140,7 @@ struct State {
 
 	// Strings
 	inline auto& push(const char *s) {
+		//printf("pushing string\n");
 		if (s == 0) return nil();
 		lua_pushstring(L(), s);
 		return *this;
@@ -170,11 +175,11 @@ struct State {
 #endif
 
 	// remove reference and turn to pointer
-	template <class T>
+/*	template <class T>
 	inline State& push(const T &p) {
 		printf("pushing pod\n");
 		return push((T*)(&p));
-	}
+	}*/
 
 	// push pointers to class instances and record their typeid
 	template <typename T>
@@ -186,11 +191,19 @@ struct State {
 		return *this;
 	}
 
-	inline auto& push(Value &v) { lua_pushvalue(L(), v.idx); return *this; }
+	inline auto& push(Value &v) {
+		//printf("pushvalue ref\n");
+		lua_pushvalue(L(), v.idx); return *this;
+	}
+	inline auto& push(Value v) {
+		//printf("pushvalue copy\n");
+		lua_pushvalue(L(), v.idx); return *this;
+	}
 
 	inline int pushmulti(int n) { return n; };
 	template <typename T, typename... Ts>
 	inline int pushmulti(int n, const T &value, const Ts&... values) {
+		//printf("pushmulti %d\n", n);
 		push(value);
 		return pushmulti(n + 1, values...);
 	}
@@ -367,6 +380,7 @@ struct State {
 	auto& call(const Ts&... values) {
 		lua_State *L = this->L();
 		assert(!lua_isnil(L, -1));
+		assert(lua_isfunction(L, -1));
 		lua_pushcfunction(L, traceback);
 		lua_insert(L, -2);
 		int nargs = pushmulti(0,values...);
@@ -390,7 +404,7 @@ struct State {
 		return *this;
 	}
 
-	inline auto& newtable() {
+	inline Value newtable() {
 		lua_newtable(L());
 		return get();
 	}
@@ -477,6 +491,7 @@ inline Value Index<T>::operator()(const Ts&... values) {
 template <typename... Ts>
 inline Value Value::operator()(const Ts&... values) const {
 	auto *s = State::make(L);
+	s->push(*this);
 	s->call(values...);
 	return s->get();
 }
