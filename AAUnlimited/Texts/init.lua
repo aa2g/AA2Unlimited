@@ -263,6 +263,9 @@ end
 function unload_module(name)
 	log.spam("Unloading %s", name)
 	local mod = modules[name]
+	if mod.unload then
+		mod:unload()
+	end
 	if not mod then return end
 	-- nuke all event handlers of a given module
 	for evn,v in pairs(handlers) do
@@ -294,6 +297,8 @@ function unload_module(name)
 	modules[name] = nil
 
 	-- and this should nuke it for good
+	collectgarbage("collect")
+	collectgarbage("collect")
 	collectgarbage("collect")
 	collectgarbage("collect")
 end
@@ -407,13 +412,13 @@ end
 
 
 function add_event_handler(evname, v)
-	assert(current_module, "event handlers can be installed only on module load (ie top level)")
 	handlers[evname] = handlers[evname] or {}
 	table.insert(handlers[evname], {v, current_module})
 end
 
 setmetatable(on, {
 	__newindex = function(t, evname, v)
+		assert(current_module, "event handlers can be installed only on module load (ie top level)")
 		add_event_handler(evname, v)
 	end
 })
@@ -548,3 +553,4 @@ function p(t)
 	local r = pl.write(t)
 	return r
 end
+
