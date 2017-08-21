@@ -124,14 +124,14 @@ public:
 	char *GameAlloc(size_t sz);
 
 	PP2File(PP2 *pp2, const wchar_t *);
-	void *getCache(uint32_t idx);
+	void *getCache(uint32_t idx, size_t *csz);
 	uint32_t freeCache(uint32_t idx);
 	uint32_t rawfreeCache(PP2File::cacheEntry *ce);
 	cacheEntry *rawallocCache(size_t sz);
 	cacheEntry *allocCache(uint32_t idx, size_t sz);
 	PP2File::cacheEntry *PP2File::reallocCache(PP2File::cacheEntry *ce);
 	bool OPUS_decompress(int, int, int nchan, char *dst, size_t dstlen, char *src, size_t srclen);
-	uint32_t chunkSize(uint32_t chunk);
+	int chunkSize(uint32_t chunk);
 	std::wstring name;
 	const std::wstring& getName(int idx);
 
@@ -183,6 +183,7 @@ public:;
 
 	bool ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFile, DWORD* readBytes, BYTE** outBuffer);
 	bool LoadFile(std::wstring path, DWORD* readBytes, BYTE** outBuffer);
+	void bindLua();
 };
 
 extern PP2 g_PP2;

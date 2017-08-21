@@ -9,7 +9,7 @@ local function patch_aaplay()
 	g_poke(0x001AEA80, "\x80");
 	g_poke(0x0021BD45, "\x90\x90");
 
-	p = x_pages(8192)
+	local p = x_pages(8192)
 	local fixcp = "\xC7\x44\x24\x04\xA4\x03\x00\x00"
 	poke(p, fixcp .. "\x68" .. string.pack("<I4", g_xchg_dword(0x002E318C, p)) .. "\xC3")
 	poke(p+128, fixcp .. "\x68" .. string.pack("<I4", g_xchg_dword(0x002E3190, p+128)) .. "\xC3")

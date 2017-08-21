@@ -4,6 +4,7 @@
 #include <io.h>
 #include <windows.h>
 #include <Shlwapi.h>
+#include "General/ModuleInfo.h"
 
 
 #define DBG LOGPRIONC(Logger::Priority::SPAM) dec <<
@@ -181,7 +182,7 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 }
 
 
-uint32_t PP2File::chunkSize(uint32_t chunk) {
+int PP2File::chunkSize(uint32_t chunk) {
 	return chunks[chunk + 1].offset - chunks[chunk].offset;
 }
 
@@ -268,13 +269,13 @@ void PP2::compressWorker(workItem wi) {
 	bufmutex.unlock();
 }
 
-void *PP2File::getCache(uint32_t idx) {
+void *PP2File::getCache(uint32_t idx, size_t *cachedsize) {
 	bool buflocked = false;
 	fileInfo &fe = files[idx];
 	cacheEntry *ce = NULL;
 	char *ret = NULL;
 
-	if (fe.flags & FLAG_OPUS) {
+	if ((!cachedsize) && (fe.flags & FLAG_OPUS)) {
 		ascore[idx]++;
 		if (acache.find(idx) != acache.end()) {
 			ret = GameAlloc(fe.osize);
@@ -349,6 +350,8 @@ void *PP2File::getCache(uint32_t idx) {
 
 		// copy the data
 		memcpy(ret, tmp + fe.chpos, fe.osize);
+		if (cachedsize)
+			*cachedsize = fe.osize;
 
 		// now kick the worker thread to start recompressing
 		// the entries again
@@ -383,6 +386,11 @@ void *PP2File::getCache(uint32_t idx) {
 	assert(ce);
 
 	if (fe.flags & FLAG_OPUS) {
+		if (cachedsize) {
+			ret = ce->data;
+			*cachedsize = ce->csize;
+			return ret;
+		}
 		int wshift = fe.flags & 3;
 		int wavrate = ((fe.flags & 4) ? 12000 : 11025) << wshift;
 		int opusrate = 12000 << wshift;
@@ -418,6 +426,8 @@ void *PP2File::getCache(uint32_t idx) {
 			<< " expected size " << fe.osize << "!=" << got << " from zstd " << ZSTD_getDecompressedSize(ce->data, ce->csize) << "\r\n";
 	}
 
+	if (cachedsize)
+		*cachedsize = fe.osize;
 	assert(got == fe.osize);
 	return ret;
 }
@@ -518,8 +528,77 @@ void PP2::AddPath(const wstring &path) {
 
 
 void PP2::AddArchive(const wchar_t *fn) {
-	LOGPRIONC(Logger::Priority::INFO) "Adding .pp2 archive " << wstring(fn) << "\r\n";
-	pfiles.emplace_back(this, fn);
+	wchar_t buf[1024];
+	GetFullPathName(fn, 1024, buf, NULL);
+	wstring wfn(buf);
+
+	LOGPRIONC(Logger::Priority::INFO) "Adding .pp2 archive " << wfn << "\r\n";
+	for (auto &it : pfiles) {
+		if (it.name == wfn) {
+			LOGPRIONC(Logger::Priority::WARN) wfn << "is already loaded\r\n";
+			return;
+		}
+	}
+	pfiles.emplace_back(this, buf);
+}
+
+void PP2::bindLua() {
+	LUA_SCOPE;
+	auto _BINDING = g_Lua[LUA_BINDING_TABLE];
+	_BINDING["PP2AddPath"] = GLua::Function([](auto &s) {
+		const char *str = s.get(1);
+		std::wstring fn = General::utf8.from_bytes(str);
+		g_PP2.AddPath(fn);
+		return 0;
+	});
+	_BINDING["PP2List"] = GLua::Function([](auto &s) {
+		s.top(0);
+		for (auto it : g_PP2.pfiles)
+			s.push(General::to_utf8(it.name));	
+		return s.top();
+	});
+	_BINDING["PP2GetFiles"] = GLua::Function([](auto &s) {
+		auto &f = g_PP2.pfiles[s.get(1)];
+		auto t = s.newtable();
+		// maps hash to { index, flags, osize, csize }
+		const void *chk = lua_topointer(s.L(), 2);
+		for (int i = 0; i < f.hdr.nfiles; i++) {
+			LUA_SCOPE;
+			auto &fe = f.files[i];
+			auto tf = s.newtable();
+			tf["index"] = i;
+			tf["flags"] = fe.flags;
+			tf["osize"] = fe.osize;
+			tf["csize"] = (fe.flags&f.FLAG_OPUS) ? f.chunkSize(fe.chunk) : -1;
+			t[f.files[i].hash & ((1ULL<<52)-1)] = tf;
+		}
+		if (chk != lua_topointer(s.L(), 2))
+			__debugbreak();
+		return 1;
+	});
+
+	_BINDING["PP2ReadFile"] = GLua::Function([](auto &s) {
+		auto &pf = g_PP2.pfiles[s.get(1)];
+		int i = s.get(2);
+		size_t osz;
+		void *buf = pf.getCache(i, &osz);
+		s.pushlstring((const char*)buf, osz);
+		Shared::IllusionMemFree(buf);
+		return 1;
+	});
+
+	_BINDING["PP2GetNames"] = GLua::Function([](auto &s) {
+		auto &f = g_PP2.pfiles[s.get(1)];
+		auto t = s.newtable();
+		// maps name to index
+		for (auto &it : f.names) {
+			LUA_SCOPE;
+			const char *nm = General::to_utf8(it.first);
+			t[nm] = it.second;
+		}
+		return 1;
+	});
+
 }
 
 bool PP2::LoadFile(wstring path, DWORD* readBytes, BYTE** outBuffer) {
@@ -533,7 +612,7 @@ bool PP2::LoadFile(wstring path, DWORD* readBytes, BYTE** outBuffer) {
 			return true;
 		}
 		*readBytes = p.files[fidx].osize;
-		*outBuffer = (BYTE*)p.getCache(fidx);
+		*outBuffer = (BYTE*)p.getCache(fidx, NULL);
 		if (g_Config.PP2Profiling) {
 			prof.write((char*)(&p.files[fidx].hash), 8);
 			prof.write((char*)(&GameTick::tick), 4);
@@ -639,6 +718,7 @@ void PP2::Init() {
 			}
 		});
 	}
+	bindLua();
 }
 
 

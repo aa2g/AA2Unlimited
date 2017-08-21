@@ -268,6 +268,13 @@ void Lua::bindLua() {
 		return 0;
 	});
 
+	_BINDING["GetGameTick"] = LUA_LAMBDA({
+		s.push(GameTick::tick);
+	});
+	_BINDING["GetGameHwnd"] = LUA_LAMBDA({
+		s.push((DWORD)(*GameTick::hwnd));
+	});
+
 	GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
 		if (m->hwnd != *GameTick::hwnd) return false;
 		const char *mstr = NULL;
@@ -275,9 +282,28 @@ void Lua::bindLua() {
 		case WM_KEYDOWN: mstr = "keydown"; break;
 		case WM_KEYUP: mstr = "keyup"; break;
 		case WM_CHAR: mstr = "char"; break;
+
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+			mstr = "mousedown";
+			break;
+
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+			mstr = "mouseup";
+			break;
+
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDBLCLK:
+		case WM_MBUTTONDBLCLK:
+			mstr = "mousedblclk";
+			break;
 		}
+
 		if (mstr) {
-			LUA_EVENT(mstr, m->wParam);
+			LUA_EVENT(mstr, m->wParam, m->lParam, m->hwnd);
 			if (m->wParam == -1)
 				return true;
 		}

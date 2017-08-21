@@ -215,3 +215,11 @@ function hexdump(addr, size)
 	end
 	return table.concat(res)
 end
+
+function set_window_proc(hwnd, proc)
+	local orig = GetWindowLongW(hwnd, -4)
+	SetWindowLongW(hwnd, -4, make_callback(function(...)
+		return proc(orig, ...)
+	end, 4))
+	return orig
+end

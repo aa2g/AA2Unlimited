@@ -22,7 +22,7 @@ std::wstringstream resourceInfo;
 
 std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8;
 
-const char *to_utf8(std::wstring &ws)
+const char *to_utf8(const std::wstring &ws)
 {
 	static std::string s;
 	s = utf8.to_bytes(ws);

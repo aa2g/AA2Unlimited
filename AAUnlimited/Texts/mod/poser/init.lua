@@ -9,9 +9,8 @@ local opts
 local signals = require "poser.signals"
 
 local characters = {}
-local forceparenting
 
-function on.first_tick(hwnd)
+local function detect_parenting(hwnd)
 	dlg.parentHWND = hwnd
 
 	local rect = malloc(16)
@@ -22,7 +21,13 @@ function on.first_tick(hwnd)
 	local left, top, right, bottom = string.unpack("<IIII", peek(rect, 16))
 	if right == screenw and bottom == screenh then
 		log.info("Forcing non-floating poser windows")
-		forceparenting = true
+		return true
+	end
+end
+
+function on.first_tick(hwnd)
+	if dlg then
+		dlg.forceparenting = detect_parenting(hwnd)
 	end
 end
 
@@ -43,9 +48,19 @@ end
 function on.poserframemod(xx)
 end
 
+function on.iup_mousebutton(dlg, button, x, y, status)
+end
+
 function _M:load()
 	dlg = require "poser.dlg"
-	dlg.forceparenting = forceparenting
+	if GetGameTick() > 0 then
+		dlg.forceparenting = detect_parenting(GetGameHwnd())
+	end
+end
+
+function _M:unload()
+	-- close all dialogs
+	dlg:close_all()
 end
 
 return _M

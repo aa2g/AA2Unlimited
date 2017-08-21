@@ -328,8 +328,12 @@
     <None Include="Texts\mod\pl\utils.lua" />
     <None Include="Texts\mod\pl\xml.lua" />
     <None Include="Texts\mod\poser\dlg.lua" />
+    <None Include="Texts\mod\poser\framelist.lua" />
     <None Include="Texts\mod\poser\init.lua" />
+    <None Include="Texts\mod\poser\lists.lua" />
     <None Include="Texts\mod\poser\signals.lua" />
+    <None Include="Texts\mod\poser\sliders.lua" />
+    <None Include="Texts\mod\poser\toggles.lua" />
     <None Include="Texts\mod\reshade.lua" />
     <None Include="Texts\mod\stats.lua" />
     <None Include="Texts\mod\strutil.lua" />
