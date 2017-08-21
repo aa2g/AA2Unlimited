@@ -177,30 +177,26 @@ local dummymt = {
 setmetatable(dummyslider, dummymt)
 
 local sliders = require "poser.sliders"
-local sliderx = sliders.slider { title = "X" }
-local slidery = sliders.slider { title = "Y" }
-local sliderz = sliders.slider { title = "Z" }
+local sliderx = sliders.slider { title = "X", data = 0 }
+local slidery = sliders.slider { title = "Y", data = 1 }
+local sliderz = sliders.slider { title = "Z", data = 2 }
 
 local rotatebutton = toggles.button { title = "Rotate", data = 0 }
 local scalebutton = toggles.button { title = "Scale", data = 2 }
 local translatebutton = toggles.button { title = "Translate", data = 1 }
 
 local modifierx1 = toggles.button { title = "x1", data = 1 }
-local modifierx10 = toggles.button { title = "x1", data = 10 }
-local modifierx100 = toggles.button { title = "x1", data = 100 }
+local modifierx10 = toggles.button { title = "x10", data = 10 }
+local modifierx100 = toggles.button { title = "x100", data = 100 }
 
 local slidermod
 local sliderop
 local slider
 local function sliderchanged()
-	log.info("sliderchanged")
 	currentslider = dummyslider
 	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
 	if currentcharacter then
-		log.info("character %s poser: %s", currentcharacter.name, currentcharacter.poser)
-		log.info("got slidername %s", slidername)
 		local slider = currentcharacter.poser:GetSlider(slidername)
-		log.info("got slider %s", slider)
 		currentslider = slider or dummyslider
 	end
 end
@@ -336,7 +332,6 @@ function _M.addcharacter(character)
 		local data = character.m_charData
 		local name = string.format("%s %s", data.m_forename, data.m_surname)
 		new = { name = name, struct = character, poser = GetPoserCharacter(character) }
-		log.info("Poser is %s", new.poser)
 		characters[last + 1] = new
 	end
 	currentcharacter = currentcharacter or new
@@ -345,8 +340,7 @@ function _M.addcharacter(character)
 end
 
 function _M.removecharacter(character)
-	log.info("rem character %s", currentcharacter or "no currentcharacter")
-	if currentcharacter.struct == character then
+	if currentcharacter and currentcharacter.struct == character then
 		currentcharacter = nil
 	end
 	for k,v in pairs(characters) do

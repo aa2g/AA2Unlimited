@@ -281,7 +281,6 @@ namespace Poser {
 
 
 	void PoserController::AddCharacter(ExtClass::CharacterStruct* charStruct) {
-		LOGPRIO(Logger::Priority::INFO) << "Adding character" << charStruct;
 		PoserCharacter* character = nullptr;
 		for (PoserCharacter* c : m_characters) {
 			if (c->m_character == charStruct)
@@ -296,7 +295,6 @@ namespace Poser {
 	}
 
 	void PoserController::RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
-		LOGPRIO(Logger::Priority::INFO) << "Removing character" << charStruct;
 		for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
 			if ((*it)->m_character == charStruct) {
 				m_characters.erase(it);

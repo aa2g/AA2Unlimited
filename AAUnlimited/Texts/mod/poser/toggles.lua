@@ -18,11 +18,10 @@ function _M.button(opts)
 	}
 	
 	function button.valuechanged_cb(self)
-		log.info("toggle changed to: ", self.value)
-		if self.value == "yes" then
+		if self.value == "ON" then
 			selected(data)
 		end
-		changedstate(self.value == "yes")
+		changedstate(self.value == "ON")
 	end
 	
 	return button
