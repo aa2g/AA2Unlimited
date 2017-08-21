@@ -21,7 +21,7 @@ function _M.button(opts)
 		if self.value == "ON" then
 			selected(data)
 		end
-		changedstate(self.value == "ON")
+		changedstate(data, self.value == "ON")
 	end
 	
 	return button

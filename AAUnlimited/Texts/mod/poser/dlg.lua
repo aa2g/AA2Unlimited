@@ -162,6 +162,14 @@ local function updatecharacterlist()
 end
 characterschanged.connect(updatecharacterlist)
 
+local modifiers = {
+	{ 30, 90, 180 },
+	{ 1, 10, 100 },
+	{ 1, 10, 100 },
+}
+local modifier = modifiers[1][1]
+local currentmodifier = 1
+local currentoperation = 1
 local currentslider
 local dummyslider = {}
 local dummymt = {
@@ -187,12 +195,39 @@ local scalebutton = toggles.button { title = "Scale", data = 2 }
 local translatebutton = toggles.button { title = "Translate", data = 1 }
 
 local modifierx1 = toggles.button { title = "x1", data = 1 }
-local modifierx10 = toggles.button { title = "x10", data = 10 }
-local modifierx100 = toggles.button { title = "x100", data = 100 }
+local modifierx10 = toggles.button { title = "x10", data = 2 }
+local modifierx100 = toggles.button { title = "x100", data = 3 }
 
 local slidermod
 local sliderop
 local slider
+
+local function sliderincrement(amount, axis)
+	if currentslider then
+		currentslider:Increment(amount * modifier, axis)
+	end
+end
+
+local function updatemodifier()
+	modifier = modifiers[currentoperation][currentmodifier]
+	log.spam("increment modifier set to %f", modifier)
+end
+
+local function slidersetmodifier(modifier)
+	log.spam("set current modifier to %d", modifier)
+	currentmodifier = modifier
+	updatemodifier()
+end
+
+local function slidersetoperation(operation)
+	currentoperation = operation + 1
+	log.spam("set current slider operation to %d", currentoperation)
+	if currentslider then
+		currentslider:SetCurrentOperation(operation)
+	end
+	updatemodifier()
+end
+
 local function sliderchanged()
 	currentslider = dummyslider
 	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
@@ -203,15 +238,18 @@ local function sliderchanged()
 end
 signals.connect(bonelist, "selectionchanged", sliderchanged)
 
-local function sliderincrement(amount, axis)
-	if currentslider then
-		currentslider:Increment(amount, axis)
-	end
-end
 characterschanged.connect(sliderchanged)
 signals.connect(sliderx, "increment", sliderincrement)
 signals.connect(slidery, "increment", sliderincrement)
 signals.connect(sliderz, "increment", sliderincrement)
+
+signals.connect(rotatebutton, "selected", slidersetoperation)
+signals.connect(translatebutton, "selected", slidersetoperation)
+signals.connect(scalebutton, "selected", slidersetoperation)
+
+signals.connect(modifierx1, "selected", slidersetmodifier)
+signals.connect(modifierx10, "selected", slidersetmodifier)
+signals.connect(modifierx100, "selected", slidersetmodifier)
 
 local dialogsliders = iup.dialog {
 	iup.hbox {
