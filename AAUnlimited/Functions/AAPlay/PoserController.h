@@ -324,21 +324,12 @@ namespace Poser {
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 
-#define LUA_MGETTERP(var, pointer) \
-GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
-	return _gl.push(_self->pointer).one; \
-});
-
 #define LUA_CLASS PoserController::PoserCharacter
 			static inline void bindLua() {
 				LUA_NAME;
 				LUA_MGETTER1(GetSlider);
-				LUA_MGETTERP(GetFirstName, m_character->m_charData->m_forename);
-				LUA_MGETTERP(GetSecondName, m_character->m_charData->m_surname);
 			}
 #undef LUA_CLASS
-
-#undef LUA_MGETTERP
 		}; // PoserCharacter
 
 	public:
