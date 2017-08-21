@@ -488,5 +488,17 @@
     <None Include="Texts\mod\charex.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\poser\framelist.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\lists.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\sliders.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\toggles.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
   </ItemGroup>
 </Project>

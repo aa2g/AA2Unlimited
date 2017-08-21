@@ -1,5 +1,6 @@
 require "iuplua"
 require "iupluacontrols"
+require "memory"
 
 local _M = { 
 	visible = false,
@@ -354,11 +355,27 @@ end
 function _M.updatereferences()
 end
 
+-- This hack is inspired by
+-- https://www.codeproject.com/Articles/11114/Move-window-form-without-Titlebar-in-C
+-- Of course iup supports nothing of the sorts, so we have to do it the dirty way
+local function adjust_parenting(v)
+	if not _M.forceparenting then return end
+	v.menubox = "no"
+	v:map()
+	set_window_proc(v.hwnd, function(orig, this, hwnd, msg, wparam, lparam)
+		if msg == 0x0201 and hwnd == fixptr(v.hwnd) then
+			ReleaseCapture()
+			SendMessageW(hwnd, 0xA1, 2, 0)
+		end
+		return CallWindowProcW(orig, hwnd, msg, wparam, lparam)
+	end)
+end
+
 function _M.togglevisible()
 	dialogs = dialogs or { dialogposes, dialogsliders }
 	if not _M.visible then
 		for _,v in ipairs(dialogs) do
-			v:map()
+			adjust_parenting(v)
 			_M.updatefloating({v})
 			v:show()
 		end
@@ -384,6 +401,13 @@ end
 function _M.hotkey_cb(dialog, k, ...)
 	if k == iup.K_F12 then
 		_M.togglevisible()
+	end
+end
+
+function _M.close_all()
+	dialogs = dialogs or { dialogposes, dialogsliders }
+	for _,d in ipairs(dialogs or {}) do
+		d:destroy()
 	end
 end
 
