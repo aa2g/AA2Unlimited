@@ -411,15 +411,6 @@ function _M.close_all()
 	end
 end
 
-function _M.mouse_cb(dlg, but, pressed)
-	log("inside mouse cb, ")
-	if not _M.forceparenting  then return end
-	-- clever hack from https://www.codeproject.com/Articles/11114/Move-window-form-without-Titlebar-in-C
-	if but == iup.BUTTON1 and pressed == 1 then
-		-- redirect mouse clicks to titlebar
-	end
-end
-
 signals.connect(dialogsliders, "k_any", _M, "hotkey_cb")
 signals.connect(dialogposes, "k_any", _M, "hotkey_cb")
 
