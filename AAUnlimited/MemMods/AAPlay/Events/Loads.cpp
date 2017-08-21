@@ -9,6 +9,7 @@ namespace Loads {
 // you can update these on HiPolyLoadStartEvent, and restore back to 2 on EndEvent
 BYTE g_skirtOffOverride = 2; // 0 - have skirt, 1 - noskirt, 2 - original (cloth state dependent)
 BYTE g_boobGravityOverride = 2; // 0 - saggy, 1 bra, 2 - original (cloth state dependent)
+int g_eyeTracking = -1;
 
 
 //////////////////////////
@@ -152,6 +153,19 @@ no_override:
 	}
 }
 
+void __declspec(naked) QueryEye() {
+	__asm {
+		cmp g_eyeTracking, -1
+		je skip
+		mov ebx, g_eyeTracking
+skip:
+		cmp [esi+100Eh], bx
+		jnz skip2
+		cmp byte ptr[ebp+16], 0
+skip2:  ret
+	}
+}
+
 class HiPolyLoader {
 public:;
 virtual BYTE LoadMale(BYTE a2, BYTE a3, BYTE a4, BYTE a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
@@ -164,18 +178,20 @@ virtual BYTE DespawnFemale() { return CallOrigDespawn(OrigDespawnFemale, this); 
 
 void HiPolyLoadsInjection() {
 
-	DWORD female, male, boobs, skirt;
+	DWORD female, male, boobs, skirt, eye;
 	if (General::IsAAPlay) {
 		female =0x32D260;
 		male =  0x32CD80;
 		boobs = 0x12DA8B;
 		skirt = 0x1132B1;
+		eye = 0x1CB809;
 	}
 	else if (General::IsAAEdit) {
 		female =0x30C328;
 		male =  0x30BE48;
 		boobs = 0x11BF7B;
 		skirt = 0x101C31;
+		eye =   0x1ADFA9;
 	}
 
 	// dummy vtable to force stdcall
@@ -186,6 +202,7 @@ void HiPolyLoadsInjection() {
 	male += General::GameBase;
 	boobs += General::GameBase;
 	skirt += General::GameBase;
+	eye += General::GameBase;
 
 	// patch the vtable, save original pointers
 
@@ -216,6 +233,10 @@ void HiPolyLoadsInjection() {
 	{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&QuerySkirt },	//redirect to our function
 		NULL);
 
+	Hook((BYTE*)eye,
+	{ 0x75, 0x06, 0x80, 0x7D, 0x10, 0x00 },							//expected values
+	{ 0x90, 0xe8, HookControl::RELATIVE_DWORD, (DWORD)&QueryEye },	//redirect to our function
+		NULL);
 
 }
 

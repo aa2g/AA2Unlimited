@@ -11,6 +11,10 @@ function poke_dword(addr, d)
 	return _BINDING.poke(addr, string.pack("<I4", d))
 end
 
+function poke_word(addr, d)
+	return _BINDING.poke(addr, string.pack("<H", d))
+end
+
 
 function g_wrap(f)
 	assert(f)
@@ -146,7 +150,68 @@ function f_patch(bytes, offs)
 		offs = -offs
 	end
 	local save = g_peek(offs, #bytes)
-	log.spam("f_patch %x, %s=> %s", offs, hexdump(save), hexdump(bytes))
+	--log.spam("f_patch %x, %s=> %s", offs, hexdump(save), hexdump(bytes))
 	g_poke(offs, bytes)
 	return save
+end
+
+function fixptr(p)
+	if type(p) ~= "number" then
+		p = tostring(p)
+		local h = p:match(".-([0-9A-F]+)$")
+		return tonumber(h, 16)
+	end
+	return p
+end
+
+function ptr_walk(ptr,...)
+	ptr = fixptr(ptr)
+	for idx, off in ipairs {...} do
+		if idx > 1 then
+			peek_dword(ptr)
+		end
+		ptr = ptr+off
+	end
+	return ptr
+end
+
+function peek_walk(ptr,...)
+	return peek_dword(ptr_walk(ptr, ...))
+end
+
+function poke_walk(ptr,val,...)
+	return poke_dword(ptr_walk(ptr, ...), val)
+end
+
+function hexdump(addr, size)
+	if type(addr) ~= "string" then
+		buf = peek(addr, size)
+	else
+		buf = addr
+	end
+
+	local hres = {"0000 "}
+	local ares = {}
+	local res = {}
+
+
+	for i=1,#buf do
+		local b = buf:byte(i)
+		local c = buf:sub(i,i)
+		if (b < 32) or (b > 128) then
+			c = '.'
+		end	
+		table.insert(ares, c)
+		table.insert(hres, "%02x " % b)
+		if ((i-1) % 16) == 7 then table.insert(hres, " ") end
+
+		if (i>1 and (((i-1)%16) == 15)) or i==#buf then
+			table.insert(res, table.concat(hres))
+			table.insert(res, table.concat(ares))
+			table.insert(res, "\n")
+			ares = {}
+			hres = { "%04x " % (i) }
+		end
+	end
+	return table.concat(res)
 end

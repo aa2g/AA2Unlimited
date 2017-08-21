@@ -82,6 +82,7 @@ void Lua::bindLua() {
 	Frame::bindLua();
 	TimeData::bindLua();
 	XXFile::bindLua();
+	XXFileFace::bindLua();
 
 	// Character/interaction
 	CharacterActivity::bindLua();
@@ -116,6 +117,11 @@ void Lua::bindLua() {
 		int addr = (int)lua_touserdata(L, 1);
 		if (addr == 0) addr = luaL_checkinteger(L, 1);
 		int scanmax = luaL_checkinteger(L, 2);	
+		char *buf = (char*)alloca(scanmax);
+		SIZE_T gotread;
+
+		if (!ReadProcessMemory(GetCurrentProcess(), (void*)addr, buf, scanmax, &gotread))
+			return 0;
 		char *p = (char*)addr;
 		int i = scanmax;
 
@@ -147,8 +153,10 @@ void Lua::bindLua() {
 		const char *buf = luaL_checklstring(L, 2, &nbytes);
 		void *ptr = (void*)(addr);
 		Memrights unprotect(ptr, nbytes);
-		memcpy(ptr, buf, nbytes);
-		return 0;
+		SIZE_T wrote = 0;
+		WriteProcessMemory(GetCurrentProcess(), ptr, buf, nbytes, &wrote);
+		lua_pushinteger(L, wrote);
+		return 1;
 	});
 
 	_BINDING["proc_invoke"] = lua_CFunction([](lua_State *L) {
@@ -206,11 +214,15 @@ void Lua::bindLua() {
 	using namespace AAPlay;
 	using namespace PlayInjections::Loads;
 	_BINDING["SetLoadOverrides"] = LUA_LAMBDA({
+		s.top(3);
 		s.push(g_skirtOffOverride);
 		s.push(g_boobGravityOverride);
-		g_skirtOffOverride = s.get(1);
-		g_boobGravityOverride = s.get(2);
-		return 2;
+		s.push(g_eyeTracking);
+
+		if (!s.isnil(1)) g_skirtOffOverride = s.get(1);
+		if (!s.isnil(2)) g_boobGravityOverride = s.get(2);
+		if (!s.isnil(3)) g_eyeTracking = s.get(3);
+		return 3;
 	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
 		int idx = s.get(1);

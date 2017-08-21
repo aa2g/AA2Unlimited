@@ -11,6 +11,7 @@
 #include "CharacterActivity.h"
 #include "HStatistics.h"
 #include "XXFile.h"
+#include "XXFileFace.h"
 #include "Script/ScriptLua.h"
 
 namespace ExtClass {
@@ -53,17 +54,20 @@ public:
 	/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
 
 	BYTE m_unknown1[0x24];
-	CharacterData* m_charData;
-	void* m_somePointer;
-	BYTE m_unknown2[12];
-	int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24
-	BYTE m_boobs; // weird female boobs state. girls generally have some, boys dont.
+	CharacterData* m_charData; // 0x28
+	void* m_somePointer; // 0x2c
+	void* m_somePointer2;
+	void* m_somePointer3;
+	void* m_somePointer4;
+	int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24 //3c
+	BYTE m_boobs; // weird female boobs state. girls generally have some, boys dont. // 40
 	BYTE m_clothState;
 	BYTE m_bClothesOn;
 	BYTE m_currClothSlot;
 	BYTE m_currClothes;
 	BYTE m_unknown5[3];
-	XXFile* m_xxFace; //certain pointers to model files. all of these may be NULL if they are not loaded yet or not used
+	XXFile* m_xxFace; //0x48 certain pointers to model files. all of these may be NULL if they are not loaded yet or not used
+
 	XXFile* m_xxGlasses;
 	union {
 		struct {
@@ -126,9 +130,12 @@ public:
 		_gl.push(_self->Despawn2());
 	});
 	LUA_BINDSTR(m_unknown1)
-	LUA_BINDSTR(m_unknown2)
 	LUA_BINDSTR(m_unknown5)
 	LUA_BINDSTR(m_unknown6)
+	LUA_BIND(m_somePointer)
+	LUA_BIND(m_somePointer2)
+	LUA_BIND(m_somePointer3)
+	LUA_BIND(m_somePointer4)
 	LUA_BIND(m_charData)
 	LUA_BIND(m_seat)
 	LUA_BIND(m_boobs)
@@ -152,9 +159,14 @@ public:
 	LUA_MGETTER1(GetLover)
 	LUA_MGETTER0(GetNpcReactData)
 	LUA_MGETTER0(GetNpcAiData)
+	LUA_MGETTER0(GetXXFileFace)
 
 	}
 #undef LUA_CLASS
+	inline XXFileFace *GetXXFileFace() {
+		return (XXFileFace*)m_xxFace;
+	}
+
 	inline CharacterRelation *GetRelation(int idx) {
 		auto &rel = *GetRelations();
 		if (idx >= rel.GetSize())
