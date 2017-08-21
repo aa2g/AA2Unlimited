@@ -11,10 +11,18 @@ namespace Poser {
 #define Z 2
 #define W 3
 
+	struct SliderHelper {
+		int m_currentSlidingAxis;
+		PoserController::SliderInfo::Operation m_currentOperation;
+		D3DXVECTOR3 m_currentSlidingRotationAxisVector;
+		D3DXQUATERNION m_currentSlidingRotationBase;
+		PoserController::SliderInfo::TranslationScaleData m_translationScaleBase;
+	} loc_sliderHelper;
+
 	void PoserController::SliderInfo::increment(float order, int axis) {
 		if (currentOperation == Rotate) {
 			if (order) {
-				rotation.rotateAxis(axis, (float)M_PI * order / 180.0f);
+				rotation.rotateAxis(axis, order, sliding, slidingRotData);
 			}
 			else {
 				rotation.reset();
@@ -23,29 +31,22 @@ namespace Poser {
 		else {
 			if (order) {
 				float delta = currentOperation == Translate ? order / 10.0f : order / 50.0f;
-				getCurrentOperationData()->value[axis] += delta;
-				getCurrentOperationData()->delta[axis] += delta;
+				if (sliding)
+					getCurrentOperationData()->value[axis] += delta;
+				else
+					getCurrentOperationData()->value[axis] = slidingTSData[axis] + delta;
 			}
 			else {
 				getCurrentOperationData()->value[axis] = currentOperation == Scale ? 1.0f : 0.0f;
-				getCurrentOperationData()->delta[axis] = 0;
 			}
 		}
 	}
 
 	void PoserController::SliderInfo::Reset() {
+		rotation.reset();
 		for (int i = 0; i < 3; i++) {
-			rotation.reset();
-			rotation.minEuler[i] = (float)-M_PI / 2;
-			rotation.maxEuler[i] = (float)M_PI / 2;
 			translate.value[i] = 0;
-			translate.min[i] = -2;
-			translate.max[i] = 2;
-			translate.delta[i] = 0;
 			scale.value[i] = 1;
-			scale.min[i] = 0;
-			scale.max[i] = 2;
-			scale.delta[i] = 0;
 		}
 	}
 

@@ -163,7 +163,7 @@ end
 characterschanged.connect(updatecharacterlist)
 
 local modifiers = {
-	{ 30, 90, 180 },
+	{ 30 * math.pi / 180, 90 * math.pi / 180, 180 * math.pi / 180 },
 	{ 1, 10, 100 },
 	{ 1, 10, 100 },
 }
@@ -208,6 +208,18 @@ local function sliderincrement(amount, axis)
 	end
 end
 
+local function slidestarted()
+	if currentslider then
+		currentslider:StartSlide()
+	end
+end
+
+local function slidestopped()
+	if currentslider then
+		currentslider:StopSlide()
+	end
+end
+
 local function updatemodifier()
 	modifier = modifiers[currentoperation][currentmodifier]
 	log.spam("increment modifier set to %f", modifier)
@@ -242,6 +254,14 @@ characterschanged.connect(sliderchanged)
 signals.connect(sliderx, "increment", sliderincrement)
 signals.connect(slidery, "increment", sliderincrement)
 signals.connect(sliderz, "increment", sliderincrement)
+
+signals.connect(sliderx, "slidestarted", slidestarted)
+signals.connect(slidery, "slidestarted", slidestarted)
+signals.connect(sliderz, "slidestarted", slidestarted)
+
+signals.connect(sliderx, "slidestopped", slidestopped)
+signals.connect(slidery, "slidestopped", slidestopped)
+signals.connect(sliderz, "slidestopped", slidestopped)
 
 signals.connect(rotatebutton, "selected", slidersetoperation)
 signals.connect(translatebutton, "selected", slidersetoperation)

@@ -31,12 +31,17 @@ namespace Poser {
 				frame[0] = nullptr;
 				frame[1] = nullptr;
 				Reset();
+				sliding = false;
 			}
 
 			void Apply();
 
 			std::vector<ExtClass::Frame*> frame;
 			ExtClass::Frame* guide;
+
+			bool sliding;
+			D3DXQUATERNION slidingRotData;
+			float slidingTSData[3];
 
 			enum Operation {
 				Rotate,
@@ -45,24 +50,12 @@ namespace Poser {
 			} currentOperation;
 
 			struct TranslationScaleData {
-				inline float rangeMin(int axis) {
-					return min[axis] + delta[axis];
-				}
-
-				inline float rangeMax(int axis) {
-					return max[axis] + delta[axis];
-				}
-
 				float value[3];
-				float min[3];
-				float max[3];
-				float delta[3];
 			} translate, scale;
 
 			struct RotationData {
 				D3DXQUATERNION data;
-				float minEuler[3];
-				float maxEuler[3];
+				
 				inline void reset() {
 					Shared::D3DXQuaternionIdentity(&data);
 					for (int i = 0; i < 3; i++) {
@@ -70,13 +63,19 @@ namespace Poser {
 					}
 				}
 
-				inline void rotateAxis(int axis, float delta) {
+				inline void rotateAxis(int axis, float delta, const bool& sliding, const D3DXQUATERNION& slideData) {
 					D3DXQUATERNION deltaRotation;
 					(*Shared::D3DXQuaternionRotationAxis)(&deltaRotation, rotAxes[axis].vector(), delta);
-					(*Shared::D3DXQuaternionMultiply)(&data, &data, &deltaRotation);
-					for (int i = 0; i < 3; i++) {
-						if (i != axis) {
-							rotAxes[i].rotate(deltaRotation);
+					if (sliding) {
+						(*Shared::D3DXQuaternionMultiply)(&data, &slideData, &deltaRotation);
+						setRotationQuaternion(data);
+					}
+					else {
+						(*Shared::D3DXQuaternionMultiply)(&data, &data, &deltaRotation);
+						for (int i = 0; i < 3; i++) {
+							if (i != axis) {
+								rotAxes[i].rotate(deltaRotation);
+							}
 						}
 					}
 				}
@@ -144,20 +143,6 @@ namespace Poser {
 				return currentOperation == Translate ? &translate : &scale;
 			}
 
-			inline float getCurrentOperationRangeMin(int axis) {
-				if (currentOperation == Rotate)
-					return rotation.minEuler[axis];
-				else
-					return getCurrentOperationData()->rangeMin(axis);
-			}
-
-			inline float getCurrentOperationRange(int axis) {
-				if (currentOperation == Rotate)
-					return rotation.maxEuler[axis] - rotation.minEuler[axis];
-				else
-					return getCurrentOperationData()->rangeMax(axis) - getCurrentOperationData()->rangeMin(axis); //map from [min,max] to [0,0x10000]
-			}
-
 			inline float getValue(int axis) {
 				if (currentOperation == Rotate) {
 					float angle[3];
@@ -191,11 +176,27 @@ namespace Poser {
 				}
 			}
 
-			void increment(float order, int axis);
-
-			inline void translateSlider(float delta, int axis) {
-				getCurrentOperationData()->delta[axis] = delta;
+			inline void startSlide() {
+				sliding = true;
+				if (currentOperation == Rotate) {
+					slidingRotData = rotation.data;
+				}
+				if (currentOperation == Translate) {
+					slidingTSData[0] = translate.value[0];
+					slidingTSData[1] = translate.value[1];
+					slidingTSData[2] = translate.value[2];
+				}
+				if (currentOperation == Scale) {
+					slidingTSData[0] = scale.value[0];
+					slidingTSData[1] = scale.value[1];
+					slidingTSData[2] = scale.value[2];
+				}
 			}
+			inline void stopSlide() {
+				sliding = false;
+			}
+
+			void increment(float order, int axis);
 
 			void Reset();
 
@@ -208,6 +209,12 @@ namespace Poser {
 				LUA_METHOD(Increment, {
 					_self->increment(_gl.get(2), _gl.get(3));
 					_self->Apply();
+				});
+				LUA_METHOD(StartSlide, {
+					_self->startSlide();
+				});
+				LUA_METHOD(StopSlide, {
+					_self->stopSlide();
 				});
 			}
 #undef LUA_CLASS

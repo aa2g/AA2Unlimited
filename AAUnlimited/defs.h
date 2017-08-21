@@ -5,7 +5,6 @@
 
 #define LUA_FILE_PATH TEXT("init.lua")
 #define LOGGER_FILE_PATH TEXT("logfile.txt")
-#define POSEMOD_FILE_PATH TEXT("poserframes.txt")
 
 #define OVERRIDE_PATH TEXT("data\\override\\")
 #define CLASS_SAVES_PATH TEXT("data\\save\\class\\")
