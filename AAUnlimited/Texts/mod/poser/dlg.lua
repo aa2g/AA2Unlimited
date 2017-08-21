@@ -23,87 +23,34 @@ local _M = {
 local dialogsliders
 local dialogposes
 local dialogs
---local style = require "poser.style"
-local signals = require "poser.signals"
 
+local signals = require "poser.signals"
+local lists = require "poser.lists"
+local toggles = require "poser.toggles"
 local unpack = table.unpack
 
-local ctrl = setmetatable({}, {__index=function(t,k)
-	return iup.GetDialogChild(dlg, k)
-end})
+local boneentries = {}
+local categoryentries = {}
 
+local framecfg = require "poser.framelist"
 
-local sshift = 16
-local function floatspinner(v,step)
-	return iup.text {
-		value=tostring(v),
-		spin="yes",
-		spinauto="no",
-		spin_cb = function(e,pos)
-			e.value = v + tonumber(pos - (1<<sshift)) * step
-			e:valuechanged_cb()
-		end,
-		mask=iup.MASK_FLOAT,
-		spinmin=0,
-		spinmax=1<<(sshift+1),
-		spinvalue=1<<sshift
-	}
-end
+local bones = {
+	bonemap = {},
+	bones = {},
+	categories = { },
+	props = {},
+	rooms = {},
+}
 
-local function listfilter()
-	return iup.vbox {
-		iup.text { expand = "horizontal"},
-		iup.list {
-			expand = "yes"
-		},
-		expand = "yes"
-	}
-end
-
-local function slider(label)
-	local step = 0.01
-	
-	local incremented = signals.signal()
-	local slidestarted = signals.signal()
-	local slidestopped = signals.signal()
-	local textbox = iup.text {}
-	local sliding = false
-	
-	local control = iup.hbox {
-		iup.label { title = label },
-		textbox,
-		iup.flatbutton { title = "0", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0) end },
-		iup.flatbutton { title = "-", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(-0.01) end },
-		iup.flatbutton { title = "+", font = "Serif, Courier, 8", size = "15x10", border = "yes", flat_action = function() incremented(0.01) end },
-		iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = step, value = 0,
-			mousemove_cb = function(self)
-				if not sliding then
-					sliding = true
-					slidestarted()
-				end
-				incremented(self.value)
-			end,
-			button_press_cb = function(self)
-				print("button press")
-				incremented(self.value)
-				self.value = 0
-			end,
-			button_release_cb = function(self)
-				self.value = 0
-				sliding = false
-				slidestopped()
-			end,
-		},
-		alignment = "acenter",
-		gap = 3,
-		incremented = incremented,
-		slidestarted = slidestarted,
-		slidestopped = slidestopped,
-	}
-	
-	incremented.connect(textbox, "value")
-	
-	return control
+for _,v in ipairs(framecfg) do
+	local name = v[3]
+	local frame = v[1]
+	bones.bonemap[name] = frame
+	table.insert(bones.bones, name)
+	for _,g in ipairs(v[2]) do
+		bones.categories[g] = bones.categories[g] or {}
+		table.insert(bones.categories[g], name)
+	end
 end
 
 local function shapecontrols(title, shapelist, rowsize)
@@ -164,34 +111,173 @@ local function facecontrols()
 	}
 end
 
-dialogsliders = iup.dialog {
+local bonefilter = lists.listfilter()
+local categorylist = lists.listbox { sort = "yes" }
+local bonelist = lists.listbox {}
+
+local categories = { "All", "Props", "Room" }
+for cat,_ in pairs(bones.categories) do
+	table.insert(categories, cat)
+end
+categorylist.setlist(categories)
+
+local function setcategory(category)
+	if category == "All" then
+		bonelist.setlist(bones.bones)
+	else
+		bonelist.setlist(bones.categories[category] or {})
+	end
+end
+setcategory("All")
+
+signals.connect(categorylist, "selectionchanged", setcategory)
+signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
+
+local characterlist = lists.listbox { lines = 2, expand = "horizontal" }
+local stylelist = lists.listbox { lines = 4, expand = "horizontal" }
+
+local characters = {}
+local currentcharacter
+local characterschanged = signals.signal()
+
+local function updatecurrentcharacter(_, index)
+	currentcharacter = characters[index]
+end
+signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
+
+local function updatecharacterlist()
+	log.info("Updating character list")
+	local cur
+	local list = {}
+	for i,v in ipairs(characters) do
+		if currentcharacter and v.struct == currentcharacter.struct then
+			cur = i
+		end
+		table.insert(list, v.name)
+	end
+	log.info("%s characters", #list)
+	characterlist.setlist(list)
+	characterlist.value = cur
+end
+characterschanged.connect(updatecharacterlist)
+
+local currentslider
+local dummyslider = {}
+local dummymt = {
+	__call = function()
+		log.warn("calling dummy slider")
+		return dummyslider
+	end,
+	
+	__index = function()
+		log.warn("indexing dummy slider")
+		return dummyslider
+	end
+}
+setmetatable(dummyslider, dummymt)
+
+local sliders = require "poser.sliders"
+local sliderx = sliders.slider { title = "X" }
+local slidery = sliders.slider { title = "Y" }
+local sliderz = sliders.slider { title = "Z" }
+
+local rotatebutton = toggles.button { title = "Rotate", data = 0 }
+local scalebutton = toggles.button { title = "Scale", data = 2 }
+local translatebutton = toggles.button { title = "Translate", data = 1 }
+
+local modifierx1 = toggles.button { title = "x1", data = 1 }
+local modifierx10 = toggles.button { title = "x1", data = 10 }
+local modifierx100 = toggles.button { title = "x1", data = 100 }
+
+local slidermod
+local sliderop
+local slider
+local function sliderchanged()
+	log.info("sliderchanged")
+	currentslider = dummyslider
+	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
+	if currentcharacter then
+		log.info("character %s poser: %s", currentcharacter.name, currentcharacter.poser)
+		log.info("got slidername %s", slidername)
+		local slider = currentcharacter.poser:GetSlider(slidername)
+		log.info("got slider %s", slider)
+		currentslider = slider or dummyslider
+	end
+end
+signals.connect(bonelist, "selectionchanged", sliderchanged)
+
+local function sliderincrement(amount, axis)
+	if currentslider then
+		currentslider:Increment(amount, axis)
+	end
+end
+characterschanged.connect(sliderchanged)
+signals.connect(sliderx, "increment", sliderincrement)
+signals.connect(slidery, "increment", sliderincrement)
+signals.connect(sliderz, "increment", sliderincrement)
+
+local dialogsliders = iup.dialog {
 	iup.hbox {
-		listfilter(),
-		listfilter(),
-		iup.vbox {
-			iup.hbox {
-				iup.radio {
-					iup.hbox {
-						iup.flatbutton { title = "Rotate", toggle = "yes", border = "yes", padding = 3},
-						iup.flatbutton { title = "Translate", toggle = "yes", border = "yes", padding = 3 },
-						iup.flatbutton { title = "Scale", toggle = "yes", border = "yes", padding = 3 },
-					}
-				},
-				iup.label { title = "Modifiers" },
-				iup.radio {
-					iup.hbox {
-						iup.flatbutton { title = "x1", toggle = "yes", border = "yes", padding = 3 },
-						iup.flatbutton { title = "x10", toggle = "yes", border = "yes", padding = 3 },
-						iup.flatbutton { title = "x100", toggle = "yes", border = "yes", padding = 3 },
-					}
-				},
-				iup.flatbutton { title = "Show", toggle = "yes", border = "yes", padding = 3 },
-				alignment = "acenter",
-				gap = 3
+		nmargin = "7x7",
+		iup.frame {
+			title = "Characters",
+			iup.vbox {
+				characterlist,
+				iup.label { title = "Styles" },
+				stylelist,
+				iup.button { title = "Edit clothes", expand = "horizontal" },
+				iup.button { title = "Edit overrides", expand = "horizontal" },
 			},
-			slider("X"),
-			slider("Y"),
-			slider("Z"),
+		},
+		iup.frame {
+			title = "Bones",
+			ncmargin = "3x3",
+			iup.hbox {
+				categorylist,
+				iup.vbox {
+					bonefilter, bonelist,
+					expand = "yes",
+				},
+			},
+		},
+		iup.vbox {
+			iup.frame {
+				title = "Sliders",
+				iup.vbox {
+					iup.hbox {
+						iup.label { title = "Operation" },
+						iup.radio {
+							iup.hbox {
+								rotatebutton,
+								scalebutton,
+								translatebutton,
+								gap = 3,
+							}
+						},
+						iup.label { separator = "vertical" },
+						iup.label { title = "Modifier" },
+						iup.radio {
+							iup.hbox {
+								modifierx1,
+								modifierx10,
+								modifierx100,
+								gap = 3,
+							}
+						},
+						iup.vbox {
+							iup.flatbutton { title = "Z-Copy", toggle = "no", border = "yes", padding = 3 },
+							alignment = "aright",
+							expand = "horizontal",
+						},
+						alignment = "acenter",
+						expand = "horizontal",
+						gap = 7
+					},
+					sliderx,
+					slidery,
+					sliderz,
+				},
+			},
 			iup.hbox {
 				shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, 4),
 				shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2),
@@ -201,60 +287,81 @@ dialogsliders = iup.dialog {
 		},
 		--gap = 3,
 	},
+	nmargin = "3x3",
 	maxbox = "no",
 	minbox = "no",
 }
 
 dialogposes = iup.dialog {
-	iup.tabs {
-		iup.vbox {
-			listfilter(),
-			iup.button { title = "Load Pose", expand = "horizontal" },
-			iup.button { title = "Save Pose", expand = "horizontal" },
-			iup.button { title = "Delete Pose", expand = "horizontal" },
-			iup.hbox { 
-				iup.label { title = "Clip" },
-				iup.text {},
-				iup.label { title = "Frame" },
-				iup.text {},
-				gap = 3,
-				alignment = "acenter"
+	iup.vbox {
+		iup.tabs {
+			iup.vbox {
+				lists.listbox { editbox = "yes" },
+				tabtitle = "Poses"
 			},
-			tabtitle = "Poses"
+			iup.vbox {
+				lists.listbox { editbox = "yes" },
+				tabtitle = "Scenes"
+			},
 		},
-		iup.vbox {
-			listfilter(),
-			iup.button { title = "Load Scene", expand = "horizontal" },
-			iup.button { title = "Save Scene", expand = "horizontal" },
-			iup.button { title = "Delete Scene", expand = "horizontal" },
-			iup.hbox { 
-				iup.label { title = "Clip" },
-				iup.text {},
-				iup.label { title = "Frame" },
-				iup.text {},
-				gap = 3,
-				alignment = "acenter"
-			},
-			tabtitle = "Scenes"
+		iup.hbox { 
+			iup.button { title = "Load", expand = "horizontal" },
+			iup.button { title = "Save", expand = "horizontal" },
+			iup.button { title = "Delete" },
+		},
+		iup.hbox { 
+			iup.label { title = "Clip" },
+			iup.text { expand = "horizontal" },
+			iup.label { title = "Frame" },
+			iup.text { expand = "horizontal" },
+			gap = 3,
+			alignment = "acenter"
 		},
 	},
+	nmargin = "3x3",
 	maxbox = "no",
 	minbox = "no",
 }
 
-dialogcharacters = iup.dialog {
-	iup.vbox {
-		iup.label { title = "Character" },
-		iup.list { expand = "horizontal" },
-		iup.label { title = "Style" },
-		iup.list { expand = "horizontal" },
-	},
-	maxbox = "no",
-	minbox = "no",
-}
+function _M.addcharacter(character)
+	local new = true
+	local last = 0
+	for i,v in ipairs(characters) do
+		if v.struct == character then
+			new = false
+		end
+		last = i
+	end
+	if new then
+		local data = character.m_charData
+		local name = string.format("%s %s", data.m_forename, data.m_surname)
+		new = { name = name, struct = character, poser = GetPoserCharacter(character) }
+		log.info("Poser is %s", new.poser)
+		characters[last + 1] = new
+	end
+	currentcharacter = currentcharacter or new
+	log.info("add character = %s", currentcharacter or "no currentcharacter")
+	characterschanged()
+end
+
+function _M.removecharacter(character)
+	log.info("rem character %s", currentcharacter or "no currentcharacter")
+	if currentcharacter.struct == character then
+		currentcharacter = nil
+	end
+	for k,v in pairs(characters) do
+		if v.struct == character then
+			table.remove(characters, k)
+		end
+	end
+	characterschanged()
+end
+
+function _M.updatereferences()
+end
 
 function _M.togglevisible()
-	dialogs = dialogs or { dialogcharacters, dialogposes, dialogsliders }
+	dialogs = dialogs or { dialogposes, dialogsliders }
 	if not _M.visible then
 		for _,v in ipairs(dialogs) do
 			v:map()
@@ -274,7 +381,7 @@ function _M.updatefloating(d)
 	d = d or dialogs
 	if not d then return end
 	local parent = 0
-	if _M.opts.floating == 0 or _M.opts.forcefullscreen then parent = _M.parentHWND end
+	if _M.forceparenting then parent = _M.parentHWND end
 	for _,v in ipairs(d) do
 		SetParent(v.hwnd, parent)
 	end

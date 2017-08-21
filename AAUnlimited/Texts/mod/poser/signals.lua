@@ -9,13 +9,17 @@ local function newmetaconnector(self)
 			print("signal fired")
 			local target
 			for k,v in pairs(self) do
-				for _,slot in ipairs(v) do
-					target = k[slot]
-					if type(target) == "function" or target.isconnector then
-						target(...)
-					else
-						--try setting the property
-						k[slot] = ...
+				if type(k) == "function" or k.isconnector then
+					k(...)
+				else
+					for _,slot in ipairs(v) do
+						target = k[slot]
+						if type(target) == "function" or target.isconnector then
+							target(...)
+						else
+							--try setting the property
+							k[slot] = ...
+						end
 					end
 				end
 			end

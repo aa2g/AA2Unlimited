@@ -8,6 +8,9 @@ local dlg
 local opts
 local signals = require "poser.signals"
 
+local characters = {}
+local forceparenting
+
 function on.first_tick(hwnd)
 	dlg.parentHWND = hwnd
 
@@ -18,7 +21,8 @@ function on.first_tick(hwnd)
 	GetClientRect(hwnd, rect)
 	local left, top, right, bottom = string.unpack("<IIII", peek(rect, 16))
 	if right == screenw and bottom == screenh then
-		opts.forcefullscreen = true
+		log.info("Forcing non-floating poser windows")
+		forceparenting = true
 	end
 end
 
@@ -28,29 +32,20 @@ function on.keydown(k)
 	end
 end
 
-function _M:load()
-	opts = self
-	self.floating = self.floating or 1
-	dlg = require "poser.dlg"
-	dlg.opts = opts
+function on.char_spawn_end(ret,character)
+	dlg.addcharacter(character)
 end
 
-function _M:config()
-	if not self then
-		return
-	end
+function on.char_despawn(character)
+	dlg.removecharacter(character)
+end
 
-	local ok, floating = iup.GetParam("Configure poser", nil, [[
-Floating windows: %b
-]], self.floating)
-	if ok then
-		self.floating = floating
-		
-		dlg.opts = opts
-		if dlg then dlg.updatefloating() end
-	end
+function on.poserframemod(xx)
+end
 
-	Config.save()
+function _M:load()
+	dlg = require "poser.dlg"
+	dlg.forceparenting = forceparenting
 end
 
 return _M

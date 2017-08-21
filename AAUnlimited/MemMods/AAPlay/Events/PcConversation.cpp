@@ -14,7 +14,7 @@ namespace PcConversation {
 // TODO - both these events get passed some interesting arguments we currently ignore
 void __stdcall StartEvent() {
 	Shared::GameState::setIsPcConversation(true);
-	Poser::StartEvent(Poser::NpcInteraction);
+	Poser::StartEvent(Poser::DialogueScene);
 }
 
 void __stdcall EndEvent() {

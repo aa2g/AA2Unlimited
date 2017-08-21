@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <map>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "../../External/ExternalClasses/CharacterStruct.h"
 #include "../../External/ExternalClasses/Frame.h"
@@ -24,17 +26,16 @@ namespace Poser {
 		struct SliderInfo {
 
 			SliderInfo()
-				: xxFrame(nullptr), guide(nullptr) {
-
+				: guide(nullptr) {
+				frame.resize(2);
+				frame[0] = nullptr;
+				frame[1] = nullptr;
+				Reset();
 			}
 
 			void Apply();
 
-			std::wstring frameName;
-			std::wstring descr;
-			PoseMods::FrameCategory category;
-
-			ExtClass::Frame* xxFrame;
+			std::vector<ExtClass::Frame*> frame;
 			ExtClass::Frame* guide;
 
 			enum Operation {
@@ -190,11 +191,6 @@ namespace Poser {
 				}
 			}
 
-			inline int toSlider(int axis) {
-				float coeff = 0x10000 / getCurrentOperationRange(axis);
-				return int(coeff * (getValue(axis) - getCurrentOperationRangeMin(axis)));
-			}
-
 			void increment(float order, int axis);
 
 			inline void translateSlider(float delta, int axis) {
@@ -203,6 +199,18 @@ namespace Poser {
 
 			void Reset();
 
+#define LUA_CLASS PoserController::SliderInfo
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_METHOD(SetCurrentOperation, {
+					_self->setCurrentOperation((Operation)(int)_gl.get(2));
+				});
+				LUA_METHOD(Increment, {
+					_self->increment(_gl.get(2), _gl.get(3));
+					_self->Apply();
+				});
+			}
+#undef LUA_CLASS
 		}; //SliderInfo
 
 		class PoserCharacter {
@@ -282,54 +290,55 @@ namespace Poser {
 				XXFileFace *m_faceStruct;
 			}; // struct Face
 
-			PoserCharacter(ExtClass::CharacterStruct* c, std::vector<SliderInfo> sliders);
+			PoserCharacter(ExtClass::CharacterStruct* c);
+			~PoserCharacter();
 
-			inline SliderInfo* CurrentSlider(PoseMods::FrameCategory category) {
-							if (category == PoseMods::FrameCategory::Prop) {
-								return &m_propSliders[m_currentProp];
-							}
-							else {
-								return m_currentSlider;
-							}
-			}
-
-			inline void SetCurrentSlider(PoseMods::FrameCategory category, int index) {
-				if (category == PoseMods::Room) return;
-				if (category == PoseMods::FrameCategory::Prop)
-					m_currentProp = m_propFrames[index];
-				else
-					m_currentSlider = &m_sliders[index];
-			}
-
-			inline void SetCurrentProp(std::string prop) {
-				m_currentProp = prop;
-			}
-
-			inline std::string GetCurrentProp() {
-				return m_currentProp;
-			}
-
-			void ResetSliders() {
+			inline void ResetSliders() {
 				for (auto it = m_sliders.begin(), end = m_sliders.end(); it != end; it++) {
-					it->Reset();
-					it->Apply();
+					it->second->Reset();
+					it->second->Apply();
 				}
+			}
+
+			inline void VoidFramePointers() {
+				SliderInfo* slider = nullptr;
+				for (auto it = m_sliders.begin(), end = m_sliders.end(); it != end; it++) {
+					slider = it->second;
+					slider->frame[0] = nullptr;
+					slider->frame[1] = nullptr;
+					slider->guide = nullptr;
+				}
+				m_targetBodyFrames.clear();
 			}
 
 			Face GetFace() {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
 
-			// index of each slider according to its frame name
-			static std::map<std::string, unsigned int> s_frameMap;
-			int id;
+			PoserController::SliderInfo* FrameMod(ExtClass::Frame* frame, const std::string& name);
+			SliderInfo* GetSlider(const char* name);
+			SliderInfo* GetSlider(const std::string& name);
+
 			ExtClass::CharacterStruct* m_character;
-			std::vector<SliderInfo> m_sliders;
-			SliderInfo *m_currentSlider;
-			std::map<PoseMods::FrameCategory, int> m_CategoryCurrentSlider;
-			std::map<std::string, SliderInfo> m_propSliders;
-			std::string m_currentProp;
-			std::vector<std::string> m_propFrames;
+			std::unordered_map<std::string, SliderInfo*> m_sliders;
+			std::unordered_map<std::string, ExtClass::Frame*> m_targetBodyFrames;
+			std::vector<ExtClass::Bone*> m_targetBodyBones;
+
+#define LUA_MGETTERP(var, pointer) \
+GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
+	return _gl.push(_self->pointer).one; \
+});
+
+#define LUA_CLASS PoserController::PoserCharacter
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_MGETTER1(GetSlider);
+				LUA_MGETTERP(GetFirstName, m_character->m_charData->m_forename);
+				LUA_MGETTERP(GetSecondName, m_character->m_charData->m_surname);
+			}
+#undef LUA_CLASS
+
+#undef LUA_MGETTERP
 		}; // PoserCharacter
 
 	public:
@@ -362,56 +371,17 @@ namespace Poser {
 			SetHidden("A00_O_sitasiru", !show);
 		}
 
-		inline PoserCharacter* CurrentCharacter() {
-			if (m_characters.size())
-				return m_characters[m_currentCharacter];
-			else
-				return nullptr;
-		}
-
-		void SetCurrentCharacter(int character) {
-			m_currentCharacter = character % m_characters.size();
-		}
-		void NewCharacter(int index);
-		void SetTargetCharacter(ExtClass::CharacterStruct* c);
-
-		inline SliderInfo* CurrentSlider() {
-			if (m_currentCategory == PoseMods::FrameCategory::Room) {
-				return &m_roomSliders[m_roomCurrentFrame];
-			}
-			else {
-				return m_characters.size() ? CurrentCharacter()->CurrentSlider(m_currentCategory) : nullptr;
+		void SetCurrentCharacter(ExtClass::CharacterStruct* character) {
+			for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
+				if ((*it)->m_character == character) {
+					m_currentCharacter = *it;
+				}
 			}
 		}
 
-		inline void SetCurrentSlider(PoseMods::FrameCategory category, int index) {
-			if (category == PoseMods::Room || category == PoseMods::Prop) return;
-			CurrentCharacter()->SetCurrentSlider(category, m_sliderCategories[category][index]);
-		}
-
-		inline void SetCurrentRoomSlider(std::string room) {
-			auto match = m_roomSliders.find(room);
-			if (match != m_roomSliders.end()) {
-				m_roomCurrentFrame = room;
-			}
-		}
-
-		inline SliderInfo* GetPropSlider(std::string slider) {
-			auto s = CurrentCharacter()->m_propSliders.find(slider);
-			if (s != CurrentCharacter()->m_propSliders.end()) {
-				return &s->second;
-			}
-			else
-				return nullptr;
-		}
-
-		inline SliderInfo::Operation currentOperation() {
-			return CurrentSlider()->currentOperation;
-		}
-
-		inline void SetCurrentCategory(PoseMods::FrameCategory category) {
-			m_currentCategory = category;
-		}
+		void AddCharacter(ExtClass::CharacterStruct* c);
+		void RemoveCharacter(ExtClass::CharacterStruct* c);
+		PoserCharacter* GetPoserCharacter(ExtClass::CharacterStruct* c);
 
 		bool IsActive() {
 			return m_isActive;
@@ -419,16 +389,11 @@ namespace Poser {
 		void StartPoser();
 		void StopPoser();
 		void Clear();
-		void GenSliderInfo();
-		void UpdateUI();
-
-		void SliderUpdate(int axis, int order, int position);
-		inline void ApplyIncrement(int axis, float order) {
-			CurrentSlider()->increment(order, axis);
-		}
 
 		void LoadPose(const TCHAR* path);
 		void SavePose(const TCHAR* path);
+		void LoadScene(const TCHAR* path);
+		void SaveScene(const TCHAR* path);
 		void LoadCloth(std::vector<BYTE> &file);
 		void jsonToPose(PoserCharacter* c, picojson::value json);
 		picojson::value poseToJson(PoserCharacter* c);
@@ -437,28 +402,18 @@ namespace Poser {
 
 		std::wstring GetOverride(const std::wstring& file);
 		void SetOverride(const std::wstring& file, const std::wstring& override);
-		bool IsUseGuidesEnabled();
-		void SetUseGuides(bool enabled);
-		bool ShowGuides();
-		void SetShowGuides(bool show);
 
 		bool m_isActive;
-		PoseMods::FrameCategory m_currentCategory;
 		std::vector<PoserCharacter*> m_characters;
-		PoserCharacter* m_targetCharacter; // the most recent loaded character
-		int m_currentCharacter;
-
-		// holds the index of each slider in the main slider vector
-		// according the the category they reside into
-		// loc_sliderCategories[category][categoryIndex] = index
-		std::map<PoseMods::FrameCategory, std::vector<unsigned int>> m_sliderCategories; 
-		std::vector<SliderInfo> m_sliders;
-		std::map<std::string, SliderInfo> m_roomSliders;
-		std::string m_roomCurrentFrame;
+		PoserCharacter* m_loadCharacter;
+		PoserCharacter* m_currentCharacter;
 		std::map<std::wstring, std::wstring> m_overrides;
+		
+#define LUA_CLASS Poser::PoserController
+		static inline void bindLua() {
+			LUA_NAME;
+		};
+#undef LUA_CLASS
 
-		bool m_useGuides;
-		bool m_showGuides;
-};
-
+	};
 }

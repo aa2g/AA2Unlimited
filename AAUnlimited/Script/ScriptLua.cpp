@@ -104,6 +104,9 @@ void Lua::bindLua() {
 	HPosButtonList::bindLua();
 	HStatistics::bindLua();
 
+	Poser::bindLua();
+	Poser::PoserController::PoserCharacter::bindLua();
+	Poser::PoserController::SliderInfo::bindLua();
 	Render::bindLua();
 
 	// Very low level utilities

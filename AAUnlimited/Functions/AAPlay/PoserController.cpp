@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "Files/PoseMods.h"
 
+#include <string.h>
+
 namespace Poser {
 
 #define X 0
@@ -64,18 +66,17 @@ namespace Poser {
 		angle[2] = std::atan2(t3, t4);
 	}
 
-	PoserController::PoserCharacter::PoserCharacter(ExtClass::CharacterStruct* c, std::vector<PoserController::SliderInfo> sliders) :
-		m_character(c), m_sliders(sliders)
+	PoserController::PoserCharacter::PoserCharacter(ExtClass::CharacterStruct* c) :
+		m_character(c)
 	{
-		m_currentSlider = &m_sliders[0];
 	}
 
-	ExtClass::XXFile* PoserController::GetXXFile(ExtClass::CharacterStruct::Models model) {
-		PoserController::PoserCharacter* c = CurrentCharacter();
-		if (!c) return nullptr;
-		return c->m_character->GetXXFile(model);
+	PoserController::PoserCharacter::~PoserCharacter() {
+		for (auto it = m_sliders.begin(); it != m_sliders.end(); it++) {
+			delete it->second;
+		}
 	}
-
+	/*
 	void PoserController::SetHidden(const char* name, bool hidden) {
 		ExtClass::Frame** frame = CurrentCharacter()->m_character->m_bonePtrArray;
 		ExtClass::Frame** arrayEnd= CurrentCharacter()->m_character->m_bonePtrArrayEnd;
@@ -88,16 +89,15 @@ namespace Poser {
 			frame++;
 		}
 	}
-
-	PoserController::PoserController() : m_currentCharacter(0), m_isActive(false),
-	m_useGuides(false) {
+	*/
+	PoserController::PoserController() :
+		m_currentCharacter(nullptr), m_isActive(false) {
 	}
 
 	PoserController::~PoserController()	{
 	}
 
 	void PoserController::StartPoser() {
-		GenSliderInfo();
 		m_isActive = true;
 	}
 
@@ -110,32 +110,28 @@ namespace Poser {
 		for (PoserCharacter* c : m_characters)
 			delete c;
 		m_characters.clear();
-		m_currentCharacter = 0;
-		m_roomSliders.clear();
-	}
-
-	void PoserController::SliderUpdate(int axis, int order, int position) {
-
+		m_currentCharacter = nullptr;
 	}
 
 	void PoserController::SliderInfo::Apply() {
-		if (xxFrame) {
+		if (frame[0] && frame[1]) {
 			//note that somehow those frame manipulations dont quite work as expected;
 			//by observation, rotation happens around the base of the bone whos frame got manipulated,
 			//rather than the tip.
 			//so to correct that, we gotta translate back
 
-			ExtClass::Frame* origFrame = &xxFrame->m_children[0];
+			ExtClass::Frame* origFrame = &frame[1]->m_children[0];
 
 			D3DMATRIX transMatrix;
 			(*Shared::D3DXMatrixTranslation)(&transMatrix, translate.value[X], translate.value[Y], translate.value[Z]);
+			frame[0]->m_matrix1 = transMatrix;
+
 			D3DMATRIX rotMatrix;
 			//(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
 			(*Shared::D3DXMatrixRotationQuaternion)(&rotMatrix, &getRotation());
 			D3DMATRIX scaleMatrix;
 			(*Shared::D3DXMatrixScaling)(&scaleMatrix, scale.value[X], scale.value[Y], scale.value[Z]);
 			D3DMATRIX matrix = origFrame->m_matrix5;
-			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &transMatrix);
 			(*Shared::D3DXMatrixMultiply)(&matrix, &matrix, &rotMatrix);
 			(*Shared::D3DXMatrixMultiply)(&rotMatrix, &scaleMatrix, &rotMatrix);
 
@@ -145,70 +141,115 @@ namespace Poser {
 			translations.z = origFrame->m_matrix5._43 - matrix._43;
 
 			D3DMATRIX resultMatrix = rotMatrix;
-			resultMatrix._41 += translations.x;
-			resultMatrix._42 += translations.y;
-			resultMatrix._43 += translations.z;
+			//resultMatrix._41 += translations.x;
+			//resultMatrix._42 += translations.y;
+			//resultMatrix._43 += translations.z;
 
-			xxFrame->m_matrix1 = resultMatrix;
+			frame[1]->m_matrix1 = resultMatrix;
 		}
 	}
 
+	PoserController::SliderInfo* PoserController::PoserCharacter::GetSlider(const char* name) {
+		if (name)
+			return GetSlider(std::string(name));
+		return nullptr;
+	}
+
+	PoserController::SliderInfo* PoserController::PoserCharacter::GetSlider(const std::string& name) {
+		if (m_sliders.count(name)) {
+			return m_sliders.at(name);
+		}
+		else if (m_targetBodyFrames.count(name)) {
+			return FrameMod(m_targetBodyFrames.at(name), name);
+		}
+		return 0;
+	}
+
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
-		using namespace ExtClass;
+		if (xxFile == nullptr || m_loadCharacter == nullptr) return;
+		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
+		if (model == ExtClass::CharacterStruct::SKELETON || model == ExtClass::CharacterStruct::FACE ||
+			model == ExtClass::CharacterStruct::TONGUE || model == ExtClass::CharacterStruct::SKIRT) {
+			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
+				if (bone->m_nBones) {
+					for (size_t i = 0; i < bone->m_nBones; i++) {
+						m_loadCharacter->m_targetBodyBones.push_back(&bone->m_bones[i]);
+					}
+				}
+				else {
+					m_loadCharacter->m_targetBodyFrames.emplace(bone->m_name, bone);
+				}
+			});
+		}
+	}
+
+	PoserController::SliderInfo* PoserController::PoserCharacter::FrameMod(ExtClass::Frame* frame, const std::string& origName) {
 		static const char prefix[]{ "pose_" };
 		static const char prefixTrans[]{ "pose_tr_" };
 		static const char prefixRot[]{ "pose_rot_" };
 		static const char propFramePrefix[]{ "AS00_N_Prop" };
-		static const std::wstring propPrefixTrans( L"t_" );
-		static const std::wstring propPrefixRot( L"r_" );
-		static const std::wstring suffixTrans(L" TR");
-		static const std::wstring suffixRot(L" ROT");
 
-		if (xxFile == NULL) return;
-		if (m_characters.size() == 0) return;
-		PoserCharacter* targetChar = m_targetCharacter;
-		ExtClass::CharacterStruct::Models model;
-		model = General::GetModelFromName(xxFile->m_name);
-		//targetChar = loc_loadCharacter;
-
-		auto InsertFrame = [&xxFile](ExtClass::Frame* bone, ExtClass::Frame** child, const char* prefix) {
+		auto InsertFrame = [](ExtClass::Frame** frame, const char* prefix) {
 			//make copy of the bone first
-			Frame* newMatch = (Frame*)Shared::IllusionMemAlloc(sizeof(Frame));
-			memcpy_s(newMatch, sizeof(Frame), bone, sizeof(Frame));
+			ExtClass::Frame* newMatch = (ExtClass::Frame*)Shared::IllusionMemAlloc(sizeof(ExtClass::Frame));
+			memcpy_s(newMatch, sizeof(ExtClass::Frame), (*frame), sizeof(ExtClass::Frame));
 
 			//turn match into a copy of the root for now, since there are a lot of members i dont know
-			memcpy_s(bone, sizeof(Frame), xxFile->m_root, sizeof(Frame));
+			memcpy_s((*frame), sizeof(ExtClass::Frame), (*frame)->m_xxPartOf->m_root, sizeof(ExtClass::Frame));
 
 			//change parent and child stuff
-			bone->m_parent = newMatch->m_parent;
-			bone->m_nChildren = 1;
-			bone->m_children = newMatch;
-			newMatch->m_parent = bone;
+			(*frame)->m_parent = newMatch->m_parent;
+			(*frame)->m_nChildren = 1;
+			(*frame)->m_children = newMatch;
+			newMatch->m_parent = *frame;
 			for (unsigned int i = 0; i < newMatch->m_nChildren; i++) {
 				newMatch->m_children[i].m_parent = newMatch;
 			}
 
 			//change name
 			int namelength = newMatch->m_nameBufferSize + strlen(prefix);
-			bone->m_name = (char*)Shared::IllusionMemAlloc(namelength);
-			bone->m_nameBufferSize = namelength;
-			strcpy_s(bone->m_name, bone->m_nameBufferSize, prefix);
-			strcat_s(bone->m_name, bone->m_nameBufferSize, newMatch->m_name);
-			*child = newMatch;
+			(*frame)->m_name = (char*)Shared::IllusionMemAlloc(namelength);
+			(*frame)->m_nameBufferSize = namelength;
+			strcpy_s((*frame)->m_name, (*frame)->m_nameBufferSize, prefix);
+			strcat_s((*frame)->m_name, (*frame)->m_nameBufferSize, newMatch->m_name);
+			*frame = newMatch;
 		};
 
-		if (model == ExtClass::CharacterStruct::SKELETON) {
-			if (targetChar->m_character->m_xxSkeleton != xxFile) {
-				for (PoserCharacter* c : m_characters) {
-					if (c->m_character->m_xxSkeleton == xxFile)
-						targetChar = c;
-				}
+		ExtClass::Frame* transFrame = frame;
+		InsertFrame(&frame, prefixTrans);
+		ExtClass::Frame* rotFrame = frame;
+		InsertFrame(&frame, prefixRot);
+
+		//now, frames that represent a mesh have a bunch of bones; each bone has a pointer to its frame (more precisely,
+		//its frames matrix2), which it uses to position its mesh. after this, those pointers will point to the artificial matrizes,
+		//so we have to change that as well
+		for (auto bone : m_targetBodyBones) {
+			ExtClass::Frame* boneFrame = bone->GetFrame();
+			if (boneFrame != NULL && strncmp(boneFrame->m_name, prefix, sizeof(prefix) - 1) == 0) {
+				bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
 			}
 		}
-		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE || model == ExtClass::CharacterStruct::SKIRT) {
-			//targetChar = loc_loadCharacter;
-		}
-		else if (model == ExtClass::CharacterStruct::H3DROOM) {
+
+		SliderInfo* slider = new SliderInfo;
+		slider->frame[0] = transFrame;
+		slider->frame[1] = rotFrame;
+		slider->Reset();
+		slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+		slider->Apply();
+
+		m_sliders.emplace(std::string(origName), slider);
+
+		return slider;
+	}
+
+
+
+
+
+
+
+
+			/*
 			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 
 				//make copy of the bone first
@@ -226,168 +267,65 @@ namespace Poser {
 					match->second.Apply();
 				}
 				else {
-					SliderInfo slider;
-					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixTrans;
-					slider.frameName = slider.descr;
-					slider.Reset();
-					slider.xxFrame = trans;
-					slider.category = PoseMods::FrameCategory::Room;
-					slider.setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-					m_roomSliders[General::CastToString(slider.frameName)] = slider;
-					slider.Apply();
-
-					slider.descr = General::CastToWStringN(child->m_name, child->m_nameBufferSize) + suffixRot;
-					slider.frameName = slider.descr;
-					slider.xxFrame = rot;
-					m_roomSliders[General::CastToString(slider.frameName)] = slider;
-					slider.Apply();
 				}
 			});
-		}
-		else
-			return; // model type isn't known so ignore
+			*/
 
-		//adjust bone matrizes
-		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
-			if (General::StartsWith(bone->m_name, "guide_")) {
-				auto match = PoserCharacter::s_frameMap.find(bone->m_name + 6);
-				if (match != PoserCharacter::s_frameMap.end()) {
-					targetChar->m_sliders[match->second].guide = bone;
+			/*if (General::StartsWith(bone->m_name, "guide_")) {
+				auto match = sliders.find(bone->m_name + 6);
+				if (match != sliders.end()) {
+					match->second->guide = bone;
 					SetHiddenFrame(bone, !m_showGuides);
 				}
-			}
-
-			//try to find matches in both the bone rules and slider rules
-			auto match = PoserCharacter::s_frameMap.find(bone->m_name);
-
-			//apply matches by adding matrizes
-			if (match != PoserCharacter::s_frameMap.end()) {
-				if (model != ExtClass::CharacterStruct::SKIRT || targetChar->m_sliders[match->second].category == PoseMods::FrameCategory::Skirt) {
-					//make copy of the bone first
-					Frame* child = nullptr;
-					InsertFrame(bone, &child, prefix);
-
-					targetChar->m_sliders[match->second].xxFrame = bone;
-					targetChar->m_sliders[match->second].Apply();
-				}
-			}
-			else {
-				if (strncmp(bone->m_name, propFramePrefix, sizeof(propFramePrefix) - 1) == 0) {
-					auto& map = targetChar->m_propSliders;
-
-					//make copy of the bone first
-					Frame* trans, *rot;
-					Frame* child = nullptr;
-					InsertFrame(bone, &child, prefixTrans);
-					trans = bone;
-					bone = child;
-					InsertFrame(bone, &child, prefixRot);
-					rot = bone;
-
-					auto sliderTrans = map.find(trans->m_name);
-					auto sliderRot = map.find(rot->m_name);
-					if (sliderTrans != map.end() && sliderRot != map.end()) {
-						sliderTrans->second.xxFrame = trans;
-						sliderRot->second.xxFrame = rot;
-						sliderTrans->second.Apply();
-						sliderRot->second.Apply();
-					}
-					else {
-						SliderInfo info;
-						info.descr = /*propPrefixTrans + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix) - 1, L"") + suffixTrans;
-						info.frameName = General::CastToWStringN(trans->m_name, trans->m_nameBufferSize);
-						info.Reset();
-						info.xxFrame = trans;
-						info.setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-						info.category = PoseMods::FrameCategory::Prop;
-						map[General::CastToString(info.descr)] = info;
-
-						info.descr = /*propPrefixRot + */General::CastToWStringN(child->m_name, child->m_nameBufferSize).replace(0, sizeof(propFramePrefix) - 1, L"") + suffixRot;
-						info.frameName = General::CastToWStringN(rot->m_name, rot->m_nameBufferSize);
-						info.xxFrame = rot;
-						map[General::CastToString(info.descr)] = info;
-
-						info.Apply();
-					}
-				}
-			}
-
-		});
+			}*/
 
 
-
-		//now, frames that represent a mesh have a bunch of bones; each bone has a pointer to its frame (more precisely,
-		//its frames matrix2), which it uses to position its mesh. after this, those pointers will point to the artificial matrizes,
-		//so we have to change that as well
-		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
-			for (unsigned int i = 0; i < frame->m_nBones; i++) {
-				Bone* bone = &frame->m_bones[i];
-				Frame* boneFrame = bone->GetFrame();
-				if (boneFrame != NULL && strncmp(boneFrame->m_name, prefix, sizeof(prefix) - 1) == 0) {
-					bone->SetFrame(&boneFrame->m_children[0]);
-				}
-			}
-		});
-	}
-
-	std::map<std::string, unsigned int> PoserController::PoserCharacter::s_frameMap;
-
-	void PoserController::GenSliderInfo() {
-		if (!m_sliders.empty()) return;
-
-		PoseMods mods(General::BuildAAUPath(POSEMOD_FILE_PATH).c_str());
-		auto& input = mods.GetInput();
-		for (auto& elem : input) {
-			SliderInfo info;
-			PoseMods::FrameCategory category = std::get<0>(elem);
-			std::string& strFrame = std::get<1>(elem);
-			std::string& strDesc = std::get<2>(elem);
-
-			std::wstring wstrFrame(strFrame.begin(), strFrame.end());
-			info.frameName = wstrFrame;
-			std::wstring wstrDescr(strDesc.begin(), strDesc.end());
-			info.descr = wstrDescr;
-
-			info.Reset();
-
-			info.xxFrame = NULL;
-			info.setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-			info.category = category;
-
-			m_sliders.push_back(info);
-			m_sliderCategories[category].push_back(m_sliders.size() - 1);
-			PoserCharacter::s_frameMap.insert(std::make_pair(strFrame, m_sliders.size() - 1));
-		}
-	}
-
-	void PoserController::SetTargetCharacter(ExtClass::CharacterStruct* charStruct) {
+	void PoserController::AddCharacter(ExtClass::CharacterStruct* charStruct) {
+		LOGPRIO(Logger::Priority::INFO) << "Adding character" << charStruct;
 		PoserCharacter* character = nullptr;
 		for (PoserCharacter* c : m_characters) {
 			if (c->m_character == charStruct)
 				character = c;
 		}
 		if (!character) {
-			character = new PoserCharacter(charStruct, m_sliders);
+			character = new PoserCharacter(charStruct);
 			m_characters.push_back(character);
 		}
-		m_targetCharacter = character;
+		character->VoidFramePointers();
+		m_loadCharacter = character;
+	}
+
+	void PoserController::RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
+		LOGPRIO(Logger::Priority::INFO) << "Removing character" << charStruct;
+		for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
+			if ((*it)->m_character == charStruct) {
+				m_characters.erase(it);
+				break;
+			}
+		}
+	}
+
+	PoserController::PoserCharacter* PoserController::GetPoserCharacter(ExtClass::CharacterStruct* c) {
+		for (auto charas : m_characters) {
+			if (charas->m_character == c)
+				return charas;
+		}
+		return nullptr;
 	}
 	
 	void PoserController::LoadPose(const TCHAR* path) {
 		using namespace picojson;
 		value json;
 
-		PoserCharacter* character = CurrentCharacter();
+		PoserCharacter* character = m_currentCharacter;
 		if (!character)
 			return;
-		for (SliderInfo& slider : character->m_sliders) {
-			slider.Reset();
-			slider.Apply();
-		}
+		character->ResetSliders();
 
 		std::ifstream in(path);
 		in >> json;
 
+		auto& sliders = character->m_sliders;
 		if (picojson::get_last_error().empty() && json.is<object>()) {
 			jsonToPose(character, json);
 		}
@@ -396,9 +334,9 @@ namespace Poser {
 			std::wstring str;
 			SliderInfo* slider = NULL;
 			for (auto elem : openFile.GetMods()) {
-				auto match = character->s_frameMap.find(elem.frameName);
-				if (match != character->s_frameMap.end()) {
-					slider = &character->m_sliders[match->second];
+				auto match = sliders.find(elem.frameName);
+				if (match != sliders.end()) {
+					slider = match->second;
 					float x, y, z;
 					x = elem.matrix[0];
 					y = elem.matrix[1];
@@ -417,7 +355,7 @@ namespace Poser {
 	}
 
 	void PoserController::SavePose(const TCHAR* path) {
-		PoserCharacter* character = CurrentCharacter();
+		PoserCharacter* character = m_currentCharacter;
 		if (!character)
 			return;
 		std::ofstream out(path);
@@ -430,6 +368,7 @@ namespace Poser {
 		if (json.is<object>()) {
 			const object load = json.get<object>();
 			int version = 1;
+			auto& sliders = c->m_sliders;
 			try {
 				auto versionCheck = load.find("_VERSION_");
 				if (versionCheck != load.end()) {
@@ -437,11 +376,8 @@ namespace Poser {
 				}
 				c->m_character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
 				c->m_character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
-				object sliders = load.at("sliders").get<object>();
-				for (auto it = c->m_sliders.begin(); it != c->m_sliders.end(); it++) {
-					it->Reset();
-					(*it).Apply();
-				}
+				object posesliders = load.at("sliders").get<object>();
+				c->ResetSliders();
 
 				auto LoadSlider = [this,&version](SliderInfo* slider, array& mods) {
 					if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
@@ -472,18 +408,11 @@ namespace Poser {
 						//invalid json data
 					}
 				};
-				for (auto s = sliders.cbegin(); s != sliders.cend(); s++) {
-					auto match = c->s_frameMap.find((*s).first);
-					if (match != c->s_frameMap.end()) {
+				for (auto s = posesliders.cbegin(); s != posesliders.cend(); s++) {
+					auto match = sliders.find(s->first);
+					if (match != sliders.end()) {
 						array mods = (*s).second.get<array>();
-						LoadSlider(&c->m_sliders[match->second], mods);
-					}
-					else {
-						auto match = c->m_propSliders.find((*s).first);
-						if (match != c->m_propSliders.end()) {
-							array mods = (*s).second.get<array>();
-							LoadSlider(&match->second, mods);
-						}
+						LoadSlider(match->second, mods);
 					}
 				}
 			}
@@ -539,25 +468,22 @@ namespace Poser {
 		json["pose"] = value((double)c->m_character->m_xxSkeleton->m_poseNumber);
 		json["frame"] = value((double)c->m_character->m_xxSkeleton->m_animFrame);
 		value::object sliders;
-		auto SaveSlider = [&sliders](auto& slider) {
+		auto SaveSlider = [&sliders](auto& frameName, auto& slider) {
 			value::array values(10);
-			values[0] = value((double)slider.rotation.data.x);
-			values[1] = value((double)slider.rotation.data.y);
-			values[2] = value((double)slider.rotation.data.z);
-			values[3] = value((double)slider.rotation.data.w);
-			values[4] = value((double)slider.translate.value[X]);
-			values[5] = value((double)slider.translate.value[Y]);
-			values[6] = value((double)slider.translate.value[Z]);
-			values[7] = value((double)slider.scale.value[X]);
-			values[8] = value((double)slider.scale.value[Y]);
-			values[9] = value((double)slider.scale.value[Z]);
-			sliders[std::string(slider.frameName.cbegin(), slider.frameName.cend())] = value(values);
+			values[0] = value((double)slider->rotation.data.x);
+			values[1] = value((double)slider->rotation.data.y);
+			values[2] = value((double)slider->rotation.data.z);
+			values[3] = value((double)slider->rotation.data.w);
+			values[4] = value((double)slider->translate.value[X]);
+			values[5] = value((double)slider->translate.value[Y]);
+			values[6] = value((double)slider->translate.value[Z]);
+			values[7] = value((double)slider->scale.value[X]);
+			values[8] = value((double)slider->scale.value[Y]);
+			values[9] = value((double)slider->scale.value[Z]);
+			sliders[frameName] = value(values);
 		};
-		for (SliderInfo& slider : c->m_sliders) {
-			SaveSlider(slider);
-		}
-		for (auto i = c->m_propSliders.begin(); i != c->m_propSliders.end(); i++) {
-			SaveSlider(i->second);
+		for (auto it = c->m_sliders.begin(); it != c->m_sliders.end(); it++) {
+			SaveSlider(it->first, it->second);
 		}
 		json["sliders"] = value(sliders);
 
@@ -576,7 +502,7 @@ namespace Poser {
 	void PoserController::LoadCloth(std::vector<BYTE> &file) {
 		ClothFile load(file);
 		if (!load.IsValid()) return;
-		ExtClass::CharacterData::Clothes* cloth = &CurrentCharacter()->m_character->m_charData->m_clothes[CurrentCharacter()->m_character->m_currClothes];
+		ExtClass::CharacterData::Clothes* cloth = &m_currentCharacter->m_character->m_charData->m_clothes[m_currentCharacter->m_character->m_currClothes];
 		cloth->slot = load.m_slot;
 		cloth->skirtLength = load.m_shortSkirt;
 		cloth->socks = load.m_socksId;
@@ -609,9 +535,9 @@ namespace Poser {
 
 	std::wstring PoserController::GetOverride(const std::wstring& file) {
 		//A00_00_01_00h.xx - skeleton
-		if (m_useGuides && file.length() == 16 && General::StartsWith(file, L"A00_00") && file.substr(10, 6) == L"00h.xx") {
+		/*if (m_useGuides && file.length() == 16 && General::StartsWith(file, L"A00_00") && file.substr(10, 6) == L"00h.xx") {
 			return L"poser\\skeleton\\female_guides.xx";
-		}
+		}*/
 		auto it = m_overrides.find(file);
 		if (it != m_overrides.end()) {
 			return it->second;
@@ -627,21 +553,4 @@ namespace Poser {
 			m_overrides[file] = override;
 		}
 	}
-
-	bool PoserController::IsUseGuidesEnabled() {
-		return m_useGuides;
-	}
-
-	void PoserController::SetUseGuides(bool enabled) {
-		m_useGuides = enabled;
-	}
-
-	bool PoserController::ShowGuides() {
-		return m_showGuides;
-	}
-
-	void PoserController::SetShowGuides(bool show) {
-		m_showGuides = show;
-	}
-
 }

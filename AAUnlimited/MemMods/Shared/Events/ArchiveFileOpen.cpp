@@ -108,7 +108,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 
 
 	if (Poser::OverrideFile(&parchive, &pfile, readBytes, &outBuffer)) {
-		provider = "overridefile";
+		provider = "poseroverride";
 		goto done;
 	}
 
