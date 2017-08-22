@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <d3d9.h>
+#include <queue>
 #include "Script/ScriptLua.h"
 
 #include "Bone.h"
@@ -61,6 +62,22 @@ public:
 		return &m_children[n];
 	}
 
+	inline Frame* FindFrame(const char* name) {
+		Frame* child = nullptr;
+		EnumTreeLevelOrder([&child, &name](Frame* frame) {
+			int idx = strcmp(frame->m_name, name);
+			if (!idx) {
+				child = frame;
+				return false; //stop
+			}
+			return true; //continue
+		});
+		return child;
+	}
+
+	template<class Callback>
+	void EnumTreeLevelOrder(Callback& callback);
+
 	static inline void bindLua() {
 #define LUA_CLASS Frame
 		LUA_BINDSTRP(m_name)
@@ -84,6 +101,24 @@ public:
 #undef LUA_CLASS
 	};
 };
+
+template<class Callback>
+void Frame::EnumTreeLevelOrder(Callback& callback) {
+	std::queue<Frame*> q;
+	q.push(this);
+
+	bool ret;
+	Frame* it;
+	while (!q.empty()) {
+		it = q.front();
+		q.pop();
+		for (int i = 0; i < it->m_nChildren; i++) {
+			q.push(&it->m_children[i]);
+		}
+		ret = callback(it);
+		if (!ret) break;
+	}
+}
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");
 static_assert(sizeof(Frame::SubmeshFlags) == 0x248, "size mismatch");

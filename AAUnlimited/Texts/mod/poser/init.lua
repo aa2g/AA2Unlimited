@@ -60,7 +60,7 @@ end
 
 function _M:unload()
 	-- close all dialogs
-	dlg:close_all()
+	if dlg then dlg:close_all() end
 end
 
 return _M
