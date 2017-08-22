@@ -12,7 +12,8 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Time (Day)"),
 	TEXT("Time (Period)"),
 	TEXT("Character (Pregnancy Risk)"),
-	TEXT("Event Type")
+	TEXT("Event Type"),
+	TEXT("Mood")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -977,6 +978,52 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			190, NCONSTCAT_EVENT_TYPE,
 			TEXT("PC conversation state updated"), TEXT("PC_CONVERSATION_STATE_UPDATED"), TEXT("PC Conversation state updated"),
 			Value(Shared::Triggers::Events::PC_CONVERSATION_STATE_UPDATED)
+		},
+		//Moods
+		{
+			191, NCONSTCAT_MOOD,
+			TEXT("ENERGETIC"), TEXT("ENERGETIC"), TEXT("ENERGETIC"),
+			Value(0)
+		},
+		{
+			192, NCONSTCAT_MOOD,
+			TEXT("EMBARRASSED"), TEXT("EMBARRASSED"), TEXT("EMBARRASSED"),
+			Value(1)
+		},
+		{
+			193, NCONSTCAT_MOOD,
+			TEXT("JEALOUS"), TEXT("JEALOUS"), TEXT("JEALOUS"),
+			Value(2)
+		},
+		{
+			194, NCONSTCAT_MOOD,
+			TEXT("ANGRY"), TEXT("ANGRY"), TEXT("ANGRY"),
+			Value(3)
+		},
+		{
+			195, NCONSTCAT_MOOD,
+			TEXT("SAD"), TEXT("SAD"), TEXT("SAD"),
+			Value(4)
+		},
+		{
+			196, NCONSTCAT_MOOD,
+			TEXT("RELAXED"), TEXT("RELAXED"), TEXT("RELAXED"),
+			Value(5)
+		},
+		{
+			197, NCONSTCAT_MOOD,
+			TEXT("AROUSED"), TEXT("AROUSED"), TEXT("AROUSED"),
+			Value(6)
+		},
+		{
+			198, NCONSTCAT_MOOD,
+			TEXT("SERIOUS"), TEXT("SERIOUS"), TEXT("SERIOUS"),
+			Value(7)
+		},
+		{
+			199, NCONSTCAT_MOOD,
+			TEXT("NORMAL"), TEXT("NORMAL"), TEXT("NORMAL"),
+			Value(8)
 		},
 		
 	},
