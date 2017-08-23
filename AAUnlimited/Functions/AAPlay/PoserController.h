@@ -13,6 +13,7 @@
 #include "../../Files/PoseMods.h"
 #include "../Shared/Globals.h"
 #include "../../3rdparty/picojson/picojson.h"
+#include "Script/glua_stl.h"
 
 namespace Poser {
 
@@ -321,7 +322,7 @@ namespace Poser {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
 
-			void FrameModTree(ExtClass::Frame* tree);
+			void FrameModTree(ExtClass::Frame* tree, const char* filter = nullptr);
 			void FrameModSkeleton(ExtClass::XXFile* xxFile);
 			void FrameModFace(ExtClass::XXFile* xxFile);
 			void FrameModSkirt(ExtClass::XXFile* xxFile);
@@ -335,6 +336,7 @@ namespace Poser {
 			static inline void bindLua() {
 				LUA_NAME;
 				LUA_MGETTER1(GetSlider);
+				LUA_MAPITERATOR(Sliders, m_sliders)
 			}
 #undef LUA_CLASS
 		}; // PoserCharacter

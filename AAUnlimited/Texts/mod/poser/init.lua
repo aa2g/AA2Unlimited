@@ -41,6 +41,10 @@ function on.char_spawn_end(ret,character)
 	dlg.addcharacter(character)
 end
 
+function on.char_update_end(ret,character)
+	dlg.addcharacter(character)
+end
+
 function on.char_despawn(character)
 	dlg.removecharacter(character)
 end

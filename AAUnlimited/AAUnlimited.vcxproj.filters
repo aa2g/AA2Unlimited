@@ -247,6 +247,7 @@
     <ClInclude Include="Files\PersistentStorage.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\UiEvent.h" />
+    <ClInclude Include="Script\glua_stl.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
