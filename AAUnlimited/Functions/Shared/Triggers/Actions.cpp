@@ -617,6 +617,51 @@ namespace Shared {
 
 		}
 
+		//int seat, int mood, int moodStr
+		void Thread::AddMood(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			int mood = params[1].iVal;
+			int moodStr = params[2].iVal;
+			//validation
+			if (!inst->IsValid()) return;
+			if (mood > 8 || mood < 0) return;
+			if (moodStr > 9) moodStr = 9;
+			if (moodStr < 0) moodStr = 0;
+
+			auto moods1 = inst->m_char->GetMoods1();
+			//shift old moods
+			for (int i = 0; i < 9 - moodStr; i++) {
+				moods1[i] = moods1[i + moodStr];
+			}
+			//add new moods
+			for (int i = 9 - moodStr; i < 9; i++) {
+				moods1[i] = mood;
+			}
+		}
+
+		//int seat, int mood1, int mood2, int moodStr
+		void Thread::ReplaceMood(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			int mood1 = params[1].iVal;
+			int mood2 = params[2].iVal;
+			int moodStr = params[3].iVal;
+			//validation
+			if (!inst->IsValid()) return;
+			if (mood1 > 8 || mood1 < 0) return;
+			if (mood2 > 8 || mood2 < 0) return;
+
+			auto moods = inst->m_char->GetMoods1();
+			int count = moodStr;
+			for (int i = 8; i >= 0 && count > 0; i--) {
+				if (moods[i] == mood1) {
+					moods[i] = mood2;
+					count--;
+				}
+			}
+		}
+
 
 		/*
 		 * A list of all action categories
@@ -982,12 +1027,18 @@ namespace Shared {
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardAnalSexExperience
 			},
-			//{
-			//	54, ACTIONCAT_FLOW_CONTROL, TEXT("Fire Trigger"), TEXT("Fire( %p )"),
-			//	TEXT("Execute triggers with provided name."),
-			//	{ TYPE_STRING },
-			//	&Thread::FireTrigger
-			//},
+			{
+				54, ACTIONCAT_GENERAL, TEXT("Add Mood"), TEXT("%p ::AddMood(mood: %p , strength: %p"),
+				TEXT("Add mood strength."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::AddMood
+			},
+			{
+				55, ACTIONCAT_GENERAL, TEXT("Replace Mood"), TEXT("%p ::ReplaceMood(mood: %p , with mood: %p , strength: %p"),
+				TEXT("Replace mood 1 with mood 2 up to strength."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::ReplaceMood
+			},
 		};
 
 
