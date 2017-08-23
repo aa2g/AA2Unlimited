@@ -170,6 +170,7 @@ public:;
 
 	void OOM();
 	void Init();
+	void InitProfiling();
 	void GC();
 	void CacheGC(size_t);
 	void ACacheGC(size_t);
