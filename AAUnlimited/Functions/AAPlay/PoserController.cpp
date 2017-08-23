@@ -23,7 +23,7 @@ namespace Poser {
 		else {
 			if (order) {
 				float delta = currentOperation == Translate ? order / 10.0f : order / 50.0f;
-				if (sliding)
+				if (!sliding)
 					getCurrentOperationData()->value[axis] += delta;
 				else
 					getCurrentOperationData()->value[axis] = slidingTSData[axis] + delta;
@@ -220,26 +220,28 @@ namespace Poser {
 		*origFrame = frame;
 	}
 
-	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree) {
+	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, const char* filter) {
 		PoserController::SliderInfo* slider;
 		ExtClass::Frame* transFrame;
 		ExtClass::Frame* rotFrame;
+		size_t len = filter? strlen(filter) : 0;
 
-		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
-			FrameMod(&frame, &transFrame, &rotFrame);
+		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame, &filter, &len](ExtClass::Frame* frame) {
+			if (!filter || strncmp(frame->m_name, filter, len) == 0) {
+				FrameMod(&frame, &transFrame, &rotFrame);
 
-			slider = GetSlider(frame->m_name);
-			if (!slider) {
-				slider = new SliderInfo;
-				slider->frame[0] = transFrame;
-				slider->frame[1] = rotFrame;
-				slider->Reset();
-				slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-				slider->Apply();
-				m_sliders.emplace(std::string(frame->m_name), slider);
+				slider = GetSlider(frame->m_name);
+				if (!slider) {
+					slider = new SliderInfo;
+					slider->frame[0] = transFrame;
+					slider->frame[1] = rotFrame;
+					slider->Reset();
+					slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+					slider->Apply();
+					m_sliders.emplace(std::string(frame->m_name), slider);
+				}
+				slider = nullptr;
 			}
-			slider = nullptr;
-
 			return true;
 		});
 	}
@@ -249,7 +251,7 @@ namespace Poser {
 		ExtClass::Frame* world = root->FindFrame("a01_N_Zentai_010");
 
 		if (world) {
-			FrameModTree(world);
+			FrameModTree(world, "a01");
 		}
 
 		ExtClass::Frame* dankon = root->FindFrame("a00_N_Dankon_01");
@@ -300,7 +302,7 @@ namespace Poser {
 			character = new PoserCharacter(charStruct);
 			m_characters.push_back(character);
 		}
-		character->VoidFramePointers();
+		//character->VoidFramePointers();
 		m_loadCharacter = character;
 	}
 

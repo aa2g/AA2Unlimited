@@ -142,9 +142,13 @@ local currentcharacter
 local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 
-local function updatecurrentcharacter(_, index)
-	currentcharacter = characters[tonumber(index)]
+local function setcurrentcharacter(c)
+	currentcharacter = c
 	currentcharacterchanged(currentcharacter)
+end
+
+local function updatecurrentcharacter(_, index)
+	setcurrentcharacter(characters[tonumber(index)])
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
@@ -191,9 +195,9 @@ local sliderx = sliders.slider { title = "X", data = 0 }
 local slidery = sliders.slider { title = "Y", data = 1 }
 local sliderz = sliders.slider { title = "Z", data = 2 }
 
-local rotatebutton = toggles.button { title = "Rotate", data = 0 }
-local scalebutton = toggles.button { title = "Scale", data = 2 }
-local translatebutton = toggles.button { title = "Translate", data = 1 }
+local rotatebutton = toggles.button { title = "Rotate", data = 1 }
+local scalebutton = toggles.button { title = "Scale", data = 3 }
+local translatebutton = toggles.button { title = "Translate", data = 2 }
 
 local modifierx1 = toggles.button { title = "x1", data = 1 }
 local modifierx10 = toggles.button { title = "x10", data = 2 }
@@ -233,21 +237,25 @@ local function slidersetmodifier(modifier)
 end
 
 local function slidersetoperation(operation)
-	currentoperation = operation + 1
+	currentoperation = operation
 	log.spam("set current slider operation to %d", currentoperation)
 	if currentslider then
-		currentslider:SetCurrentOperation(operation)
+		currentslider:SetCurrentOperation(operation - 1)
 	end
 	updatemodifier()
 end
 
 local function sliderchanged()
+	log.spam("sliderchanged")
 	currentslider = dummyslider
 	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
+	log.spam("looking for %s", slidername)
 	if currentcharacter then
 		local slider = currentcharacter.poser:GetSlider(slidername)
 		currentslider = slider or dummyslider
+		log.spam("set currrent slider to %s", currentslider)
 	end
+	slidersetoperation(currentoperation)
 end
 signals.connect(bonelist, "selectionchanged", sliderchanged)
 currentcharacterchanged.connect(sliderchanged)
@@ -370,8 +378,10 @@ function _M.addcharacter(character)
 		local name = string.format("%s %s", data.m_forename, data.m_surname)
 		new = { name = name, struct = character, poser = GetPoserCharacter(character) }
 		characters[last + 1] = new
+		if not currentcharacter then
+			setcurrentcharacter(new)
+		end
 	end
-	currentcharacter = currentcharacter or new
 	log.info("add character = %s", currentcharacter or "no currentcharacter")
 	characterschanged()
 end

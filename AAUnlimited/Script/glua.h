@@ -145,6 +145,10 @@ struct State {
 		lua_pushlstring(L(), s, n);
 		return *this;
 	}
+	inline auto& push(const std::string& s) {
+		lua_pushlstring(L(), s.c_str(), s.length());
+		return *this;
+	}
 
 	// Closure
 

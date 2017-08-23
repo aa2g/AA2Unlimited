@@ -246,6 +246,7 @@
     <ClInclude Include="Functions\Shared\Shadowing.h" />
     <ClInclude Include="Script\glua.h" />
     <ClInclude Include="Script\gluam.h" />
+    <ClInclude Include="Script\glua_stl.h" />
     <ClInclude Include="Script\ScriptLua.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>

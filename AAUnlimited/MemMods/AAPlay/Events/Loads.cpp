@@ -25,11 +25,11 @@ static DWORD OrigDespawnMale, OrigDespawnFemale;
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
+	Poser::AddCharacter(loadCharacter);
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
 	Shared::MeshTextureCharLoadStart(loadCharacter);
-	Poser::AddCharacter(loadCharacter);
 	//Add the character to the conversation list
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
@@ -39,7 +39,6 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, 
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
 	loc_hiPolyLoaded = data.card;
 	ThrowEvent(&data);
-	loc_loadingCharacter = true;
 }
 
 void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
@@ -51,11 +50,11 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 	HiPolyEndData data;
 	data.card = loc_hiPolyLoaded;
 	ThrowEvent(&data);
-	loc_loadingCharacter = false;
 }
 
 // wraps the calls to original load character events
 DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a4, BYTE partial) {
+	loc_loadingCharacter = true;
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
@@ -76,6 +75,7 @@ DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a
 
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
 	HiPolyLoadEndEvent(loadCharacter);
+	loc_loadingCharacter = false;
 	return retv;
 }
 
@@ -99,7 +99,7 @@ DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
 	}
 
 	HiPolyLoadEndEvent(loadCharacter);
-	LUA_EVENT_NORET("char_update_end", loadCharacter, retv, a, b);
+	LUA_EVENT_NORET("char_update_end", retv, loadCharacter, a, b);
 
 	return retv;
 }
