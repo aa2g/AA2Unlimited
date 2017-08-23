@@ -195,10 +195,10 @@ struct State {
 		return *this;
 	}
 
-	inline auto& push(Value &v) {
+/*	inline auto& push(Value &v) {
 		//printf("pushvalue ref\n");
 		lua_pushvalue(L(), v.idx); return *this;
-	}
+	}*/
 	inline auto& push(Value v) {
 		//printf("pushvalue copy\n");
 		lua_pushvalue(L(), v.idx); return *this;

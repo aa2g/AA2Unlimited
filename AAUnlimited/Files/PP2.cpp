@@ -570,7 +570,8 @@ void PP2::bindLua() {
 			tf["flags"] = fe.flags;
 			tf["osize"] = fe.osize;
 			tf["csize"] = (fe.flags&f.FLAG_OPUS) ? f.chunkSize(fe.chunk) : -1;
-			t[f.files[i].hash & ((1ULL<<52)-1)] = tf;
+			auto hv = s.pushlstring((const char *)(&f.files[i].hash), 8).get();
+			t[hv] = tf;
 		}
 		if (chk != lua_topointer(s.L(), 2))
 			__debugbreak();
@@ -686,18 +687,6 @@ void PP2::Init() {
 	if (!g_Config.bUsePP2)
 		return;
 
-	if (g_Config.PP2Profiling) {
-		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.in | prof.binary);
-		// start writing on 12 byte boundary
-		int pos = prof.tellp();
-		prof.seekp(pos - (pos % 12));
-		// start game marker
-		LOGPRIONC(Logger::Priority::INFO) dec
-			<< "PP2Prof: seeking to " << pos << "\r\n";
-
-		prof.write("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12);
-	}
-
 	MemAlloc::dumpheap();
 	int nthreads = thread::hardware_concurrency();
 	if (!nthreads)
@@ -721,6 +710,19 @@ void PP2::Init() {
 	bindLua();
 }
 
+void PP2::InitProfiling() {
+	if (g_Config.PP2Profiling) {
+		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.in | prof.binary);
+		// start writing on 12 byte boundary
+		int pos = prof.tellp();
+		prof.seekp(pos - (pos % 12));
+		// start game marker
+		LOGPRIONC(Logger::Priority::INFO) dec
+			<< "PP2Prof: seeking to " << pos << "\r\n";
+
+		prof.write("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12);
+	}
+}
 
 
 HANDLE PP2::HGet() {

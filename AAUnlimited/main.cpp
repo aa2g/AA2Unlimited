@@ -34,7 +34,7 @@ static BOOL InitLua()
 }
 
 
-// Last step before handing control over
+// Last step before handing contrlo over
 static const char *NormalInit()
 {
 	srand(time(NULL));
@@ -100,8 +100,10 @@ static const char *NormalInit()
 
 	if (g_Config.bUsePPeX)
 		g_PPeX.Connect(L"\\\\.\\pipe\\PPEX");
-	if (g_Config.bUsePP2)
+	if (g_Config.bUsePP2) {
+		g_PP2.InitProfiling();
 		g_PP2.AddPath(General::BuildPlayPath(L"data"));
+	}
 
 	if (g_Config.bUseVisualStyles && General::IsAAEdit) {
 		DeactivateActCtx(0, cookie);
