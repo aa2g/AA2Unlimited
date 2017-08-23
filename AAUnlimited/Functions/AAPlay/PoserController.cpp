@@ -11,14 +11,6 @@ namespace Poser {
 #define Z 2
 #define W 3
 
-	struct SliderHelper {
-		int m_currentSlidingAxis;
-		PoserController::SliderInfo::Operation m_currentOperation;
-		D3DXVECTOR3 m_currentSlidingRotationAxisVector;
-		D3DXQUATERNION m_currentSlidingRotationBase;
-		PoserController::SliderInfo::TranslationScaleData m_translationScaleBase;
-	} loc_sliderHelper;
-
 	void PoserController::SliderInfo::increment(float order, int axis) {
 		if (currentOperation == Rotate) {
 			if (order) {
@@ -143,9 +135,9 @@ namespace Poser {
 			translations.z = origFrame->m_matrix5._43 - matrix._43;
 
 			D3DMATRIX resultMatrix = rotMatrix;
-			//resultMatrix._41 += translations.x;
-			//resultMatrix._42 += translations.y;
-			//resultMatrix._43 += translations.z;
+			resultMatrix._41 += translations.x;
+			resultMatrix._42 += translations.y;
+			resultMatrix._43 += translations.z;
 
 			frame[1]->m_matrix1 = resultMatrix;
 		}
