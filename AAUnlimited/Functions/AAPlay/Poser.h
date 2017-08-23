@@ -3,6 +3,7 @@
 
 namespace ExtClass {
 	class CharacterStruct;
+	class XXFile;
 }
 
 namespace Poser {

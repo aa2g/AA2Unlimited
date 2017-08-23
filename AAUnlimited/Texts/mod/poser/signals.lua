@@ -6,7 +6,6 @@ local connectors = {}
 local function newmetaconnector(self)
 	local metaconnector = {
 		__call = function(_, ...)
-			print("signal fired")
 			local target
 			for k,v in pairs(self) do
 				if type(k) == "function" or k.isconnector then

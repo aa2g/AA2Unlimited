@@ -139,10 +139,16 @@ local stylelist = lists.listbox { lines = 4, expand = "horizontal" }
 
 local characters = {}
 local currentcharacter
+local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 
+local function setcurrentcharacter(c)
+	currentcharacter = c
+	currentcharacterchanged(currentcharacter)
+end
+
 local function updatecurrentcharacter(_, index)
-	currentcharacter = characters[index]
+	setcurrentcharacter(characters[tonumber(index)])
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
@@ -156,12 +162,19 @@ local function updatecharacterlist()
 		end
 		table.insert(list, v.name)
 	end
-	log.info("%s characters", #list)
 	characterlist.setlist(list)
 	characterlist.value = cur
 end
 characterschanged.connect(updatecharacterlist)
 
+local modifiers = {
+	{ 30 * math.pi / 180, 90 * math.pi / 180, 180 * math.pi / 180 },
+	{ 1, 10, 100 },
+	{ 1, 10, 100 },
+}
+local modifier = modifiers[1][1]
+local currentmodifier = 1
+local currentoperation = 1
 local currentslider
 local dummyslider = {}
 local dummymt = {
@@ -182,36 +195,91 @@ local sliderx = sliders.slider { title = "X", data = 0 }
 local slidery = sliders.slider { title = "Y", data = 1 }
 local sliderz = sliders.slider { title = "Z", data = 2 }
 
-local rotatebutton = toggles.button { title = "Rotate", data = 0 }
-local scalebutton = toggles.button { title = "Scale", data = 2 }
-local translatebutton = toggles.button { title = "Translate", data = 1 }
+local rotatebutton = toggles.button { title = "Rotate", data = 1 }
+local scalebutton = toggles.button { title = "Scale", data = 3 }
+local translatebutton = toggles.button { title = "Translate", data = 2 }
 
 local modifierx1 = toggles.button { title = "x1", data = 1 }
-local modifierx10 = toggles.button { title = "x10", data = 10 }
-local modifierx100 = toggles.button { title = "x100", data = 100 }
+local modifierx10 = toggles.button { title = "x10", data = 2 }
+local modifierx100 = toggles.button { title = "x100", data = 3 }
 
 local slidermod
 local sliderop
 local slider
-local function sliderchanged()
-	currentslider = dummyslider
-	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
-	if currentcharacter then
-		local slider = currentcharacter.poser:GetSlider(slidername)
-		currentslider = slider or dummyslider
-	end
-end
-signals.connect(bonelist, "selectionchanged", sliderchanged)
 
 local function sliderincrement(amount, axis)
 	if currentslider then
-		currentslider:Increment(amount, axis)
+		currentslider:Increment(amount * modifier, axis)
 	end
 end
+
+local function slidestarted()
+	if currentslider then
+		currentslider:StartSlide()
+	end
+end
+
+local function slidestopped()
+	if currentslider then
+		currentslider:StopSlide()
+	end
+end
+
+local function updatemodifier()
+	modifier = modifiers[currentoperation][currentmodifier]
+	log.spam("increment modifier set to %f", modifier)
+end
+
+local function slidersetmodifier(modifier)
+	log.spam("set current modifier to %d", modifier)
+	currentmodifier = modifier
+	updatemodifier()
+end
+
+local function slidersetoperation(operation)
+	currentoperation = operation
+	log.spam("set current slider operation to %d", currentoperation)
+	if currentslider then
+		currentslider:SetCurrentOperation(operation - 1)
+	end
+	updatemodifier()
+end
+
+local function sliderchanged()
+	log.spam("sliderchanged")
+	currentslider = dummyslider
+	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
+	log.spam("looking for %s", slidername)
+	if currentcharacter then
+		local slider = currentcharacter.poser:GetSlider(slidername)
+		currentslider = slider or dummyslider
+		log.spam("set currrent slider to %s", currentslider)
+	end
+	slidersetoperation(currentoperation)
+end
+signals.connect(bonelist, "selectionchanged", sliderchanged)
+currentcharacterchanged.connect(sliderchanged)
+
 characterschanged.connect(sliderchanged)
 signals.connect(sliderx, "increment", sliderincrement)
 signals.connect(slidery, "increment", sliderincrement)
 signals.connect(sliderz, "increment", sliderincrement)
+
+signals.connect(sliderx, "slidestarted", slidestarted)
+signals.connect(slidery, "slidestarted", slidestarted)
+signals.connect(sliderz, "slidestarted", slidestarted)
+
+signals.connect(sliderx, "slidestopped", slidestopped)
+signals.connect(slidery, "slidestopped", slidestopped)
+signals.connect(sliderz, "slidestopped", slidestopped)
+
+signals.connect(rotatebutton, "selected", slidersetoperation)
+signals.connect(translatebutton, "selected", slidersetoperation)
+signals.connect(scalebutton, "selected", slidersetoperation)
+
+signals.connect(modifierx1, "selected", slidersetmodifier)
+signals.connect(modifierx10, "selected", slidersetmodifier)
+signals.connect(modifierx100, "selected", slidersetmodifier)
 
 local dialogsliders = iup.dialog {
 	iup.hbox {
@@ -289,36 +357,12 @@ local dialogsliders = iup.dialog {
 	minbox = "no",
 }
 
-dialogposes = iup.dialog {
-	iup.vbox {
-		iup.tabs {
-			iup.vbox {
-				lists.listbox { editbox = "yes" },
-				tabtitle = "Poses"
-			},
-			iup.vbox {
-				lists.listbox { editbox = "yes" },
-				tabtitle = "Scenes"
-			},
-		},
-		iup.hbox { 
-			iup.button { title = "Load", expand = "horizontal" },
-			iup.button { title = "Save", expand = "horizontal" },
-			iup.button { title = "Delete" },
-		},
-		iup.hbox { 
-			iup.label { title = "Clip" },
-			iup.text { expand = "horizontal" },
-			iup.label { title = "Frame" },
-			iup.text { expand = "horizontal" },
-			gap = 3,
-			alignment = "acenter"
-		},
-	},
-	nmargin = "3x3",
-	maxbox = "no",
-	minbox = "no",
-}
+local dialogposes = require "poser.posemgr"
+signals.connect(dialogposes, "loadpose", _M, "loadpose")
+signals.connect(dialogposes, "savepose", _M, "savepose")
+signals.connect(dialogposes, "loadscene", _M, "loadscene")
+signals.connect(dialogposes, "savescene", _M, "savescene")
+currentcharacterchanged.connect(dialogposes, "characterchanged")
 
 function _M.addcharacter(character)
 	local new = true
@@ -334,8 +378,10 @@ function _M.addcharacter(character)
 		local name = string.format("%s %s", data.m_forename, data.m_surname)
 		new = { name = name, struct = character, poser = GetPoserCharacter(character) }
 		characters[last + 1] = new
+		if not currentcharacter then
+			setcurrentcharacter(new)
+		end
 	end
-	currentcharacter = currentcharacter or new
 	log.info("add character = %s", currentcharacter or "no currentcharacter")
 	characterschanged()
 end

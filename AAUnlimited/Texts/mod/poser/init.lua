@@ -41,6 +41,10 @@ function on.char_spawn_end(ret,character)
 	dlg.addcharacter(character)
 end
 
+function on.char_update_end(ret,character)
+	dlg.addcharacter(character)
+end
+
 function on.char_despawn(character)
 	dlg.removecharacter(character)
 end
@@ -60,7 +64,7 @@ end
 
 function _M:unload()
 	-- close all dialogs
-	dlg:close_all()
+	if dlg then dlg:close_all() end
 end
 
 return _M
