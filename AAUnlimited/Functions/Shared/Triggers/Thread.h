@@ -101,6 +101,9 @@ namespace Shared {
 			void SetPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 
+			void AddMood(std::vector<Value>& params);
+			void ReplaceMood(std::vector<Value>& params);
+
 			//event response
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
@@ -146,6 +149,8 @@ namespace Shared {
 			Value GetCardHatePoints(std::vector<Value>& params); //int(int,int)
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
 			Value GetHasLovers(std::vector<Value>& params);	//bool(int)
+			Value GetStrongestMood(std::vector<Value>& params); //int(int)
+			Value GetMoodStrength(std::vector<Value>& params); //int(int, int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
 			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
 			Value GetStyle(std::vector<Value>& params); //int(string)
