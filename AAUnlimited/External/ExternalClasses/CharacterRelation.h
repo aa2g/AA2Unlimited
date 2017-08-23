@@ -27,7 +27,7 @@ public:
 	int m_like;
 	int m_dislike;
 	int m_hate;
-	BYTE m_unknown3[0x10];
+	FLOAT m_unknown3[0x4];
 	int m_poin;			//i have no idea what this is. aa2trainer calls it poin.
 
 public:
