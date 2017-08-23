@@ -139,10 +139,12 @@ local stylelist = lists.listbox { lines = 4, expand = "horizontal" }
 
 local characters = {}
 local currentcharacter
+local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 
 local function updatecurrentcharacter(_, index)
-	currentcharacter = characters[index]
+	currentcharacter = characters[tonumber(index)]
+	currentcharacterchanged(currentcharacter)
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
@@ -156,7 +158,6 @@ local function updatecharacterlist()
 		end
 		table.insert(list, v.name)
 	end
-	log.info("%s characters", #list)
 	characterlist.setlist(list)
 	characterlist.value = cur
 end
@@ -249,6 +250,7 @@ local function sliderchanged()
 	end
 end
 signals.connect(bonelist, "selectionchanged", sliderchanged)
+currentcharacterchanged.connect(sliderchanged)
 
 characterschanged.connect(sliderchanged)
 signals.connect(sliderx, "increment", sliderincrement)
@@ -347,36 +349,12 @@ local dialogsliders = iup.dialog {
 	minbox = "no",
 }
 
-dialogposes = iup.dialog {
-	iup.vbox {
-		iup.tabs {
-			iup.vbox {
-				lists.listbox { editbox = "yes" },
-				tabtitle = "Poses"
-			},
-			iup.vbox {
-				lists.listbox { editbox = "yes" },
-				tabtitle = "Scenes"
-			},
-		},
-		iup.hbox { 
-			iup.button { title = "Load", expand = "horizontal" },
-			iup.button { title = "Save", expand = "horizontal" },
-			iup.button { title = "Delete" },
-		},
-		iup.hbox { 
-			iup.label { title = "Clip" },
-			iup.text { expand = "horizontal" },
-			iup.label { title = "Frame" },
-			iup.text { expand = "horizontal" },
-			gap = 3,
-			alignment = "acenter"
-		},
-	},
-	nmargin = "3x3",
-	maxbox = "no",
-	minbox = "no",
-}
+local dialogposes = require "poser.posemgr"
+signals.connect(dialogposes, "loadpose", _M, "loadpose")
+signals.connect(dialogposes, "savepose", _M, "savepose")
+signals.connect(dialogposes, "loadscene", _M, "loadscene")
+signals.connect(dialogposes, "savescene", _M, "savescene")
+currentcharacterchanged.connect(dialogposes, "characterchanged")
 
 function _M.addcharacter(character)
 	local new = true

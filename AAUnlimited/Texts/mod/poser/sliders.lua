@@ -44,8 +44,6 @@ function _M.slider(opts)
 		slidestopped = slidestopped,
 	}
 	
-	increment.connect(textbox, "value")
-	
 	return control
 end
 
