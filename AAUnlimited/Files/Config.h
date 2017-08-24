@@ -14,7 +14,7 @@ public:;
 	bool bSaveFileAutoRemove;
 	int savedFileUsage;
 	int savedEyeTextureUsage;
-	bool bLogPPAccess;
+	int bLogPPAccess;
 	bool bHAiOnNoPromptH;
 	bool bUseDialoguePoser;
 	bool bUseClothesPoser;

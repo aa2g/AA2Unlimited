@@ -1,19 +1,19 @@
 
 #include "StdAfx.h"
 #include "Files\PersistentStorage.h"
+#include "External/ExternalClasses/XXFile.h"
 
 #if 1
 namespace SharedInjections {
 namespace ArchiveFile {
 
-DWORD OpenFileAddress;
 
 // This structure seems to be subclassed from std::wstring of MSVC 2008,
 // along with atomic counter and custom allocator.
 // We do only as much to please its own vtable, since the refcount
 // is pinned high and buffer large, they never touch the memory.
 struct IllusionString {
-	IllusionString(wchar_t *s) {
+	IllusionString(const wchar_t *s) {
 		ptr = buf;
 		if (!s) s = L"";
 		set(s);
@@ -30,17 +30,73 @@ struct IllusionString {
 	size_t alloc;
 	size_t refcount;
 	wchar_t buf[1024];
-	wchar_t *set(wchar_t *s) {
+	wchar_t *set(const wchar_t *s) {
 		wcscpy(buf, s);
 		size = wcslen(s);
 		return buf;
 	}
-/*	static IllusionString *get(wchar_t **s) {
-		if (!*s)
-			return 0;
-		return (IllusionString*)(((BYTE*)(*s)) - 20);
+	/*	static IllusionString *get(wchar_t **s) {
+	if (!*s)
+	return 0;
+	return (IllusionString*)(((BYTE*)(*s)) - 20);
 	}*/
 };
+
+DWORD OpenFileAddress, OpenXXAddress;
+
+ExtClass::XXFile* __stdcall CallOpenXX(void *_this, wchar_t **name, void *pploadclass, wchar_t **file, DWORD a)
+{
+	ExtClass::XXFile *retv;
+	__asm {
+		lea ecx, [_this]
+		push dword ptr[ecx+16]
+		push dword ptr[ecx+12]
+		push dword ptr[ecx+8]
+		push dword ptr[ecx+4]
+		mov ecx, [ecx]
+		call gonext
+		jmp skip
+gonext:
+		push -1
+		jmp[OpenXXAddress]
+skip:
+		add esp, 16
+		mov retv, eax
+	}
+	return retv;
+}
+
+void bindLua() {
+	LUA_SCOPE;
+	auto binding = g_Lua["_BINDING"];
+	binding["LoadXX"] = LUA_LAMBDA({
+		IllusionString arch(General::utf8.from_bytes((const char*)s.get(2)).c_str());
+		IllusionString file(General::utf8.from_bytes((const char*)s.get(4)).c_str());
+		CallOpenXX((void*)DWORD(s.get(1)), &arch.ptr, (void*)DWORD(s.get(3)), &file.ptr, s.get(5));
+	});
+}
+
+void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
+
+	if (g_Config.bLogPPAccess & 2) {
+		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],0x" << std::hex << pploadclass << ",[[" << std::wstring(*file) << "]]," << a << ")\r\n";
+	}
+
+	return CallOpenXX(this_, archname, pploadclass, file, a);
+}
+
+void __declspec(naked) OpenXXWrapper() {
+	__asm {
+		push dword ptr [esp + 16]
+		push dword ptr [esp + 16]
+		push dword ptr [esp + 16]
+		push dword ptr [esp + 16]
+		push ecx
+		call OpenXXEvent
+		ret
+	}
+}
+
 
 // Calls the original open function
 BYTE *CallOpenFile(void *_this, wchar_t **fname, DWORD *outsize, wchar_t **archive) {
@@ -64,6 +120,8 @@ skip:
 	}
 	return retv;
 }
+
+
 
 
 wchar_t *get_basepath(wchar_t *s) {
@@ -91,7 +149,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 
 	if (orig_archive && orig_archive[0])
 		orig_file = get_basepath(orig_file);
-	//if (!wcscmp(orig_file, L"H_Style.lst"))
+//	if (!wcscmp(orig_file, L"MP_STOR_09FLOOR.xx"))
 //		__debugbreak();
 
 	wchar_t *parchive = orig_archive;
@@ -162,7 +220,7 @@ done:;
 		outBuffer = CallOpenFile(_this, &file.ptr, readBytes, &archive.ptr);
 	}
 
-	if (g_Config.bLogPPAccess) {
+	if (g_Config.bLogPPAccess & 1) {
 		LOGPRIONC(Logger::Priority::SPAM) "OpenFileEvent " <<
 			"provider=" << (provider ? provider : "pp") << " " <<
 			"archive=" << std::wstring(parchive?parchive:L"<none>") << " " <<
@@ -229,16 +287,6 @@ void __declspec(naked) RedirOpenTarget() {
 	}
 }
 
-void __declspec(naked) RedirAudioTarget() {
-	__asm {
-		push[esp + 8]
-		push[esp + 8]
-		push eax
-		push ecx
-		call OpenFileEvent
-		ret
-	}
-}
 
 void OpenFileInject() {
 	auto ah = &AudioClass::load_audio;
@@ -247,19 +295,29 @@ void OpenFileInject() {
 
 	if (General::IsAAPlay) {
 		OpenFileAddress = General::GameBase + 0x1D0B28;
+		OpenXXAddress = General::GameBase + 0x2165D2;
+
 		PatchIAT((void*)(General::GameBase + 0x335110), h);
 		PatchIAT((void*)(General::GameBase + 0x3351B0), h);
 	}
 	else if (General::IsAAEdit) {
 		OpenFileAddress = General::GameBase + 0x1B32C8;
+		OpenXXAddress = General::GameBase + 0x1F8B52;
+
 		PatchIAT((void*)(General::GameBase + 0x313A50), h);
 		PatchIAT((void*)(General::GameBase + 0x313AF0), h);
-
 	}
+
 	Hook((BYTE*)OpenFileAddress - 8,
 	{ 0x83, 0xec, 0x08, 0x53, 0x8b, 0x5c, 0x24, 0x14 },
 	{ 0x90, 0x90, 0x90, 0xe9, HookControl::RELATIVE_DWORD, (DWORD)&RedirOpenTarget },
 		NULL);
+
+	Hook((BYTE*)OpenXXAddress - 2 - 5,
+	{ 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0x6a, 0xff },
+	{ 0xe9, HookControl::RELATIVE_DWORD, (DWORD)&OpenXXWrapper, 0xeb, 0xf9 },
+		NULL);
+
 }
 
 }

@@ -109,6 +109,7 @@ void Lua::bindLua() {
 	Poser::PoserController::PoserCharacter::bindLua();
 	Poser::PoserController::SliderInfo::bindLua();
 	Render::bindLua();
+	SharedInjections::ArchiveFile::bindLua();
 
 	// Very low level utilities
 	using namespace General;

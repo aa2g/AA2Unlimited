@@ -52,8 +52,11 @@ namespace ExtClass {
 		/* #7 */ virtual DWORD fn7();
 		/* #8 */ virtual DWORD fn8();
 		/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
-
-		BYTE m_unknown1[0x24];
+		BYTE m_unknown4[4];
+		void *m_xxinstance1;
+		BYTE m_unknown8[8];
+		void *m_xxinstance2;
+		BYTE m_unknown18[0x10];
 		CharacterData* m_charData; // 0x28
 		void* m_somePointer; // 0x2c
 		void* m_somePointer2;
@@ -131,9 +134,6 @@ namespace ExtClass {
 		_gl.push(_self->Despawn());
 		_gl.push(_self->Despawn2());
 	});
-	LUA_BINDSTR(m_unknown1)
-	LUA_BINDSTR(m_unknown5)
-	LUA_BINDSTR(m_unknown6)
 	LUA_BIND(m_somePointer)
 	LUA_BIND(m_somePointer2)
 	LUA_BIND(m_somePointer3)

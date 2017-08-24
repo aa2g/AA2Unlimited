@@ -57,7 +57,7 @@ function _M:config()
 	
 	iup.GetParam("Configure WineD3D", nil, [[
 Backbuffer: %b{Sometimes needed for GPU overrides to work}
-Antialiasing: %l|None|2xMSAA|4xMSAA|8xMSAA|16xMSAA|32xMSAA|
+AA override: %l|No override|2xMSAA|4xMSAA|8xMSAA|16xMSAA|32xMSAA|
 CSMT threading: %b{enables wine command stream multithreading}
 CSMT settings %t
 Queue size: %l|256KB|512KB|1MB|2MB|4MB|8MB|16MB|32MB|
