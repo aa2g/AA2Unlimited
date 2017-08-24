@@ -53,6 +53,7 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 			if (lastControl == RELATIVE_DWORD || lastControl == ABSOLUTE_DWORD) newDataSize += 4;
 			else if (lastControl == RELATIVE_WORD || lastControl == ABSOLUTE_WORD) newDataSize += 2;
 			else {
+				__debugbreak();
 				LOGPRIO(Logger::Priority::ERR) << "Unrecognized Hook Control: " << lastControl << "\n";
 			}
 			lastControl = 0;
@@ -80,11 +81,14 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 			it++;
 			expectedSize++;
 		}
-		if (expectedSize != newDataSize)
-			LOGPRIO(Logger::Priority::ERR) << std::dec << "Mismatch between expected size and newData size, " << expectedSize << "!=" << newDataSize << "\n";
+		if (expectedSize != newDataSize) {
+			LOGPRIONC(Logger::Priority::ERR) std::dec << "Mismatch between expected size and newData size, " << expectedSize << "!=" << newDataSize << "\n";
+			__debugbreak();
+		}
+
 
 		if (err) {
-			LOGPRIO(Logger::Priority::WARN) << "Hook mismatch between expected and found data: expected {";
+			LOGPRIONC(Logger::Priority::WARN) std::dec << "Hook mismatch between expected and found data: expected {";
 			g_Logger << std::hex;
 			for (auto d = expected.begin(); d != expected.end(); d++) {
 				if (*d == ANY_DWORD) {
@@ -114,7 +118,8 @@ bool Hook(BYTE* location,std::initializer_list<DWORD> expected, std::initializer
 			if(!control) {
 				//no control, interpret as byte and apply
 				if((d & ~0xFF) != 0) {
-					LOGPRIO(Logger::Priority::WARN) << "non-control hook parameter was bigger than a BYTE; additional bits will be discarded\r\n";
+					LOGPRIONC(Logger::Priority::WARN) std::dec << "non-control hook parameter was bigger than a BYTE; additional bits will be discarded\r\n";
+					__debugbreak();
 				}
 				*it = (BYTE)d;
 			}

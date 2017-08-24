@@ -7,6 +7,7 @@ namespace ArchiveFile {
 
 
 void OpenFileInject();
+void bindLua();
 
 
 }
