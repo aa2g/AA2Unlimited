@@ -5,6 +5,7 @@ namespace Shared {
 
 HANDLE *IllusionMemAllocHeap;
 size_t *IllusionMemUsed;
+void *g_ppclass;
 void* __stdcall IllusionMemAlloc(size_t size) {
 	*IllusionMemUsed += size;
 	if (!*IllusionMemAllocHeap)
@@ -57,6 +58,7 @@ void Init() {
 		//direct x stuff
 		/* D3DXQuaternionMultiply
 		AA2Edit.exe+213F90 - FF 25 00453800        - jmp dword ptr [AA2Edit.exe+2C4500] { ->->d3dx9_42.dll+1A260E }*/
+		g_ppclass = (void*)(General::GameBase + 0x003526D0);
 		
 	}
 	else if (General::IsAAPlay) {
@@ -69,6 +71,8 @@ void Init() {
 		/**(DWORD*)(&D3DXMatrixMultiply) = General::GameBase + 0x2320D0;
 		//AA2Play v12 FP v1.4.0a.exe+232100 - FF 25 D4345E00        - jmp dword ptr ["AA2Play v12 FP v1.4.0a.exe"+2E34D4] { ->->d3dx9_42.dll+1A246F }
 		*(DWORD*)(&D3DXVec3Transform) = General::GameBase + 0x232100;*/
+		g_ppclass = (void*)(General::GameBase + 0x003756D8);
+
 	}
 
 	//get direct x functions
