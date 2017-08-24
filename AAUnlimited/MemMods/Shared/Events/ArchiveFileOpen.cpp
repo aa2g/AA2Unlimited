@@ -79,12 +79,14 @@ void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, 
 
 void __declspec(naked) OpenXXWrapper() {
 	__asm {
-		push dword ptr [esp + 16]
-		push dword ptr [esp + 16]
-		push dword ptr [esp + 16]
-		push dword ptr [esp + 16]
+		push ecx
+		push dword ptr [esp + 16 + 4]
+		push dword ptr [esp + 16 + 4]
+		push dword ptr [esp + 16 + 4]
+		push dword ptr [esp + 16 + 4]
 		push ecx
 		call OpenXXEvent
+		pop ecx
 		ret
 	}
 }
@@ -270,11 +272,13 @@ public:;
 // Target of the injected jump, just converts the usercall convention
 void __declspec(naked) RedirOpenTarget() {
 	__asm {
-		push [esp + 8]
-		push [esp + 8]
+		push ecx
+		push [esp + 12]
+		push [esp + 12]
 		push eax
 		push ecx
 		call OpenFileEvent
+		pop ecx
 		ret
 	}
 }
@@ -309,7 +313,6 @@ void OpenFileInject() {
 	{ 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0x6a, 0xff },
 	{ 0xe9, HookControl::RELATIVE_DWORD, (DWORD)&OpenXXWrapper, 0xeb, 0xf9 },
 		NULL);
-
 }
 
 void bindLua() {

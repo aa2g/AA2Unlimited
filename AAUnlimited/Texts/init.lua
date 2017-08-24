@@ -31,24 +31,28 @@ end
 
 function make_path(pfx,...)
 	local npfx = pfx
-	repeat
+--[[	repeat
 		pfx = npfx
 		npfx = pfx:gsub("\\\\","\\"):gsub("//","/")
-		npfx = npfx:match("^(.*)[\\/]$") or npfx
-	until npfx == pfx
-	return table.concat({pfx,...}, "\\")
+	until npfx == pfx]]
+	npfx = npfx:match("^(.*)[\\/]$") or npfx
+
+	return table.concat({npfx,...}, "\\")
 end
 
 function aau_path(...)
-	return make_path(_BINDING.GetAAUPath(), ...)
+	local ret = make_path(_BINDING.GetAAUPath(), ...)
+	return ret
 end
 
 function host_path(...)
-	return make_path(_BINDING.IsAAEdit and _BINDING.GetAAEditPath() or _BINDING.GetAAPlayPath(), ...)
+	local ret = make_path(_BINDING.IsAAEdit and _BINDING.GetAAEditPath() or _BINDING.GetAAPlayPath(), ...)
+	return ret
 end
 
 function play_path(...)
-	return make_path(_BINDING.GetAAPlayPath(), ...)
+	local ret = make_path(_BINDING.GetAAPlayPath(), ...)
+	return ret
 end
 
 ---------------------------
@@ -321,7 +325,7 @@ end
 function load_modules()
 	Config.mods = Config.mods or {}
 	lock_globals()
-	for f in readdir(aau_path() .. "mod\\*") do
+	for f in readdir(aau_path("mod","*")) do
 		local mname = f:match("^(.*)%.lua$") or f
 		if mname == f then
 			f = f .. "/init.lua"
