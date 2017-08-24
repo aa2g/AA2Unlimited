@@ -69,7 +69,7 @@ skip:
 void bindLua() {
 	LUA_SCOPE;
 	auto binding = g_Lua["_BINDING"];
-	binding["OpenXX"] = LUA_LAMBDA({
+	binding["LoadXX"] = LUA_LAMBDA({
 		IllusionString arch(General::utf8.from_bytes((const char*)s.get(2)).c_str());
 		IllusionString file(General::utf8.from_bytes((const char*)s.get(4)).c_str());
 		CallOpenXX((void*)DWORD(s.get(1)), &arch.ptr, (void*)DWORD(s.get(3)), &file.ptr, s.get(5));
