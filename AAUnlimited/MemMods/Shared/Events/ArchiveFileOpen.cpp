@@ -66,20 +66,12 @@ skip:
 	return retv;
 }
 
-void bindLua() {
-	LUA_SCOPE;
-	auto binding = g_Lua["_BINDING"];
-	binding["LoadXX"] = LUA_LAMBDA({
-		IllusionString arch(General::utf8.from_bytes((const char*)s.get(2)).c_str());
-		IllusionString file(General::utf8.from_bytes((const char*)s.get(4)).c_str());
-		CallOpenXX((void*)DWORD(s.get(1)), &arch.ptr, (void*)DWORD(s.get(3)), &file.ptr, s.get(5));
-	});
-}
 
 void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
 
 	if (g_Config.bLogPPAccess & 2) {
-		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],0x" << std::hex << pploadclass << ",[[" << std::wstring(*file) << "]]," << a << ")\r\n";
+//		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],0x" << std::hex << pploadclass << ",[[" << std::wstring(*file) << "]]," << a << ")\r\n";
+		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],[[" << std::wstring(*file) << "]]," << a << ")\r\n";
 	}
 
 	return CallOpenXX(this_, archname, pploadclass, file, a);
@@ -319,6 +311,28 @@ void OpenFileInject() {
 		NULL);
 
 }
+
+void bindLua() {
+	LUA_SCOPE;
+	auto binding = g_Lua["_BINDING"];
+	binding["LoadXX"] = LUA_LAMBDA({
+		IllusionString arch(General::utf8.from_bytes((const char*)s.get(2)).c_str());
+	IllusionString file(General::utf8.from_bytes((const char*)s.get(3)).c_str());
+	s.push(CallOpenXX((void*)DWORD(s.get(1)), &arch.ptr, Shared::g_ppclass, &file.ptr, s.get(4)));
+	});
+	binding["PPReadFile"] = GLua::Function([](auto &s) {
+		IllusionString arch(General::utf8.from_bytes((const char*)s.get(1)).c_str());
+		IllusionString file(General::utf8.from_bytes((const char*)s.get(2)).c_str());
+		DWORD outsz = 0;
+		BYTE *outbuf = OpenFileEvent(Shared::g_ppclass, &file.ptr, &outsz, &arch.ptr);
+		if (outbuf) {
+			s.pushlstring((const char*)outbuf, outsz);
+			return 1;
+		}
+		return 0;
+	});
+}
+
 
 }
 }

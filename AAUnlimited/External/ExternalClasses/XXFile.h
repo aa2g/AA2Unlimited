@@ -45,11 +45,23 @@ public:
 			LUA_BIND(m_animFrame);
 
 			LUA_MGETTER1(FindBone);
+			LUA_MGETTER1(Unload);
 #undef LUA_CLASS
 	};
 
 	XXFile() = delete;
 	~XXFile() = delete;
+
+	inline bool Unload(DWORD kls) {
+		bool(__cdecl *unload)(DWORD , XXFile *);
+		if (General::IsAAEdit) {
+			unload = decltype(unload)(General::GameBase + 0x1E5530);
+		}
+		else {
+			unload = decltype(unload)(General::GameBase + 0x202930);
+		}
+		return unload(kls, this);
+	}
 
 	//finds a bone belonging to this xx file in depth-first-search
 	//with a maximum depth of maxDepth (or infinity if maxDepth < 0)

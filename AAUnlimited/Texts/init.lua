@@ -29,12 +29,26 @@ function check(x,a,b,...)
 	return a,b,...
 end
 
+function make_path(pfx,...)
+	local npfx = pfx
+	repeat
+		pfx = npfx
+		npfx = pfx:gsub("\\\\","\\"):gsub("//","/")
+		npfx = npfx:match("^(.*)[\\/]$") or npfx
+	until npfx == pfx
+	return table.concat({pfx,...}, "\\")
+end
+
 function aau_path(...)
-	return table.concat({_BINDING.GetAAUPath(), ...}, "/")
+	return make_path(_BINDING.GetAAUPath(), ...)
 end
 
 function host_path(...)
-	return table.concat({_BINDING.IsAAEdit and _BINDING.GetAAEditPath() or _BINDING.GetAAPlayPath(), ...}, "/")
+	return make_path(_BINDING.IsAAEdit and _BINDING.GetAAEditPath() or _BINDING.GetAAPlayPath(), ...)
+end
+
+function play_path(...)
+	return make_path(_BINDING.GetAAPlayPath(), ...)
 end
 
 ---------------------------

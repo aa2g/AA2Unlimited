@@ -558,7 +558,10 @@ void PP2::bindLua() {
 		return s.top();
 	});
 	_BINDING["PP2GetFiles"] = GLua::Function([](auto &s) {
-		auto &f = g_PP2.pfiles[s.get(1)];
+		int i = s.get(1);
+		if (i >= g_PP2.pfiles.size()) return 0;
+
+		auto &f = g_PP2.pfiles[i];
 		auto t = s.newtable();
 		// maps hash to { index, flags, osize, csize }
 		const void *chk = lua_topointer(s.L(), 2);
@@ -579,8 +582,10 @@ void PP2::bindLua() {
 	});
 
 	_BINDING["PP2ReadFile"] = GLua::Function([](auto &s) {
-		auto &pf = g_PP2.pfiles[s.get(1)];
-		int i = s.get(2);
+		int i = s.get(1);
+		if (i >= g_PP2.pfiles.size()) return 0;
+		auto &pf = g_PP2.pfiles[i];
+		i = s.get(2);
 		size_t osz;
 		void *buf = pf.getCache(i, &osz);
 		s.pushlstring((const char*)buf, osz);
@@ -589,7 +594,9 @@ void PP2::bindLua() {
 	});
 
 	_BINDING["PP2GetNames"] = GLua::Function([](auto &s) {
-		auto &f = g_PP2.pfiles[s.get(1)];
+		int i = s.get(1);
+		if (i >= g_PP2.pfiles.size()) return 0;
+		auto &f = g_PP2.pfiles[i];
 		auto t = s.newtable();
 		// maps name to index
 		for (auto &it : f.names) {

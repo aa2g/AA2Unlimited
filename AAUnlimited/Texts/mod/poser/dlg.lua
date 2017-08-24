@@ -281,6 +281,31 @@ signals.connect(modifierx1, "selected", slidersetmodifier)
 signals.connect(modifierx10, "selected", slidersetmodifier)
 signals.connect(modifierx100, "selected", slidersetmodifier)
 
+local selectroom = iup.list { dropdown="yes",  expand = "horizontal" }
+local current_room
+
+function selectroom:map_cb()
+	local added={}
+	local list = PPReadFile(play_path("data","jg2p09_00_00.pp"),"MP_ITEM.lst")
+	for w in list:gmatch("%S+") do
+		log("trying to add %s", w)
+		if w ~= "-" and (not w:match("^MP_ITEM")) and w:match("^MP_") and (not added[w]) then
+			added[w] = true
+			self.appenditem = w
+		end
+	end
+end
+
+function selectroom:action(text,itno)
+	-- play not supported yet
+	if exe_type ~= "edit" then return end
+	local xxlist = 0x00753290
+	if current_room then
+		current_room:Unload(xxlist)
+	end
+	current_room = LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0)
+end
+
 local dialogsliders = iup.dialog {
 	iup.hbox {
 		nmargin = "7x7",
@@ -292,6 +317,7 @@ local dialogsliders = iup.dialog {
 				stylelist,
 				iup.button { title = "Edit clothes", expand = "horizontal" },
 				iup.button { title = "Edit overrides", expand = "horizontal" },
+				selectroom,
 			},
 		},
 		iup.frame {
