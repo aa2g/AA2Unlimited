@@ -69,12 +69,15 @@ skip:
 
 void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
 
+	void *ret = CallOpenXX(this_, archname, pploadclass, file, a);
+//	if (!wcscmp(*file, L"MP_BOYROOM_FLOOR.xx"))
+//		__debugbreak();
 	if (g_Config.bLogPPAccess & 2) {
 //		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],0x" << std::hex << pploadclass << ",[[" << std::wstring(*file) << "]]," << a << ")\r\n";
-		LOGPRIONC(Logger::Priority::SPAM) "LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],[[" << std::wstring(*file) << "]]," << a << ")\r\n";
+		LOGPRIONC(Logger::Priority::SPAM) ret << "= LoadXX(0x" << this_ << ",[[" << std::dec << std::wstring(*archname) << "]],[[" << std::wstring(*file) << "]]," << a << ")\r\n";
 	}
 
-	return CallOpenXX(this_, archname, pploadclass, file, a);
+	return ret;
 }
 
 void __declspec(naked) OpenXXWrapper() {

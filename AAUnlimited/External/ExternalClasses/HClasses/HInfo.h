@@ -98,6 +98,7 @@ public:
 	}
 	static inline void bindLua() {
 #define LUA_CLASS HInfo
+		LUA_NAME;
 		LUA_BIND(m_positionInfo)
 		LUA_BIND(m_nPosChanges)
 		LUA_BIND(m_speed)

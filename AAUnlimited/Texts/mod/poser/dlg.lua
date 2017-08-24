@@ -287,6 +287,7 @@ local current_room
 function selectroom:map_cb()
 	local added={}
 	local list = PPReadFile(play_path("data","jg2p09_00_00.pp"),"MP_ITEM.lst")
+	self.appenditem = "None"
 	for w in list:gmatch("%S+") do
 		log("trying to add %s", w)
 		if w ~= "-" and (not w:match("^MP_ITEM")) and w:match("^MP_") and (not added[w]) then
@@ -297,13 +298,17 @@ function selectroom:map_cb()
 end
 
 function selectroom:action(text,itno)
-	-- play not supported yet
-	if exe_type ~= "edit" then return end
-	local xxlist = 0x00753290
+	local xxlist
+	-- TODO: detect if we're in h, and don't load our XX there
+	if exe_type == "edit" then
+		xxlist = GameBase + 0x00353290
+	else
+		xxlist = GameBase + 0x00376298
+	end
 	if current_room then
 		current_room:Unload(xxlist)
 	end
-	current_room = LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0)
+	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
 
 local dialogsliders = iup.dialog {

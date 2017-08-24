@@ -37,6 +37,7 @@ public:
 public:
 	static inline void bindLua() {
 #define LUA_CLASS ExtClass::XXFile
+			LUA_NAME;
 			LUA_BINDSTR(m_name)
 			LUA_BIND(m_attachmentFrame);
 			LUA_BIND(m_root);
