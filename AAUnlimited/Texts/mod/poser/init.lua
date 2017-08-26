@@ -5,10 +5,8 @@ require "iupluacontrols"
 
 local _M = {}
 local dlg
-local opts
 local signals = require "poser.signals"
-
-local characters = {}
+local charamgr = require "poser.charamgr"
 
 local function detect_parenting(hwnd)
 	dlg.parentHWND = hwnd
@@ -38,21 +36,15 @@ function on.keydown(k)
 end
 
 function on.char_spawn_end(ret,character)
-	dlg.addcharacter(character)
+	charamgr.addcharacter(character)
 end
 
 function on.char_update_end(ret,character)
-	dlg.addcharacter(character)
+	charamgr.addcharacter(character)
 end
 
 function on.char_despawn(character)
-	dlg.removecharacter(character)
-end
-
-function on.poserframemod(xx)
-end
-
-function on.iup_mousebutton(dlg, button, x, y, status)
+	charamgr.removecharacter(character)
 end
 
 function _M:load()

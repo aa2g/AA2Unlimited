@@ -18,7 +18,8 @@ namespace Poser {
 
 	void StartEvent(SceneType type);
 	void EndEvent();
-	void AddCharacter(ExtClass::CharacterStruct* c);
+	void LoadCharacter(ExtClass::CharacterStruct* c);
+	void UpdateCharacter(ExtClass::CharacterStruct* c);
 	void RemoveCharacter(ExtClass::CharacterStruct* c);
 
 	void FrameModEvent(ExtClass::XXFile* xxFile);
