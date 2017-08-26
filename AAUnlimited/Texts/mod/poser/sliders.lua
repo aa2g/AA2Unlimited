@@ -27,7 +27,6 @@ function _M.slider(opts)
 				increment(self.value, data)
 			end,
 			button_press_cb = function(self)
-				print("button press")
 				increment(self.value, data)
 				self.value = 0
 			end,

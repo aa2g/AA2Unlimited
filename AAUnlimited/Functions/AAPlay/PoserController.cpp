@@ -161,6 +161,10 @@ namespace Poser {
 	static const char prefixRot[]{ "pose_rot_" };
 	static const char propFramePrefix[]{ "AS00_N_Prop" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
+		LOGPRIONC(Logger::Priority::SPAM) "FrameModEvent " << xxFile;
+		if (xxFile->m_name)
+			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name <<")";
+		LOGPRIONC(Logger::Priority::SPAM) "\r\n";
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
 		if (model == ExtClass::CharacterStruct::H3DROOM)
@@ -233,13 +237,13 @@ namespace Poser {
 				slider = GetSlider(frame->m_name);
 				if (!slider) {
 					slider = new SliderInfo;
-					slider->frame[0] = transFrame;
-					slider->frame[1] = rotFrame;
-					slider->Reset();
-					slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
-					slider->Apply();
 					m_sliders.emplace(std::string(frame->m_name), slider);
+					slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+					slider->Reset();
 				}
+				slider->frame[0] = transFrame;
+				slider->frame[1] = rotFrame;
+				slider->Apply();
 				slider = nullptr;
 			}
 			return true;
@@ -292,7 +296,7 @@ namespace Poser {
 
 	}
 
-	void PoserController::AddCharacter(ExtClass::CharacterStruct* charStruct) {
+	void PoserController::LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		PoserCharacter* character = nullptr;
 		for (PoserCharacter* c : m_characters) {
 			if (c->m_character == charStruct)
@@ -301,6 +305,16 @@ namespace Poser {
 		if (!character) {
 			character = new PoserCharacter(charStruct);
 			m_characters.push_back(character);
+		}
+		character->VoidFramePointers();
+		m_loadCharacter = character;
+	}
+
+	void PoserController::UpdateCharacter(ExtClass::CharacterStruct* charStruct) {
+		PoserCharacter* character = nullptr;
+		for (PoserCharacter* c : m_characters) {
+			if (c->m_character == charStruct)
+				character = c;
 		}
 		//character->VoidFramePointers();
 		m_loadCharacter = character;

@@ -27,8 +27,12 @@ namespace Poser {
 		currentScene = SceneType::NoScene;
 	}
 
-	void AddCharacter(ExtClass::CharacterStruct* charStruct) {
-		g_PoserController.AddCharacter(charStruct);
+	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
+		g_PoserController.LoadCharacter(charStruct);
+	}
+
+	void UpdateCharacter(ExtClass::CharacterStruct* charStruct) {
+		g_PoserController.UpdateCharacter(charStruct);
 	}
 
 	void RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
@@ -54,17 +58,6 @@ namespace Poser {
 		*readBytes = hi;
 		return true;
 	}
-
-/*	void PoserWindow::SyncStyles() {
-		CharInstData* card = &AAPlay::g_characters[g_PoserController.CurrentCharacter()->m_character->m_seat];
-		if (!card->IsValid()) return;
-		SendMessage(this->m_listStyles, LB_RESETCONTENT, 0, 0);
-		auto styles = card->m_cardData.m_styles;
-		for (int i = 0; i < styles.size(); i++) {
-			SendMessage(this->m_listStyles, LB_ADDSTRING, 0, LPARAM(styles[i].m_name));
-		}
-		SendMessage(this->m_listStyles, LB_SETCURSEL, card->m_cardData.GetCurrAAUSet(), 0);
-	}*/
 
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		if (xxFile) {

@@ -28,6 +28,7 @@ local dialogs
 local signals = require "poser.signals"
 local lists = require "poser.lists"
 local toggles = require "poser.toggles"
+local charamgr = require "poser.charamgr"
 local unpack = table.unpack
 
 local boneentries = {}
@@ -54,20 +55,44 @@ for _,v in ipairs(framecfg) do
 	end
 end
 
-local function shapecontrols(title, shapelist, rowsize)
+local function shapecontrols(title, shapelist, opts)
+	local shapename = opts.name
+	local shapeopen = shapename .. "open"
+	local shapeselected = function(shape)
+		local character = charamgr.current
+		if character then
+			character[shapename] = shape
+		end
+	end
+	local shapeopened = function(open)
+		local character = charamgr.current
+		if character then
+			character[shapeopen] = open
+		end
+	end
+	
 	local controls = {}
-	for _, s in ipairs(shapelist) do
-		table.insert(controls, iup.flatbutton { title = s, toggle ="yes", padding = 3 })
+	for i, s in ipairs(shapelist) do
+		local button = iup.flatbutton { title = s, toggle ="yes", padding = 3 }
+		function button.flat_action(self)
+			if self.value == "ON" then
+				shapeselected(i - 1)
+			end
+		end
+		table.insert(controls, button)
 	end
 	local open = iup.label { title = "Open" }
 	local spin = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9, visiblecolumns = 1 }
+	function spin.valuechanged_cb(self)
+		shapeopened(tonumber(self.value))
+	end
 	
 	local norm = iup.normalizer { unpack(controls) }
 	norm.normalize = "horizontal"
 	return iup.frame { title = title, 
 		iup.vbox {
 			iup.radio {
-				iup.gridbox { numdiv = rowsize, unpack(controls) },
+				iup.gridbox { numdiv = opts.cols, unpack(controls) },
 				expand = "yes"
 			},
 			iup.hbox {
@@ -78,7 +103,8 @@ local function shapecontrols(title, shapelist, rowsize)
 			},
 			alignment = "aright",
 			gap = 3,
-		}
+		},
+		shapeselected = shapeselected
 	}
 end
 
@@ -137,27 +163,19 @@ signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 local characterlist = lists.listbox { lines = 2, expand = "horizontal" }
 local stylelist = lists.listbox { lines = 4, expand = "horizontal" }
 
-local characters = {}
-local currentcharacter
-local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 
-local function setcurrentcharacter(c)
-	currentcharacter = c
-	currentcharacterchanged(currentcharacter)
-end
-
 local function updatecurrentcharacter(_, index)
-	setcurrentcharacter(characters[tonumber(index)])
+	charamgr.setcurrentcharacter(tonumber(index))
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
 local function updatecharacterlist()
-	log.info("Updating character list")
+	log.spam("Updating character list")
 	local cur
 	local list = {}
-	for i,v in ipairs(characters) do
-		if currentcharacter and v.struct == currentcharacter.struct then
+	for i,v in ipairs(charamgr.characters) do
+		if v == charamgr.current then
 			cur = i
 		end
 		table.insert(list, v.name)
@@ -165,7 +183,7 @@ local function updatecharacterlist()
 	characterlist.setlist(list)
 	characterlist.value = cur
 end
-characterschanged.connect(updatecharacterlist)
+signals.connect(charamgr, "characterschanged", updatecharacterlist)
 
 local modifiers = {
 	{ 30 * math.pi / 180, 90 * math.pi / 180, 180 * math.pi / 180 },
@@ -246,21 +264,19 @@ local function slidersetoperation(operation)
 end
 
 local function sliderchanged()
-	log.spam("sliderchanged")
 	currentslider = dummyslider
 	local slidername = bones.bonemap[bonelist[bonelist.value or ""]] or ""
-	log.spam("looking for %s", slidername)
-	if currentcharacter then
-		local slider = currentcharacter.poser:GetSlider(slidername)
+	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
+	if charamgr.current then
+		local slider = charamgr.current:GetSlider(slidername)
 		currentslider = slider or dummyslider
-		log.spam("set currrent slider to %s", currentslider)
+		log.spam("Poser: Set slider to %s", currentslider)
 	end
 	slidersetoperation(currentoperation)
 end
 signals.connect(bonelist, "selectionchanged", sliderchanged)
-currentcharacterchanged.connect(sliderchanged)
-
-characterschanged.connect(sliderchanged)
+signals.connect(charamgr, "currentcharacterchanged", sliderchanged)
+signals.connect(charamgr, "characterschanged", sliderchanged)
 signals.connect(sliderx, "increment", sliderincrement)
 signals.connect(slidery, "increment", sliderincrement)
 signals.connect(sliderz, "increment", sliderincrement)
@@ -289,7 +305,6 @@ function selectroom:map_cb()
 	local list = PPReadFile(play_path("data","jg2p09_00_00.pp"),"MP_ITEM.lst")
 	self.appenditem = "None"
 	for w in list:gmatch("%S+") do
-		log("trying to add %s", w)
 		if w ~= "-" and (not w:match("^MP_ITEM")) and w:match("^MP_") and (not added[w]) then
 			added[w] = true
 			self.appenditem = w
@@ -310,6 +325,9 @@ function selectroom:action(text,itno)
 	end
 	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
+
+local mouthshapes = shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, { name = "mouth", cols = 4 })
+local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2 })
 
 local dialogsliders = iup.dialog {
 	iup.hbox {
@@ -375,8 +393,8 @@ local dialogsliders = iup.dialog {
 				},
 			},
 			iup.hbox {
-				shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, 4),
-				shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, 2),
+				mouthshapes,
+				eyeshapes,
 				facecontrols(),
 				expand = "yes",
 			}
@@ -393,44 +411,6 @@ signals.connect(dialogposes, "loadpose", _M, "loadpose")
 signals.connect(dialogposes, "savepose", _M, "savepose")
 signals.connect(dialogposes, "loadscene", _M, "loadscene")
 signals.connect(dialogposes, "savescene", _M, "savescene")
-currentcharacterchanged.connect(dialogposes, "characterchanged")
-
-function _M.addcharacter(character)
-	local new = true
-	local last = 0
-	for i,v in ipairs(characters) do
-		if v.struct == character then
-			new = false
-		end
-		last = i
-	end
-	if new then
-		local data = character.m_charData
-		local name = string.format("%s %s", data.m_forename, data.m_surname)
-		new = { name = name, struct = character, poser = GetPoserCharacter(character) }
-		characters[last + 1] = new
-		if not currentcharacter then
-			setcurrentcharacter(new)
-		end
-	end
-	log.info("add character = %s", currentcharacter or "no currentcharacter")
-	characterschanged()
-end
-
-function _M.removecharacter(character)
-	if currentcharacter and currentcharacter.struct == character then
-		currentcharacter = nil
-	end
-	for k,v in pairs(characters) do
-		if v.struct == character then
-			table.remove(characters, k)
-		end
-	end
-	characterschanged()
-end
-
-function _M.updatereferences()
-end
 
 -- This hack is inspired by
 -- https://www.codeproject.com/Articles/11114/Move-window-form-without-Titlebar-in-C

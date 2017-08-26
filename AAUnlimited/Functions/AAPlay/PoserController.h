@@ -204,6 +204,9 @@ namespace Poser {
 #define LUA_CLASS PoserController::SliderInfo
 			static inline void bindLua() {
 				LUA_NAME;
+				LUA_METHOD(Apply, {
+					_self->Apply();
+				});
 				LUA_METHOD(SetCurrentOperation, {
 					_self->setCurrentOperation((Operation)(int)_gl.get(2));
 				});
@@ -216,6 +219,17 @@ namespace Poser {
 				});
 				LUA_METHOD(StopSlide, {
 					_self->stopSlide();
+				});
+				LUA_BINDARRE(translate, .value, 3);
+				LUA_BINDARRE(scale, .value, 3);
+				GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, rotation, { \
+					unsigned _idx = _gl.get(2); \
+					if (_idx > 4) return 0; \
+					if (_gl.top() == 2) { \
+						_gl.push(((float*)(&_self->rotation.data))[_idx]); \
+						return 1; \
+					} \
+					((float*)(&_self->rotation.data))[_idx] = _gl.get(3); \
 				});
 			}
 #undef LUA_CLASS
@@ -379,7 +393,8 @@ namespace Poser {
 			}
 		}
 
-		void AddCharacter(ExtClass::CharacterStruct* c);
+		void LoadCharacter(ExtClass::CharacterStruct* c);
+		void UpdateCharacter(ExtClass::CharacterStruct* c);
 		void RemoveCharacter(ExtClass::CharacterStruct* c);
 		PoserCharacter* GetPoserCharacter(ExtClass::CharacterStruct* c);
 

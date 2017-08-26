@@ -825,7 +825,7 @@ void OverrideBoneInjectV2() {
 
 void __stdcall OverrideFrameEvent(ExtClass::XXFile* xxFile) {
 	Shared::XXFileModification(xxFile,General::IsAAEdit);
-	if (General::IsAAPlay) Poser::FrameModEvent(xxFile);
+	Poser::FrameModEvent(xxFile);
 }
 
 void __declspec(naked) OverrideFrameRedirect() {

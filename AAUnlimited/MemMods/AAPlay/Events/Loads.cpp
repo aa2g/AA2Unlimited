@@ -25,7 +25,6 @@ static DWORD OrigDespawnMale, OrigDespawnFemale;
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
-	Poser::AddCharacter(loadCharacter);
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
@@ -56,6 +55,7 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a4, BYTE partial) {
 	loc_loadingCharacter = true;
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+	Poser::LoadCharacter(loadCharacter);
 
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
 	HiPolyLoadStartEvent(loadCharacter, cloth, partial);
@@ -82,6 +82,7 @@ DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a
 // wraps the calls to original load character events
 DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+	Poser::UpdateCharacter(loadCharacter);
 
 	LUA_EVENT_NORET("char_update", loadCharacter, a, b);
 
