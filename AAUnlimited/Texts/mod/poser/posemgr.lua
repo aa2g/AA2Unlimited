@@ -23,7 +23,7 @@ local function savedposes()
 end
 
 local function savedscenes()
-	return readdir(scenesdir .. "\\*")
+	return readdir(aau_path(scenesdir .. "\\*"))
 end
 
 local poselist = lists.listbox { editbox = "yes" }
@@ -99,6 +99,56 @@ end
 
 function loadposebutton.action()
 	loadpose(poselist.value)
+end
+
+local function savepose(filename)
+	log.spam("Poser: Saving pose %s", filename)
+	local character = charamgr.current
+	if not character then return end
+	local path = aau_path(posesdir, filename)
+	log.spam("Poser: Saving to %s", path)
+	local t = {}
+	t._VERSION_ = 2
+	t.pose = character.pose
+	t.frame = character.frame
+	local sliders = {}
+	for k,v in character:Sliders() do
+		local slider = {
+			v:rotation(0),
+			v:rotation(1),
+			v:rotation(2),
+			v:rotation(3),
+			v:translate(0),
+			v:translate(1),
+			v:translate(2),
+			v:scale(0),
+			v:scale(1),
+			v:scale(2),
+		}
+		sliders[k] = slider
+	end
+	t.sliders = sliders
+	
+	local face = {
+		eye = face.eye,
+		eyeopen = face.eyeopen,
+		eyebrow = face.eyebrow,
+		mouth = face.mouth,
+		mouthopen = face.mouthopen,
+		blush = face.blush,
+		blushlines = face.blushlines,
+	}
+	t.face = face
+	
+	local file = io.open(path, "w")
+    if not file then return nil end
+    file:write(json..encode(t))
+    file:close()
+	log.spam("Poser: Pose %s saved", filename)
+end
+
+function saveposebutton.action()
+	savepose(poselist.value)
 end
 
 local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
