@@ -2,6 +2,7 @@
 
 local confont="Courier, 10"
 local nocloseafterlaunch = true
+local dlg
 local reslist = {
 	"800x480","854x480","960x600","1024x600","1280x720","1280x800","1280x854","1280x960","1366x768",
 	"1440x900","1440x960","1600x900","1680x1050","1920x1080","1920x1200","2048x1080","2048x1536",
@@ -39,7 +40,7 @@ local function update_res(text)
 		return n
 	end
 
-	factor = gcd(x,y)
+	local factor = gcd(x,y)
 	local ax = x/factor
 	local ay = y/factor
 
@@ -201,7 +202,10 @@ local function evalrepl(v)
 	if not ch then
 		log.error("%s",err)
 	end
+	local sav = global_writes
+	global_writes = true
 	local ret = {xpcall(ch, debug.traceback)}
+	global_writes = false
 	if not ret[1] then
 		log.error("%s", ret[2])
 	else

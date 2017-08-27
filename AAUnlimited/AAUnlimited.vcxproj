@@ -277,6 +277,7 @@
     <None Include="Texts\mod\fixlocale.lua" />
     <None Include="Texts\mod\homosex.lua" />
     <None Include="Texts\mod\jizou.lua" />
+    <None Include="Texts\mod\json.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
     <None Include="Texts\mod\launcher\dlglist.lua" />
     <None Include="Texts\mod\launcher\dlgmod.lua" />
@@ -328,10 +329,12 @@
     <None Include="Texts\mod\pl\url.lua" />
     <None Include="Texts\mod\pl\utils.lua" />
     <None Include="Texts\mod\pl\xml.lua" />
+    <None Include="Texts\mod\poser\charamgr.lua" />
     <None Include="Texts\mod\poser\dlg.lua" />
     <None Include="Texts\mod\poser\framelist.lua" />
     <None Include="Texts\mod\poser\init.lua" />
     <None Include="Texts\mod\poser\lists.lua" />
+    <None Include="Texts\mod\poser\posemgr.lua" />
     <None Include="Texts\mod\poser\signals.lua" />
     <None Include="Texts\mod\poser\sliders.lua" />
     <None Include="Texts\mod\poser\toggles.lua" />
@@ -448,8 +451,7 @@
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503;4624</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -487,7 +489,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503;4624</DisableSpecificWarnings>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>false</BufferSecurityCheck>

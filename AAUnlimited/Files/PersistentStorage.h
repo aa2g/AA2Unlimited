@@ -74,4 +74,6 @@ namespace PersistentStorage {
 		}
 	};
 
+
+	ClassStorage current();
 }

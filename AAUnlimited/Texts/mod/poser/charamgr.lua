@@ -35,7 +35,7 @@ charamt.GetXXFileFace = GetXXFileFace
 function charamt.__index(character,k)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
-		return face[k]
+		return face[facekeys[k]]
 	end
 	if skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
@@ -48,12 +48,7 @@ end
 function charamt.__newindex(character,k,v)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
-		if k == "eyebrow" then
-			local base = face.m_eyebrow % 7
-			face.m_eyebrow = base + v
-		else
-			face[facekeys[k]] = v
-		end
+		face[facekeys[k]] = v
 	elseif skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		skel[skelkeys[k]] = v
@@ -103,6 +98,7 @@ function _M.removecharacter(character)
 	for k,v in pairs(characters) do
 		if v.struct == character then
 			table.remove(characters, k)
+			break
 		end
 	end
 	log.spam("Poser: We have %d characters", #characters)

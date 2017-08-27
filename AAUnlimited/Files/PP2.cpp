@@ -18,6 +18,7 @@ const wstring & PP2File::getName(int idx) {
 		if (e.second == idx)
 			return e.first;
 	}
+	abort();
 }
 bool PP2File::OPUS_decompress(int srate, int opusrate, int nchan, char *dst, size_t dstlen, char *src, size_t srclen)
 {
@@ -674,12 +675,14 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 
 PP2::PP2() {};
 
-// Brute workaround for win7 bugs
 PP2::~PP2() {
-	ExitProcess(0);
-#if 0
 	if (!g_Config.bUsePP2)
 		return;
+	// WIN7 bug: work_condition.notify_all() will trash 'this' for reasons not yet clear.
+#if 0
+	// brute workaround
+	ExitProcess(0);
+#else
 	{
 		unique_lock<mutex> lock(workmutex);
 		stopping = true;

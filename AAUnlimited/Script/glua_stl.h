@@ -8,7 +8,8 @@
 	lua_pushlightuserdata(_L, &container); \
 	lua_pushcclosure(_L, nextfunc<decltype(container)>, 1); \
 	ITERATOR_TYPE_P(container) ud = (ITERATOR_TYPE_P(container))lua_newuserdata(_L, sizeof(ITERATOR_TYPE(container))); \
-	*ud = container.begin(); \
+	auto temp = container.begin(); \
+	::memcpy(ud, &temp, sizeof(temp)); \
 	return 2;
 
 #define LUA_MAPITERATOR(getter, container) \

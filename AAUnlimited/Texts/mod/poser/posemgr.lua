@@ -1,7 +1,7 @@
 local _M = {}
 
 local signals = require "poser.signals"
-local json = require "poser.json"
+local json = require "json"
 local lists = require "poser.lists"
 local charamgr = require "poser.charamgr"
 
@@ -19,11 +19,11 @@ end
 clipchanged.connect(setclip)
 
 local function savedposes()
-	return readdir(aau_path(posesdir .. "\\*"))
+	return readdir(aau_path(posesdir .. "\\*.pose"))
 end
 
 local function savedscenes()
-	return readdir(aau_path(scenesdir .. "\\*"))
+	return readdir(aau_path(scenesdir .. "\\*.scene"))
 end
 
 local poselist = lists.listbox { editbox = "yes" }
@@ -38,8 +38,11 @@ local deletescenebutton = iup.button { title = "Delete" }
 local i = 1
 local function populateposelist()
 	for f in savedposes() do
-		poselist[i] = f
-		i = i + 1
+		f = f:match("^(.*)%.pose$")
+		if f then
+			poselist[i] = f
+			i = i + 1
+		end
 	end
 end
 populateposelist()
@@ -89,7 +92,11 @@ local function loadpose(filename)
 				if face.mouthopen then character.mouthopen = face.mouthopen end
 				if face.eye then character.eye = face.eye end
 				if face.eyeopen then character.eyeopen = face.eyeopen end
-				if face.eyebrow then character.eyebrow = face.eyebrow end
+				if face.eyebrow then
+					local base = character.eyebrow
+					base = base - (base % 7)
+					character.eyebrow = base + (face.eyebrow % 7)
+				end
 				if face.blush then character.blush = face.blush / 9 end
 				if face.blushlines then character.blushlines = face.blushlines / 9 end
 			end
@@ -130,25 +137,25 @@ local function savepose(filename)
 	t.sliders = sliders
 	
 	local face = {
-		eye = face.eye,
-		eyeopen = face.eyeopen,
-		eyebrow = face.eyebrow,
-		mouth = face.mouth,
-		mouthopen = face.mouthopen,
-		blush = face.blush,
-		blushlines = face.blushlines,
+		eye = character.eye,
+		eyeopen = character.eyeopen,
+		eyebrow = character.eyebrow,
+		mouth = character.mouth,
+		mouthopen = character.mouthopen,
+		blush = character.blush,
+		blushlines = character.blushlines,
 	}
 	t.face = face
 	
 	local file = io.open(path, "w")
     if not file then return nil end
-    file:write(json..encode(t))
+    file:write(json.encode(t))
     file:close()
 	log.spam("Poser: Pose %s saved", filename)
 end
 
 function saveposebutton.action()
-	savepose(poselist.value)
+	savepose(poselist.value .. ".pose")
 end
 
 local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }

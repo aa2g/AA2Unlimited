@@ -501,5 +501,14 @@
     <None Include="Texts\mod\poser\toggles.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\poser\posemgr.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\charamgr.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\json.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

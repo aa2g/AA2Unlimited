@@ -8,6 +8,10 @@ picojson::value PersistentStorage::ClassStorage::get(std::string key)
 	return data[key];
 }
 
+PersistentStorage::ClassStorage PersistentStorage::current() {
+	return ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+}
+
 PersistentStorage::ClassStorage PersistentStorage::ClassStorage::set(std::string key, picojson::value value)
 {
 	data[key] = value;

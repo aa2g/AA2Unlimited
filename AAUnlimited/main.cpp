@@ -168,10 +168,12 @@ extern "C" __declspec(dllexport)
 void* WINAPI AA2Unlimited(UINT SDKVersion)
 {
 	static IDirect3D9* (WINAPI *orig)(UINT SDKVersion);
-	std::lock_guard<std::mutex> guard(mutex);
+	{
+		std::lock_guard<std::mutex> guard(mutex);
 
-	if (orig)
-		return Render::Wrap(orig(SDKVersion));
+		if (orig)
+			return Render::Wrap(orig(SDKVersion));
+	}
 
 	SetErrorMode(0);
 	SetUnhandledExceptionFilter(panic);
