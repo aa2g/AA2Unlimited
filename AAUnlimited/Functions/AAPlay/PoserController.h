@@ -1,5 +1,10 @@
 #pragma once
 
+// The default debug iterator level has corruption issues with this Lua bridge
+#ifdef _DEBUG
+#define _ITERATOR_DEBUG_LEVEL 1
+#endif
+
 #include <Windows.h>
 #include <map>
 #include <vector>
