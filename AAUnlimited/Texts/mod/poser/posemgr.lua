@@ -19,11 +19,11 @@ end
 clipchanged.connect(setclip)
 
 local function savedposes()
-	return readdir(aau_path(posesdir .. "\\*.json"))
+	return readdir(aau_path(posesdir .. "\\*.pose"))
 end
 
 local function savedscenes()
-	return readdir(aau_path(scenesdir .. "\\*.json"))
+	return readdir(aau_path(scenesdir .. "\\*.scene"))
 end
 
 local poselist = lists.listbox { editbox = "yes" }
