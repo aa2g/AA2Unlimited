@@ -18,7 +18,6 @@ if ver then
 	AAU_VERSION = AAU_VERSION .. " " .. ver
 end
 
-
 ---------------------------
 -- basic utils
 ---------------------------
@@ -367,16 +366,20 @@ end
 
 global_writes = false
 
+function error_trace(msg)
+	error(debug.traceback(tostring(msg)))
+end
+
 function lock_globals()
 	setmetatable(_G, {
 		__index = function(t,k)
-			return _BINDING[k] or _WIN32[k] or error("accessing undefined global '"..tostring(k).."'")
+			return _BINDING[k] or _WIN32[k] or error_trace("accessing undefined global '"..tostring(k).."'")
 		end,
 		__newindex = function(t,k,v)
 			if global_writes then
 				rawset(t,k,v)
 			else
-				error("attempted write to global " .. tostring(k) .. " value " .. tostring(v))
+				error_trace("attempted write to global " .. tostring(k) .. " value " .. tostring(v))
 			end
 		end
 	})
