@@ -105,7 +105,7 @@ local function loadpose(filename)
 end
 
 function loadposebutton.action()
-	loadpose(poselist.value)
+	loadpose(poselist.value .. ".pose")
 end
 
 local function savepose(filename)
