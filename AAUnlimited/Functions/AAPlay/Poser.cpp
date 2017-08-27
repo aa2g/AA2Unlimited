@@ -3,8 +3,8 @@
 #include <string>
 #include "Files\Logger.h"
 
-#include "PoserController.h"
 #include "StdAfx.h"
+#include "PoserController.h"
 
 namespace Poser {
 

@@ -277,6 +277,7 @@
     <None Include="Texts\mod\fixlocale.lua" />
     <None Include="Texts\mod\homosex.lua" />
     <None Include="Texts\mod\jizou.lua" />
+    <None Include="Texts\mod\json.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
     <None Include="Texts\mod\launcher\dlglist.lua" />
     <None Include="Texts\mod\launcher\dlgmod.lua" />

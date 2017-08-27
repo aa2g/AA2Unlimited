@@ -365,10 +365,19 @@ function init_module(mod)
 	end
 end
 
+global_writes = false
+
 function lock_globals()
 	setmetatable(_G, {
 		__index = function(t,k)
 			return _BINDING[k] or _WIN32[k] or error("accessing undefined global '"..tostring(k).."'")
+		end,
+		__newindex = function(t,k,v)
+			if global_writes then
+				rawset(t,k,v)
+			else
+				error("attempted write to global " .. tostring(k) .. " value " .. tostring(v))
+			end
 		end
 	})
 end
@@ -572,3 +581,11 @@ function p(t)
 	return r
 end
 
+local old_require = require
+function require(x)
+	local sav = global_writes
+	global_writes = true
+	local a,b = old_require(x)
+	global_writes = sav
+	return a,b
+end

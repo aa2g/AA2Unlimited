@@ -19,11 +19,11 @@ end
 clipchanged.connect(setclip)
 
 local function savedposes()
-	return readdir(aau_path(posesdir .. "\\*"))
+	return readdir(aau_path(posesdir .. "\\*.json"))
 end
 
 local function savedscenes()
-	return readdir(aau_path(scenesdir .. "\\*"))
+	return readdir(aau_path(scenesdir .. "\\*.json"))
 end
 
 local poselist = lists.listbox { editbox = "yes" }
@@ -38,8 +38,11 @@ local deletescenebutton = iup.button { title = "Delete" }
 local i = 1
 local function populateposelist()
 	for f in savedposes() do
-		poselist[i] = f
-		i = i + 1
+		f = f:match("^(.*)%.json")
+		if f then
+			poselist[i] = f
+			i = i + 1
+		end
 	end
 end
 populateposelist()
@@ -130,13 +133,13 @@ local function savepose(filename)
 	t.sliders = sliders
 	
 	local face = {
-		eye = face.eye,
-		eyeopen = face.eyeopen,
-		eyebrow = face.eyebrow,
-		mouth = face.mouth,
-		mouthopen = face.mouthopen,
-		blush = face.blush,
-		blushlines = face.blushlines,
+		eye = character.eye,
+		eyeopen = character.eyeopen,
+		eyebrow = character.eyebrow,
+		mouth = character.mouth,
+		mouthopen = character.mouthopen,
+		blush = character.blush,
+		blushlines = character.blushlines,
 	}
 	t.face = face
 	
@@ -148,7 +151,7 @@ local function savepose(filename)
 end
 
 function saveposebutton.action()
-	savepose(poselist.value)
+	savepose(poselist.value .. ".json")
 end
 
 local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
