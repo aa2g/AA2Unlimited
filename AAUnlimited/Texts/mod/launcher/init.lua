@@ -13,6 +13,7 @@ function _M:load()
 	local dlgproc = _BINDING.IsAAEdit and 0x2FD624 or 0x31C66C
 	log("starting launcher, detected exe type is %s", exe_type)
 	g_hook_vptr(dlgproc, 4, function(orig, this, hdlg, msg, lparam, wparam)
+		local ret
 		--log.spam("winmsg %x %x %s/%x %x %x",this,hdlg,rmsg[msg] or "unk", msg,lparam,wparam)
 		if msg == 0x18 then
 			ret = proc_invoke(orig, this, hdlg, 0x111, 0x3e9, 0)
