@@ -122,7 +122,7 @@ void Shared::GameState::clearConversationCharacter(int idx) {
 
 ExtClass::CharacterStruct ** Shared::GameState::getCharacters()
 {
-	ExtClass::CharacterStruct* result[25];
+	static ExtClass::CharacterStruct* result[25];
 	for each (auto cInst in AAPlay::g_characters)
 	{
 		if (cInst.IsValid()) {
