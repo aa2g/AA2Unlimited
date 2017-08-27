@@ -35,7 +35,7 @@ charamt.GetXXFileFace = GetXXFileFace
 function charamt.__index(character,k)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
-		return face[k]
+		return face[facekeys[k]]
 	end
 	if skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
