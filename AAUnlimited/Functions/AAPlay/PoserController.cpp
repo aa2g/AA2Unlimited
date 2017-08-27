@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "Files/PoseMods.h"
+#include "Functions/AAPlay/PoserController.h"
+
 
 #include <cmath>
 #include <string.h>

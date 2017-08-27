@@ -84,7 +84,6 @@
 #include "Functions/AAPlay/HAis/ForceAi.h"
 #include "Functions/AAPlay/HButtonMove.h"
 #include "Functions/AAPlay/Poser.h"
-#include "Functions/AAPlay/PoserController.h"
 #include "Functions/AAUCardData.h"
 #include "Functions/CharInstData.h"
 #include "Functions/OverrideFile.h"

@@ -29,8 +29,7 @@ namespace Shared {
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
 		void clearConversationCharacter(int idx);
 
-		ExtClass::CharacterStruct ** getCharacters();
-		
+
 		inline ExtClass::CharacterStruct ** getPlayerCharacter()
 		{
 			return ExtVars::AAPlay::PlayerCharacterPtr();

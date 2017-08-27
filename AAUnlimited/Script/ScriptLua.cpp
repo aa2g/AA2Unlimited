@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Functions/Render.h"
 #include "Files/PersistentStorage.h"
+#include "Functions/AAPlay/PoserController.h"
 
 #include <string>
 

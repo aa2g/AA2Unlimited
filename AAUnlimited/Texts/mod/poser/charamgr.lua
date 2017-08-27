@@ -103,6 +103,7 @@ function _M.removecharacter(character)
 	for k,v in pairs(characters) do
 		if v.struct == character then
 			table.remove(characters, k)
+			break
 		end
 	end
 	log.spam("Poser: We have %d characters", #characters)

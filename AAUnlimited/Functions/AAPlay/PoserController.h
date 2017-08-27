@@ -1,10 +1,17 @@
 #pragma once
 
 // The default debug iterator level has corruption issues with this Lua bridge
+//
+// Achkctually, NEVER, EVER do this. The debug level changes the layout of STL
+// structure which will now mismatch between compile units you didnt cherrypick
+// define it in like this. Instead, add this as global define to the build target.
+
+/*
 #ifdef _DEBUG
 #undef _ITERATOR_DEBUG_LEVEL
 #define _ITERATOR_DEBUG_LEVEL 1
 #endif
+*/
 
 #include <Windows.h>
 #include <map>
