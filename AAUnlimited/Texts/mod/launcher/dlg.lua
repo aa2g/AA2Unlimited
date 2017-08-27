@@ -202,7 +202,10 @@ local function evalrepl(v)
 	if not ch then
 		log.error("%s",err)
 	end
+	local sav = global_writes
+	global_writes = true
 	local ret = {xpcall(ch, debug.traceback)}
+	global_writes = false
 	if not ret[1] then
 		log.error("%s", ret[2])
 	else
