@@ -1,7 +1,7 @@
 local _M = {}
 
 local signals = require "poser.signals"
-local json = require "poser.json"
+local json = require "json"
 local lists = require "poser.lists"
 local charamgr = require "poser.charamgr"
 
@@ -142,7 +142,7 @@ local function savepose(filename)
 	
 	local file = io.open(path, "w")
     if not file then return nil end
-    file:write(json..encode(t))
+    file:write(json.encode(t))
     file:close()
 	log.spam("Poser: Pose %s saved", filename)
 end
