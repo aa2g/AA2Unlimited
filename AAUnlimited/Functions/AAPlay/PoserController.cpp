@@ -163,26 +163,32 @@ namespace Poser {
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
 		LOGPRIONC(Logger::Priority::SPAM) "FrameModEvent " << xxFile;
 		if (xxFile->m_name)
-			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name <<")";
-		LOGPRIONC(Logger::Priority::SPAM) "\r\n";
+			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name << ")";
+
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
 		if (model == ExtClass::CharacterStruct::H3DROOM)
 			FrameModRoom(xxFile);
-		
+
+
+		LOGPRIONC(Logger::Priority::SPAM) " model = " << std::dec << (model) << "\r\n";
+
 		if (m_loadCharacter == nullptr) return;
 		if (model == ExtClass::CharacterStruct::SKELETON)
 			m_loadCharacter->FrameModSkeleton(xxFile);
 		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE)
 			m_loadCharacter->FrameModFace(xxFile);
-		else
+		else if (model == ExtClass::CharacterStruct::SKIRT) {
 			m_loadCharacter->FrameModSkirt(xxFile);
-
+		}
+		
+		// FIXME: this seems broken
 		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
 			for (unsigned int i = 0; i < frame->m_nBones; i++) {
 				ExtClass::Bone* bone = &frame->m_bones[i];
 				ExtClass::Frame* boneFrame = bone->GetFrame();
 				if (boneFrame != NULL && strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
+					LOGPRIONC(Logger::Priority::SPAM) "Attaching translated bone " << boneFrame->m_name << "\n";
 					bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
 				}
 			}
