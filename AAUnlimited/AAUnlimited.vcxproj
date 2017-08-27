@@ -448,8 +448,7 @@
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503;4624</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -487,7 +486,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdparty\zstd\lib;$(SolutionDir)\3rdparty\opus\include;$(ProjectDir)\..\lua53\src;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Script</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
-      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4800;4244;4018;4200;4996;4503;4624</DisableSpecificWarnings>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <BufferSecurityCheck>false</BufferSecurityCheck>

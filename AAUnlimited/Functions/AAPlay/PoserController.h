@@ -2,6 +2,7 @@
 
 // The default debug iterator level has corruption issues with this Lua bridge
 #ifdef _DEBUG
+#undef _ITERATOR_DEBUG_LEVEL
 #define _ITERATOR_DEBUG_LEVEL 1
 #endif
 

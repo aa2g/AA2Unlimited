@@ -473,7 +473,7 @@ public class ChunkBuilder
         pak.Write(table.ToArray(), 0, (int)table.Length);
 
         // dump file meta
-        int co = 0;
+        //int co = 0;
         foreach (ChunkFile chf in files)
         {
 /*            Console.WriteLine("writing file no " + co++ +
