@@ -97,7 +97,7 @@ end
 
 function _M.removecharacter(character)
 	log.spam("Poser: Remove character %s", character)
-	if currentcharacter and currentcharacter.struct == character then
+	if _M.current and _M.current.struct == character then
 		setcurrentcharacter(nil)
 	end
 	for k,v in pairs(characters) do

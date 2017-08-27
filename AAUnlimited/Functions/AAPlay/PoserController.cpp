@@ -22,11 +22,10 @@ namespace Poser {
 		}
 		else {
 			if (order) {
-				float delta = currentOperation == Translate ? order / 10.0f : order / 50.0f;
 				if (!sliding)
-					getCurrentOperationData()->value[axis] += delta;
+					getCurrentOperationData()->value[axis] += order;
 				else
-					getCurrentOperationData()->value[axis] = slidingTSData[axis] + delta;
+					getCurrentOperationData()->value[axis] = slidingTSData[axis] + order;
 			}
 			else {
 				getCurrentOperationData()->value[axis] = currentOperation == Scale ? 1.0f : 0.0f;
@@ -85,7 +84,7 @@ namespace Poser {
 	}
 	*/
 	PoserController::PoserController() :
-		m_currentCharacter(nullptr), m_isActive(false) {
+		m_isActive(false) {
 	}
 
 	PoserController::~PoserController()	{
@@ -104,7 +103,6 @@ namespace Poser {
 		for (PoserCharacter* c : m_characters)
 			delete c;
 		m_characters.clear();
-		m_currentCharacter = nullptr;
 	}
 
 	void PoserController::SliderInfo::Apply() {
@@ -323,6 +321,7 @@ namespace Poser {
 	void PoserController::RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
 		for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
 			if ((*it)->m_character == charStruct) {
+				delete *it;
 				m_characters.erase(it);
 				break;
 			}
@@ -337,196 +336,10 @@ namespace Poser {
 		return nullptr;
 	}
 	
-	void PoserController::LoadPose(const TCHAR* path) {
-		using namespace picojson;
-		value json;
-
-		PoserCharacter* character = m_currentCharacter;
-		if (!character)
-			return;
-		character->ResetSliders();
-
-		std::ifstream in(path);
-		in >> json;
-
-		auto& sliders = character->m_sliders;
-		if (picojson::get_last_error().empty() && json.is<object>()) {
-			jsonToPose(character, json);
-		}
-		else {
-			PoseFile openFile(path);
-			std::wstring str;
-			SliderInfo* slider = NULL;
-			for (auto elem : openFile.GetMods()) {
-				auto match = sliders.find(elem.frameName);
-				if (match != sliders.end()) {
-					slider = match->second;
-					float x, y, z;
-					x = elem.matrix[0];
-					y = elem.matrix[1];
-					z = elem.matrix[2];
-					(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.data, y, x, z);
-					slider->translate.value[X] = elem.matrix[3];
-					slider->translate.value[Y] = elem.matrix[4];
-					slider->translate.value[Z] = elem.matrix[5];
-					slider->scale.value[X] = elem.matrix[6];
-					slider->scale.value[Y] = elem.matrix[7];
-					slider->scale.value[Z] = elem.matrix[8];
-					slider->Apply();
-				}
-			}
-		}
-	}
-
-	void PoserController::SavePose(const TCHAR* path) {
-		PoserCharacter* character = m_currentCharacter;
-		if (!character)
-			return;
-		std::ofstream out(path);
-		out << poseToJson(character).serialize(true);
-	}
-
-	void PoserController::jsonToPose(PoserCharacter* c, picojson::value json) {
-		using namespace picojson;
-
-		if (json.is<object>()) {
-			const object load = json.get<object>();
-			int version = 1;
-			auto& sliders = c->m_sliders;
-			try {
-				auto versionCheck = load.find("_VERSION_");
-				if (versionCheck != load.end()) {
-					version = (int)versionCheck->second.get<double>();
-				}
-				c->m_character->m_xxSkeleton->m_poseNumber = (int)load.at("pose").get<double>();
-				c->m_character->m_xxSkeleton->m_animFrame = (float)load.at("frame").get<double>();
-				object posesliders = load.at("sliders").get<object>();
-				c->ResetSliders();
-
-				auto LoadSlider = [this,&version](SliderInfo* slider, array& mods) {
-					if ((mods.size() == 9 && version == 1) || (mods.size() == 10 && version == 2)) {
-						float x, y, z, w;
-						int index = 0;
-						x = (float)mods[index++].get<double>();
-						y = (float)mods[index++].get<double>();
-						z = (float)mods[index++].get<double>();
-						if (version == 1) {
-							(*Shared::D3DXQuaternionRotationYawPitchRoll)(&slider->rotation.data, y, x, z);
-						}
-						else if (version == 2) {
-							w = (float)mods[index++].get<double>();
-							slider->rotation.data.x = x;
-							slider->rotation.data.y = y;
-							slider->rotation.data.z = z;
-							slider->rotation.data.w = w;
-						}
-						slider->translate.value[X] = (float)mods[index++].get<double>();
-						slider->translate.value[Y] = (float)mods[index++].get<double>();
-						slider->translate.value[Z] = (float)mods[index++].get<double>();
-						slider->scale.value[X] = (float)mods[index++].get<double>();
-						slider->scale.value[Y] = (float)mods[index++].get<double>();
-						slider->scale.value[Z] = (float)mods[index++].get<double>();
-						slider->Apply();
-					}
-					else {
-						//invalid json data
-					}
-				};
-				for (auto s = posesliders.cbegin(); s != posesliders.cend(); s++) {
-					auto match = sliders.find(s->first);
-					if (match != sliders.end()) {
-						array mods = (*s).second.get<array>();
-						LoadSlider(match->second, mods);
-					}
-				}
-			}
-			catch (std::out_of_range& e) {
-				//key doesn't exist
-			}
-			catch (std::runtime_error& e) {
-				//invalid json data
-			}
-
-			try {
-				object face = load.at("face").get<object>();
-				auto it = face.find("mouth");
-				if (it != face.end())
-					c->GetFace().SetMouthShape((int)it->second.get<double>());
-				it = face.find("mouthopen");
-				if (it != face.end())
-					c->GetFace().SetMouthOpen((float)it->second.get<double>());
-				it = face.find("eye");
-				if (it != face.end())
-					c->GetFace().SetEyeShape((int)it->second.get<double>());
-				it = face.find("eyeopen");
-				if (it != face.end())
-					c->GetFace().SetEyeOpen((float)it->second.get<double>());
-				it = face.find("eyebrow");
-				if (it != face.end()) {
-					int currentEyebrow = c->GetFace().GetEyebrows();
-					currentEyebrow = currentEyebrow - (currentEyebrow % 7);
-					int newEyebrow = (int)it->second.get<double>() % 7;
-					c->GetFace().SetEyebrows(currentEyebrow + newEyebrow);
-				}
-				it = face.find("blush");
-				if (it != face.end())
-					c->GetFace().SetBlush((int)(it->second.get<double>()));
-				it = face.find("blushlines");
-				if (it != face.end())
-					c->GetFace().SetBlushLines((int)(it->second.get<double>()));
-			}
-			catch (std::out_of_range& e) {
-				//key doesn't exist
-			}
-			catch (std::runtime_error& e) {
-				//invalid json data
-			}
-		}
-
-	}
-
-	picojson::value PoserController::poseToJson(PoserCharacter* c) {
-		using namespace picojson;
-		object json;
-		json["_VERSION_"] = value((double)2);
-		json["pose"] = value((double)c->m_character->m_xxSkeleton->m_poseNumber);
-		json["frame"] = value((double)c->m_character->m_xxSkeleton->m_animFrame);
-		value::object sliders;
-		auto SaveSlider = [&sliders](auto& frameName, auto& slider) {
-			value::array values(10);
-			values[0] = value((double)slider->rotation.data.x);
-			values[1] = value((double)slider->rotation.data.y);
-			values[2] = value((double)slider->rotation.data.z);
-			values[3] = value((double)slider->rotation.data.w);
-			values[4] = value((double)slider->translate.value[X]);
-			values[5] = value((double)slider->translate.value[Y]);
-			values[6] = value((double)slider->translate.value[Z]);
-			values[7] = value((double)slider->scale.value[X]);
-			values[8] = value((double)slider->scale.value[Y]);
-			values[9] = value((double)slider->scale.value[Z]);
-			sliders[frameName] = value(values);
-		};
-		for (auto it = c->m_sliders.begin(); it != c->m_sliders.end(); it++) {
-			SaveSlider(it->first, it->second);
-		}
-		json["sliders"] = value(sliders);
-
-		value::object face;
-		face["eye"] = value((double)c->GetFace().GetEyeShape());
-		face["eyeopen"] = value((double)c->GetFace().GetEyeOpen());
-		face["eyebrow"] = value((double)c->GetFace().GetEyebrows());
-		face["mouth"] = value((double)c->GetFace().GetMouthShape());
-		face["mouthopen"] = value((double)c->GetFace().GetMouthOpen());
-		face["blush"] = value(round((double)(c->GetFace().GetBlush())));
-		face["blushlines"] = value(round((double)(c->GetFace().GetBlushLines())));
-		json["face"] = value(face);
-		return value(json);
-	}
-
 	void PoserController::LoadCloth(std::vector<BYTE> &file) {
 		ClothFile load(file);
 		if (!load.IsValid()) return;
-		ExtClass::CharacterData::Clothes* cloth = &m_currentCharacter->m_character->m_charData->m_clothes[m_currentCharacter->m_character->m_currClothes];
+		ExtClass::CharacterData::Clothes* cloth = nullptr;
 		cloth->slot = load.m_slot;
 		cloth->skirtLength = load.m_shortSkirt;
 		cloth->socks = load.m_socksId;

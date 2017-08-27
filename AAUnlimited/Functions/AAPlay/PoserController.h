@@ -390,14 +390,6 @@ namespace Poser {
 			SetHidden("A00_O_sitasiru", !show);
 		}
 
-		void SetCurrentCharacter(ExtClass::CharacterStruct* character) {
-			for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
-				if ((*it)->m_character == character) {
-					m_currentCharacter = *it;
-				}
-			}
-		}
-
 		void LoadCharacter(ExtClass::CharacterStruct* c);
 		void UpdateCharacter(ExtClass::CharacterStruct* c);
 		void RemoveCharacter(ExtClass::CharacterStruct* c);
@@ -410,13 +402,7 @@ namespace Poser {
 		void StopPoser();
 		void Clear();
 
-		void LoadPose(const TCHAR* path);
-		void SavePose(const TCHAR* path);
-		void LoadScene(const TCHAR* path);
-		void SaveScene(const TCHAR* path);
 		void LoadCloth(std::vector<BYTE> &file);
-		void jsonToPose(PoserCharacter* c, picojson::value json);
-		picojson::value poseToJson(PoserCharacter* c);
 
 		void FrameModEvent(ExtClass::XXFile* xxFile);
 		void FrameModRoom(ExtClass::XXFile* xxFile);
@@ -427,7 +413,6 @@ namespace Poser {
 		bool m_isActive;
 		std::vector<PoserCharacter*> m_characters;
 		PoserCharacter* m_loadCharacter;
-		PoserCharacter* m_currentCharacter;
 		std::map<std::wstring, std::wstring> m_overrides;
 		
 #define LUA_CLASS Poser::PoserController
