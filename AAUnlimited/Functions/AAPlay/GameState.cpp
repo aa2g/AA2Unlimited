@@ -120,23 +120,10 @@ void Shared::GameState::clearConversationCharacter(int idx) {
 	}
 }
 
-ExtClass::CharacterStruct ** Shared::GameState::getCharacters()
-{
-	static ExtClass::CharacterStruct* result[25];
-	for each (auto cInst in AAPlay::g_characters)
-	{
-		if (cInst.IsValid()) {
-			ExtClass::CharacterStruct* cStruct = cInst.m_char;
-			result[AAPlay::GetSeatFromStruct(cStruct)] = cStruct;
-		}
-	}
-	return result;
-}
-
 void Shared::GameState::setPlayerCharacter(int seat) {
 	if (AAPlay::g_characters[seat].IsValid()) {
 		auto currentChar = getPlayerCharacter();
-		*currentChar = getCharacters()[seat];
+		*currentChar = AAPlay::g_characters[seat].m_char;
 	}
 }
 
