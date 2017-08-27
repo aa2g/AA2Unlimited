@@ -19,11 +19,11 @@ end
 clipchanged.connect(setclip)
 
 local function savedposes()
-	return readdir(aau_path(posesdir .. "\\*.json"))
+	return readdir(aau_path(posesdir .. "\\*.pose"))
 end
 
 local function savedscenes()
-	return readdir(aau_path(scenesdir .. "\\*.json"))
+	return readdir(aau_path(scenesdir .. "\\*.scene"))
 end
 
 local poselist = lists.listbox { editbox = "yes" }
@@ -38,7 +38,7 @@ local deletescenebutton = iup.button { title = "Delete" }
 local i = 1
 local function populateposelist()
 	for f in savedposes() do
-		f = f:match("^(.*)%.json")
+		f = f:match("^(.*)%.pose$")
 		if f then
 			poselist[i] = f
 			i = i + 1
@@ -92,7 +92,11 @@ local function loadpose(filename)
 				if face.mouthopen then character.mouthopen = face.mouthopen end
 				if face.eye then character.eye = face.eye end
 				if face.eyeopen then character.eyeopen = face.eyeopen end
-				if face.eyebrow then character.eyebrow = face.eyebrow end
+				if face.eyebrow then
+					local base = character.eyebrow
+					base = base - (base % 7)
+					character.eyebrow = base + (face.eyebrow % 7)
+				end
 				if face.blush then character.blush = face.blush / 9 end
 				if face.blushlines then character.blushlines = face.blushlines / 9 end
 			end
@@ -151,7 +155,7 @@ local function savepose(filename)
 end
 
 function saveposebutton.action()
-	savepose(poselist.value .. ".json")
+	savepose(poselist.value .. ".pose")
 end
 
 local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
