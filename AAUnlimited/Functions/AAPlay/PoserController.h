@@ -221,6 +221,9 @@ namespace Poser {
 				LUA_METHOD(Apply, {
 					_self->Apply();
 				});
+				LUA_METHOD(Reset, {
+					_self->Reset();
+				});
 				LUA_METHOD(SetCurrentOperation, {
 					_self->setCurrentOperation((Operation)(int)_gl.get(2));
 				});

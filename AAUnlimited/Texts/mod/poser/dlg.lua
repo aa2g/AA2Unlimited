@@ -329,6 +329,12 @@ end
 local mouthshapes = shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, { name = "mouth", cols = 4 })
 local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2 })
 
+local resetsliderbutton = iup.flatbutton { title = "Reset", toggle = "no", border = "yes", padding = 3 }
+function resetsliderbutton.flat_action()
+	currentslider:Reset()
+	currentslider:Apply()
+end
+
 local dialogsliders = iup.dialog {
 	iup.hbox {
 		nmargin = "7x7",
@@ -379,7 +385,7 @@ local dialogsliders = iup.dialog {
 							}
 						},
 						iup.vbox {
-							iup.flatbutton { title = "Z-Copy", toggle = "no", border = "yes", padding = 3 },
+							resetsliderbutton,
 							alignment = "aright",
 							expand = "horizontal",
 						},
