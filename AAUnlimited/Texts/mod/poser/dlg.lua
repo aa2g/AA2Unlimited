@@ -55,7 +55,7 @@ for _,v in ipairs(framecfg) do
 	end
 end
 
-local function shapecontrols(title, shapelist, opts)
+local function shapecontrols(shapelist, opts)
 	local shapename = opts.name
 	local shapeopen = shapename .. "open"
 	local shapeselected = function(shape)
@@ -87,52 +87,20 @@ local function shapecontrols(title, shapelist, opts)
 		shapeopened(tonumber(self.value))
 	end
 	
-	return iup.frame { title = title, 
-		iup.vbox {
-			iup.radio {
-				iup.gridbox { numdiv = opts.cols, unpack(controls) },
-				expand = "yes"
-			},
-			iup.hbox {
-				open,
-				spin,
-				alignment = "acenter",
-				gap = 3,
-			},
-			alignment = "aright",
+	return iup.vbox {
+		iup.radio {
+			iup.gridbox { numdiv = opts.cols, unpack(controls) },
+			expand = "yes"
+		},
+		iup.hbox {
+			open,
+			spin,
+			alignment = "acenter",
 			gap = 3,
 		},
+		alignment = "aright",
+		gap = 3,
 		shapeselected = shapeselected
-	}
-end
-
-local function facecontrols()
-	local leyebrows = iup.label { title = "Eyebrow", alignment = "aright:acenter" }
-	local lblush1 = iup.label { title = "Blush", alignment = "aright:acenter" }
-	local lblush2 = iup.label { title = "Blush (lines)", alignment = "aright:acenter" }
-	local ldimeyes = iup.label { title = "Dim Eyes", alignment = "aright:acenter" }
-	local ltears = iup.label { title = "Tears", alignment = "aright:acenter" }
-	local leyetracking = iup.label { title = "Eye Tracking", alignment = "aright:acenter" }
-	local lyogurt = iup.label { title = "Yogurt", alignment = "aright:acenter" }
-	local eyebrows = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1 }
-	local blush1 = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 12, visiblecolumns = 1 }
-	local blush2 = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 12, visiblecolumns = 1 }
-	local dimeyes = iup.toggle { }
-	local tears = iup.toggle { }
-	local eyetracking = iup.toggle { }
-	local yogurt = iup.toggle { }
-	local lnorm = iup.normalizer { leyebrows, lblush1, lblush2, ldimeyes, ltears, leyetracking }
-	lnorm.normalize = "horizontal"
-	return iup.frame {
-		title = "Face (more)",
-		iup.gridbox { numdiv = 4,
-			ldimeyes, dimeyes, leyebrows, eyebrows,
-			ltears, tears, lblush1, blush1,
-			leyetracking, eyetracking, lblush2, blush2,
-			lyogurt, yogurt,
-			gapcol = 3, gaplin = 3
-		},
-		expand = "yes"
 	}
 end
 
@@ -324,8 +292,17 @@ function selectroom:action(text,itno)
 	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
 
-local mouthshapes = shapecontrols("Mouth", { "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°∩°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
-local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2, buttonsize = "20x12" })
+local mouthshapes = shapecontrols({ "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°∩°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
+local eyeshapes = shapecontrols({ "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 4, buttonsize = "20x12" })
+local dimeyes = toggles.button { title = "Dim Eyes", flat_action = function(self) if charamgr.current then charamgr.current.dimeyes = self.value == "ON" end end, expand = "horizontal" }
+dimeyes.size = "x12"
+dimeyes.expand = "horizontal"
+local tears = toggles.button { title = "Tears", flat_action = function(self) if charamgr.current then charamgr.current.tears = self.value == "ON" end end, expand = "horizontal" }
+tears.size = "x12"
+tears.expand = "horizontal"
+local eyetracking = toggles.button { title = "Tracking", flat_action = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
+eyetracking.size = "x12"
+eyetracking.expand = "horizontal"
 
 local resetsliderbutton = iup.flatbutton { title = "Reset", toggle = "no", border = "yes", padding = 3 }
 function resetsliderbutton.flat_action()
@@ -397,9 +374,29 @@ local dialogsliders = iup.dialog {
 				},
 			},
 			iup.hbox {
-				mouthshapes,
-				eyeshapes,
-				facecontrols(),
+				iup.frame { title = "Mouth",
+					mouthshapes,
+				},
+				iup.frame { title = "Eyes",
+					iup.vbox {
+						eyeshapes,
+						dimeyes,
+						tears,
+						eyetracking,
+						expand = "no"
+					},
+				},
+				iup.frame { title = "Face",
+					iup.vbox {
+						iup.label { title = "Blush", alignment = "aright:acenter" },
+						iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blush = tonumber(self.value) end },
+						iup.label { title = "Blush (lines)", alignment = "aright:acenter" },
+						iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
+						iup.label { title = "Eyebrow", alignment = "aright:acenter" },
+						iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1, valuechanged_cb = function(self) charamgr.current.eyebrow = tonumber(self.value) end },
+						toggles.button { title = "Yogurt", expand = "horizontal" },
+					},
+				},
 				expand = "yes",
 			}
 		},

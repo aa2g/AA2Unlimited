@@ -2,6 +2,21 @@ local _M = {}
 
 local signals = require "poser.signals"
 
+local dummycharacter = {}
+local dummymt = {
+	__call = function()
+		log.warn("calling dummy character")
+		return dummycharacter
+	end,
+	
+	__index = function()
+		log.warn("indexing dummy character")
+		return dummycharacter
+	end
+}
+setmetatable(dummycharacter, dummymt)
+_M.current = dummycharacter
+
 local characters = {}
 local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
@@ -82,7 +97,7 @@ function _M.addcharacter(character)
 		new = { name = name, struct = character, poser = GetPoserCharacter(character), data = data, GetSlider = GetSlider }
 		setmetatable(new, charamt)
 		characters[last + 1] = new
-		if not _M.current then
+		if _M.current ~= dummycharacter then
 			setcurrentcharacter(new)
 		end
 	end
@@ -93,7 +108,7 @@ end
 function _M.removecharacter(character)
 	log.spam("Poser: Remove character %s", character)
 	if _M.current and _M.current.struct == character then
-		setcurrentcharacter(nil)
+		setcurrentcharacter(dummycharacter)
 	end
 	for k,v in pairs(characters) do
 		if v.struct == character then
