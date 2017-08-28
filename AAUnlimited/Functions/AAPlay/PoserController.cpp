@@ -229,10 +229,14 @@ namespace Poser {
 	}
 
 	void PoserController::PoserCharacter::VoidSkirtSliders() {
-		for (auto it = m_sliders.begin(); it != m_sliders.end(); it++) {
+		auto it = m_sliders.begin();
+		while(it != m_sliders.end()) {
 			if (it->second->source == ExtClass::CharacterStruct::SKIRT) {
 				delete it->second;
 				it = m_sliders.erase(it);
+			}
+			else {
+				it++;
 			}
 		}
 	}

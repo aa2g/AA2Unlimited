@@ -29,10 +29,12 @@ namespace Poser {
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		g_PoserController.LoadCharacter(charStruct);
+		g_PoserController.VoidSkirtSliders();
 	}
 
 	void UpdateCharacter(ExtClass::CharacterStruct* charStruct) {
 		g_PoserController.UpdateCharacter(charStruct);
+		g_PoserController.VoidSkirtSliders();
 	}
 
 	void RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
@@ -57,11 +59,6 @@ namespace Poser {
 		*outBuffer = (BYTE*)fileBuffer;
 		*readBytes = hi;
 		return true;
-	}
-
-	void OpenXXEvent(const wchar_t* file) {
-		if (!wcsncmp(file, L"A02", 3))
-			g_PoserController.VoidSkirtSliders();
 	}
 
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
