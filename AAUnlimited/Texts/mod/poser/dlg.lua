@@ -324,7 +324,7 @@ function selectroom:action(text,itno)
 	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
 
-local mouthshapes = shapecontrols("Mouth", { "°_°", "°◡°", "°⌒°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°﹀°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
+local mouthshapes = shapecontrols("Mouth", { "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°∩°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
 local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2, buttonsize = "20x12" })
 
 local resetsliderbutton = iup.flatbutton { title = "Reset", toggle = "no", border = "yes", padding = 3 }
