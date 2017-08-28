@@ -73,7 +73,7 @@ local function shapecontrols(title, shapelist, opts)
 	
 	local controls = {}
 	for i, s in ipairs(shapelist) do
-		local button = iup.flatbutton { title = s, toggle ="yes", padding = 3 }
+		local button = iup.flatbutton { title = s, toggle ="yes", padding = 3, size = opts.buttonsize }
 		function button.flat_action(self)
 			if self.value == "ON" then
 				shapeselected(i - 1)
@@ -87,8 +87,6 @@ local function shapecontrols(title, shapelist, opts)
 		shapeopened(tonumber(self.value))
 	end
 	
-	local norm = iup.normalizer { unpack(controls) }
-	norm.normalize = "horizontal"
 	return iup.frame { title = title, 
 		iup.vbox {
 			iup.radio {
@@ -326,8 +324,8 @@ function selectroom:action(text,itno)
 	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
 
-local mouthshapes = shapecontrols("Mouth", { ":|", ":)", ":(", ":3", ":3" , ":O", ":s", "", ":[]", ":o", ":·", ":D", ":]", "", ":]", ":>"}, { name = "mouth", cols = 4 })
-local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2 })
+local mouthshapes = shapecontrols("Mouth", { "°_°", "°◡°", "°⌒°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°﹀°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
+local eyeshapes = shapecontrols("Eyes", { "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 2, buttonsize = "20x12" })
 
 local resetsliderbutton = iup.flatbutton { title = "Reset", toggle = "no", border = "yes", padding = 3 }
 function resetsliderbutton.flat_action()
