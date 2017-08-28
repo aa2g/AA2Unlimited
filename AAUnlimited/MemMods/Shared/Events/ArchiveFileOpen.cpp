@@ -68,7 +68,7 @@ skip:
 
 
 void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
-
+	Poser::OpenXXEvent(*file);
 	void *ret = CallOpenXX(this_, archname, pploadclass, file, a);
 //	if (!wcscmp(*file, L"MP_BOYROOM_FLOOR.xx"))
 //		__debugbreak();

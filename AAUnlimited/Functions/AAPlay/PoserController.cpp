@@ -162,30 +162,39 @@ namespace Poser {
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
 		LOGPRIONC(Logger::Priority::SPAM) "FrameModEvent " << xxFile;
 		if (xxFile->m_name)
-			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name <<")";
+			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name << ")";
 		LOGPRIONC(Logger::Priority::SPAM) "\r\n";
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
 		if (model == ExtClass::CharacterStruct::H3DROOM)
 			FrameModRoom(xxFile);
-		
-		if (m_loadCharacter == nullptr) return;
-		if (model == ExtClass::CharacterStruct::SKELETON)
-			m_loadCharacter->FrameModSkeleton(xxFile);
-		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE)
-			m_loadCharacter->FrameModFace(xxFile);
-		else
-			m_loadCharacter->FrameModSkirt(xxFile);
 
-		xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
-			for (unsigned int i = 0; i < frame->m_nBones; i++) {
-				ExtClass::Bone* bone = &frame->m_bones[i];
-				ExtClass::Frame* boneFrame = bone->GetFrame();
-				if (boneFrame != NULL && strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
-					bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
+		if (m_loadCharacter == nullptr) return;
+		bool modded = false;
+		if (model == ExtClass::CharacterStruct::SKELETON) {
+			m_loadCharacter->FrameModSkeleton(xxFile);
+			modded = true;
+		}
+		else if (model == ExtClass::CharacterStruct::FACE || model == ExtClass::CharacterStruct::TONGUE) {
+			m_loadCharacter->FrameModFace(xxFile);
+			modded = true;
+		}
+		else if (model == ExtClass::CharacterStruct::SKIRT) {
+			m_loadCharacter->FrameModSkirt(xxFile);
+			modded = true;
+		}
+
+		if (modded) {
+			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* frame) {
+				for (unsigned int i = 0; i < frame->m_nBones; i++) {
+					ExtClass::Bone* bone = &frame->m_bones[i];
+					ExtClass::Frame* boneFrame = bone->GetFrame();
+					if (boneFrame != NULL && strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
+						bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	void FrameModInsertFrame(ExtClass::Frame** frame, const char* prefix) {
@@ -213,7 +222,21 @@ namespace Poser {
 		strcat_s((*frame)->m_name, (*frame)->m_nameBufferSize, newMatch->m_name);
 		*frame = newMatch;
 	};
-	
+
+	void PoserController::VoidSkirtSliders() {
+		if (m_loadCharacter)
+			m_loadCharacter->VoidSkirtSliders();
+	}
+
+	void PoserController::PoserCharacter::VoidSkirtSliders() {
+		for (auto it = m_sliders.begin(); it != m_sliders.end(); it++) {
+			if (it->second->source == ExtClass::CharacterStruct::SKIRT) {
+				delete it->second;
+				it = m_sliders.erase(it);
+			}
+		}
+	}
+
 	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** transFrame, ExtClass::Frame** rotFrame) {
 		ExtClass::Frame* frame = *origFrame;
 		*transFrame = frame;
@@ -223,26 +246,37 @@ namespace Poser {
 		*origFrame = frame;
 	}
 
-	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, const char* filter) {
+	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter) {
 		PoserController::SliderInfo* slider;
 		ExtClass::Frame* transFrame;
 		ExtClass::Frame* rotFrame;
 		size_t len = filter? strlen(filter) : 0;
 
-		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame, &filter, &len](ExtClass::Frame* frame) {
+		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame, &source, &filter, &len](ExtClass::Frame* frame) {
+			// limit the frames we work on based on a starts-with filter criteria
 			if (!filter || strncmp(frame->m_name, filter, len) == 0) {
-				FrameMod(&frame, &transFrame, &rotFrame);
-
+				// Search for this frame slider if it exists
 				slider = GetSlider(frame->m_name);
+				// If it doesn't exist we create a new one and claim it for this model source
+				// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 				if (!slider) {
 					slider = new SliderInfo;
 					m_sliders.emplace(std::string(frame->m_name), slider);
 					slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
 					slider->Reset();
+					slider->source = source;
 				}
-				slider->frame[0] = transFrame;
-				slider->frame[1] = rotFrame;
-				slider->Apply();
+
+				// If the models match we can mod this frame as it either:
+				// * has not been claimed yet
+				// * we're updating this model
+				if (slider->source == source) {
+					FrameMod(&frame, &transFrame, &rotFrame);
+
+					slider->frame[0] = transFrame;
+					slider->frame[1] = rotFrame;
+					slider->Apply();
+				}
 				slider = nullptr;
 			}
 			return true;
@@ -254,12 +288,12 @@ namespace Poser {
 		ExtClass::Frame* world = root->FindFrame("a01_N_Zentai_010");
 
 		if (world) {
-			FrameModTree(world, "a01");
+			FrameModTree(world, ExtClass::CharacterStruct::SKELETON, "a01");
 		}
 
 		ExtClass::Frame* dankon = root->FindFrame("a00_N_Dankon_01");
 		if (dankon) {
-			FrameModTree(dankon);
+			FrameModTree(dankon, ExtClass::CharacterStruct::SKELETON);
 		}
 	}
 
@@ -268,17 +302,21 @@ namespace Poser {
 		targets.push("A00_O_mimi");
 		targets.push("A00_J_mayumaba");
 		targets.push("A00_J_kao");
-		targets.push("A00_J_sita00");
 
 		ExtClass::Frame* root = xxFile->m_root;
-		ExtClass::Frame* t;;
+		ExtClass::Frame* t;
 		std::string tn;
 		while (!targets.empty()) {
 			tn = targets.front();
 			t = root->FindFrame(tn.c_str());
 			if (t)
-				FrameModTree(t);
+				FrameModTree(t, ExtClass::CharacterStruct::FACE);
 			targets.pop();
+		}
+
+		t = root->FindFrame("A00_J_sita00");
+		if (t) {
+			FrameModTree(t, ExtClass::CharacterStruct::TONGUE);
 		}
 	}
 
@@ -287,7 +325,7 @@ namespace Poser {
 		ExtClass::Frame* sukato = root->FindFrame("A00_N_sukato");
 
 		if (sukato) {
-			FrameModTree(sukato);
+			FrameModTree(sukato, ExtClass::CharacterStruct::SKIRT, "a01_J_SK");
 		}
 	}
 
