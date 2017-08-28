@@ -353,7 +353,6 @@ namespace Poser {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
 
-			void VoidSkirtSliders();
 			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
 			void FrameModSkeleton(ExtClass::XXFile* xxFile);
 			void FrameModFace(ExtClass::XXFile* xxFile);
@@ -363,6 +362,7 @@ namespace Poser {
 
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
+			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
 
 #define LUA_CLASS PoserController::PoserCharacter
 			static inline void bindLua() {
@@ -417,7 +417,7 @@ namespace Poser {
 
 		void LoadCloth(std::vector<BYTE> &file);
 
-		void VoidSkirtSliders();
+		void SwapTransientSliders(bool skipSkeleton);
 		void FrameModEvent(ExtClass::XXFile* xxFile);
 		void FrameModRoom(ExtClass::XXFile* xxFile);
 
