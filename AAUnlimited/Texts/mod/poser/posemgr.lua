@@ -64,10 +64,16 @@ local function loadpose(filename)
 	log.spam("Poser: Reading %s", path)
 	local data = readfile(path)
 	if data then
-		local jp = json.decode(data)
+		local ok, ret = pcall(json.decode, data)
+		if not ok then
+			log.error("Error decoding pose %s data:", filename)
+			log.error(ret)
+			return
+		end
+		local jp = ret
 		if jp then
-			if jp._VERSION_ and jp._VERSION_ ~= 2 then
-				log.warning("Poser: %s isn't a valid pose file", filename)
+			if not jp._VERSION_ or jp._VERSION_ ~= 2 then
+				log.error("Poser: %s isn't a valid pose file", filename)
 				return
 			end
 			local clip = jp.pose
