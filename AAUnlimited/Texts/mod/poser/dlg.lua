@@ -393,7 +393,14 @@ local dialogsliders = iup.dialog {
 						iup.label { title = "Blush (lines)", alignment = "aright:acenter" },
 						iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
 						iup.label { title = "Eyebrow", alignment = "aright:acenter" },
-						iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1, valuechanged_cb = function(self) charamgr.current.eyebrow = tonumber(self.value) end },
+						iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1,
+							valuechanged_cb = function(self)
+								local base = tonumber(charamgr.current.eyebrow)
+								if not base then return end
+								base = base - (base % 7)
+								charamgr.current.eyebrow = base + tonumber(self.value)
+							end
+						},
 						toggles.button { title = "Yogurt", expand = "horizontal" },
 					},
 				},
