@@ -23,7 +23,6 @@
 #include "../../External/ExternalClasses/Frame.h"
 #include "../../External/ExternalClasses/XXFileFace.h"
 #include "../../General/DirectXStructs.h"
-#include "../../Files/PoseMods.h"
 #include "../Shared/Globals.h"
 #include "../../3rdparty/picojson/picojson.h"
 #include "Script/glua_stl.h"
