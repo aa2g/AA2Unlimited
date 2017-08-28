@@ -223,22 +223,27 @@ namespace Poser {
 		*frame = newMatch;
 	};
 
-	void PoserController::VoidSkirtSliders() {
-		if (m_loadCharacter)
-			m_loadCharacter->VoidSkirtSliders();
-	}
-
-	void PoserController::PoserCharacter::VoidSkirtSliders() {
-		auto it = m_sliders.begin();
-		while(it != m_sliders.end()) {
-			if (it->second->source == ExtClass::CharacterStruct::SKIRT) {
+	void PoserController::SwapTransientSliders(bool skipSkeleton) {
+		{
+			auto it = m_loadCharacter->m_transientSliders.begin();
+			while (it != m_loadCharacter->m_transientSliders.end()) {
 				delete it->second;
-				it = m_sliders.erase(it);
-			}
-			else {
-				it++;
+				it = m_loadCharacter->m_transientSliders.erase(it);
 			}
 		}
+		{
+			auto it = m_loadCharacter->m_sliders.begin();
+			while (it != m_loadCharacter->m_sliders.end()) {
+				if (skipSkeleton && it->second->source == ExtClass::CharacterStruct::SKELETON) {
+					m_loadCharacter->m_transientSliders[it->first] = it->second;
+					it = m_loadCharacter->m_sliders.erase(it);
+				}
+				else {
+					it++;
+				}
+			}
+		}
+		std::swap(m_loadCharacter->m_transientSliders, m_loadCharacter->m_sliders);
 	}
 
 	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** transFrame, ExtClass::Frame** rotFrame) {
@@ -261,6 +266,12 @@ namespace Poser {
 			if (!filter || strncmp(frame->m_name, filter, len) == 0) {
 				// Search for this frame slider if it exists
 				slider = GetSlider(frame->m_name);
+				// Search for and recover from the transient slider list
+				auto match = m_transientSliders.find(frame->m_name);
+				if (match != m_transientSliders.end() && match->second->source == source) {
+					slider = match->second;
+					m_transientSliders.erase(match);
+				}
 				// If it doesn't exist we create a new one and claim it for this model source
 				// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 				if (!slider) {

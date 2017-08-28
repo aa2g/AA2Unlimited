@@ -8,16 +8,8 @@
 
 namespace Poser {
 
-#define X 0
-#define Y 1
-#define Z 2
-#define W 3
-
 	PoserController g_PoserController;
 	SceneType currentScene = NoScene;
-	int characterCount = 0;
-
-	bool loc_syncing;
 
 	void StartEvent(SceneType type) {
 		currentScene = type;
@@ -29,12 +21,12 @@ namespace Poser {
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		g_PoserController.LoadCharacter(charStruct);
-		g_PoserController.VoidSkirtSliders();
+		g_PoserController.SwapTransientSliders(false);
 	}
 
 	void UpdateCharacter(ExtClass::CharacterStruct* charStruct) {
 		g_PoserController.UpdateCharacter(charStruct);
-		g_PoserController.VoidSkirtSliders();
+		g_PoserController.SwapTransientSliders(true);
 	}
 
 	void RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
