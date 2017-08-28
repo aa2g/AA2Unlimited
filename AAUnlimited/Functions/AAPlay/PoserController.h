@@ -23,7 +23,6 @@
 #include "../../External/ExternalClasses/Frame.h"
 #include "../../External/ExternalClasses/XXFileFace.h"
 #include "../../General/DirectXStructs.h"
-#include "../../Files/PoseMods.h"
 #include "../Shared/Globals.h"
 #include "../../3rdparty/picojson/picojson.h"
 #include "Script/glua_stl.h"
@@ -46,10 +45,12 @@ namespace Poser {
 				frame[1] = nullptr;
 				Reset();
 				sliding = false;
+				source = ExtClass::CharacterStruct::INVALID;
 			}
 
 			void Apply();
 
+			ExtClass::CharacterStruct::Models source;
 			std::vector<ExtClass::Frame*> frame;
 			ExtClass::Frame* guide;
 
@@ -349,7 +350,8 @@ namespace Poser {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
 
-			void FrameModTree(ExtClass::Frame* tree, const char* filter = nullptr);
+			void VoidSkirtSliders();
+			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
 			void FrameModSkeleton(ExtClass::XXFile* xxFile);
 			void FrameModFace(ExtClass::XXFile* xxFile);
 			void FrameModSkirt(ExtClass::XXFile* xxFile);
@@ -412,6 +414,7 @@ namespace Poser {
 
 		void LoadCloth(std::vector<BYTE> &file);
 
+		void VoidSkirtSliders();
 		void FrameModEvent(ExtClass::XXFile* xxFile);
 		void FrameModRoom(ExtClass::XXFile* xxFile);
 

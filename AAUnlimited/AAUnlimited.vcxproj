@@ -35,7 +35,6 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Files\PersistentStorage.cpp" />
-    <ClCompile Include="Files\PoseFile.cpp" />
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
@@ -73,7 +72,6 @@
     <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
     <ClCompile Include="Functions\XXObjectFile.cpp" />
-    <ClCompile Include="General\GuiSlider.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="Hooks\WinAPI.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
@@ -127,7 +125,6 @@
     <ClCompile Include="MemMods\Shared\Events\MemAlloc.cpp" />
     <ClCompile Include="MemMods\Shared\Events\MeshTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
-    <ClCompile Include="Files\PoseMods.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
     <ClCompile Include="Script\ScriptLua.cpp" />
   </ItemGroup>
@@ -150,7 +147,6 @@
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Files\PersistentStorage.h" />
-    <ClInclude Include="Files\PoseFile.h" />
     <ClInclude Include="Files\PP2.h" />
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="Files\XXFile.h" />
@@ -186,7 +182,6 @@
     <ClInclude Include="Functions\Shared\Triggers\Value.h" />
     <ClInclude Include="Functions\XXObjectFile.h" />
     <ClInclude Include="General\DirectXStructs.h" />
-    <ClInclude Include="General\GuiSlider.h" />
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
@@ -236,7 +231,6 @@
     <ClInclude Include="MemMods\Shared\Events\MemAlloc.h" />
     <ClInclude Include="MemMods\Shared\Events\MeshTexture.h" />
     <ClInclude Include="MemMods\Shared\Misc\EyeTexture.h" />
-    <ClInclude Include="Files\PoseMods.h" />
     <ClInclude Include="Functions\AAPlay\PoserController.h" />
     <ClInclude Include="MemMods\Shared\Misc\FixLocale.h" />
     <ClInclude Include="resource.h" />
@@ -252,7 +246,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />
-    <Text Include="Texts\poserframes.txt" />
     <Text Include="Texts\readme.txt" />
     <Text Include="Texts\todo.txt" />
   </ItemGroup>

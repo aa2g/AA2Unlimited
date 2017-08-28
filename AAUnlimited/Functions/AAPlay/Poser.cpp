@@ -59,6 +59,11 @@ namespace Poser {
 		return true;
 	}
 
+	void OpenXXEvent(const wchar_t* file) {
+		if (!wcsncmp(file, L"A02", 3))
+			g_PoserController.VoidSkirtSliders();
+	}
+
 	void FrameModEvent(ExtClass::XXFile* xxFile) {
 		if (xxFile) {
 			g_PoserController.FrameModEvent(xxFile);

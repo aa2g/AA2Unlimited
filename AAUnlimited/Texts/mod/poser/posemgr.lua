@@ -8,8 +8,8 @@ local charamgr = require "poser.charamgr"
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
 
-local posesdir = "poser/save/poses"
-local scenesdir = "poser/save/scenes"
+local posesdir = "poser/poses"
+local scenesdir = "poser/scenes"
 
 local function setclip(clip)
 	if charamgr.current then
@@ -35,8 +35,9 @@ local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 
-local i = 1
 local function populateposelist()
+	local i = 1
+	poselist[i] = nil
 	for f in savedposes() do
 		f = f:match("^(.*)%.pose$")
 		if f then
@@ -59,7 +60,7 @@ local function loadpose(filename)
 	log.spam("Poser: Loading pose %s", filename)
 	local character = charamgr.current
 	if not character then return end
-	local path = aau_path(posesdir, filename)
+	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Reading %s", path)
 	local data = readfile(path)
 	if data then
@@ -105,14 +106,14 @@ local function loadpose(filename)
 end
 
 function loadposebutton.action()
-	loadpose(poselist.value .. ".pose")
+	loadpose(poselist.value)
 end
 
 local function savepose(filename)
 	log.spam("Poser: Saving pose %s", filename)
 	local character = charamgr.current
 	if not character then return end
-	local path = aau_path(posesdir, filename)
+	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Saving to %s", path)
 	local t = {}
 	t._VERSION_ = 2
@@ -142,8 +143,8 @@ local function savepose(filename)
 		eyebrow = character.eyebrow,
 		mouth = character.mouth,
 		mouthopen = character.mouthopen,
-		blush = character.blush,
-		blushlines = character.blushlines,
+		blush = character.blush * 9,
+		blushlines = character.blushlines * 9,
 	}
 	t.face = face
 	
@@ -152,10 +153,11 @@ local function savepose(filename)
     file:write(json.encode(t))
     file:close()
 	log.spam("Poser: Pose %s saved", filename)
+	populateposelist()
 end
 
 function saveposebutton.action()
-	savepose(poselist.value .. ".pose")
+	savepose(poselist.value)
 end
 
 local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }

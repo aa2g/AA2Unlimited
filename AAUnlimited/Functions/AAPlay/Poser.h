@@ -22,6 +22,7 @@ namespace Poser {
 	void UpdateCharacter(ExtClass::CharacterStruct* c);
 	void RemoveCharacter(ExtClass::CharacterStruct* c);
 
+	void OpenXXEvent(const wchar_t* file);
 	void FrameModEvent(ExtClass::XXFile* xxFile);
 
 	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer);
