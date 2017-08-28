@@ -8,8 +8,8 @@ local charamgr = require "poser.charamgr"
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
 
-local posesdir = "poser/poses"
-local scenesdir = "poser/scenes"
+local posesdir = "poser\\poses"
+local scenesdir = "poser\\scenes"
 
 local function setclip(clip)
 	if charamgr.current then
@@ -34,6 +34,7 @@ local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
+local resetposebutton = iup.button { title = "Reset Pose", expand = "horizontal" }
 
 local function populateposelist()
 	local i = 1
@@ -47,6 +48,29 @@ local function populateposelist()
 	end
 end
 populateposelist()
+
+function resetposebutton.action()
+	if charamgr.current then
+		for _,v in charamgr.current:Sliders() do
+			v:Reset()
+			v:Apply()
+		end
+	end
+end
+
+function deleteposebutton.action()
+	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete the selected pose?", "Yes", "No")
+	if resp == 1 then
+		local path = aau_path(posesdir, poselist.value .. ".pose")
+		local ret, msg = os.remove(path)
+		if not ret then
+			log.error(msg)
+		end
+		log.spam("Removed %s", path)
+		populateposelist()
+	end
+end
+
 
 local function readfile(path)
     local file = io.open(path, "rb")
@@ -219,6 +243,7 @@ local dialogposes = iup.dialog {
 				alignment = "acenter"
 			},
 		},
+		resetposebutton,
 	},
 	nmargin = "3x3",
 	maxbox = "no",
