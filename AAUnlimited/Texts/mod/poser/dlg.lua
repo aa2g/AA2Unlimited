@@ -159,7 +159,6 @@ local modifiers = {
 local modifier = modifiers[1][1]
 local currentmodifier = 1
 local currentoperation = 1
-local currentslider
 local dummyslider = {}
 local dummymt = {
 	__call = function()
@@ -173,6 +172,7 @@ local dummymt = {
 	end
 }
 setmetatable(dummyslider, dummymt)
+local currentslider = dummyslider
 
 local sliders = require "poser.sliders"
 local sliderx = sliders.slider { title = "X", data = 0 }
@@ -191,10 +191,26 @@ local slidermod
 local sliderop
 local slider
 
+local function setslidervalues()
+	local x, y, z = currentslider:Values()
+	x = tonumber(x) or ""
+	y = tonumber(y) or ""
+	z = tonumber(z) or ""
+	sliderx.setvalue(x)
+	slidery.setvalue(y)
+	sliderz.setvalue(z)
+end
+
+local function slidervaluechanged(value, axis)
+	local va = { sliderx.getvalue(), slidery.getvalue(), sliderz.getvalue() }
+	va[axis + 1] = value
+	currentslider:SetValues(va[1], va[2], va[3])
+	currentslider:Apply()
+end
+
 local function sliderincrement(amount, axis)
-	if currentslider then
-		currentslider:Increment(amount * modifier, axis)
-	end
+	currentslider:Increment(amount * modifier, axis)
+	setslidervalues()
 end
 
 local function slidestarted()
@@ -227,6 +243,7 @@ local function slidersetoperation(operation)
 		currentslider:SetCurrentOperation(operation - 1)
 	end
 	updatemodifier()
+	setslidervalues()
 end
 
 local function sliderchanged()
@@ -239,10 +256,16 @@ local function sliderchanged()
 		log.spam("Poser: Set slider to %s", currentslider)
 	end
 	slidersetoperation(currentoperation)
+	setslidervalues()
 end
 signals.connect(bonelist, "selectionchanged", sliderchanged)
 signals.connect(charamgr, "currentcharacterchanged", sliderchanged)
 signals.connect(charamgr, "characterschanged", sliderchanged)
+
+signals.connect(sliderx, "valuechanged", slidervaluechanged)
+signals.connect(slidery, "valuechanged", slidervaluechanged)
+signals.connect(sliderz, "valuechanged", slidervaluechanged)
+
 signals.connect(sliderx, "increment", sliderincrement)
 signals.connect(slidery, "increment", sliderincrement)
 signals.connect(sliderz, "increment", sliderincrement)
@@ -292,7 +315,7 @@ function selectroom:action(text,itno)
 	current_room = text ~= "None" and LoadXX(xxlist, play_path("data","jg2p01_00_00.pp"),text .. ".xx",0) or nil
 end
 
-local mouthshapes = shapecontrols({ "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°∩°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
+local mouthshapes = shapecontrols({ "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°⌓°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
 local eyeshapes = shapecontrols({ "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 4, buttonsize = "20x12" })
 local dimeyes = toggles.button { title = "Dim Eyes", flat_action = function(self) if charamgr.current then charamgr.current.dimeyes = self.value == "ON" end end, expand = "horizontal" }
 dimeyes.size = "x12"
@@ -300,7 +323,7 @@ dimeyes.expand = "horizontal"
 local tears = toggles.button { title = "Tears", flat_action = function(self) if charamgr.current then charamgr.current.tears = self.value == "ON" end end, expand = "horizontal" }
 tears.size = "x12"
 tears.expand = "horizontal"
-local eyetracking = toggles.button { title = "Tracking", flat_action = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
+local eyetracking = toggles.button { title = "Eye Tracking", flat_action = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
 eyetracking.size = "x12"
 eyetracking.expand = "horizontal"
 
@@ -386,13 +409,15 @@ local dialogsliders = iup.dialog {
 						expand = "no"
 					},
 				},
-				iup.frame { title = "Face",
-					iup.vbox {
-						iup.label { title = "Blush", alignment = "aright:acenter" },
-						iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blush = tonumber(self.value) end },
-						iup.label { title = "Blush (lines)", alignment = "aright:acenter" },
-						iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
-						iup.label { title = "Eyebrow", alignment = "aright:acenter" },
+				iup.vbox {
+					iup.frame { title = "Blush",
+						iup.vbox {
+							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blush = tonumber(self.value) end },
+							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
+						},
+					},
+					iup.hbox {
+						iup.label { title = "Eyebrow", alignment = "aright:acenter", expand = "horizontal" },
 						iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1,
 							valuechanged_cb = function(self)
 								local base = tonumber(charamgr.current.eyebrow)
@@ -401,11 +426,12 @@ local dialogsliders = iup.dialog {
 								charamgr.current.eyebrow = base + tonumber(self.value)
 							end
 						},
-						toggles.button { title = "Yogurt", expand = "horizontal" },
+						alignment = "acenter",
 					},
+					toggles.button { title = "Yogurt", size = "x12", expand = "horizontal" },
 				},
 				expand = "yes",
-			}
+			},
 		},
 		--gap = 3,
 	},
