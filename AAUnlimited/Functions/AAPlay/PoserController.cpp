@@ -267,10 +267,12 @@ namespace Poser {
 				// Search for this frame slider if it exists
 				slider = GetSlider(frame->m_name);
 				// Search for and recover from the transient slider list
-				auto match = m_transientSliders.find(frame->m_name);
-				if (match != m_transientSliders.end() && match->second->source == source) {
-					slider = match->second;
-					m_transientSliders.erase(match);
+				if (!slider) {
+					auto match = m_transientSliders.find(frame->m_name);
+					if (match != m_transientSliders.end() && match->second->source == source) {
+						slider = match->second;
+						m_transientSliders.erase(match);
+					}
 				}
 				// If it doesn't exist we create a new one and claim it for this model source
 				// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
