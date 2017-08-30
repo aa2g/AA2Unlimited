@@ -295,6 +295,7 @@ namespace Poser {
 					auto match = m_transientSliders.find(frame->m_name);
 					if (match != m_transientSliders.end() && match->second->source == source) {
 						slider = match->second;
+						m_sliders.emplace(match->first, slider);
 						m_transientSliders.erase(match);
 					}
 				}
