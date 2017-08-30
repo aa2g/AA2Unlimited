@@ -12,6 +12,30 @@ namespace Poser {
 #define Z 2
 #define W 3
 
+	void PoserController::SliderInfo::setValue(int axis, float value) {
+		if (currentOperation == Rotate) {
+			float angle[3];
+			rotation.getEulerAngles(angle);
+			angle[axis] = value;
+			(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), angle[1], angle[0], angle[2]);
+		}
+		else {
+			getCurrentOperationData()->value[axis] = value;
+		}
+	}
+
+	void PoserController::SliderInfo::setValue(float newValueX, float newValueY, float newValueZ) {
+		if (currentOperation == Rotate) {
+			rotation.setRotationYawPitchRoll(newValueX, newValueY, newValueZ);
+		}
+		else {
+			float* data = getCurrentOperationData()->value;
+			data[0] = newValueX;
+			data[1] = newValueY;
+			data[2] = newValueZ;
+		}
+	}
+
 	void PoserController::SliderInfo::increment(float order, int axis) {
 		if (currentOperation == Rotate) {
 			if (order) {
@@ -267,10 +291,12 @@ namespace Poser {
 				// Search for this frame slider if it exists
 				slider = GetSlider(frame->m_name);
 				// Search for and recover from the transient slider list
-				auto match = m_transientSliders.find(frame->m_name);
-				if (match != m_transientSliders.end() && match->second->source == source) {
-					slider = match->second;
-					m_transientSliders.erase(match);
+				if (!slider) {
+					auto match = m_transientSliders.find(frame->m_name);
+					if (match != m_transientSliders.end() && match->second->source == source) {
+						slider = match->second;
+						m_transientSliders.erase(match);
+					}
 				}
 				// If it doesn't exist we create a new one and claim it for this model source
 				// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
