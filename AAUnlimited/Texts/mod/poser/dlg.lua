@@ -105,13 +105,10 @@ local function shapecontrols(shapelist, opts)
 end
 
 local bonefilter = lists.listfilter()
-local categorylist = lists.listbox { sort = "yes" }
+local categorylist = lists.listbox { }
 local bonelist = lists.listbox {}
 
-local categories = { "All", "Props", "Room" }
-for cat,_ in pairs(bones.categories) do
-	table.insert(categories, cat)
-end
+local categories = { "All", "Torso", "Left Arm", "Right Arm", "Left Hand", "Right Hand", "Left Leg", "Right Leg", "Face", "Breasts", "Skirt", "Props", "Room" }
 categorylist.setlist(categories)
 
 local function setcategory(category)
