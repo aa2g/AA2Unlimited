@@ -6,12 +6,17 @@ local dummycharacter = {}
 local dummymt = {
 	__call = function()
 		log.warn("calling dummy character")
-		return dummycharacter
+		return nil
 	end,
 	
 	__index = function()
 		log.warn("indexing dummy character")
 		return dummycharacter
+	end,
+	
+	__pairs = function()
+		log.warn("iterating dummy character")
+		return nil
 	end
 }
 setmetatable(dummycharacter, dummymt)
@@ -29,6 +34,10 @@ local function Sliders(character)
 	local poser = character.poser
 	return poser:Sliders()
 end
+local function Props(character)
+	local poser = character.poser
+	return poser:Props()
+end
 local function SetClip(character, clip)
 	local skel = character.struct.m_xxSkeleton
 	skel.m_poseNumber = clip
@@ -44,8 +53,10 @@ local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame" }
 local charamt = {}
 charamt.GetSlider = GetSlider
 charamt.Sliders = Sliders
+charamt.Props = Props
 charamt.SetClip = SetClip
 charamt.GetXXFileFace = GetXXFileFace
+charamt.ischaracter = true
 
 function charamt.__index(character,k)
 	if facekeys[k] then

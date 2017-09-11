@@ -83,7 +83,7 @@ end
 local function loadpose(filename)
 	log.spam("Poser: Loading pose %s", filename)
 	local character = charamgr.current
-	if not character then return end
+	if not character or not character.isvalid ~= true then return end
 	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Reading %s", path)
 	local data = readfile(path)
@@ -148,7 +148,7 @@ end
 local function savepose(filename)
 	log.spam("Poser: Saving pose %s", filename)
 	local character = charamgr.current
-	if not character then return end
+	if not character or not character.isvalid ~= true then return end
 	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Saving to %s", path)
 	local t = {}

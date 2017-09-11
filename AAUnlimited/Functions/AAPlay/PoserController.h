@@ -252,6 +252,10 @@ namespace Poser {
 					} \
 					((float*)(&_self->rotation.data))[_idx] = _gl.get(3); \
 				});
+				GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, frame, {
+					_gl.push(_self->frame[1]->m_children);
+					return 1;
+				});
 			}
 #undef LUA_CLASS
 		}; //SliderInfo
@@ -343,16 +347,6 @@ namespace Poser {
 				}
 			}
 
-			inline void VoidFramePointers() {
-				SliderInfo* slider = nullptr;
-				for (auto it = m_sliders.begin(), end = m_sliders.end(); it != end; it++) {
-					slider = it->second;
-					slider->frame[0] = nullptr;
-					slider->frame[1] = nullptr;
-					slider->guide = nullptr;
-				}
-			}
-
 			Face GetFace() {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
@@ -363,21 +357,45 @@ namespace Poser {
 			void FrameModSkirt(ExtClass::XXFile* xxFile);
 			SliderInfo* GetSlider(const char* name);
 			SliderInfo* GetSlider(const std::string& name);
+			SliderInfo* GetPropSlider(const char* name);
 
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
+			std::unordered_map<std::string, SliderInfo*> m_propSliders;
 
 #define LUA_CLASS PoserController::PoserCharacter
 			static inline void bindLua() {
 				LUA_NAME;
 				LUA_MGETTER1(GetSlider);
 				LUA_MAPITERATOR(Sliders, m_sliders)
+				LUA_MAPITERATOR(Props, m_propSliders)
 			}
 #undef LUA_CLASS
 		}; // PoserCharacter
 
-	public:
+		class PoserProp {
+		public:
+			PoserProp(ExtClass::XXFile* xxFile) : m_xxFile(xxFile) {
+
+			}
+
+			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
+			SliderInfo* GetSlider(const char* name);
+			SliderInfo* GetSlider(const std::string& name);
+
+			ExtClass::XXFile* m_xxFile;
+			std::unordered_map<std::string, SliderInfo*> m_sliders;
+#define LUA_CLASS PoserController::PoserProp
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_MGETTER1(GetSlider);
+				LUA_MAPITERATOR(Sliders, m_sliders)
+			}
+#undef LUA_CLASS
+		}; // PoserProp
+
+		public:
 		PoserController();
 
 		~PoserController();
@@ -432,12 +450,5 @@ namespace Poser {
 		std::vector<PoserCharacter*> m_characters;
 		PoserCharacter* m_loadCharacter;
 		std::map<std::wstring, std::wstring> m_overrides;
-		
-#define LUA_CLASS Poser::PoserController
-		static inline void bindLua() {
-			LUA_NAME;
-		};
-#undef LUA_CLASS
-
 	};
 }
