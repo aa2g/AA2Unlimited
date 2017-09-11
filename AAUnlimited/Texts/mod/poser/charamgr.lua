@@ -49,14 +49,18 @@ end
 
 -- Character Helper Metatables
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines" }
-local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame" }
+local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
+local charkeys = { clothstate = "m_clothState", spawn = "Spawn" }
 local charamt = {}
 charamt.GetSlider = GetSlider
 charamt.Sliders = Sliders
 charamt.Props = Props
 charamt.SetClip = SetClip
 charamt.GetXXFileFace = GetXXFileFace
-charamt.ischaracter = true
+charamt.isvalid = true
+charamt.override = function(character, skeleton, override)
+	character.poser:Override(skeleton, override)
+end
 
 function charamt.__index(character,k)
 	if facekeys[k] then
@@ -66,6 +70,9 @@ function charamt.__index(character,k)
 	if skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		return skel[skelkeys[k]]
+	end
+	if charkeys[k] then
+		return character.struct[charkeys[k]]
 	end
 	if charamt[k] then
 		return charamt[k]

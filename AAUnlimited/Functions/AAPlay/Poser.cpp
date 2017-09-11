@@ -34,11 +34,8 @@ namespace Poser {
 	}
 
 	bool OverrideFile(wchar_t** paramArchive, wchar_t** paramFile, DWORD* readBytes, BYTE** outBuffer) {
-		if (!g_PoserController.IsActive()) {
-			return false;
-		}
 		std::wstring& override = g_PoserController.GetOverride(std::wstring(*paramFile));
-		override = General::BuildOverridePath(override.c_str());
+		if (override.empty()) return false;
 		HANDLE hFile = CreateFile(override.c_str(), FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 		if (hFile == NULL || hFile == INVALID_HANDLE_VALUE) {
 			return false;

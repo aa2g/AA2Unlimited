@@ -2,6 +2,7 @@ local _M = {}
 
 local fileutils = require "poser.fileutils"
 local signals = require "poser.signals"
+local charamgr = require "poser.charamgr"
 
 local propschanged = signals.signal()
 
@@ -30,8 +31,16 @@ _M.propschanged = propschanged
 
 function _M.loadprop(path)
 	local directory, filename, extension = fileutils.splitfilepath(path)
-	if directory and filename and extension == "xx" then
-		loadxx(directory, filename)
+	local directoryname = string.match(directory, ".*\\(.+)\\")
+	if directoryname == "charitems" and extension == "xx" then
+		local skeleton = charamgr.current.skelname
+		local character = charamgr.current
+		character:override(skeleton .. ".xx", path)
+		character.spawn(character.struct, character.clothstate, 0, 0, 1)
+	else
+		if directory and filename and extension == "xx" then
+			loadxx(directory, filename)
+		end
 	end
 end
 

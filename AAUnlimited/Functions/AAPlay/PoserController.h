@@ -363,13 +363,20 @@ namespace Poser {
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
 			std::unordered_map<std::string, SliderInfo*> m_propSliders;
+			std::unordered_map<std::wstring, std::wstring> m_overrides;
 
 #define LUA_CLASS PoserController::PoserCharacter
 			static inline void bindLua() {
 				LUA_NAME;
 				LUA_MGETTER1(GetSlider);
-				LUA_MAPITERATOR(Sliders, m_sliders)
-				LUA_MAPITERATOR(Props, m_propSliders)
+				LUA_MAPITERATOR(Sliders, m_sliders);
+				LUA_MAPITERATOR(Props, m_propSliders);
+				LUA_METHOD(Override, {
+					if (_gl.top() == 3) {
+						_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
+					}
+					return 0;
+				});
 			}
 #undef LUA_CLASS
 		}; // PoserCharacter
@@ -449,6 +456,6 @@ namespace Poser {
 		bool m_isActive;
 		std::vector<PoserCharacter*> m_characters;
 		PoserCharacter* m_loadCharacter;
-		std::map<std::wstring, std::wstring> m_overrides;
+		std::unordered_map<std::wstring, std::wstring> m_overrides;
 	};
 }

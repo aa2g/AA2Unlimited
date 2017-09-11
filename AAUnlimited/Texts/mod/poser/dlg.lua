@@ -170,7 +170,7 @@ local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
 local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
 
 function addpropbutton.action()
-	local pattern = aau_path("poser\\props\\*.xx")
+	local pattern = aau_path("poser\\*.xx")
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)

@@ -535,6 +535,11 @@ namespace Poser {
 		if (it != m_overrides.end()) {
 			return it->second;
 		}
+		if (m_loadCharacter) {
+			it = m_loadCharacter->m_overrides.find(file);
+			if (it != m_loadCharacter->m_overrides.end())
+				return it->second;
+		}
 		return std::wstring();
 	}
 
