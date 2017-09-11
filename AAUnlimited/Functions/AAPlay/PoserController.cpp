@@ -93,6 +93,12 @@ namespace Poser {
 		for (auto it = m_sliders.begin(); it != m_sliders.end(); it++) {
 			delete it->second;
 		}
+		for (auto it = m_transientSliders.begin(); it != m_transientSliders.end(); it++) {
+			delete it->second;
+		}
+		for (auto it = m_propSliders.begin(); it != m_propSliders.end(); it++) {
+			delete it->second;
+		}
 	}
 	/*
 	void PoserController::SetHidden(const char* name, bool hidden) {
@@ -167,9 +173,13 @@ namespace Poser {
 	}
 
 	PoserController::SliderInfo* PoserController::PoserCharacter::GetSlider(const char* name) {
-		if (name)
-			return GetSlider(std::string(name));
-		return nullptr;
+		PoserController::SliderInfo* slider = nullptr;
+		if (name) {
+			slider = GetSlider(std::string(name));
+			if (!slider)
+				slider = GetPropSlider(name);
+		}
+		return slider;
 	}
 
 	PoserController::SliderInfo* PoserController::PoserCharacter::GetSlider(const std::string& name) {
@@ -179,15 +189,16 @@ namespace Poser {
 		return 0;
 	}
 
-	static const char prefix[]{ "pose_" };
+	PoserController::SliderInfo* PoserController::PoserCharacter::GetPropSlider(const char* name) {
+		auto match = m_propSliders.find(name);
+		if (match != m_propSliders.end())
+			return match->second;
+		return 0;
+	}
+
 	static const char prefixTrans[]{ "pose_tr_" };
 	static const char prefixRot[]{ "pose_rot_" };
-	static const char propFramePrefix[]{ "AS00_N_Prop" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
-		LOGPRIONC(Logger::Priority::SPAM) "FrameModEvent " << xxFile;
-		if (xxFile->m_name)
-			LOGPRIONC(Logger::Priority::SPAM) "(" << xxFile->m_name << ")";
-		LOGPRIONC(Logger::Priority::SPAM) "\r\n";
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
 		if (model == ExtClass::CharacterStruct::H3DROOM)
@@ -263,11 +274,19 @@ namespace Poser {
 					it = m_loadCharacter->m_sliders.erase(it);
 				}
 				else {
+					it->second->guide = nullptr;
 					it++;
 				}
 			}
 		}
 		std::swap(m_loadCharacter->m_transientSliders, m_loadCharacter->m_sliders);
+
+		if (!skipSkeleton) {
+			for (auto it = m_loadCharacter->m_propSliders.begin(); it != m_loadCharacter->m_propSliders.end(); it++) {
+				delete it->second;
+			}
+			m_loadCharacter->m_propSliders.clear();
+		}
 	}
 
 	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** transFrame, ExtClass::Frame** rotFrame) {
@@ -330,7 +349,65 @@ namespace Poser {
 		ExtClass::Frame* world = root->FindFrame("a01_N_Zentai_010");
 
 		if (world) {
-			FrameModTree(world, ExtClass::CharacterStruct::SKELETON, "a01");
+			PoserController::SliderInfo* slider;
+			ExtClass::Frame* transFrame;
+			ExtClass::Frame* rotFrame;
+
+			world->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
+				bool isSlider = false;
+				bool isProp = false;
+				// Filter out nipple bones as they glitch on breast animations
+				if (strncmp(frame->m_name, "a01", 3) == 0 && strncmp(frame->m_name, "a01_J_Chiku", 11) != 0) {
+					isSlider = true;
+				}
+				else if (frame->m_nSubmeshes) {
+					isProp = true;
+				}
+				else if (strncmp(frame->m_name, "guide_", 6) == 0 && frame->m_nameBufferSize == frame->m_parent->m_nameBufferSize + 6) {
+					slider = GetSlider(frame->m_name + 6);
+					if (slider) {
+						slider->guide = frame;
+					}
+				}
+				if(isSlider || isProp) {
+					// Search for this frame slider if it exists
+					slider = GetSlider(frame->m_name);
+					// Search for and recover from the transient slider list
+					if (!slider) {
+						auto match = m_transientSliders.find(frame->m_name);
+						if (match != m_transientSliders.end() && match->second->source == ExtClass::CharacterStruct::SKELETON) {
+							slider = match->second;
+							m_sliders.emplace(match->first, slider);
+							m_transientSliders.erase(match);
+						}
+					}
+					// If it doesn't exist we create a new one and claim it for this model source
+					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
+					if (!slider) {
+						slider = new SliderInfo;
+						slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+						slider->Reset();
+						slider->source = ExtClass::CharacterStruct::SKELETON;
+						if (isSlider)
+							m_sliders.emplace(frame->m_name, slider);
+						else
+							m_propSliders.emplace(frame->m_name, slider);
+					}
+
+					// If the models match we can mod this frame as it either:
+					// * has not been claimed yet
+					// * we're updating this model
+					if (slider->source == ExtClass::CharacterStruct::SKELETON) {
+						FrameMod(&frame, &transFrame, &rotFrame);
+
+						slider->frame[0] = transFrame;
+						slider->frame[1] = rotFrame;
+						slider->Apply();
+					}
+					slider = nullptr;
+				}
+				return true;
+			});
 		}
 
 		ExtClass::Frame* dankon = root->FindFrame("a00_N_Dankon_01");
@@ -385,7 +462,6 @@ namespace Poser {
 			character = new PoserCharacter(charStruct);
 			m_characters.push_back(character);
 		}
-		character->VoidFramePointers();
 		m_loadCharacter = character;
 	}
 
@@ -395,7 +471,6 @@ namespace Poser {
 			if (c->m_character == charStruct)
 				character = c;
 		}
-		//character->VoidFramePointers();
 		m_loadCharacter = character;
 	}
 
@@ -459,6 +534,11 @@ namespace Poser {
 		auto it = m_overrides.find(file);
 		if (it != m_overrides.end()) {
 			return it->second;
+		}
+		if (m_loadCharacter) {
+			it = m_loadCharacter->m_overrides.find(file);
+			if (it != m_loadCharacter->m_overrides.end())
+				return it->second;
 		}
 		return std::wstring();
 	}
