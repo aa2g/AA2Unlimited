@@ -174,6 +174,7 @@ function addpropbutton.action()
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)
+	log.spam("add prop button returned %s / %d", file, ret)
 	if ret == 0 then
 		propmgr.loadprop(file)
 	end

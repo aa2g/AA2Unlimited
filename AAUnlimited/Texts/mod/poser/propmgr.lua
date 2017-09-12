@@ -32,13 +32,18 @@ _M.propschanged = propschanged
 function _M.loadprop(path)
 	local directory, filename, extension = fileutils.splitfilepath(path)
 	local directoryname = string.match(directory, ".*\\(.+)\\")
+	log.spam("loadprop( %s )\ndirectory: %s\nfilename: %s\nextension: %s", path, directory, filename, extension)
 	if directoryname == "charitems" and extension == "xx" then
+		log.spam("loading charitem %s", path)
 		local skeleton = charamgr.current.skelname
 		local character = charamgr.current
+		log.spam("inspect %s, %s", character.override, character.spawn)
 		character:override(skeleton .. ".xx", path)
 		character.spawn(character.struct, character.clothstate, 0, 0, 1)
+		log.spam("re-spawned character")
 	else
 		if directory and filename and extension == "xx" then
+			log.spam("loading item %s", filename)
 			loadxx(directory, filename)
 		end
 	end
