@@ -23,14 +23,15 @@ local vtable = {
 	0,
 	0,
 	0,
+
 	0,
 	0,
 	0,
 
 	5,
 	0,
-	3,
-	6,
+	3, -- 11 
+	6, -- 12
 
 	1,
 	1,
@@ -94,6 +95,8 @@ function _M:load()
 				log.info("result = %x", rt)
 				return rt
 			end
+--			if i == 12 then return 0 end -- mouth
+--			if i == 11 then return 0 end -- animate
 			return proc_invoke(orig, this, ...)
 		end)
 	end

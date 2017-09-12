@@ -50,6 +50,16 @@ GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
 	return _gl.push(_self->var(_gl.get(2), _gl.get(3))).one; \
 });
 
+#define LUA_MGETTER3(var) \
+GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
+	return _gl.push(_self->var(_gl.get(2), _gl.get(3), _gl.get(4))).one; \
+});
+
+#define LUA_MGETTER6(var) \
+GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, var, { \
+	return _gl.push(_self->var(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5), _gl.get(6), _gl.get(7))).one; \
+});
+
 
 // get/set struct embedded byte string (ie fix buffer, not a pointer)
 #define LUA_BINDSTR(var) \

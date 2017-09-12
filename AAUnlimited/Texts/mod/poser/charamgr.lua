@@ -50,7 +50,7 @@ end
 -- Character Helper Metatables
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
-local charkeys = { clothstate = "m_clothState", spawn = "Spawn" }
+local charkeys = { clothstate = "m_clothState", spawn = "Spawn", }
 local charamt = {}
 charamt.GetSlider = GetSlider
 charamt.Sliders = Sliders
@@ -60,6 +60,35 @@ charamt.GetXXFileFace = GetXXFileFace
 charamt.isvalid = true
 charamt.override = function(character, skeleton, override)
 	character.poser:Override(skeleton, override)
+end
+
+function charamt.despawn(char)
+	if not char.spawned then return false end
+	if char == _M.current then
+		_M.setcurrentcharacter(characters[1] or dummycharacter)
+	end
+	char.struct:Despawn()
+	char.spawn = false
+	return true
+end
+
+function charamt.update(clothstate)
+	char.struct:Update(clothstate or 0, exe_type == "edit" and 1 or 0)
+end
+
+function charamt.skeleton(char, pose)
+	return _M.skeleton(char.struct, pose)
+end
+
+function charamt.reload(char, light)
+	-- TODO: light/partial now hardcoded
+	char:spawn(1,char.index, light, exe_type == "edit" and 1 or 0)
+	char:skeleton()
+end
+
+function charamt.update_face(chara)
+	chara.struct:Animate1(0,1,512)
+	chara.struct:Animate2(-1,0,1,0,1,0)
 end
 
 function charamt.__index(character,k)
@@ -82,6 +111,7 @@ function charamt.__newindex(character,k,v)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
 		face[facekeys[k]] = v
+		character:update_face()
 	elseif skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		skel[skelkeys[k]] = v
@@ -99,6 +129,7 @@ local function setcurrentcharacter(character)
 	end
 end
 
+local charcount = 0 -- this counts only characters spawned by the game, not us
 function _M.addcharacter(character)
 	log.spam("Poser: Add character %s", character)
 	local new = true
@@ -112,7 +143,10 @@ function _M.addcharacter(character)
 	if new then
 		local data = character.m_charData
 		local name = string.format("%s %s", data.m_forename, data.m_surname)
-		new = { name = name, struct = character, poser = GetPoserCharacter(character), data = data, GetSlider = GetSlider }
+		if not _M.is_spawning then
+			charcount = charcount + 1
+		end
+		new = { index = last, name = name, struct = character, poser = GetPoserCharacter(character), data = data, GetSlider = GetSlider, spawned = _M.is_spawning }
 		setmetatable(new, charamt)
 		characters[last + 1] = new
 		if _M.current ~= dummycharacter then
@@ -136,11 +170,38 @@ function _M.removecharacter(character)
 	end
 	log.spam("Poser: We have %d characters", #characters)
 	characterschanged()
+	if character.spawned then return end
+	charcount = charcount - 1
+	-- the legit character despawned, this means the scene is ending - despawn all our injected characters, too
+	if charcount == 0 then
+		while #characters > 0 do
+			-- all characters remaining must be spawned ones
+			assert(characters[1].spawned)
+			characters[1].struct:Despawn()
+		end
+	end
 end
+
+function _M.spawn(seat,cloth,pose)
+	_M.is_spawning = true
+	local ch = GetCharacter(seat)
+	ch:Spawn(cloth or 1,#characters,0,0)
+	_M:skeleton(ch, pose)
+	_M.is_spawning = false
+end
+
+function _M.skeleton(char, pose)
+	local pp = host_path("data", "jg2e01_00_00.pp")
+	-- TODO: xa name depends on some things (editor/play, gender ..), hardcoded for female clothing screen for now
+	local xa = host_path("data", "HAE00_00_00_00.xa")
+	char:Skeleton(pp, xa, pose or 1)
+end
+
 
 _M.characters = characters
 _M.setcurrentcharacter = setcurrentcharacter
 _M.currentcharacterchanged = currentcharacterchanged
 _M.characterschanged = characterschanged
+_M.is_spawning = false
 
 return _M

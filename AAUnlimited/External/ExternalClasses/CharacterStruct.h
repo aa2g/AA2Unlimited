@@ -43,8 +43,8 @@ namespace ExtClass {
 
 		// original game vtable
 		/* #0 */ virtual DWORD Destroy(int free); // destroys the character, 1 frees it too i think
-		/* #1 */ virtual DWORD Spawn(BYTE clothstate, BYTE a3, BYTE light, BYTE partial); // Loads character on scene
-		/* #2 */ virtual DWORD Update(BYTE clothstate, BYTE playormake); // second argument indicates if maker/play pp
+		/* #1 */ virtual DWORD Spawn(BYTE clothstate, BYTE a3, BYTE light, BYTE isedit); // Loads character on scene
+		/* #2 */ virtual DWORD Update(BYTE clothstate, BYTE isedit); // second argument indicates if maker/play pp
 		/* #3 */ virtual DWORD fn3();
 		/* #4 */ virtual DWORD Despawn(); // removes the character from scene
 		/* #5 */ virtual DWORD fn5();
@@ -52,6 +52,9 @@ namespace ExtClass {
 		/* #7 */ virtual DWORD fn7();
 		/* #8 */ virtual DWORD fn8();
 		/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
+		/* #10 */ virtual DWORD fn10();
+		/* #11 */ virtual DWORD Animate1(DWORD a, DWORD b, DWORD c);
+		/* #12 */ virtual DWORD Animate2(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f);
 		BYTE m_unknown4[4];
 		void *m_xxinstance1;
 		BYTE m_unknown8[8];
@@ -162,6 +165,8 @@ namespace ExtClass {
 	LUA_MGETTER0(GetNpcReactData)
 	LUA_MGETTER0(GetNpcAiData)
 	LUA_MGETTER0(GetXXFileFace)
+	LUA_MGETTER3(Animate1)
+	LUA_MGETTER6(Animate2)
 
 	}
 #undef LUA_CLASS

@@ -139,6 +139,7 @@ local function updatecharacterlist()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
 
+
 local function showframe(frame, show)
 	show = show and 0 or 2
 	frame.m_renderFlag = show
@@ -159,6 +160,59 @@ local hideframebutton = iup.button {
 		showframe(currentslider.frame, false)
 	end,
 }
+
+------------
+-- Char spawning
+------------
+
+
+local addcharbutton = exe_type == "play" and iup.button { title = "Add", expand = "horizontal" } or {}
+local removecharbutton = exe_type == "play" and iup.button { title = "Remove", expand = "horizontal" } or {}
+
+function addcharbutton.action()
+	local seats = {}
+	local list = {
+		expand = "horizontal"
+	}
+	for i=0,24 do
+		local char = GetCharacter(i)
+		if char then
+			local name = string.format("#%d: %s %s", i, char.m_charData.m_forename, char.m_charData.m_surname)
+			table.insert(list, name)
+			table.insert(seats, i)
+		end
+	end
+
+	local chlist = iup.list(list)
+	local charsel
+	local function chsel()
+		charsel:destroy()
+	end
+	function chlist.dblclick_cb()
+		return iup.CLOSE
+	end
+	charsel = iup.dialog {
+		iup.vbox {
+			chlist,
+			iup.button {
+				title = "Spawn",
+				expand = "horizontal",
+				action = function()
+					return iup.CLOSE
+				end
+			},
+		}
+	}
+	charsel:popup()
+	local char = seats[tonumber(chlist.value)]
+	charamgr.spawn(char)
+	updatecharacterlist()
+end
+
+function removecharbutton.action()
+	charamgr.current:despawn()
+	updatecharacterlist()
+end
 
 
 -- ----------
@@ -450,6 +504,10 @@ local dialogsliders = iup.dialog {
 				title = "Characters",
 				iup.vbox {
 					characterlist,
+					iup.hbox {
+						addcharbutton,
+						removecharbutton,
+					},
 					iup.label { title = "Style" },
 					stylelist,
 					iup.hbox {
@@ -472,6 +530,7 @@ local dialogsliders = iup.dialog {
 						ngap = 3,
 					},
 				},
+				expand = "horizontal",
 			},
 			iup.frame { title = "Props",
 				iup.vbox {
