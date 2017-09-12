@@ -297,6 +297,14 @@ namespace ExtClass {
 			Clothes::bindLua();
 
 			LUA_NAME;
+
+			LUA_BINDP(m_figure);
+			LUA_BINDP(m_chest);
+			LUA_BINDP(m_bodyColor);
+			LUA_BINDP(m_eyes);
+			LUA_BINDP(m_eyebrows);
+			LUA_BINDP(m_faceDetails);
+
 			LUA_BINDP(m_character);
 			LUA_BIND(m_voicePitch);
 			LUA_BINDARR(m_traitBools);
