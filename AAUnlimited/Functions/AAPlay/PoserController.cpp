@@ -467,6 +467,7 @@ namespace Poser {
 				break;
 			}
 		}
+		m_loadCharacter = nullptr;
 	}
 
 	PoserController::PoserCharacter* PoserController::GetPoserCharacter(ExtClass::CharacterStruct* c) {

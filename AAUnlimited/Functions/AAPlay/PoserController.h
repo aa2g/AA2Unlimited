@@ -373,6 +373,7 @@ namespace Poser {
 				LUA_MAPITERATOR(Props, m_propSliders);
 				LUA_METHOD(Override, {
 					if (_gl.top() == 3) {
+						_self->m_overrides.erase(General::utf8.from_bytes((const char*)_gl.get(2)));
 						_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
 					}
 					return 0;
