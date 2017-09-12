@@ -59,6 +59,8 @@ local exempts = {
 	[12]=true,
 	[20]=true,
 }
+local last = 0
+local ticks = {}
 function _M:load()
 	if exe_type == "edit" then
 		vtaddr = 0x30C324
@@ -74,6 +76,16 @@ function _M:load()
 			local argstr = table.concat(artab, ",")
 			if not exempts[i] then
 				log.info("female vtable %x.%s(%s) " % {this,(names[i+1] or "" ).."#"..i, argstr})
+			else
+				local f = "vtable#%d(%x,%s)" % {i, this, argstr}
+				if not ticks[f] then
+					ticks[f] = 0
+				end
+				ticks[f] = ticks[f] + 1
+				if last < os.time() then
+					last = os.time() + 1
+					print(p(ticks))
+				end
 			end
 			if i == 9 then
 --				log.info('-> vtcall(GetPlayerCharacter(), 9, utf8_to_unicode(%q), utf8_to_unicode(%q), %d,0,0)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
