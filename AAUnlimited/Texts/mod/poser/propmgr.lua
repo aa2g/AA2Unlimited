@@ -30,7 +30,7 @@ local loaded = {}
 local function walk_fixlight(f)
 	for i=0,f.m_nChildren-1 do
 		local c = f:m_children(i)
-		poke_dword(fixptr(c)+0x1bd, 2)
+		poke(fixptr(c)+0x1bd, "\x02")
 		walk_fixlight(c)
 	end
 end
