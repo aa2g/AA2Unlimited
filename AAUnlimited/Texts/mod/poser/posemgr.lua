@@ -83,59 +83,60 @@ end
 local function loadpose(filename)
 	log.spam("Poser: Loading pose %s", filename)
 	local character = charamgr.current
-	if not character or not character.isvalid ~= true then return end
-	local path = aau_path(posesdir, filename) .. ".pose"
-	log.spam("Poser: Reading %s", path)
-	local data = readfile(path)
-	if data then
-		local ok, ret = pcall(json.decode, data)
-		if not ok then
-			log.error("Error decoding pose %s data:", filename)
-			log.error(ret)
-			return
-		end
-		local jp = ret
-		if jp then
-			if not jp._VERSION_ or jp._VERSION_ ~= 2 then
-				log.error("Poser: %s isn't a valid pose file", filename)
+	if character and character.isvalid == true then
+		local path = aau_path(posesdir, filename) .. ".pose"
+		log.spam("Poser: Reading %s", path)
+		local data = readfile(path)
+		if data then
+			local ok, ret = pcall(json.decode, data)
+			if not ok then
+				log.error("Error decoding pose %s data:", filename)
+				log.error(ret)
 				return
 			end
-			local clip = jp.pose
-			if clip then setclip(clip) end
-			local frame = jp.frame
-			if jp.sliders then
-				log.spam("Setting sliders")
-				for k,v in pairs(jp.sliders) do
-					local slider = character:GetSlider(k)
-					if slider then
-						slider:rotation(0,v[1])
-						slider:rotation(1,v[2])
-						slider:rotation(2,v[3])
-						slider:rotation(3,v[4])
-						slider:translate(0,v[5])
-						slider:translate(1,v[6])
-						slider:translate(2,v[7])
-						slider:scale(0,v[8])
-						slider:scale(1,v[9])
-						slider:scale(2,v[10])
-						slider:Apply()
+			local jp = ret
+			if jp then
+				if not jp._VERSION_ or jp._VERSION_ ~= 2 then
+					log.error("Poser: %s isn't a valid pose file", filename)
+					return
+				end
+				local clip = jp.pose
+				if clip then setclip(clip) end
+				local frame = jp.frame
+				if jp.sliders then
+					log.spam("Setting sliders")
+					for k,v in pairs(jp.sliders) do
+						local slider = character:GetSlider(k)
+						if slider then
+							slider:rotation(0,v[1])
+							slider:rotation(1,v[2])
+							slider:rotation(2,v[3])
+							slider:rotation(3,v[4])
+							slider:translate(0,v[5])
+							slider:translate(1,v[6])
+							slider:translate(2,v[7])
+							slider:scale(0,v[8])
+							slider:scale(1,v[9])
+							slider:scale(2,v[10])
+							slider:Apply()
+						end
 					end
 				end
-			end
-			local face = jp.face
-			if face then
-				local xxface = character:GetXXFileFace()
-				if face.mouth then character.mouth = face.mouth end
-				if face.mouthopen then character.mouthopen = face.mouthopen end
-				if face.eye then character.eye = face.eye end
-				if face.eyeopen then character.eyeopen = face.eyeopen end
-				if face.eyebrow then
-					local base = character.eyebrow
-					base = base - (base % 7)
-					character.eyebrow = base + (face.eyebrow % 7)
+				local face = jp.face
+				if face then
+					local xxface = character:GetXXFileFace()
+					if face.mouth then character.mouth = face.mouth end
+					if face.mouthopen then character.mouthopen = face.mouthopen end
+					if face.eye then character.eye = face.eye end
+					if face.eyeopen then character.eyeopen = face.eyeopen end
+					if face.eyebrow then
+						local base = character.eyebrow
+						base = base - (base % 7)
+						character.eyebrow = base + (face.eyebrow % 7)
+					end
+					if face.blush then character.blush = face.blush / 9 end
+					if face.blushlines then character.blushlines = face.blushlines / 9 end
 				end
-				if face.blush then character.blush = face.blush / 9 end
-				if face.blushlines then character.blushlines = face.blushlines / 9 end
 			end
 		end
 	end
@@ -148,48 +149,49 @@ end
 local function savepose(filename)
 	log.spam("Poser: Saving pose %s", filename)
 	local character = charamgr.current
-	if not character or not character.isvalid ~= true then return end
-	local path = aau_path(posesdir, filename) .. ".pose"
-	log.spam("Poser: Saving to %s", path)
-	local t = {}
-	t._VERSION_ = 2
-	t.pose = character.pose
-	t.frame = character.frame
-	local sliders = {}
-	for k,v in character:Sliders() do
-		local slider = {
-			v:rotation(0),
-			v:rotation(1),
-			v:rotation(2),
-			v:rotation(3),
-			v:translate(0),
-			v:translate(1),
-			v:translate(2),
-			v:scale(0),
-			v:scale(1),
-			v:scale(2),
+	if character and character.isvalid == true then
+		local path = aau_path(posesdir, filename) .. ".pose"
+		log.spam("Poser: Saving to %s", path)
+		local t = {}
+		t._VERSION_ = 2
+		t.pose = character.pose
+		t.frame = character.frame
+		local sliders = {}
+		for k,v in character:Sliders() do
+			local slider = {
+				v:rotation(0),
+				v:rotation(1),
+				v:rotation(2),
+				v:rotation(3),
+				v:translate(0),
+				v:translate(1),
+				v:translate(2),
+				v:scale(0),
+				v:scale(1),
+				v:scale(2),
+			}
+			sliders[k] = slider
+		end
+		t.sliders = sliders
+		
+		local face = {
+			eye = character.eye,
+			eyeopen = character.eyeopen,
+			eyebrow = character.eyebrow,
+			mouth = character.mouth,
+			mouthopen = character.mouthopen,
+			blush = character.blush * 9,
+			blushlines = character.blushlines * 9,
 		}
-		sliders[k] = slider
+		t.face = face
+		
+		local file = io.open(path, "w")
+		if not file then return nil end
+		file:write(json.encode(t))
+		file:close()
+		log.spam("Poser: Pose %s saved", filename)
+		populateposelist()
 	end
-	t.sliders = sliders
-	
-	local face = {
-		eye = character.eye,
-		eyeopen = character.eyeopen,
-		eyebrow = character.eyebrow,
-		mouth = character.mouth,
-		mouthopen = character.mouthopen,
-		blush = character.blush * 9,
-		blushlines = character.blushlines * 9,
-	}
-	t.face = face
-	
-	local file = io.open(path, "w")
-    if not file then return nil end
-    file:write(json.encode(t))
-    file:close()
-	log.spam("Poser: Pose %s saved", filename)
-	populateposelist()
 end
 
 function saveposebutton.action()
