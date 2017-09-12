@@ -1409,6 +1409,16 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				  { CharacterStruct::SKELETON, 13 },{ CharacterStruct::SKELETON, 14 } },
 				-0.4f, 0.2f
 			},
+			{ TEXT("Hand Thickness"),
+				{ { CharacterStruct::SKELETON, 48 },{ CharacterStruct::SKELETON, 49 },
+				{ CharacterStruct::SKELETON, 50 },{ CharacterStruct::SKELETON, 51 } },
+				-0.4f, 0.2f
+			},
+			{ TEXT("Hand Thickness"),
+				{ { CharacterStruct::SKELETON, 52 },{ CharacterStruct::SKELETON, 53 },
+				{ CharacterStruct::SKELETON, 54 },{ CharacterStruct::SKELETON, 55 } },
+				-0.4f, 0.2f
+			},
 			{ TEXT("Foot Length"),
 			{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
 				-0.15f, 0.2f
@@ -1449,19 +1459,39 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Thigh Thickness"),
+			{ TEXT("Thighs Width"),
 				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Shoulder Width"),
+			{ TEXT("Thighs Height"),
+				{ { CharacterStruct::SKELETON, 38 },{ CharacterStruct::SKELETON, 39 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Thighs Thickness"),
+				{ { CharacterStruct::SKELETON, 40 },{ CharacterStruct::SKELETON, 41 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Calves Width"),
+				{ { CharacterStruct::SKELETON, 42 },{ CharacterStruct::SKELETON, 43 } },
+				-0.5f, 0.5f
+			},
+			//{ TEXT("Calve Height"),
+			//	{ { CharacterStruct::SKELETON, 44 },{ CharacterStruct::SKELETON, 45 } },
+			//	-0.5f, 0.5f
+			//},
+			{ TEXT("Calves Thickness"),
+				{ { CharacterStruct::SKELETON, 46 },{ CharacterStruct::SKELETON, 47 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulders Width"),
 				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Shoulder Size"),
+			{ TEXT("Shoulders Size"),
 				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Shoulder Height"),
+			{ TEXT("Shoulders Height"),
 				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
 				-0.5f, 0.5f
 			},
@@ -1469,7 +1499,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Arm Bone Size"),
+			{ TEXT("Arms Size"),
 				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
 				  { CharacterStruct::BODY, 7 },{ CharacterStruct::BODY, 8 },{ CharacterStruct::BODY, 9 },
 				  { CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
