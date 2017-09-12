@@ -80,6 +80,7 @@ public:
 
 	static inline void bindLua() {
 #define LUA_CLASS Frame
+		LUA_NAME;
 		LUA_BINDSTRP(m_name)
 		LUA_BIND(m_nChildren)
 		LUA_BINDARREP(m_children,, _self->m_nChildren)

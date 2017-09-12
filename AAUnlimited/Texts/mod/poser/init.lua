@@ -3,10 +3,12 @@
 require "iuplua"
 require "iupluacontrols"
 
+
 local _M = {}
 local dlg
 local signals = require "poser.signals"
 local charamgr = require "poser.charamgr"
+local propmgr = require "poser.propmgr"
 
 local function detect_parenting(hwnd)
 	dlg.parentHWND = hwnd
@@ -52,11 +54,13 @@ function _M:load()
 	if GetGameTick() > 0 then
 		dlg.forceparenting = detect_parenting(GetGameHwnd())
 	end
+	propmgr:init()
 end
 
 function _M:unload()
 	-- close all dialogs
 	if dlg then dlg:close_all() end
+		propmgr:cleanup()
 end
 
 return _M

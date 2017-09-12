@@ -503,5 +503,11 @@
     <None Include="Texts\mod\json.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\poser\fileutils.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\propmgr.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
   </ItemGroup>
 </Project>

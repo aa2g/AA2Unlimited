@@ -39,7 +39,7 @@ function on.launch()
 		end
 		return proc_invoke(orig, this, key, value, res, type, pdata, pcdata)
 	end)
-	opt = g_hook_vptr(close, 1, function(orig, this, hk)
+	local opt = g_hook_vptr(close, 1, function(orig, this, hk)
 		if (hk == 0xdeadbabe) then
 			return 0
 		end
