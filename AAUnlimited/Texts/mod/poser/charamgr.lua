@@ -72,7 +72,7 @@ function charamt.despawn(char)
 	return true
 end
 
-function charamt.update(clothstate)
+function charamt.update(char, clothstate)
 	char.struct:Update(clothstate or 0, exe_type == "edit" and 1 or 0)
 end
 
@@ -185,8 +185,9 @@ end
 function _M.spawn(seat,cloth,pose)
 	_M.is_spawning = true
 	local ch = GetCharacter(seat)
+	assert(ch)
 	ch:Spawn(cloth or 1,#characters,0,0)
-	_M:skeleton(ch, pose)
+	_M.skeleton(ch, pose)
 	_M.is_spawning = false
 end
 
