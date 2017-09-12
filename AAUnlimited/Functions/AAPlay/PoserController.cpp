@@ -306,7 +306,8 @@ namespace Poser {
 
 		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame, &source, &filter, &len](ExtClass::Frame* frame) {
 			// limit the frames we work on based on a starts-with filter criteria
-			if (!filter || strncmp(frame->m_name, filter, len) == 0) {
+			// Filter out nipple bones as they glitch on breast animations
+			if (!filter || strncmp(frame->m_name, filter, len) == 0 && strncmp(frame->m_name, "a01_J_Chiku", 11) != 0) {
 				// Search for this frame slider if it exists
 				slider = GetSlider(frame->m_name);
 				// Search for and recover from the transient slider list
@@ -353,14 +354,10 @@ namespace Poser {
 			ExtClass::Frame* transFrame;
 			ExtClass::Frame* rotFrame;
 
-			world->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
-				bool isSlider = false;
+			FrameModTree(world, ExtClass::CharacterStruct::Models::SKELETON, "a01");
+			root->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
 				bool isProp = false;
-				// Filter out nipple bones as they glitch on breast animations
-				if (strncmp(frame->m_name, "a01", 3) == 0 && strncmp(frame->m_name, "a01_J_Chiku", 11) != 0) {
-					isSlider = true;
-				}
-				else if (frame->m_nSubmeshes) {
+				if (frame->m_nSubmeshes) {
 					isProp = true;
 				}
 				else if (strncmp(frame->m_name, "guide_", 6) == 0 && frame->m_nameBufferSize == frame->m_parent->m_nameBufferSize + 6) {
@@ -369,18 +366,9 @@ namespace Poser {
 						slider->guide = frame;
 					}
 				}
-				if(isSlider || isProp) {
+				if(isProp) {
 					// Search for this frame slider if it exists
 					slider = GetSlider(frame->m_name);
-					// Search for and recover from the transient slider list
-					if (!slider) {
-						auto match = m_transientSliders.find(frame->m_name);
-						if (match != m_transientSliders.end() && match->second->source == ExtClass::CharacterStruct::SKELETON) {
-							slider = match->second;
-							m_sliders.emplace(match->first, slider);
-							m_transientSliders.erase(match);
-						}
-					}
 					// If it doesn't exist we create a new one and claim it for this model source
 					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 					if (!slider) {
@@ -388,10 +376,7 @@ namespace Poser {
 						slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
 						slider->Reset();
 						slider->source = ExtClass::CharacterStruct::SKELETON;
-						if (isSlider)
-							m_sliders.emplace(frame->m_name, slider);
-						else
-							m_propSliders.emplace(frame->m_name, slider);
+						m_propSliders.emplace(frame->m_name, slider);
 					}
 
 					// If the models match we can mod this frame as it either:
@@ -482,6 +467,7 @@ namespace Poser {
 				break;
 			}
 		}
+		m_loadCharacter = nullptr;
 	}
 
 	PoserController::PoserCharacter* PoserController::GetPoserCharacter(ExtClass::CharacterStruct* c) {
