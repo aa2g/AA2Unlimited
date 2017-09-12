@@ -111,7 +111,9 @@ function charamt.__newindex(character,k,v)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
 		face[facekeys[k]] = v
-		character:update_face()
+		for i=1,10 do
+			character:update_face()
+		end
 	elseif skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		skel[skelkeys[k]] = v
