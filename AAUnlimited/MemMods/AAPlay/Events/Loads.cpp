@@ -121,7 +121,7 @@ DWORD __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	}
 
 	if (!loc_loadingCharacter) {
-		LUA_EVENT_NORET("char_despawn_after", loadCharacter, retv);
+		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
 	}
 

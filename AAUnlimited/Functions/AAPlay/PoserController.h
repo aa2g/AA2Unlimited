@@ -167,29 +167,8 @@ namespace Poser {
 				return getCurrentOperationData()->value[axis];
 			}
 
-			inline void setValue(int axis, float value) {
-				if (currentOperation == Rotate) {
-					float angle[3];
-					rotation.getEulerAngles(angle);
-					angle[axis] = value;
-					(*Shared::D3DXQuaternionRotationYawPitchRoll)(&getRotation(), angle[1], angle[0], angle[2]);
-				}
-				else {
-					getCurrentOperationData()->value[axis] = value;
-				}
-			}
-
-			inline void setValue(float newValueX, float newValueY, float newValueZ) {
-				if (currentOperation == Rotate) {
-					rotation.setRotationYawPitchRoll(newValueX, newValueY, newValueZ);
-				}
-				else {
-					float* data = getCurrentOperationData()->value;
-					data[0] = newValueX;
-					data[1] = newValueY;
-					data[2] = newValueZ;
-				}
-			}
+			void setValue(int axis, float value);
+			void setValue(float newValueX, float newValueY, float newValueZ);
 
 			inline void startSlide() {
 				sliding = true;
@@ -231,6 +210,31 @@ namespace Poser {
 					_self->increment(_gl.get(2), _gl.get(3));
 					_self->Apply();
 				});
+				LUA_METHOD(Values, {
+					if (_self->currentOperation == Rotate) {
+						float angles[3];
+						_self->rotation.getEulerAngles(angles);
+						_gl.push(angles[0]);
+						_gl.push(angles[1]);
+						_gl.push(angles[2]);
+					}
+					else if (_self->currentOperation == Translate) {
+						_gl.push(_self->translate.value[0]);
+						_gl.push(_self->translate.value[1]);
+						_gl.push(_self->translate.value[2]);
+}
+					else {
+						_gl.push(_self->scale.value[0]);
+						_gl.push(_self->scale.value[1]);
+						_gl.push(_self->scale.value[2]);
+
+					}
+					return 3;
+				});
+				LUA_METHOD(SetValues, {
+					_self->setValue(_gl.get(2), _gl.get(3), _gl.get(4));
+					return 0;
+				});
 				LUA_METHOD(StartSlide, {
 					_self->startSlide();
 				});
@@ -247,6 +251,10 @@ namespace Poser {
 						return 1; \
 					} \
 					((float*)(&_self->rotation.data))[_idx] = _gl.get(3); \
+				});
+				GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, frame, {
+					_gl.push(_self->frame[1]->m_children);
+					return 1;
 				});
 			}
 #undef LUA_CLASS
@@ -339,16 +347,6 @@ namespace Poser {
 				}
 			}
 
-			inline void VoidFramePointers() {
-				SliderInfo* slider = nullptr;
-				for (auto it = m_sliders.begin(), end = m_sliders.end(); it != end; it++) {
-					slider = it->second;
-					slider->frame[0] = nullptr;
-					slider->frame[1] = nullptr;
-					slider->guide = nullptr;
-				}
-			}
-
 			Face GetFace() {
 				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
 			}
@@ -359,21 +357,53 @@ namespace Poser {
 			void FrameModSkirt(ExtClass::XXFile* xxFile);
 			SliderInfo* GetSlider(const char* name);
 			SliderInfo* GetSlider(const std::string& name);
+			SliderInfo* GetPropSlider(const char* name);
 
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
+			std::unordered_map<std::string, SliderInfo*> m_propSliders;
+			std::unordered_map<std::wstring, std::wstring> m_overrides;
 
 #define LUA_CLASS PoserController::PoserCharacter
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_MGETTER1(GetSlider);
+				LUA_MAPITERATOR(Sliders, m_sliders);
+				LUA_MAPITERATOR(Props, m_propSliders);
+				LUA_METHOD(Override, {
+					if (_gl.top() == 3) {
+						_self->m_overrides.erase(General::utf8.from_bytes((const char*)_gl.get(2)));
+						_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
+					}
+					return 0;
+				});
+			}
+#undef LUA_CLASS
+		}; // PoserCharacter
+
+		class PoserProp {
+		public:
+			PoserProp(ExtClass::XXFile* xxFile) : m_xxFile(xxFile) {
+
+			}
+
+			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
+			SliderInfo* GetSlider(const char* name);
+			SliderInfo* GetSlider(const std::string& name);
+
+			ExtClass::XXFile* m_xxFile;
+			std::unordered_map<std::string, SliderInfo*> m_sliders;
+#define LUA_CLASS PoserController::PoserProp
 			static inline void bindLua() {
 				LUA_NAME;
 				LUA_MGETTER1(GetSlider);
 				LUA_MAPITERATOR(Sliders, m_sliders)
 			}
 #undef LUA_CLASS
-		}; // PoserCharacter
+		}; // PoserProp
 
-	public:
+		public:
 		PoserController();
 
 		~PoserController();
@@ -427,13 +457,6 @@ namespace Poser {
 		bool m_isActive;
 		std::vector<PoserCharacter*> m_characters;
 		PoserCharacter* m_loadCharacter;
-		std::map<std::wstring, std::wstring> m_overrides;
-		
-#define LUA_CLASS Poser::PoserController
-		static inline void bindLua() {
-			LUA_NAME;
-		};
-#undef LUA_CLASS
-
+		std::unordered_map<std::wstring, std::wstring> m_overrides;
 	};
 }

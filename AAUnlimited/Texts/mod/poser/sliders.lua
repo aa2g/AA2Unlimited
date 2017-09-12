@@ -9,7 +9,17 @@ function _M.slider(opts)
 	local increment = signals.signal()
 	local slidestarted = signals.signal()
 	local slidestopped = signals.signal()
-	local textbox = iup.text {}
+	local valuechanged = signals.signal()
+	local textbox = iup.text {
+		valuechanged_cb = function(self)
+			log.spam("slider text changed")
+			local newvalue = tonumber(self.value)
+			if newvalue then
+				log.spam("value changed %f", newvalue)
+				valuechanged(newvalue, data)
+			end
+		end
+	}
 	local sliding = false
 	
 	local control = iup.hbox {
@@ -41,6 +51,13 @@ function _M.slider(opts)
 		increment = increment,
 		slidestarted = slidestarted,
 		slidestopped = slidestopped,
+		valuechanged = valuechanged,
+		getvalue = function()
+			return tonumber(textbox.value) or 0
+		end,
+		setvalue = function(value)
+			textbox.value = tostring(value)
+		end,
 	}
 	
 	return control

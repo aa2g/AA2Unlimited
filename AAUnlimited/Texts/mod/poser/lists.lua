@@ -77,6 +77,7 @@ function _M.listfilter()
 	function text.clear()
 		text.value = ""
 		setfilter()
+		iup.SetFocus(text)
 	end
 	
 	local clear = iup.flatbutton { title = "X", font = "Serif, Courier, 8", size = "15x10", border = "yes" }
