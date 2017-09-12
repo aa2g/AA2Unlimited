@@ -125,6 +125,7 @@ end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
 local function update_showui()
+	if _M.opts.hideui ~= 1 then return end
 	if _M.visible and #charamgr.characters > 0 then
 		SetHideUI(true)
 	else
@@ -186,7 +187,7 @@ function addcharbutton.action()
 	for i=0,24 do
 		local char = GetCharacter(i)
 		if char then
-			local name = string.format("#%d: %s %s", i, char.m_charData.m_forename, char.m_charData.m_surname)
+			local name = sjis_to_utf8(string.format("#%d: %s %s", i, char.m_charData.m_forename, char.m_charData.m_surname))
 			table.insert(list, name)
 			table.insert(seats, i)
 		end

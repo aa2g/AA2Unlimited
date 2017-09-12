@@ -145,7 +145,7 @@ function _M.addcharacter(character)
 	end
 	if new then
 		local data = character.m_charData
-		local name = string.format("%s %s", data.m_forename, data.m_surname)
+		local name = sjis_to_utf8(string.format("%s %s", data.m_forename, data.m_surname))
 		if not _M.is_spawning then
 			charcount = charcount + 1
 		end

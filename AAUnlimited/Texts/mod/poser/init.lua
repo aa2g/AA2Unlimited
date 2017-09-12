@@ -9,6 +9,10 @@ local dlg
 local signals = require "poser.signals"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
+local opts = {
+	{"hideui", 0, "Hide game 2D UI: %b"},
+}
+
 
 local function detect_parenting(hwnd)
 	dlg.parentHWND = hwnd
@@ -50,7 +54,9 @@ function on.char_despawn(character)
 end
 
 function _M:load()
+	mod_load_config(self, opts)
 	dlg = require "poser.dlg"
+	dlg.opts = opts
 	if GetGameTick() > 0 then
 		dlg.forceparenting = detect_parenting(GetGameHwnd())
 	end
@@ -61,6 +67,10 @@ function _M:unload()
 	-- close all dialogs
 	if dlg then dlg:close_all() end
 		propmgr:cleanup()
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Poser settings")
 end
 
 return _M
