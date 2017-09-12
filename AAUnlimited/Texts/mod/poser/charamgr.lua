@@ -87,8 +87,11 @@ function charamt.reload(char, light)
 end
 
 function charamt.update_face(chara)
-	chara.struct:Animate1(0,1,512)
-	chara.struct:Animate2(-1,0,1,0,1,0)
+--	local blink = exe_type == "edit" or 0xFC720 or 0x10DBB0
+--	local saved = g_poke(blink, "\xc2\x08\x00")
+	--chara.struct:Animate2(-1,0,1,1,1,1)
+	--chara.struct:Animate1(0,1,0)
+	--saved = g_poke(blink, saved)
 end
 
 function charamt.__index(character,k)
@@ -111,9 +114,7 @@ function charamt.__newindex(character,k,v)
 	if facekeys[k] then
 		local face = character.struct:GetXXFileFace()
 		face[facekeys[k]] = v
-		for i=1,10 do
-			character:update_face()
-		end
+		character:update_face()
 	elseif skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		skel[skelkeys[k]] = v
@@ -189,6 +190,7 @@ function _M.spawn(seat,cloth,pose)
 	local ch = GetCharacter(seat)
 	assert(ch)
 	ch:Spawn(cloth or 1,#characters,0,0)
+	ch:SetAnimData(-1,0,1,1,1,1,0,1,0)
 	_M.skeleton(ch, pose)
 	_M.is_spawning = false
 end

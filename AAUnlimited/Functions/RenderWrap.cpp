@@ -15,6 +15,7 @@
 #include "Files/Logger.h"
 #include "Files/Config.h"
 #include "Render.h"
+#include "External/ExternalClasses/CharacterStruct.h"
 
 
 #define FRAME_MASK 15
@@ -563,6 +564,7 @@ public:;
 
 	HRESULT WINAPI BeginScene(void)
 	{
+		ExtClass::CharacterStruct::ApplyAnimData();
 		WRAPCALL(orig->BeginScene());
 	}
 

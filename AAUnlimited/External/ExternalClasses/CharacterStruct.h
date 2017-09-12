@@ -15,7 +15,7 @@
 #include "Script/ScriptLua.h"
 
 namespace ExtClass {
-
+extern DWORD g_anim_data[25][10];
 
 #pragma pack(push, 1)
 	/*
@@ -136,7 +136,19 @@ namespace ExtClass {
 	LUA_METHOD(Despawn, {
 		_gl.push(_self->Despawn());
 		_gl.push(_self->Despawn2());
+		int seat = _self->m_seat;
+		if (seat < 25 && seat >= 0)
+			g_anim_data[seat][0] = 0;
 	});
+	LUA_METHOD(SetAnimData, {
+		int seat = _self->m_seat;
+		g_anim_data[seat][0] = 1;
+		for (int i = 0; i < 9; i++) {
+			g_anim_data[seat][i + 1] = _gl.get(2 + i);
+		}
+		return 0;
+	});
+
 	LUA_BIND(m_somePointer)
 	LUA_BIND(m_somePointer2)
 	LUA_BIND(m_somePointer3)
@@ -191,7 +203,7 @@ namespace ExtClass {
 		BYTE* ptr = (BYTE*)m_moreData;
 		return (IllusionArray<CharacterRelation>*)(ptr + 0x16A14);
 	}
-	
+
 	inline CharacterActivity* GetActivity() {
 		if (m_moreData2 == NULL) return NULL;
 		BYTE* ptr = (BYTE*)(m_moreData2)+0x18;
@@ -243,7 +255,7 @@ namespace ExtClass {
 		case HAIR_EXT:
 			return m_xxHairExtension;
 		case FACE_SLIDERS: {
-			DWORD rule[] {0x70, 4, 0};
+			DWORD rule[]{ 0x70, 4, 0 };
 			return (XXFile*)ExtVars::ApplyRule(this, rule);
 			break; }
 		case TONGUE:
@@ -252,9 +264,12 @@ namespace ExtClass {
 
 		default:
 			return NULL;
-			}
 		}
+	}
+	static void ApplyAnimData();
+
 	};
+
 
 	static_assert(sizeof(CharacterStruct) == 0xF9C, "CharacterStruct size missmatch; must be 0xF9C bytes (allocation size)");
 

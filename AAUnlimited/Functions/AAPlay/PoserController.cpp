@@ -199,6 +199,7 @@ namespace Poser {
 	static const char prefixTrans[]{ "pose_tr_" };
 	static const char prefixRot[]{ "pose_rot_" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
+		return;
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
 		if (model == ExtClass::CharacterStruct::H3DROOM)
