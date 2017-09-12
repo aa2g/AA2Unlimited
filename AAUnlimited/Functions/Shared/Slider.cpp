@@ -109,9 +109,9 @@ namespace Shared {
 		},
 		{
 			//SKELETON
-			{ ExtClass::CharacterStruct::SKELETON, 0, TEXT("SCENE_ROOT"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body height,
-			{ ExtClass::CharacterStruct::SKELETON, 1, TEXT("SCENE_ROOT"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body width,
-			{ ExtClass::CharacterStruct::SKELETON, 2, TEXT("SCENE_ROOT"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body thickness
+			{ ExtClass::CharacterStruct::SKELETON, 0, TEXT("a01_N_Zentai_010"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body height,
+			{ ExtClass::CharacterStruct::SKELETON, 1, TEXT("a01_N_Zentai_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body width,
+			{ ExtClass::CharacterStruct::SKELETON, 2, TEXT("a01_N_Zentai_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //body thickness
 			{ ExtClass::CharacterStruct::SKELETON, 3, TEXT("a01_J_ArmL_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left arm thickness
 			{ ExtClass::CharacterStruct::SKELETON, 4, TEXT("a01_J_ArmR_01"),{ 1,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right arm thickness
 			{ ExtClass::CharacterStruct::SKELETON, 5, TEXT("a01_J_HandL_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left hand fingers length
@@ -128,8 +128,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,16, TEXT("a01_J_FootR_03"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right foot length
 			{ ExtClass::CharacterStruct::SKELETON,17, TEXT("a01_J_FootL_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left foot width
 			{ ExtClass::CharacterStruct::SKELETON,18, TEXT("a01_J_FootR_03"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right foot width
-			{ ExtClass::CharacterStruct::SKELETON,19, TEXT("a01_J_UplegL_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left thigh thickness
-			{ ExtClass::CharacterStruct::SKELETON,20, TEXT("a01_J_UplegR_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right thigh thickness
+			{ ExtClass::CharacterStruct::SKELETON,19, TEXT("a01_J_UplegL_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left thigh width
+			{ ExtClass::CharacterStruct::SKELETON,20, TEXT("a01_J_UplegR_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right thigh width
 			{ ExtClass::CharacterStruct::SKELETON,21, TEXT("a01_J_KataL_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left shoulder height
 			{ ExtClass::CharacterStruct::SKELETON,22, TEXT("a01_J_KataR_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right shoulder height
 			{ ExtClass::CharacterStruct::SKELETON,23, TEXT("a01_J_KataL_01"),{ 0,0,0, 0,0,0, 0,1,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left shoulder height
@@ -147,6 +147,33 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,35, TEXT("a_J_ana06"),{ 1,1,1, 0,0,0, 0,0,0 }, Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //not sure why these exist twice
 			{ ExtClass::CharacterStruct::SKELETON,36, TEXT("a01_J_KataL_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left shoulder width
 			{ ExtClass::CharacterStruct::SKELETON,37, TEXT("a01_J_KataR_02"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right shoulder width
+			{ ExtClass::CharacterStruct::SKELETON,38, TEXT("a01_J_UplegL_020"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left thigh height
+			{ ExtClass::CharacterStruct::SKELETON,39, TEXT("a01_J_UplegR_020"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right thigh height
+			{ ExtClass::CharacterStruct::SKELETON,40, TEXT("a01_J_UplegL_020"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left thigh thickness
+			{ ExtClass::CharacterStruct::SKELETON,41, TEXT("a01_J_UplegR_020"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right thigh thickness
+			{ ExtClass::CharacterStruct::SKELETON,42, TEXT("a01_J_LegL_01"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left calve width
+			{ ExtClass::CharacterStruct::SKELETON,43, TEXT("a01_J_LegR_01"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right calve width
+			{ ExtClass::CharacterStruct::SKELETON,44, TEXT("a01_J_LegL_01"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left calve height
+			{ ExtClass::CharacterStruct::SKELETON,45, TEXT("a01_J_LegR_01"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right calve height
+			{ ExtClass::CharacterStruct::SKELETON,46, TEXT("a01_J_LegL_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left calve thickness
+			{ ExtClass::CharacterStruct::SKELETON,47, TEXT("a01_J_LegR_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right calve thickness
+			{ ExtClass::CharacterStruct::SKELETON,48, TEXT("a01_J_HandL_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left hand thickness
+			{ ExtClass::CharacterStruct::SKELETON,49, TEXT("a01_J_HandR_02"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right hand thickness
+			{ ExtClass::CharacterStruct::SKELETON,50, TEXT("a01_J_OyaL_01"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left hand thumb thickness
+			{ ExtClass::CharacterStruct::SKELETON,51, TEXT("a01_J_OyaR_01"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right hand thumb thickness
+			{ ExtClass::CharacterStruct::SKELETON,52, TEXT("a01_J_HandL_02"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left hand width
+			{ ExtClass::CharacterStruct::SKELETON,53, TEXT("a01_J_HandR_02"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right hand width
+			{ ExtClass::CharacterStruct::SKELETON,54, TEXT("a01_J_OyaL_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //left hand thumb width
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_OyaR_01"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //right hand thumb width
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_020"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest width
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_020"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest height
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_020"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest thickness
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //waist width
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_010"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //waist height
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Spin_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //waist thickness
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip width
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Kosi_010"),{ 0,1,0, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip height
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 }, Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
 		},
 		{
 			//BODY
