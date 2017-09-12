@@ -21,6 +21,7 @@
 #define FRAME_MASK 15
 #define TEST_DISABLE
 namespace Render {
+bool g_hideUI;
 
 DWORD frameno;
 
@@ -771,18 +772,27 @@ public:;
 		WRAPCALL(orig->GetNPatchMode());
 	}
 
+	bool stopdraw;
 	HRESULT WINAPI DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount)
 	{
+		if (stopdraw)
+			return D3D_OK;
 		WRAPCALL(orig->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount));
 	}
 
 	HRESULT WINAPI DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, CONST void* pVertexStreamZeroData, UINT VertexStreamZeroStride)
 	{
+		if (stopdraw)
+			return D3D_OK;
+
 		WRAPCALL(orig->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride));
 	}
 
 	HRESULT WINAPI DrawIndexedPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT MinVertexIndex, UINT NumVertices, UINT PrimitiveCount, CONST void* pIndexData, D3DFORMAT IndexDataFormat, CONST void* pVertexStreamZeroData, UINT VertexStreamZeroStride)
 	{
+		if (stopdraw)
+			return D3D_OK;
+
 		WRAPCALL(orig->DrawIndexedPrimitiveUP(PrimitiveType, MinVertexIndex, NumVertices, PrimitiveCount, pIndexData, IndexDataFormat, pVertexStreamZeroData, VertexStreamZeroStride));
 	}
 
@@ -806,8 +816,18 @@ public:;
 		WRAPCALL(orig->GetVertexDeclaration(ppDecl));
 	}
 
+	DWORD old_FVF;
 	HRESULT WINAPI SetFVF(DWORD FVF)
 	{
+		if (g_hideUI && (FVF == 0x1c4)) {
+			stopdraw = true;
+		}
+		else {
+			stopdraw = false;
+		}
+		if (FVF != old_FVF) {
+			old_FVF = FVF;
+		}
 		WRAPCALL(orig->SetFVF(FVF));
 	}
 

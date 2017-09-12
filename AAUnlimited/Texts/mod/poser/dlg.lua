@@ -124,6 +124,14 @@ local function updatecurrentcharacter(_, index)
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
+local function update_showui()
+	if _M.visible and #charamgr.characters > 0 then
+		SetHideUI(true)
+	else
+		SetHideUI(false)
+	end
+end
+
 local function updatecharacterlist()
 	log.spam("Updating character list")
 	local cur
@@ -136,6 +144,7 @@ local function updatecharacterlist()
 	end
 	characterlist.setlist(list)
 	characterlist.value = cur
+	update_showui()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
 
@@ -675,11 +684,13 @@ function _M.togglevisible()
 			v:show()
 		end
 		_M.visible = true
+		update_showui()
 	else
 		for _,v in ipairs(dialogs) do
 			v:hide()
 		end
 		_M.visible = false
+		update_showui()
 	end
 end
 

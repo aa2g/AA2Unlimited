@@ -294,6 +294,10 @@ void Lua::bindLua() {
 	_BINDING["GetGameTick"] = LUA_LAMBDA({
 		s.push(GameTick::tick);
 	});
+	_BINDING["SetHideUI"] = LUA_LAMBDA({
+		Render::g_hideUI = s.get(1);
+	});
+
 	_BINDING["GetGameHwnd"] = LUA_LAMBDA({
 		s.push((DWORD)(*GameTick::hwnd));
 	});
