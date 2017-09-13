@@ -208,7 +208,7 @@ end
 function _M.skeleton(char, pose)
 	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))
 	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(char.m_charData.m_figure)) & 0xff })
-	char:Skeleton(pp, xa, pose or 0)
+	char:Skeleton(pp, xa, pose or 0, 0, 0)
 end
 
 

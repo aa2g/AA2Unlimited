@@ -129,9 +129,11 @@ extern DWORD g_anim_data[25][10];
 		//__debugbreak();
 		const char *a = _gl.get(2);
 		const char *b = _gl.get(3);
+		int c = _gl.get(4);
+		int d = _gl.get(5);
 		std::wstring aw = General::utf8.from_bytes(a);
 		std::wstring bw = General::utf8.from_bytes(b);
-		return _gl.push(_self->Skeleton(aw.c_str(),bw.c_str(),_gl.get(4),0,0)).one;
+		return _gl.push(_self->Skeleton(aw.c_str(),bw.c_str(),_gl.get(4),c,d)).one;
 	});
 	LUA_METHOD(Despawn, {
 		_gl.push(_self->Despawn());

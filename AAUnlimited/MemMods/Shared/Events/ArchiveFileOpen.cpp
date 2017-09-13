@@ -48,12 +48,17 @@ ExtClass::XXFile* __stdcall CallOpenXX(void *_this, wchar_t **name, void *ppload
 {
 	ExtClass::XXFile *retv;
 	__asm {
-		lea ecx, [_this]
+/*		lea ecx, [_this]
 		push dword ptr[ecx+16]
 		push dword ptr[ecx+12]
 		push dword ptr[ecx+8]
 		push dword ptr[ecx+4]
-		mov ecx, [ecx]
+		mov ecx, [ecx]*/
+		push a
+		push file
+		push pploadclass
+		push name
+		mov ecx, _this
 		call gonext
 		jmp skip
 gonext:

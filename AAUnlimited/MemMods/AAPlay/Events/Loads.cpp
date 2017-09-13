@@ -22,6 +22,7 @@ using namespace ExtClass;
 static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
+static DWORD OrigSkeletonMale, OrigSkeletonFemale;
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
@@ -52,7 +53,7 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 }
 
 // wraps the calls to original load character events
-DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a4, BYTE partial) {
+DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD cloth, DWORD a3, DWORD a4, DWORD partial) {
 	loc_loadingCharacter = true;
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 	Poser::LoadCharacter(loadCharacter);
@@ -63,13 +64,19 @@ DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a
 	DWORD retv;
 
 	__asm {
-		lea eax, [who]
+/*		lea eax, [who]
 		push dword ptr [eax+20]
 		push dword ptr [eax+16]
 		push dword ptr [eax+12]
 		push dword ptr [eax+8]
 		mov ecx, [eax+4]
-		call dword ptr [eax]
+		call dword ptr [eax]*/
+		push partial
+		push a4
+		push a3
+		push cloth
+		mov ecx, _this
+		call dword ptr[who]
 		mov retv, eax
 	}
 
@@ -80,7 +87,7 @@ DWORD __stdcall CallOrigLoad(DWORD who, void *_this, BYTE cloth, BYTE a3, BYTE a
 }
 
 // wraps the calls to original load character events
-DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
+DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWORD a, DWORD b) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 	Poser::UpdateCharacter(loadCharacter);
 
@@ -91,11 +98,15 @@ DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
 	DWORD retv;
 
 	__asm {
-		lea eax, [who]
+/*		lea eax, [who]
 		push dword ptr[eax + 12]
 		push dword ptr[eax + 8]
 		mov ecx, [eax + 4]
-		call dword ptr[eax]
+		call dword ptr[eax]*/
+		push b
+		push a
+		mov ecx, _this
+		call dword ptr[who]
 		mov retv, eax
 	}
 
@@ -105,7 +116,7 @@ DWORD __stdcall CallOrigUpdate(DWORD who, void *_this, BYTE a, BYTE b) {
 	return retv;
 }
 
-DWORD __stdcall CallOrigDespawn(DWORD who, void *_this) {
+DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 
 	if(!loc_loadingCharacter)
@@ -114,15 +125,46 @@ DWORD __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	DWORD retv;
 
 	__asm {
-		lea eax, [who]
+/*		lea eax, [who]
 		mov ecx, [eax + 4]
-		call dword ptr[eax]
+		call dword ptr[eax]*/
+		mov ecx, _this
+		call dword ptr[who]
 		mov retv, eax
 	}
 
 	if (!loc_loadingCharacter) {
 		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
+	}
+
+	return retv;
+}
+
+DWORD  __declspec(noinline) __stdcall CallOrigSkeleton(DWORD who, void *_this, wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) {
+	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+	std::string pp_utf8(General::utf8.to_bytes(pp));
+	std::string xa_utf8(General::utf8.to_bytes(xa));
+
+	LUA_EVENT_NORET("char_skeleton", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
+
+	DWORD retv;
+	__asm {
+/*		lea eax, [who]
+		push dword ptr[eax + 24]
+		push dword ptr[eax + 20]
+		push dword ptr[eax + 16]
+		push dword ptr[eax + 12]
+		push dword ptr[eax + 8]
+		mov ecx, [eax + 4]*/
+		push z1
+		push z0
+		push pose
+		push xa
+		push pp
+		mov ecx, _this
+		call dword ptr [who]
+		mov retv, eax
 	}
 
 	return retv;
@@ -171,10 +213,15 @@ class HiPolyLoader {
 public:;
 virtual BYTE LoadMale(BYTE a2, BYTE a3, BYTE a4, BYTE a5) { return CallOrigLoad(OrigLoadMale, this, a2, a3, a4, a5); }
 virtual BYTE LoadFemale(BYTE a2, BYTE a3, BYTE a4, BYTE a5) { return CallOrigLoad(OrigLoadFemale, this, a2, a3, a4, a5); }
+
 virtual BYTE UpdateMale(BYTE a2, BYTE a3) { return CallOrigUpdate(OrigUpdateMale, this, a2, a3); }
 virtual BYTE UpdateFemale(BYTE a2, BYTE a3) { return CallOrigUpdate(OrigUpdateFemale, this, a2, a3); }
+
 virtual BYTE DespawnMale() { return CallOrigDespawn(OrigDespawnMale, this); }
 virtual BYTE DespawnFemale() { return CallOrigDespawn(OrigDespawnFemale, this); }
+
+virtual BYTE SkeletonMale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigSkeleton(OrigSkeletonMale, this, pp,xa,pose,z0,z1); }
+virtual BYTE __thiscall SkeletonFemale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigSkeleton(OrigSkeletonFemale, this, pp, xa, pose, z0, z1); }
 };
 
 void HiPolyLoadsInjection() {
@@ -206,7 +253,17 @@ void HiPolyLoadsInjection() {
 	eye += General::GameBase;
 
 	// patch the vtable, save original pointers
+#define GET_VT(i,n,j) \
+	Orig ## n ## Male = PatchIAT((void*)(male+(i-1)*4), fns[j*2]); \
+	Orig ## n ## Female = PatchIAT((void*)(female + (i - 1) * 4), fns[j * 2 + 1]);
 
+	GET_VT(1, Load, 0);
+	GET_VT(2, Update, 1);
+	GET_VT(4, Despawn, 2);
+	GET_VT(9, Skeleton, 3);
+#undef GET_VT
+
+/*
 	// #0 unused
 	// #1
 	OrigLoadMale = PatchIAT((void*)male, fns[0]);
@@ -221,7 +278,10 @@ void HiPolyLoadsInjection() {
 	OrigDespawnMale = PatchIAT((void*)(male + 12), fns[4]);
 	OrigDespawnFemale = PatchIAT((void*)(female + 12), fns[5]);
 
-	// #5 and more unused
+	// #6
+	// #7
+	// #8 unused
+*/
 
 	// inject calls in place of skirt/boob queries
 	Hook((BYTE*)boobs,
