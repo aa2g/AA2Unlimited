@@ -173,11 +173,6 @@ namespace Shared {
 		ExtClass::CharacterStruct::Models model;
 		model = General::GetModelFromName(xxFile->m_name);
 
-		// Leaving skirts out of preset sliders was an old oversight.
-		// Thus let's cheat and consider all the body bones in the skirt
-		if (model == ExtClass::CharacterStruct::SKIRT)
-			model = ExtClass::CharacterStruct::BODY;
-
 		if(model <= ExtClass::CharacterStruct::N_MODELS) {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderFrameRuleMap(model);
 			if(saveMods) {
@@ -299,8 +294,9 @@ namespace Shared {
 			//find model type of xx file and slider rule if existant
 			const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
 
-			ExtClass::CharacterStruct::Models model;
+			ExtClass::CharacterStruct::Models model, realModel;
 			model = General::GetModelFromName(xxFile->m_name);
+			realModel = model;
 
 			// Leaving skirts out of preset sliders was an old oversight.
 			// Thus let's cheat and consider all the body bones in the skirt
@@ -362,7 +358,9 @@ namespace Shared {
 								Shared::Slider::ModifySRT(&scales,&vecRot,&trans,Shared::Slider::ADD,mod);
 							}
 						}
-						if (makeSave) {
+						// Save parent frame data for use of Maker body sliders updates
+						// Skip saving parent frame data when disguising skirt meshes as body meshes
+						if (makeSave && realModel == model) {
 							bool added = false;
 							for(auto& elem : g_xxBoneParents[model]) {
 								if(elem.boneName == name) {

@@ -100,20 +100,7 @@ namespace Poser {
 			delete it->second;
 		}
 	}
-	/*
-	void PoserController::SetHidden(const char* name, bool hidden) {
-		ExtClass::Frame** frame = CurrentCharacter()->m_character->m_bonePtrArray;
-		ExtClass::Frame** arrayEnd= CurrentCharacter()->m_character->m_bonePtrArrayEnd;
-		while (frame < arrayEnd) {
-			if (*frame != nullptr) {
-				if (strstr((*frame)->m_name, name)) {
-					SetHiddenFrame(*frame, hidden);
-				}
-			}
-			frame++;
-		}
-	}
-	*/
+
 	PoserController::PoserController() :
 		m_isActive(false) {
 	}
@@ -137,17 +124,17 @@ namespace Poser {
 	}
 
 	void PoserController::SliderInfo::Apply() {
-		if (frame[0] && frame[1]) {
+		if (frame) {
 			//note that somehow those frame manipulations dont quite work as expected;
 			//by observation, rotation happens around the base of the bone whos frame got manipulated,
 			//rather than the tip.
 			//so to correct that, we gotta translate back
 
-			ExtClass::Frame* origFrame = &frame[1]->m_children[0];
+			ExtClass::Frame* origFrame = frame->m_children;
 
 			D3DMATRIX transMatrix;
 			(*Shared::D3DXMatrixTranslation)(&transMatrix, translate.value[X], translate.value[Y], translate.value[Z]);
-			frame[0]->m_matrix1 = transMatrix;
+			//frame[0]->m_matrix5 = transMatrix;
 
 			D3DMATRIX rotMatrix;
 			//(*Shared::D3DXMatrixRotationYawPitchRoll)(&rotMatrix, targetSlider->rotate.value[Y], targetSlider->rotate.value[X], targetSlider->rotate.value[Z]);
@@ -167,8 +154,8 @@ namespace Poser {
 			resultMatrix._41 += translations.x;
 			resultMatrix._42 += translations.y;
 			resultMatrix._43 += translations.z;
-
-			frame[1]->m_matrix1 = resultMatrix;
+			(*Shared::D3DXMatrixMultiply)(&transMatrix, &resultMatrix, &transMatrix);
+			frame->m_matrix1 = transMatrix;
 		}
 	}
 
@@ -197,7 +184,6 @@ namespace Poser {
 	}
 
 	static const char prefixTrans[]{ "pose_tr_" };
-	static const char prefixRot[]{ "pose_rot_" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 
@@ -214,7 +200,7 @@ namespace Poser {
 			m_loadCharacter->FrameModFace(xxFile);
 			modded = true;
 		}
-		else if (model == ExtClass::CharacterStruct::SKIRT) {
+		else if (model == ExtClass::CharacterStruct::SKIRT && General::IsAAPlay) {
 			m_loadCharacter->FrameModSkirt(xxFile);
 			modded = true;
 		}
@@ -225,7 +211,7 @@ namespace Poser {
 					ExtClass::Bone* bone = &frame->m_bones[i];
 					ExtClass::Frame* boneFrame = bone->GetFrame();
 					if (boneFrame != NULL && strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
-						bone->SetFrame(&boneFrame->m_children[0].m_children[0]);
+						bone->SetFrame(boneFrame->m_children);
 					}
 				}
 			});
@@ -289,22 +275,19 @@ namespace Poser {
 		}
 	}
 
-	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** transFrame, ExtClass::Frame** rotFrame) {
+	inline void FrameMod(ExtClass::Frame** origFrame, ExtClass::Frame** modFrame) {
 		ExtClass::Frame* frame = *origFrame;
-		*transFrame = frame;
+		*modFrame = frame;
 		FrameModInsertFrame(&frame, prefixTrans);
-		*rotFrame = frame;
-		FrameModInsertFrame(&frame, prefixRot);
 		*origFrame = frame;
 	}
 
 	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter) {
 		PoserController::SliderInfo* slider;
-		ExtClass::Frame* transFrame;
-		ExtClass::Frame* rotFrame;
+		ExtClass::Frame* modFrame;
 		size_t len = filter? strlen(filter) : 0;
 
-		tree->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame, &source, &filter, &len](ExtClass::Frame* frame) {
+		tree->EnumTreeLevelOrder([this, &slider, &modFrame, &source, &filter, &len](ExtClass::Frame* frame) {
 			// limit the frames we work on based on a starts-with filter criteria
 			// Filter out nipple bones as they glitch on breast animations
 			if (!filter || strncmp(frame->m_name, filter, len) == 0 && strncmp(frame->m_name, "a01_J_Chiku", 11) != 0) {
@@ -333,10 +316,9 @@ namespace Poser {
 				// * has not been claimed yet
 				// * we're updating this model
 				if (slider->source == source) {
-					FrameMod(&frame, &transFrame, &rotFrame);
+					FrameMod(&frame, &modFrame);
 
-					slider->frame[0] = transFrame;
-					slider->frame[1] = rotFrame;
+					slider->frame = modFrame;
 					slider->Apply();
 				}
 				slider = nullptr;
@@ -351,11 +333,10 @@ namespace Poser {
 
 		if (world) {
 			PoserController::SliderInfo* slider;
-			ExtClass::Frame* transFrame;
-			ExtClass::Frame* rotFrame;
+			ExtClass::Frame* modFrame;
 
 			FrameModTree(world, ExtClass::CharacterStruct::Models::SKELETON, "a01");
-			root->EnumTreeLevelOrder([this, &slider, &transFrame, &rotFrame](ExtClass::Frame* frame) {
+			root->EnumTreeLevelOrder([this, &slider, &modFrame](ExtClass::Frame* frame) {
 				bool isProp = false;
 				if (frame->m_nSubmeshes) {
 					isProp = true;
@@ -383,10 +364,9 @@ namespace Poser {
 					// * has not been claimed yet
 					// * we're updating this model
 					if (slider->source == ExtClass::CharacterStruct::SKELETON) {
-						FrameMod(&frame, &transFrame, &rotFrame);
+						FrameMod(&frame, &modFrame);
 
-						slider->frame[0] = transFrame;
-						slider->frame[1] = rotFrame;
+						slider->frame = modFrame;
 						slider->Apply();
 					}
 					slider = nullptr;

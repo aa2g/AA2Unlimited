@@ -107,6 +107,14 @@ public:
 		LUA_BIND(m_renderFlag2)
 		LUA_BIND(m_lightData)
 		LUA_BINDP(m_unkflags)
+		LUA_METHOD(FindFrame, {
+			Frame* child = nullptr;
+			if (_gl.top() == 2) {
+				child = _self->FindFrame(_gl.get(2));
+			}
+			_gl.push(child);
+			return 1;
+		})
 #undef LUA_CLASS
 	};
 };
