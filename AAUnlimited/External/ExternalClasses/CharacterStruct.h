@@ -169,6 +169,7 @@ extern DWORD g_anim_data[25][10];
 	LUA_BIND(m_xxSkeleton)
 	LUA_BIND(m_xxBody)
 	LUA_BIND(m_xxLegs)
+	LUA_BIND(m_xxSkirt)
 	LUA_BINDARRE(m_bonePtrArray,,_self->m_bonePtrArrayEnd-_self->m_bonePtrArray)
 	LUA_BIND(m_hStats)
 

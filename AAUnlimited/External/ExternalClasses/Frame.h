@@ -99,6 +99,15 @@ public:
 		LUA_BINDARREP(m_bones,,_self->m_nBones)
 		LUA_BIND(m_xxPartOf)
 		LUA_BIND(m_renderFlag)
+
+		LUA_METHOD(FindFrame, {
+			Frame* child = nullptr;
+			if (_gl.top() == 2) {
+				child = _self->FindFrame(_gl.get(2));
+			}
+			_gl.push(child);
+			return 1;
+		})
 #undef LUA_CLASS
 	};
 };
