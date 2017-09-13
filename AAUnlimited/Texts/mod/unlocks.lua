@@ -223,6 +223,7 @@ local function apply_patchset()
 	end
 end
 
+local send_msg
 function _M:load()
 	mod_load_config(self, options)
 	local avoid = {
