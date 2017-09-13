@@ -1400,6 +1400,18 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 2 } },
 				-0.05f, 0.05f
 			},
+			{ TEXT("Glasses vertical"),
+				{ { CharacterStruct::FACE, 10 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Glasses horizontal"),
+				{ { CharacterStruct::FACE, 11 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Glasses rotation"),
+				{ { CharacterStruct::FACE, 12 } },
+				-1.0f, 1.0f
+			},
 			/*{ TEXT("Arm Thickness"),
 				{ { CharacterStruct::SKELETON, 3 },{ CharacterStruct::SKELETON, 4 } },
 				-0.5f, 1.0f
@@ -1420,8 +1432,8 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.4f, 0.2f
 			},
 			{ TEXT("Foot Length"),
-			{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
-				-0.15f, 0.2f
+				{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
+					-0.15f, 0.2f
 			},
 			{ TEXT("Foot Width"),
 				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
@@ -1435,6 +1447,26 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Ribs height"),
+				{
+					{ CharacterStruct::SKELETON, 56 },
+					{ CharacterStruct::SKELETON, 57 },
+					{ CharacterStruct::SKELETON, 58 }
+					//{ CharacterStruct::SKELETON, 58 }
+				},
+				1.0f, 1.5f
+			},
+			//{ TEXT("Hip height"),
+			//	{
+			//		//{ CharacterStruct::SKELETON, 59 },
+			//		{ CharacterStruct::SKELETON, 60 },
+			//		//{ CharacterStruct::SKELETON, 61 },
+			//		{ CharacterStruct::SKELETON, 62 },
+			//		{ CharacterStruct::SKELETON, 63 }					
+			//		//{ CharacterStruct::SKELETON, 58 }
+			//	},
+			//	0.8f, 1.2f
+			//},
 			{ TEXT("Bottom Bone Width"),
 				{ { CharacterStruct::BODY, 0 } },
 				-0.5f, 0.5f
