@@ -179,12 +179,32 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,62, TEXT("a01_J_UplegL_010"),	{ 0,1,0, 0,0,0, 0,0,0 },		Slider::DIVIDE, AAUCardData::MODIFY_FRAME }, //left thigh height
 			{ ExtClass::CharacterStruct::SKELETON,63, TEXT("a01_J_UplegR_010"),	{ 0,1,0, 0,0,0, 0,0,0 },		Slider::DIVIDE, AAUCardData::MODIFY_FRAME }, //right thigh height
 
+			{ ExtClass::CharacterStruct::SKELETON,64, TEXT("a01_J_ArmL_00"),{ 0,0,0, 0,0,0, 0.15f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,65, TEXT("a01_J_ArmR_00"),{ 0,0,0, 0,0,0, -0.15f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,66, TEXT("a01_J_ArmL_00"),{ 0.15f,0.15f,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,67, TEXT("a01_J_ArmR_00"),{ 0.15f,0.15f,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,68, TEXT("a01_J_ArmL_01"),{ 0.15f,0.15f,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,69, TEXT("a01_J_ArmR_01"),{ 0.15f,0.15f,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,70, TEXT("a01_N_ribon_00"),{ 0,0,0, 0,0,0, 0,0,0.1f },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,71, TEXT("a01_J_MuneL_01"),{ 0.15f,0.15f,0.15f, 0,0,0, 0.1f,0,0.04f },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,72, TEXT("a01_J_MuneR_01"),{ 0.15f,0.15f,0.15f, 0,0,0, -0.1f,0,0.04f },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+
+			{ ExtClass::CharacterStruct::SKELETON,73, TEXT("a01_J_SiriL_010"),{ 0.15f,0.15f,0.15f, 0,0,0, 0.15f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,74, TEXT("a01_J_SiriR_010"),{ 0.15f,0.15f,0.15f, 0,0,0, -0.15f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,75, TEXT("a01_J_UplegL_010"),{ 0,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,76, TEXT("a01_J_UplegR_010"),{ 0,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,77, TEXT("a01_J_UplegDDL_010"),{ 0,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,78, TEXT("a01_J_UplegDDR_010"),{ 0,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,79, TEXT("a01_J_UplegDDL_020"),{ 0,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,80, TEXT("a01_J_UplegDDR_020"),{ 0,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,81, TEXT("a01_J_Kokan_010"),{ 0.1f,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+
 			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Spin_020"),	{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest width
 			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Spin_020"),	{ 0,0,1, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest thickness
 			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Spin_010"),	{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //waist width
 			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Spin_010"),	{ 0,0,1, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //waist thickness
 			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Kosi_010"),	{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip width
-			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Kosi_010"),	{ 0,0,1, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
+			{ ExtClass::CharacterStruct::SKELETON,99, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
 		},
 		{
 			//BODY
@@ -201,19 +221,57 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,10, TEXT("a01_J_TekubiL_01"),	{ 0,1,1, 0,0,0, 0,-15.795f,0.346239984f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::BODY,11, TEXT("a01_J_TekubiR_01"),	{ 0,1,1, 0,0,0, 0,-15.795f,0.346239984f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::BODY,12, TEXT("a01_J_ArmL_02"),	{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
-			{ ExtClass::CharacterStruct::BODY,13, TEXT("a01_J_ArmR_02"),	{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,13, TEXT("a01_J_ArmR_02"),{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::BODY,14, TEXT("a01_J_Spin_020"),{ 0.15f,0,0.06f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,15, TEXT("a01_J_Kosi_010"),{ 0.15f,0,0.06f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::BODY,16, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,17, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,18, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,19, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::BODY,20, TEXT("a01_J_Spin_020"),{ 0,0.2f,0, 0,0,0, 0,-3.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,21, TEXT("a01_J_Kosi_010"),{ 0,0.2f,0, 0,0,0, 0,-2.0f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,22, TEXT("a01_J_Spin_010"),{ 0,0.1f,0, 0,0,0, 0,-1.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,23, TEXT("a01_J_Spin_010"),{ 0,0,0, 0,0,0, 0,1.0f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+		},
+		{
+			//LEGS
+			{ ExtClass::CharacterStruct::LEGS,0, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,1, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,2, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,3, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,4, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,5, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 		},
 		{
 			//HAIR_FRONT
+			{ ExtClass::CharacterStruct::HAIR_FRONT,0, TEXT("A00_N_kamiF"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,1, TEXT("A00_N_kamiFtop"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,2, TEXT("A00_N_kamiF"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,3, TEXT("A00_N_kamiFtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//HAIR_SIDE
+			{ ExtClass::CharacterStruct::HAIR_SIDE,0, TEXT("A00_N_kamiS"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_SIDE,1, TEXT("A00_N_kamiStop"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_SIDE,2, TEXT("A00_N_kamiS"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_SIDE,3, TEXT("A00_N_kamiStop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//HAIR_BACK
+			{ ExtClass::CharacterStruct::HAIR_BACK,0, TEXT("A00_N_kamiB"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,1, TEXT("A00_N_kamiBtop"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,2, TEXT("A00_N_kamiB"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,3, TEXT("A00_N_kamiBtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//HAIR_EXT
+			{ ExtClass::CharacterStruct::HAIR_EXT,0, TEXT("A00_N_kamiO"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_EXT,1, TEXT("A00_N_kamiOtop"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_EXT,2, TEXT("A00_N_kamiO"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_EXT,3, TEXT("A00_N_kamiOtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//FACE_SLIDERS

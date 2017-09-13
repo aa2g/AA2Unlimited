@@ -1376,10 +1376,6 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			float min;
 			float max;
 		} sliderIds[] = {
-			{ TEXT("Mouth Width"), 
-				{ { CharacterStruct::FACE, 0 } }, 
-				-0.9f, 0.5f 
-			},
 			{ TEXT("Total Body Height"),
 				{ { CharacterStruct::SKELETON, 0 } },
 				-0.9f, 1.0f 
@@ -1388,6 +1384,77 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 1 } }, 
 				-0.9f, 1.0f
 			},
+			{ TEXT("Hair Size"),
+			{ { CharacterStruct::HAIR_FRONT, 0 },{ CharacterStruct::HAIR_SIDE, 0 },
+			{ CharacterStruct::HAIR_BACK, 0 } ,{ CharacterStruct::HAIR_EXT, 0 },
+			{ CharacterStruct::HAIR_FRONT, 1 },{ CharacterStruct::HAIR_SIDE, 1 },
+			{ CharacterStruct::HAIR_BACK, 1 } ,{ CharacterStruct::HAIR_EXT, 1 } },
+			-1, 1
+			},
+			{ TEXT("Hair Height"),
+			{ { CharacterStruct::HAIR_FRONT, 2 },{ CharacterStruct::HAIR_SIDE, 2 },
+			{ CharacterStruct::HAIR_BACK, 2 } ,{ CharacterStruct::HAIR_EXT, 2 },
+			{ CharacterStruct::HAIR_FRONT, 3 },{ CharacterStruct::HAIR_SIDE, 3 },
+			{ CharacterStruct::HAIR_BACK, 3 } ,{ CharacterStruct::HAIR_EXT, 3 } },
+			-2, 2
+			},
+			{ TEXT("Chest Size"),
+			{ { CharacterStruct::BODY, 14 },{ CharacterStruct::SKELETON, 70 },
+			{ CharacterStruct::SKELETON, 71 } ,{ CharacterStruct::SKELETON, 72 } },
+			-0.6f, 0.6f
+			},
+			{ TEXT("Chest Height"),
+			{ { CharacterStruct::BODY, 20 } },
+			-1, 1
+			},
+			{ TEXT("Arm 00 distance"),
+			{ { CharacterStruct::SKELETON, 64 },
+			{ CharacterStruct::SKELETON, 65 }, },
+			-0.4f, 0.3f
+			},
+			{ TEXT("Arm 00 scale"),
+			{ { CharacterStruct::SKELETON, 66 },
+			{ CharacterStruct::SKELETON, 67 }, },
+			-0.4f, 0.3f
+			},
+			{ TEXT("Waist Height"),
+			{ { CharacterStruct::BODY, 22 } },
+			-1, 1
+			},
+			{ TEXT("Waist Position"),
+			{ { CharacterStruct::BODY, 23 } },
+			-1, 1
+			},
+			{ TEXT("Hip Size"),
+			{ { CharacterStruct::BODY, 15 },{ CharacterStruct::SKELETON, 73 },
+			{ CharacterStruct::SKELETON, 74 } ,{ CharacterStruct::SKELETON, 81 } },
+			-0.6f, 0.6f
+			},
+			{ TEXT("Hip Height"),
+			{ { CharacterStruct::BODY, 21 } },
+			-1, 1
+			},
+			{ TEXT("Leg Distance"),
+			{ { CharacterStruct::SKELETON, 75 },
+			{ CharacterStruct::SKELETON, 76 } ,{ CharacterStruct::SKELETON, 77 },
+			{ CharacterStruct::SKELETON, 78 } ,{ CharacterStruct::SKELETON, 79 },
+			{ CharacterStruct::SKELETON, 80 } },
+			-0.5f, 0.5f
+			},
+			{ TEXT("Thighs Thickness 1"),
+			{ { CharacterStruct::BODY, 16 },{ CharacterStruct::BODY, 18 },
+			{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS,2 } },
+			-1.0f, 1.0f
+			},
+			{ TEXT("Thighs Thickness 2"),
+			{ { CharacterStruct::BODY, 17 },{ CharacterStruct::BODY, 19 },
+			{ CharacterStruct::LEGS, 1 },{ CharacterStruct::LEGS, 3 } },
+			-1.0f, 1.0f
+			},
+			{ TEXT("Underleg Thickness 1"),
+			{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 } },
+			-0.5f, 0.5f
+			},
 			{ TEXT("Total Body Thickness"),
 				{ { CharacterStruct::SKELETON, 2 } }, 
 				-0.9f, 1.0f
@@ -1395,6 +1462,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Total Ear Height"),
 				{ { CharacterStruct::FACE, 1 } },
 				-0.05f, 0.05f
+			},
+			{ TEXT("Mouth Width"),
+			{ { CharacterStruct::FACE, 0 } },
+			-0.9f, 0.5f
 			},
 			{ TEXT("Mouth Height"),
 				{ { CharacterStruct::FACE, 2 } },
