@@ -200,7 +200,7 @@ namespace Poser {
 			m_loadCharacter->FrameModFace(xxFile);
 			modded = true;
 		}
-		else if (model == ExtClass::CharacterStruct::SKIRT) {
+		else if (model == ExtClass::CharacterStruct::SKIRT && General::IsAAPlay) {
 			m_loadCharacter->FrameModSkirt(xxFile);
 			modded = true;
 		}
