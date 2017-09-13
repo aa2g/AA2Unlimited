@@ -1,6 +1,7 @@
 --@INFO Opengl renderer (needs game restart)
 
 local _M = {}
+local opts
 
 local function setvar(var,val)
 	SetEnvironmentVariableA(var,val)
