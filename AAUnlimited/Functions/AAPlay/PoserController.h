@@ -40,9 +40,7 @@ namespace Poser {
 
 			SliderInfo()
 				: guide(nullptr) {
-				frame.resize(2);
-				frame[0] = nullptr;
-				frame[1] = nullptr;
+				frame = nullptr;
 				Reset();
 				sliding = false;
 				source = ExtClass::CharacterStruct::INVALID;
@@ -51,7 +49,7 @@ namespace Poser {
 			void Apply();
 
 			ExtClass::CharacterStruct::Models source;
-			std::vector<ExtClass::Frame*> frame;
+			ExtClass::Frame* frame;
 			ExtClass::Frame* guide;
 
 			bool sliding;
@@ -253,7 +251,7 @@ namespace Poser {
 					((float*)(&_self->rotation.data))[_idx] = _gl.get(3); \
 				});
 				GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, frame, {
-					_gl.push(_self->frame[1]->m_children);
+					_gl.push(_self->frame->m_children);
 					return 1;
 				});
 			}
