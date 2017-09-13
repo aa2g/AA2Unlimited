@@ -103,11 +103,12 @@ bUseMKIII = true
 bUseAA2Face = true
 
 mods = {
---	{ "fakereg" },
+	{ "unlocks" },
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "facecam" }, 
 	{ "geass"},
+	{ "jizou"},
 	{ "borderless" },
 	{ "launcher" },
 }

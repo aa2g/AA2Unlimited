@@ -2,6 +2,10 @@
 
 require "memory"
 
+local opts = {
+	{"level", 1, "Force jp locale: %l|Never|Auto|Always|" }
+}
+
 local function patch_aaplay()
 	g_poke(0x001BEBE3, "\x80");
 	g_poke(0x001C208C, "\x80");
@@ -25,15 +29,19 @@ end
 local _M={}
 
 function _M:load()
+	mod_load_config(self, opts)
 	-- TODO, make level configurable
-	local level = 1
 	-- not emulated, nor japanese system (langid 17)
-	if (level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
+	if (opts.level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
 		SetThreadLocale(1041)
 	end
 end
 
 function _M:unload()
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Fixlocale settings")
 end
 
 return _M

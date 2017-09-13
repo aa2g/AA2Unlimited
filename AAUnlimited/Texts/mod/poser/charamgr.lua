@@ -165,40 +165,49 @@ function _M.removecharacter(character)
 	if _M.current and _M.current.struct == character then
 		setcurrentcharacter(dummycharacter)
 	end
+
+	local removed
 	for k,v in pairs(characters) do
 		if v.struct == character then
 			table.remove(characters, k)
+			removed = v
 			break
 		end
 	end
+	if not removed then return end
 	log.spam("Poser: We have %d characters", #characters)
 	characterschanged()
-	if character.spawned then return end
+	assert(removed.spawned ~= nil)
+	if removed.spawned then return end
 	charcount = charcount - 1
+	assert(charcount >= 0)
+	log.spam("Poser: charcount %d", charcount)
 	-- the legit character despawned, this means the scene is ending - despawn all our injected characters, too
 	if charcount == 0 then
 		while #characters > 0 do
+			--local tch = characters[#characters-1]
+			local tch = characters[1]
 			-- all characters remaining must be spawned ones
-			assert(characters[1].spawned)
-			characters[1].struct:Despawn()
+			assert(tch.spawned)
+			tch.struct:Despawn()
 		end
 	end
 end
 
 function _M.spawn(seat,cloth,pose)
+	assert(not _M.is_spawning)
 	_M.is_spawning = true
 	local ch = GetCharacter(seat)
 	assert(ch)
 	ch:Spawn(cloth or 1,#characters,0,0)
-	ch:SetAnimData(-1,0,1,1,1,1,0,1,0)
+	ch:SetAnimData(0,0,1,1,1,1,0,1,1)
 	_M.skeleton(ch, pose)
 	_M.is_spawning = false
 end
 
 function _M.skeleton(char, pose)
-	local pp = host_path("data", "jg2e01_00_00.pp")
-	-- TODO: xa name depends on some things (editor/play, gender ..), hardcoded for female clothing screen for now
-	local xa = host_path("data", "HAE00_00_00_00.xa")
+	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))
+	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(char.m_charData.m_figure)) & 0xff })
 	char:Skeleton(pp, xa, pose or 1)
 end
 
