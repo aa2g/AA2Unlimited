@@ -263,8 +263,10 @@ namespace Shared {
 			//HAIR_BACK
 			{ ExtClass::CharacterStruct::HAIR_BACK,0, TEXT("A00_N_kamiB"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 			{ ExtClass::CharacterStruct::HAIR_BACK,1, TEXT("A00_N_kamiBtop"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
-			{ ExtClass::CharacterStruct::HAIR_BACK,2, TEXT("A00_N_kamiB"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
-			{ ExtClass::CharacterStruct::HAIR_BACK,3, TEXT("A00_N_kamiBtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,2, TEXT("A00_N_kamiBtop00"),{ 1,1,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,3, TEXT("A00_N_kamiB"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,4, TEXT("A00_N_kamiBtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_BACK,5, TEXT("A00_N_kamiBtop00"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//HAIR_EXT
