@@ -1447,12 +1447,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Thighs Thickness 1"),
 				{ { CharacterStruct::BODY, 16 },{ CharacterStruct::BODY, 18 },
-				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 } },
+				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 } },
 				-1.0f, 1.0f
 			},
 			{ TEXT("Thighs Thickness 2"),
 				{ { CharacterStruct::BODY, 17 },{ CharacterStruct::BODY, 19 },
-				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 } },
+				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 } },
 				-1.0f, 1.0f
 			},
 			{ TEXT("Zetthigh Ryouiki"),
