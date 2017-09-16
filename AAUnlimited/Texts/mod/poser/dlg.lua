@@ -171,9 +171,9 @@ local hideframebutton = iup.button {
 	end,
 }
 
-------------
+-- -----------------
 -- Char spawning
-------------
+-- -----------------
 
 
 local addcharbutton = exe_type == "play" and iup.button { title = "Add", expand = "horizontal" } or {}
@@ -201,6 +201,8 @@ function addcharbutton.action()
 	function chlist.dblclick_cb()
 		return iup.CLOSE
 	end
+	
+	local pick
 	charsel = iup.dialog {
 		iup.vbox {
 			chlist,
@@ -208,15 +210,18 @@ function addcharbutton.action()
 				title = "Spawn",
 				expand = "horizontal",
 				action = function()
+					pick = chlist.value
 					return iup.CLOSE
 				end
 			},
 		}
 	}
 	charsel:popup()
-	local char = seats[tonumber(chlist.value)]
-	charamgr.spawn(char)
-	updatecharacterlist()
+	local char = seats[tonumber(pick)]
+	if char then
+		charamgr.spawn(char)
+		updatecharacterlist()
+	end
 end
 
 function removecharbutton.action()
