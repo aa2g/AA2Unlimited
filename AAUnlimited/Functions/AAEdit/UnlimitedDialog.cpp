@@ -1417,6 +1417,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
 				-0.5f, 0.5f
 			},
+			{ TEXT("Waist Thickness"),
+				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 } },
+				-1, 1
+			},
 			{ TEXT("Waist Height"),
 				{ { CharacterStruct::BODY, 22 } },
 				-1, 1
