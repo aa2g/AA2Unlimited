@@ -1376,25 +1376,126 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			float min;
 			float max;
 		} sliderIds[] = {
-			{ TEXT("Mouth Width"), 
-				{ { CharacterStruct::FACE, 0 } }, 
-				-0.9f, 0.5f 
-			},
-			{ TEXT("Total Body Height"),
-				{ { CharacterStruct::SKELETON, 0 } },
-				-0.9f, 1.0f 
-			},
-			{ TEXT("Total Body Width"),
-				{ { CharacterStruct::SKELETON, 1 } }, 
+			{ TEXT("Body Size"),
+				{ { CharacterStruct::SKELETON, 55 } },
 				-0.9f, 1.0f
 			},
-			{ TEXT("Total Body Thickness"),
-				{ { CharacterStruct::SKELETON, 2 } }, 
-				-0.9f, 1.0f
+			{ TEXT("Chest Size"),
+				{ { CharacterStruct::BODY, 14 },{ CharacterStruct::SKELETON, 42 },
+				{ CharacterStruct::SKELETON, 43 } ,{ CharacterStruct::SKELETON, 44 } },
+				-0.6f, 0.6f
 			},
-			{ TEXT("Total Ear Height"),
+			{ TEXT("Chest Height"),
+				{ { CharacterStruct::BODY, 20 } },
+				-1, 1
+			},
+			{ TEXT("Arms Size"),
+				{ { CharacterStruct::SKELETON, 40 },
+				{ CharacterStruct::SKELETON, 41 }, },
+				-0.4f, 0.3f
+			},
+			{ TEXT("Arms Distance"),
+				{ { CharacterStruct::SKELETON, 38 },
+				{ CharacterStruct::SKELETON, 39 }, },
+				-0.4f, 0.3f
+			},
+			{ TEXT("Arms Thickness"),
+				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
+				{ CharacterStruct::BODY,  7 },{ CharacterStruct::BODY,  8 },{ CharacterStruct::BODY, 9 },
+				{ CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulders Width"),
+				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulders Size"),
+				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Shoulders Height"),
+				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Waist Thickness"),
+				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 } },
+				-1, 1
+			},
+			{ TEXT("Waist Height"),
+				{ { CharacterStruct::BODY, 22 } },
+				-1, 1
+			},
+			{ TEXT("Waist Position"),
+				{ { CharacterStruct::BODY, 23 } },
+				-1, 1
+			},
+			{ TEXT("Hip Size"),
+				{ { CharacterStruct::BODY,   15 }, { CharacterStruct::SKIRT, 0 },
+				{ CharacterStruct::SKELETON, 45 },
+				{ CharacterStruct::SKELETON, 46 }, { CharacterStruct::SKELETON, 47 } },
+				-0.6f, 0.6f
+			},
+			{ TEXT("Hip Height"),
+				{ { CharacterStruct::BODY, 21 } },
+				-1, 1
+			},
+			{ TEXT("Legs Distance"),
+				{ { CharacterStruct::SKELETON, 48 },{ CharacterStruct::SKELETON, 49 },
+				{ CharacterStruct::SKELETON, 50 } ,{ CharacterStruct::SKELETON, 51 },
+				{ CharacterStruct::SKELETON, 52 } ,{ CharacterStruct::SKELETON, 53 }, },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Thighs Thickness 1"),
+				{ { CharacterStruct::BODY, 16 },{ CharacterStruct::BODY, 18 },
+				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Thighs Thickness 2"),
+				{ { CharacterStruct::BODY, 17 },{ CharacterStruct::BODY, 19 },
+				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Zetthigh Ryouiki"),
+				{ { CharacterStruct::LEGS, 6 },{ CharacterStruct::LEGS, 7 },
+				{ CharacterStruct::BODY, 24 },{ CharacterStruct::BODY, 25 } },
+				-3.0f, 3.0f
+			},
+			{ TEXT("Calves Thickness"),
+				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Head Size"),
+				{ { CharacterStruct::SKELETON, 54 } },
+				0, 3
+			},
+			{ TEXT("Hair Size"),
+				{ { CharacterStruct::HAIR_FRONT, 0 },{ CharacterStruct::HAIR_FRONT, 1 },
+				{ CharacterStruct::HAIR_SIDE, 0 },{ CharacterStruct::HAIR_SIDE, 1 },
+				{ CharacterStruct::HAIR_BACK, 0 },{ CharacterStruct::HAIR_BACK, 1 },{ CharacterStruct::HAIR_BACK, 2 },
+				{ CharacterStruct::HAIR_EXT,  0 },{ CharacterStruct::HAIR_EXT,  1 } },
+				-1, 1
+			},
+			{ TEXT("Hair Width"),
+				{ { CharacterStruct::HAIR_FRONT, 4 },{ CharacterStruct::HAIR_FRONT, 5 },
+				{ CharacterStruct::HAIR_SIDE, 4 },{ CharacterStruct::HAIR_SIDE, 5 },
+				{ CharacterStruct::HAIR_BACK, 6 },{ CharacterStruct::HAIR_BACK, 7 },{ CharacterStruct::HAIR_BACK, 8 },
+				{ CharacterStruct::HAIR_EXT,  4 },{ CharacterStruct::HAIR_EXT,  5 } },
+				-1, 1
+			},
+			{ TEXT("Hair Height"),
+				{ { CharacterStruct::HAIR_FRONT, 2 },{ CharacterStruct::HAIR_FRONT, 3 },
+				{ CharacterStruct::HAIR_SIDE, 2 },{ CharacterStruct::HAIR_SIDE, 3 },
+				{ CharacterStruct::HAIR_BACK, 3 },{ CharacterStruct::HAIR_BACK, 4 },{ CharacterStruct::HAIR_BACK, 5 },
+				{ CharacterStruct::HAIR_EXT,  2 },{ CharacterStruct::HAIR_EXT,  3 } },
+				-2, 2
+			},
+			{ TEXT("Ear Height"),
 				{ { CharacterStruct::FACE, 1 } },
 				-0.05f, 0.05f
+			},
+			{ TEXT("Mouth Width"),
+				{ { CharacterStruct::FACE, 0 } },
+				-0.9f, 0.5f
 			},
 			{ TEXT("Mouth Height"),
 				{ { CharacterStruct::FACE, 2 } },
@@ -1412,129 +1513,8 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 12 } },
 				-1.0f, 1.0f
 			},
-			/*{ TEXT("Arm Thickness"),
-				{ { CharacterStruct::SKELETON, 3 },{ CharacterStruct::SKELETON, 4 } },
-				-0.5f, 1.0f
-			},*/
-			{ TEXT("Hand Length"),
-				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 },
-				  { CharacterStruct::SKELETON, 13 },{ CharacterStruct::SKELETON, 14 } },
-				-0.4f, 0.2f
-			},
-			{ TEXT("Hand Thickness"),
-				{ { CharacterStruct::SKELETON, 48 },{ CharacterStruct::SKELETON, 49 },
-				{ CharacterStruct::SKELETON, 50 },{ CharacterStruct::SKELETON, 51 } },
-				-0.4f, 0.2f
-			},
-			{ TEXT("Hand Thickness"),
-				{ { CharacterStruct::SKELETON, 52 },{ CharacterStruct::SKELETON, 53 },
-				{ CharacterStruct::SKELETON, 54 },{ CharacterStruct::SKELETON, 55 } },
-				-0.4f, 0.2f
-			},
-			{ TEXT("Foot Length"),
-				{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
-					-0.15f, 0.2f
-			},
-			{ TEXT("Foot Width"),
-				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
-				-0.2f, 0.2f
-			},
-			{ TEXT("Eyebrow Height"),
-				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
-				-0.1f, 0.1f
-			},
-			{ TEXT("Eye Depth"),
-				{ { CharacterStruct::FACE, 5 } },
-				-0.1f, 0.1f
-			},
-			{ TEXT("Ribs height"),
-				{
-					{ CharacterStruct::SKELETON, 56 },
-					{ CharacterStruct::SKELETON, 57 },
-					{ CharacterStruct::SKELETON, 58 }
-					//{ CharacterStruct::SKELETON, 58 }
-				},
-				1.0f, 1.5f
-			},
-			//{ TEXT("Hip height"),
-			//	{
-			//		//{ CharacterStruct::SKELETON, 59 },
-			//		{ CharacterStruct::SKELETON, 60 },
-			//		//{ CharacterStruct::SKELETON, 61 },
-			//		{ CharacterStruct::SKELETON, 62 },
-			//		{ CharacterStruct::SKELETON, 63 }					
-			//		//{ CharacterStruct::SKELETON, 58 }
-			//	},
-			//	0.8f, 1.2f
-			//},
-			{ TEXT("Bottom Bone Width"),
-				{ { CharacterStruct::BODY, 0 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Bottom Bone Thickness"),
-				{ { CharacterStruct::BODY, 1 }  },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Bottom Width"),
-				{ { CharacterStruct::SKELETON, 7 } },
-				0.5f, 1.5f
-			},
-			{ TEXT("Bottom Thickness"),
-				{ { CharacterStruct::SKELETON, 8 } },
-				0.5f, 1.5f
-			},
-			{ TEXT("Lower Bottom Thickness"),
-				{ { CharacterStruct::SKELETON, 9 }, { CharacterStruct::SKELETON, 10 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Lower Bottom Width"),
-				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Thighs Width"),
-				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Thighs Height"),
-				{ { CharacterStruct::SKELETON, 38 },{ CharacterStruct::SKELETON, 39 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Thighs Thickness"),
-				{ { CharacterStruct::SKELETON, 40 },{ CharacterStruct::SKELETON, 41 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Calves Width"),
-				{ { CharacterStruct::SKELETON, 42 },{ CharacterStruct::SKELETON, 43 } },
-				-0.5f, 0.5f
-			},
-			//{ TEXT("Calve Height"),
-			//	{ { CharacterStruct::SKELETON, 44 },{ CharacterStruct::SKELETON, 45 } },
-			//	-0.5f, 0.5f
-			//},
-			{ TEXT("Calves Thickness"),
-				{ { CharacterStruct::SKELETON, 46 },{ CharacterStruct::SKELETON, 47 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Shoulders Width"),
-				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Shoulders Size"),
-				{ { CharacterStruct::SKELETON, 21 },{ CharacterStruct::SKELETON, 22 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Shoulders Height"),
-				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Neck Bone Size"),
+			{ TEXT("Neck Thickness"),
 				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("Arms Size"),
-				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
-				  { CharacterStruct::BODY, 7 },{ CharacterStruct::BODY, 8 },{ CharacterStruct::BODY, 9 },
-				  { CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Ball Size"),
@@ -1553,11 +1533,72 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
 				0.5f, 1.5f
 			},
-			{ TEXT("[split] Ear Width"),
-				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
-				-0.5f, 1.5f
+			{ TEXT("Eyebrow Height"),
+				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
+				-0.1f, 0.1f
 			},
-			{ TEXT("[split] Ear Height"),
+			{ TEXT("Eye Depth"),
+				{ { CharacterStruct::FACE, 5 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Ass Cheeks Thickness"),
+				{ { CharacterStruct::SKELETON, 9 },{ CharacterStruct::SKELETON, 10 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Ass Cheeks Width"),
+				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
+				-0.5f, 0.5f
+			},
+
+			
+			
+			//Obsolete Sliders
+			{ TEXT("*Body Thickness"),
+				{ { CharacterStruct::SKELETON, 2 } },
+				-0.9f, 1.0f
+			},
+			{ TEXT("*Total Body Height"),
+				{ { CharacterStruct::SKELETON, 0 } },
+				-0.9f, 1.0f
+			},
+			{ TEXT("*Total Body Width"),
+				{ { CharacterStruct::SKELETON, 1 } },
+				-0.9f, 1.0f
+			},
+			{ TEXT("*Hip Width"),
+				{ { CharacterStruct::BODY, 0 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("*Hip Thickness"),
+				{ { CharacterStruct::BODY, 1 }  },
+				-0.5f, 0.5f
+			},
+			{ TEXT("*Bottom Width"),
+				{ { CharacterStruct::SKELETON, 7 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("*Bottom Thickness"),
+				{ { CharacterStruct::SKELETON, 8 } },
+				0.5f, 1.5f
+			},
+			{ TEXT("*Thighs Width"),
+				{ { CharacterStruct::SKELETON, 19 },{ CharacterStruct::SKELETON, 20 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("*Hand Length"),
+				{ { CharacterStruct::SKELETON, 5 },{ CharacterStruct::SKELETON, 6 },
+				{ CharacterStruct::SKELETON, 13 },{ CharacterStruct::SKELETON, 14 } },
+				-0.4f, 0.2f
+			},
+			{ TEXT("*Foot Length"),
+				{ { CharacterStruct::SKELETON, 15 },{ CharacterStruct::SKELETON, 16 } },
+				-0.15f, 0.2f
+			},
+			{ TEXT("*Foot Width"),
+				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
+				-0.2f, 0.2f
+			},
+			{ TEXT("*[split] Ear Height"),
 				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
 				-0.5f, 1.5f
 			},
@@ -1897,6 +1938,8 @@ void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	const auto& list = g_currChar.m_cardData.GetSliderList();
 	for(auto& slider : sliderData) {
 		for (auto elem : list) {
+			if (elem.first.second >= Shared::g_sliders[elem.first.first].size())
+				continue;
 			if (&Shared::g_sliders[elem.first.first][elem.first.second] == slider) {
 				currVal = elem.second;
 				break;

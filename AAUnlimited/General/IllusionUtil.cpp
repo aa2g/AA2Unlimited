@@ -100,6 +100,9 @@ ExtClass::CharacterStruct::Models GetModelFromName(const char* name) {
 				}
 			}
 		}
+		else if (props.num1 == 1) {
+			return ExtClass::CharacterStruct::LEGS;
+		}
 		else if(props.num1 == 2 && props.num3 == 0) {
 			return ExtClass::CharacterStruct::SKIRT;
 		}
