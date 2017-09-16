@@ -1938,6 +1938,8 @@ void UnlimitedDialog::BSDialog::BodySlider::FromCard() {
 	const auto& list = g_currChar.m_cardData.GetSliderList();
 	for(auto& slider : sliderData) {
 		for (auto elem : list) {
+			if (elem.first.second >= Shared::g_sliders[elem.first.first].size())
+				continue;
 			if (&Shared::g_sliders[elem.first.first][elem.first.second] == slider) {
 				currVal = elem.second;
 				break;
