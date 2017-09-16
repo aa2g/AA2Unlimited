@@ -96,10 +96,7 @@ local function loadpose(filename)
 			end
 			local jp = ret
 			if jp then
-				if not jp._VERSION_ or jp._VERSION_ ~= 2 then
-					log.error("Poser: %s isn't a valid pose file", filename)
-					return
-				end
+				local version = jp._VERSION_ or 1
 				local clip = jp.pose
 				if clip then setclip(clip) end
 				local frame = jp.frame
@@ -108,16 +105,20 @@ local function loadpose(filename)
 					for k,v in pairs(jp.sliders) do
 						local slider = character:GetSlider(k)
 						if slider then
-							slider:rotation(0,v[1])
-							slider:rotation(1,v[2])
-							slider:rotation(2,v[3])
-							slider:rotation(3,v[4])
-							slider:translate(0,v[5])
-							slider:translate(1,v[6])
-							slider:translate(2,v[7])
-							slider:scale(0,v[8])
-							slider:scale(1,v[9])
-							slider:scale(2,v[10])
+							if version == 1 then
+								slider:SetValues(v[1], v[2], v[3])
+							else
+								slider:rotation(0,v[1])
+								slider:rotation(1,v[2])
+								slider:rotation(2,v[3])
+								slider:rotation(3,v[4])
+							end
+							slider:translate(0,v[3 + version])
+							slider:translate(1,v[4 + version])
+							slider:translate(2,v[5 + version])
+							slider:scale(0,v[6 + version])
+							slider:scale(1,v[7 + version])
+							slider:scale(2,v[8 + version])
 							slider:Apply()
 						end
 					end
@@ -143,7 +144,11 @@ local function loadpose(filename)
 end
 
 function loadposebutton.action()
-	loadpose(poselist.value)
+	local ok, ret = pcall(loadpose, poselist.value)
+	if not ok then
+		log.error("Error loading pose %s:", poselist.value)
+		log.error(ret)
+	end
 end
 
 local function savepose(filename)

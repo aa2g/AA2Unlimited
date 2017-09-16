@@ -44,6 +44,7 @@ namespace Poser {
 				Reset();
 				sliding = false;
 				source = ExtClass::CharacterStruct::INVALID;
+				currentOperation = Rotate;
 			}
 
 			void Apply();
@@ -225,7 +226,6 @@ namespace Poser {
 						_gl.push(_self->scale.value[0]);
 						_gl.push(_self->scale.value[1]);
 						_gl.push(_self->scale.value[2]);
-
 					}
 					return 3;
 				});
