@@ -1,4 +1,4 @@
---@INFO Hue,sliders,trait&pref,M2M H,role swap
+--@INFO sliders, trait & H pref, gay H, role swap
 
 -- This script unites virtually all unlocks of known "snowflake" launchers,
 -- that is, frontier and ASU (both play and exe), plus some additional features
@@ -226,37 +226,6 @@ end
 local send_msg
 function _M:load()
 	mod_load_config(self, options)
-	local avoid = {
-		[10176] = true,
-		[10292] = true,
-		[10356] = true,
-		[10440] = true,
-		[10551] = true,
-		[10355] = true,
-	}
-
-	if exe_type == "edit" then
-		send_msg = g_hook_vptr(0x002C43E0, 4, function(orig, this, hdlg, msg, wparam, lparam)
-			-- slider range - something asking for 100, make it 255
-			local itemid = GetWindowLongW(hdlg, -12)
-			if not avoid[itemid] then
-
-				if msg == 0x408 and wparam == 1 and lparam == 100 then
-					--log("OVERRIDE 100->255 %x %x %x %x %x %x", orig,this,hdlg,msg,wparam,lparam)
-					lparam = 255 
-				end
-
-				-- text field size, 6 and 26 -> 255
-				if msg == 0xc5 and (wparam == 26) or (wparam == 6) then
-					wparam = 255
-				end
-			end
-
-
-			local ret = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
-			return ret
-		end)
-	end
 
 	-- some mandatory patches
 	for bytes, offs in pairs(patches[exe_type]) do
@@ -289,9 +258,6 @@ function _M:unload()
 		f_patch(bytes,offs)
 	end
 	save = {}
-	if exe_type == "edit" then
-		g_poke_dword(0x002C43E0, send_msg)
-	end
 	unapply_patchset()
 end
 

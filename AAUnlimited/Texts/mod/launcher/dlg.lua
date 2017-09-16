@@ -397,6 +397,7 @@ return function()
 	gsdconfig = gsdlib.load_gsd()
 	update_res(_CONFIG["res_"..exe_type])
 	iup.SetGlobal("UTF8MODE","YES")
+	iup.SetGlobal("UTF8MODE_FILE","YES")
 	dlg = iup.dialog {
 		iup.vbox {
 			buildtabs(),

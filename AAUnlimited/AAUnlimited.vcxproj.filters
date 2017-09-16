@@ -509,5 +509,8 @@
     <None Include="Texts\mod\poser\propmgr.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\editfix.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
