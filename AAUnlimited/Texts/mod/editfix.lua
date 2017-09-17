@@ -1,6 +1,9 @@
 --@INFO Slider range, hue ranges, texture file selection
 
 
+-- RMB key to save as rainbow
+local RAINBOW_KEY = 2
+
 local _M = {}
 
 local send_msg, dlg_param
@@ -88,6 +91,16 @@ function _M.load()
 		return proc_invoke(orig,this,hinst,template,parent,dlgfun,initpar)
 	end)
 
+end
+
+
+-- just before the saving card, add rainbow
+function on.save_card(char)
+	if (GetAsyncKeyState(RAINBOW_KEY) & 0x8000) ~= 0 then
+		info("Rainbow applied")
+		char.m_charData:m_traitBools(38, 1)
+	end
+	return char
 end
 
 function _M.unload()
