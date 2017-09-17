@@ -62,6 +62,7 @@ function unmapposebutton.action()
 	local chr = charamgr.current 
 	if chr then
 		_M.cfg.autoload[chr:context_name()] = nil
+		set_class_key(chr:context_name(), nil)
 	end
 end
 
@@ -101,6 +102,7 @@ local function autopose(fname)
 	local chr = charamgr.current
 	local ctx = chr:context_name()
 	log.info("Autopose: saving autopose %s %s",ctx,fname)
+	set_class_key(ctx, fname)
 	_M.cfg.autoload[ctx] = fname
 	Config.save()
 end
@@ -263,7 +265,7 @@ charamgr.on_character_updated.connect(function(chr)
 	if (_M.opts.autoloading == 1) and (not chr.first_update) then
 		chr.first_update = true
 		local ctname = chr:context_name()
-		local auto = _M.cfg.autoload[ctname]
+		local auto = get_class_key(ctname) or _M.cfg.autoload[ctname]
 		if auto then
 			log.spam("Autoloading pose %s",auto)
 			if pcall(loadpose,auto) then

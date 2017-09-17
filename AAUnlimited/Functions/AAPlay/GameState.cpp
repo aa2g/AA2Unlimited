@@ -130,7 +130,8 @@ void Shared::GameState::setPlayerCharacter(int seat) {
 std::wstring Shared::GameState::getCurrentClassSaveName()
 {
 	static const DWORD saveNameOffset[]{ 0x376164, 0x28, 0x64 };
-	auto className = std::wstring((wchar_t*)ExtVars::ApplyRule(saveNameOffset));
+	auto strp = (const wchar_t*)ExtVars::ApplyRule(saveNameOffset);
+	auto className = std::wstring(strp?strp:L"");
 	loc_gameState.m_classSaveName = className.substr(0, className.size() - 4);
 
 	return loc_gameState.m_classSaveName;
