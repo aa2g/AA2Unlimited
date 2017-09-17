@@ -53,6 +53,10 @@ local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", 
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothstate = "m_clothState", spawn = "Spawn", }
 local charamt = {}
+charamt.resetpose = function(chr)
+	_M.cfg.autoload[chr:context_name()] = nil
+	Config.save()
+end
 charamt.GetSlider = GetSlider
 charamt.Sliders = Sliders
 charamt.Props = Props

@@ -72,6 +72,7 @@ function _M:load()
 	dlg = require "poser.dlg"
 	dlg.opts = opts
 	dlg.cfg = self.cfg
+	charamgr.cfg = self.cfg
 	posemgr.opts = opts
 	posemgr.cfg = self.cfg
 	if GetGameTick() > 0 then
