@@ -65,7 +65,8 @@ charamt.override = function(character, skeleton, override)
 end
 
 function charamt.context_name(chr)
-	return chr.name .. '@' .. chr.struct.m_xxSkeleton.m_poseNumber
+	log.spam("chr is %s",chr)
+	return chr.name .. '@' .. chr.struct.m_xxSkeleton.m_poseNumber .. '@' .. (chr.xa or '<DEFAULT>')
 end
 
 function charamt.despawn(char)
@@ -124,6 +125,8 @@ function charamt.__newindex(character,k,v)
 	elseif skelkeys[k] then
 		local skel = character.struct.m_xxSkeleton
 		skel[skelkeys[k]] = v
+	else
+		rawset(character,k,v)
 	end
 end
 
@@ -138,10 +141,15 @@ local function setcurrentcharacter(character)
 	end
 end
 
-function _M.character_updated(character)
+function _M.character_updated(character, data)
 	for i,v in ipairs(characters) do
 		if v.struct == character then
-			return v:updated()
+			for i,j in pairs(data or {}) do
+				log.spam("setting %s %s",i,j)
+				v[i] = j
+			end
+			log.spam("updating %s",v)
+			return v:updated(data)
 		end
 	end
 	log.warn("Didn't find character to update", character)

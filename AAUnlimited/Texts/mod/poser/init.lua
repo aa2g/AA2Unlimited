@@ -12,6 +12,8 @@ local posemgr
 local propmgr = require "poser.propmgr"
 local opts = {
 	{"hideui", 0, "Hide game 2D UI: %b"},
+	{"ontop", 1, "Always-On-Top in fullscreen: %b"},
+	{"autoloading", 0, "Autoload character pose: %b"},
 }
 
 
@@ -57,7 +59,9 @@ function on.char_despawn(character)
 end
 
 function on.char_skeleton_end(character,pp,xa,pose)
-	charamgr.character_updated(character)
+	xa = xa:match("[^\\]*$")
+	log("xa is %s",xa)
+	charamgr.character_updated(character, {xa=xa})
 end
 
 function _M:load()

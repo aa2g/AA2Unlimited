@@ -31,8 +31,6 @@ local function savedscenes()
 end
 
 
---local autoload = exe_type == "play" and toggles.button {title="Autoload",expand="horizontal"}
-local autoload = iup.toggle {name="autoload", title="Auto"}
 local poselist = lists.listbox { editbox = "yes" }
 local scenelist = lists.listbox { editbox = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
@@ -88,7 +86,7 @@ local function readfile(path)
 end
 
 local function autopose(fname)
-	if autoload.value == "ON" then
+	if _M.opts.autoloading == 1 then
 		_M.cfg.autoload[charamgr.current:context_name()] = fname
 		Config.save()
 	end
@@ -232,14 +230,13 @@ function frametext.valuechanged_cb(self)
 end
 
 charamgr.on_character_updated.connect(function(chr)
-	log.spam("updating character %s %s",chr, autoload.value)
 	if chr ~= charamgr.current then
 		log.warn("updating non-current character")
 		return
 	end
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
 	cliptext.value = p
-	if (autoload.value == "ON") and (not chr.first_update) then
+	if (_M.opts.autoloading == 1) and (not chr.first_update) then
 		chr.first_update = true
 		local ctname = chr:context_name()
 		local auto = _M.cfg.autoload[ctname]
@@ -263,7 +260,6 @@ _M.dialogposes = iup.dialog {
 			iup.vbox {
 				poselist,
 				iup.hbox { 
-					autoload,
 					loadposebutton,
 					saveposebutton,
 					deleteposebutton,
