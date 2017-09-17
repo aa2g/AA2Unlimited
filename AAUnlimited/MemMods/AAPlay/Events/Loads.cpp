@@ -166,6 +166,7 @@ DWORD  __declspec(noinline) __stdcall CallOrigSkeleton(DWORD who, void *_this, w
 		call dword ptr [who]
 		mov retv, eax
 	}
+	LUA_EVENT_NORET("char_skeleton_end", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
 
 	return retv;
 }

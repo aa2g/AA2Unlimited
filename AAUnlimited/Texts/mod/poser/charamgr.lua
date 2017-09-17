@@ -25,6 +25,7 @@ _M.current = dummycharacter
 local characters = {}
 local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
+local on_character_updated = signals.signal()
 
 -- Character Helper Functions
 local function GetSlider(character, slider)
@@ -58,8 +59,13 @@ charamt.Props = Props
 charamt.SetClip = SetClip
 charamt.GetXXFileFace = GetXXFileFace
 charamt.isvalid = true
+charamt.updated = on_character_updated
 charamt.override = function(character, skeleton, override)
 	character.poser:Override(skeleton, override)
+end
+
+function charamt.context_name(chr)
+	return chr.name .. '@' .. chr.struct.m_xxSkeleton.m_poseNumber
 end
 
 function charamt.despawn(char)
@@ -132,18 +138,28 @@ local function setcurrentcharacter(character)
 	end
 end
 
+function _M.character_updated(character)
+	for i,v in ipairs(characters) do
+		if v.struct == character then
+			return v:updated()
+		end
+	end
+	log.warn("Didn't find character to update", character)
+end
+
 local charcount = 0 -- this counts only characters spawned by the game, not us
 function _M.addcharacter(character)
 	log.spam("Poser: Add character %s", character)
-	local new = true
+	local new
 	local last = 0
 	for i,v in ipairs(characters) do
 		if v.struct == character then
-			new = false
+			new = v
+			break
 		end
 		last = i
 	end
-	if new then
+	if not new then
 		local data = character.m_charData
 		local name = sjis_to_utf8(string.format("%s %s", data.m_forename, data.m_surname))
 		if not _M.is_spawning then
@@ -152,10 +168,11 @@ function _M.addcharacter(character)
 		new = { index = last, name = name, struct = character, poser = GetPoserCharacter(character), data = data, GetSlider = GetSlider, spawned = _M.is_spawning }
 		setmetatable(new, charamt)
 		characters[last + 1] = new
-		if _M.current ~= dummycharacter then
+--		if _M.current ~= dummycharacter then
 			setcurrentcharacter(new)
-		end
+--		end
 	end
+	new.first_update = false
 	log.spam("Poser: We have %d characters", #characters)
 	characterschanged()
 end
@@ -216,6 +233,7 @@ _M.characters = characters
 _M.setcurrentcharacter = setcurrentcharacter
 _M.currentcharacterchanged = currentcharacterchanged
 _M.characterschanged = characterschanged
+_M.on_character_updated = on_character_updated -- RFC: would be probably nice to distinguish signals by on_ prefix
 _M.is_spawning = false
 
 return _M

@@ -8,6 +8,7 @@ local _M = {}
 local dlg
 local signals = require "poser.signals"
 local charamgr = require "poser.charamgr"
+local posemgr
 local propmgr = require "poser.propmgr"
 local opts = {
 	{"hideui", 0, "Hide game 2D UI: %b"},
@@ -46,6 +47,8 @@ function on.char_spawn_end(ret,character)
 end
 
 function on.char_update_end(ret,character)
+	-- XXX TODO: distinguish update and skeleton load from reload
+	--charamgr.character_updated(character)
 	charamgr.addcharacter(character)
 end
 
@@ -53,10 +56,20 @@ function on.char_despawn(character)
 	charamgr.removecharacter(character)
 end
 
+function on.char_skeleton_end(character,pp,xa,pose)
+	charamgr.character_updated(character)
+end
+
 function _M:load()
+	self.cfg = self.cfg or {}
+	self.cfg.autoload = self.cfg.autoload or {}
 	mod_load_config(self, opts)
+	posemgr = require "poser.posemgr"
 	dlg = require "poser.dlg"
 	dlg.opts = opts
+	dlg.cfg = self.cfg
+	posemgr.opts = opts
+	posemgr.cfg = self.cfg
 	if GetGameTick() > 0 then
 		dlg.forceparenting = detect_parenting(GetGameHwnd())
 	end
@@ -66,7 +79,7 @@ end
 function _M:unload()
 	-- close all dialogs
 	if dlg then dlg:close_all() end
-		propmgr:cleanup()
+	propmgr:cleanup()
 end
 
 function _M:config()

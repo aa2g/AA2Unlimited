@@ -58,6 +58,14 @@ function _M.listbox(opts)
 			list[i] = v
 		end
 	end
+
+	function list.select(val)
+		for i,v in ipairs(entries) do
+			if v == val then
+				list.value = i
+			end
+		end		
+	end
 	
 	return list
 end

@@ -1,9 +1,13 @@
+require "iuplua"
+require "iupluacontrols"
+
 local _M = {}
 
 local signals = require "poser.signals"
 local json = require "json"
 local lists = require "poser.lists"
 local charamgr = require "poser.charamgr"
+local toggles = require "poser.toggles"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
@@ -26,6 +30,9 @@ local function savedscenes()
 	return readdir(aau_path(scenesdir .. "\\*.scene"))
 end
 
+
+--local autoload = exe_type == "play" and toggles.button {title="Autoload",expand="horizontal"}
+local autoload = iup.toggle {name="autoload", title="Auto"}
 local poselist = lists.listbox { editbox = "yes" }
 local scenelist = lists.listbox { editbox = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
@@ -80,8 +87,16 @@ local function readfile(path)
     return data
 end
 
+local function autopose(fname)
+	if autoload.value == "ON" then
+		_M.cfg.autoload[charamgr.current:context_name()] = fname
+		Config.save()
+	end
+end
+
 local function loadpose(filename)
 	log.spam("Poser: Loading pose %s", filename)
+	autopose(filename)
 	local character = charamgr.current
 	if character and character.isvalid == true then
 		local path = aau_path(posesdir, filename) .. ".pose"
@@ -90,9 +105,7 @@ local function loadpose(filename)
 		if data then
 			local ok, ret = pcall(json.decode, data)
 			if not ok then
-				log.error("Error decoding pose %s data:", filename)
-				log.error(ret)
-				return
+				error("Error decoding pose %s data:" % filename)
 			end
 			local jp = ret
 			if jp then
@@ -152,6 +165,7 @@ function loadposebutton.action()
 end
 
 local function savepose(filename)
+	autopose(filename)
 	log.spam("Poser: Saving pose %s", filename)
 	local character = charamgr.current
 	if character and character.isvalid == true then
@@ -217,12 +231,39 @@ function frametext.valuechanged_cb(self)
 	if n then framechanged(n) end
 end
 
-local dialogposes = iup.dialog {
+charamgr.on_character_updated.connect(function(chr)
+	log.spam("updating character %s %s",chr, autoload.value)
+	if chr ~= charamgr.current then
+		log.warn("updating non-current character")
+		return
+	end
+	local p = chr.struct.m_xxSkeleton.m_poseNumber
+	cliptext.value = p
+	if (autoload.value == "ON") and (not chr.first_update) then
+		chr.first_update = true
+		local ctname = chr:context_name()
+		local auto = _M.cfg.autoload[ctname]
+		if auto then
+			log.spam("Autoloading pose %s",auto)
+			if pcall(loadpose,auto) then
+				-- focus the autoloaded pose in the list
+				poselist.select(auto)
+			else
+				log.warn("Poser: Autoload for %s failed", ctname)
+			end
+		else
+			log.warn("Poser: Autoload for %s not found", ctname)
+		end
+	end
+end)
+
+_M.dialogposes = iup.dialog {
 	iup.vbox {
 		iup.tabs {
 			iup.vbox {
 				poselist,
 				iup.hbox { 
+					autoload,
 					loadposebutton,
 					saveposebutton,
 					deleteposebutton,
@@ -257,4 +298,4 @@ local dialogposes = iup.dialog {
 	minbox = "no",
 }
 
-return dialogposes
+return _M

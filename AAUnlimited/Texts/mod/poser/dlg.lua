@@ -659,7 +659,8 @@ local dialogsliders = iup.dialog {
 	minbox = "no",
 }
 
-local dialogposes = require "poser.posemgr"
+local posemgr = require "poser.posemgr"
+dialogposes = posemgr.dialogposes
 signals.connect(dialogposes, "loadpose", _M, "loadpose")
 signals.connect(dialogposes, "savepose", _M, "savepose")
 signals.connect(dialogposes, "loadscene", _M, "loadscene")

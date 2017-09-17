@@ -103,6 +103,8 @@ bUseMKIII = true
 bUseAA2Face = true
 
 mods = {
+	{ "poser" },
+	{ "editfix" },
 	{ "unlocks" },
 	{ "fixlocale" },
 	{ "makertrans" },
