@@ -61,8 +61,7 @@ end
 
 function on.char_skeleton_end(character,pp,xa,pose)
 	xa = xa:match("[^\\]*$")
-	log("xa is %s",xa)
-	charamgr.character_updated(character, {xa=xa})
+	charamgr.character_updated(character, {xa=xa,startpose=pose})
 end
 
 function _M:load()

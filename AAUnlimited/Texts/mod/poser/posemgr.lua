@@ -227,6 +227,7 @@ function saveposebutton.action()
 end
 
 cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
+local maptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
 function cliptext.valuechanged_cb(self)
 	log.spam("clip text changed to %s", self.value)
 	local n = tonumber(self.value)
@@ -245,6 +246,7 @@ charamgr.on_character_updated.connect(function(chr)
 		log.warn("updating non-current character")
 		return
 	end
+	maptext.value = chr.startpose
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
 	cliptext.value = p
 	if (_M.opts.autoloading == 1) and (not chr.first_update) then
@@ -292,6 +294,8 @@ _M.dialogposes = iup.dialog {
 			iup.hbox { 
 				iup.label { title = "Clip" },
 				cliptext,
+				iup.label { title = "Map" },
+				maptext,
 				iup.label { title = "Frame" },
 				frametext,
 				gap = 3,

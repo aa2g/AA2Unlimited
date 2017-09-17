@@ -66,7 +66,7 @@ end
 
 function charamt.context_name(chr)
 	log.spam("chr is %s",chr)
-	return chr.name .. '@' .. chr.struct.m_xxSkeleton.m_poseNumber .. '@' .. (chr.xa or '<DEFAULT>')
+	return chr.name .. '@' .. chr.startpose .. '@' .. (chr.xa or '<DEFAULT>')
 end
 
 function charamt.despawn(char)
