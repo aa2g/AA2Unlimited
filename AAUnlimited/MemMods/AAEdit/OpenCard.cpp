@@ -5,6 +5,7 @@ namespace OpenCard {
 
 
 void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
+	LUA_EVENT_NORET("open_card", DWORD(hFile));
 	const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
 	const DWORD maleRule[]{ 0x353254, 0x30, 0 };
 	AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
@@ -35,6 +36,7 @@ void __stdcall ReadUnlimitData(HANDLE hFile, DWORD /*illusionDataOffset*/) {
 }
 
 void __stdcall ReadUnlimitDataV2(const wchar_t* card) {
+	LUA_EVENT_NORET("open_card2", DWORD(card));
 	auto& aauData = AAEdit::g_currChar.m_cardData;
 	aauData.Reset();
 

@@ -670,7 +670,8 @@ signals.connect(dialogposes, "savescene", _M, "savescene")
 -- https://www.codeproject.com/Articles/11114/Move-window-form-without-Titlebar-in-C
 -- Of course iup supports nothing of the sorts, so we have to do it the dirty way
 local function adjust_parenting(v)
-	if (not _M.forceparenting) or (_M.opts.ontop == 0) then return end
+	if (not _M.opts.notitle) then return end
+	if (not _M.forceparenting)  then return end
 	v.menubox = "no"
 	v:map()
 	set_window_proc(v.hwnd, function(orig, this, hwnd, msg, wparam, lparam)

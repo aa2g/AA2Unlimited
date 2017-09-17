@@ -170,6 +170,7 @@ function _M.addcharacter(character)
 	if not new then
 		local data = character.m_charData
 		local name = sjis_to_utf8(string.format("%s %s", data.m_forename, data.m_surname))
+		log.spam("Poser: new character %s", name)
 		if not _M.is_spawning then
 			charcount = charcount + 1
 		end
@@ -216,6 +217,12 @@ function _M.removecharacter(character)
 			assert(tch.spawned)
 			tch.struct:Despawn()
 		end
+	end
+end
+
+function _M.clear_characters()
+	while characters[1] ~= dummycharacter do
+		_M.removecharacter(characters[1].struct)
 	end
 end
 

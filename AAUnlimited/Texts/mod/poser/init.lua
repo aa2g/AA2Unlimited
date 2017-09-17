@@ -12,8 +12,9 @@ local posemgr
 local propmgr = require "poser.propmgr"
 local opts = {
 	{"hideui", 0, "Hide game 2D UI: %b"},
-	{"ontop", 1, "Always-On-Top in fullscreen: %b"},
 	{"autoloading", 0, "Autoload character pose: %b"},
+	{"ontop", 1, "Always-On-Top in fullscreen: %b"},
+	{"notitle", 1, "No titlebar in fullscreen: %b"},
 }
 
 
@@ -78,6 +79,12 @@ function _M:load()
 		dlg.forceparenting = detect_parenting(GetGameHwnd())
 	end
 	propmgr:init()
+end
+
+function on.open_card2()
+	if exe_type == "edit" then
+		charamgr.clear_characters()
+	end
 end
 
 function _M:unload()

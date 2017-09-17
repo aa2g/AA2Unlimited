@@ -63,7 +63,9 @@ function _M.listbox(opts)
 		for i,v in ipairs(entries) do
 			if v == val then
 				list.value = i
+				return
 			end
+			log.warn("listbox: can't select '%s''", val)
 		end		
 	end
 	

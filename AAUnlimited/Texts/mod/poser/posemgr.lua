@@ -87,14 +87,17 @@ end
 
 local function autopose(fname)
 	if _M.opts.autoloading == 1 then
-		_M.cfg.autoload[charamgr.current:context_name()] = fname
+		local ctx = charamgr.current:context_name()
+		log.spam("Autopose: saving autopose %s %s",ctx,fname)
+		_M.cfg.autoload[ctx] = fname
 		Config.save()
 	end
 end
 
+local cliptext
 local function loadpose(filename)
+	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
-	autopose(filename)
 	local character = charamgr.current
 	if character and character.isvalid == true then
 		local path = aau_path(posesdir, filename) .. ".pose"
@@ -109,7 +112,11 @@ local function loadpose(filename)
 			if jp then
 				local version = jp._VERSION_ or 1
 				local clip = jp.pose
-				if clip then setclip(clip) end
+				if clip then
+					log.spam("setting clip from pose to %d", clip)
+					setclip(clip)
+					cliptext.value = clip
+				end
 				local frame = jp.frame
 				if jp.sliders then
 					log.spam("Setting sliders")
@@ -155,10 +162,14 @@ local function loadpose(filename)
 end
 
 function loadposebutton.action()
-	local ok, ret = pcall(loadpose, poselist.value)
+	local fn = poselist.value
+	local ok, ret = pcall(loadpose, fn)
 	if not ok then
 		log.error("Error loading pose %s:", poselist.value)
 		log.error(ret)
+	else
+		-- at this point pose number is rewritten to whatever is in pose file
+		autopose(fn)
 	end
 end
 
@@ -215,9 +226,9 @@ function saveposebutton.action()
 	savepose(poselist.value)
 end
 
-local cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
+cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
 function cliptext.valuechanged_cb(self)
-	log.spam("clip text changed")
+	log.spam("clip text changed to %s", self.value)
 	local n = tonumber(self.value)
 	if n then clipchanged(n) end
 end
