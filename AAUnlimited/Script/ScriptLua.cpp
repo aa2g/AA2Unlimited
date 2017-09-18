@@ -110,6 +110,7 @@ void Lua::bindLua() {
 	Poser::bindLua();
 	Poser::PoserController::PoserCharacter::bindLua();
 	Poser::PoserController::SliderInfo::bindLua();
+	Poser::PoserController::PoserProp::bindLua();
 	Render::bindLua();
 	SharedInjections::ArchiveFile::bindLua();
 

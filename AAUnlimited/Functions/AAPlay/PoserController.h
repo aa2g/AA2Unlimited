@@ -383,12 +383,10 @@ namespace Poser {
 		class PoserProp {
 		public:
 			PoserProp(ExtClass::XXFile* xxFile) : m_xxFile(xxFile) {
-
 			}
 
-			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
 			SliderInfo* GetSlider(const char* name);
-			SliderInfo* GetSlider(const std::string& name);
+			//SliderInfo* GetSlider(const std::string& name);
 
 			ExtClass::XXFile* m_xxFile;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
@@ -448,6 +446,7 @@ namespace Poser {
 		void SwapTransientSliders(bool skipSkeleton);
 		void FrameModEvent(ExtClass::XXFile* xxFile);
 		void FrameModRoom(ExtClass::XXFile* xxFile);
+		void FrameModProp(PoserProp* xxFile);
 
 		std::wstring GetOverride(const std::wstring& file);
 		void SetOverride(const std::wstring& file, const std::wstring& override);

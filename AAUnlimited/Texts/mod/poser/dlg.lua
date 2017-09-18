@@ -90,6 +90,67 @@ local bonefilter = lists.listfilter()
 local categorylist = lists.listbox { }
 local bonelist = lists.listbox {}
 
+local propbonefilter = lists.listfilter()
+local propbonelist = lists.listbox {}
+
+local function showframe(frame, show)
+	show = show and 0 or 2
+	frame.m_renderFlag = show
+end
+
+local bonelistzbox = iup.zbox {
+	iup.backgroundbox {
+		iup.hbox {
+			categorylist,
+			iup.vbox {
+				bonefilter,
+				bonelist,
+				iup.hbox {
+					iup.button {
+						title = "Show",
+						expand = "horizontal",
+						action = function()
+							showframe(currentslider.frame, true)
+						end,
+					},
+					iup.button {
+						title = "Hide",
+						expand = "horizontal",
+						action = function()
+							showframe(currentslider.frame, false)
+						end,
+					},
+				},
+				expand = "yes",
+			},
+		},
+	},
+	iup.backgroundbox {
+		iup.vbox {
+			propbonefilter,
+			propbonelist,
+			iup.hbox {
+				iup.button {
+					title = "Show",
+					expand = "horizontal",
+					action = function()
+						showframe(currentslider.frame, true)
+					end,
+				},
+				iup.button {
+					title = "Hide",
+					expand = "horizontal",
+					action = function()
+						showframe(currentslider.frame, false)
+					end,
+				},
+			},
+			expand = "yes",
+		},
+	},
+	expand = "yes",
+}
+
 local categories = { "All", "Torso", "Left Arm", "Right Arm", "Left Hand", "Right Hand", "Left Leg", "Right Leg", "Face", "Breasts", "Skirt", "Props", "Room" }
 categorylist.setlist(categories)
 
@@ -116,7 +177,7 @@ setcategory("All")
 signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
-local characterlist = lists.listbox { lines = 2, expand = "horizontal" }
+local characterlist = lists.listbox { lines = 8, expand = "yes" }
 local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
 
 local function updatecurrentcharacter(_, index)
@@ -149,27 +210,6 @@ local function updatecharacterlist()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
 
-
-local function showframe(frame, show)
-	show = show and 0 or 2
-	frame.m_renderFlag = show
-end
-
-local showframebutton = iup.button {
-	title = "Show",
-	expand = "horizontal",
-	action = function()
-		showframe(currentslider.frame, true) 
-	end,
-}
-
-local hideframebutton = iup.button {
-	title = "Hide",
-	expand = "horizontal",
-	action = function()
-		showframe(currentslider.frame, false)
-	end,
-}
 
 -- -----------------
 -- Char spawning
@@ -234,7 +274,7 @@ end
 -- UI Props
 -- ----------
 
-local proplist = lists.listbox { lines = 4, expand = "horizontal" }
+local proplist = lists.listbox { lines = 8, expand = "yes" }
 local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
 local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
 
@@ -354,19 +394,48 @@ local function slidersetoperation(operation)
 	setslidervalues()
 end
 
+local function setcurrentslider(slider)
+	currentslider = slider or dummyslider
+	log.spam("Poser: Set slider to %s", currentslider)
+	setslidervalues()
+end
+
+local function propsliderchanged()
+	local bone = propbonelist[tonumber(propbonelist.value)]
+	local prop = propmgr.props[tonumber(proplist.value)]
+	if prop and bone then
+		setcurrentslider(prop.poser:GetSlider(bone))
+	end
+end
+
+local function propchanged()
+	local prop = propmgr.props[tonumber(proplist.value)]
+	if prop then
+		local i = 1
+		log.spam("%s %s", prop, prop.poser)
+		for k,_ in prop.poser:Sliders() do
+			propbonelist[i] = k
+			i = i + 1
+		end
+		propbonelist[i] = nil
+		propsliderchanged()
+	end
+end
+
 local function sliderchanged()
-	currentslider = dummyslider
 	local slidername = bonelist[bonelist.value or ""]
 	slidername = bones.bonemap[slidername] or slidername or ""
 	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
 		local slider = charamgr.current:GetSlider(slidername)
-		currentslider = slider or dummyslider
-		log.spam("Poser: Set slider to %s", currentslider)
+		setcurrentslider(slider)
 	end
 	slidersetoperation(currentoperation)
-	setslidervalues()
 end
+
+signals.connect(proplist, "selectionchanged", propchanged)
+signals.connect(propbonelist, "selectionchanged", propsliderchanged)
+
 signals.connect(bonelist, "selectionchanged", sliderchanged)
 signals.connect(charamgr, "currentcharacterchanged", sliderchanged)
 signals.connect(charamgr, "characterschanged", sliderchanged)
@@ -506,6 +575,10 @@ local eyeshapes = iup.vbox {
 	gap = 3,
 }
 
+local eyebrowshapes = iup.vbox {
+	shapecontrols({ "1", "2", "3", "4", "5", "6", "7"}, { name = "eyebrow", cols = 7, buttonsize = "15x12" }),
+}
+
 
 -- -----------
 -- UI Layout
@@ -514,40 +587,42 @@ local eyeshapes = iup.vbox {
 local dialogsliders = iup.dialog {
 	iup.hbox {
 		nmargin = "7x7",
-		iup.vbox {
-			iup.frame {
-				title = "Characters",
-				iup.vbox {
-					characterlist,
-					iup.hbox {
-						addcharbutton,
-						removecharbutton,
-					},
-					iup.label { title = "Style" },
-					stylelist,
-					iup.hbox {
-						iup.flatbutton { title = "Uniform", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						iup.flatbutton { title = "Sports", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						iup.flatbutton { title = "Swimsuit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						iup.flatbutton { title = "Club", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						ngap = 3,
-					},
-					iup.hbox {
-						iup.flatbutton { title = "Edit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						iup.hbox {
-							iup.flatbutton { title = "0", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "21x10", expand = "horizontal" },
-							iup.flatbutton { title = "1", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-							iup.flatbutton { title = "2", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-							iup.flatbutton { title = "3", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-							iup.flatbutton { title = "4", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						},
-						iup.flatbutton { title = "Reload", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-						ngap = 3,
-					},
+		iup.tabs {
+			tabchangepos_cb = function(self, new, old)
+				bonelistzbox.valuepos = new
+			end,
+			iup.vbox {
+				tabtitle = "Characters",
+				characterlist,
+				iup.hbox {
+					addcharbutton,
+					removecharbutton,
 				},
-				expand = "horizontal",
+				iup.label { title = "Style" },
+				stylelist,
+				iup.hbox {
+					iup.flatbutton { title = "Uniform", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					iup.flatbutton { title = "Sports", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					iup.flatbutton { title = "Swimsuit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					iup.flatbutton { title = "Club", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					ngap = 3,
+				},
+				iup.hbox {
+					iup.flatbutton { title = "Edit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					iup.hbox {
+						iup.flatbutton { title = "0", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "21x10", expand = "horizontal" },
+						iup.flatbutton { title = "1", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
+						iup.flatbutton { title = "2", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
+						iup.flatbutton { title = "3", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
+						iup.flatbutton { title = "4", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
+					},
+					iup.flatbutton { title = "Reload", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
+					ngap = 3,
+				},
+				expand = "yes",
 			},
-			iup.frame { title = "Props",
+			iup.vbox {
+				tabtitle = "Props",
 				iup.vbox {
 					proplist,
 					iup.hbox {
@@ -555,25 +630,16 @@ local dialogsliders = iup.dialog {
 						removepropbutton,
 					},
 				},
-				expand = "horizontal",
+				expand = "yes",
 			},
-			expand = "no",
 		},
 		iup.frame {
 			title = "Bones",
 			ncmargin = "3x3",
-			iup.hbox {
-				categorylist,
-				iup.vbox {
-					bonefilter,
-					bonelist,
-					iup.hbox {
-						showframebutton,
-						hideframebutton,
-					},
-					expand = "yes",
-				},
-			},
+			iup.vbox {
+				bonelistzbox,
+				expand = "yes",
+			}
 		},
 		iup.vbox {
 			iup.frame {
@@ -631,26 +697,22 @@ local dialogsliders = iup.dialog {
 						expand = "no"
 				},
 				iup.vbox {
+					iup.frame { title = "Eyebrow",
+						iup.vbox {
+							eyebrowshapes
+						},
+					},
 					iup.frame { title = "Blush",
 						iup.vbox {
 							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blush = tonumber(self.value) end },
 							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
 						},
+						expand ="yes",
 					},
-					iup.hbox {
-						iup.label { title = "Eyebrow", alignment = "aright:acenter", expand = "horizontal" },
-						iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 6, visiblecolumns = 1,
-							valuechanged_cb = function(self)
-								local base = tonumber(charamgr.current.eyebrow)
-								if not base then return end
-								base = base - (base % 7)
-								charamgr.current.eyebrow = base + tonumber(self.value)
-							end
-						},
-						alignment = "acenter",
-					},
+					expand = "no",
 				},
 			},
+			expand = "no",
 		},
 		--gap = 3,
 	},

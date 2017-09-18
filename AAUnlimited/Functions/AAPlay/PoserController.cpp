@@ -413,6 +413,41 @@ namespace Poser {
 		}
 	}
 
+	void PoserController::FrameModProp(PoserProp* prop) {
+		ExtClass::Frame* root = prop->m_xxFile->m_root;
+		ExtClass::Frame* modFrame;
+		PoserController::SliderInfo* slider;
+
+		if (root) {
+			root->EnumTreeLevelOrder([&prop, &slider, &modFrame](ExtClass::Frame* frame) {
+				bool isProp = false;
+				if (frame->m_nSubmeshes) {
+					isProp = true;
+				}
+				if (isProp) {
+					// Search for this frame slider if it exists
+					slider = prop->GetSlider(frame->m_name);
+					// If it doesn't exist we create a new one and claim it for this model source
+					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
+					if (!slider) {
+						slider = new SliderInfo;
+						slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+						slider->Reset();
+						slider->source = ExtClass::CharacterStruct::SKELETON;
+						prop->m_sliders.emplace(frame->m_name, slider);
+					}
+
+					FrameMod(&frame, &modFrame);
+
+					slider->frame = modFrame;
+					slider->Apply();
+					slider = nullptr;
+				}
+				return true;
+			});
+		}
+	}
+
 	void PoserController::FrameModRoom(ExtClass::XXFile* xxFile) {
 
 	}
@@ -516,5 +551,12 @@ namespace Poser {
 		else {
 			m_overrides[file] = override;
 		}
+	}
+
+	PoserController::SliderInfo* PoserController::PoserProp::GetSlider(const char* name) {
+		if (m_sliders.count(name)) {
+			return m_sliders.at(name);
+		}
+		return 0;
 	}
 }

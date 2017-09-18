@@ -56,6 +56,7 @@ local function loadxx(directory, file)
 	table.insert(loaded, {
 		name = file,
 		xx = newprop,
+		poser = GetPoserProp(newprop),
 	})
 	log.spam("loaded xx %s at index %d = %s", file, #loaded, newprop)
 	propschanged(#loaded)

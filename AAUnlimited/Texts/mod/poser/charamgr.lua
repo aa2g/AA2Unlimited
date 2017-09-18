@@ -221,7 +221,7 @@ function _M.removecharacter(character)
 end
 
 function _M.clear_characters()
-	while characters[1] ~= dummycharacter do
+	while characters[1] and characters[1] ~= dummycharacter do
 		_M.removecharacter(characters[1].struct)
 	end
 end

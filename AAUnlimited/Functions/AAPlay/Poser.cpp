@@ -62,6 +62,15 @@ namespace Poser {
 			ExtClass::CharacterStruct* charStruct = (ExtClass::CharacterStruct*)(s.get(1));
 			s.push(g_PoserController.GetPoserCharacter(charStruct));
 		});
+		b["GetPoserProp"] = LUA_LAMBDA({
+			PoserController::PoserProp* prop = nullptr;
+			ExtClass::XXFile* xxStruct = (ExtClass::XXFile*)(s.get(1));
+			if (xxStruct) {
+				prop = new PoserController::PoserProp(xxStruct);
+				g_PoserController.FrameModProp(prop);
+			}
+			s.push(prop);
+		});
 		b["GetPoserController"] = LUA_LAMBDA({
 			s.push(&g_PoserController);
 		});
