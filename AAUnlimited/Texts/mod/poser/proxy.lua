@@ -39,7 +39,7 @@ function _M.wrap(entity)
 			if cached then return cached end
 			if ischaracter then
 				if facekeys[k] then
-					return struct:GetXXFileFace()[facekeys[k]]
+					return face[facekeys[k]]
 				end
 				if skelkeys[k] then
 					return struct.m_xxSkeleton[skelkeys[k]]
@@ -62,9 +62,14 @@ function _M.wrap(entity)
 			if ischaracter then
 				if facekeys[k] then
 					local face = struct:GetXXFileFace()
+					if k == "eyebrow" then
+						local eyebrow = face.m_eyebrow
+						local offset = eyebrow % 7
+						v = eyebrow - offset + v
+					end
 					rawset(cache, k, v)
 					face[facekeys[k]] = v
-					character:update_face()
+					-- character:update_face()
 				elseif facetoggles[k] then
 					rawset(cache, k, v)
 				elseif skelkeys[k] then
