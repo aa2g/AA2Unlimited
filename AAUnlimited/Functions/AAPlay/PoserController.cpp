@@ -415,10 +415,26 @@ namespace Poser {
 
 	void PoserController::FrameModProp(PoserProp* prop) {
 		ExtClass::Frame* root = prop->m_xxFile->m_root;
+		ExtClass::Frame* sceneRoot;
 		ExtClass::Frame* modFrame;
 		PoserController::SliderInfo* slider;
 
 		if (root) {
+			sceneRoot = root->FindFrame("SCENE_ROOT");
+			if (sceneRoot) {
+				slider = prop->GetSlider(sceneRoot->m_name);
+				if (!slider) {
+					FrameMod(&sceneRoot, &modFrame);
+
+					slider = new SliderInfo;
+					slider->setCurrentOperation(PoserController::SliderInfo::Operation::Rotate);
+					slider->Reset();
+					slider->source = ExtClass::CharacterStruct::SKELETON;
+					slider->frame = modFrame;
+					prop->m_sliders.emplace(sceneRoot->m_name, slider);
+					slider = nullptr;
+				}
+			}
 			root->EnumTreeLevelOrder([&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 				bool isProp = false;
 				if (frame->m_nSubmeshes) {
