@@ -182,6 +182,7 @@ local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" 
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
+	_M.restorecharui()
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
@@ -507,20 +508,24 @@ local function shapecontrols(shapelist, opts)
 
 	local controls = {}
 	for i, s in ipairs(shapelist) do
-		local button = iup.flatbutton { title = s, padding = 3, size = opts.buttonsize }
-		function button.flat_action(self)
-			shapeselected(i - 1)
+		local button = iup.flatbutton { title = s, toggle = "yes", padding = 3, size = opts.buttonsize }
+		function button.valuechanged_cb(self)
+			if self.value == "ON" then
+				shapeselected(i - 1)
+			end
 		end
 		table.insert(controls, button)
 	end
 	
 	return iup.vbox {
-		iup.gridbox {
-		numdiv = opts.cols,
-		unpack(controls),
+		iup.radio {
+			iup.gridbox {
+				numdiv = opts.cols,
+				unpack(controls),
+			},
+			gap = 3,
 		},
-		gap = 3,
-		
+		shapecontrols = controls,
 	}
 end
 
@@ -552,8 +557,9 @@ local eyespin = iup.text {
 	end
 }
 
+local mouthshapescontrols = shapecontrols({ "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°⌓°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" })
 local mouthshapes = iup.vbox {
-	shapecontrols({ "°_°", "°◡°", "°∩°", "°w°", "°ω°" , "°O°", "°~°", "° °", "°д°", "°o°", "°3°", "°▽°", "°ㅂ°", "°-°", "°ت°", "°v°", "°#°", "°⌓°", "°Ә°" }, { name = "mouth", cols = 4, buttonsize = "20x12" }),
+	mouthshapescontrols,
 	iup.hbox {
 		yogurt,
 		iup.label { title = "Open" },
@@ -564,8 +570,9 @@ local mouthshapes = iup.vbox {
 	gap = 3,
 }
 
+local eyeshapescontrols = shapecontrols({ "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 4, buttonsize = "20x12" })
 local eyeshapes = iup.vbox {
-	shapecontrols({ "u_u", "n_n", "^_^", "-_-", "o_u", "u_o", "o_n", "n_o" }, { name = "eye", cols = 4, buttonsize = "20x12" }),
+	eyeshapescontrols,
 	iup.hbox {
 		iup.label { title = "Open" },
 		eyespin,
@@ -576,9 +583,40 @@ local eyeshapes = iup.vbox {
 	gap = 3,
 }
 
+local eyebrowshapescontrols = shapecontrols({ "1", "2", "3", "4", "5", "6", "7"}, { name = "eyebrow", cols = 7, buttonsize = "15x12" })
 local eyebrowshapes = iup.vbox {
-	shapecontrols({ "1", "2", "3", "4", "5", "6", "7"}, { name = "eyebrow", cols = 7, buttonsize = "15x12" }),
+	eyebrowshapescontrols,
 }
+
+
+-- ------------
+-- Restore UI
+-- ------------
+
+local restoreuitable = {
+	eye = function(v)
+		eyeshapescontrols.shapecontrols[v + 1].value = "ON"
+	end,
+	eyeopen = function(v)
+		eyespin.value = v
+	end,
+	eyebrow = function(v)
+		eyebrowshapescontrols.shapecontrols[v + 1].value = "ON"
+	end,
+	mouth = function(v)
+		mouthshapescontrols.shapecontrols[v + 1].value = "ON"
+	end,
+	mouthopen = function(v)
+		mouthspin.value = v
+	end,
+}
+function _M.restorecharui()
+	for k,v in pairs(charamgr.current.cache) do
+		if restoreuitable[k] then
+			restoreuitable[k](v)
+		end
+	end
+end
 
 
 -- -----------

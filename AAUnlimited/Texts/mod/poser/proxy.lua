@@ -59,12 +59,12 @@ function _M.wrap(entity)
 			if ischaracter then
 				if facekeys[k] then
 					local face = struct:GetXXFileFace()
+					rawset(cache, k, v)
 					if k == "eyebrow" then
 						local eyebrow = face.m_eyebrow
 						local offset = eyebrow % 7
 						v = eyebrow - offset + v
 					end
-					rawset(cache, k, v)
 					face[facekeys[k]] = v
 					-- character:update_face()
 				elseif facetoggles[k] then
@@ -86,6 +86,7 @@ function _M.wrap(entity)
 	rawset(wrapper, "struct", struct)
 	rawset(wrapper, "poser", poser)
 	rawset(wrapper, "name", name)
+	rawset(wrapper, "cache", cache)
 	rawset(wrapper, "boneselection", {})
 	setmetatable(wrapper, charamt)
 
