@@ -161,7 +161,7 @@ local function setcategory(category)
 		local props = {}
 		local character = charamgr.current
 		if character and character.isvalid == true then
-			for p,_ in character:Props() do
+			for p,_ in character:props() do
 				table.insert(props, p)
 			end
 		end
@@ -195,13 +195,14 @@ local function update_showui()
 end
 
 local function updatecharacterlist()
-	log.spam("Updating character list")
+	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur
 	local list = {}
 	for i,v in ipairs(charamgr.characters) do
 		if v == charamgr.current then
 			cur = i
 		end
+		log.spam("Insert character %s %s", v, v.name)
 		table.insert(list, v.name)
 	end
 	characterlist.setlist(list)
@@ -404,7 +405,7 @@ local function propsliderchanged()
 	local bone = propbonelist[tonumber(propbonelist.value)]
 	local prop = propmgr.props[tonumber(proplist.value)]
 	if prop and bone then
-		setcurrentslider(prop.poser:GetSlider(bone))
+		setcurrentslider(prop.getslider(bone))
 	end
 end
 
@@ -413,7 +414,7 @@ local function propchanged()
 	if prop then
 		local i = 1
 		log.spam("%s %s", prop, prop.poser)
-		for k,_ in prop.poser:Sliders() do
+		for k,_ in prop.sliders() do
 			propbonelist[i] = k
 			i = i + 1
 		end
@@ -427,7 +428,7 @@ local function sliderchanged()
 	slidername = bones.bonemap[slidername] or slidername or ""
 	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
-		local slider = charamgr.current:GetSlider(slidername)
+		local slider = charamgr.current.getslider(slidername)
 		setcurrentslider(slider)
 	end
 	slidersetoperation(currentoperation)

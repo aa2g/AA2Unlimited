@@ -52,6 +52,7 @@ local function loadxx(directory, file)
 	end
 	local newprop = LoadXX(xxlist, directory .. ".pp", file .. ".xx",0) or nil
 	if not newprop then return end
+	log.spam("prop struct %s", getmetatable(newprop).__name)
 	walk_fixlight(newprop.m_root)
 	table.insert(loaded, {
 		name = file,

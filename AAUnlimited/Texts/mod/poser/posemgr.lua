@@ -56,7 +56,7 @@ populateposelist()
 
 function resetposebutton.action()
 	if charamgr.current then
-		for _,v in charamgr.current:Sliders() do
+		for _,v in charamgr.current.sliders() do
 			v:Reset()
 			v:Apply()
 		end
@@ -185,7 +185,7 @@ local function savepose(filename)
 		t.pose = character.pose
 		t.frame = character.frame
 		local sliders = {}
-		for k,v in character:Sliders() do
+		for k,v in character.sliders() do
 			local slider = {
 				v:rotation(0),
 				v:rotation(1),
