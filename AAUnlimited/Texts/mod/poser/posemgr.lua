@@ -17,7 +17,7 @@ local scenesdir = "poser\\scenes"
 
 local function setclip(clip)
 	if charamgr.current then
-		charamgr.current:SetClip(clip)
+		charamgr.current.setclip(clip)
 	end
 end
 clipchanged.connect(setclip)
@@ -99,7 +99,7 @@ local function loadpose(filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
 	local character = charamgr.current
-	if character and character.isvalid == true then
+	if character and character.ischaracter == true then
 		local path = aau_path(posesdir, filename) .. ".pose"
 		log.spam("Poser: Reading %s", path)
 		local data = readfile(path)
@@ -121,7 +121,7 @@ local function loadpose(filename)
 				if jp.sliders then
 					log.spam("Setting sliders")
 					for k,v in pairs(jp.sliders) do
-						local slider = character:GetSlider(k)
+						local slider = character.getslider(k)
 						if slider then
 							if version == 1 then
 								slider:SetValues(v[1], v[2], v[3])
@@ -143,16 +143,11 @@ local function loadpose(filename)
 				end
 				local face = jp.face
 				if face then
-					local xxface = character:GetXXFileFace()
 					if face.mouth then character.mouth = face.mouth end
 					if face.mouthopen then character.mouthopen = face.mouthopen end
 					if face.eye then character.eye = face.eye end
 					if face.eyeopen then character.eyeopen = face.eyeopen end
-					if face.eyebrow then
-						local base = character.eyebrow
-						base = base - (base % 7)
-						character.eyebrow = base + (face.eyebrow % 7)
-					end
+					if face.eyebrow then character.eyebrow = face.eyebrow end
 					if face.blush then character.blush = face.blush / 9 end
 					if face.blushlines then character.blushlines = face.blushlines / 9 end
 				end
@@ -177,7 +172,7 @@ local function savepose(filename)
 	autopose(filename)
 	log.spam("Poser: Saving pose %s", filename)
 	local character = charamgr.current
-	if character and character.isvalid == true then
+	if character and character.ischaracter == true then
 		local path = aau_path(posesdir, filename) .. ".pose"
 		log.spam("Poser: Saving to %s", path)
 		local t = {}

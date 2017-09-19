@@ -3,6 +3,7 @@ local _M = {}
 local fileutils = require "poser.fileutils"
 local signals = require "poser.signals"
 local charamgr = require "poser.charamgr"
+local proxy = require "poser.proxy"
 
 local propschanged = signals.signal()
 
@@ -54,11 +55,7 @@ local function loadxx(directory, file)
 	if not newprop then return end
 	log.spam("prop struct %s", getmetatable(newprop).__name)
 	walk_fixlight(newprop.m_root)
-	table.insert(loaded, {
-		name = file,
-		xx = newprop,
-		poser = GetPoserProp(newprop),
-	})
+	table.insert(loaded, proxy.wrap(newprop))
 	log.spam("loaded xx %s at index %d = %s", file, #loaded, newprop)
 	propschanged(#loaded)
 end
@@ -90,7 +87,7 @@ function _M.unloadprop(index)
 	local prop = loaded[tonumber(index)]
 	if prop then
 		log.spam("unloading prop %s", prop.name)
-		prop.xx:Unload(xxlist)
+		prop.unload(xxlist)
 		table.remove(loaded, index)
 		propschanged()
 	end

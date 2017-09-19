@@ -4,14 +4,11 @@ local facetoggles = { tears = "", dimeyes = "" }
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines", eyetracking = "m_eyeTracking" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothstate = "m_clothState" }
-local charfuncs = { spawn = "Spawn", despawn = "Despawn", update = "Update", skeleton = "Skeleton", destroy = "Destroy" }
+local structfuncs = { spawn = "Spawn", despawn = "Despawn", update = "Update", skeleton = "Skeleton", destroy = "Destroy", unload = "Unload" }
 local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props" }
-
-local wrapped = {}
 
 function _M.wrap(entity)
 	log.spam("Poser: Wrapping %s", entity)
-	if wrapped[entity] then return wrapped[entity] end
 	local mt = getmetatable(entity)
 	if not entity or not mt then return end
 	local ischaracter
@@ -48,8 +45,8 @@ function _M.wrap(entity)
 					return struct[charkeys[k]]
 				end
 			end
-			if charfuncs[k] then
-				return function (...) return struct[charfuncs[k]](struct, ...) end
+			if structfuncs[k] then
+				return function (...) return struct[structfuncs[k]](struct, ...) end
 			end
 			if poserfuncs[k] then
 				log.spam("Poser: return poserfunc %s for %s", poserfuncs[k], poser)
@@ -73,7 +70,7 @@ function _M.wrap(entity)
 				elseif facetoggles[k] then
 					rawset(cache, k, v)
 				elseif skelkeys[k] then
-					local skel = character.struct.m_xxSkeleton
+					local skel = struct.m_xxSkeleton
 					skel[skelkeys[k]] = v
 				elseif charkeys[k] then
 					struct[charkeys[k]] = v
@@ -89,8 +86,8 @@ function _M.wrap(entity)
 	rawset(wrapper, "struct", struct)
 	rawset(wrapper, "poser", poser)
 	rawset(wrapper, "name", name)
+	rawset(wrapper, "boneselection", {})
 	setmetatable(wrapper, charamt)
-	wrapped[entity] = exe_type == "play" and wrapper
 
 	if ischaracter then
 		
@@ -113,7 +110,6 @@ function _M.wrap(entity)
 		wrapper.origskel = wrapper.skelname
 	end
 	
-	log.spam("Poser: wrapped %s", wrapper)
 	return wrapper
 end
 
