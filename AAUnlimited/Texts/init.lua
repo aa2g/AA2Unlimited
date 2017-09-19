@@ -592,3 +592,17 @@ function require(x)
 	global_writes = sav
 	return a,b
 end
+
+
+function set_class_key(k,v)
+	local json = require "json"
+	SetClassJSONData(k,json.encode(v))
+end
+
+function get_class_key(k)
+	local json = require "json"
+	local js = GetClassJSONData(k)
+	if js then
+		return json.decode(js)
+	end
+end

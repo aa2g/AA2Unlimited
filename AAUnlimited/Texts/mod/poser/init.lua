@@ -61,8 +61,7 @@ end
 
 function on.char_skeleton_end(character,pp,xa,pose)
 	xa = xa:match("[^\\]*$")
-	log("xa is %s",xa)
-	charamgr.character_updated(character, {xa=xa})
+	charamgr.character_updated(character, {xa=xa,startpose=pose})
 end
 
 function _M:load()
@@ -73,6 +72,7 @@ function _M:load()
 	dlg = require "poser.dlg"
 	dlg.opts = opts
 	dlg.cfg = self.cfg
+	charamgr.cfg = self.cfg
 	posemgr.opts = opts
 	posemgr.cfg = self.cfg
 	if GetGameTick() > 0 then

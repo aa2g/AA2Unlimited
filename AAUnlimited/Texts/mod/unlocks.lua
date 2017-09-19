@@ -50,8 +50,6 @@ patches.homosex = {
 }
 
 -----------------------------------------------------------------
--- RMB key to save as rainbow
-local RAINBOW_KEY = 2
 
 patches.play = {
 	-- hue onload check
@@ -235,15 +233,6 @@ function _M:load()
 	end
 
 	apply_patchset()
-end
-
--- just before the saving card, add rainbow
-function on.save_card(char)
-	if (GetAsyncKeyState(RAINBOW_KEY) & 0x8000) ~= 0 then
-		info("Rainbow applied")
-		char.m_charData:m_traitBools(38, 1)
-	end
-	return char
 end
 
 

@@ -11,6 +11,7 @@ local toggles = require "poser.toggles"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
+local posemap = signals.signal()
 
 local posesdir = "poser\\poses"
 local scenesdir = "poser\\scenes"
@@ -36,11 +37,14 @@ local poselist = lists.listbox { editbox = "yes" }
 local scenelist = lists.listbox { editbox = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
+local mapposebutton = iup.button { title = "Map", expand = "horizontal" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 local resetposebutton = iup.button { title = "Reset Pose", expand = "horizontal" }
+local unmapposebutton = iup.button { title = "Unmap pose", expand = "horizontal" }
+
 
 local function populateposelist()
 	local i = 1
@@ -55,8 +59,17 @@ local function populateposelist()
 end
 populateposelist()
 
+function unmapposebutton.action()
+	local chr = charamgr.current 
+	if chr then
+		_M.cfg.autoload[chr:context_name()] = nil
+		set_class_key(chr:context_name(), nil)
+	end
+end
+
 function resetposebutton.action()
 	if charamgr.current then
+		-- TODO: make this sane
 		for _,v in charamgr.current.sliders() do
 			v:Reset()
 			v:Apply()
@@ -87,12 +100,12 @@ local function readfile(path)
 end
 
 local function autopose(fname)
-	if _M.opts.autoloading == 1 then
-		local ctx = charamgr.current:context_name()
-		log.spam("Autopose: saving autopose %s %s",ctx,fname)
-		_M.cfg.autoload[ctx] = fname
-		Config.save()
-	end
+	local chr = charamgr.current
+	local ctx = chr:context_name()
+	log.info("Autopose: saving autopose %s %s",ctx,fname)
+	set_class_key(ctx, fname)
+	_M.cfg.autoload[ctx] = fname
+	Config.save()
 end
 
 local function table2pose(pose, character)
@@ -165,9 +178,6 @@ function loadposebutton.action()
 	if not ok then
 		log.error("Error loading pose %s:", poselist.value)
 		log.error(ret)
-	else
-		-- at this point pose number is rewritten to whatever is in pose file
-		autopose(fn)
 	end
 end
 
@@ -229,7 +239,12 @@ function saveposebutton.action()
 	savepose(poselist.value)
 end
 
+function mapposebutton.action()
+	autopose(poselist.value)
+end
+
 cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
+local maptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
 function cliptext.valuechanged_cb(self)
 	log.spam("clip text changed to %s", self.value)
 	local n = tonumber(self.value)
@@ -248,12 +263,13 @@ charamgr.on_character_updated.connect(function(chr)
 		log.warn("updating non-current character")
 		return
 	end
+	maptext.value = chr.startpose
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
 	cliptext.value = p
 	if (_M.opts.autoloading == 1) and (not chr.first_update) then
 		chr.first_update = true
 		local ctname = chr:context_name()
-		local auto = _M.cfg.autoload[ctname]
+		local auto = get_class_key(ctname) or _M.cfg.autoload[ctname]
 		if auto then
 			log.spam("Autoloading pose %s",auto)
 			if pcall(loadpose,auto) then
@@ -276,6 +292,7 @@ _M.dialogposes = iup.dialog {
 				iup.hbox { 
 					loadposebutton,
 					saveposebutton,
+					mapposebutton,
 					deleteposebutton,
 				},
 				tabtitle = "Poses"
@@ -295,6 +312,8 @@ _M.dialogposes = iup.dialog {
 			iup.hbox { 
 				iup.label { title = "Clip" },
 				cliptext,
+				iup.label { title = "Map" },
+				maptext,
 				iup.label { title = "Frame" },
 				frametext,
 				gap = 3,
@@ -302,6 +321,7 @@ _M.dialogposes = iup.dialog {
 			},
 		},
 		resetposebutton,
+		unmapposebutton,
 	},
 	nmargin = "3x3",
 	maxbox = "no",
