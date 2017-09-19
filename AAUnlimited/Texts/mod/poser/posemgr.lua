@@ -31,6 +31,7 @@ local function savedscenes()
 end
 
 
+local cliptext
 local poselist = lists.listbox { editbox = "yes" }
 local scenelist = lists.listbox { editbox = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
@@ -94,7 +95,50 @@ local function autopose(fname)
 	end
 end
 
-local cliptext
+local function table2pose(pose, character)
+	local version = pose._VERSION_ or 1
+	local clip = pose.pose
+	if clip then
+		log.spam("setting clip from pose to %d", clip)
+		setclip(clip)
+		cliptext.value = clip
+	end
+	local frame = pose.frame
+	if pose.sliders then
+		log.spam("Setting sliders")
+		for k,v in pairs(pose.sliders) do
+			local slider = character.getslider(k)
+			if slider then
+				if version == 1 then
+					slider:SetValues(v[1], v[2], v[3])
+				else
+					slider:rotation(0,v[1])
+					slider:rotation(1,v[2])
+					slider:rotation(2,v[3])
+					slider:rotation(3,v[4])
+				end
+				slider:translate(0,v[3 + version])
+				slider:translate(1,v[4 + version])
+				slider:translate(2,v[5 + version])
+				slider:scale(0,v[6 + version])
+				slider:scale(1,v[7 + version])
+				slider:scale(2,v[8 + version])
+				slider:Apply()
+			end
+		end
+	end
+	local face = pose.face
+	if face then
+		if face.mouth then character.mouth = face.mouth end
+		if face.mouthopen then character.mouthopen = face.mouthopen end
+		if face.eye then character.eye = face.eye end
+		if face.eyeopen then character.eyeopen = face.eyeopen end
+		if face.eyebrow then character.eyebrow = face.eyebrow end
+		if face.blush then character.blush = face.blush / 9 end
+		if face.blushlines then character.blushlines = face.blushlines / 9 end
+	end
+end
+
 local function loadpose(filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
@@ -108,49 +152,8 @@ local function loadpose(filename)
 			if not ok then
 				error("Error decoding pose %s data:" % filename)
 			end
-			local jp = ret
-			if jp then
-				local version = jp._VERSION_ or 1
-				local clip = jp.pose
-				if clip then
-					log.spam("setting clip from pose to %d", clip)
-					setclip(clip)
-					cliptext.value = clip
-				end
-				local frame = jp.frame
-				if jp.sliders then
-					log.spam("Setting sliders")
-					for k,v in pairs(jp.sliders) do
-						local slider = character.getslider(k)
-						if slider then
-							if version == 1 then
-								slider:SetValues(v[1], v[2], v[3])
-							else
-								slider:rotation(0,v[1])
-								slider:rotation(1,v[2])
-								slider:rotation(2,v[3])
-								slider:rotation(3,v[4])
-							end
-							slider:translate(0,v[3 + version])
-							slider:translate(1,v[4 + version])
-							slider:translate(2,v[5 + version])
-							slider:scale(0,v[6 + version])
-							slider:scale(1,v[7 + version])
-							slider:scale(2,v[8 + version])
-							slider:Apply()
-						end
-					end
-				end
-				local face = jp.face
-				if face then
-					if face.mouth then character.mouth = face.mouth end
-					if face.mouthopen then character.mouthopen = face.mouthopen end
-					if face.eye then character.eye = face.eye end
-					if face.eyeopen then character.eyeopen = face.eyeopen end
-					if face.eyebrow then character.eyebrow = face.eyebrow end
-					if face.blush then character.blush = face.blush / 9 end
-					if face.blushlines then character.blushlines = face.blushlines / 9 end
-				end
+			if ret then
+				table2pose(ret, character)
 			end
 		end
 	end
@@ -168,13 +171,8 @@ function loadposebutton.action()
 	end
 end
 
-local function savepose(filename)
-	autopose(filename)
-	log.spam("Poser: Saving pose %s", filename)
-	local character = charamgr.current
+local function pose2table(character)
 	if character and character.ischaracter == true then
-		local path = aau_path(posesdir, filename) .. ".pose"
-		log.spam("Poser: Saving to %s", path)
 		local t = {}
 		t._VERSION_ = 2
 		t.pose = character.pose
@@ -207,10 +205,20 @@ local function savepose(filename)
 			blushlines = character.blushlines * 9,
 		}
 		t.face = face
-		
+		return t
+	end
+end
+
+local function savepose(filename)
+	autopose(filename)
+	local path = aau_path(posesdir, filename) .. ".pose"
+	log.spam("Poser: Saving pose %s to %s", filename, path)
+	local character = charamgr.current
+	local pose = pose2table(character)
+	if pose then
 		local file = io.open(path, "w")
 		if not file then return nil end
-		file:write(json.encode(t))
+		file:write(json.encode(pose))
 		file:close()
 		log.spam("Poser: Pose %s saved", filename)
 		populateposelist()

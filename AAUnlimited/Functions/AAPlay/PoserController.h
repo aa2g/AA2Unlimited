@@ -261,80 +261,6 @@ namespace Poser {
 		class PoserCharacter {
 		public:
 
-			struct Face {
-				Face(XXFileFace* face) {
-					m_faceStruct = face;
-				}
-
-				inline int GetEyeShape() {
-					return m_faceStruct->m_eye;
-				}
-
-				inline void SetEyeShape(int shape) {
-					m_faceStruct->m_eye = shape;
-				}
-
-				inline int GetEyebrows() {
-					return m_faceStruct->m_eyebrow;
-				}
-
-				inline void SetEyebrows(int brows) {
-					m_faceStruct->m_eyebrow = brows;
-				}
-
-				inline float GetEyeOpen() {
-					return m_faceStruct->m_eyeOpen;
-				}
-
-				inline void SetEyeOpen(float open) {
-					m_faceStruct->m_eyeOpen = open;
-				}
-
-				inline int GetMouthShape() {
-					return m_faceStruct->m_mouth;
-				}
-
-				inline void SetMouthShape(int shape) {
-					m_faceStruct->m_mouth = shape;
-				}
-
-				inline float GetMouthOpen() {
-					return m_faceStruct->m_mouthOpen;
-				}
-
-				inline void SetMouthOpen(float open) {
-					m_faceStruct->m_mouthOpen = open;
-				}
-
-				inline int GetBlush() {
-					// default face doesn't have blushpointer set so check for that
-					return m_faceStruct->blushPointer ? (int)(*m_faceStruct->GetBlush() * 9) : 0;
-				}
-
-				inline void SetBlush(int blush) {
-					if (m_faceStruct->blushPointer) *m_faceStruct->GetBlush() = (float)blush / 9.0f;
-				}
-
-				inline int GetBlushLines() {
-					// default face doesn't have blushpointer set so check for that
-					return m_faceStruct->blushPointer ? (int)(*m_faceStruct->GetBlushLines() * 9) : 0;
-				}
-
-				inline void SetBlushLines(int lines) {
-					if (m_faceStruct->blushPointer)*m_faceStruct->GetBlushLines() = (float)lines / 9.0f;
-				}
-
-				inline bool GetEyeTracking() {
-					return m_faceStruct->m_eyeTracking;
-				}
-
-				inline void SetEyeTracking(bool value) {
-					m_faceStruct->m_eyeTracking = value;
-				}
-
-				XXFileFace *m_faceStruct;
-			}; // struct Face
-
 			PoserCharacter(ExtClass::CharacterStruct* c);
 			~PoserCharacter();
 
@@ -345,10 +271,6 @@ namespace Poser {
 				}
 			}
 
-			Face GetFace() {
-				return Face(reinterpret_cast<XXFileFace*>(m_character->m_xxFace));
-			}
-
 			void FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter = nullptr);
 			void FrameModSkeleton(ExtClass::XXFile* xxFile);
 			void FrameModFace(ExtClass::XXFile* xxFile);
@@ -356,6 +278,7 @@ namespace Poser {
 			SliderInfo* GetSlider(const char* name);
 			SliderInfo* GetSlider(const std::string& name);
 			SliderInfo* GetPropSlider(const char* name);
+			void SetHidden(const char* name, bool hidden);
 
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
@@ -382,6 +305,9 @@ namespace Poser {
 						}
 					}
 					return 0;
+				});
+				LUA_METHOD(SetHidden, {
+					_self->SetHidden(_gl.get(2), _gl.get(3));
 				});
 			}
 #undef LUA_CLASS
@@ -410,31 +336,6 @@ namespace Poser {
 		PoserController();
 
 		~PoserController();
-
-		ExtClass::XXFile* GetXXFile(ExtClass::CharacterStruct::Models model);
-
-		inline bool GetIsHiddenFrame(ExtClass::Frame* frame) {
-			return frame->m_renderFlag == 2;
-		}
-
-		inline void SetHiddenFrame(ExtClass::Frame* frame, bool hidden) {
-			frame->m_renderFlag = hidden ? 2 : 0;
-		}
-
-		void SetHidden(const char* name, bool hidden);
-
-		inline void SetTears(bool show) {
-			SetHidden("A00_O_namida", !show);
-		}
-
-		inline void SetDimEyes(bool dim) {
-			SetHidden("A00_O_mehi", dim);
-		}
-
-		inline void SetTongueJuice(bool show) {
-			SetHidden("A00_O_kutisiru", !show);
-			SetHidden("A00_O_sitasiru", !show);
-		}
 
 		void LoadCharacter(ExtClass::CharacterStruct* c);
 		void UpdateCharacter(ExtClass::CharacterStruct* c);

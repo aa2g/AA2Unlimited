@@ -1,6 +1,6 @@
 local _M = {}
 
-local facetoggles = { tears = "", dimeyes = "" }
+local facetoggles = { tears = "00_O_namida", dimeyes = "00_O_mehi", mouthjuice = "A00_O_kutisiru", tonguejuice = "A00_O_sitasiru" }
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines", eyetracking = "m_eyeTracking" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothstate = "m_clothState" }
@@ -49,7 +49,6 @@ function _M.wrap(entity)
 				return function (...) return struct[structfuncs[k]](struct, ...) end
 			end
 			if poserfuncs[k] then
-				log.spam("Poser: return poserfunc %s for %s", poserfuncs[k], poser)
 				return function (...) return poser[poserfuncs[k]](poser, ...) end
 			end
 			return charamt[k]
@@ -69,6 +68,7 @@ function _M.wrap(entity)
 					-- character:update_face()
 				elseif facetoggles[k] then
 					rawset(cache, k, v)
+					poser:SetHidden(facetoggles[k], v)
 				elseif skelkeys[k] then
 					local skel = struct.m_xxSkeleton
 					skel[skelkeys[k]] = v

@@ -575,4 +575,17 @@ namespace Poser {
 		}
 		return 0;
 	}
+
+	void PoserController::PoserCharacter::SetHidden(const char* name, bool hidden) {
+		ExtClass::Frame** frame = m_character->m_bonePtrArray;
+		ExtClass::Frame** arrayEnd = m_character->m_bonePtrArrayEnd;
+		while (frame < arrayEnd) {
+			if (*frame != nullptr) {
+				if (strstr((*frame)->m_name, name)) {
+					(*frame)->m_renderFlag = hidden ? 2 : 0;
+				}
+			}
+			frame++;
+		}
+	}
 }

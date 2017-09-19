@@ -471,13 +471,13 @@ signals.connect(modifierx100, "selected", slidersetmodifier)
 -- UI Face
 -- ---------
 
-local dimeyes = toggles.button { title = "Dim Eyes", flat_action = function(self) if charamgr.current then charamgr.current.dimeyes = self.value == "ON" end end, expand = "horizontal" }
+local dimeyes = iup.flatbutton { title = "Dim Eyes", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.dimeyes = self.value == "ON" end end, expand = "horizontal" }
 dimeyes.size = "x12"
 dimeyes.expand = "horizontal"
-local tears = toggles.button { title = "Tears", flat_action = function(self) if charamgr.current then charamgr.current.tears = self.value == "ON" end end, expand = "horizontal" }
+local tears = iup.flatbutton { title = "Tears", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tears = self.value == "ON" end end, expand = "horizontal" }
 tears.size = "x12"
 tears.expand = "horizontal"
-local eyetracking = toggles.button { title = "Eye Tracking", flat_action = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
+local eyetracking = iup.flatbutton { title = "Eye Tracking", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
 eyetracking.size = "x12"
 eyetracking.expand = "horizontal"
 local yogurt = toggles.button { title = "Yogurt" }
