@@ -278,18 +278,25 @@ end
 -- UI Props
 -- ----------
 
-local proplist = lists.listbox { lines = 8, expand = "yes" }
-local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
-local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
-
-function addpropbutton.action()
-	local pattern = aau_path("poser\\*.xx")
+local function getpropfile(pattern)
+	local pattern = aau_path(pattern)
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)
 	if ret == 0 then
-		propmgr.loadprop(file)
+		return file
 	end
+end
+
+local proplist = lists.listbox { lines = 8, expand = "yes" }
+local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
+local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
+
+local attachpropsbutton = iup.button { title = "Attach", expand = "horizontal" }
+local detachpropsbutton = iup.button { title = "Detach", expand = "horizontal" }
+
+function addpropbutton.action()
+	propmgr.loadprop(getpropfile("poser\\items\\*.xx"))
 end
 
 function removepropbutton.action()
@@ -297,6 +304,27 @@ function removepropbutton.action()
 	if index and index ~= 0 then
 		log.spam("removing prop %d", index)
 		propmgr.unloadprop(index)
+	end
+end
+
+function attachpropsbutton.action()
+	local path = getpropfile("poser\\charitems\\*.xx")
+	if not path then return end
+	log.spam("loading charitem %s", path)
+	local character = charamgr.current
+	if not character.origskel then
+		character.origskel = character.skelname
+	end
+	character:override(character.origskel .. ".xx", path)
+	character:reload()
+	log.spam("re-spawned character")
+end
+
+function detachpropsbutton.action()
+	local character = charamgr.current
+	if character.origskel then
+		character:override(character.origskel .. ".xx", nil)
+		character:reload()
 	end
 end
 
@@ -637,6 +665,10 @@ local dialogsliders = iup.dialog {
 				iup.hbox {
 					addcharbutton,
 					removecharbutton,
+				},
+				iup.hbox {
+					attachpropsbutton,
+					detachpropsbutton,
 				},
 				iup.label { title = "Style" },
 				stylelist,

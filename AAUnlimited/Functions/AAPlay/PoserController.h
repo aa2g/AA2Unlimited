@@ -296,9 +296,12 @@ namespace Poser {
 				LUA_MAPITERATOR(Props, m_propSliders);
 				LUA_METHOD(Override, {
 					if (_gl.top() == 3) {
-						LOGSPAM << "Poser: Registered PoserCharacter Override\n";
 						_self->m_overrides.erase(General::utf8.from_bytes((const char*)_gl.get(2)));
-						_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
+						LOGSPAM << "Poser: Unregistered PoserCharacter Override\n";
+						if (!_gl.get(3).isnil()) {
+							_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
+							LOGSPAM << "Poser: Registered PoserCharacter Override\n";
+						}
 					}
 					else if (_gl.top() == 2) {
 						LOGSPAM << "Poser: Queried PoserCharacter Override\n";

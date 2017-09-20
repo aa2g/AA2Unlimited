@@ -67,21 +67,9 @@ function _M.loadprop(path)
 	local directory, filename, extension = fileutils.splitfilepath(path)
 	local directoryname = string.match(directory, ".*\\(.+)\\")
 	log.spam("loadprop( %s )\ndirectory: %s\nfilename: %s\nextension: %s", path, directory, filename, extension)
-	if directoryname == "charitems" and extension == "xx" then
-		log.spam("loading charitem %s", path)
-		local character = charamgr.current
-		if not character.origskel then
-			character.origskel = character.skelname
-		end
-		log.spam("inspect %s, %s", character.override, character.reload)
-		character:override(charamgr.current.origskel .. ".xx", path)
-		character:reload()
-		log.spam("re-spawned character")
-	else
-		if directory and filename and extension == "xx" then
-			log.spam("loading item %s", filename)
-			loadxx(directory, filename)
-		end
+	if directory and filename and extension == "xx" then
+		log.spam("loading item %s", filename)
+		loadxx(directory, filename)
 	end
 end
 
