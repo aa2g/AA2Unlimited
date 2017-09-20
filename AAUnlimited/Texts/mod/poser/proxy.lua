@@ -35,7 +35,7 @@ function _M.wrap(entity, entmgr)
 	charamt = {
 		__index = function(t, k)
 			local cached = cache[k]
-			if cached then return cached end
+			if cached ~= nil then return cached end
 			if ischaracter then
 				if facekeys[k] then
 					return face[facekeys[k]]

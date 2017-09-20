@@ -104,7 +104,7 @@ function _M.removecharacter(character)
 		end
 	end
 	if not removed then return end
-	log.spam("Poser: We have %d characters", #characters)
+	log.spam("Poser: We have %d characters left", #characters)
 	characterschanged()
 	assert(removed.spawned ~= nil)
 	if removed.spawned then
@@ -122,7 +122,7 @@ function _M.removecharacter(character)
 				local tch = characters[1]
 				-- all characters remaining must be spawned ones
 				assert(tch.spawned)
-				tch.despawn()
+				tch:despawn()
 			end
 		end
 		if _M.opts.pruneprops == 1 then
@@ -148,8 +148,9 @@ function _M.spawn(character, clothstate, pose)
 	_M.is_spawning = true
 	local wrapper = proxy.wrap(character, _M)
 	characters[#characters + 1] = wrapper
-	spawned[#spawned + 1] = wrapper
-	wrapper.spawned = #spawned
+	local slot = #spawned + 1
+	spawned[slot] = wrapper
+	wrapper.spawned = slot
 	wrapper.struct:SetAnimData(0,0,1,1,1,1,0,1,1)
 	wrapper:reload(clothstate or 1, pose or 0)
 	_M.is_spawning = false
