@@ -64,7 +64,7 @@ extern DWORD g_anim_data[25][10];
 		void* m_somePointer; // 0x2c
 		void* m_somePointer2;
 		void* m_somePointer3;
-		void* m_somePointer4;
+		int m_materialSlot;
 		int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24 //3c
 		BYTE m_boobs; // weird female boobs state. girls generally have some, boys dont. // 40
 		BYTE m_clothState;
@@ -154,7 +154,7 @@ extern DWORD g_anim_data[25][10];
 	LUA_BIND(m_somePointer)
 	LUA_BIND(m_somePointer2)
 	LUA_BIND(m_somePointer3)
-	LUA_BIND(m_somePointer4)
+	LUA_BIND(m_materialSlot)
 	LUA_BIND(m_charData)
 	LUA_BIND(m_seat)
 	LUA_BIND(m_boobs)

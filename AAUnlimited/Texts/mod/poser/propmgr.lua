@@ -75,7 +75,7 @@ function _M.loadprop(path)
 		end
 		log.spam("inspect %s, %s", character.override, character.reload)
 		character:override(charamgr.current.origskel .. ".xx", path)
-		character:reload(character.clothstate, 0, 0, 1)
+		character:reload()
 		log.spam("re-spawned character")
 	else
 		if directory and filename and extension == "xx" then

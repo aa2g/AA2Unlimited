@@ -29,9 +29,9 @@ local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 local on_character_updated = signals.signal()
 
-function _M.reload(character, clothstate, pose)
+function _M.reload(character, clothstate, pose, materialslot)
 	-- TODO: light/partial now hardcoded
-	character.struct:Spawn(clothstate or character.clothstate or 1, character.spawned + 1, 0, 0)
+	character.struct:Spawn(clothstate or character.clothstate or 1, materialslot or character.materialslot, 0, 0)
 	_M.load_xa(character, pose or 0)
 end
 
@@ -152,7 +152,7 @@ function _M.spawn(character, clothstate, pose)
 	spawned[slot] = wrapper
 	wrapper.spawned = slot
 	wrapper.struct:SetAnimData(0,0,1,1,1,1,0,1,1)
-	wrapper:reload(clothstate or 1, pose or 0)
+	wrapper:reload(clothstate or 1, pose or 0, slot + 1)
 	_M.is_spawning = false
 end
 
