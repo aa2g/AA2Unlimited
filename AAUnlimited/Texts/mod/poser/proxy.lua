@@ -4,10 +4,10 @@ local facetoggles = { tears = "00_O_namida", dimeyes = "00_O_mehi", mouthjuice =
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines", eyetracking = "m_eyeTracking" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothstate = "m_clothState" }
-local structfuncs = { spawn = "Spawn", despawn = "Despawn", update = "Update", load_xa = "LoadXA", destroy = "Destroy", unload = "Unload" }
+local structfuncs = { despawn = "Despawn", destroy = "Destroy", unload = "Unload" }
 local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props" }
 
-function _M.wrap(entity)
+function _M.wrap(entity, entmgr)
 	log.spam("Poser: Wrapping %s", entity)
 	local mt = getmetatable(entity)
 	if not entity or not mt then return end
@@ -22,6 +22,7 @@ function _M.wrap(entity)
 	if not (ischaracter or isprop) then
 		log.error("Poser: Cannot wrap unknown struct %s", entity)
 	end
+	-- TODO: maybe auto-set entmgr depending on mt, too. introduces *mgr.lua circular dep tho
 	
 	local struct = entity
 	local poser = ischaracter and GetPoserCharacter(struct) or GetPoserProp(struct)
@@ -50,6 +51,9 @@ function _M.wrap(entity)
 			end
 			if poserfuncs[k] then
 				return function (...) return poser[poserfuncs[k]](poser, ...) end
+			end
+			if entmgr and entmgr[k] then
+				return function (...) return entmgr[k](struct, ...) end
 			end
 			return charamt[k]
 		end,
@@ -91,11 +95,6 @@ function _M.wrap(entity)
 	setmetatable(wrapper, charamt)
 
 	if ischaracter then
-		
-		function charamt.update(clothstate)
-			struct:Update(clothstate or 0, exe_type == "edit" and 1 or 0)
-		end
-		
 		function charamt.setclip(clip)
 			wrapper.pose = clip
 			wrapper.frame = 9000

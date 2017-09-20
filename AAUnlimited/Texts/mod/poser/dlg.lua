@@ -261,6 +261,7 @@ function addcharbutton.action()
 	charsel:popup()
 	local char = seats[tonumber(pick)]
 	if char then
+		char = GetCharacter(char)
 		charamgr.spawn(char)
 		updatecharacterlist()
 	end

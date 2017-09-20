@@ -34,6 +34,7 @@ function _M.reload(char, light)
 	_M.load_xa(char)
 end
 
+
 -- function charamt.update_face(chara)
 --	local blink = exe_type == "edit" or 0xFC720 or 0x10DBB0
 --	local saved = g_poke(blink, "\xc2\x08\x00")
@@ -82,7 +83,7 @@ function _M.addcharacter(character)
 		if not _M.is_spawning then
 			charcount = charcount + 1
 		end
-		new = proxy.wrap(character)
+		new = proxy.wrap(character, _M)
 		log.spam("Poser: new character %s", character.name)
 		new.index = last
 		new.spawned = _M.is_spawning
@@ -137,15 +138,20 @@ function _M.clear_characters()
 	end
 end
 
-function _M.spawn(seat,clothstate,pose)
-	assert(not _M.is_spawning)
+-- NOTE: these are separated from the proxy because we want to use those *without* the entity proxy,
+-- too. Proxy routes to these delegates via entmgr (our _M) argument.
+function _M.spawn(ch,clothstate,pose)
 	_M.is_spawning = true
-	local ch = GetCharacter(seat)
-	assert(ch)
 	ch:Spawn(clothstate or 1,#characters,0,0)
 	ch:SetAnimData(0,0,1,1,1,1,0,1,1)
-	_M.load_xa(ch, pose)
+	_M.load_xa(ch, pose or 0)
 	_M.is_spawning = false
+end
+
+function _M.reload(char,clothstate,pose)
+	ch:Spawn(clothstate or 1,#characters,0,0)
+	-- does reload clear the animation track?
+	--_M.load_xa(ch, pose or 0)
 end
 
 function _M.despawn(character)
@@ -161,6 +167,11 @@ function _M.despawn(character)
 	log.spam("Poser: Despawned character: %s", character.name)
 	return true
 end
+
+function _M.update(struct,clothstate)
+	struct:Update(clothstate or 0, exe_type == "edit" and 1 or 0)
+end
+
 
 function _M.load_xa(char, pose)
 	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))

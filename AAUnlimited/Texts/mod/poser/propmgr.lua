@@ -71,9 +71,9 @@ function _M.loadprop(path)
 		log.spam("loading charitem %s", path)
 		local skeleton = charamgr.current.skelname
 		local character = charamgr.current
-		log.spam("inspect %s, %s", character.override, character.spawn)
-		character:override(skeleton .. ".xx", path)
-		character.spawn(character.struct, character.clothstate, 0, 0, 1)
+		log.spam("inspect %s, %s", character.override, character.reload)
+		character.override(skeleton .. ".xx", path)
+		character.reload(character.clothstate, 0, 0, 1)
 		log.spam("re-spawned character")
 	else
 		if directory and filename and extension == "xx" then
