@@ -23,25 +23,18 @@ local dummymt = {
 setmetatable(dummycharacter, dummymt)
 _M.current = dummycharacter
 
-local characters = {}
+local characters = {} -- characters in scene
+local spawned = {} -- used character material slots
 local currentcharacterchanged = signals.signal()
 local characterschanged = signals.signal()
 local on_character_updated = signals.signal()
 
-function _M.reload(char, light)
+function _M.reload(character, clothstate, pose)
 	-- TODO: light/partial now hardcoded
-	char:spawn(1,char.index, light, exe_type == "edit" and 1 or 0)
-	_M.load_xa(char)
+	character.struct:Spawn(clothstate or character.clothstate or 1, character.spawned + 1, 0, 0)
+	_M.load_xa(character, pose or 0)
 end
 
-
--- function charamt.update_face(chara)
---	local blink = exe_type == "edit" or 0xFC720 or 0x10DBB0
---	local saved = g_poke(blink, "\xc2\x08\x00")
-	--chara.struct:Animate2(-1,0,1,1,1,1)
-	--chara.struct:Animate1(0,1,0)
-	--saved = g_poke(blink, saved)
--- end
 
 local function setcurrentcharacter(character)
 	log.spam("Poser: Set current character %s", character)
@@ -71,23 +64,21 @@ local charcount = 0 -- this counts only characters spawned by the game, not us
 function _M.addcharacter(character)
 	log.spam("Poser: Add character %s", character)
 	local new
-	local last = 0
-	for i,v in ipairs(characters) do
+	for _,v in pairs(characters) do
 		if v.struct == character then
 			new = v
 			break
 		end
-		last = i
 	end
+	log.spam("new: %s", new)
 	if not new then
 		if not _M.is_spawning then
 			charcount = charcount + 1
 		end
 		new = proxy.wrap(character, _M)
 		log.spam("Poser: new character %s", character.name)
-		new.index = last
-		new.spawned = _M.is_spawning
-		characters[last + 1] = new
+		new.spawned = new.spawned or false
+		characters[#characters + 1] = new
 		for i,v in ipairs(characters) do
 			log.spam("%d: %s", i, v.name)
 		end
@@ -116,7 +107,9 @@ function _M.removecharacter(character)
 	log.spam("Poser: We have %d characters", #characters)
 	characterschanged()
 	assert(removed.spawned ~= nil)
-	if removed.spawned then return end
+	if removed.spawned then
+		spawned[removed.spawned] = nil
+	end
 	charcount = charcount - 1
 	assert(charcount >= 0)
 	log.spam("Poser: charcount %d", charcount)
@@ -151,18 +144,15 @@ end
 
 -- NOTE: these are separated from the proxy because we want to use those *without* the entity proxy,
 -- too. Proxy routes to these delegates via entmgr (our _M) argument.
-function _M.spawn(ch,clothstate,pose)
+function _M.spawn(character, clothstate, pose)
 	_M.is_spawning = true
-	ch:Spawn(clothstate or 1,#characters,0,0)
-	ch:SetAnimData(0,0,1,1,1,1,0,1,1)
-	_M.load_xa(ch, pose or 0)
+	local wrapper = proxy.wrap(character, _M)
+	characters[#characters + 1] = wrapper
+	spawned[#spawned + 1] = wrapper
+	wrapper.spawned = #spawned
+	wrapper.struct:SetAnimData(0,0,1,1,1,1,0,1,1)
+	wrapper:reload(clothstate or 1, pose or 0)
 	_M.is_spawning = false
-end
-
-function _M.reload(char,clothstate,pose)
-	ch:Spawn(clothstate or 1,#characters,0,0)
-	-- does reload clear the animation track?
-	--_M.load_xa(ch, pose or 0)
 end
 
 function _M.despawn(character)
@@ -173,21 +163,21 @@ function _M.despawn(character)
 	if character == _M.current then
 		_M.setcurrentcharacter(characters[1] or dummycharacter)
 	end
-	character.despawn()
+	character.struct:Despawn()
 	character.spawned = false
 	log.spam("Poser: Despawned character: %s", character.name)
 	return true
 end
 
-function _M.update(struct,clothstate)
-	struct:Update(clothstate or 0, exe_type == "edit" and 1 or 0)
+function _M.update(character)
+	character.struct:Update(character.clothstate or 0, exe_type == "edit" and 1 or 0)
 end
 
 
-function _M.load_xa(char, pose)
+function _M.load_xa(character, pose)
 	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))
-	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(char.m_charData.m_figure)) & 0xff })
-	char:LoadXA(pp, xa, pose or 0, 0, 0)
+	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(character.struct.m_charData.m_figure)) & 0xff })
+	character.struct:LoadXA(pp, xa, pose or 0, 0, 0)
 end
 
 

@@ -261,8 +261,10 @@ namespace Poser {
 		class PoserCharacter {
 		public:
 
-			PoserCharacter(ExtClass::CharacterStruct* c);
+			PoserCharacter();
 			~PoserCharacter();
+
+			void Clear();
 
 			inline void ResetSliders() {
 				for (auto it = m_sliders.begin(), end = m_sliders.end(); it != end; it++) {
@@ -294,10 +296,12 @@ namespace Poser {
 				LUA_MAPITERATOR(Props, m_propSliders);
 				LUA_METHOD(Override, {
 					if (_gl.top() == 3) {
+						LOGSPAM << "Poser: Registered PoserCharacter Override\n";
 						_self->m_overrides.erase(General::utf8.from_bytes((const char*)_gl.get(2)));
 						_self->m_overrides.emplace(General::utf8.from_bytes((const char*)_gl.get(2)), General::utf8.from_bytes((const char*)_gl.get(3)));
 					}
 					else if (_gl.top() == 2) {
+						LOGSPAM << "Poser: Queried PoserCharacter Override\n";
 						auto match = _self->m_overrides.find(General::utf8.from_bytes((const char*)_gl.get(2)));
 						if (match != _self->m_overrides.end()) {
 							_gl.push(General::utf8.to_bytes(match->first).c_str());
@@ -353,14 +357,13 @@ namespace Poser {
 
 		void SwapTransientSliders(bool skipSkeleton);
 		void FrameModEvent(ExtClass::XXFile* xxFile);
-		void FrameModRoom(ExtClass::XXFile* xxFile);
 		void FrameModProp(PoserProp* xxFile);
 
 		std::wstring GetOverride(const std::wstring& file);
 		void SetOverride(const std::wstring& file, const std::wstring& override);
 
 		bool m_isActive;
-		std::vector<PoserCharacter*> m_characters;
+		std::vector<PoserCharacter> m_characters;
 		PoserCharacter* m_loadCharacter;
 		std::unordered_map<std::wstring, std::wstring> m_overrides;
 	};

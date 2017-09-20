@@ -18,7 +18,7 @@ local scenesdir = "poser\\scenes"
 
 local function setclip(clip)
 	if charamgr.current then
-		charamgr.current.setclip(clip)
+		charamgr.current:setclip(clip)
 	end
 end
 clipchanged.connect(setclip)
@@ -70,7 +70,7 @@ end
 function resetposebutton.action()
 	if charamgr.current then
 		-- TODO: make this sane
-		for _,v in charamgr.current.sliders() do
+		for _,v in charamgr.current:sliders() do
 			v:Reset()
 			v:Apply()
 		end
@@ -120,7 +120,7 @@ local function table2pose(pose, character)
 	if pose.sliders then
 		log.spam("Setting sliders")
 		for k,v in pairs(pose.sliders) do
-			local slider = character.getslider(k)
+			local slider = character:getslider(k)
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
@@ -188,7 +188,7 @@ local function pose2table(character)
 		t.pose = character.pose
 		t.frame = character.frame
 		local sliders = {}
-		for k,v in character.sliders() do
+		for k,v in character:sliders() do
 			local slider = {
 				v:rotation(0),
 				v:rotation(1),

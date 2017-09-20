@@ -69,11 +69,13 @@ function _M.loadprop(path)
 	log.spam("loadprop( %s )\ndirectory: %s\nfilename: %s\nextension: %s", path, directory, filename, extension)
 	if directoryname == "charitems" and extension == "xx" then
 		log.spam("loading charitem %s", path)
-		local skeleton = charamgr.current.skelname
 		local character = charamgr.current
+		if not character.origskel then
+			character.origskel = character.skelname
+		end
 		log.spam("inspect %s, %s", character.override, character.reload)
-		character.override(skeleton .. ".xx", path)
-		character.reload(character.clothstate, 0, 0, 1)
+		character:override(charamgr.current.origskel .. ".xx", path)
+		character:reload(character.clothstate, 0, 0, 1)
 		log.spam("re-spawned character")
 	else
 		if directory and filename and extension == "xx" then
@@ -87,7 +89,7 @@ function _M.unloadprop(index)
 	local prop = loaded[tonumber(index)]
 	if prop then
 		log.spam("unloading prop %s", prop.name)
-		prop.unload(xxlist)
+		prop:unload(xxlist)
 		table.remove(loaded, index)
 		propschanged()
 	end

@@ -4,7 +4,7 @@ local facetoggles = { tears = "00_O_namida", dimeyes = "00_O_mehi", mouthjuice =
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpen", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpen", blush = "Blush", blushlines = "BlushLines", eyetracking = "m_eyeTracking" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothstate = "m_clothState" }
-local structfuncs = { despawn = "Despawn", destroy = "Destroy", unload = "Unload" }
+local structfuncs = { destroy = "Destroy", unload = "Unload" }
 local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props" }
 
 function _M.wrap(entity, entmgr)
@@ -21,6 +21,7 @@ function _M.wrap(entity, entmgr)
 	log.spam("Poser: Is character: %s", ischaracter)
 	if not (ischaracter or isprop) then
 		log.error("Poser: Cannot wrap unknown struct %s", entity)
+		return
 	end
 	-- TODO: maybe auto-set entmgr depending on mt, too. introduces *mgr.lua circular dep tho
 	
@@ -47,13 +48,13 @@ function _M.wrap(entity, entmgr)
 				end
 			end
 			if structfuncs[k] then
-				return function (...) return struct[structfuncs[k]](struct, ...) end
+				return function (self, ...) return struct[structfuncs[k]](struct, ...) end
 			end
 			if poserfuncs[k] then
-				return function (...) return poser[poserfuncs[k]](poser, ...) end
+				return function (self, ...) return poser[poserfuncs[k]](poser, ...) end
 			end
 			if entmgr and entmgr[k] then
-				return function (...) return entmgr[k](struct, ...) end
+				return function (self, ...) return entmgr[k](wrapper, ...) end
 			end
 			return charamt[k]
 		end,
@@ -79,7 +80,7 @@ function _M.wrap(entity, entmgr)
 				elseif charkeys[k] then
 					struct[charkeys[k]] = v
 				else
-					rawset(charamt, k, v)
+					rawset(cache, k, v)
 				end
 			end
 		end
@@ -95,19 +96,15 @@ function _M.wrap(entity, entmgr)
 	setmetatable(wrapper, charamt)
 
 	if ischaracter then
-		function charamt.setclip(clip)
-			wrapper.pose = clip
-			wrapper.frame = 9000
+		function charamt.setclip(character, clip)
+			character.pose = clip
+			character.frame = 9000
 		end
 
 		function charamt.context_name()
 			log.spam("chr is %s",chr)
 			return name .. '@' .. wrapper.pose .. '@' .. (wrapper.xa or '<DEFAULT>')
 		end
-	end
-	
-	if ischaracter then
-		wrapper.origskel = wrapper.skelname
 	end
 	
 	return wrapper

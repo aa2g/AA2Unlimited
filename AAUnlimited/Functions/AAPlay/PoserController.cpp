@@ -84,8 +84,8 @@ namespace Poser {
 		angle[2] = std::atan2(t3, t4);
 	}
 
-	PoserController::PoserCharacter::PoserCharacter(ExtClass::CharacterStruct* c) :
-		m_character(c)
+	PoserController::PoserCharacter::PoserCharacter() :
+		m_character(nullptr)
 	{
 	}
 
@@ -101,8 +101,16 @@ namespace Poser {
 		}
 	}
 
+	void PoserController::PoserCharacter::Clear() {
+		m_sliders.clear();
+		m_transientSliders.clear();
+		m_propSliders.clear();
+		m_overrides.clear();
+	}
+
 	PoserController::PoserController() :
 		m_isActive(false) {
+		m_characters.resize(25);
 	}
 
 	PoserController::~PoserController()	{
@@ -118,9 +126,6 @@ namespace Poser {
 	}
 
 	void PoserController::Clear() {
-		for (PoserCharacter* c : m_characters)
-			delete c;
-		m_characters.clear();
 	}
 
 	void PoserController::SliderInfo::Apply() {
@@ -186,9 +191,6 @@ namespace Poser {
 	static const char prefixTrans[]{ "pose_tr_" };
 	void PoserController::FrameModEvent(ExtClass::XXFile* xxFile) {
 		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
-
-		if (model == ExtClass::CharacterStruct::H3DROOM)
-			FrameModRoom(xxFile);
 
 		if (m_loadCharacter == nullptr) return;
 		bool modded = false;
@@ -464,49 +466,28 @@ namespace Poser {
 		}
 	}
 
-	void PoserController::FrameModRoom(ExtClass::XXFile* xxFile) {
-
-	}
-
 	void PoserController::LoadCharacter(ExtClass::CharacterStruct* charStruct) {
-		PoserCharacter* character = nullptr;
-		for (PoserCharacter* c : m_characters) {
-			if (c->m_character == charStruct)
-				character = c;
-		}
-		if (!character) {
-			character = new PoserCharacter(charStruct);
-			m_characters.push_back(character);
-		}
+		PoserCharacter* character = &m_characters[charStruct->m_seat];
+		character->m_character = charStruct;
 		m_loadCharacter = character;
 	}
 
 	void PoserController::UpdateCharacter(ExtClass::CharacterStruct* charStruct) {
-		PoserCharacter* character = nullptr;
-		for (PoserCharacter* c : m_characters) {
-			if (c->m_character == charStruct)
-				character = c;
-		}
-		m_loadCharacter = character;
+		m_loadCharacter = &m_characters[charStruct->m_seat];
 	}
 
 	void PoserController::RemoveCharacter(ExtClass::CharacterStruct* charStruct) {
-		for (auto it = m_characters.begin(); it != m_characters.end(); it++) {
-			if ((*it)->m_character == charStruct) {
-				delete *it;
-				m_characters.erase(it);
-				break;
-			}
-		}
+		m_characters[charStruct->m_seat].Clear();
 		m_loadCharacter = nullptr;
 	}
 
-	PoserController::PoserCharacter* PoserController::GetPoserCharacter(ExtClass::CharacterStruct* c) {
-		for (auto charas : m_characters) {
-			if (charas->m_character == c)
-				return charas;
+	PoserController::PoserCharacter* PoserController::GetPoserCharacter(ExtClass::CharacterStruct* charStruct) {
+		PoserCharacter* poserCharacter = nullptr;
+		if (charStruct) {
+			poserCharacter = &m_characters[charStruct->m_seat];
+			poserCharacter->m_character = charStruct;
 		}
-		return nullptr;
+		return poserCharacter;
 	}
 	
 	void PoserController::LoadCloth(std::vector<BYTE> &file) {

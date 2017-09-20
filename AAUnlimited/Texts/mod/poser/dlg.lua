@@ -160,7 +160,7 @@ local function setcategory(category)
 	elseif category == "Props" then
 		local props = {}
 		local character = charamgr.current
-		if character and character.isvalid == true then
+		if character and character.ischaracter then
 			for p,_ in character:props() do
 				table.insert(props, p)
 			end
@@ -235,16 +235,17 @@ function addcharbutton.action()
 		end
 	end
 
+	local pick
 	local chlist = iup.list(list)
 	local charsel
 	local function chsel()
 		charsel:destroy()
 	end
 	function chlist.dblclick_cb()
+		pick = chlist.value
 		return iup.CLOSE
 	end
 	
-	local pick
 	charsel = iup.dialog {
 		iup.vbox {
 			chlist,
@@ -262,7 +263,7 @@ function addcharbutton.action()
 	local char = seats[tonumber(pick)]
 	if char then
 		char = GetCharacter(char)
-		charamgr.spawn(char)
+		charamgr.spawn(char, 1, 0)
 		updatecharacterlist()
 	end
 end
@@ -286,7 +287,6 @@ function addpropbutton.action()
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)
-	log.spam("add prop button returned %s / %d", file, ret)
 	if ret == 0 then
 		propmgr.loadprop(file)
 	end
@@ -407,7 +407,7 @@ local function propsliderchanged()
 	local bone = propbonelist[tonumber(propbonelist.value)]
 	local prop = propmgr.props[tonumber(proplist.value)]
 	if prop and bone then
-		setcurrentslider(prop.getslider(bone))
+		setcurrentslider(prop:getslider(bone))
 	end
 end
 
@@ -416,7 +416,7 @@ local function propchanged()
 	if prop then
 		local i = 1
 		log.spam("%s %s", prop, prop.poser)
-		for k,_ in prop.sliders() do
+		for k,_ in prop:sliders() do
 			propbonelist[i] = k
 			i = i + 1
 		end
@@ -430,7 +430,7 @@ local function sliderchanged()
 	slidername = bones.bonemap[slidername] or slidername or ""
 	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
-		local slider = charamgr.current.getslider(slidername)
+		local slider = charamgr.current:getslider(slidername)
 		setcurrentslider(slider)
 	end
 	slidersetoperation(currentoperation)
