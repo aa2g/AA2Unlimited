@@ -122,12 +122,23 @@ function _M.removecharacter(character)
 	log.spam("Poser: charcount %d", charcount)
 	-- the legit character despawned, this means the scene is ending - despawn all our injected characters, too
 	if charcount == 0 then
-		while #characters > 0 do
-			--local tch = characters[#characters-1]
-			local tch = characters[1]
-			-- all characters remaining must be spawned ones
-			assert(tch.spawned)
-			tch.despawn()
+		if _M.opts.prunecharacters == 1 then
+			log.spam("Poser despawning extra characters")
+			while #characters > 0 do
+				--local tch = characters[#characters-1]
+				local tch = characters[1]
+				-- all characters remaining must be spawned ones
+				assert(tch.spawned)
+				tch.despawn()
+			end
+		end
+		if _M.opts.pruneprops == 1 then
+			log.spam("Poser despawning props")
+			local propmgr = require "poser.propmgr"
+			local props = propmgr.props
+			while #props > 0 do
+				propmgr.unloadprop(1)
+			end
 		end
 	end
 end

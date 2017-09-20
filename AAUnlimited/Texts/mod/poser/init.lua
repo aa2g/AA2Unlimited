@@ -15,6 +15,8 @@ local opts = {
 	{"autoloading", 0, "Autoload character pose: %b"},
 	{"ontop", 1, "Always-On-Top in fullscreen: %b"},
 	{"notitle", 1, "No titlebar in fullscreen: %b"},
+	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
+	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
 }
 
 
@@ -72,6 +74,7 @@ function _M:load()
 	dlg = require "poser.dlg"
 	dlg.opts = opts
 	dlg.cfg = self.cfg
+	charamgr.opts = opts
 	charamgr.cfg = self.cfg
 	posemgr.opts = opts
 	posemgr.cfg = self.cfg
