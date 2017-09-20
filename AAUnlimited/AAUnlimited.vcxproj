@@ -331,6 +331,7 @@
     <None Include="Texts\mod\poser\lists.lua" />
     <None Include="Texts\mod\poser\posemgr.lua" />
     <None Include="Texts\mod\poser\propmgr.lua" />
+    <None Include="Texts\mod\poser\proxy.lua" />
     <None Include="Texts\mod\poser\signals.lua" />
     <None Include="Texts\mod\poser\sliders.lua" />
     <None Include="Texts\mod\poser\toggles.lua" />

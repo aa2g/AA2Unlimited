@@ -31,7 +31,7 @@ local on_character_updated = signals.signal()
 function _M.reload(char, light)
 	-- TODO: light/partial now hardcoded
 	char:spawn(1,char.index, light, exe_type == "edit" and 1 or 0)
-	_M.skeleton(char)
+	_M.load_xa(char)
 end
 
 -- function charamt.update_face(chara)
@@ -144,7 +144,7 @@ function _M.spawn(seat,clothstate,pose)
 	assert(ch)
 	ch:Spawn(clothstate or 1,#characters,0,0)
 	ch:SetAnimData(0,0,1,1,1,1,0,1,1)
-	_M.skeleton(ch, pose)
+	_M.load_xa(ch, pose)
 	_M.is_spawning = false
 end
 
@@ -162,10 +162,10 @@ function _M.despawn(character)
 	return true
 end
 
-function _M.skeleton(char, pose)
+function _M.load_xa(char, pose)
 	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))
 	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(char.m_charData.m_figure)) & 0xff })
-	char:Skeleton(pp, xa, pose or 0, 0, 0)
+	char:LoadXA(pp, xa, pose or 0, 0, 0)
 end
 
 

@@ -51,7 +51,7 @@ extern DWORD g_anim_data[25][10];
 		/* #6 */ virtual DWORD Despawn2(); // called together with Despawn, frees memory?
 		/* #7 */ virtual DWORD fn7();
 		/* #8 */ virtual DWORD fn8();
-		/* #9 */ virtual DWORD Skeleton(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
+		/* #9 */ virtual DWORD LoadXA(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
 		/* #10 */ virtual DWORD fn10();
 		/* #11 */ virtual DWORD Animate1(DWORD a, DWORD b, DWORD c);
 		/* #12 */ virtual DWORD Animate2(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f);
@@ -125,7 +125,7 @@ extern DWORD g_anim_data[25][10];
 		//__debugbreak();
 		return _gl.push(_self->Update(_gl.get(2), _gl.get(3))).one;
 	});
-	LUA_METHOD(Skeleton, {
+	LUA_METHOD(LoadXA, {
 		//__debugbreak();
 		const char *a = _gl.get(2);
 		const char *b = _gl.get(3);
@@ -133,7 +133,7 @@ extern DWORD g_anim_data[25][10];
 		int d = _gl.get(5);
 		std::wstring aw = General::utf8.from_bytes(a);
 		std::wstring bw = General::utf8.from_bytes(b);
-		return _gl.push(_self->Skeleton(aw.c_str(),bw.c_str(),_gl.get(4),c,d)).one;
+		return _gl.push(_self->LoadXA(aw.c_str(),bw.c_str(),_gl.get(4),c,d)).one;
 	});
 	LUA_METHOD(Despawn, {
 		_gl.push(_self->Despawn());

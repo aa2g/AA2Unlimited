@@ -59,7 +59,7 @@ function on.char_despawn(character)
 	charamgr.removecharacter(character)
 end
 
-function on.char_skeleton_end(character,pp,xa,pose)
+function on.char_xa_end(character,pp,xa,pose)
 	xa = xa:match("[^\\]*$")
 	charamgr.character_updated(character, {xa=xa,startpose=pose})
 end

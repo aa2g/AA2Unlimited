@@ -22,7 +22,7 @@ using namespace ExtClass;
 static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
-static DWORD OrigSkeletonMale, OrigSkeletonFemale;
+static DWORD OrigLoadXAMale, OrigLoadXAFemale;
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
@@ -141,12 +141,12 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	return retv;
 }
 
-DWORD  __declspec(noinline) __stdcall CallOrigSkeleton(DWORD who, void *_this, wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) {
+DWORD  __declspec(noinline) __stdcall CallOrigLoadXA(DWORD who, void *_this, wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 	std::string pp_utf8(General::utf8.to_bytes(pp));
 	std::string xa_utf8(General::utf8.to_bytes(xa));
 
-	LUA_EVENT_NORET("char_skeleton", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
+	LUA_EVENT_NORET("char_xa", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
 
 	DWORD retv;
 	__asm {
@@ -166,7 +166,7 @@ DWORD  __declspec(noinline) __stdcall CallOrigSkeleton(DWORD who, void *_this, w
 		call dword ptr [who]
 		mov retv, eax
 	}
-	LUA_EVENT_NORET("char_skeleton_end", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
+	LUA_EVENT_NORET("char_xa_end", loadCharacter, pp_utf8.c_str(), xa_utf8.c_str(), pose, z0, z1);
 
 	return retv;
 }
@@ -221,8 +221,8 @@ virtual BYTE UpdateFemale(BYTE a2, BYTE a3) { return CallOrigUpdate(OrigUpdateFe
 virtual BYTE DespawnMale() { return CallOrigDespawn(OrigDespawnMale, this); }
 virtual BYTE DespawnFemale() { return CallOrigDespawn(OrigDespawnFemale, this); }
 
-virtual BYTE SkeletonMale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigSkeleton(OrigSkeletonMale, this, pp,xa,pose,z0,z1); }
-virtual BYTE __thiscall SkeletonFemale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigSkeleton(OrigSkeletonFemale, this, pp, xa, pose, z0, z1); }
+virtual BYTE LoadXAMale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigLoadXA(OrigLoadXAMale, this, pp,xa,pose,z0,z1); }
+virtual BYTE __thiscall LoadXAFemale(wchar_t *pp, wchar_t *xa, DWORD pose, DWORD z0, DWORD z1) { return CallOrigLoadXA(OrigLoadXAFemale, this, pp, xa, pose, z0, z1); }
 };
 
 void HiPolyLoadsInjection() {
@@ -261,7 +261,7 @@ void HiPolyLoadsInjection() {
 	GET_VT(1, Load, 0);
 	GET_VT(2, Update, 1);
 	GET_VT(4, Despawn, 2);
-	GET_VT(9, Skeleton, 3);
+	GET_VT(9, LoadXA, 3);
 #undef GET_VT
 
 /*
