@@ -292,8 +292,12 @@ local proplist = lists.listbox { lines = 8, expand = "yes" }
 local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
 local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
 
-local attachpropsbutton = iup.button { title = "Attach", expand = "horizontal" }
+local attachpropsbutton = iup.button { title = "Add CharProps", expand = "horizontal" }
 local detachpropsbutton = iup.button { title = "Detach", expand = "horizontal" }
+
+local normalizeraddremove = iup.normalizer { addpropbutton, removepropbutton, attachpropsbutton, detachpropsbutton, addcharbutton, removecharbutton }
+normalizeraddremove.normalize = "horizontal"
+normalizeraddremove:destroy()
 
 function addpropbutton.action()
 	propmgr.loadprop(getpropfile("poser\\items\\*.xx"))
