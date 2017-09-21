@@ -1381,12 +1381,13 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.9f, 1.0f
 			},
 			{ TEXT("Chest Size"),
-				{ { CharacterStruct::BODY, 14 },{ CharacterStruct::SKELETON, 42 },
-				{ CharacterStruct::SKELETON, 43 } ,{ CharacterStruct::SKELETON, 44 } },
+				{ { CharacterStruct::BODY, 14 }, { CharacterStruct::SKELETON, 42 },
+				{ CharacterStruct::SKELETON, 43 } ,{ CharacterStruct::SKELETON, 44 },
+				{ CharacterStruct::SKIRT, 1 }, },
 				-0.6f, 0.6f
 			},
 			{ TEXT("Chest Height"),
-				{ { CharacterStruct::BODY, 20 } },
+				{ { CharacterStruct::BODY, 20 }, { CharacterStruct::SKIRT, 6 }, },
 				-1, 1
 			},
 			{ TEXT("Arms Size"),
@@ -1402,7 +1403,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Arms Thickness"),
 				{ { CharacterStruct::BODY, 4 },{ CharacterStruct::BODY, 5 },{ CharacterStruct::BODY, 6 },
 				{ CharacterStruct::BODY,  7 },{ CharacterStruct::BODY,  8 },{ CharacterStruct::BODY, 9 },
-				{ CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 } },
+				{ CharacterStruct::BODY, 10 },{ CharacterStruct::BODY, 11 },
+				{ CharacterStruct::SKIRT, 14 },{ CharacterStruct::SKIRT, 15 },{ CharacterStruct::SKIRT, 16 },
+				{ CharacterStruct::SKIRT, 17 },{ CharacterStruct::SKIRT, 18 },{ CharacterStruct::SKIRT, 19 },
+				{ CharacterStruct::SKIRT, 20 },{ CharacterStruct::SKIRT, 21 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Shoulders Width"),
@@ -1418,15 +1422,16 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.5f, 0.5f
 			},
 			{ TEXT("Waist Thickness"),
-				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 } },
+				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 },
+				{ CharacterStruct::SKIRT, 12 },{ CharacterStruct::SKIRT, 13 } },
 				-1, 1
 			},
 			{ TEXT("Waist Height"),
-				{ { CharacterStruct::BODY, 22 } },
+				{ { CharacterStruct::BODY, 22 },{ CharacterStruct::SKIRT, 8 } },
 				-1, 1
 			},
 			{ TEXT("Waist Position"),
-				{ { CharacterStruct::BODY, 23 } },
+				{ { CharacterStruct::BODY, 23 },{ CharacterStruct::SKIRT, 9 } },
 				-1, 1
 			},
 			{ TEXT("Hip Size"),
@@ -1436,7 +1441,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.6f, 0.6f
 			},
 			{ TEXT("Hip Height"),
-				{ { CharacterStruct::BODY, 21 } },
+				{ { CharacterStruct::BODY, 21 }/*,{ CharacterStruct::SKIRT, 7 }*/ },
 				-1, 1
 			},
 			{ TEXT("Legs Distance"),
@@ -1447,21 +1452,25 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Thighs Thickness 1"),
 				{ { CharacterStruct::BODY, 16 },{ CharacterStruct::BODY, 18 },
-				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 } },
+				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 },
+				{ CharacterStruct::SKIRT, 2 },{ CharacterStruct::SKIRT, 4 } },
 				-1.0f, 1.0f
 			},
 			{ TEXT("Thighs Thickness 2"),
 				{ { CharacterStruct::BODY, 17 },{ CharacterStruct::BODY, 19 },
-				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 } },
+				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 },
+				{ CharacterStruct::SKIRT, 3 },{ CharacterStruct::SKIRT, 5 } },
 				-1.0f, 1.0f
 			},
 			{ TEXT("Zetthigh Ryouiki"),
 				{ { CharacterStruct::LEGS, 6 },{ CharacterStruct::LEGS, 7 },
-				{ CharacterStruct::BODY, 24 },{ CharacterStruct::BODY, 25 } },
+				{ CharacterStruct::BODY, 24 },{ CharacterStruct::BODY, 25 },
+				/*{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 }*/ },
 				-3.0f, 3.0f
 			},
 			{ TEXT("Calves Thickness"),
-				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 } },
+				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 },
+				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Head Size"),
@@ -1514,7 +1523,8 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-1.0f, 1.0f
 			},
 			{ TEXT("Neck Thickness"),
-				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 } },
+				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 },
+				{ CharacterStruct::SKIRT, 24 },{ CharacterStruct::SKIRT, 25 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Ball Size"),
