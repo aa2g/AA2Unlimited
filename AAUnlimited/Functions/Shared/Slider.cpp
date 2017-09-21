@@ -175,7 +175,7 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::SKELETON,54, TEXT("a01_J_Neck_03"),{ 1,1,1, 0,0,0, 0,-0.4f,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //extra head size
 
-			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_J_Hip_010"),{ 1,1,1, 0,0,0, 0,-0.4f,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //body size
+			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_N_Zentai_010"),{ 1,1,1, 0,0,0, 0,-0.4f,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //body size
 
 		},
 		{
