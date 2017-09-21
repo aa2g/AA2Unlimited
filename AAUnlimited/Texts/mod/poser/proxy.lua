@@ -38,7 +38,7 @@ function _M.wrap(entity, entmgr)
 			if cached ~= nil then return cached end
 			if ischaracter then
 				if facekeys[k] then
-					return face[facekeys[k]]
+					return struct:GetXXFileFace()[facekeys[k]]
 				end
 				if skelkeys[k] then
 					return struct.m_xxSkeleton[skelkeys[k]]
@@ -102,7 +102,7 @@ function _M.wrap(entity, entmgr)
 		end
 
 		function charamt.context_name()
-			log.spam("chr is %s",chr)
+			log.spam("chr is %s", name)
 			return name .. '@' .. wrapper.pose .. '@' .. (wrapper.xa or '<DEFAULT>')
 		end
 	end
