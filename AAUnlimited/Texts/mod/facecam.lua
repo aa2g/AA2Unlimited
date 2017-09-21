@@ -24,6 +24,7 @@ local SEVEN = 103
 
 --local
 hinfo = hinfo or false
+local parts = {}
 
 local tohide = { 0, 3, 4, 5, 6, 10, 11}
 
@@ -83,8 +84,7 @@ function set_eye_focus(who)
 		restore_camera()
 		return
 	end
-	local part = who and hinfo.m_activeParticipant or hinfo.m_passiveParticipant
-	local cptr = part.m_charPtr
+	local cptr = parts[who and 1 or 2]
 	local face = cptr:GetXXFile(0)
 	local left = face:FindBone("A00_J_meL2",-1)
 	local right = face:FindBone("A00_J_meR2",-1)
@@ -121,8 +121,7 @@ end
 function hide_heda(who, hide)
 	--log("hide heda %s %s", who, hide)
 	local flag = hide and 2 or 0
-	local part = who and hinfo.m_activeParticipant or hinfo.m_passiveParticipant
-	local cptr = part.m_charPtr
+	local cptr = parts[who and 1 or 2]
 	for _,v in ipairs(tohide) do
 		pcall(function() cptr:GetXXFile(v).m_root:m_children(0):m_children(0).m_renderFlag = flag end)
 	end
@@ -216,6 +215,8 @@ end
 
 function on.start_h(hi)
 	hinfo = hi
+	parts[1] = hinfo.m_activeParticipant.m_charPtr
+	parts[2] = hinfo.m_passiveParticipant.m_charPtr
 end
 
 
