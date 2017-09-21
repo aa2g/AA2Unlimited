@@ -159,8 +159,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,41, TEXT("a01_J_ArmR_00"),	{ 0.15f,0.15f,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //arm distance
 
 			{ ExtClass::CharacterStruct::SKELETON,42, TEXT("a01_N_ribon_00"),	{ 0,0,0, 0,0,0, 0,0,0.1f },					Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest size
-			{ ExtClass::CharacterStruct::SKELETON,43, TEXT("a01_J_MuneL_01"),	{ 0.15f,0.15f,0.15f, 0,0,0, 0.15f,0,0.04f },Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest size
-			{ ExtClass::CharacterStruct::SKELETON,44, TEXT("a01_J_MuneR_01"),	{ 0.15f,0.15f,0.15f, 0,0,0,-0.15f,0,0.04f },Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest size
+			{ ExtClass::CharacterStruct::SKELETON,43, TEXT("a01_J_MuneL_01"),	{ 0.1f,0.1f,0.1f, 0,0,0, 0.1f,-0.15f,0.035f },Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest size
+			{ ExtClass::CharacterStruct::SKELETON,44, TEXT("a01_J_MuneR_01"),	{ 0.1f,0.1f,0.1f, 0,0,0,-0.1f,-0.15f,0.035f },Slider::ADD, AAUCardData::MODIFY_FRAME }, //chest size
 
 			{ ExtClass::CharacterStruct::SKELETON,45, TEXT("a01_J_SiriL_010"),	{ 0.15f,0.15f,0.15f, 0,0,0, 0.15f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
 			{ ExtClass::CharacterStruct::SKELETON,46, TEXT("a01_J_SiriR_010"),	{ 0.15f,0.15f,0.15f, 0,0,0, -0.15f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //hip thickness
