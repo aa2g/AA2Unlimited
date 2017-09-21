@@ -67,7 +67,7 @@ function _M.wrap(entity, entmgr)
 					if k == "eyebrow" then
 						local eyebrow = face.m_eyebrow
 						local offset = eyebrow % 7
-						v = eyebrow - offset + v
+						v = eyebrow - offset + v % 7
 					end
 					face[facekeys[k]] = v
 					-- character:update_face()
