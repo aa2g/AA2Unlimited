@@ -224,12 +224,20 @@ end
 	set_status(current)
 end]]
 
-function on.end_h()
+local function kill_h()
 	if not hinfo then return end
 	fetch_rot()
 	Config.save()
 	set_status(nil)
 	hinfo = false
+end
+
+function on.end_h()
+	kill_h()
+end
+
+function on.convo()
+	kill_h()
 end
 
 local function on_hposchange(arg)
