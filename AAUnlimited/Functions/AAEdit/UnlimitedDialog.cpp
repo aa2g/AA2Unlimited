@@ -1421,6 +1421,13 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 23 },{ CharacterStruct::SKELETON, 24 } },
 				-0.5f, 0.5f
 			},
+			{ TEXT("Breasts Shape"),
+				{ { CharacterStruct::BODY, 30 },{ CharacterStruct::BODY, 31 },
+				{ CharacterStruct::BODY, 32 },{ CharacterStruct::BODY, 33 },
+				{ CharacterStruct::SKIRT, 28 },{ CharacterStruct::SKIRT, 29 },
+				{ CharacterStruct::SKIRT, 30 },{ CharacterStruct::SKIRT, 31 }, },
+				-1, 1
+			},
 			{ TEXT("Waist Thickness"),
 				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 },
 				{ CharacterStruct::SKIRT, 12 },{ CharacterStruct::SKIRT, 13 } },
@@ -1443,6 +1450,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Hip Height"),
 				{ { CharacterStruct::BODY, 21 }/*,{ CharacterStruct::SKIRT, 7 }*/ },
 				-1, 1
+			},
+			{ TEXT("Hip Width"),
+				{ { CharacterStruct::BODY, 0 },{ CharacterStruct::SKIRT, 26 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Hip Thickness"),
+				{ { CharacterStruct::BODY, 1 },{ CharacterStruct::SKIRT, 27 } },
+				-0.5f, 0.5f
 			},
 			{ TEXT("Legs Distance"),
 				{ { CharacterStruct::SKELETON, 48 },{ CharacterStruct::SKELETON, 49 },
@@ -1574,14 +1589,6 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("*Total Body Width"),
 				{ { CharacterStruct::SKELETON, 1 } },
 				-0.9f, 1.0f
-			},
-			{ TEXT("*Hip Width"),
-				{ { CharacterStruct::BODY, 0 } },
-				-0.5f, 0.5f
-			},
-			{ TEXT("*Hip Thickness"),
-				{ { CharacterStruct::BODY, 1 }  },
-				-0.5f, 0.5f
 			},
 			{ TEXT("*Bottom Width"),
 				{ { CharacterStruct::SKELETON, 7 } },

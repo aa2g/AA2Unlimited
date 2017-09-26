@@ -198,10 +198,10 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,14, TEXT("a01_J_Spin_020"),{ 0.15f,0,0.1f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //chest size
 			{ ExtClass::CharacterStruct::BODY,15, TEXT("a01_J_Kosi_010"),{ 0.15f,0,0.06f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //hip size
 
-			{ ExtClass::CharacterStruct::BODY,16, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::BODY,17, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::BODY,18, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::BODY,19, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::BODY,16, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, -0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::BODY,17, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::BODY,18, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::BODY,19, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
 			{ ExtClass::CharacterStruct::BODY,20, TEXT("a01_J_Spin_020"),{ 0,0.2f,0, 0,0,0, 0,-3.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //chest height
 			{ ExtClass::CharacterStruct::BODY,21, TEXT("a01_J_Kosi_010"),{ 0,0.2f,0, 0,0,0, 0,-2.0f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //hip height
@@ -214,16 +214,24 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::BODY,26, TEXT("a01_J_Spin_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist height
 			{ ExtClass::CharacterStruct::BODY,27, TEXT("a01_J_Kosi_010"),{ 0,0,0.10f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist height
+
+			{ ExtClass::CharacterStruct::BODY,28, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,29, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::BODY,30, TEXT("a01_J_MuneL_01"),{ 0.25f,0,0, 0,0,0, -0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,31, TEXT("a01_J_MuneR_01"),{ 0.25f,0,0, 0,0,0, 0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,32, TEXT("a01_J_MuneL_02"),{ 0.1f,0,0, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::BODY,33, TEXT("a01_J_MuneR_02"),{ 0.1f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE },
 		},
 		{
 			//LEGS
-			{ ExtClass::CharacterStruct::LEGS,0, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::LEGS,1, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::LEGS,2, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::LEGS,3, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::LEGS,0, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::LEGS,1, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::LEGS,2, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::LEGS,3, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, -0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
-			{ ExtClass::CharacterStruct::LEGS,4, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
-			{ ExtClass::CharacterStruct::LEGS,5, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::LEGS,4, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::LEGS,5, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
 
 			{ ExtClass::CharacterStruct::LEGS,6, TEXT("a01_J_UplegR_020"),{ 0,0.15f,0, 0,0,0, 0,-1.5f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //upperthigh height
 			{ ExtClass::CharacterStruct::LEGS,7, TEXT("a01_J_UplegL_020"),{ 0,0.15f,0, 0,0,0, 0,-1.5f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //upperthigh height
@@ -275,10 +283,10 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKIRT,0, TEXT("a01_J_Kosi_010"),{ 0.15f,0,0.06f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //hip size
 			{ ExtClass::CharacterStruct::SKIRT,1, TEXT("a01_J_Spin_020"),{ 0.15f,0,0.1f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //chest size
 
-			{ ExtClass::CharacterStruct::SKIRT,2, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::SKIRT,3, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::SKIRT,4, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
-			{ ExtClass::CharacterStruct::SKIRT,5, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::SKIRT,2, TEXT("a01_J_UplegL_020"),{ 0.15f,0,0.15f, 0,0,0, -0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::SKIRT,3, TEXT("a01_J_UplegL_010"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::SKIRT,4, TEXT("a01_J_UplegR_020"),{ 0.15f,0,0.15f, 0,0,0, 0.2f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
+			{ ExtClass::CharacterStruct::SKIRT,5, TEXT("a01_J_UplegR_010"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
 			{ ExtClass::CharacterStruct::SKIRT,6, TEXT("a01_J_Spin_020"),{ 0,0.2f,0, 0,0,0, 0,-3.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //chest height
 			{ ExtClass::CharacterStruct::SKIRT,7, TEXT("a01_J_Kosi_010"),{ 0,0.2f,0, 0,0,0, 0,-2.0f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //hip height
@@ -301,11 +309,19 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKIRT,20, TEXT("a01_J_TekubiL_01"),{ 0,1,1, 0,0,0, 0,-15.795f,0.346239984f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::SKIRT,21, TEXT("a01_J_TekubiR_01"),{ 0,1,1, 0,0,0, 0,-15.795f,0.346239984f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 
-			{ ExtClass::CharacterStruct::SKIRT,22, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
-			{ ExtClass::CharacterStruct::SKIRT,23, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::SKIRT,22, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::SKIRT,23, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
 
 			{ ExtClass::CharacterStruct::SKIRT,24, TEXT("a01_J_Neck_01"),{ 1,0,1, 0,0,0, 0,0,0 },					Slider::ADD, AAUCardData::MODIFY_BONE }, //Neck thickness
 			{ ExtClass::CharacterStruct::SKIRT,25, TEXT("a01_J_Neck_02"),{ 1,0,1, 0,0,0, 0,0,0 },					Slider::ADD, AAUCardData::MODIFY_BONE }, //Neck thickness
+
+			{ ExtClass::CharacterStruct::SKIRT,26, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,27, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::SKIRT,28, TEXT("a01_J_MuneL_01"),{ 0.25f,0,0, 0,0,0, -0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,29, TEXT("a01_J_MuneR_01"),{ 0.25f,0,0, 0,0,0, 0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,30, TEXT("a01_J_MuneL_02"),{ 0.1f,0,0, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,31, TEXT("a01_J_MuneR_02"),{ 0.1f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE },
 		}
 	};
 
