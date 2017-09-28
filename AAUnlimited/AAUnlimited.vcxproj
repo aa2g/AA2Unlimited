@@ -141,6 +141,7 @@
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalClasses\LoverData.h" />
+    <ClInclude Include="External\ExternalClasses\Material.h" />
     <ClInclude Include="External\ExternalClasses\TimeData.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />

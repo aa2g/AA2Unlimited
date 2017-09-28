@@ -2,12 +2,14 @@
 
 #include <Windows.h>
 
-#include "Frame.h"
 #include "Animation.h"
 #include "Script/ScriptLua.h"
 
 
 namespace ExtClass {
+
+class Frame;
+struct Material;
 
 #pragma pack(push, 1)
 /*
@@ -22,7 +24,9 @@ public:
 	Frame* m_attachmentFrame;
 	BYTE m_unknown3[0x8];
 	Frame* m_root;
-	BYTE m_unknown4[0x138];
+	BYTE m_unknown4[0x130];
+	uint32_t m_materialCount;
+	Material* m_materialArray;
 	DWORD m_animArraySize;
 	Animation* m_animArray;
 	BYTE m_unknown5[0x1C018];
@@ -80,7 +84,7 @@ public:
 };
 #pragma pack(pop)
 
-static_assert(sizeof(XXFile) == 0x1C384,"XXFile size missmatch; must be 0x35C bytes");
+static_assert(sizeof(XXFile) == 0x1C384, "XXFile size mismatch; must be 0x1C384 bytes");
 
 
 template<class Callback>
