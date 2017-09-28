@@ -82,9 +82,9 @@ void Lua::bindLua() {
 
 	// General
 	Frame::bindLua();
+	Material::bindLua();
 	TimeData::bindLua();
 	XXFile::bindLua();
-	XXFileFace::bindLua();
 
 	// Character/interaction
 	CharacterActivity::bindLua();

@@ -1,9 +1,15 @@
 #pragma once
 
+#include "Script/ScriptLua.h"
+
 #include <Windows.h>
 #include <stdint.h>
 
 namespace ExtClass {
+#pragma pack(push, 1)
+	/*
+		Represents the material attributes of a submesh
+	*/
 	struct Material {
 		uint32_t m_nameLength;
 		const char* m_name;
@@ -32,7 +38,27 @@ namespace ExtClass {
 
 		BYTE m_hexFlags[88];
 		BYTE m_unknown[0x20];
+
+#define LUA_CLASS ExtClass::Material
+		static inline void bindLua() {
+			LUA_NAME;
+			LUA_BINDSTRN(m_name, _self->m_nameLength);
+			LUA_BINDARR(m_lightingAttributes);
+			LUA_BIND(m_shininess);
+			LUA_BINDARR(m_hexFlags);
+
+			LUA_BINDSTRP(m_texture1Name);
+			LUA_BINDARR(m_texture1Flags);
+			LUA_BINDSTRP(m_texture2Name);
+			LUA_BINDARR(m_texture2Flags);
+			LUA_BINDSTRP(m_texture3Name);
+			LUA_BINDARR(m_texture3Flags);
+			LUA_BINDSTRP(m_texture4Name);
+			LUA_BINDARR(m_texture4Flags);
+		}
+#undef LUA_CLASS
 	};
+#pragma pack(pop)
 
 static_assert(sizeof(Material) == 0x134, "Material size mismatch; must be 0x134 bytes");
 

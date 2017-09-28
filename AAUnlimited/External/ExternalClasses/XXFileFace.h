@@ -22,9 +22,12 @@ public:
 		return (float*)ExtVars::ApplyRule(this, rule);
 	}
 
-	BYTE m_unknown1[0x234];
-	// this pointer leads to blush materials. see GetBlush() and GetBlushLines()
-	void* blushPointer;
+	BYTE m_unknown1[0x224];
+	void* m_morphsPointer1;
+	DWORD m_morphsUnknown1;
+	void* m_morphShapesPointer;
+	DWORD m_morphsUnknown2;
+	void* m_morphsPointer3;
 	BYTE m_unknown2[0x4];
 	// mouth shape
 	int m_mouth;
