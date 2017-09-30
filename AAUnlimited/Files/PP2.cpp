@@ -303,6 +303,8 @@ void *PP2File::getCache(uint32_t idx, size_t *cachedsize) {
 				ret = GameAlloc(fe.osize);
 				char *buf = buffers[fe.chunk];
 				memcpy(ret, buf + fe.chpos, fe.osize);
+				if (cachedsize)
+					*cachedsize = fe.osize;
 
 				return ret;
 			}
@@ -332,7 +334,7 @@ void *PP2File::getCache(uint32_t idx, size_t *cachedsize) {
 		assert(rgot == sz);
 
 		// if its unique snowflake (FLAG_ALONE), we're done here
-		if (ce) 
+		if (ce)
 			break;
 
 		assert(!(fe.flags & FLAG_ALONE));
@@ -587,8 +589,9 @@ void PP2::bindLua() {
 		if (i >= g_PP2.pfiles.size()) return 0;
 		auto &pf = g_PP2.pfiles[i];
 		i = s.get(2);
-		size_t osz;
+		size_t osz = 0;
 		void *buf = pf.getCache(i, &osz);
+		if (!buf) return 0;
 		s.pushlstring((const char*)buf, osz);
 		Shared::IllusionMemFree(buf);
 		return 1;
