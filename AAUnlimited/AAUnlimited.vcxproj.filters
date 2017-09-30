@@ -515,5 +515,8 @@
     <None Include="Texts\mod\poser\proxy.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\pp2util.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
   </ItemGroup>
 </Project>
