@@ -606,3 +606,5 @@ function get_class_key(k)
 		return json.decode(js)
 	end
 end
+
+help = "If you don't know what's this for, you shouldn't probably use it. See https://github.com/aa2g/AA2Unlimited/wiki/Lua-cruft"
