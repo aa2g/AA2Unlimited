@@ -20,7 +20,7 @@ void __stdcall StartEvent() {
 void __stdcall EndEvent() {
 	Shared::GameState::setIsPcConversation(false);
 	data.state = -1;
-	LUA_EVENT_NORET("convo", data.state);
+	LUA_EVENT_NORET("convo", false);
 	Shared::Triggers::ThrowEvent(&data);
 
 	Shared::GameState::clearConversationCharacter(-1);

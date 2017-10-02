@@ -437,11 +437,6 @@ void NpcMovingActionInjection() {
 }
 
 bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
-//	success = LUA_EVENT("plan", success, params);
-
-	//where unknownStruct is [m_moreUnknownData + 0x1C]
-	if (success) return success;
-
 	ExtClass::CharacterStruct* user = NULL;
 	for (int i = 0; i < 25; i++) {
 		ExtClass::CharacterStruct* it = AAPlay::g_characters[i].m_char;
@@ -454,6 +449,16 @@ bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::Action
 			}
 		}
 	}
+
+	LUA_EVENT("plan", success, params, user);
+
+	//where unknownStruct is [m_moreUnknownData + 0x1C]
+
+	// an action has been planned succesfuly
+	if (success) return success;
+
+	// no event planned this time round (or cancelled by lua), inject our own forced action
+
 	if (user == NULL) return success;
 
 	//apply a forced action if queued

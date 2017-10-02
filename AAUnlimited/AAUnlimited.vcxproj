@@ -260,8 +260,10 @@
     <None Include="Texts\init.lua" />
     <None Include="Texts\mod\aaface\init.lua" />
     <None Include="Texts\mod\borderless.lua" />
+    <None Include="Texts\mod\butthurt.lua" />
     <None Include="Texts\mod\charex.lua" />
     <None Include="Texts\mod\com.lua" />
+    <None Include="Texts\mod\const.lua" />
     <None Include="Texts\mod\dx.lua" />
     <None Include="Texts\mod\editfix.lua" />
     <None Include="Texts\mod\font.lua" />

@@ -518,5 +518,11 @@
     <None Include="Texts\mod\pp2util.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\butthurt.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\const.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
