@@ -725,7 +725,11 @@ void PP2::Init() {
 
 void PP2::InitProfiling() {
 	if (g_Config.PP2Profiling) {
-		prof.open(General::to_utf8(General::BuildAAUPath(L"pp2.prof")), prof.ate | prof.out | prof.in | prof.binary);
+		std::string path(General::to_utf8(General::BuildAAUPath(L"pp2.prof")));
+		prof.open(path, prof.ate | prof.out | prof.in | prof.binary);
+		if (!prof.is_open()) {
+			prof.open(path, prof.ate | prof.out | prof.in | prof.binary | prof.trunc);
+		}
 		// start writing on 12 byte boundary
 		int pos = prof.tellp();
 		prof.seekp(pos - (pos % 12));
