@@ -1,0 +1,57 @@
+; used for random button.
+; this file defines which slots "exist" and are therefor acceptable draws for the random button.
+; format is simple; [slotType], followed by blankspace-seperated number or number-ranges.
+; numbers not mentioned are assumed to not exist.
+
+; i'll just activate all of them cause i have 0 motivation to test them all
+[FrontHair]
+0-134	; viewable by gui and probably occupied
+135-255 ; i have no idea which hairs exist, youll have to change that yourself
+[SideHair]
+0-134
+135-255
+[BackHair]
+0-134
+135-255
+[HairExtension] 
+0-134
+135-255
+
+[FrontHairFlip]
+0-134
+135-255
+[SideHairFlip]
+0-134
+135-255
+[BackHairFlip]
+0-134
+135-255
+[HairExtensionFlip]
+0-134
+135-255
+
+; tested with hexa 3.0 stuff
+[Face] 
+0-6	; default stuff
+9-58
+66-81
+83-85
+92-254
+[NipType]
+0-4
+5-17
+[NipColor]
+0-7
+8
+[Tan]
+0-5	; likely not ever gonna change
+[Mosaic]
+0-4
+[PubShape]
+0-3
+[Glasses]
+0-4
+5-26
+[LipColor]
+0-7
+8-73

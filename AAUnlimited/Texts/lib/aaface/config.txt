@@ -1,0 +1,126 @@
+;VERBOSITY sets the verbosity of the logger. possible modes:
+;	SPAM
+;	INFO
+;	WARNING
+;	ERROR
+;	CRITICAL_ERROR
+
+VERBOSITY SPAM
+
+;DISABLE disables certain features:
+;	GENERAL				: disables hotkeys
+;	FACE				: disables face dropdowns
+;	HAIR				: disables hair stuff
+;	HAIR_SKIPINVALID	: disables the thing where the hair keeps scrolling on invalid slots.
+;							note that this feature is based on the info given by the list files,
+;							and might therefor view hairs as existing when they are in fact not,
+;							and apparently also as missing when they are not
+;	FACEDETAILS			: disables facedetail edit boxes
+;	BODY_COLOR			: disables body color edit boxes
+;	LIMITS				: disables the unlimited sliders that weren't changed by the unlocked editor
+;	PRE_BACKUP			: disables automatic backup of the current card when saving
+;	POST_BACKUP			: disables automatic backup of the new card, before the old cardface was reapplied
+;	BACKUP_UNIQUE		: on default, backups will be seeded with a timestamp to assure that they are unique.
+;							if this is disabled, there will only be up to 2 backups per card (pre, post)
+;	RANDOM_SLOT_MOD		: when disabled, random buttons will behave like normal, only picking slots that
+							the gui can pick
+
+DISABLE HAIR_SKIPINVALID
+DISABLE POST_BACKUP
+DISABLE BACKUP_UNIQUE
+DISABLE RANDOM_SLOT_MOD
+
+; the minimum and maximum zoom can be changed using ZOOM [MIN/MAX] float
+; MIN means zooming out; default value is 1.5.
+; MAX means zooming in; default value is 0.1. smaller = closer.
+
+;Set Zoom Properties
+ZOOM MAX 0.01 ; default is 0.1
+
+; virtual key codes: https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
+; ascii key codes (1-127): https://msdn.microsoft.com/en-us/library/60ecse8t%28v=vs.80%29.aspx
+; ascii key codes (128-255) (might not work/differ depending on your keyboard): 
+;						https://msdn.microsoft.com/en-us/library/9hxt0028%28v=vs.80%29.aspx
+
+; hotkeydefinitions start with KEY. Available options:
+; MODs: ALT, CTRL, SHIFT 	: modifier keys that are part of the hotkey. multiple can be used.
+; KEYVAL:
+;	VKEY:				: following is a virtual key id in hexadecimal (this is default)
+;	ASCII:				: following is an ascii value in hexadecimal
+;		<param>			: the actual key code. must be followed and given in hexadecimal as parsed by strtol(,,16)
+; CONTEXTs:
+;    ACTIVE:			: window must exist and currently be active. no effect on DIALOG_ALL, ALL or PREVIEW_WINDOW
+;    FOCUS:				: window is active and it or one of its child must have current focus. 
+;							for dialogs, the upper bar might also be in focus if the given dialog is active
+;						: these values are optional; if not given, it defaults to FOCUS
+;		DIALOG_SYSTEM
+;		DIALOG_FIGURE
+;		DIALOG_CHEST
+;		DIALOG_BODY_COLOR
+;		DIALOG_FACE
+;		DIALOG_EYES
+;		DIALOG_EYE_COLOR
+;		DIALOG_FACE_DETAILS
+;		DIALOG_HAIR			: only valid while this dialog is focused
+;		DIALOG_HAIR_COLOR
+;		DIALOG_CHARACTER
+;		DIALOG_PERSONALITY
+;		DIALOG_TRAITS	
+;	    DIALOG_ALL		: valid while any dialog is on focus
+;	    PREVIEW_WINDOW	: valid while the character-rendering window is focused
+;	    ALL (default)	: valid anywhere, everywhere
+; FUNCTIONs: HAIR_FLIP		: flips the currently selected hair
+;	     HAIR_ADD		: adds iparam to the current hairs index
+;	     HAIR_SET		: sets current hair to iparam
+;	     HAIR_SIZEADD	: adds iparam to the current hairs size (slider)
+;	     HAIR_SIZESET	: sets value of size slider to iparam
+;		 FACEDETAILS_ADDGLASSES : adds iparam to current glasses value
+;	     FACEDETAILS_SETGLASSES : sets current glasses to iparam
+;		 BODYCOLOR_ADDTAN		: adds iparam to current tans value
+;		 BODYCOLOR_SETTAN		: sets current tan to iparam
+; 	     ZOOM_ADD		: zooms in or out, depending on float-param
+; 	     ZOOM_SET		: sets zoom to float parameter
+;	     TILT_ADD		: tilts the view by fparam (values from 0 to 6.28)
+;	     TILT_SET		: sets tilt to fparam (values from 0 to 6.28)
+;		 POSE_ADD		: add iparam to the current pose
+;		 POSE_APPLY		: apply current pose, as if the apply button was clicked
+;	     NOP			: does nothing. originally supposed to be able to overwrite
+;							default keys, but i ended up using accels for easy hold-key-behavour,
+;							so that doesnt work now
+; PARAM:     INT		: 32 bit integer parameter. must be followed as decimal number as parsed by atoi
+;			 FLOAT		: 32 bit float parameter. must be followed as float number as parsed by atof
+
+; these parameters can the chained together in no particular order. except for MOD (and PARAM), only one may be used. example:
+;KEY MOD:ALT MOD:CTRL KEYVAL:50 FUNCTION:HAIR_FLIP	; fine
+;KEY KEYVAL:50 FUNCTION:HAIR_FLIP FUNCTION:ZOOM_ADD   ; not fine, 2 functions
+;KEY FUNCTION:HAIR_FLIP								; which key, dumbass
+; if you want a key to do multiple things, maybe have different meaning in different contexts, define the same key
+; with the same mod multiple times in succession (with no other key definition inbetween). example:
+;KEY KEYVAL:4C CONTEXT:FOCUS:DIALOG_HAIR FUNCTION:HAIR_ADD PARAM:INT:1
+;KEY KEYVAL:4C CONTEXT:FOCUS:DIALOG_FACE_DETAILS FUNCTION:FACEDETAILS_ADD PARAM:INT:1
+;makes L choose the next hair if hair dialog is in focus, or next glasses if face details dialog is in focus 
+; note that it will probably not warn you about invalid keys cause im lazy.
+
+; testing different kinds of contexts
+KEY CONTEXT:ALL KEYVAL:50 FUNCTION:HAIR_FLIP ; P
+KEY CONTEXT:DIALOG_HAIR KEYVAL:50 FUNCTION:HAIR_FLIP ; P
+KEY CONTEXT:DIALOG_ALL KEYVAL:4F FUNCTION:HAIR_FLIP ;	O
+KEY CONTEXT:PREVIEW_WINDOW KEYVAL:49 FUNCTION:HAIR_FLIP ; I
+
+;prev and next hair test
+KEY CONTEXT:ACTIVE:DIALOG_HAIR KEYVAL:4C FUNCTION:HAIR_ADD PARAM:INT:1; L
+KEY CONTEXT:ACTIVE:DIALOG_HAIR KEYVAL:4B FUNCTION:HAIR_ADD PARAM:INT:-1; K
+
+;hair size test
+KEY CONTEXT:ACTIVE:DIALOG_HAIR KEYVAL:4C MOD:CTRL FUNCTION:HAIR_SIZEADD PARAM:INT:1
+KEY CONTEXT:ACTIVE:DIALOG_HAIR KEYVAL:4B MOD:CTRL FUNCTION:HAIR_SIZEADD PARAM:INT:-1
+
+;ascii test
+KEY CONTEXT:ALL KEYVAL:ASCII:3D FUNCTION:HAIR_FLIP
+
+;pose scroll keys
+KEY CONTEXT:ACTIVE:DIALOG_SYSTEM KEYVAL:57 MOD:SHIFT FUNCTION:POSE_ADD PARAM:INT:1	;W
+KEY CONTEXT:ACTIVE:DIALOG_SYSTEM KEYVAL:57 MOD:SHIFT FUNCTION:POSE_APPLY
+
+KEY CONTEXT:ACTIVE:DIALOG_SYSTEM KEYVAL:53 MOD:SHIFT FUNCTION:POSE_ADD PARAM:INT:-1	;S
+KEY CONTEXT:ACTIVE:DIALOG_SYSTEM KEYVAL:53 MOD:SHIFT FUNCTION:POSE_APPLY

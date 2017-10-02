@@ -1,0 +1,249 @@
+7: --NOT SPECIFIED--
+8: --NOT SPECIFIED--
+9: Face 1 Long A
+10: Face 1 Long B
+11: Face 1 Long C
+12: Face 1 Long X
+13: Face 1 Medium A
+14: Face 1 Medium B
+15: Face 1 Medium X
+16: Face 1 Short A
+17: Face 1 Short B
+18: Face 1 Earless
+19: Face 2 Long A
+20: Face 2 Long B
+21: Face 2 Long C
+22: Face 2 Long X
+23: Face 2 Medium A
+24: Face 2 Medium B
+25: Face 2 Medium X
+26: Face 2 Short A
+27: Face 2 Short B
+28: Face 2 Earless
+29: Face 3 Long A
+30: Face 3 Long B
+31: Face 3 Long C
+32: Face 3 Long X
+33: Face 3 Medium A
+34: Face 3 Medium B
+35: Face 3 Medium X
+36: Face 3 Short A
+37: Face 3 Short B
+38: Face 3 Earless
+39: Face 4 Long A
+40: Face 4 Long B
+41: Face 4 Long C
+42: Face 4 Long X
+43: Face 4 Medium A
+44: Face 4 Medium B
+45: Face 4 Medium X
+46: Face 4 Short A
+47: Face 4 Short B
+48: Face 4 Earless
+49: Face 5 Long A
+50: Face 5 Long B
+51: Face 5 Long C
+52: Face 5 Long X
+53: Face 5 Medium A
+54: Face 5 Medium B
+55: Face 5 Medium X
+56: Face 5 Short A
+57: Face 5 Short B
+58: Face 5 Earless
+59: Mitcher
+60: Tuman Garie
+61: Micha Jawkan
+62: Rounded Face 11 Variant A
+63: Rounded Face 13 Variant A
+64: Rounded Face 1 Half Closed Variant
+65: Rounded Face 8
+66: Half-Closed Eyes Face 4 + DDH
+67: Face 11 (Variant A) + Lower Iris + Extended highlight + Thinner eyebrows + DDH + Fixed lips V2
+68: Face 11 + Thinner eyebrows
+69: Face 11 + Thinner eyebrows + Lashes [Slightly] Angled Downward
+70: Face 12 + Thinner eyebrows
+71: Face 13 + Thinner eyebrows
+72: Face 13 + Thinner eyebrows + Lashes [Slightly] Angled Downward
+73: Face 11 (Variant A) + Thinner eyebrows
+74: Face 13 (Variant A) + Thinner eyebrows
+75: Face 11 + Thinner eyebrows + Jaw raised
+76: Face 11 + Thinner eyebrows + Lashes [Slightly] Angled Downward + Jaw raised
+77: Face 12 + Thinner eyebrows + Jaw raised
+78: Face 13 + Thinner eyebrows + Jaw raised
+79: Face 13 + Thinner eyebrows + Lashes [Slightly] Angled Downward + Jaw raised
+80: Face 11 (Variant A) + Thinner eyebrows + Jaw raised
+81: Face 13 (Variant A) + Thinner eyebrows + Jaw raised
+82: Face 13 + Elf Ears
+83: JS3F DDH 1
+84: JS3F DDH 2
+85: JS3F DDH 3
+86: Rounded Face 1
+87: Rounded Face 2
+88: Rounded Face 3
+89: Rounded Face 11
+90: Rounded Face 12
+91: Rounded Face 13
+92: DDH 2 + Lowered Iris
+93: DDH 6 + Lower Ears + Snaggletooth
+94: Face 1 Snaggletooth
+95: Face 2 Snaggletooth
+96: Face 3 Snaggletooth
+97: Face 4 Snaggletooth
+98: Face 5 Snaggletooth
+99: Face 6 Snaggletooth
+100: Face 7 Snaggletooth
+101: Face 8 Snaggletooth
+102: Face 1 Vampire Teeth
+103: Face 2 Vampire Teeth
+104: Face 3 Vampire Teeth
+105: Face 4 Vampire Teeth
+106: Face 5 Vampire Teeth
+107: Face 6 Vampire Teeth
+108: Face 7 Vampire Teeth
+109: Face 8 Vampire Teeth
+110: Face 1 Vampire Teeth w/ Bottom
+111: Face 2 Vampire Teeth w/ Bottom
+112: Face 3 Vampire Teeth w/ Bottom
+113: Face 4 Vampire Teeth w/ Bottom
+114: Face 5 Vampire Teeth w/ Bottom
+115: Face 6 Vampire Teeth w/ Bottom
+116: Face 7 Vampire Teeth w/ Bottom
+117: Face 8 Vampire Teeth w/ Bottom
+118: Face 1 Shark Teeth
+119: Face 2 Shark Teeth
+120: Face 3 Shark Teeth
+121: Face 4 Shark Teeth
+122: Face 5 Shark Teeth
+123: Face 6 Shark Teeth
+124: Face 7 Shark Teeth
+125: Face 8 Shark Teeth
+126: Face 1 w/ Blush Sticker
+127: Face 2 w/ Blush Sticker
+128: Face 3 w/ Blush Sticker
+129: Face 4 w/ Blush Sticker
+130: Face 5 w/ Blush Sticker
+131: Face 6 w/ Blush Sticker
+132: Face 7 w/ Blush Sticker
+133: Face 8 w/ Blush Sticker
+134: Face 8
+135: Round Face 1
+136: Round Face 2
+137: Round Face 3
+138: Round Face 4
+139: Round Face 5
+140: Round Face 6
+141: Round Face 7
+142: DDH 1 Colorable Eyelashes Lowered Ears
+143: DDH 2 Colorable Eyelashes Lowered Ears
+144: DDH 3 Colorable Eyelashes Lowered Ears
+145: DDH 4 Colorable Eyelashes Lowered Ears
+146: DDH 5 Colorable Eyelashes Lowered Ears
+147: DDH 6 Colorable Eyelashes Lowered Ears
+148: Face 9 DDH Colorable Eyelashes Lowered Ears
+149: Face 10 DDH Colorable Eyelashes Lowered Ears
+150: Round Face 1 + ElfEars Long C + SC + Shark Teeth
+151: Round Face 2 + ElfEars Long A + SC + Shark Teeth
+152: JS3F DDH 1 [Black Eyelashes]
+153: JS3F DDH 2 [Black Eyelashes]
+154: JS3F DDH 3 [Black Eyelashes]
+155: JS3F DDH 4 [Black Eyelashes]
+156: JS3F DDH 5 [Black Eyelashes]
+157: JS3F DDH 6 [Black Eyelashes]
+158: JS3F DDH 6 + Vampire Teeth [Black Eyelashes]
+159: Face 2 [Black Sclera]
+160: Face 1 [Yellow Sclera]
+161: Face 2 [Red Sclera]
+162: Face 2 [Black Sclera + Elf Ears]
+163: Face 1 [Colorable Eyelashes]
+164: Face 2 [Colorable Eyelashes]
+165: Face 3 [Colorable Eyelashes]
+166: Face 4 [Colorable Eyelashes]
+167: Face 5 [Colorable Eyelashes]
+168: Face 6 [Colorable Eyelashes]
+169: Face 7 [Colorable Eyelashes]
+170: Face 8 [Colorable Eyelashes]
+171: Face 1 Thicker Beauty Marks + Raised Jaw
+172: Face 2 Thicker Beauty Marks + Raised Jaw
+173: Face 3 Thicker Beauty Marks + Raised Jaw
+174: Face 4 Thicker Beauty Marks + Raised Jaw
+175: Face 5 Thicker Beauty Marks + Raised Jaw
+176: Face 6 Thicker Beauty Marks + Raised Jaw
+177: Face 7 Thicker Beauty Marks + Raised Jaw
+178: Face 1 Thicker Beauty Marks - Double variant + Raised Jaw
+179: Face 2 Thicker Beauty Marks - Double variant + Raised Jaw
+180: Face 3 Thicker Beauty Marks - Double variant + Raised Jaw
+181: Face 4 Thicker Beauty Marks - Double variant + Raised Jaw
+182: Face 5 Thicker Beauty Marks - Double variant + Raised Jaw
+183: Face 6 Thicker Beauty Marks - Double variant + Raised Jaw
+184: Face 7 Thicker Beauty Marks - Double variant + Raised Jaw
+185: Face 1 Thicker Beauty Marks - Tear variant + Raised Jaw
+186: Face 2 Thicker Beauty Marks - Tear variant + Raised Jaw
+187: Face 3 Thicker Beauty Marks - Tear variant + Raised Jaw
+188: Face 4 Thicker Beauty Marks - Tear variant + Raised Jaw
+189: Face 5 Thicker Beauty Marks - Tear variant + Raised Jaw
+190: Face 6 Thicker Beauty Marks - Tear variant + Raised Jaw
+191: Face 7 Thicker Beauty Marks - Tear variant + Raised Jaw
+192: Face 11 + Thinner eyebrows + DDH
+193: Face 11 + Thinner eyebrows + Lashes [Slightly] Angled Downward + DDH
+194: Face 12 + Thinner eyebrows + DDH
+195: Face 13 + Thinner eyebrows + DDH
+196: Face 13 + Thinner eyebrows + Lashes [Slightly] Angled Downward + DDH
+197: Face 11 (Variant A) + Thinner eyebrows + DDH
+198: Face 13 (Variant A) + Thinner eyebrows + DDH
+199: Face 1 No Blush
+200: Face 2 No Blush
+201: Face 3 No Blush
+202: Face 4 No Blush
+203: Face 5 No Blush
+204: Face 6 No Blush
+205: Face 7 No Blush
+206: Face 8 Earless
+207: Face 9 Earless
+208: Face 10 Earless
+209: DDH 1 Earless
+210: DDH 3 Earless
+211: DDH 3 Earless w/ Snaggletooth
+212: Face 1 Colorable sclera
+213: Face 2 Colorable sclera
+214: Face 3 Colorable sclera
+215: Face 4 Colorable sclera
+216: Face 5 Colorable sclera
+217: Face 6 Colorable sclera
+218: Face 7 Colorable sclera
+219: Face 9
+220: Face 10
+221: Face 9 + DDH
+222: Face 10 + DDH
+223: Face 9 + DDH + Lower ears
+224: Face 10 + DDH + Lower ears
+225: Face 9 + Thinner eyebrows
+226: Face 10 + Thinner eyebrows
+227: Face 9 + Thinner eyebrows + DDH
+228: Face 10 + Thinner eyebrows + DDH
+229: Face 1 + Lower ears
+230: Face 2 + Lower ears
+231: JS3F DDH 1 [Black Eyelashes] + Lower ears
+232: JS3F DDH 6 [Black Eyelashes] + Lower ears
+233: JS3F DDH 3 [Black Eyelashes] + Lower ears
+234: Face 9 + Thinner eyebrows + DDH + Lower ears
+235: Face 10 + Thinner eyebrows + DDH + Lower ears
+236: Face 10 Vampire Teeth + Thinner eyebrows + DDH + Lower ears
+237: JS3F DDH 1 [Black Eyelashes] + Short B
+238: Face 9 + Thinner eyebrows + DDH + Short B
+239: Face 9 + DDH + Medium B
+240: DDH 1 + Dark red eyelashes + Lower ears + Higher nose
+241: DDH 1 + Lower ears + Higher nose
+242: Face 10 + DDH + Thinner eyebrows + Lower ears + Snaggletooth
+243: Face 9 + DDH + Lower Ears + Long Lash + Flatter Sclera Texture
+244: Face 10 + DDH + Lower Ears + Long Lash + Flatter Sclera Texture
+245: Face 1 + DDH + Lower Ears + Higher Nose + Flatter Sclera Texture
+246: Face 11 DDH No Bottom Lash + Custom Lash & Sclera Texture
+247: Face 13 + Thinner eyebrows + DDH [Colorable Eyelashes]
+248: JS3F DDH 2 + Perma Catface
+249: Hole Face
+250: Black Sclera - Face 10
+251: Black Sclera - Face 10 DDH
+252: Possessed - Face 10 DDH
+253: Stitched Face [White]
+254: Clock Eye
+255: --NOT SPECIFIED-- 
