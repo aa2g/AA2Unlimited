@@ -103,6 +103,7 @@ bUseMKIII = true
 bUseAA2Face = true
 
 mods = {
+	{ "aaface" },
 	{ "poser" },
 	{ "editfix" },
 	{ "unlocks" },
