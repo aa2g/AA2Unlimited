@@ -242,6 +242,7 @@
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\UiEvent.h" />
     <ClInclude Include="Script\glua_stl.h" />
+    <ClInclude Include="External\ExternalClasses\Material.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

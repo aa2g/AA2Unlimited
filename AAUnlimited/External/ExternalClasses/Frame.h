@@ -11,13 +11,20 @@
 namespace ExtClass {
 
 class XXFile;
+struct Material;
 
 class Frame
 {
 public:
-	struct SubmeshFlags {
+	struct Submesh {
 		BYTE m_flags[64]; //SB3U submesh flags
-		BYTE m_unknown1[48]; //unknown
+		DWORD m_unknown0; //unknown
+		uint32_t m_faceCount; //Face Count (actually count*3, counts WORDS(vertex indizes))
+		void* m_pointer1;
+		void* m_pointer2;
+		Material* m_material;
+		uint32_t m_vertexCount;
+		BYTE m_unknown1[24]; //unknown
 		BYTE m_flagsUnknown2[20]; //SB3U submesh unknown2 flags
 		BYTE m_unknown2[136]; //unknown
 		//BYTE m_flagsUnknown3[]; //unsure about the location of this one
@@ -46,14 +53,16 @@ public:
 	BYTE m_frameFlags[0x20]; //SB3U Frame Flags
 	DWORD m_nSubmeshes; //number of submeshes
 	DWORD m_readStuff[6]; //usually 0, something else on meshes
-	SubmeshFlags* m_subMeshFlags; //SB3U Submesh Flags array
-	BYTE m_unknown2[0x14];
+	Submesh* m_subMeshes; //SB3U Submesh Flags array
+	DWORD m_unknown6;
+	BYTE m_vertexListDuplicate[0x8]; // SB3U's VertexListDuplicate field in Mesh tab
+	BYTE m_unknown2[0x8];
 	DWORD m_nBones;		//only meshes have bones. else, this is 0
 	Bone* m_bones;		//looks like this is not actually an array.
 	float m_someXXCopy; //some value copied from the xx file. usually 1
 
 	DWORD m_unkint;
-	BYTE m_renderFlag2; // used by skirt hiding
+	BYTE m_renderFlag2; // used by skirt hiding - First byte of SB3U Mesh Flags
 	BYTE m_lightData; // sets up light, used by fixed light for custom props
 	BYTE m_unkflags[0x40-2];
 
@@ -98,7 +107,7 @@ public:
 
 		LUA_BINDARR(m_frameFlags)
 		LUA_BIND(m_nSubmeshes)
-		LUA_BIND(m_subMeshFlags)
+		LUA_BIND(m_subMeshes)
 
 		LUA_BIND(m_nBones)
 		LUA_BINDARREP(m_bones,,_self->m_nBones)
@@ -138,6 +147,6 @@ void Frame::EnumTreeLevelOrder(Callback& callback) {
 }
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");
-static_assert(sizeof(Frame::SubmeshFlags) == 0x248, "size mismatch");
+static_assert(sizeof(Frame::Submesh) == 0x248, "size mismatch");
 
 }

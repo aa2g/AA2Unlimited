@@ -507,7 +507,7 @@ signals.connect(modifierx100, "selected", slidersetmodifier)
 local dimeyes = iup.flatbutton { title = "Dim Eyes", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.dimeyes = self.value == "ON" end end, expand = "horizontal" }
 dimeyes.size = "x12"
 dimeyes.expand = "horizontal"
-local tears = iup.flatbutton { title = "Tears", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tears = self.value == "ON" end end, expand = "horizontal" }
+local tears = iup.flatbutton { title = "Tears", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tears = self.value == "OFF" end end, expand = "horizontal" }
 tears.size = "x12"
 tears.expand = "horizontal"
 local eyetracking = iup.flatbutton { title = "Eye Tracking", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" end end, expand = "horizontal" }
@@ -522,6 +522,26 @@ function resetsliderbutton.flat_action()
 	currentslider:Reset()
 	currentslider:Apply()
 end
+
+local blushslider = iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0,
+	valuechanged_cb = function(self)
+		local face = charamgr.current.struct.m_xxFace
+		local material = face:FindMaterial("A00_M_hoho") or face:FindMaterial("S00_M_hoho") 
+		if material then
+			material:m_lightingAttributes(3, tonumber(self.value))
+		end
+	end
+}
+local blushlinesslider = iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0,
+	valuechanged_cb = function(self)
+		local face = charamgr.current.struct.m_xxFace
+		local material = face:FindMaterial("A00_M_hohosen") or face:FindMaterial("S00_M_hohosen") 
+		if material then
+			material:m_lightingAttributes(3, tonumber(self.value))
+		end
+	end
+}
+
 
 
 -- ------------
@@ -780,8 +800,8 @@ local dialogsliders = iup.dialog {
 					},
 					iup.frame { title = "Blush",
 						iup.vbox {
-							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blush = tonumber(self.value) end },
-							iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0, valuechanged_cb = function(self) charamgr.current.blushlines = tonumber(self.value) end },
+							blushslider,
+							blushlinesslider,
 						},
 						expand ="yes",
 					},

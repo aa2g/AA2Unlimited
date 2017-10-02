@@ -179,16 +179,11 @@ extern DWORD g_anim_data[25][10];
 	LUA_MGETTER1(GetLover)
 	LUA_MGETTER0(GetNpcReactData)
 	LUA_MGETTER0(GetNpcAiData)
-	LUA_MGETTER0(GetXXFileFace)
 	LUA_MGETTER3(Animate1)
 	LUA_MGETTER6(Animate2)
 
 	}
 #undef LUA_CLASS
-	inline XXFileFace *GetXXFileFace() {
-		return (XXFileFace*)m_xxFace;
-	}
-
 	inline CharacterRelation *GetRelation(int idx) {
 		auto &rel = *GetRelations();
 		if (idx >= rel.GetSize())

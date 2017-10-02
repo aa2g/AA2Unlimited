@@ -58,6 +58,7 @@
 #include "External/ExternalClasses/TimeData.h"
 #include "External/ExternalClasses/XXFile.h"
 #include "External/ExternalClasses/XXFileFace.h"
+#include "External/ExternalClasses/Material.h"
 #include "External/ExternalClasses.h"
 #include "External/ExternalVariables/AAEdit/CardData.h"
 #include "External/ExternalVariables/AAEdit/RefreshTable.h"

@@ -39,3 +39,13 @@ ExtClass::Frame* ExtClass::XXFile::FindBone(const char* name,int maxDepth) {
 	depth = 0;
 	return ::FindBone(m_root);
 }
+
+ExtClass::Material* ExtClass::XXFile::FindMaterial(const char* name) {
+	size_t nameLength = strlen(name) + 1;
+	for (size_t i = 0; i < m_materialCount; i++) {
+		if (nameLength == m_materialArray[i].m_nameLength && strcmp(name, m_materialArray[i].m_name) == 0) {
+			return &m_materialArray[i];
+		}
+	}
+	return nullptr;
+}

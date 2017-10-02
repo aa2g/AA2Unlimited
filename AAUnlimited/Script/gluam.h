@@ -79,6 +79,17 @@ GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
 });
 
 
+// get/set byte string (pointer with buffer size)
+#define LUA_BINDSTRN(var,n) \
+GLUA_BIND(LUA_GLOBAL, ACCESOR, LUA_CLASS, var, { \
+        if (_gl.top() == 1) { \
+                _gl.push((const char*)_self->var); \
+                return 1; \
+        } \
+	_gl.gets(2, (char*)_self->var, n); \
+});
+
+
 // extended array reference. sub can be used for partial keying / cherrypicking into sub-structs.
 // limit is to customize array bounds (can refer to other members via _self->)
 #define LUA_BINDARRE(var,sub,limit) \

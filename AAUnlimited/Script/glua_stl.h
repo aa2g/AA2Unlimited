@@ -50,3 +50,27 @@ int vector_iterator_next(lua_State *L) {
 	}
 	return 0;
 }
+
+#define LUA_ARRAYITERATOR(getter, ary, limit) \
+	LUA_METHOD(getter, { \
+		lua_pushlightuserdata(_L, (void*)limit); \
+		lua_pushcclosure(_L, array_iterator_next<decltype(_self->ary)>, 1); \
+		lua_pushlightuserdata(_L, _self->ary); \
+		lua_pushnumber(_L, -1); \
+		return 3; \
+	})
+
+template<class C>
+int array_iterator_next(lua_State *L) {
+	if (lua_isuserdata(L, 1) && lua_isnumber(L,2)) {
+		C it = (C)lua_touserdata(L, 1);
+		int index = (int)lua_tonumber(L, 2) + 1;
+		int limit = (int)lua_touserdata(L, lua_upvalueindex(1));
+		if (index < limit) {
+			g_Lua.push(index);
+			g_Lua.push(it + index);
+			return 2;
+		}
+	}
+	return 0;
+}
