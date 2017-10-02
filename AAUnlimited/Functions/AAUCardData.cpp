@@ -1171,7 +1171,7 @@ void AAUCardData::SaveOverrideFiles() {
 bool AAUCardData::DumpSavedOverrideFiles() {
 	if (m_savedFiles.size() == 0) return false;
 	int mode = g_Config.savedFileUsage;
-	if (mode == 3) return false; //if 3, do not extract
+	if (mode == 2) return false; //if 2, do not extract
 
 	// look for which files to extract
 	//override files
@@ -1253,8 +1253,8 @@ bool AAUCardData::DumpSavedOverrideFiles() {
 		return false;
 	}
 
-	//if mode is 1, build a popup asking for extraction
-	if (mode == 1) {
+	//if mode is 0, build a popup asking for extraction
+	if (mode == 0) {
 		std::wstringstream text(TEXT("This card contains files that were not found in your installation:\r\n"));
 		for (auto& elem : toExtract) {
 			int i = elem.first;

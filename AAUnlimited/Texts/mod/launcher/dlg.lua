@@ -336,7 +336,7 @@ local function buildtabs() return
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
-				iup.label {title = "Card eye files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
+				iup.label {title = "Modcard files", }, aaul("savedFileUsage", iup.list { "ask", "always extract", "dont extract", dropdown="YES" }),
 				iup.label {title = "Screenshot format", }, aaul("screenshotFormat", iup.list { ".BMP", ".JPG", ".PNG", dropdown="YES" }),
 --				iup.label {title = "Poser hotkeys" }, aauv("sPoserHotKeys", iup.text {"WER", mask="^[A-Z]*$"}),
 				iup.label {title = ".pp2 cache MB", },  aauv("PP2Cache", iup.text { spin="yes", spinmax=4096}),

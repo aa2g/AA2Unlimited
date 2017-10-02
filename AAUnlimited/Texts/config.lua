@@ -47,10 +47,10 @@ sFont = "MS Gothic"
 --determines how eye files that were saved into the card data are handled.
 --unlike eye textures, these can not be loaded from memory, are probably huge,
 --and might be malicious, so take caution
---1: on first load, check if all files are there. If not, give a pop up
+--0: on first load, check if all files are there. If not, give a pop up
 --   informing about the missing files and extract if wanted
---2: same as 1, but do not ask for permission just extract
---3: do not extract files
+--1: same as 0, but do not ask for permission just extract
+--2: do not extract files
 savedFileUsage = 1					
 
 --if true, after saved files were successfully extracted, they will be removed
