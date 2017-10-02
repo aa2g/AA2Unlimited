@@ -682,7 +682,7 @@ PP2::~PP2() {
 	if (!g_Config.bUsePP2)
 		return;
 	// WIN7 bug: work_condition.notify_all() will trash 'this' for reasons not yet clear.
-#if 0
+#if 1
 	// brute workaround
 	ExitProcess(0);
 #else
