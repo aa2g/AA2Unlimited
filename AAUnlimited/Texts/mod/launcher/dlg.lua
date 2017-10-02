@@ -332,7 +332,7 @@ local function buildtabs() return
 			title = "Settings",
 			iup.gridbox {
 				padding="4x7",
-				nmargin="x1",
+				nmargin="x8",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
@@ -361,6 +361,7 @@ local function buildtabs() return
 				aaut("bSaveFileAutoRemove", iup.toggle {title = "Demod modcards after extracting" }),
 				aaut("bSaveFileBackup", iup.toggle {title = "Backup modcards before de-modding" }),
 				aaut("bUsePP2", iup.toggle {title = "Use .pp2 resource loader" }),
+				aaut("PP2Profiling", iup.toggle {title = "Enable pp2 defrag/profiling" }),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)" }),
 			}
