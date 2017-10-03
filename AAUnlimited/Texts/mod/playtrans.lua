@@ -1,7 +1,18 @@
 --@INFO Club/Place translations for AA2Play.exe
 
-local dict = {
+-- some entries need a string length, too
+local fixup = {
+	[0xDBE64] = 0xDBE5F,
+	[0xDBF06] = 0xDBEFE,
+	[0xDBFA6] = 0xDBF9E,
+	[0xDC04C] = 0xDC044,
+	[0xDC0F2] = 0xDC0EA,
+	[0xDC198] = 0xDC190,
+	[0xDC23C] = 0xDC238,
+	[0xDC2EA] = 0xDC2E2,
+}
 
+local dict = {
 [0x2D154] = "None",
 [0xF054] = "None",
 [0xEFE9] = "None",
@@ -21,11 +32,12 @@ local dict = {
 [0xF4ECD] = "Dojo",
 [0xDC0F2] = "Dojo",
 [0xF4EE5] = "Fine arts",
-[0xDC198] = "fine arts",
+[0xDC198] = "Fine arts",
 [0xF4F27] = "Culture",
 [0xDC23C] = "Culture",
 [0xF4F47] = "Other",
 [0xDC2EA] = "Other",
+
 
 [0xE1206] = "Outside Station",
 [0xE100E] = "School route",
@@ -91,19 +103,24 @@ function _M:load()
 
 	local chk = ((GameBase + 0x00720000) - 0x00400000) >> 16
 	for ptr, off in pairs(rel) do
+		local orig_bytes = g_peek(ptr, 4)
 		local orig = g_peek_dword(ptr)
 		if ((orig >> 16) ~= chk) then
-			log.warn("playtrans: Invalid pointer %x at %x for '%s', skipping", orig, ptr, dict[ptr])
+			log.warn("playtrans: Invalid pointer %x at %x for '%s', skipping translation", orig, ptr, dict[ptr])
 		else
 			g_poke_dword(ptr, stringbuf + off)
-			save[ptr] = orig
+			save[ptr] = orig_bytes
+			local ptr2 = fixup[ptr]
+			if ptr2 then
+				save[ptr2] = g_poke(ptr2, string.char(#dict[ptr]))
+			end
 		end
 	end
 end
 
 function _M:unload()
 	for ptr,old in ipairs(save) do
-		g_poke_dword(ptr, old)
+		g_poke(ptr, old)
 	end
 	free(stringbuf)
 	save = {}
