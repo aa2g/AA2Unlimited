@@ -75,6 +75,7 @@ local stringbuf
 
 function _M:load()
 	if exe_type ~= "play" then return end
+	info("playtrans: patching exe strings")
 
 	-- translate the strings from utf8 to unicode
 	local buf = ""
@@ -88,10 +89,11 @@ function _M:load()
 	stringbuf = malloc(#buf)
 	poke(stringbuf, buf)
 
+	local chk = ((GameBase + 0x00720000) - 0x00400000) >> 16
 	for ptr, off in pairs(rel) do
 		local orig = g_peek_dword(ptr)
-		if ((orig >> 16) ~= 0x0072) then
-			log.error("playtrans: Invalid pointer %x at %x for '%s'", orig, ptr, dict[ptr])
+		if ((orig >> 16) ~= chk) then
+			log.warn("playtrans: Invalid pointer %x at %x for '%s', skipping", orig, ptr, dict[ptr])
 		else
 			g_poke_dword(ptr, stringbuf + off)
 			save[ptr] = orig

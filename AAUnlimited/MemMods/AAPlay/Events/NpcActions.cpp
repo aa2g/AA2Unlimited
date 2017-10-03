@@ -67,7 +67,6 @@ BYTE CallAnswerLow(AnswerStruct *as) {
 goback:
 		// part of function we destroyed
 		push 0xffffffff
-		push 0x006d53c8
 		// Original function
 		jmp [AnswerLowAddress]
 skip:
@@ -151,10 +150,10 @@ void NpcAnswerInjection() {
 	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswer, 0x90, 0x90}, NULL);
 
 	// AnswerLow
-	AnswerLowAddress = General::GameBase + 0x18F045;
-	Hook((BYTE*)AnswerLowAddress - 5,
-	{ 0x6a, 0xff, 0x68, 0xc8, 0x53, 0x6d, 0x00 },
-	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswerLow, 0x90, 0x90 }, NULL);
+	AnswerLowAddress = General::GameBase + 0x18F042;
+	Hook((BYTE*)AnswerLowAddress - 7,
+	{ 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0x6a, 0xff },
+	{ 0xE9, HookControl::RELATIVE_DWORD, (DWORD)&WrapAnswerLow, 0xeb, 0xf9 }, NULL);
 }
 
 #endif
