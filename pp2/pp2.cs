@@ -401,7 +401,7 @@ public class ChunkBuilder
 
 
         fixed (byte* pcbuf = cbuf) {
-            ZSTD.ZSTD_compress_generic_simpleArgs(ctx, new IntPtr(pcbuf), (IntPtr)cbuf.Length, out dpos, input, (IntPtr)input.Length, out spos, (IntPtr)2);
+            ZSTD.ZSTD_compress_generic_simpleArgs(ctx, new IntPtr(pcbuf), (IntPtr)cbuf.Length, out dpos, input, (IntPtr)input.Length, out spos, (IntPtr)22);
         }
         ZSTD.ZSTD_freeCCtx(ctx);
         var res = new MemoryStream();
