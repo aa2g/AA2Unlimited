@@ -24,13 +24,22 @@ extern DWORD g_anim_data[25][10];
 	class CharacterStruct
 	{
 	public:
+		// CAVEAT: order const.lua
 		enum Models {
-			FACE, SKELETON, BODY, LEGS, HAIR_FRONT, HAIR_SIDE, HAIR_BACK, HAIR_EXT,
-			FACE_SLIDERS, SKIRT,
-			N_MODELS,
-			TONGUE,
-			GLASSES,
-			H3DROOM,
+			FACE = 0,
+			SKELETON = 1,
+			BODY = 2,
+			LEGS = 3,
+			HAIR_FRONT = 4,
+			HAIR_SIDE = 5,
+			HAIR_BACK = 6,
+			HAIR_EXT = 7,
+			FACE_SLIDERS = 8,
+			SKIRT = 9,
+			N_MODELS = 10,
+			TONGUE = 11,
+			GLASSES = 12,
+			H3DROOM = 13,
 			INVALID
 		};
 
