@@ -37,6 +37,16 @@ namespace ExtClass {
 			BYTE headSize;
 			BYTE headLength;
 			BYTE waist;
+#define LUA_CLASS CharacterDataTypes::Figure
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BIND(height);
+				LUA_BIND(figure);
+				LUA_BIND(headSize);
+				LUA_BIND(headLength);
+				LUA_BIND(waist);
+			}
+#undef LUA_CLASS
 		};
 		struct Chest {
 			BYTE size;
@@ -48,6 +58,20 @@ namespace ExtClass {
 			BYTE spacing;
 			BYTE depth;
 			BYTE softness;
+#define LUA_CLASS CharacterDataTypes::Chest
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BIND(size);
+				LUA_BIND(aerolaSize);
+				LUA_BIND(shape);
+				LUA_BIND(roundness);
+				LUA_BIND(direction);
+				LUA_BIND(height);
+				LUA_BIND(spacing);
+				LUA_BIND(depth);
+				LUA_BIND(softness);
+			}
+#undef LUA_CLASS
 		};
 		struct BodyColor {
 			DWORD skinColor;
@@ -62,6 +86,23 @@ namespace ExtClass {
 			BYTE tan;
 			BYTE tanOpacity;
 			BYTE mosaic;
+#define LUA_CLASS CharacterDataTypes::BodyColor
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BIND(skinColor);
+				LUA_BIND(pubShape);
+				LUA_BIND(pubOpacity);
+				LUA_BIND(unknown7);
+				LUA_BIND(unknown8);
+				LUA_BIND(pubicColor);
+				LUA_BIND(nipType);
+				LUA_BIND(nipColor);
+				LUA_BIND(nipOpacity);
+				LUA_BIND(tan);
+				LUA_BIND(tanOpacity);
+				LUA_BIND(mosaic);
+			}
+#undef LUA_CLASS
 		};
 		struct Eyes {
 			BYTE width;
@@ -74,6 +115,14 @@ namespace ExtClass {
 				BYTE width;
 				BYTE height;
 				BYTE position;
+#define LUA_CLASS CharacterDataTypes::Eyes::Iris
+				static inline void bindLua() {
+					LUA_BIND(shape);
+					LUA_BIND(width);
+					LUA_BIND(height);
+					LUA_BIND(position);
+				}
+#undef LUA_CLASS
 			} iris;
 			BYTE textureSlot;
 			BYTE hightlightSlot;
@@ -83,6 +132,20 @@ namespace ExtClass {
 			char highlight[260];
 			DWORD leftColor;
 			DWORD rightColor;
+#define LUA_CLASS CharacterDataTypes::Eyes
+			static inline void bindLua() {
+				Iris::bindLua();
+				LUA_NAME;
+				LUA_BIND(textureSlot);
+				LUA_BIND(hightlightSlot);
+				LUA_BIND(bExtTextureUsed);
+				LUA_BIND(bExtHighlightUsed);
+				LUA_BINDSTR(texture);
+				LUA_BINDSTR(highlight);
+				LUA_BIND(leftColor);
+				LUA_BIND(rightColor);
+			}
+#undef LUA_CLASS
 		};
 		struct Eyebrows {
 			DWORD color;
@@ -92,6 +155,19 @@ namespace ExtClass {
 			BYTE bMole2;
 			BYTE bMole3;
 			BYTE bMole4;
+#define LUA_CLASS CharacterDataTypes::Eyebrows
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BIND(color);
+				LUA_BIND(shapeSlot);
+				LUA_BIND(angle);
+				LUA_BIND(bMole1);
+				LUA_BIND(bMole2);
+				LUA_BIND(bMole3);
+				LUA_BIND(bMole4);
+			}
+#undef LUA_CLASS
+
 		};
 		struct FaceDetails {
 			BYTE eyelidSlot;
@@ -101,6 +177,18 @@ namespace ExtClass {
 			BYTE lipColorSlot;
 			BYTE lipOpacity;
 			DWORD glassesColor;
+#define LUA_CLASS CharacterDataTypes::FaceDetails
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BIND(eyelidSlot);
+				LUA_BIND(upperEyelidSlot);
+				LUA_BIND(lowerEyelidSlot);
+				LUA_BIND(glassesSlot);
+				LUA_BIND(lipColorSlot);
+				LUA_BIND(lipOpacity);
+				LUA_BIND(glassesColor);
+			}
+#undef LUA_CLASS
 		};
 		struct Hair {
 			union {
@@ -131,10 +219,20 @@ namespace ExtClass {
 				BYTE hairFlips[4];
 			};
 			DWORD hairColor;
+#define LUA_CLASS CharacterDataTypes::Hair
+			static inline void bindLua() {
+				LUA_NAME;
+				LUA_BINDARR(hairs);
+				LUA_BINDARR(hairAdjustment);
+				LUA_BINDARR(hairFlips);
+				LUA_BIND(hairColor);
+			}
+#undef LUA_CLASS
 		};
 		struct Clothes {
 			static inline void bindLua() {
 #define LUA_CLASS CharacterDataTypes::Clothes
+			LUA_NAME
 			LUA_BIND(slot)
 			LUA_BIND(skirtLength)
 			LUA_BIND(socks)
@@ -292,9 +390,15 @@ namespace ExtClass {
 #define LUA_CLASS ExtClass::CharacterData
 		static inline void bindLua()
 		{
-			// more sub-structs todo
 			Character::bindLua();
 			Clothes::bindLua();
+			Hair::bindLua();
+			FaceDetails::bindLua();
+			Eyebrows::bindLua();
+			Eyes::bindLua();
+			BodyColor::bindLua();
+			Chest::bindLua();
+			Figure::bindLua();
 
 			LUA_NAME;
 
@@ -304,6 +408,7 @@ namespace ExtClass {
 			LUA_BINDP(m_eyes);
 			LUA_BINDP(m_eyebrows);
 			LUA_BINDP(m_faceDetails);
+			LUA_BINDP(m_hair);
 
 			LUA_BINDP(m_character);
 			LUA_BIND(m_voicePitch);
