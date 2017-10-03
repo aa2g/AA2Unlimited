@@ -26,7 +26,7 @@ local SEVEN = 103
 hinfo = hinfo or false
 local parts = {}
 
-local tohide = { 0, 3, 4, 5, 6, 10, 11}
+local tohide = { 0, 3, 4, 5, 6, 7, 10, 11}
 
 local current = nil
 local eye = nil
