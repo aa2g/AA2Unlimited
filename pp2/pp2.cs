@@ -40,7 +40,7 @@ public class DirEntry : IReadFile
 // This can be easily interfac-ied, needs to give only .GetData(), .GetMeta() & .naked
 public class ChunkFile
 {
-    const int MAXSIZE = 16 * 1024 * 1024;
+    const int MAXSIZE = 32 * 1024 * 1024;
     // helper fields
     public bool done, naked; // no zstd, and no chunk grouping
     public IReadFile pp;
@@ -374,7 +374,7 @@ public class ChunkBuilder
         int clen;
         fixed (byte* pcbuf = cbuf)
         {
-            clen = (int)ZSTD.ZSTD_compress(new IntPtr(pcbuf), (IntPtr)cbuf.Length, input, (IntPtr)input.Length, 3);
+            clen = (int)ZSTD.ZSTD_compress(new IntPtr(pcbuf), (IntPtr)cbuf.Length, input, (IntPtr)input.Length, 22);
         }
         var res = new MemoryStream();
         res.Write(cbuf, 0, clen);
