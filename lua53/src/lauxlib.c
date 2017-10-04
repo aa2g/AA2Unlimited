@@ -25,6 +25,7 @@
 #include "lua.h"
 
 #include "lauxlib.h"
+#include "utf8fopen.h"
 
 
 /*

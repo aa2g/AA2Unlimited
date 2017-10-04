@@ -23,6 +23,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "utf8fopen.h"
+
 
 /*
 ** LUA_IGMARK is a mark to ignore all before it when building the
