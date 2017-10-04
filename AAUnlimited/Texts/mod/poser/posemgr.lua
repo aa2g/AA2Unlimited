@@ -147,8 +147,16 @@ local function table2pose(pose, character)
 		if face.eye then character.eye = face.eye end
 		if face.eyeopen then character.eyeopen = face.eyeopen end
 		if face.eyebrow then character.eyebrow = face.eyebrow end
-		if face.blush then character.blush = face.blush / 9 end
-		if face.blushlines then character.blushlines = face.blushlines / 9 end
+
+		local facestruct = charamgr.current.struct.m_xxFace
+		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho") 
+		if material then
+			material:m_lightingAttributes(3, face.blush / 9)
+		end
+		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen") 
+		if material then
+			material:m_lightingAttributes(3, face.blush / 9)
+		end
 	end
 end
 
@@ -211,9 +219,18 @@ local function pose2table(character)
 			eyebrow = character.eyebrow,
 			mouth = character.mouth,
 			mouthopen = character.mouthopen,
-			blush = character.blush * 9,
-			blushlines = character.blushlines * 9,
 		}
+
+		local facestruct = charamgr.current.struct.m_xxFace
+		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho")
+		if material then
+			face.blush = material:m_lightingAttributes(3) * 9
+		end
+		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen")
+		if material then
+			face.blushlines = material:m_lightingAttributes(3) * 9
+		end
+
 		t.face = face
 		return t
 	end
