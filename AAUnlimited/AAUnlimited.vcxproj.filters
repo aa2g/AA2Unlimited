@@ -126,6 +126,7 @@
     <ClCompile Include="Files\PersistentStorage.cpp" />
     <ClCompile Include="Hooks\WinAPI.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\UiEvent.cpp" />
+    <ClCompile Include="Files\PNGData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -243,6 +244,7 @@
     <ClInclude Include="MemMods\AAPlay\Events\UiEvent.h" />
     <ClInclude Include="Script\glua_stl.h" />
     <ClInclude Include="External\ExternalClasses\Material.h" />
+    <ClInclude Include="Files\PNGData.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Texts\config.txt" />

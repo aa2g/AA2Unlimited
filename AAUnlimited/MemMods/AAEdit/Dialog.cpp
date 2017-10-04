@@ -20,13 +20,7 @@ namespace EditInjections {
 					switch (LOWORD(wparam)) {
 					case 10032: //Save character button
 						if (General::IsAAEdit) {
-							if (!AAEdit::g_currChar.IsValid()) {
-								const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
-								const DWORD maleRule[]{ 0x353254, 0x30, 0 };
-								AAEdit::g_currChar.m_char = (ExtClass::CharacterStruct*) ExtVars::ApplyRule(femaleRule);
-								if (AAEdit::g_currChar.m_char == NULL) (ExtClass::CharacterStruct*) ExtVars::ApplyRule(maleRule);
-							}
-							if (AAEdit::g_currChar.IsValid()) {
+							if (AAEdit::g_currChar.Editable()) {
 								AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), AAEdit::g_currChar.m_char->m_charData);
 								AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(0, AAEdit::g_currChar.m_char->m_charData);
 							}

@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Files/PNGData.h"
 
 /*
  * Can be used as newData DWORD parameters of the hook function; if used, the parameter
@@ -268,6 +269,7 @@ void InitializeHooks() {
 		FileDump::FileDumpStartInject();
 		using namespace PlayInjections;
 		Loads::HiPolyLoadsInjection();
+		Shared::PNG::InstallHooks();
 	}
 
 	if (General::IsAAPlay) {
@@ -319,7 +321,6 @@ void InitializeHooks() {
 		}
 
 		SaveCard::AddUnlimitDataInject();
-		SaveCard::JustBeforeSaveInject();
 		OpenCard::ReadUnlimitDataInject();
 		OpenCard::PreviewCardInject();
 

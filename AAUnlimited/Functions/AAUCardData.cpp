@@ -46,7 +46,7 @@ void AAUCardData::Reset() {
 
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	using namespace Serialize;
-	LOGPRIO(Logger::Priority::SPAM) << "reading card data...\r\n";
+	LOGPRIO(Logger::Priority::SPAM) << std::dec << "reading card data " << size << " bytes...\r\n";
 	//read members
 	if (size < 4) return;
 
@@ -1169,7 +1169,10 @@ void AAUCardData::SaveOverrideFiles() {
 }
 
 bool AAUCardData::DumpSavedOverrideFiles() {
+#if 0
+	// This can be empty even if we have eye files packed in
 	if (m_savedFiles.size() == 0) return false;
+#endif
 	int mode = g_Config.savedFileUsage;
 	if (mode == 2) return false; //if 2, do not extract
 

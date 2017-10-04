@@ -35,6 +35,7 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
     <ClCompile Include="Files\ModuleFile.cpp" />
     <ClCompile Include="Files\PersistentStorage.cpp" />
+    <ClCompile Include="Files\PNGData.cpp" />
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Files\ClothFile.h" />
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Files\PersistentStorage.h" />
+    <ClInclude Include="Files\PNGData.h" />
     <ClInclude Include="Files\PP2.h" />
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="Files\XXFile.h" />
