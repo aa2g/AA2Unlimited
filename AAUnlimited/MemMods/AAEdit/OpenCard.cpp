@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 
+#if 0
 namespace EditInjections {
 namespace OpenCard {
 
@@ -154,6 +155,7 @@ void __declspec(naked) ReadUnlimitDataRedirectV2() {
 }
 
 void ReadUnlimitDataInject() {
+#if 0
 	//Part of the open card function. The last DWORD in the png file actually indicates the start of the custom data,
 	//so that filesize-lastDword = offset of custom data.
 	//edi is that offset at this point, and the SetFilePointer call will put the file (ebp) to that location.
@@ -191,6 +193,7 @@ void ReadUnlimitDataInject() {
 void __stdcall PreviewCardEvent(const wchar_t* card) {
 	AAEdit::g_AAUnlimitDialog.Initialize();
 	ReadUnlimitDataV2(card);
+#endif
 }
 
 DWORD PreviewCardOriginal;
@@ -205,6 +208,7 @@ void __declspec(naked) PreviewCardRedirect() {
 }
 
 void PreviewCardInject() {
+#if 0
 	//eax is the card path. some stack parameter, some class. function allocates buffer and reads card, not sure where the buffer goes
 	/*AA2Edit.exe+1A467 - 8D 84 24 64020000     - lea eax,[esp+00000264]
 	AA2Edit.exe+1A46E - 89 74 24 18           - mov [esp+18],esi
@@ -229,8 +233,12 @@ void PreviewCardInject() {
 		{ 0xE8, 0x39, 0xF7, 0xFF, 0xFF },							//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&PreviewCardOriginal);
+#endif
 }
 
 
+
 }
 }
+
+#endif

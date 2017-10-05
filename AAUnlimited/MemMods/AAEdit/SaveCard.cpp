@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-
+#if 0
 namespace EditInjections {
 namespace SaveCard {
 
@@ -129,6 +129,7 @@ void __declspec(naked) AddUnlimitDataRedirect() {
 
 
 void AddUnlimitDataInject() {
+#if 0
 	//the save card data function call. one stack parameter stdcall, as well as eax (wchar_t* fileName) and ecx (?)
 	/*AA2Edit.exe+1BEC8 - 50                    - push eax
 	AA2Edit.exe+1BEC9 - 8D 84 24 34050000     - lea eax,[esp+00000534]
@@ -139,8 +140,11 @@ void AddUnlimitDataInject() {
 	{ 0xE8, 0xEB, 0xA2, 0x10, 0x00 },						//expected values
 	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		&AddUnlimitDataOriginalFunction);
+#endif
 }
 
 
 }
 }
+
+#endif

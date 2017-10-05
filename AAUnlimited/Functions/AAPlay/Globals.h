@@ -11,7 +11,6 @@ namespace AAPlay {
 	void InitOnLoad();
 	void InitTransferedCharacter(ExtClass::CharacterStruct* character);
 	void RemoveTransferedCharacter(ExtClass::CharacterStruct* character);
-	void SetPreviewChar(ExtClass::CharacterStruct* previewChar);
 
 	inline CharInstData* GetInstFromStruct(ExtClass::CharacterStruct* character) { return &g_characters[character->m_seat]; }
 	inline int GetSeatFromStruct(ExtClass::CharacterStruct* character) { return character->m_seat; }

@@ -79,7 +79,7 @@ static HANDLE WINAPI MyFF(const wchar_t *path, LPWIN32_FIND_DATAW data) {
 
 	// You can add more FindFirst hooks in here
 	FFList = 0;
-	if (!FFList)
+	if (!FFList && g_Config.bUsePP2)
 		FFList = g_PP2.FList(path);
 	if (!FFList) {
 		SetLastError(err);
@@ -155,12 +155,7 @@ BOOL WINAPI MyExists(
 	return FALSE;
 }
 
-
-struct {
-	const char *name;
-	void *fn;
-	void **old;
-} patches[] = {
+HookImport patches[] = {
 	{"FindFirstFileW", &MyFF, 0},
 	{"FindNextFileW", &MyFN, 0},
 	{"FindClose", &MyFC, 0 },
@@ -169,13 +164,20 @@ struct {
 	{0}
 };
 
-void Inject() {
-
+void HookImports(HookImport *patches) {
 	for (int i = 0; patches[i].name; i++) {
 		void *oldp = patch_iat(patches[i].name, patches[i].fn);
 		if (patches[i].old)
 			*patches[i].old = oldp;
+		if (!oldp) {
+			LOGPRIO(Logger::Priority::WARN) << "winapi: couldn't hook " << patches[i].name << "\n";
+		}
 	}
+}
+
+void Inject() {
+	HookImports(patches);
+
 
 }
 

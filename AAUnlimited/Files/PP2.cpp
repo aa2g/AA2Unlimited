@@ -743,34 +743,7 @@ void PP2::InitProfiling() {
 
 
 HANDLE PP2::HGet() {
-	static int config;
-	if (!*Shared::IllusionMemAllocHeap)
-		*Shared::IllusionMemAllocHeap = HeapCreate(0, 0, 0);
-	HANDLE h = *Shared::IllusionMemAllocHeap;
-
-	if (!config) {
-		config = 1;
-		ULONG HeapInformation;
-		
-		HeapInformation = 2;
-		HeapSetInformation(h,
-			HeapCompatibilityInformation,
-			&HeapInformation,
-			sizeof(HeapInformation));
-
-		HeapInformation = 2;
-		HeapSetInformation(GetProcessHeap(),
-			HeapCompatibilityInformation,
-			&HeapInformation,
-			sizeof(HeapInformation));
-
-		HeapInformation = 2;
-		HeapSetInformation((HANDLE)_get_heap_handle(),
-			HeapCompatibilityInformation,
-			&HeapInformation,
-			sizeof(HeapInformation));
-	}
-	return h;
+	return (HANDLE)_get_heap_handle();
 }
 
 void  PP2::GC() {

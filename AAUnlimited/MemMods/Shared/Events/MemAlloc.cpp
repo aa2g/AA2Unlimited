@@ -1,16 +1,7 @@
 #include "StdAfx.h"
-
-// Illusion heap is forced to process one to reduce fragmentation
-// of address space. Set this to 0 to use separate heaps for debugging.
-#define SHARED_HEAP 1
+#include "Hooks/WinAPI.h"
 
 namespace MemAlloc {
-static DWORD *iat_HeapAlloc;
-static DWORD *iat_HeapFree;
-static DWORD *iat_HeapSize;
-static DWORD *iat_HeapReAlloc;
-static DWORD *iat_HeapDestroy;
-
 
 static void dumpheap1(HANDLE h, const char *hn) {
 	size_t commited = 0, uncommited = 0, busy = 0, overhead = 0, entries = 0;
@@ -41,9 +32,6 @@ static void dumpheap1(HANDLE h, const char *hn) {
 void dumpheap() {
 	LOGPRIONC(Logger::Priority::SPAM) "----- DUMPING HEAP -----\n";
 
-#if !SHARED_HEAP
-	dumpheap1(*Shared::IllusionMemAllocHeap, "IllusionHeap");
-#endif
 	dumpheap1(GetProcessHeap(), "ProcessHeap");
 	if (g_Lua_p) {
 		LUA_SCOPE;
@@ -51,60 +39,50 @@ void dumpheap() {
 		int luam = int(g_Lua["_alloced"].get()) / 1024;
 		LOGPRIONC(Logger::Priority::SPAM) std::dec << luakb << "KiB in use by Lua objects, " << luam << "KiB by malloc\n";
 	}
-	//	dumpheap1((HANDLE)_get_heap_handle(), "CRTHeap");
 }
 
-static SIZE_T __stdcall InjectedHeapSize(HANDLE hHeap, DWORD dwFlags, LPCVOID lpMem) {
-	return HeapSize(hHeap, dwFlags, lpMem);
-}
+using namespace SharedInjections::WinAPI;
 
-static LPVOID __stdcall InjectedHeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes) {
+static LPVOID __stdcall MyHeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes) {
 	dwFlags &= ~1;
 	return HeapAlloc(hHeap, dwFlags, dwBytes);
 }
 
-static LPVOID __stdcall InjectedHeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes) {
+static LPVOID __stdcall MyHeapReAlloc(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes) {
 	dwFlags &= ~1;
 	return HeapReAlloc(hHeap, dwFlags, lpMem, dwBytes);
 }
 
-static BOOL __stdcall InjectedHeapDestroy(HANDLE hHeap) {
-	if (*Shared::IllusionMemAllocHeap == hHeap) {
-		LOGPRIONC(Logger::Priority::SPAM) "Destroying IllusionHeap\n";
-		dumpheap();
-		return TRUE;
-	}
-	return HeapDestroy(hHeap);
+static BOOL __stdcall MyHeapDestroy(HANDLE hHeap) {
+	return true;
+	//HeapDestroy(hHeap);
 }
 
-static BOOL __stdcall InjectedHeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem) {
+static HANDLE __stdcall MyHeapCreate(DWORD opt, size_t init, size_t max) {
+	return (HANDLE)_get_heap_handle();
+}
+
+static BOOL __stdcall MyHeapFree(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem) {
 	return HeapFree(hHeap, dwFlags, lpMem);
 }
+HookImport patches[] = {
+	{ "HeapAlloc", &MyHeapAlloc, 0 },
+	{ "HeapReAlloc", &MyHeapReAlloc,0 },
+	{ "HeapFree",&MyHeapFree,0 },
+	{ "HeapCreate",&MyHeapCreate,0 },
+	{ "HeapDestroy",&MyHeapDestroy,0 },
+	{0,0}
+};
 
 void Init() {
-	if (General::IsAAEdit) {
-		iat_HeapReAlloc = (DWORD*)(General::GameBase + 0x4C40D8);
-		iat_HeapDestroy = (DWORD*)(General::GameBase + 0x4C40DC);
-
-		iat_HeapSize = (DWORD*)(General::GameBase + 0x4C423C);
-		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x4C4244);
-		iat_HeapFree = (DWORD*)(General::GameBase + 0x4C4248);
-	}
-	else if (General::IsAAPlay) {
-		iat_HeapReAlloc = (DWORD*)(General::GameBase + 0x4E30D8);
-		iat_HeapDestroy = (DWORD*)(General::GameBase + 0x4E30DC);
-
-		iat_HeapSize = (DWORD*)(General::GameBase + 0x2E324C);
-		iat_HeapAlloc = (DWORD*)(General::GameBase + 0x2E3254);
-		iat_HeapFree = (DWORD*)(General::GameBase + 0x2E3258);
-	}
-
-	PatchIAT(iat_HeapSize, &InjectedHeapSize);
-	PatchIAT(iat_HeapAlloc, &InjectedHeapAlloc);
-	PatchIAT(iat_HeapFree, &InjectedHeapFree);
-
-#if SHARED_HEAP
-	*Shared::IllusionMemAllocHeap = (HANDLE)_get_heap_handle();
-#endif
+	HookImports(patches);
+	ULONG HeapInformation;
+	HeapInformation = 2;
+	HANDLE heap = (HANDLE)_get_heap_handle();
+	HeapSetInformation(heap,
+		HeapCompatibilityInformation,
+		&HeapInformation,
+		sizeof(HeapInformation));
 }
+
 }

@@ -95,7 +95,13 @@ end
 
 
 -- just before the saving card, add rainbow
-function on.save_card(char)
+function on.save_card(char,stat,outbufp,outlenp,outlen)
+	local pngdata = peek(peek_dword(fixptr(outbufp)), outlen)
+	local of = io.open("test.png", "wb")
+	of:write(pngdata)
+	of:close()
+
+	info(char,stat,outbufp,outlenp,outlen)
 	if (GetAsyncKeyState(RAINBOW_KEY) & 0x8000) ~= 0 then
 		info("Rainbow applied")
 		char.m_charData:m_traitBools(38, 1)

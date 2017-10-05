@@ -67,5 +67,9 @@ public:
 		return m_char != NULL;
 	}
 
+	inline bool LoadAAUData() {
+		return m_cardData.FromPNGBuffer((char*)m_char->m_charData->m_pngBuffer, m_char->m_charData->m_pngBufferSize);
+	}
+
 };
 

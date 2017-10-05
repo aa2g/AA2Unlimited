@@ -25,7 +25,7 @@ void InitOnLoad() {
 
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
-		g_characters[seat].m_cardData.FromFileBuffer((char*)it->m_charData->m_pngBuffer,it->m_charData->m_pngBufferSize);
+		g_characters[seat].LoadAAUData();		
 		g_characters[seat].charOffset = 0x04 * idxCharacter;
 
 		//initialize triggers
@@ -56,7 +56,7 @@ void InitOnLoad() {
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
-	bool modded = g_characters[seat].m_cardData.FromFileBuffer((char*)character->m_charData->m_pngBuffer,character->m_charData->m_pngBufferSize);
+	bool modded = g_characters[seat].LoadAAUData();
 	if (modded)
 		LOGPRIO(Logger::Priority::INFO) << std::dec << "Loaded modcard into seat " << seat << "\n";
 	
@@ -105,13 +105,6 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	//destroy
 	g_characters[seat].Reset();
 }
-
-void SetPreviewChar(ExtClass::CharacterStruct* previewChar) {
-	g_previewChar.Reset();
-	g_previewChar.m_char = previewChar;
-	g_previewChar.m_cardData.FromFileBuffer((char*)previewChar->m_charData->m_pngBuffer,previewChar->m_charData->m_pngBufferSize);
-}
-
 
 
 void ApplyRelationshipPoints(ExtClass::CharacterStruct* characterFrom,ExtClass::CharacterRelation* relation) {

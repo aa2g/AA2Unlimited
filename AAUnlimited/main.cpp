@@ -83,6 +83,7 @@ static const char *NormalInit()
 	LOGPRIONC(Logger::Priority::SPAM) "cfg test" << g_Config.getb("bUseMeshTextureOverrides") << "\r\n";
 	InitializeHooks();
 	LOGPRIONC(Logger::Priority::SPAM) "Memory hooks initialized.\r\n";
+	LOGPRIONC(Logger::Priority::SPAM) std::hex << "memalloc: routing unified heap to 0x" << _get_heap_handle() << "\n";
 
 	// And run rest of lua
 	g_Logger.luaFlush(); // make lua see pending log entries

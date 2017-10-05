@@ -239,8 +239,9 @@ void InitializeHooks() {
 		using namespace SharedInjections;
 
 		GameTick::Initialize();
-		ArchiveFile::OpenFileInject();
 		WinAPI::Inject();
+
+		ArchiveFile::OpenFileInject();
 		if (g_Config.getb("bUseMeshTextureOverrides")) {
 			LOGPRIO(Logger::Priority::SPAM) << "Mesh texture override init" << "\n";
 			MeshTexture::OverrideTextureListSizeInject();
@@ -320,10 +321,11 @@ void InitializeHooks() {
 			TanSlotUnlimit::InsertLoopEnd();
 		}
 
+#if 0
 		SaveCard::AddUnlimitDataInject();
 		OpenCard::ReadUnlimitDataInject();
 		OpenCard::PreviewCardInject();
-
+#endif
 		
 
 		Dialog::DialogProcInject();

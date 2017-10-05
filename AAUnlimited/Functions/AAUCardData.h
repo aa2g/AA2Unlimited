@@ -5,6 +5,7 @@
 #include <map>
 
 
+#include "General/Buffer.h"
 #include "TextureImage.h"
 #include "OverrideFile.h"
 #include "XXObjectFile.h"
@@ -34,27 +35,25 @@ public:
 	enum MeshModFlag {
 		MODIFY_FRAME = 1, MODIFY_BONE = 2
 	};
-	static const int CurrentVersion = 2;
+	static const int CurrentVersion = 3;
 
 	AAUCardData();
 	~AAUCardData();
 
-	//the part of the buffer that contains the file-chunk and has to be removed.
-	//[0] is eye texture left, [1] is eye tetxture right, [2] is eye highlights, [3] are files.
-	//todo: make this into a better system. this is a retarded way to handle this
-	struct {
-		char* fileStart;
-		char* fileEnd;
+	char *Blob;
 
-		inline DWORD size() { return fileEnd - fileStart; }
-	}  ret_files[4];
-	char* ret_chunkSize;
+	// TODO: this is lazy, move to .cpp
+	int BlobAt;
+	int BlobSize;
+	bool BlobAppendBuffer(BYTE *buf, size_t len);
+	bool BlobAppendEntry(std::wstring &name, int typ, BYTE *buf, size_t len);
+	bool BlobAppendFile(std::wstring &name, int typ, std::wstring fullPath);
+	void BlobReset();
 
-	//searches for AAUnlimited data inside file, then reads it.
-	bool FromFileBuffer(char* buffer, DWORD size);
+
 	//writes data to a buffer, including png chunk. Returns size of buffer filled,
 	//or 0 if it failed (because the buffer was too small and resize was false)
-	int ToBuffer(char** buffer, int* size, bool resize, bool pngChunks);
+	int ToBuffer(char** buffer);
 	void Reset();
 
 	//add/remove stuffs
@@ -103,8 +102,12 @@ public:
 	bool AddModule(const Shared::Triggers::Module& mod);
 	bool RemoveModule(int index);
 
-	void SaveOverrideFiles();
-	bool DumpSavedOverrideFiles();
+	void PrepareSaveBlob();
+	void PrepareSaveBlob(int i);
+
+	bool ConvertFilesToBlob();
+	bool PrepareDumpBlob();
+	bool DumpBlob();
 
 	void ConvertToNewVersion();
 
@@ -117,6 +120,11 @@ public:
 	typedef std::pair<std::wstring, std::wstring> ObjectOverrideRule;
 	typedef std::pair<std::wstring, D3DMATRIX> BoneRule;
 	typedef std::pair<std::pair<int, std::wstring>, std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
+	// first.first - type
+	// first.second - name
+	// second - size
+	typedef std::pair<std::pair<int, std::wstring>, size_t> BlobInfo;
+
 	struct HairPart {
 		BYTE kind; //0-3
 		BYTE slot;
@@ -276,10 +284,19 @@ public:
 
 	std::vector<SavedFile> m_savedFiles;
 
-
+	// Blobs work similiar to m_savedFiles, however they carry only name, type, filesizes - making stripping
+	// of bulk data less messy (we'll simply always retain blobinfo, and cut off the blob it refers to).
+	// In addition to overrides, blobs also store eye/hilite textures, leaving the old storage tags for those files unused.
+	enum {
+		BLOB_EYE = 0,      // eye in edit folder, must not contain \ and ..
+		BLOB_HI = 1,       // hilite in edit folder, must not contain \ and ..
+		BLOB_OVERRIDE = 2, // override folder in edit, must not contain ..
+	};
+	std::vector<BlobInfo> m_blobInfo;
 
 	//fills data from buffer. buffer should point to start of the png chunk (the length member)
 	void FromBuffer(char* buffer, int size);
+	bool FromPNGBuffer(char* buffer, DWORD size);
 
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
@@ -361,7 +378,9 @@ inline const D3DMATRIX* AAUCardData::GetBoneTransformationRule(const TCHAR* bone
 	return it == m_styles[m_currCardStyle].m_boneTransformMap.end() ? NULL : &it->second;
 }
 
-inline bool AAUCardData::HasFilesSaved() { return m_savedFiles.size() > 0; }
+inline bool AAUCardData::HasFilesSaved() {
+	return m_savedFiles.size() > 0;
+}
 
 inline const std::vector<AAUCardData::HairPart>& AAUCardData::GetHairs(BYTE kind) { return m_styles[m_currCardStyle].m_hairs[kind]; }
 

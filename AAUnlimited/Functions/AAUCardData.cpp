@@ -20,11 +20,6 @@ AAUCardData::AAUCardData()
 
 	m_currCardStyle = 0;
 	m_styles.resize(1);
-
-	for (int i = 0; i < sizeof(ret_files) / sizeof(ret_files[0]); i++) {
-		ret_files[i].fileEnd = 0;
-		ret_files[i].fileStart = 0;
-	}
 	m_version = 1;
 }
 
@@ -37,12 +32,31 @@ AAUCardData::CardStyle::CardStyle() {
 
 AAUCardData::~AAUCardData()
 {
-
+	BlobReset();
 }
 
 void AAUCardData::Reset() {
+	BlobReset();
 	*this = g_defaultValues;
 }
+
+bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
+	Reset();
+	if (size < 8) {
+		m_version = AAUCardData::CurrentVersion;
+		return false;
+	}
+
+	BYTE* chunk = General::FindPngChunk((BYTE*)buffer, size, AAUCardData::PngChunkIdBigEndian);
+	if (chunk) {
+		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 8;
+		FromBuffer((char*)chunk, size);
+		return true;
+	}
+	m_version = AAUCardData::CurrentVersion;
+	return false;
+}
+
 
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	using namespace Serialize;
@@ -140,15 +154,15 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				LOGPRIO(Logger::Priority::SPAM) << "...found EtRN: " << m_styles[m_currCardStyle].m_eyeTextures[1].texName << "\r\n";
 				break;
 			case 'EtLF':
-				ret_files[0].fileStart = buffer - 4; //before the chunk
+				//ret_files[0].fileStart = buffer - 4; //before the chunk
 				m_styles[m_currCardStyle].m_eyeTextures[0].texFile = ReadData<std::vector<BYTE>>(buffer, size);
-				ret_files[0].fileEnd = buffer;
+				//ret_files[0].fileEnd = buffer;
 				LOGPRIO(Logger::Priority::SPAM) << "...found EtLF, size " << m_styles[m_currCardStyle].m_eyeTextures[0].texFile.size() << "\r\n";
 				break;
 			case 'EtRF':
-				ret_files[1].fileStart = buffer - 4; //before the chunk
+				//ret_files[1].fileStart = buffer - 4; //before the chunk
 				m_styles[m_currCardStyle].m_eyeTextures[1].texFile = ReadData<std::vector<BYTE>>(buffer, size);
-				ret_files[1].fileEnd = buffer;
+				//ret_files[1].fileEnd = buffer;
 				LOGPRIO(Logger::Priority::SPAM) << "...found EtRF, size " << m_styles[m_currCardStyle].m_eyeTextures[1].texFile.size() << "\r\n";
 				break;
 			case 'EhXN':
@@ -156,9 +170,9 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				LOGPRIO(Logger::Priority::SPAM) << "...found EtXN: " << m_styles[m_currCardStyle].m_eyeHighlightName << "\r\n";
 				break;
 			case 'EhXF':
-				ret_files[2].fileStart = buffer - 4; //before the chunk
+				//ret_files[2].fileStart = buffer - 4; //before the chunk
 				m_styles[m_currCardStyle].m_eyeHighlightFile = ReadData<decltype(m_styles[m_currCardStyle].m_eyeHighlightFile)>(buffer, size);
-				ret_files[2].fileEnd = buffer;
+				//ret_files[2].fileEnd = buffer;
 				LOGPRIO(Logger::Priority::SPAM) << "...found EtXF, size " << m_styles[m_currCardStyle].m_eyeHighlightFile.size() << "\r\n";
 				break;
 			case 'HrRd':
@@ -220,10 +234,14 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				LOGPRIO(Logger::Priority::SPAM) << "found Slds, loaded " << m_styles[m_currCardStyle].m_sliders.size() << " elements\r\n";
 				break;
 			case 'File':
-				ret_files[3].fileStart = buffer - 4; //before the 'File'
+				//ret_files[3].fileStart = buffer - 4; //before the 'File'
 				m_savedFiles = ReadData<decltype(m_savedFiles)>(buffer, size);
-				ret_files[3].fileEnd = buffer;
+				//ret_files[3].fileEnd = buffer;
 				LOGPRIO(Logger::Priority::SPAM) << "found File list, loaded " << m_savedFiles.size() << " elements.\r\n";
+				break;
+			case 'Blob':
+				m_blobInfo = ReadData<decltype(m_blobInfo)>(buffer, size);
+				LOGPRIO(Logger::Priority::SPAM) << "found Blob list, loaded " << m_blobInfo.size() << " elements.\r\n";
 				break;
 			case 'Trgs':
 				m_triggers = ReadData<decltype(m_triggers)>(buffer, size);
@@ -258,47 +276,12 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
 	}
 
-
-	if (m_version == 1 && g_Config.legacyMode == 3) {
-		ConvertToNewVersion();
-	}
-	m_version = 2;
-
-	GenAllFileMaps(); //we do this in the end in case conversion or something changed the file paths
-
+	GenAllFileMaps();
 }
 
-bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
-	Reset();
-	//try to find it at the end first
-	if (size < 8) {
-		m_version = AAUCardData::CurrentVersion;
-		return false;
-	}
-	DWORD aauDataSize = *(DWORD*)(&buffer[size - 8]);
-	if (aauDataSize < size - 8) {
-		DWORD id = *(DWORD*)(&buffer[size - 8 - aauDataSize - 4]);
-		if (id == PngChunkIdBigEndian) {
-			FromBuffer((char*)(&buffer[size - 8 - aauDataSize]), aauDataSize);
-			return true;
-		}
-	}
-	//else, find our png chunk
-	BYTE* chunk = General::FindPngChunk((BYTE*)buffer, size, AAUCardData::PngChunkIdBigEndian);
-	if (chunk == NULL) chunk = General::FindPngChunk((BYTE*)buffer, size, *(DWORD*)"AAUD");
-	if (chunk != NULL) {
-		//first, read chunk size (big endian)
-		ret_chunkSize = (char*)chunk;
-		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 8;
-		FromBuffer((char*)chunk, size);
-		return true;
-	}
-	m_version = AAUCardData::CurrentVersion;
-	return false;
-}
 
 /*
- * Will write the png file to a buffer. If pngChunks == true, the old format will be printed,
+ * Will write the png file to a buffer.
  * that includes a pngChunk structure like this:
  * DWORD chunkDataLength;
  * DWORD chunkId;
@@ -310,13 +293,6 @@ bool AAUCardData::FromFileBuffer(char* buffer, DWORD size) {
  * BYTE chunkData[chunkDataLength]
  * DWORD chunkDataLength
  */
-int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks) {
-	using namespace Serialize;
-	LOGPRIO(Logger::Priority::SPAM) << "dumping card info...\r\n";
-	int at = 0;
-	bool ret = true;
-	//a define to make this function look simpler.
-	//dumps the given id, followed by the value, but only if its actually different from the default value
 #define DUMP_MEMBER(id,x) \
 		if(x != g_defaultValues.x) { \
 			DWORD varId = id; \
@@ -350,14 +326,21 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 			LOGPRIO(Logger::Priority::SPAM) << 	"... " #x " had default value and was not written\r\n";\
 		}
 
+int AAUCardData::ToBuffer(char** buffer) {
+	int at = 0;
+	int ssize = 0;
+	int *size = &ssize;
+	using namespace Serialize;
+	LOGPRIO(Logger::Priority::SPAM) << "dumping card info...\r\n";
+	bool ret = true;
+	bool resize = true;
 
-	if (pngChunks) {
-		//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder
-		ret &= General::BufferAppend(buffer, size, at, "Msgn", 4, resize);
-		at += 4;
-	}
+	//dumps the given id, followed by the value, but only if its actually different from the default value
+	//so, first we would need to write the size. we dont know that yet tho, so we will put in a placeholder
+	ret &= General::BufferAppend(buffer, size, at, "Msgn", 4, resize);
+	at += 4;
 	//write chunk id (big endian)
-	ret &= General::BufferAppend(buffer, size, at, (const char*)(&PngChunkIdBigEndian), 4, resize);
+	ret &= General::BufferAppend(buffer, size, at, (const char*)(&AAUCardData::PngChunkIdBigEndian), 4, resize);
 	at += 4;
 	//now write all members
 
@@ -365,8 +348,10 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 	DUMP_MEMBER('Vers', m_version);
 	//tan-slot
 	//DUMP_MEMBER('TanS', m_tanSlot);	//deprecated
-	//embedded files
-	DUMP_MEMBER_CONTAINER('File', m_savedFiles);
+	//embedded files, deprecated by blobs
+	//DUMP_MEMBER_CONTAINER('File', m_savedFiles);
+	if (m_blobInfo.size())
+		DUMP_MEMBER_CONTAINER('Blob', m_blobInfo);
 	//dump aau sets
 	for (int i = 0; i < m_styles.size(); i++) {
 		DUMP_MEMBER_AAUSET('AUSS', m_name);
@@ -378,11 +363,13 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 		//eye textures
 		DUMP_MEMBER_AAUSET('EtLN', m_eyeTextures[0].texName);
 		DUMP_MEMBER_AAUSET('EtRN', m_eyeTextures[1].texName);
-		DUMP_MEMBER_CONTAINER_AAUSET('EtLF', m_eyeTextures[0].texFile);
-		DUMP_MEMBER_CONTAINER_AAUSET('EtRF', m_eyeTextures[1].texFile);
+		//deprecated by blobs
+		//DUMP_MEMBER_CONTAINER_AAUSET('EtLF', m_eyeTextures[0].texFile);
+		//DUMP_MEMBER_CONTAINER_AAUSET('EtRF', m_eyeTextures[1].texFile);
 		//highlight texture
 		DUMP_MEMBER_AAUSET('EhXN', m_eyeHighlightName);
-		DUMP_MEMBER_CONTAINER_AAUSET('EhXF', m_eyeHighlightFile);
+		// deprecated by blobs
+		//DUMP_MEMBER_CONTAINER_AAUSET('EhXF', m_eyeHighlightFile);
 		//tans
 		DUMP_MEMBER_AAUSET('TnRd', m_tanName);
 		//hair highlight
@@ -414,32 +401,21 @@ int AAUCardData::ToBuffer(char** buffer, int* size, bool resize, bool pngChunks)
 
 
 	//now we know the size of the data. its where we are now (at) minus the start of the data (8) (big endian)
-	if (pngChunks) {
-		int dataSize = at - 8;
-		int dataSizeSwapped = _byteswap_ulong(at - 8);
-		ret &= General::BufferAppend(buffer, size, 0, (const char*)(&dataSizeSwapped), 4, resize);
+	int dataSize = at - 8;
+	int dataSizeSwapped = _byteswap_ulong(at - 8);
+	ret &= General::BufferAppend(buffer, size, 0, (const char*)(&dataSizeSwapped), 4, resize);
 
-		//write checksum
-		DWORD checksum = General::Crc32((BYTE*)(*buffer) + 4, dataSize + 4);
-		ret &= General::BufferAppend(buffer, size, at, (const char*)(&checksum), 4, resize);
-		return !ret ? 0 : dataSize + 12;
-	}
-	else {
-		int dataSize = at - 4;
-		ret &= General::BufferAppend(buffer, size, at, (const char*)(&dataSize), 4, resize);
-		return !ret ? 0 : dataSize + 8;
-	}
+	//write checksum
+	DWORD checksum = General::Crc32((BYTE*)(*buffer) + 4, dataSize + 4);
+	ret &= General::BufferAppend(buffer, size, at, (const char*)(&checksum), 4, resize);
 
-
-	//undefine macros again
+	return !ret ? 0 : dataSize + 12;
+}
+//undefine macros again
 #undef DUMP_MEMBER_CONTAINER
 #undef DUMP_MEMBER
 #undef DUMP_MEMBER_CONTAINER_AAUSET
 #undef DUMP_MEMBER_AAUSET
-
-
-
-}
 
 /*****************************/
 /* Elementwise add functions */
@@ -716,104 +692,27 @@ void AAUCardData::SetSliderValue(int sliderTarget, int sliderIndex, float value)
 	GenSliderMap();
 }
 
-/****************************/
-/* Map Generation functions */
-/****************************/
+// FIXME: this be better served by some sort of insert-order map containers
+void AAUCardData::GenAllFileMaps() {
+	for (auto &st : m_styles) {
+		st.m_meshOverrideMap.clear();
+		for (auto &list : st.m_meshOverrides)
+			st.m_meshOverrideMap.emplace(list.first, TextureImage(list.second.c_str(), TextureImage::OVERRIDE));
 
-void AAUCardData::GenMeshOverrideMap() {
-	for (int i = 0; i < m_styles.size(); i++) {
-		m_styles[i].m_meshOverrideMap.clear();
-		for (const auto& it : m_styles[i].m_meshOverrides) {
-			std::wstring path;
-			TextureImage::PathStart start;
-			switch (m_version) {
-			case 1:
-				//version 1 mean relative to the old texture path
-				path = VER1_OVERRIDE_IMAGE_PATH + it.second;
-				start = TextureImage::AAEDIT;
-				break;
-			case 2:
-				//relative to override path
-				path = it.second;
-				start = TextureImage::OVERRIDE;
-			default:
-				break;
-			}
-			TextureImage img(path.c_str(), start);
-			if (img.IsGood()) {
-				m_styles[i].m_meshOverrideMap.emplace(it.first, std::move(img));
-			}
-		}
-	}
-}
-void AAUCardData::GenArchiveOverrideMap() {
-	for (int i = 0; i < m_styles.size(); i++) {
-		m_styles[i].m_archiveOverrideMap.clear();
-		for (const auto& it : m_styles[i].m_archiveOverrides) {
-			std::wstring path;
-			OverrideFile::PathStart start;
-			switch (m_version) {
-			case 1:
-				//version 1 mean relative to data root, either play or edit
-				path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
-				start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
-				break;
-			case 2:
-				//relative to override path
-				path = it.second;
-				start = OverrideFile::OVERRIDE;
-			default:
-				break;
-			}
-			OverrideFile img(path.c_str(), start);
-			if (img.IsGood()) {
-				m_styles[i].m_archiveOverrideMap.emplace(it.first, std::move(img));
-			}
-		}
-	}
-}
-void AAUCardData::GenArchiveRedirectMap() {
-	for (int i = 0; i < m_styles.size(); i++) {
-		m_styles[i].m_archiveRedirectMap.clear();
-		for (const auto& it : m_styles[i].m_archiveRedirects) {
-			if (m_styles[i].m_archiveRedirectMap.find(it.first) == m_styles[i].m_archiveRedirectMap.end()) {
-				m_styles[i].m_archiveRedirectMap.emplace(it.first, it.second);
-			}
-		}
-	}
-}
-void AAUCardData::GenObjectOverrideMap() {
-	for (int i = 0; i < m_styles.size(); i++) {
-		m_styles[i].m_objectOverrideMap.clear();
-		for (const auto& it : m_styles[i].m_objectOverrides) {
-			char buff[256];
-			size_t n;
-			wcstombs_s(&n, buff, it.first.c_str(), 256);
-			std::string strObject = buff;
+		st.m_archiveOverrideMap.clear();
+		for (auto &list : st.m_archiveOverrides)
+			st.m_archiveOverrideMap.emplace(list.first, OverrideFile(list.second.c_str(), OverrideFile::OVERRIDE));
 
-			std::wstring path;
-			XXObjectFile::PathStart start;
-			switch (m_version) {
-			case 1:
-				//version 1 mean relative to data root, either play or edit
-				path = VER1_OVERRIDE_ARCHIVE_PATH + it.second;
-				start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
-				break;
-			case 2:
-				//relative to override path
-				path = it.second;
-				start = OverrideFile::OVERRIDE;
-			default:
-				break;
-			}
+		st.m_objectOverrideMap.clear();
+		for (auto &list : st.m_objectOverrides)
+			st.m_objectOverrideMap.emplace(General::utf8.to_bytes(list.first), XXObjectFile(list.second.c_str(), OverrideFile::OVERRIDE));
 
-			XXObjectFile ofile(path.c_str(), start);
-			if (ofile.IsGood()) {
-				m_styles[i].m_objectOverrideMap.insert(std::make_pair(strObject, std::move(ofile)));
-			}
-		}
+		st.m_archiveRedirectMap.clear();
+		for (auto &list : st.m_archiveRedirects)
+			st.m_archiveRedirectMap.emplace(list.first, list.second);
 	}
 }
+
 void AAUCardData::GenBoneRuleMap() {
 	m_styles[m_currCardStyle].m_boneRuleMap.clear();
 	for (auto& elem : m_styles[m_currCardStyle].m_boneRules) {
@@ -897,22 +796,6 @@ void AAUCardData::GenSliderMap() {
 	}
 }
 
-void AAUCardData::GenAllFileMaps() {
-	GenArchiveRedirectMap();
-	GenMeshOverrideMap();
-	GenArchiveOverrideMap();
-	GenObjectOverrideMap();
-
-	int tmp = m_currCardStyle;
-	for (int i = 0; i < m_styles.size(); i++) {
-		m_currCardStyle = i;
-		auto temp = m_styles[m_currCardStyle].m_tanName; //not sure if this is stricly neccessary, but i do it out of safety
-		SetTan(temp.c_str());
-		temp = m_styles[m_currCardStyle].m_hairHighlightName;
-		SetHairHighlight(temp.c_str());
-	}
-	m_currCardStyle = tmp;
-}
 
 /***************************/
 /* Setting loose variables */
@@ -922,64 +805,26 @@ bool AAUCardData::SetEyeTexture(int leftright, const TCHAR* texName, bool save) 
 	int other = leftright == 0 ? 1 : 0;
 	if (texName == NULL) {
 		m_styles[m_currCardStyle].m_eyeTextures[leftright].texName = TEXT("");
-		m_styles[m_currCardStyle].m_eyeTextures[leftright].texFile.clear();
 		return true;
 	}
-	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), texName);
-	HANDLE file = CreateFile(fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	if (file == INVALID_HANDLE_VALUE || file == NULL) {
-		return false;
-	}
-	if (save && m_styles[m_currCardStyle].m_eyeTextures[other].texName != m_styles[m_currCardStyle].m_eyeTextures[leftright].texName) {
-		DWORD lo, hi;
-		lo = GetFileSize(file, &hi);
-		m_styles[m_currCardStyle].m_eyeTextures[leftright].texFile.resize(lo);
-		ReadFile(file, m_styles[m_currCardStyle].m_eyeTextures[leftright].texFile.data(), lo, &hi, NULL);
-	}
 	m_styles[m_currCardStyle].m_eyeTextures[leftright].texName = texName;
-	CloseHandle(file);
 	return true;
 }
 
 bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
 	if (texName == NULL) {
 		m_styles[m_currCardStyle].m_eyeHighlightName = TEXT("");
-		m_styles[m_currCardStyle].m_eyeHighlightFile.clear();
 		return true;
 	}
-	if (m_styles[m_currCardStyle].m_eyeHighlightFile.size() > 0) {
-		m_styles[m_currCardStyle].m_eyeHighlightFile.clear();
-	}
-	std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"), texName);
-	HANDLE file = CreateFile(fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	if (file == INVALID_HANDLE_VALUE || file == NULL) {
-		return false;
-	}
 	m_styles[m_currCardStyle].m_eyeHighlightName = texName;
-
-	DWORD lo, hi;
-	lo = GetFileSize(file, &hi);
-	m_styles[m_currCardStyle].m_eyeHighlightFile.resize(lo);
-	ReadFile(file, m_styles[m_currCardStyle].m_eyeHighlightFile.data(), lo, &hi, NULL);
-
-	CloseHandle(file);
 	return true;
 }
 
 bool AAUCardData::SetHairHighlight(const TCHAR* name) {
 	std::wstring path;
 	TextureImage::PathStart start;
-	switch (m_version) {
-	case 1:
-		path = VER1_HAIR_HIGHLIGHT_PATH;
-		start = TextureImage::AAEDIT;
-		break;
-	case 2:
-		path = HAIR_HIGHLIGHT_PATH;
-		start = TextureImage::OVERRIDE;
-	default:
-		break;
-	}
+	path = HAIR_HIGHLIGHT_PATH;
+	start = TextureImage::OVERRIDE;
 	path += name;
 	m_styles[m_currCardStyle].m_hairHighlightImage = TextureImage(path.c_str(), start);
 	if (m_styles[m_currCardStyle].m_hairHighlightImage.IsGood()) {
@@ -1000,17 +845,8 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 	}
 	std::wstring path;
 	TextureImage::PathStart start;
-	switch (m_version) {
-	case 1:
-		path = VER1_TAN_PATH;
-		start = TextureImage::AAEDIT;
-		break;
-	case 2:
-	default:
-		path = TAN_PATH;
-		start = TextureImage::OVERRIDE;
-		break;
-	}
+	path = TAN_PATH;
+	start = TextureImage::OVERRIDE;
 	path += name;
 	path += TEXT("\\");
 	bool anyGood = false;
@@ -1105,216 +941,302 @@ bool AAUCardData::RemoveModule(int index) {
 /********************************/
 /* Save and Dump file functions */
 /********************************/
+void AAUCardData::PrepareSaveBlob() {
+	BlobReset();
+	int nstyles = m_styles.size();
+	for (int i = 0; i < nstyles; i++)
+		PrepareSaveBlob(i);
+}
 
-void AAUCardData::SaveOverrideFiles() {
-	m_savedFiles.clear();
-
+void AAUCardData::PrepareSaveBlob(int style) {
 	//general overrides first:
+
 	//mesh overrides:
-	for (const auto& mrule : m_styles[m_currCardStyle].m_meshOverrideMap) {
+	for (const auto& mrule : m_styles[style].m_meshOverrideMap) {
 		std::vector<BYTE> buffer(mrule.second.GetFileSize());
 		mrule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
 			auto path = mrule.second.GetRelPath();
-			m_savedFiles.emplace_back(std::make_pair(2, path), buffer);
+			BlobAppendEntry(path, BLOB_OVERRIDE, buffer.data(), buffer.size());
 		}
 	}
 
 	//archive overrides
-	for (const auto& arule : m_styles[m_currCardStyle].m_archiveOverrideMap) {
+	for (const auto& arule : m_styles[style].m_archiveOverrideMap) {
 		std::vector<BYTE> buffer(arule.second.GetFileSize());
 		arule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
 			int location;
 			auto path = arule.second.GetRelPath();
-			//if (General::StartsWith(arule.second.GetFilePath().c_str(),General::AAPlayPath.c_str())) {
-			//	path = path;
-			//	location = 0;
-			//}
-			//else {
-			path = path;
-			location = 2;
-			//}
-			m_savedFiles.emplace_back(std::make_pair(location, path), buffer);
+			BlobAppendEntry(path, BLOB_OVERRIDE, buffer.data(), buffer.size());
 		}
 	}
 
 	//object overrides
-	for (const auto& orule : m_styles[m_currCardStyle].m_objectOverrideMap) {
+	for (const auto& orule : m_styles[style].m_objectOverrideMap) {
 		std::vector<BYTE> buffer(orule.second.GetFileSize());
 		orule.second.WriteToBuffer(buffer.data());
 		if (buffer.size() > 0) {
 			auto path = orule.second.GetRelPath();
-			m_savedFiles.emplace_back(std::make_pair(2, path), buffer);
+			BlobAppendEntry(path, BLOB_OVERRIDE, buffer.data(), buffer.size());
 		}
 	}
 
 	//hair highlight
-	if (m_styles[m_currCardStyle].m_hairHighlightImage.IsGood()) {
-		std::vector<BYTE> buffer(m_styles[m_currCardStyle].m_hairHighlightImage.GetFileSize());
-		m_styles[m_currCardStyle].m_hairHighlightImage.WriteToBuffer(buffer.data());
-		auto path = m_styles[m_currCardStyle].m_hairHighlightImage.GetRelPath();
-		m_savedFiles.emplace_back(std::make_pair(2, path), buffer);
+	if (m_styles[style].m_hairHighlightImage.IsGood()) {
+		std::vector<BYTE> buffer(m_styles[style].m_hairHighlightImage.GetFileSize());
+		m_styles[style].m_hairHighlightImage.WriteToBuffer(buffer.data());
+		auto path = m_styles[style].m_hairHighlightImage.GetRelPath();
+		BlobAppendEntry(path, BLOB_OVERRIDE, buffer.data(), buffer.size());
 	}
 
 	//tan
 	for (int i = 0; i < 5; i++) {
-		if (m_styles[m_currCardStyle].m_tanImages[i].IsGood()) {
-			std::vector<BYTE> buffer(m_styles[m_currCardStyle].m_tanImages[i].GetFileSize());
-			m_styles[m_currCardStyle].m_tanImages[i].WriteToBuffer(buffer.data());
-			auto path = m_styles[m_currCardStyle].m_tanImages[i].GetRelPath();
-			m_savedFiles.emplace_back(std::make_pair(2, path), buffer);
+		if (m_styles[style].m_tanImages[i].IsGood()) {
+			std::vector<BYTE> buffer(m_styles[style].m_tanImages[i].GetFileSize());
+			m_styles[style].m_tanImages[i].WriteToBuffer(buffer.data());
+			auto path = m_styles[style].m_tanImages[i].GetRelPath();
+			BlobAppendEntry(path, BLOB_OVERRIDE, buffer.data(), buffer.size());
 		}
+	}
+
+	// eye tex
+	for (int i = 0; i < 2; i++) {
+		std::wstring &texName = m_styles[style].m_eyeTextures[i].texName;
+		if (texName.size())
+			BlobAppendFile(texName, BLOB_EYE, General::BuildEditPath(TEXT("data\\texture\\eye\\"), texName.c_str()));
+	}
+
+	// hilite tex
+	std::wstring &texName = m_styles[style].m_eyeHighlightName;
+	if (texName.size())
+		BlobAppendFile(texName, BLOB_HI, General::BuildEditPath(TEXT("data\\texture\\hilight\\"), texName.c_str()));
+
+}
+
+static bool CheckPath(std::wstring &fullPath) {
+	bool suspicious = false;
+	for (unsigned int i = 0; i < fullPath.size() - 1; i++) {
+		if (fullPath[i] == '.') {
+			if (fullPath[i + 1] == '.') {
+				suspicious = true;
+				break;
+			}
+			else {
+				i++; //skip the second dot as well
+			}
+		}
+	}
+	if (suspicious) {
+		std::wstringstream warningMessage;
+		warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
+		warningMessage << fullPath << TEXT("This cards files will not be extracted. Blame the guy who made the card");
+		MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING | MB_TASKMODAL);
+		return false;
+	}
+	return true;
+}
+
+bool AAUCardData::BlobAppendBuffer(BYTE *buf, size_t len) {
+	bool ret = General::BufferAppend(&Blob, &BlobSize, BlobAt, (const char*)buf, len, true);
+	BlobAt += len;
+	return ret;
+}
+bool AAUCardData::BlobAppendEntry(std::wstring &name, int typ, BYTE *buf, size_t len) {
+	LOGPRIO(Logger::Priority::SPAM) << std::dec << "appending " << name << " of " << len << " bytes, type = " << typ << "\n";
+	auto ninfo = std::make_pair(typ, name);
+	// already have this entry
+	for (auto &b : m_blobInfo) {
+		if (b.first == ninfo)
+			return true;
+	}
+	m_blobInfo.emplace_back(std::make_pair(ninfo, len));
+	return BlobAppendBuffer(buf, len);
+}
+
+bool AAUCardData::BlobAppendFile(std::wstring &name, int typ, std::wstring fullPath) {
+	HANDLE file = CreateFile(fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (file == INVALID_HANDLE_VALUE || file == NULL)
+		return false;
+	DWORD sz = GetFileSize(file, NULL);
+	BYTE *buf = new BYTE[sz];
+	DWORD got = 0;
+	ReadFile(file, buf, sz, &got, NULL);
+	CloseHandle(file);
+	bool res = (got == sz) && BlobAppendEntry(name, typ, buf, sz);
+	delete buf;
+	return res;
+}
+
+void AAUCardData::BlobReset() {
+	m_blobInfo.clear();
+	BlobAt = 0;
+	BlobSize = 0;
+	if (Blob) {
+		delete Blob;
+		Blob = nullptr;
 	}
 }
 
-bool AAUCardData::DumpSavedOverrideFiles() {
-#if 0
-	// This can be empty even if we have eye files packed in
-	if (m_savedFiles.size() == 0) return false;
-#endif
-	int mode = g_Config.savedFileUsage;
-	if (mode == 2) return false; //if 2, do not extract
 
-	// look for which files to extract
-	//override files
+bool AAUCardData::ConvertFilesToBlob() {
+	LOGPRIO(Logger::Priority::SPAM) << "converting File to Blob\r\n";
+
+	// override files
 	std::vector<std::pair<int, std::wstring>> toExtract;
 	for (unsigned int i = 0; i < m_savedFiles.size(); i++) {
 		auto& file = m_savedFiles[i];
-		int basePath = file.first.first;
-		std::wstring fullPath;
-		if (basePath == 0) fullPath = General::BuildPlayPath(file.first.second.c_str());
-		else if (basePath == 1) fullPath = General::BuildEditPath(file.first.second.c_str());
-		else					fullPath = General::BuildOverridePath(file.first.second.c_str());
-		//check if path has any backdirections (two dots or more)
-		bool suspicious = false;
-		for (unsigned int i = 0; i < fullPath.size() - 1; i++) {
-			if (fullPath[i] == '.') {
-				if (fullPath[i + 1] == '.') {
-					suspicious = true;
-					break;
-				}
-				else {
-					i++; //skip the second dot as well
-				}
-			}
+		int typ = file.first.first;
+		if (typ < 2) {
+			LOGPRIO(Logger::Priority::WARN) << "could not convert file " << file.first.second.c_str() << ": v1 card embedded files no longer supported\r\n";
+			continue;
 		}
-		if (suspicious) {
-			std::wstringstream warningMessage;
-			warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
-			warningMessage << fullPath << TEXT("This cards files will not be extracted. Blame the guy who made the card");
-			MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING | MB_TASKMODAL);
-			return false;
-		}
-		if (!General::FileExists(fullPath.c_str()))
-			toExtract.emplace_back(i, std::move(fullPath));
+		BlobAppendEntry(file.first.second, typ, file.second.data(), file.second.size());
+		file.second.resize(0);
 	}
-	//eye textures/highlights
+
+	//eye textures
 	std::pair<std::wstring, std::vector<BYTE>*> eyeStuff[3];
 	for (int i = 0; i < 2; i++) {
 		if (m_styles[m_currCardStyle].m_eyeTextures[i].texName.size() > 0 && m_styles[m_currCardStyle].m_eyeTextures[i].texFile.size() > 0) {
-			//make sure texture has no folders in it first
-			bool validFileName = true;
-			for (wchar_t c : m_styles[m_currCardStyle].m_eyeTextures[i].texName) {
-				if (c == L'\\') {
-					validFileName = false;
-				}
-			}
-			if (!validFileName) {
-				std::wstringstream warningMessage;
-				warningMessage << TEXT("The card contains a file with a suspicious file path:\r\n");
-				warningMessage << m_styles[m_currCardStyle].m_eyeTextures[i].texName << TEXT("This cards files will not be extracted. Blame the guy who made the card");
-				MessageBox(NULL, warningMessage.str().c_str(), TEXT("Warning"), MB_ICONWARNING | MB_TASKMODAL);
+			std::wstring &texName = m_styles[m_currCardStyle].m_eyeTextures[i].texName;
+			auto &texFile = m_styles[m_currCardStyle].m_eyeTextures[i].texFile;
+
+			if (texName.find('\\') != texName.npos)
 				return false;
-			}
-			std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), m_styles[m_currCardStyle].m_eyeTextures[i].texName.c_str());
-			if (!General::FileExists(fullPath.c_str())) {
-				eyeStuff[i] = make_pair(fullPath, &m_styles[m_currCardStyle].m_eyeTextures[i].texFile);
-			}
+
+			//texName = L"data\\texture\\eye\\" + texName;
+
+			BlobAppendEntry(texName, BLOB_EYE, texFile.data(), texFile.size());
+			texFile.resize(0);
 		}
 	}
+
 	//eye highlight
 	if (m_styles[m_currCardStyle].m_eyeHighlightName.size() > 0 && m_styles[m_currCardStyle].m_eyeHighlightFile.size() > 0) {
 		//make sure texture has no folders in it first
-		bool validFileName = true;
-		for (wchar_t c : m_styles[m_currCardStyle].m_eyeHighlightName) {
-			if (c == L'\\') {
-				validFileName = false;
+		std::wstring &texName = m_styles[m_currCardStyle].m_eyeHighlightName;
+		auto &texFile = m_styles[m_currCardStyle].m_eyeHighlightFile;
+
+		if (texName.find('\\') != texName.npos)
+			return false;
+
+		//texName = L"data\\texture\\hilight\\" + texName;
+		BlobAppendEntry(texName, BLOB_HI, texFile.data(), texFile.size());
+		texFile.resize(0);
+	}
+	LOGPRIO(Logger::Priority::SPAM) << std::dec << "got " << m_blobInfo.size() << " blob entries\r\n";
+
+	return true;
+}
+
+bool AAUCardData::PrepareDumpBlob() {
+	int need_extract = 0;
+	int mode = g_Config.savedFileUsage;
+	if (mode == 2) return false; //if 2, do not extract
+
+	// no blob to extract
+	if (m_blobInfo.size() == 0) return false;
+
+	// now rewrite the relative paths in the blob to absolute according to file type
+	int total = 0;
+	for (auto& elem : m_blobInfo) {
+		int typ = elem.first.first;
+		std::wstring path = L"";
+
+		switch (typ) {
+		case BLOB_EYE:
+			path = L"data\\texture\\eye\\";
+			break;
+		case BLOB_HI:
+			path = L"data\\texture\\hilight\\";
+			break;
+		case BLOB_OVERRIDE:
+			path = OVERRIDE_PATH;
+			break;
+		}
+		if (path.size()) {
+			auto &ep = elem.first.second;
+			LOGPRIO(Logger::Priority::SPAM) << std::dec << "dumping " << ep << " of " << elem.second << " bytes, typ=" << typ << "\n";
+
+			// eyes cant have slashes in em
+			if ((typ < BLOB_OVERRIDE) && ep.find_first_of(L"\\/") != ep.npos)
+				return false;
+
+			path = General::BuildEditPath(path.c_str(), ep.c_str());
+
+			// avoid nasty paths
+			if (!CheckPath(path))
+				return false;
+
+			// is the file missing?
+			if (!General::FileExists(path.c_str())) {
+				need_extract++;
+				elem.first.second = path;
+			}
+			// it exists, clear the filename so that it is skipped during extraction
+			else {
+				elem.first.second = L"";
 			}
 		}
-		if (!validFileName) {
-			LOGPRIO(Logger::Priority::WARN) << "saved eye file " << m_styles[m_currCardStyle].m_eyeHighlightName << " contains paths in "
-				"file name and was not extracted for safety purposes.\r\n";
-		}
-		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\hilight\\"), m_styles[m_currCardStyle].m_eyeHighlightName.c_str());
-		if (!General::FileExists(fullPath.c_str())) {
-			eyeStuff[2] = make_pair(fullPath, &m_styles[m_currCardStyle].m_eyeHighlightFile);
-		}
+		total += elem.second;
 	}
 
-	if (toExtract.size() == 0 && eyeStuff[0].second == NULL && eyeStuff[1].second == NULL &&eyeStuff[2].second == NULL) {
+	// Only for File imports, we don't know blob size yet otherwise
+	if ((BlobAt) && (total != BlobAt)) {
+		LOGPRIO(Logger::Priority::ERR) << std::dec << "sum of blob entries mismatch blob size, " << total << "!=" << BlobAt << ", aborting extraction.\r\n";
 		return false;
 	}
 
+	// nothing to do
+	if (!need_extract) return false;
+
 	//if mode is 0, build a popup asking for extraction
 	if (mode == 0) {
-		std::wstringstream text(TEXT("This card contains files that were not found in your installation:\r\n"));
-		for (auto& elem : toExtract) {
-			int i = elem.first;
-			if (m_savedFiles[i].first.first == 0) text << TEXT("AAPlay\\");
-			else if (m_savedFiles[i].first.first == 1) text << TEXT("AAEdit\\");
-			else text << OVERRIDE_PATH;
-			text << m_savedFiles[i].first.second << TEXT("\r\n");
+		std::wstringstream text;
+		text << "A card wants to extract " << need_extract << " files:\n";
+		for (auto& elem : m_blobInfo) {
+			auto &fn = elem.first.second;
+			if (!fn.size()) continue;
+			text << fn << "\n";
 		}
-		text << TEXT("These files are probably required for the card to work properly.\r\n"
-			"Do you want to extract these files now?");
+		text << "These files are probably required for the card to work properly.\n"
+			"Do you want to extract these files now?";
 		int res = MessageBox(NULL, text.str().c_str(), TEXT("Info"), MB_YESNO | MB_TASKMODAL);
 		if (res != IDYES) {
 			//doesnt want to extract, abort
 			return false;
 		}
 	}
+	return true;
+}
 
+
+bool AAUCardData::DumpBlob() {
 	//create files
-	//overrides
 	bool success = true;
-	for (auto& elem : toExtract) {
-		General::CreatePathForFile(elem.second.c_str());
-		HANDLE file = CreateFile(elem.second.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, 0, NULL);
-		if (file == INVALID_HANDLE_VALUE || file == NULL) {
-			int err = GetLastError();
-			LOGPRIO(Logger::Priority::WARN) << "could not create file " << elem.second.c_str() << ": error " << err << "\r\n";
-			success = false;
-			continue;
+	int off = 0;
+	for (auto& elem : m_blobInfo) {
+		auto &fn = elem.first.second;
+		int sz = elem.second;
+		// only files marked for extraction have names
+		if (fn.size()) {
+			General::CreatePathForFile(fn.c_str());
+			HANDLE file = CreateFile(fn.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, 0, NULL);
+			if (file == INVALID_HANDLE_VALUE || file == NULL) {
+				int err = GetLastError();
+				LOGPRIO(Logger::Priority::WARN) << "could not create file " << fn << ": error " << err << "\r\n";
+				success = false;
+			}
+			else {
+				DWORD written = 0;
+				WriteFile(file, Blob + off, sz, &written, NULL);
+				CloseHandle(file);
+				if (written != sz)
+					success = false;
+			}
 		}
-		DWORD written = 0;
-		auto& vec = m_savedFiles[elem.first].second;
-		WriteFile(file, vec.data(), vec.size(), &written, NULL);
-		CloseHandle(file);
-
-		if (written != vec.size()) {
-			success = false;
-		}
-	}
-	//eye stuff
-	for (int i = 0; i < 3; i++) {
-		auto& elem = eyeStuff[i];
-		if (elem.second == NULL) continue;
-		HANDLE file = CreateFile(elem.first.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, 0, NULL);
-		if (file == INVALID_HANDLE_VALUE || file == NULL) {
-			int err = GetLastError();
-			LOGPRIO(Logger::Priority::WARN) << "could not create file " << elem.first.c_str() << ": error " << err << "\r\n";
-			success = false;
-			continue;
-		}
-		DWORD written = 0;
-		auto& vec = *elem.second;
-		WriteFile(file, vec.data(), vec.size(), &written, NULL);
-		CloseHandle(file);
-
-		if (written != vec.size()) {
-			success = false;
-		}
+		off += sz;
 	}
 
 	if (!success) {
@@ -1334,7 +1256,7 @@ void AAUCardData::ConvertToNewVersion() {
 		/////////////////////////
 		// change all the paths that were relative to some path to a path relative to the override folder
 
-		//if a path allready starts with the override path, truncate it to be relative to that instead
+		//if a path already starts with the override path, truncate it to be relative to that instead
 		//else, move file path into override folder
 		//if inconsitent (both rules applied), conversion failed
 		auto changeFilePaths = [&](TCHAR* start, std::wstring& relPath) {
@@ -1345,17 +1267,6 @@ void AAUCardData::ConvertToNewVersion() {
 				std::wstring temp = toChange;
 				toChange = path.substr(wcslen(OVERRIDE_PATH));
 				LOGPRIO(Logger::Priority::INFO) << "Truncating path " << temp << " to " << toChange << "\r\n";
-			}
-			else {
-				//path does not match with override folder; move files in there.
-				OverrideFile::PathStart start = (OverrideFile::PathStart) (OverrideFile::AAEDIT | OverrideFile::AAPLAY);
-				OverrideFile tmp(path.c_str(), start);
-
-				std::wstring target = General::BuildOverridePath(relPath.c_str());
-				std::wstring fileTarget = tmp.GetFilePath();
-				if (tmp.IsGood() && target != fileTarget && !General::FileExists(target.c_str())) {
-					filesToMove.push_back(std::make_pair(tmp.GetFilePath(), target));
-				}
 			}
 		};
 
@@ -1372,30 +1283,7 @@ void AAUCardData::ConvertToNewVersion() {
 			changeFilePaths(VER1_OVERRIDE_ARCHIVE_PATH, elem.second);
 		}
 
-		if (!success) {
-			message << TEXT("Conversion failed.");
-			MessageBox(NULL, message.str().c_str(), TEXT("Warning"), 0);
-			return;
-		}
-
-		if (filesToMove.size() > 0) {
-
-			message << filesToMove.size() << TEXT(" files can be moved:\r\n");
-			for (int i = 0; i < min(filesToMove.size(), 5); i++) {
-				message << filesToMove[i].first << TEXT(" -> ") << filesToMove[i].second << TEXT("\r\n");
-			}
-			if (filesToMove.size() > 5) message << TEXT("...\r\n");
-			message << TEXT("\r\nDo you want to copy them now?");
-			int res = MessageBox(NULL, message.str().c_str(), TEXT("Conversion - Copy Files"), MB_YESNO);
-			if (res == IDYES) {
-				for (auto& elem : filesToMove) {
-					General::CreatePathForFile(elem.second.c_str());
-					CopyFile(elem.first.c_str(), elem.second.c_str(), TRUE);
-				}
-			}
-		}
-
-		m_version = 2;
+		m_version = CurrentVersion;
 	}
 }
 

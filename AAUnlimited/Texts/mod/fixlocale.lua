@@ -3,7 +3,7 @@
 require "memory"
 
 local opts = {
-	{"level", 1, "Force jp locale: %l|Never|Auto|Always|" }
+	{"level", 1, "Force jp system langid: %l|Never|Auto|Always|" }
 }
 
 local function patch_aaplay()
@@ -20,9 +20,11 @@ local function patch_aaplay()
 end
 
 function on.launch()
+	if not ((opts.level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0))) then return end
 	if (_BINDING.IsAAPlay) then
 		patch_aaplay()
 	end
+	SetThreadLocale(1041)
 end
 
 
@@ -30,11 +32,6 @@ local _M={}
 
 function _M:load()
 	mod_load_config(self, opts)
-	-- TODO, make level configurable
-	-- not emulated, nor japanese system (langid 17)
-	if (opts.level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
-		SetThreadLocale(1041)
-	end
 end
 
 function _M:unload()
