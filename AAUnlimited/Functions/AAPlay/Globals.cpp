@@ -10,7 +10,7 @@ CharInstData g_characters[25];
 CharInstData g_previewChar;
 
 void InitOnLoad() {
-	LUA_EVENT_NORET("save_load", false);
+	LUA_EVENT_NORET("load_class", false);
 
 	for(int i = 0; i < 25; i++) {
 		g_characters[i].Reset();
@@ -50,7 +50,7 @@ void InitOnLoad() {
 	}
 	LOGPRIONC(Logger::Priority::INFO) "Loaded class with " << (idxCharacter) << " cards in it.\r\n";
 
-	LUA_EVENT_NORET("save_load", true);
+	LUA_EVENT_NORET("load_class", true);
 }
 
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
