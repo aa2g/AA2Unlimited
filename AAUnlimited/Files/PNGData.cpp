@@ -305,7 +305,7 @@ void InstallHooks() {
 		fsize_addr2 += 0x138EC8;
 	}
 
-	Hook((BYTE*)fsize_addr1, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSizeSimple_imp }, NULL);
+//	Hook((BYTE*)fsize_addr1, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSizeSimple_imp }, NULL);
 	Hook((BYTE*)fsize_addr2, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
 
 	if (General::IsAAEdit) {
