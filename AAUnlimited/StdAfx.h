@@ -110,8 +110,6 @@
 #include "General/ModuleInfo.h"
 #include "General/Util.h"
 #include "MemMods/AAEdit/Dialog.h"
-#include "MemMods/AAEdit/OpenCard.h"
-#include "MemMods/AAEdit/SaveCard.h"
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
 #include "MemMods/AAPlay/Events/CharacterActions.h"
 #include "MemMods/AAPlay/Events/ClothingDialog.h"

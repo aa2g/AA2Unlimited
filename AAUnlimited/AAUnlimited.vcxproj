@@ -110,12 +110,10 @@
     <ClCompile Include="MemMods\AAPlay\Events\PcConversation.cpp" />
     <ClCompile Include="MemMods\AAPlay\Misc\TanSlotUnlimit.cpp" />
     <ClCompile Include="MemMods\Hook.cpp" />
-    <ClCompile Include="MemMods\AAEdit\SaveCard.cpp" />
     <ClCompile Include="Functions\TextureImage.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialog.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\WindowData.cpp" />
     <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
-    <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
     <ClCompile Include="General\Util.cpp" />
     <ClCompile Include="Functions\OverrideFile.cpp" />
     <ClCompile Include="Functions\Shared\Shadowing.cpp" />
@@ -222,10 +220,8 @@
     <ClInclude Include="MemMods\AAPlay\Misc\TanSlotUnlimit.h" />
     <ClInclude Include="MemMods\Hook.h" />
     <ClInclude Include="MemMods\MemRightsLock.h" />
-    <ClInclude Include="MemMods\AAEdit\SaveCard.h" />
     <ClInclude Include="Functions\TextureImage.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialog.h" />
-    <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="Functions\OverrideFile.h" />
     <ClInclude Include="MemMods\Shared\Events\FileDump.h" />
     <ClInclude Include="MemMods\Shared\Events\FrameManipulationTest.h" />

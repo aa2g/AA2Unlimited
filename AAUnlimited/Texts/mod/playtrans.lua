@@ -87,7 +87,6 @@ local stringbuf
 
 function _M:load()
 	if exe_type ~= "play" then return end
-	info("playtrans: patching exe strings")
 
 	-- translate the strings from utf8 to unicode
 	local buf = ""

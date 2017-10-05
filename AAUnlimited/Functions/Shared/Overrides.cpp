@@ -85,23 +85,13 @@ namespace Shared {
 
 	void __stdcall EyeTextureStart(int leftRight, TCHAR** texture) {
 		const std::wstring& eyeTexture = g_currentChar->m_cardData.GetEyeTexture(leftRight);
-		if (eyeTexture.size() > 0) {
-			//if usage is 2, texture should be dumped from the buffer directly
-			const std::vector<BYTE>& fileSave = g_currentChar->m_cardData.GetEyeTextureBuffer(leftRight);
-			if (fileSave.size() > 0 && g_Config.savedEyeTextureUsage == 2) {
-				loc_dumpTexture = true;
-				loc_textureBuffer = &fileSave;
-			}
-			else {
-				loc_savedPointer = *texture;
-				//*texture = (TCHAR*)eyeTexture.c_str();
-				memcpy_s((void*)loc_replaceBuffer, 1024, (BYTE*)(*texture) - 16, 16);
-				std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), eyeTexture.c_str());
-				wcscpy_s((TCHAR*)(loc_replaceBuffer + 16), 512 - 16 / 2, fullPath.c_str());
-				*texture = (TCHAR*)(loc_replaceBuffer + 16);
-			}
-			
-		}
+		if (!eyeTexture.size()) return;
+		loc_savedPointer = *texture;
+		//*texture = (TCHAR*)eyeTexture.c_str();
+		memcpy_s((void*)loc_replaceBuffer, 1024, (BYTE*)(*texture) - 16, 16);
+		std::wstring fullPath = General::BuildEditPath(TEXT("data\\texture\\eye\\"), eyeTexture.c_str());
+		wcscpy_s((TCHAR*)(loc_replaceBuffer + 16), 512 - 16 / 2, fullPath.c_str());
+		*texture = (TCHAR*)(loc_replaceBuffer + 16);
 	}
 
 	BYTE* EyeTextureDump(wchar_t* fileName, DWORD* readBytes) {

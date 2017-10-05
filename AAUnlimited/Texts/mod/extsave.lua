@@ -35,7 +35,7 @@ local function save_handler(data)
 		return play_path("data", "save", "class", p .. ".sav")
 	end
 	local fn = 	mkp(cfile)
-	log.info("Saving game to %s.sav...", fn)
+	log.info("Saving game to %s...", fn)
 	if not is_key_pressed(bcodes[opts.bkey]) then return end
 	local fd = io.open(fn, "rb")
 	if fd then

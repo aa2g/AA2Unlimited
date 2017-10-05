@@ -73,16 +73,9 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			buffer += 4, size -= 4;
 			m_version = ReadData<int>(buffer, size);
 		}
-		if (m_version == 1) {
-			if (g_Config.legacyMode == 0) {
-				LOGPRIO(Logger::Priority::INFO) << "An aau card version " << m_version << " was read and ignored due to legacy mode settings.\r\n";
-				this->Reset();
-				return;
-			}
-			else if (g_Config.legacyMode == 2) {
-				//treat as version 2 card
-				m_version = 2;
-			}
+		else {
+			LOGPRIO(Logger::Priority::WARN) << "Version 1 cards no longer supported.\r\n";
+			return;
 		}
 	}
 

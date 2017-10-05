@@ -24,17 +24,11 @@ bUseShadowing = true
 --window and become unclickable
 bEnableHPosButtonReorder = true		
 
---enables poser in cloth select screen
-bUseClothesPoser = true
-
---enables poser in dialogue and sex scenes
-bUseDialoguePoser = true
-
-
 --format to save game screenshots in
 --0 - BMP
 --1 - JPG
-screenshotFormat = 0				
+--2 - PNG
+screenshotFormat = 2
 									
 --HAi should be activated at no prompt h done by evil npcs
 bHAiOnNoPromptH = true				
@@ -53,22 +47,6 @@ sFont = "MS Gothic"
 --2: do not extract files
 savedFileUsage = 1					
 
---if true, after saved files were successfully extracted, they will be removed
---from the card in an attempt to save hard drive space
-bSaveFileAutoRemove = true
-
---does a backup of a card before saved files are removed
-bSaveFileBackup = true				
-
-
---determines how old cards using the old paths are treated.
---0: old cards are treated as non-AAU cards and are ignored
---1: old cards will use the old pathing methods.
---2: old cards will be treated like new cards
---paths will be reinterpreted
---3: the game will attempt a conversion
-legacyMode = 3
-
 -- Set log level
 --0: spam
 --1: info
@@ -76,9 +54,6 @@ legacyMode = 3
 --3: err
 --4: crit
 logPrio = 1
-
--- (don't set, these are currently broken)
-sPoserHotKeys = ""
 
 -- load .ppx files
 bUsePPeX = false
@@ -100,7 +75,6 @@ PP2Profiling = true
 -- actually is tga format. Sometimes it needs to be disabled for stuff which
 -- expects the BMP behavior of vanilla (SVII perhaps)
 bUseMKIII = true
-bUseAA2Face = true
 
 mods = {
 	{ "aaface" },
@@ -112,6 +86,8 @@ mods = {
 	{ "facecam" }, 
 	{ "geass"},
 	{ "jizou"},
+	{ "timewarp" },
+	{ "extsave" },
 	{ "borderless" },
 	{ "launcher" },
 }

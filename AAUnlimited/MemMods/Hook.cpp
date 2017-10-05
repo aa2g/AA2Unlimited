@@ -225,8 +225,6 @@ DWORD PatchIAT(void *piat, void *newp)
 
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
-#include "MemMods/AAEdit/SaveCard.h"
-#include "MemMods/AAEdit/OpenCard.h"
 #include "MemMods/AAEdit/Dialog.h"
 
 #include "Functions/AAPlay/GameState.h"

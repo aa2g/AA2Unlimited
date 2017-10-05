@@ -51,7 +51,6 @@
     <ClCompile Include="MemMods\Hook.cpp" />
     <ClCompile Include="MemMods\AAEdit\TanSlotUnlimited.cpp" />
     <ClCompile Include="General\ModuleInfo.cpp" />
-    <ClCompile Include="MemMods\AAEdit\SaveCard.cpp" />
     <ClCompile Include="Functions\AAUCardData.cpp" />
     <ClCompile Include="General\Buffer.cpp" />
     <ClCompile Include="Functions\AAEdit\Globals.cpp" />
@@ -60,7 +59,6 @@
     <ClCompile Include="External\ExternalVariables\AAEdit\WindowData.cpp" />
     <ClCompile Include="MemMods\AAEdit\Dialog.cpp" />
     <ClCompile Include="External\ExternalClasses\TextureStruct.cpp" />
-    <ClCompile Include="MemMods\AAEdit\OpenCard.cpp" />
     <ClCompile Include="General\Util.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\Loads.cpp" />
     <ClCompile Include="Functions\OverrideFile.cpp" />
@@ -147,7 +145,6 @@
     <ClInclude Include="MemMods\MemRightsLock.h" />
     <ClInclude Include="MemMods\AAEdit\TanSlotUnlimited.h" />
     <ClInclude Include="General\ModuleInfo.h" />
-    <ClInclude Include="MemMods\AAEdit\SaveCard.h" />
     <ClInclude Include="Functions\AAUCardData.h" />
     <ClInclude Include="General\Buffer.h" />
     <ClInclude Include="Functions\AAEdit\Globals.h" />
@@ -158,7 +155,6 @@
     <ClInclude Include="External\ExternalVariables.h" />
     <ClInclude Include="MemMods\AAEdit\Dialog.h" />
     <ClInclude Include="External\ExternalClasses\TextureStruct.h" />
-    <ClInclude Include="MemMods\AAEdit\OpenCard.h" />
     <ClInclude Include="General\Util.h" />
     <ClInclude Include="MemMods\AAPlay\Events\Loads.h" />
     <ClInclude Include="Functions\OverrideFile.h" />
