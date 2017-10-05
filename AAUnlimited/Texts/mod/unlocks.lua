@@ -31,8 +31,9 @@
 local patches = {}
 local options = {
 	-- name, default, dialog
-	{"homosex", 0, "Enable homosex: %b"},
 	{"roleswap", 1, "Enable H position role swap: %b"},
+	{"homosex", 0, "Enable homosex: %b"},
+	{"homosex2", 0, "Enable homosex (test fixes): %b"},
 }
 
 -- "Are they both girls" check before spawning role swap button
@@ -42,10 +43,47 @@ patches.roleswap = {
 	},
 }
 
--- "Is a boy" check when inviting/forcing for sex
 patches.homosex = {
+	-- "Is a boy" check when inviting/forcing for sex
 	["\xff"] = {
 		-0x7A2C4,
+		-0x7FBBF,
+		-0x957BB,
+	},
+	["\x00"] = {
+		-0x79280,
+		-0x83191,
+		-0x8BC40,
+		-0x96412,
+	},
+	-- dynamic_cast<GirlClass> -> static_cast to prevent null deref
+	["\x89\xc8\xeb\x01"] = {
+		-0x8E122,
+	},
+}
+
+-- more casting mishap fixes
+local rswapfix = parse_asm[[
+00000001  05E0000000        add eax,0xe0
+00000006  8B4804            mov ecx,[eax+0x4]
+00000009  8B09              mov ecx,[ecx]
+0000000B  80794001          cmp byte [ecx+0x40],0x1
+0000000F  7425              jz 0x36
+00000011  8D4804            lea ecx,[eax+0x4]
+00000014  8B31              mov esi,[ecx]
+00000016  807E4000          cmp byte [esi+0x40],0x0
+0000001A  741A              jz 0x36
+0000001C  39C8              cmp eax,ecx
+0000001E  7408              jz 0x28
+00000020  FF30              push dword [eax]
+00000022  FF31              push dword [ecx]
+00000024  8F00              pop dword [eax]
+00000026  8F01              pop dword [ecx]
+]]
+
+patches.homosex2 = {
+	[rswapfix] = {
+		-0x8DF25,
 	}
 }
 

@@ -4,7 +4,7 @@ local _M = {}
 local keys = { 0x02, 0x04, 0x10, 0x11, 0x12 }
 local keyf = "%l|None|Right Mouse Button|Middle Mouse Button|Shift Key|Control Key|Alt Key|"
 local opts = {
-	{ "back", 1, "Travel back a period: "..keyf},
+	{ "back", 1, "Travel back a period (or day): "..keyf},
 	{ "days", 3, "Travel days instead of period: "..keyf },
 }
 
