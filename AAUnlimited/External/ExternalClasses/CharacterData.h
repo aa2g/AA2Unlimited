@@ -310,17 +310,19 @@ namespace ExtClass {
 	 * In essence, this seems to be a slightly misaligned version of the "advanced" tab
 	 * from reiedit. i filled what members i could observe from the editor and filled in
 	 * some interisting holes using reiedit, so im not sure if they are all correct.
+	 *
+	 * CJS_ChaEditInfo
 	 */
 	class CharacterData : public CharacterDataTypes
 	{
 	public:
-		void* m_virtualTable;
-		BYTE m_unknown1[0x2C];
-		DWORD m_pngBufferSize;
-		void* m_pngBuffer; //card image, exluding the aa2 data (just the image part)
-		BYTE m_unknown2[4];
-		BYTE m_gender; //0=male, 1=female. no tumbler, thats all.
-		char m_forename[260];
+		void* m_virtualTable; // 4
+		BYTE m_unknown1[0x2C]; 
+		DWORD m_pngBufferSize; // 0x30
+		void* m_pngBuffer; // 0x34 card image, exluding the aa2 data (just the image part)
+		BYTE m_unknown2[4]; // 0x38
+		BYTE m_gender; //0x3c, 0=male, 1=female. no tumbler, thats all.
+		char m_forename[260]; // 0x3d
 		char m_surname[260];
 		char m_description[260];
 		BYTE m_unknown3[0xFC];
@@ -506,7 +508,7 @@ namespace ExtClass {
 		}
 	};
 
-
+	// maybe 0xbf8
 	static_assert(sizeof(CharacterData) == 0xBF0, "CharacterData size mismatch");
 
 #pragma pack(pop)

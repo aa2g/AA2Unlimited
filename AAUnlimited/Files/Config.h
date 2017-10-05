@@ -45,6 +45,7 @@ public:;
 	bool bDrawFPS;
 	bool bUseVisualStyles;
 	bool PP2Profiling;
+	bool bListFilenames;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -66,6 +67,7 @@ public:;
 			LUA_BIND(bDrawFPS)
 			LUA_BIND(bUseVisualStyles)
 			LUA_BIND(PP2Profiling)
+			LUA_BIND(bListFilenames)
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

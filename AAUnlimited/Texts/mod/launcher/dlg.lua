@@ -331,8 +331,8 @@ local function buildtabs() return
 		iup.frame {
 			title = "Settings",
 			iup.gridbox {
-				padding="4x7",
-				nmargin="x7",
+				padding="4x8",
+				nmargin="x4",
 				orientation="HORIZONTAL", numdiv=2, normalizesize="HORIZONTAL", homogenouslin="YES", alignmentlin = "ACENTER", floating = "yes",
 				iup.label {title = "Default log priority" }, aaul("logPrio", iup.list { "spam","info","warn","error", "critical", dropdown="YES" }),
 --				iup.label {title = "Legacy cards" }, aaul("legacyMode", iup.list { "ignore", "load", "reinterpret", "convert", dropdown="YES" }),
@@ -348,7 +348,7 @@ local function buildtabs() return
 		iup.frame {
 			title = "Toggles",
 			iup.vbox {
-				gap="1",
+				gap="0",
 				aaut("bUseVisualStyles", iup.toggle {title = "Use ux theme" }),
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI" }),
@@ -364,6 +364,7 @@ local function buildtabs() return
 				aaut("PP2Profiling", iup.toggle {title = "Enable pp2 defrag/profiling" }),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)" }),
+				aaut("bListFilenames", iup.toggle {title = "List card file names" }),
 			}
 		},
 	}, iup.fill{}, launch() },

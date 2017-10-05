@@ -76,6 +76,9 @@ PP2Profiling = true
 -- expects the BMP behavior of vanilla (SVII perhaps)
 bUseMKIII = true
 
+-- List file names instead of name in card select (AA2Play)
+bListFilenames = false
+
 mods = {
 	{ "aaface" },
 	{ "poser" },

@@ -280,7 +280,10 @@ bool __stdcall SaveClass(void *cls) {
 	return SaveClassOrig(cls);
 }
 
+bool loc_indirscan;
 DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
+	if (loc_indirscan)
+		return OpenCard(fh, hi, true);
 	return OpenCard(fh, hi, false);
 }
 
@@ -288,27 +291,76 @@ DWORD __stdcall GetFileSizeHookSimple(HANDLE fh, DWORD *hi) {
 	return OpenCard(fh, hi, true);
 }
 
+DWORD LoadChrDataFun;
+
+struct CacheEntry {
+	char m_forename[260];
+	char m_surname[260];
+	BYTE personality;
+	DWORD t1, t2;
+};
+
+
+std::map<std::wstring, CacheEntry> cache;
+
+bool __stdcall MyLoadChrData(DWORD *esi, wchar_t *eax, ExtClass::CharacterData *chr) {
+	const wchar_t *path = eax;
+	std::wstring wp(path);
+	bool newcache = false;
+
+	if (cache.find(wp) != cache.end()) {
+		auto &ce = cache[wp];
+		LOGPRIO(Logger::Priority::SPAM) << "Found " << std::wstring(path) << " in cache\n";
+		memcpy(chr->m_surname, ce.m_surname, sizeof(ce.m_surname));
+		memcpy(chr->m_forename, ce.m_forename, sizeof(ce.m_forename));
+		chr->m_bPersonality = ce.personality;
+		chr->m_unknown2[0] = 0x67;
+	}
+	else {
+		loc_indirscan = true;
+		__asm {
+			mov eax, path
+			push chr
+			call[LoadChrDataFun]
+		}
+		newcache = true;
+		loc_indirscan = false;
+	}
+	
+
+	if (newcache) {
+		CacheEntry ce;
+		memcpy(ce.m_surname, chr->m_surname, sizeof(ce.m_surname));
+		memcpy(ce.m_forename, chr->m_forename, sizeof(ce.m_forename));
+		ce.personality = chr->m_bPersonality;
+		cache[path] = ce;
+	}
+
+	if (g_Config.bListFilenames) {
+		wcstombs(chr->m_surname, path + wp.find_last_of(L"\\/") + 1, 256);
+		chr->m_forename[0] = 0;
+	}
+
+	return 1;
+}
+
+void __declspec(naked) LoadChrDataJump() {
+	__asm {
+		push [esp+4]
+		push eax
+		push esi
+		call MyLoadChrData
+		ret 4
+	}
+}
+
 void InstallHooks() {
 	static DWORD GetFileSize_imp = (DWORD)&GetFileSizeHook;
 	static DWORD GetFileSizeSimple_imp = (DWORD)&GetFileSizeHookSimple;
 
-	DWORD fsize_addr1 = General::GameBase;
-	DWORD fsize_addr2 = General::GameBase;
-	DWORD get_png = General::GameBase;
-
 	if (General::IsAAEdit) {
-		fsize_addr1 += 0x127DE7;
-		fsize_addr2 += 0x127278;
-	}
-	else {
-		fsize_addr1 += 0x139A2F;
-		fsize_addr2 += 0x138EC8;
-	}
-
-//	Hook((BYTE*)fsize_addr1, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSizeSimple_imp }, NULL);
-	Hook((BYTE*)fsize_addr2, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
-
-	if (General::IsAAEdit) {
+		Hook((BYTE*)(General::GameBase + 0x127DE7), { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSizeSimple_imp }, NULL);
+		Hook((BYTE*)(General::GameBase + 0x127278), { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
 		// This one is called to produce the initial png preview
 		Hook((BYTE*)(General::GameBase + 0x12628b),
 		{ 0xE8, HookControl::ANY_DWORD },						//expected values
@@ -320,10 +372,23 @@ void InstallHooks() {
 		{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&FinishPNG }, NULL);
 	}
 	else {
+		Hook((BYTE*)(General::GameBase + 0x138EC8), { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
+
 		Hook((BYTE*)(General::GameBase + 0x4732B),
 		{ 0xE8, HookControl::ANY_DWORD },
 		{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&SaveClass }, (DWORD*)&SaveClassOrig);
+
+
+		Hook((BYTE*)(General::GameBase + 0xCA15D),
+		{ 0xE8, HookControl::ANY_DWORD },
+		{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&LoadChrDataJump }, &LoadChrDataFun);
+
+		Hook((BYTE*)(General::GameBase + 0xCA16C),
+		{ 0x8b, 0x4c, 0x24, 0x18, 0x6a },
+		{ 0xe9, HookControl::RELATIVE_DWORD, General::GameBase + 0xCA1C2 }, NULL);
+
 	}
+
 }
 
 }
