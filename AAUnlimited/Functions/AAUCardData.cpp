@@ -38,6 +38,7 @@ AAUCardData::~AAUCardData()
 void AAUCardData::Reset() {
 	BlobReset();
 	*this = g_defaultValues;
+	LOGPRIO(Logger::Priority::SPAM) << "resetting card data\n";
 }
 
 bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
@@ -51,6 +52,7 @@ bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
 	if (chunk) {
 		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 8;
 		FromBuffer((char*)chunk, size);
+		GenAllFileMaps();
 		return true;
 	}
 	m_version = AAUCardData::CurrentVersion;
@@ -269,7 +271,6 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 		LOGPRIO(Logger::Priority::WARN) << "size of unlimited card data mismatched; " << size << " bytes were left\r\n";
 	}
 
-	GenAllFileMaps();
 }
 
 
@@ -685,20 +686,25 @@ void AAUCardData::SetSliderValue(int sliderTarget, int sliderIndex, float value)
 	GenSliderMap();
 }
 
-// FIXME: this be better served by some sort of insert-order map containers
 void AAUCardData::GenAllFileMaps() {
 	for (auto &st : m_styles) {
 		st.m_meshOverrideMap.clear();
-		for (auto &list : st.m_meshOverrides)
-			st.m_meshOverrideMap.emplace(list.first, TextureImage(list.second.c_str(), TextureImage::OVERRIDE));
+		for (auto &list : st.m_meshOverrides) {
+			TextureImage tex(list.second.c_str(), TextureImage::OVERRIDE);
+			if (tex.IsGood()) st.m_meshOverrideMap.emplace(list.first, tex);
+		}
 
 		st.m_archiveOverrideMap.clear();
-		for (auto &list : st.m_archiveOverrides)
-			st.m_archiveOverrideMap.emplace(list.first, OverrideFile(list.second.c_str(), OverrideFile::OVERRIDE));
+		for (auto &list : st.m_archiveOverrides) {
+			OverrideFile of(list.second.c_str(), OverrideFile::OVERRIDE);
+			if (of.IsGood()) st.m_archiveOverrideMap.emplace(list.first, of);
+		}
 
 		st.m_objectOverrideMap.clear();
-		for (auto &list : st.m_objectOverrides)
-			st.m_objectOverrideMap.emplace(General::utf8.to_bytes(list.first), XXObjectFile(list.second.c_str(), OverrideFile::OVERRIDE));
+		for (auto &list : st.m_objectOverrides) {
+			XXObjectFile xx(list.second.c_str(), OverrideFile::OVERRIDE);
+			if (xx.IsGood()) st.m_objectOverrideMap.emplace(General::utf8.to_bytes(list.first), xx);
+		}
 
 		st.m_archiveRedirectMap.clear();
 		for (auto &list : st.m_archiveRedirects)

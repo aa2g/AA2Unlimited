@@ -119,8 +119,15 @@ DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWOR
 DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 
-	if(!loc_loadingCharacter)
+	if (!loc_loadingCharacter) {
 		LUA_EVENT_NORET("char_despawn", loadCharacter);
+		// In edit, we may end up with lingering AAU data on character creation from previous card. Simply ensure the data is cleared whenever character despawns.
+		/*if (General::IsAAEdit && AAEdit::g_currChar.Editable() && (AAEdit::g_currChar.m_char == loadCharacter)) {
+			AAEdit::g_currChar.Reset();
+			AAEdit::g_AAUnlimitDialog.Refresh();
+		}*/
+	}
+
 
 	DWORD retv;
 

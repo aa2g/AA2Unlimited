@@ -13,7 +13,10 @@ namespace PNG {
 // extract override files, as well as fetch aau data in case of aaedit. Secondly, we lie
 // about the file size returned - we omit the large data blobs, so that those dont end
 // up in game saves.
-DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
+//
+// The simple case, on the other hand, happens when scanning a directory. We want to exit
+// quickly, while only removing the blob part for the caller.
+DWORD OpenCard(HANDLE fh, DWORD *hi, bool simple) {
 	bool converted = false;
 	Footer footer = { 0 };
 	DWORD sz = GetFileSize(fh, NULL);
@@ -25,6 +28,17 @@ DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
 	SetFilePointer(fh, sz - sizeof(Footer), NULL, FILE_BEGIN);
 	DWORD got = 0;
 	ReadFile(fh, &footer, sizeof(footer), &got, NULL);
+
+	// If a simple read is requested, we only truncate the card but wont otherwise touch it
+	if (simple) {
+		SetFilePointer(fh, 0, NULL, FILE_BEGIN);
+		if (memcmp(footer.vermagic, vermagic, 8))
+			return sz;
+		return sz - footer.aaublob_delta;
+	}
+
+	AAUCardData &cd = g_currentChar->m_cardData;
+	cd.Reset();
 
 	LUA_EVENT_NORET("open_card", DWORD(fh));
 
@@ -85,9 +99,6 @@ DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
 	if (General::IsAAPlay && (g_Config.savedFileUsage == 2))
 		goto out;
 
-	AAUCardData &cd = g_currentChar->m_cardData;
-	
-	cd.Reset();
 	cd.FromBuffer((char*)aaud_ptr, aaud_sz);
 
 	// if this is an old card with File entries, convert those to (already decompressed) blob first
@@ -124,20 +135,25 @@ DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
 
 skip_load:;
 	// and dump it; the files to be dumped were already picked by PrepareDumpBlob()
-	if (cd.Blob)
+	if (cd.Blob) {
 		cd.DumpBlob();
+	}
+
 
 skip_blob:;
 	if (cbuf) delete cbuf;
 	if (dbuf) delete dbuf;
 
 	// if we have blob entries (even if not extracted), it means this flag has to be checked
-	if (General::IsAAEdit) {
+	if (General::IsAAEdit)
 		AAEdit::g_AAUnlimitDialog.SetSaveFiles((cd.m_blobInfo.size() > 0));
-		AAEdit::g_AAUnlimitDialog.Refresh();
-	}
 	cd.BlobReset();
+	cd.GenAllFileMaps();
+
 out:
+
+	if (General::IsAAEdit)
+		AAEdit::g_AAUnlimitDialog.Refresh();
 	if (buf) delete buf;
 
 	// return size without aau blob
@@ -264,8 +280,18 @@ bool __stdcall SaveClass(void *cls) {
 	return SaveClassOrig(cls);
 }
 
+DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
+	return OpenCard(fh, hi, false);
+}
+
+DWORD __stdcall GetFileSizeHookSimple(HANDLE fh, DWORD *hi) {
+	return OpenCard(fh, hi, true);
+}
+
 void InstallHooks() {
 	static DWORD GetFileSize_imp = (DWORD)&GetFileSizeHook;
+	static DWORD GetFileSizeSimple_imp = (DWORD)&GetFileSizeHookSimple;
+
 	DWORD fsize_addr1 = General::GameBase;
 	DWORD fsize_addr2 = General::GameBase;
 	DWORD get_png = General::GameBase;
@@ -279,7 +305,7 @@ void InstallHooks() {
 		fsize_addr2 += 0x138EC8;
 	}
 
-	Hook((BYTE*)fsize_addr1, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
+	Hook((BYTE*)fsize_addr1, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSizeSimple_imp }, NULL);
 	Hook((BYTE*)fsize_addr2, { 0xFF, 0x15, HookControl::ANY_DWORD }, { 0xFF, 0x15, HookControl::ABSOLUTE_DWORD, (DWORD)&GetFileSize_imp }, NULL);
 
 	if (General::IsAAEdit) {
