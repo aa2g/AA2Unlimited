@@ -1,4 +1,4 @@
---@INFO Optimizations
+--disabled@INFO Optimizations
 
 -- The game uses a lot of atomics, even in hot loops, while being
 -- single threaded. On CPUs lacking thread cache tags, removing

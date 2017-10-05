@@ -270,6 +270,7 @@
     <None Include="Texts\mod\dx.lua" />
     <None Include="Texts\mod\editfix.lua" />
     <None Include="Texts\mod\extsave.lua" />
+    <None Include="Texts\mod\fader.lua" />
     <None Include="Texts\mod\font.lua" />
     <None Include="Texts\mod\geass.lua" />
     <None Include="Texts\mod\facecam.lua" />

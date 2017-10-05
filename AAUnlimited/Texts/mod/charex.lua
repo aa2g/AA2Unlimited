@@ -1,4 +1,4 @@
---@INFO Character mod experiments
+--disabled@INFO Character mod experiments
 
 local names = {
 	"new",

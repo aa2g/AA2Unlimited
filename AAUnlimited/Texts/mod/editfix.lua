@@ -1,4 +1,4 @@
---@INFO Slider range, hue ranges, texture file selection
+--@INFO UI dialog fixes of edit (slider ranges)
 
 
 -- RMB key to save as rainbow

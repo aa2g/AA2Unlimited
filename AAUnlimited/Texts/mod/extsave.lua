@@ -1,4 +1,4 @@
---@INFO Saves game everywhere, backups previous saves
+--@INFO Saves game everywhere, multi save
 
 local _M = {}
 require 'memory'

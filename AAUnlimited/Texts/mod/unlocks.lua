@@ -1,4 +1,4 @@
---@INFO sliders, trait & H pref, gay H, role swap
+--@INFO Limit removals (hue, ASU..)
 
 -- This script unites virtually all unlocks of known "snowflake" launchers,
 -- that is, frontier and ASU (both play and exe), plus some additional features
