@@ -527,5 +527,11 @@
     <None Include="Texts\mod\const.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\extsave.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\timewarp.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

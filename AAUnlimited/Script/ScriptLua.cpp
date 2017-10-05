@@ -2,6 +2,7 @@
 #include "Functions/Render.h"
 #include "Files/PersistentStorage.h"
 #include "Functions/AAPlay/PoserController.h"
+#include "MemMods/AAPlay/Events/UiEvent.h"
 
 #include <string>
 
@@ -301,6 +302,11 @@ void Lua::bindLua() {
 
 	_BINDING["GetGameHwnd"] = LUA_LAMBDA({
 		s.push((DWORD)(*GameTick::hwnd));
+	});
+
+
+	_BINDING["SwitchUI"] = LUA_LAMBDA({
+		s.push(PlayInjections::UIEvent::UiEventHook(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6), s.get(7)));
 	});
 
 	GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {

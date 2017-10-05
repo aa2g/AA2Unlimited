@@ -167,10 +167,7 @@ end
 function ptr_walk(ptr,...)
 	ptr = fixptr(ptr)
 	for idx, off in ipairs {...} do
-		if idx > 1 then
-			peek_dword(ptr)
-		end
-		ptr = ptr+off
+		ptr = peek_dword(ptr) + off
 	end
 	return ptr
 end

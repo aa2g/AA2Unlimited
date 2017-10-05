@@ -269,6 +269,7 @@
     <None Include="Texts\mod\const.lua" />
     <None Include="Texts\mod\dx.lua" />
     <None Include="Texts\mod\editfix.lua" />
+    <None Include="Texts\mod\extsave.lua" />
     <None Include="Texts\mod\font.lua" />
     <None Include="Texts\mod\geass.lua" />
     <None Include="Texts\mod\facecam.lua" />
@@ -344,6 +345,7 @@
     <None Include="Texts\mod\stats.lua" />
     <None Include="Texts\mod\strutil.lua" />
     <None Include="Texts\mod\opt.lua" />
+    <None Include="Texts\mod\timewarp.lua" />
     <None Include="Texts\mod\unlocks.lua" />
     <None Include="Texts\mod\win10fix.lua" />
     <None Include="Texts\mod\wined3d.lua" />
