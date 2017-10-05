@@ -244,11 +244,6 @@
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Texts\config.txt" />
-    <Text Include="Texts\readme.txt" />
-    <Text Include="Texts\todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc" />
   </ItemGroup>
   <ItemGroup>

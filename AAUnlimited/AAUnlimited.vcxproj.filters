@@ -243,11 +243,6 @@
     <ClInclude Include="Files\PNGData.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Texts\config.txt" />
-    <Text Include="Texts\todo.txt" />
-    <Text Include="Texts\readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
