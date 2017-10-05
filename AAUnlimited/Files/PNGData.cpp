@@ -255,14 +255,12 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 bool(__stdcall *SaveClassOrig)(void *cls);
 bool __stdcall SaveClass(void *cls) {
 	LUA_EVENT_NORET("save_class", cls);
-#if 0
 	for (int i = 0; i < 25; i++) {
 		CharInstData &ch = AAPlay::g_characters[i];
 		if (ch.IsValid()) {
-			SavePNGChunk(ch.m_char, ch.m_char->png
+			SavePNGChunk(ch.m_char,(BYTE**)&ch.m_char->m_charData->m_pngBuffer, &ch.m_char->m_charData->m_pngBufferSize);
 		}
 	}
-#endif
 	return SaveClassOrig(cls);
 }
 
