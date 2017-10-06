@@ -109,10 +109,6 @@ public:
 	bool PrepareDumpBlob();
 	bool DumpBlob();
 
-	void ConvertToNewVersion();
-
-	void ClearOverrides();
-
 	//rule types
 	typedef std::pair<std::wstring, std::wstring> MeshOverrideRule;
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::wstring> ArchiveOverrideRule;
@@ -302,13 +298,8 @@ public:
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
 
 	//generate the maps from the vectors read from the file
-	void GenMeshOverrideMap();
-	void GenArchiveOverrideMap();
-	void GenArchiveRedirectMap();
-	void GenObjectOverrideMap();
 	void GenBoneRuleMap();
 	void GenSliderMap();
-
 	void GenAllFileMaps();
 };
 
