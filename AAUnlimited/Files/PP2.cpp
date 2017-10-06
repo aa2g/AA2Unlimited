@@ -156,11 +156,18 @@ PP2File::PP2File(PP2 *_pp2, const wchar_t *fn) : pp2(_pp2) {
 		p += 2;
 		wstring tfn((wchar_t*)p, len / 2);
 		wstring low(tfn);
-//		transform(low.begin(), low.end(), low.begin(), ::tolower);
 
-		names.emplace(low, fidx);
+		// the letter cases for pp names must remain canonical
 		tfn.resize(tfn.find_first_of(L"/"));
 		pp2->pplist.insert(tfn);
+
+		// alternative: only if the path is a pp file, lowercase it
+//		if (tfn.rfind(L".pp")+3 == tfn.size())
+
+		// but the actual pathnmaes are lowercase
+		transform(low.begin(), low.end(), low.begin(), ::tolower);
+		names.emplace(low, fidx);
+
 //		SharedInjections::WinAPI::RegisterPP(tfn.c_str());
 		p += len;
 	}
@@ -658,16 +665,6 @@ bool PP2::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFil
 		if (!strip_data_path(path))
 			return false;
 	}
-
-	if (LoadFile(path, readBytes, outBuffer))
-		return true;
-
-	// no? common mod breakage is uppercased first letter
-	path[ppos] = ::toupper(path[ppos]);
-	if (LoadFile(path, readBytes, outBuffer))
-		return true;
-
-	// try again with lower case this time
 	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 	if (LoadFile(path, readBytes, outBuffer))
@@ -724,7 +721,7 @@ void PP2::Init() {
 }
 
 void PP2::InitProfiling() {
-	if (g_Config.PP2Profiling) {
+	if (g_Config.bUsePP2 && g_Config.PP2Profiling) {
 		std::string path(General::to_utf8(General::BuildAAUPath(L"pp2.prof")));
 		prof.open(path, prof.ate | prof.out | prof.in | prof.binary);
 		if (!prof.is_open()) {

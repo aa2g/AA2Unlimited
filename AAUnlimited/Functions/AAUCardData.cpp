@@ -11,6 +11,7 @@
 #include "Files\Config.h"
 #include "Files\ModuleFile.h"
 #include "Functions\Shared\TriggerEventDistributor.h"
+#include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
 const AAUCardData AAUCardData::g_defaultValues;
 
@@ -1053,18 +1054,13 @@ bool AAUCardData::BlobAppendEntry(std::wstring &name, int typ, BYTE *buf, size_t
 	return BlobAppendBuffer(buf, len);
 }
 
+// Note that the appended file can come from an archive, too
 bool AAUCardData::BlobAppendFile(std::wstring &name, int typ, std::wstring fullPath) {
-	HANDLE file = CreateFile(fullPath.c_str(), FILE_READ_ACCESS, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-	if (file == INVALID_HANDLE_VALUE || file == NULL)
-		return false;
-	DWORD sz = GetFileSize(file, NULL);
-	BYTE *buf = new BYTE[sz];
-	DWORD got = 0;
-	ReadFile(file, buf, sz, &got, NULL);
-	CloseHandle(file);
-	bool res = (got == sz) && BlobAppendEntry(name, typ, buf, sz);
-	delete buf;
-	return res;
+	DWORD sz;
+	BYTE *buf = SharedInjections::ArchiveFile::ReadBuf(fullPath.c_str(), &sz);
+	if (buf) BlobAppendEntry(name, typ, buf, sz);
+	Shared::IllusionMemFree(buf);
+	return buf != NULL;
 }
 
 void AAUCardData::BlobReset() {

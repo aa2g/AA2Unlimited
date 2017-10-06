@@ -161,10 +161,38 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 	const char *rewriter2 = "";
 	BYTE *outBuffer = NULL;
 
-	// The following can't cope with nil archive (yet?)
-	if (!parchive)
-		goto skip;
+	// If the archive is empty, it's a request to open straight filesystem file.
+	// In that event, call the original open routine first, and only if that fails
+	// we'll defer to pp2/ppex.
+	if (!parchive) {
+#if 0
+		IllusionString archive(parchive);
+		IllusionString file(pfile);
 
+		outBuffer = CallOpenFile(_this, &file.ptr, readBytes, &archive.ptr);
+		if (outBuffer) {
+			provider = "direct";
+			goto out;
+		}
+#else
+		HANDLE hFile = CreateFile(pfile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		if (!(hFile == NULL || hFile == INVALID_HANDLE_VALUE)) {
+			DWORD hi = 0;
+			DWORD size = GetFileSize(hFile, &hi);
+			outBuffer = (BYTE*)Shared::IllusionMemAlloc(size);
+			ReadFile(hFile, outBuffer, size, &hi, NULL);
+			*readBytes = hi;
+			CloseHandle(hFile);
+			provider = "direct";
+			goto out;
+		}
+
+#endif
+
+
+		// FIXME: remove this after other hooks below can cope with empty archives.
+		goto skip;
+	}
 
 	if (Poser::OverrideFile(&parchive, &pfile, readBytes, &outBuffer)) {
 		provider = "poseroverride";
@@ -214,13 +242,14 @@ skip:;
 done:;
 
 	// If no provider got us the file, call the games original
-	if (!provider) {
+	if (!provider && parchive) {
 		IllusionString archive(parchive);
 		IllusionString file(pfile);
 
 		outBuffer = CallOpenFile(_this, &file.ptr, readBytes, &archive.ptr);
 	}
 
+out:
 	if (g_Config.bLogPPAccess & 1) {
 		LOGPRIONC(Logger::Priority::SPAM) "OpenFileEvent " <<
 			"provider=" << (provider ? provider : "pp") << " " <<
@@ -237,6 +266,14 @@ done:;
 	}
 	return outBuffer;
 }
+
+// Reads fully qualified path, possibly from pp2/ppex.
+BYTE *ReadBuf(const wchar_t *path, DWORD *readBytes) {
+	wchar_t *pnull = nullptr;
+	// TODO: fix this constness mess evetnually
+	return OpenFileEvent(NULL, (wchar_t**)&path, readBytes, &pnull);
+}
+
 
 class padstr {
 	int padding;
