@@ -383,12 +383,13 @@ void InstallHooks() {
 		{ 0xE8, HookControl::ANY_DWORD },
 		{ 0xE8, HookControl::RELATIVE_DWORD, (DWORD)&LoadChrDataJump }, &LoadChrDataFun);
 
+#if 0
 		Hook((BYTE*)(General::GameBase + 0xCA16C),
 		{ 0x8b, 0x4c, 0x24, 0x18, 0x6a },
 		{ 0xe9, HookControl::RELATIVE_DWORD, General::GameBase + 0xCA1C2 }, NULL);
+#endif
 
 	}
-
 }
 
 }
