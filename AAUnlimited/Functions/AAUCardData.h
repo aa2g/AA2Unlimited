@@ -88,9 +88,9 @@ public:
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
 	bool SetEyeHighlight(const TCHAR* texName);
 
-	bool SetHairHighlight(const TCHAR* name);
+	bool SetHairHighlight(const TCHAR* name, int style = -1);
 
-	bool SetTan(const TCHAR* name);
+	bool SetTan(const TCHAR* name, int style = -1);
 
 	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
 	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);

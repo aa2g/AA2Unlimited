@@ -711,6 +711,10 @@ void AAUCardData::GenAllFileMaps() {
 		for (auto &list : st.m_archiveRedirects)
 			st.m_archiveRedirectMap.emplace(list.first, list.second);
 	}
+	for (int i = 0; i < m_styles.size(); i++) {
+		SetTan(m_styles[m_currCardStyle].m_tanName.c_str(), i);
+		SetHairHighlight(m_styles[m_currCardStyle].m_hairHighlightName.c_str(), i);
+	}
 }
 
 void AAUCardData::GenBoneRuleMap() {
@@ -820,27 +824,29 @@ bool AAUCardData::SetEyeHighlight(const TCHAR* texName) {
 	return true;
 }
 
-bool AAUCardData::SetHairHighlight(const TCHAR* name) {
+bool AAUCardData::SetHairHighlight(const TCHAR* name, int style) {
+	if (style < 0) style = m_currCardStyle;
 	std::wstring path;
 	TextureImage::PathStart start;
 	path = HAIR_HIGHLIGHT_PATH;
 	start = TextureImage::OVERRIDE;
 	path += name;
-	m_styles[m_currCardStyle].m_hairHighlightImage = TextureImage(path.c_str(), start);
-	if (m_styles[m_currCardStyle].m_hairHighlightImage.IsGood()) {
-		m_styles[m_currCardStyle].m_hairHighlightName = name;
+	m_styles[style].m_hairHighlightImage = TextureImage(path.c_str(), start);
+	if (m_styles[style].m_hairHighlightImage.IsGood()) {
+		m_styles[style].m_hairHighlightName = name;
 		return true;
 	}
 	return false;
 }
 
-bool AAUCardData::SetTan(const TCHAR* name) {
+bool AAUCardData::SetTan(const TCHAR* name, int style) {
+	if (style < 0) style = m_currCardStyle;
 	//if empty tan name we unset and invalidate the current style tan files
 	if (!wcsnlen_s(name, 255)) {
 		for (int i = 0; i < 5; i++) {
-			m_styles[m_currCardStyle].m_tanImages[i] = TextureImage();
+			m_styles[style].m_tanImages[i] = TextureImage();
 		}
-		m_styles[m_currCardStyle].m_tanName = L"";
+		m_styles[style].m_tanName = L"";
 		return false;
 	}
 	std::wstring path;
@@ -855,10 +861,10 @@ bool AAUCardData::SetTan(const TCHAR* name) {
 		std::wstring file = TEXT("0");
 		file += iChar;
 		file += TEXT(".bmp");
-		m_styles[m_currCardStyle].m_tanImages[i] = TextureImage((path + file).c_str(), start);
-		anyGood = anyGood || m_styles[m_currCardStyle].m_tanImages[i].IsGood();
+		m_styles[style].m_tanImages[i] = TextureImage((path + file).c_str(), start);
+		anyGood = anyGood || m_styles[style].m_tanImages[i].IsGood();
 	}
-	if (anyGood) m_styles[m_currCardStyle].m_tanName = name;
+	if (anyGood) m_styles[style].m_tanName = name;
 	return anyGood;
 }
 
