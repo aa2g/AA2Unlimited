@@ -712,8 +712,8 @@ void AAUCardData::GenAllFileMaps() {
 			st.m_archiveRedirectMap.emplace(list.first, list.second);
 	}
 	for (int i = 0; i < m_styles.size(); i++) {
-		SetTan(m_styles[m_currCardStyle].m_tanName.c_str(), i);
-		SetHairHighlight(m_styles[m_currCardStyle].m_hairHighlightName.c_str(), i);
+		SetTan(m_styles[i].m_tanName.c_str(), i);
+		SetHairHighlight(m_styles[i].m_hairHighlightName.c_str(), i);
 	}
 }
 
