@@ -285,7 +285,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
-					RedrawBodyPart(Category::FIGURE,RedrawId::FIGURE_HEIGHT);
+					LUA_EVENT_NORET("update_edit_gui");
+					//RedrawBodyPart(Category::FIGURE, RedrawId::FIGURE_HEIGHT);
 				}
 				return TRUE;
 			}

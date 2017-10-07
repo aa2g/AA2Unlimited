@@ -28,13 +28,15 @@ void RedrawBodyPart(Category cat, RedrawId redraw) {
 	HWND dialog = Dialogs[cat];
 	WCHAR* propName = (WCHAR*)(General::GameBase + 0x3100A4); //name of the prop that is used to save the class name, "__WND_BASE_CLASS__"
 	BYTE* internclass = (BYTE*)GetPropW(dialog,propName);
+
 	if (internclass == NULL) return;
 	//set both flags
 	*(internclass+offset) = 1;
-	BYTE* redrawTable = (BYTE*)(General::GameBase + 0x353160);
-	*(redrawTable + redraw) = 1;
+	if (redraw != UI_ONLY) {
+		BYTE* redrawTable = (BYTE*)(General::GameBase + 0x353160);
+		*(redrawTable + redraw) = 1;
+	}
 }
-
 
 
 }

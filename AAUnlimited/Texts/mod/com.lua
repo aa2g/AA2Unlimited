@@ -15,6 +15,7 @@ function retptr()
 end
 
 function create_com_interface(fns)
+	if true then return end
 	local fns = {}
 	local index = 0
 	for f in fns:gmatch("%S+") do

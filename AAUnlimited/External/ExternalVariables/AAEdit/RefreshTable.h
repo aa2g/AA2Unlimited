@@ -13,6 +13,7 @@ enum Category {
 };
 
 enum RedrawId {
+	UI_ONLY,
 	FIGURE_HEIGHT = 4, //reloads entire model
 	HAIR_FRONT = 0x16, HAIR_EXTENSION = 0x17, HAIR_SIDE = 0x18, HAIR_BACK = 0x19,
 	EYES_ALL = 0x13, //used multiple times
