@@ -465,8 +465,11 @@ bool PP2::FExists(const wchar_t *path) {
 		return false;
 
 	wstring pa(path);
+	transform(pa.begin(), pa.end(), pa.begin(), ::tolower);
+
 	if (!strip_data_path(pa))
 		return false;
+
 	for (auto &pp : pfiles) {
 		if (pp.names.find(pa) != pp.names.end())
 			return true;
