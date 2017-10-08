@@ -13,14 +13,14 @@ local propmgr = require "poser.propmgr"
 local opts = {
 	{"hideui", 0, "Hide game 2D UI: %b"},
 	{"autoloading", 0, "Autoload character pose: %b"},
-	{"ontop", 1, "Always-On-Top in fullscreen: %b"},
-	{"notitle", 1, "No titlebar in fullscreen: %b"},
+	{"ontop", 1, "Always-On-Top mode: %l|Never|In fullscreen|Always|"},
+	{"notitle", 1, "No titlebar: %l|Never|In fullscreen|Always|"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
 }
 
 
-local function detect_parenting(hwnd)
+local function detect_fs(hwnd)
 	dlg.parentHWND = hwnd
 
 	local rect = malloc(16)
@@ -37,7 +37,7 @@ end
 
 function on.first_tick(hwnd)
 	if dlg then
-		dlg.forceparenting = detect_parenting(hwnd)
+		dlg.fullscreen = detect_fs(hwnd)
 	end
 end
 
