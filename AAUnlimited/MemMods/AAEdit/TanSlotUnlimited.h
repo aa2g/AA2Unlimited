@@ -1,7 +1,7 @@
 #pragma once
 
 namespace EditInjections {
-namespace TanSlotUnlimit {
+namespace TanSlotUnlimited {
 
 
 void LoadLoopStartInject();

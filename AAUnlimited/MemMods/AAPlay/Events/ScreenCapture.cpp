@@ -113,6 +113,8 @@ namespace PlayInjections {
 			00E85EF5   . E8 66AB0000    CALL AA2Play.00E90A60                    ;  Create file
 			*/
 			DWORD address = General::GameBase + 0x1C5EEC;
+			if (General::IsAAEdit)
+				address = General::GameBase + 0x1A868C;
 			DWORD redirectAddress = (DWORD)(&SaveRedirect);
 			Hook((BYTE*)address,
 			{ 0x8B, 0x94, 0x24, 0xB4, 0x00, 0x00, 0x00,				//expected values

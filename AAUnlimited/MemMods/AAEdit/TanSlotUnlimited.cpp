@@ -12,7 +12,7 @@
 #define TAN_MAX_LINE (TAN_ADDITIONAL_SLOTS+14)
 
 namespace EditInjections { 
-namespace TanSlotUnlimit {
+namespace TanSlotUnlimited {
 
 
 /****************************************/

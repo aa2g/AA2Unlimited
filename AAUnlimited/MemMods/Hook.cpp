@@ -232,9 +232,14 @@ DWORD PatchIAT(void *piat, void *newp)
 void InitializeHooks() {
 	ExtVars::InitializeExtVars();
 
+	// These pigeonholes mean jack shit now
+	using namespace SharedInjections;
+	using namespace PlayInjections;
+	using namespace ExtClass;
+	using namespace EditInjections;
+
 	//shared
 	{
-		using namespace SharedInjections;
 
 		GameTick::Initialize();
 		WinAPI::Inject();
@@ -266,16 +271,13 @@ void InitializeHooks() {
 		EyeTexture::EyeTextureInject();
 
 		FileDump::FileDumpStartInject();
-		using namespace PlayInjections;
 		Loads::HiPolyLoadsInjection();
 		Shared::PNG::InstallHooks();
+		ScreenCapture::InitInjection();
 	}
 
 	if (General::IsAAPlay) {
-		using namespace ExtClass;
 		HGUIButton::InitializeHooks();
-
-		using namespace PlayInjections;
 
 		UIEvent::Inject();
 
@@ -304,19 +306,16 @@ void InitializeHooks() {
 		NpcActions::NpcMovingActionInjection();
 		NpcActions::NpcMovingActionPlanInjection();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
-		ScreenCapture::InitInjection();
-		using namespace SharedInjections;
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();
 	}
 	else if (General::IsAAEdit) {
-		using namespace EditInjections;
 		if (g_Config.getb("bUseAdditionalTanSlots")) {
-			TanSlotUnlimit::LoadLoopStartInject();
-			TanSlotUnlimit::LoadLoopPaPointerInject();
-			TanSlotUnlimit::LoadLoopEndInject();
-			TanSlotUnlimit::InsertLoopCall();
-			TanSlotUnlimit::InsertLoopEnd();
+			TanSlotUnlimited::LoadLoopStartInject();
+			TanSlotUnlimited::LoadLoopPaPointerInject();
+			TanSlotUnlimited::LoadLoopEndInject();
+			TanSlotUnlimited::InsertLoopCall();
+			TanSlotUnlimited::InsertLoopEnd();
 		}
 
 #if 0
