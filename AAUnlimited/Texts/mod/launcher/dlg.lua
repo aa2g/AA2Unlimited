@@ -304,15 +304,16 @@ local function buildtabs() return
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background" }),
 				aaut("bDrawFPS", iup.toggle {title = "Show FPS" }),
-				gsdt("fullscreen", iup.toggle {title = "Fullscreen" }),
-				gsdt("svp", iup.toggle {title = "Software vertex processing" }),
-				gsdt("sharp", iup.toggle {title = "Blur textures**" }),
-				gsdt("blur", iup.toggle {title = "Blur output" }),
+				--gsdt("fullscreen", iup.toggle {title = "Fullscreen" }), broken
+				gsdt("rim", iup.toggle {title = "Rim lighting (slow)" }),
+				gsdt("svp", iup.toggle {title = "Software vertex processing**" }),
+				gsdt("blur", iup.toggle {title = "Blur output***" }),
+				gsdt("sharp", iup.toggle {title = "Blur textures" }),
 			}
 		},
 	},
 	iup.fill{},
-	iup.label{title="* Selecting unsupported AA => defaults to 8xQ CSAA\n** Blur options may make sense only if you can't afford AA"},
+	iup.label{title="* Selecting unsupported AA => defaults to 8xQ CSAA\n** SVP is slow but needed if game crashes\n*** Blur is cheap but ugly \"AA\""},
 
 	iup.fill{},
 	
@@ -400,7 +401,10 @@ return function()
 	update_res(_CONFIG["res_"..exe_type])
 	iup.SetGlobal("UTF8MODE","YES")
 	iup.SetGlobal("UTF8MODE_FILE","YES")
+	local ico = aau_path("mod","launcher","aau.ico")
+	iup.SetGlobal("ICON", ico)
 	dlg = iup.dialog {
+		icon = ico,
 		iup.vbox {
 			buildtabs(),
 		};
