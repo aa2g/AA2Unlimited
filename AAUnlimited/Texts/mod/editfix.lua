@@ -31,7 +31,7 @@ function _M.load()
 		if msg == LB_ADDSTRING and eye_select then
 			local idx = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
 			local fn = unicode_to_utf8(peek(lparam, 256, "\x00\x00", 2))
-			if fn == eye_select then
+			if fn:lower() == eye_select:lower() then
 				SendMessageW(hdlg, LB_SETCURSEL, idx, 0)
 			end
 			return idx
