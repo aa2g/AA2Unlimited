@@ -1,3 +1,5 @@
+bUnlimitedOnTop = false
+
 -- Flat UI (but not in maker)
 bUseVisualStyles = true
 

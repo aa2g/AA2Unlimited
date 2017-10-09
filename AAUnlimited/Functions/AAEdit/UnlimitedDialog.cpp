@@ -34,7 +34,7 @@ void UnlimitedDialog::Initialize()
 	if (m_visible) return;
 	if (m_dialog == NULL) {
 		CreateDialogParam(General::DllInst, MAKEINTRESOURCE(IDD_AAUPROPDIALOG),
-			NULL /*ExtVars::AAEdit::MainWnd*/, MainDialogProc, (LPARAM)this);
+			g_Config.bUnlimitedOnTop ? *ExtVars::AAEdit::MainWnd : 0, MainDialogProc, (LPARAM)this);
 	}
 	ShowWindow(m_dialog, SW_SHOW);
 	m_visible = true;

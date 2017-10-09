@@ -866,7 +866,9 @@ function _M.updatefloating(d)
 	local parent = 0
 	if ((_M.opts.ontop == 2) or (_M.fs and _M.opts.ontop == 1)) then parent = _M.parentHWND end
 	for _,v in ipairs(d) do
-		SetParent(v.hwnd, parent)
+		SetWindowLongW(v.hwnd, -8, parent)
+		--SetParent(v.hwnd, parent)
+		--UpdateWindow(v.hwnd)
 	end
 end
 

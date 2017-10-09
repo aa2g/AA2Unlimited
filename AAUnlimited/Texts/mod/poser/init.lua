@@ -13,7 +13,7 @@ local propmgr = require "poser.propmgr"
 local opts = {
 	{"hideui", 0, "Hide game 2D UI: %b"},
 	{"autoloading", 0, "Autoload character pose: %b"},
-	{"ontop", 1, "Always-On-Top mode: %l|Never|In fullscreen|Always|"},
+	{"ontop", 2, "Single-window mode: %l|Never|In fullscreen|Always|"},
 	{"notitle", 1, "No titlebar: %l|Never|In fullscreen|Always|"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
