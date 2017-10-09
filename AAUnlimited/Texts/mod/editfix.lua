@@ -1,10 +1,11 @@
 --@INFO UI dialog fixes of edit (slider ranges)
 
 
--- RMB key to save as rainbow
+-- Todo: configurable
 local RAINBOW_KEY = 0x10 -- shift key
 local SELECT_PNG = 0x11 -- ctrl key
 local GEN_PNG = 0x12 -- alt key
+
 
 local _M = {}
 

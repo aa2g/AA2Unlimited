@@ -100,12 +100,12 @@ function _M:load()
 	stringbuf = malloc(#buf)
 	poke(stringbuf, buf)
 
-	local chk = ((GameBase + 0x00720000) - 0x00400000) >> 16
 	for ptr, off in pairs(rel) do
 		local orig_bytes = g_peek(ptr, 4)
 		local orig = g_peek_dword(ptr)
-		if ((orig >> 16) ~= chk) then
-			log.warn("playtrans: Invalid pointer %x at %x for '%s', skipping translation", orig, ptr, dict[ptr])
+		local ran = orig-GameBase-0x00320000
+		if (ran > 0xffff) or (ran < 0) then
+			log.warn("playtrans: Invalid pointer %x at %x for '%s', skipping translation", ran, ptr, dict[ptr])
 		else
 			g_poke_dword(ptr, stringbuf + off)
 			save[ptr] = orig_bytes

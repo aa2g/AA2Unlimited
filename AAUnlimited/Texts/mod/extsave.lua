@@ -14,7 +14,6 @@ local opts = {
 	{ "bkey", 3, "Backup on save key: %l|None|Right Mouse Button|Middle Mouse Button|Shift Key|Control Key|Alt Key|" },
 	{ "signal", 1, "Signal save done: %b" },
 	{ "period", 1, "Remember period: %b"},
-
 }
 
 
