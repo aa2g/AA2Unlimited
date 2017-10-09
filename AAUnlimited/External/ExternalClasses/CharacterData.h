@@ -430,6 +430,9 @@ namespace ExtClass {
 			LUA_BINDSTR(m_item2);
 			LUA_BINDSTR(m_item3);
 			LUA_BINDARRP(m_clothes);
+
+			LUA_BIND(m_pngBuffer);
+			LUA_BIND(m_pngBufferSize);
 		}
 #undef LUA_CLASS
 

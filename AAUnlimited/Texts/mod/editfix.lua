@@ -3,7 +3,8 @@
 
 -- RMB key to save as rainbow
 local RAINBOW_KEY = 0x10 -- shift key
-local PNG_KEY = 0x11 -- ctrl key
+local SELECT_PNG = 0x11 -- ctrl key
+local GEN_PNG = 0x12 -- alt key
 
 local _M = {}
 
@@ -92,6 +93,10 @@ function _M.load()
 		return proc_invoke(orig,this,hinst,template,parent,dlgfun,initpar)
 	end)
 
+	-- stops png buffer from being freed
+	g_poke(0x12626D, "\xeb")
+	g_poke(0x126285, "\x90\x90\x90\x90\x90\x90")
+
 end
 
 function on.update_edit_gui()
@@ -125,10 +130,31 @@ end
 
 
 
-function on.save_card(char,stat,outbufp,outlenp,outlen)
-	-- replace png buffer with custom file. aaud will be filled in latter by caller.
-	if is_key_pressed(PNG_KEY) then
-		local png = iup.filedlg {filter="*.png", title="Select (clean!) PNG as card face"}
+function on.pre_save_card(char,outbufp,outlenp)
+	log("presave orig ptr%x %d", peek_dword(fixptr(outbufp)), peek_dword(fixptr(outlenp)))
+
+	local bufp = peek_dword(fixptr(outbufp))
+	local bufsz = peek_dword(fixptr(outlenp))
+
+	-- just before the saving card, add rainbow
+	if is_key_pressed(RAINBOW_KEY) then
+		info("Rainbow applied")
+		char.m_charData:m_traitBools(38, 1)
+	end
+
+	-- generator requested, or no no image and no png select requested
+	if is_key_pressed(GEN_PNG) then
+		if bufp ~= 0 then
+			log("genpng: freeing previous png")
+			free(bufp)
+		end
+		bufp = 0
+		bufsz = 0
+	end
+
+	-- replace png buffer with custom file. aaud will be filled in later by caller.
+	if is_key_pressed(SELECT_PNG) then
+		local png = iup.filedlg {filter="*.png", title="Select PNG as card face"}
 		png:popup(iup.ANYWHERE, iup.ANYWHERE)
 		if png then
 			local fpng = io.open(png.value, "rb")
@@ -144,25 +170,16 @@ function on.save_card(char,stat,outbufp,outlenp,outlen)
 			fpng:seek("set", 0)
 			local pngbuf = fpng:read(fsize)
 			fpng:close()
-			local pngmem = malloc(#pngbuf)
-			poke(pngmem, pngbuf)
-			free(peek_dword(fixptr(outbufp)))
-			poke_dword(fixptr(outbufp), pngmem)
-			poke_dword(fixptr(outlenp), #pngbuf)
+			if bufp ~= 0 then
+				free(bufp)
+			end
+			bufp = malloc(#pngbuf)
+			bufsz = #pngbuf
+			poke(bufp, pngbuf)
 		end
 	end
---	local pngdata = peek(peek_dword(fixptr(outbufp)), outlen)
---	local of = io.open("test.png", "wb")
---	of:write(pngdata)
---	of:close()
-
-	-- just before the saving card, add rainbow
-	info(char,stat,outbufp,outlenp,outlen)
-	if is_key_pressed(RAINBOW_KEY) then
-		info("Rainbow applied")
-		char.m_charData:m_traitBools(38, 1)
-	end
-	return char
+	poke_dword(fixptr(outbufp), bufp)
+	poke_dword(fixptr(outlenp), bufsz)
 end
 
 function _M.unload()

@@ -277,9 +277,14 @@ static void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
 // so this is our best chance to stuff in whatever partains to AAU here.
 bool(__stdcall *GetPNGOrig)(DWORD _this, CharacterStruct *chr, BYTE **outbuf, DWORD *outlen);
 bool __stdcall GetPNG(DWORD _this, CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
-	bool stat = GetPNGOrig(_this, chr, outbuf, outlen);
-	if (!stat) return stat;
+	bool stat = true;
+//	*outbuf = NULL;
+	LUA_EVENT_NORET("pre_save_card", chr, outbuf, outlen);
+	if (!*outbuf)
+		stat = GetPNGOrig(_this, chr, outbuf, outlen);
 	LUA_EVENT_NORET("save_card", chr, stat, outbuf, outlen, outlen ? *outlen : 0);
+	if (!stat)
+		return stat;
 	SavePNGChunk(chr, outbuf, outlen);
 	return stat;
 }

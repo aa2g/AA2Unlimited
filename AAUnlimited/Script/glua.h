@@ -72,7 +72,7 @@ struct Value {
 	inline operator bool() const { return lua_toboolean(L, idx); }
 
 	template <class T>
-	inline operator T*() const { if (!idx) return 0; return (T*)lua_touserdata(L, idx); }
+	inline operator T*() const { if (!idx) return 0; void *v = lua_touserdata(L, idx); if (!v) v = (void*)lua_tointeger(L, idx); return (T*)v; }
 
 	inline bool isnil() { return lua_isnil(L, idx); }
 	inline int type() { return lua_type(L, idx); }

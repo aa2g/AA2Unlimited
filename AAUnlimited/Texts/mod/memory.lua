@@ -156,6 +156,7 @@ function f_patch(bytes, offs)
 end
 
 function fixptr(p)
+	if p == nil then return 0 end
 	if type(p) ~= "number" then
 		p = tostring(p)
 		local h = p:match(".-([0-9A-F]+)$")
