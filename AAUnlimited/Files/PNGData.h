@@ -26,6 +26,7 @@ namespace Shared {
 namespace PNG {
 void InstallHooks();
 static const char vermagic[] = "MODCARD3";
+void Reset();
 struct Footer {
 	char vermagic[8];		// keep version in some visible place now
 	DWORD aaublob_delta;	// filesize-aaublob_delta must point to blob (and also a blob truncation point)

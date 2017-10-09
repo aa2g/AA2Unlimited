@@ -2,7 +2,8 @@
 
 
 -- RMB key to save as rainbow
-local RAINBOW_KEY = 2
+local RAINBOW_KEY = 0x10 -- shift key
+local PNG_KEY = 0x11 -- ctrl key
 
 local _M = {}
 
@@ -123,15 +124,41 @@ function on.update_edit_gui()
 end
 
 
--- just before the saving card, add rainbow
-function on.save_card(char,stat,outbufp,outlenp,outlen)
-	local pngdata = peek(peek_dword(fixptr(outbufp)), outlen)
-	local of = io.open("test.png", "wb")
-	of:write(pngdata)
-	of:close()
 
+function on.save_card(char,stat,outbufp,outlenp,outlen)
+	-- replace png buffer with custom file. aaud will be filled in latter by caller.
+	if is_key_pressed(PNG_KEY) then
+		local png = iup.filedlg {filter="*.png", title="Select (clean!) PNG as card face"}
+		png:popup(iup.ANYWHERE, iup.ANYWHERE)
+		if png then
+			local fpng = io.open(png.value, "rb")
+			fpng:read(8)
+			while true do
+					local len = fpng:read(4)
+					len = string.unpack(">I", len)
+					local tag = fpng:read(4)
+					fpng:seek("cur",len+4)
+					if tag == "IEND" then break end
+			end
+			local fsize = fpng:seek("cur")
+			fpng:seek("set", 0)
+			local pngbuf = fpng:read(fsize)
+			fpng:close()
+			local pngmem = malloc(#pngbuf)
+			poke(pngmem, pngbuf)
+			free(peek_dword(fixptr(outbufp)))
+			poke_dword(fixptr(outbufp), pngmem)
+			poke_dword(fixptr(outlenp), #pngbuf)
+		end
+	end
+--	local pngdata = peek(peek_dword(fixptr(outbufp)), outlen)
+--	local of = io.open("test.png", "wb")
+--	of:write(pngdata)
+--	of:close()
+
+	-- just before the saving card, add rainbow
 	info(char,stat,outbufp,outlenp,outlen)
-	if (GetAsyncKeyState(RAINBOW_KEY) & 0x8000) ~= 0 then
+	if is_key_pressed(RAINBOW_KEY) then
 		info("Rainbow applied")
 		char.m_charData:m_traitBools(38, 1)
 	end

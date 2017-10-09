@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Files/PNGData.h"
 
 /*
  * These are similar to the AAFace versions.
@@ -30,9 +31,9 @@ namespace EditInjections {
 					case 10031:	//New character button
 					case 10033: //Open card button
 						if (General::IsAAEdit) {
-							if (AAEdit::g_currChar.IsValid()) {
-								AAEdit::g_currChar.m_char = NULL;
-							}
+							// TODO do this better
+							Shared::PNG::Reset();
+							AAEdit::g_currChar.Reset();
 						}
 						break;
 					}
