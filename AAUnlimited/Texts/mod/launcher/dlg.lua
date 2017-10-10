@@ -304,7 +304,7 @@ local function buildtabs() return
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background" }),
 				aaut("bDrawFPS", iup.toggle {title = "Show FPS" }),
-				--gsdt("fullscreen", iup.toggle {title = "Fullscreen" }), broken
+				aaut("bFullscreen", iup.toggle {title = "Fullscreen" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting (slow)" }),
 				gsdt("svp", iup.toggle {title = "Software vertex processing**" }),
 				gsdt("blur", iup.toggle {title = "Blur output***" }),

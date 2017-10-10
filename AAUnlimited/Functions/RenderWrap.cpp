@@ -1031,17 +1031,30 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
+		static bool created;
 //		LOGSPAM << "D3d behavior :" << std::hex << BehaviorFlags << "\n";
 /*		BehaviorFlags &= ~D3DCREATE_DISABLE_PSGP_THREADING;
 		BehaviorFlags |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
 		BehaviorFlags &= ~D3DCREATE_SOFTWARE_VERTEXPROCESSING;*/
 		BehaviorFlags &= ~D3DCREATE_MULTITHREADED;
-
 		HRESULT hres = orig->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
-		if (hres == D3D_OK)
+		if (hres == D3D_OK) {
 			*ppReturnedDeviceInterface = d3dev;
+			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
+				DEVMODE dmScreenSettings = { 0 };
+				dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+				dmScreenSettings.dmPelsWidth = pPresentationParameters->BackBufferWidth;
+				dmScreenSettings.dmPelsHeight = pPresentationParameters->BackBufferHeight;
+				dmScreenSettings.dmBitsPerPel = 32;
+				dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+				ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
+			}
+			if (!created)
+				LUA_EVENT_NORET("post_d3d", (DWORD)(hFocusWindow));
+			created = true;
+		}
 		return hres;
 	}
 };
