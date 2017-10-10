@@ -4,7 +4,8 @@ require "memory"
 
 local _M = { 
 	visible = false,
-	floating = false
+	floating = false,
+	block_mouse = false,
 }
 
 -- IUP fonts:
@@ -850,12 +851,14 @@ function _M.togglevisible()
 			v:show()
 		end
 		_M.visible = true
+		_M.block_mouse = true
 		update_showui()
 	else
 		for _,v in ipairs(dialogs) do
 			v:hide()
 		end
 		_M.visible = false
+		_M.block_mouse = false
 		update_showui()
 	end
 end

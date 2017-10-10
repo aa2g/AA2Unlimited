@@ -422,7 +422,11 @@ end
 
 
 function __DISPATCH_EVENT(name, arg1, ...)
-	if name ~= "plan" then
+	local filter = {
+		plan = true,
+		mousemove = true,
+	}
+	if not filter[name] then
 		print("EVENT: ", name, arg1, ...)
 	end
 

@@ -17,6 +17,7 @@ local opts = {
 	{"notitle", 1, "No titlebar: %l|Never|In fullscreen|Always|"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
+	{"autofocus", 1, "Window auto-focus: %b"},
 }
 
 
@@ -64,6 +65,14 @@ end
 function on.char_xa_end(character,pp,xa,pose)
 	xa = xa:match("[^\\]*$")
 	charamgr.character_updated(character, {xa=xa,startpose=pose})
+end
+
+local lastwnd = 0
+function on.mousemove(wparam,lparam,hwnd,x,y)
+	if (opts.autofocus == 1) and (lastwnd ~= hwnd) and (IsWindow(hwnd) ~= 0) then
+		lastwnd = hwnd
+		SetFocus(hwnd)
+	end
 end
 
 function _M:load()
