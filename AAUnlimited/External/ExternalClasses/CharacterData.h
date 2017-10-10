@@ -317,7 +317,9 @@ namespace ExtClass {
 	{
 	public:
 		void* m_virtualTable; // 4
-		BYTE m_unknown1[0x2C]; 
+		BYTE m_unknown1[0x2C-8]; 
+		DWORD m_pngRosterBufferSize;
+		void* m_pngRosterBuffer; // roster image
 		DWORD m_pngBufferSize; // 0x30
 		void* m_pngBuffer; // 0x34 card image, exluding the aa2 data (just the image part)
 		BYTE m_unknown2[4]; // 0x38
@@ -433,6 +435,8 @@ namespace ExtClass {
 
 			LUA_BIND(m_pngBuffer);
 			LUA_BIND(m_pngBufferSize);
+			LUA_BIND(m_pngRosterBuffer);
+			LUA_BIND(m_pngRosterBufferSize);
 		}
 #undef LUA_CLASS
 
