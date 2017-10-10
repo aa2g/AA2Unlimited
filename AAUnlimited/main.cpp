@@ -208,9 +208,10 @@ void* WINAPI AA2Unlimited(UINT SDKVersion)
 extern "C" __declspec(dllexport)
 void WINAPI CALLBACK AA2UPatcher(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow) {
 	SetUnhandledExceptionFilter(panic);
+	General::InitializePaths();
+
 	InitLogger();
 	InitLua();
-	General::InitializePaths();
 	try {
 		g_Lua["require"]("patcher")((const char*)lpszCmdLine, nCmdShow);
 	}
