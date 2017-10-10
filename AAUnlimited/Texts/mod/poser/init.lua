@@ -15,9 +15,10 @@ local opts = {
 	{"autoloading", 0, "Autoload character pose: %b"},
 	{"ontop", 2, "Single-window mode: %l|Never|In fullscreen|Always|"},
 	{"notitle", 1, "No titlebar: %l|Never|In fullscreen|Always|"},
+	{"grab", 1, "Mouse grab-move: %b"},
+	{"autofocus", 1, "Window auto-focus: %b"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
-	{"autofocus", 1, "Window auto-focus: %b"},
 }
 
 
@@ -67,13 +68,14 @@ function on.char_xa_end(character,pp,xa,pose)
 	charamgr.character_updated(character, {xa=xa,startpose=pose})
 end
 
+--[[
 local lastwnd = 0
 function on.mousemove(wparam,lparam,hwnd,x,y)
-	if (opts.autofocus == 1) and (lastwnd ~= hwnd) and (IsWindow(hwnd) ~= 0) then
+	if dlg.visible and dlg[hwnd] and (opts.autofocus == 1) and (lastwnd ~= hwnd) then
 		lastwnd = hwnd
 		SetFocus(hwnd)
 	end
-end
+end]]
 
 function _M:load()
 	self.cfg = self.cfg or {}
@@ -88,7 +90,7 @@ function _M:load()
 	posemgr.opts = opts
 	posemgr.cfg = self.cfg
 	if GetGameTick() > 0 then
-		dlg.forceparenting = detect_parenting(GetGameHwnd())
+		dlg.fullscreen = detect_fs(GetGameHwnd())
 	end
 	propmgr:init()
 end

@@ -335,9 +335,9 @@ void Lua::bindLua() {
 		case WM_MBUTTONDBLCLK:
 			mstr = "mousedblclk";
 			break;
-		case WM_MOUSEMOVE:
+/*		case WM_MOUSEMOVE:
 			mstr = "mousemove";
-			break;
+			break;*/
 		}
 
 		if (mstr) {

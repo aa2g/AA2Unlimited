@@ -829,14 +829,18 @@ signals.connect(dialogposes, "savescene", _M, "savescene")
 -- https://www.codeproject.com/Articles/11114/Move-window-form-without-Titlebar-in-C
 -- Of course iup supports nothing of the sorts, so we have to do it the dirty way
 local function adjust_parenting(v)
-	if _M.opts.notitle == 0 then return end
-	if _M.opts.notitle == 1 and not _M.fullscreen then return end
-	v.menubox = "no"
+	if _M.opts.notitle == 2 or (_M.opts.notitle == 1 and _M.fullscreen) then
+		v.menubox = "no"
+	end
 	v:map()
 	set_window_proc(v.hwnd, function(orig, this, hwnd, msg, wparam, lparam)
-		if msg == 0x0201 and hwnd == fixptr(v.hwnd) then
+		-- left click, grab-mvoe
+		if msg == 0x201 and _M.opts.grab and hwnd == fixptr(v.hwnd) then
 			ReleaseCapture()
 			SendMessageW(hwnd, 0xA1, 2, 0)
+		-- mouse moves onto the window, grab focus
+		elseif msg == 0x20 and (_M.opts.autofocus == 1) and (GetForegroundWindow() == GetGameHwnd()) then
+			SetFocus(v.hwnd)
 		end
 		return CallWindowProcW(orig, hwnd, msg, wparam, lparam)
 	end)
