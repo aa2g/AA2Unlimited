@@ -220,7 +220,7 @@
 	[ [[眉へ反映]] ] = [[Eyebrows]],
 	[ [[髪の色]] ] = [[Hair Color]],
 	[ [[苗字]] ] = [[Last Name]],
-	[ [[名前]] ] = [[Full Name]],
+	[ [[名前]] ] = [[First Name]],
 	[ [[社交性]] ] = [[Sociability]],
 	[ [[貞操観念]] ] = [[Virtue]],
 	[ [[性愛対象]] ] = [[Orientation]],

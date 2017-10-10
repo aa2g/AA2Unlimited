@@ -34,5 +34,46 @@ struct Footer {
 	DWORD illusion_delta;	// filesize-illusion_delta points to illusion data
 };
 
+// this is similiar to CharacterDataTypes::Clothes, yet not quite
+// move this somewhere relevant when needed
+#pragma pack(push, 1)
+struct CardClothes {
+	DWORD slot;
+	BYTE skirtLength;
+	BYTE socks;
+	BYTE indoorShoes;
+	BYTE outdoorShoes;
+
+	DWORD colorTop1;
+	DWORD colorTop2;
+	DWORD colorTop3;
+	DWORD colorTop4;
+	DWORD colorBottom1;
+	DWORD colorBottom2;
+	DWORD colorUnderwear;
+	DWORD colorSocks;
+	DWORD colorIndoorShoes;
+	DWORD colorOutdoorShoes;
+	DWORD textureBottom1;
+	DWORD textureUnderwear;
+	DWORD textureBottom1Hue;
+	DWORD textureBottom1Lightness;
+	DWORD shadowBottom1Hue;
+	DWORD shadowBottom1Lightness;
+
+	BYTE isOnePiece;
+	BYTE hasUnderwear;
+	BYTE hasSkirt;
+
+	DWORD textureUnderwearHue;
+	DWORD textureUnderwearLightness;
+	DWORD shadowUnderwearHue;
+	DWORD shadowUnderwearLightness;
+};
+extern CardClothes saved_clothes[4];
+extern bool have_clothes;
+#pragma pack(pop)
+
+
 }
 }

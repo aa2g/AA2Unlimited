@@ -7,56 +7,18 @@ using namespace ExtClass;
 namespace Shared {
 namespace PNG {
 
-// this is similiar to CharacterDataTypes::Clothes, yet not quite
-// move this somewhere relevant when needed
-#pragma pack(push, 1)
-struct CardClothes {
-	DWORD slot;
-	BYTE skirtLength;
-	BYTE socks;
-	BYTE indoorShoes;
-	BYTE outdoorShoes;
-
-	DWORD colorTop1;
-	DWORD colorTop2;
-	DWORD colorTop3;
-	DWORD colorTop4;
-	DWORD colorBottom1;
-	DWORD colorBottom2;
-	DWORD colorUnderwear;
-	DWORD colorSocks;
-	DWORD colorIndoorShoes;
-	DWORD colorOutdoorShoes;
-	DWORD textureBottom1;
-	DWORD textureUnderwear;
-	DWORD textureBottom1Hue;
-	DWORD textureBottom1Lightness;
-	DWORD shadowBottom1Hue;
-	DWORD shadowBottom1Lightness;
-
-	BYTE isOnePiece;
-	BYTE hasUnderwear;
-	BYTE hasSkirt;
-
-	DWORD textureUnderwearHue;
-	DWORD textureUnderwearLightness;
-	DWORD shadowUnderwearHue;
-	DWORD shadowUnderwearLightness;
-};
-#pragma pack(pop)
-
 // this range of bytes is backed up between saves
 static const int BACKUP_START = 0xa57;
 static const int BACKUP_END = 0xbc3;
 
-static CardClothes stats_backup[4];
-static_assert(sizeof(stats_backup) == BACKUP_END-BACKUP_START, "Backup buffer mismatched");
+CardClothes saved_clothes[4];
+static_assert(sizeof(saved_clothes) == BACKUP_END-BACKUP_START, "Backup buffer mismatched");
 
-bool do_backup;
+bool have_clothes;
 
 void Reset() {
 	LOGPRIO(Logger::Priority::SPAM) << "Resetting PNG stats backup buffer\n";
-	do_backup = false;
+	have_clothes = false;
 }
 
 
@@ -202,10 +164,10 @@ skip_blob:;
 	cd.GenAllFileMaps();
 
 out:
-	do_backup = true;
+	have_clothes = true;
 	SetFilePointer(fh, illusion_off + BACKUP_START, NULL, FILE_BEGIN);
 	got = 0;
-	ReadFile(fh, stats_backup, BACKUP_END - BACKUP_START, &got, NULL);
+	ReadFile(fh, saved_clothes, BACKUP_END - BACKUP_START, &got, NULL);
 
 	if (General::IsAAEdit)
 		AAEdit::g_AAUnlimitDialog.Refresh();
@@ -324,12 +286,12 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	footer.illusion_delta = sz - illusion_off;
 	got = 0;
 	WriteFile(hf, &footer, sizeof(footer), &got, NULL);
-	if (do_backup) {
+	if (have_clothes) {
 		LOGPRIO(Logger::Priority::SPAM) << "Backup buffer present, restoring\n";
 
 		SetFilePointer(hf, illusion_off + BACKUP_START, NULL, FILE_BEGIN);
 		got = 0;
-		WriteFile(hf, stats_backup, BACKUP_END - BACKUP_START, &got, NULL);
+		WriteFile(hf, saved_clothes, BACKUP_END - BACKUP_START, &got, NULL);
 		SetFilePointer(hf, 0, NULL, FILE_END);
 	}
 	return true;
