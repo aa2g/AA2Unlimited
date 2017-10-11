@@ -1064,7 +1064,12 @@ bool AAUCardData::BlobAppendEntry(std::wstring &name, int typ, BYTE *buf, size_t
 bool AAUCardData::BlobAppendFile(std::wstring &name, int typ, std::wstring fullPath) {
 	DWORD sz;
 	BYTE *buf = SharedInjections::ArchiveFile::ReadBuf(fullPath.c_str(), &sz);
-	if (buf) BlobAppendEntry(name, typ, buf, sz);
+	if (buf) {
+		BlobAppendEntry(name, typ, buf, sz);
+	}
+	else {
+		LOGPRIO(Logger::Priority::WARN) << "Failed to append " << fullPath << " to the blob (missing or unreadable)\r\n";
+	}
 	Shared::IllusionMemFree(buf);
 	return buf != NULL;
 }

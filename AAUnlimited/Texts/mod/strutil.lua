@@ -13,6 +13,13 @@ function cp_to_unicode(cp, text)
 	return peek(strbuf, nconv*2)
 end
 
+function cp_strdup(cp, text, prepend)
+	text = text .. "\0"
+	local strbuf = malloc(4096)
+	local nconv = MultiByteToWideChar(cp, 0, text, #text, strbuf + prepend, 4096)
+	return strbuf + prepend, nconv-1
+end
+
 function unicode_to_cp(cp, text)
 	local nconv = WideCharToMultiByte(cp, 0, text, #text / 2, strbuf, 4096, 0, 0)
 	return peek(strbuf, nconv)

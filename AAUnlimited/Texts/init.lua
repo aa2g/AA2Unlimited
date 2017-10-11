@@ -425,6 +425,8 @@ function __DISPATCH_EVENT(name, arg1, ...)
 	local filter = {
 		plan = true,
 		mousemove = true,
+		mousedown = true,
+		mouseup = true,
 	}
 	if not filter[name] then
 		print("EVENT: ", name, arg1, ...)

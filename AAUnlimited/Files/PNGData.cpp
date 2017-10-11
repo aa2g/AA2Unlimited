@@ -254,7 +254,7 @@ bool __stdcall GetPNG(DWORD _this, CharacterStruct *chr, BYTE **outbuf, DWORD *o
 // Called when finishing up writing a png and writing the last delta DWORD. Edit only.
 bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	DWORD got = 0;
-
+	LUA_EVENT_NORET("post_save_card");
 	// Write the original delta marker
 	WriteFile(hf, delta, 4, &got, NULL);
 

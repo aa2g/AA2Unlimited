@@ -14,6 +14,7 @@ void* __stdcall IllusionMemAlloc(size_t size) {
 }
 
 void __stdcall IllusionMemFree(void *mem) {
+	if (!mem) return;
 	size_t sz = HeapSize(*IllusionMemAllocHeap, 0, mem);
 	*IllusionMemUsed -= sz;
 	HeapFree(*IllusionMemAllocHeap, 0, mem);

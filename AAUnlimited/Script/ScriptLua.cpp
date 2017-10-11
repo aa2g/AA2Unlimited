@@ -9,7 +9,7 @@
 Lua *g_Lua_p;
 using namespace General;
 
-// direct assembly code callback, stdcall/thiscall
+// direct assembly code callback, stdcall/thiscall/cdecl
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
 	lua_State *L = LUA_GLOBAL.L();
 	lua_getglobal(L, LUA_EVENTS_TABLE);
@@ -165,7 +165,7 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["proc_invoke"] = lua_CFunction([](lua_State *L) {
-		// eax, edx = proc_invoke(addr, args...), stdcall/thiscall only
+		// eax, edx = proc_invoke(addr, args...), stdcall/thiscall/cdecl only
 		DWORD *argbuf = (DWORD*)alloca((lua_gettop(L) - 2)*4);
 		int addr = lua_tointeger(L, 1);
 		if (!addr) addr = (int)lua_topointer(L, 1);
@@ -189,13 +189,17 @@ void Lua::bindLua() {
 			mov eax, addr
 			mov edx, _this
 			mov esi, argbuf
-			mov edi, esp
 			mov ecx, nbytes
+			push ebp
+			mov ebp, esp
+			mov edi, esp
 			sub esp, ecx
 			sub edi, ecx
 			rep movsb
 			mov ecx, edx
 			call eax
+			mov esp, ebp
+			pop ebp
 			mov saved_eax, eax
 			mov saved_edx, edx
 		}

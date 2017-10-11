@@ -72,11 +72,16 @@ end
 
 -- create callback and returns pointer to it
 function make_callback(f, nargs)
+	local cdecl = false
+	if nargs < 0 then
+		nargs = -nargs
+		cdecl = true
+	end
 	cidx = cidx+1
 	local page = x_pages(4096)
 	local buf =
 		asm .. push(cidx) .. push(nargs) ..
-		asm2 .. string.pack("<I2", nargs*4) ..
+		asm2 .. string.pack("<I2", cdecl and 0 or nargs*4) ..
 		push(_BINDING.callback) .. "\xc3"
 	poke(page, buf)
 	_EVENTS.callback[cidx] = f
@@ -94,8 +99,19 @@ end
 
 g_hook_vptr = g_wrap(hook_vptr)
 
+function hook_call(addr, nargs, f)
+	local save = peek(addr, 5)
+	local op, orig = string.unpack("<BI4", save)
+	assert(op == 0xe8)
+	orig = (addr + 5 + orig) & 0xffffffff
+	local ff = function(...)
+		return f(orig, ...)
+	end
+	callto(addr, make_callback(ff, nargs))
+	return save
+end
 
-
+g_hook_call = g_wrap(hook_call)
 
 function hook_func(addr, fixbytes, nargs, f)
 	if type(fixbytes) == "number" then
@@ -113,10 +129,11 @@ function hook_func(addr, fixbytes, nargs, f)
 end
 
 function callto(addr, addr2)
-	poke(addr, "\xe8" .. string.pack("<I", addr2-addr-5))
+	poke(addr, "\xe8" .. string.pack("<I", (addr2-addr-5) & 0xffffffff))
 end
 
 g_callto = g_wrap(callto)
+
 
 g_hook_func = g_wrap(hook_func)
 
@@ -220,4 +237,28 @@ function set_window_proc(hwnd, proc)
 		return proc(orig, ...)
 	end, 4))
 	return orig
+end
+
+function patcher()
+	local savetab = {}
+	local ret = setmetatable({}, {
+		__index = function(t,k)
+			local f = rawget(_G, k)
+			log.spam("patcher %s"%k)
+			assert(f, "patcher function not found")
+			return function(self,addr,...)
+				log.spam("patcher: patched %x" % addr)
+				local saved = f(addr,...)
+				savetab[addr] = saved
+				return saved
+			end
+		end
+	})
+	function ret.unload()
+		for addr,saved in pairs(savetab) do
+			log.spam("patcher: restored %x" % addr)
+			g_poke(addr, saved)
+		end
+	end
+	return ret
 end

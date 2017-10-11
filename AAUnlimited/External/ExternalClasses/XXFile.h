@@ -69,7 +69,8 @@ public:
 			LUA_BINDSTR(m_name)
 			LUA_BIND(m_attachmentFrame);
 			LUA_BIND(m_root);
-			LUA_BINDARREP(m_animArray,,_self->m_animArraySize)
+			LUA_BINDARREP(m_animArray, , _self->m_animArraySize);
+			LUA_BIND(m_animArraySize);
 			LUA_BIND(m_poseNumber);
 			LUA_BIND(m_animFrame);
 
