@@ -98,6 +98,15 @@ patches.play = {
 
 
 patches.edit = {
+
+	-- dont hardcode eye resolution (128x128), copy it from bitmap instead
+	["\xDB\x46\x0C\x90"] = {
+		-0x118C88
+	},
+	["\xDB\x46\x10\x90"] = {
+		-0x118CC8,
+	},
+
 	-- nop out hue check
 	["\x67\x01"] = {
 		0x0002058A,
