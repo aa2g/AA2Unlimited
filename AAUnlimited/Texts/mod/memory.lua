@@ -244,7 +244,6 @@ function patcher()
 	local ret = setmetatable({}, {
 		__index = function(t,k)
 			local f = rawget(_G, k)
-			log.spam("patcher %s"%k)
 			assert(f, "patcher function not found")
 			return function(self,addr,...)
 				log.spam("patcher: patched %x" % addr)
@@ -257,7 +256,11 @@ function patcher()
 	function ret.unload()
 		for addr,saved in pairs(savetab) do
 			log.spam("patcher: restored %x" % addr)
-			g_poke(addr, saved)
+			if type(saved) == "number" then
+				g_poke_dword(addr, saved)
+			else
+				g_poke(addr, saved)
+			end
 		end
 	end
 	return ret

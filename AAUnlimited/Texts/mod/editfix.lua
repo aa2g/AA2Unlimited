@@ -16,13 +16,14 @@ local LB_ADDSTRING = 0x180
 local TBM_SETRANGEMAX = 0x408
 local EM_SETLIMITTEXT = 0xc5
 
-
-function on.update_edit_gui()
+local function update_ui(eyeonly)
 	local base = GetPropW(g_peek_dword(0x353180), GameBase + 0x3100A4)
 	local function run(addr,off, ...)
 		local val = peek_dword(base+off)
 		proc_invoke(GameBase + addr, nil, val, ...)
 	end
+	run(0x23640,160) -- updates eyes
+	if (eyeonly) then return end
 
 	run(0x1D5B0,128) -- slow
 
@@ -31,7 +32,7 @@ function on.update_edit_gui()
 	
 	--run(0x22360,152)
 	
-	run(0x23640,160) -- updates eyes
+
 	run(0x24E20,168,0)
 	run(0x25D50,176,0)
 	run(0x26FC0,184)
@@ -44,6 +45,10 @@ function on.update_edit_gui()
 	run(0x2D510,216)
 	run(0x2DB00,216) -- pose?
 	run(0x2F730,224) -- pose?
+end
+
+function on.update_edit_gui()
+	update_ui()
 end
 
 local function open_png(path, buf, sz)
@@ -157,6 +162,25 @@ function on.post_save_card()
 
 end
 
+local function select_eye(dir,field)
+	require "iuplua"
+	local path = host_path("data","texture",dir)
+	local orig = GetPlayerCharacter().m_charData.m_eyes[field]
+	local dlg = iup.filedlg {
+		allownew = "yes",
+		dialogtype = "OPEN",
+		filter = "*.bmp;*.tga",
+		filterinfo =  "bmp or tga "..dir.." texture",
+		directory=path,
+		file=orig,
+		showpreview="yes",
+	}
+	dlg:popup()
+	if dlg.status == "-1" then return end
+	local eye_select = dlg.value:match("[^\\]*$")
+	GetPlayerCharacter().m_charData.m_eyes[field] = eye_select
+	update_ui(true)
+end
 
 function _M:load()
 	_M.patcher = patcher()
@@ -175,14 +199,14 @@ function _M:load()
 
 	-- SendMessageW
 	p:g_hook_vptr(0x002C43E0, 4, function(orig, this, hdlg, msg, wparam, lparam)
-		if msg == LB_ADDSTRING and eye_select then
+--[[		if msg == LB_ADDSTRING and eye_select then
 			local idx = proc_invoke(orig, this, hdlg, msg, wparam, lparam)
 			local fn = unicode_to_utf8(peek(lparam, 256, "\x00\x00", 2))
 			if fn:lower() == eye_select:lower() then
 				SendMessageW(hdlg, LB_SETCURSEL, idx, 0)
 			end
 			return idx
-		end
+		end]]
 		-- slider range - something asking for 100, make it 255
 		local itemid = GetWindowLongW(hdlg, -12)
 		if not avoid[itemid] then
@@ -204,7 +228,7 @@ function _M:load()
 	end)
 
 	--DialogBoxParamW
-	p:g_hook_vptr(0x2C4350, 5, function(orig,this,hinst,template,parent,dlgfun,initpar)
+--[[	p:g_hook_vptr(0x2C4350, 5, function(orig,this,hinst,template,parent,dlgfun,initpar)
 		if template == 167 then
 			local kind = peek_dword(initpar+100)&0xff
 			local path
@@ -236,6 +260,21 @@ function _M:load()
 		end
 
 		return proc_invoke(orig,this,hinst,template,parent,dlgfun,initpar)
+	end)]]
+
+	-- eye control hook
+	p:g_hook_vptr(0x304CCC, 4, function(orig,this,a2,a3,a4,hwnd)
+		if a3 == 273 then
+			local ctrl = a4 & 0xffff
+			if ctrl == 10215 then
+				select_eye("eye", "texture")
+				return 0
+			elseif ctrl == 10214 then
+				select_eye("hilight", "highlight")
+				return 0
+			end
+		end
+		return proc_invoke(orig,this,a2,a3,a4,hwnd)
 	end)
 
 	-- stops cardface buffer from being freed
