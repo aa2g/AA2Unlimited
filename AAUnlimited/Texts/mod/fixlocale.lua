@@ -19,9 +19,10 @@ local function patch_aaplay()
 	poke(p+128, fixcp .. "\x68" .. string.pack("<I4", g_xchg_dword(0x002E3190, p+128)) .. "\xC3")
 end
 
+local dopatch = false
 function on.launch()
-	if not ((opts.level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0))) then return end
-	if (_BINDING.IsAAPlay) then
+	if not dopatch then return end
+	if (dopatch and _BINDING.IsAAPlay) then
 		patch_aaplay()
 	end
 	SetThreadLocale(1041)
@@ -32,6 +33,12 @@ local _M={}
 
 function _M:load()
 	mod_load_config(self, opts)
+    -- TODO, make level configurable
+    -- not emulated, nor japanese system (langid 17)
+    if (opts.level > (((GetSystemDefaultLangID() & 0x3ff) == 17) and 1 or 0)) then
+		dopatch = true
+		SetThreadLocale(1041)
+    end
 end
 
 function _M:unload()
