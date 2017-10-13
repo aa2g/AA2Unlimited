@@ -279,6 +279,7 @@
     <None Include="Texts\mod\makertrans\dict.lua" />
     <None Include="Texts\mod\makertrans\init.lua" />
     <None Include="Texts\mod\memory.lua" />
+    <None Include="Texts\mod\meshfix.lua" />
     <None Include="Texts\mod\nocd.lua" />
     <None Include="Texts\mod\patcher.lua" />
     <None Include="Texts\mod\patches.lua" />
