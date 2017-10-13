@@ -164,7 +164,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 	// If the archive is empty, it's a request to open straight filesystem file.
 	// In that event, call the original open routine first, and only if that fails
 	// we'll defer to pp2/ppex.
-	if (!parchive) {
+	if (!parchive || !*parchive) {
 #if 0
 		IllusionString archive(parchive);
 		IllusionString file(pfile);
@@ -264,6 +264,8 @@ out:
 		LOGSPAM << " size=" << std::dec << *readBytes;
 		LOGSPAM << "\r\n";
 	}
+//	if (std::wstring(pfile) == L"A00_12_00_00_00.bmp")
+//		__debugbreak();
 	return outBuffer;
 }
 

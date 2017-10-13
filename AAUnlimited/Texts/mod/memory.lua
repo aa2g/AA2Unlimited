@@ -125,7 +125,7 @@ function hook_func(addr, fixbytes, nargs, f)
 	end
 	local cb = make_callback(ff, nargs)
 	poke(addr, push(cb) .. "\xc3")
-	return orig, fixbytes
+	return fixbytes, orig
 end
 
 function callto(addr, addr2)
