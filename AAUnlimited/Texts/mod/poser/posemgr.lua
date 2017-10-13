@@ -48,7 +48,6 @@ local unmapposebutton = iup.button { title = "Unmap pose", expand = "horizontal"
 
 local function populateposelist()
 	local i = 1
-	poselist[i] = nil
 	for f in savedposes() do
 		f = f:match("^(.*)%.pose$")
 		if f then
@@ -56,8 +55,22 @@ local function populateposelist()
 			i = i + 1
 		end
 	end
+	poselist[i] = nil
 end
 populateposelist()
+
+local function populatescenelist()
+	local i = 1
+	for f in savedscenes() do
+		f = f:match("^(.*)%.scene$")
+		if f then
+			scenelist[i] = f
+			i = i + 1
+		end
+	end
+	scenelist[i] = nil
+end
+populatescenelist()
 
 function unmapposebutton.action()
 	local chr = charamgr.current 
@@ -112,8 +125,7 @@ local function table2pose(pose, character)
 	local version = pose._VERSION_ or 1
 	local clip = pose.pose
 	if clip then
-		log.spam("setting clip from pose to %d", clip)
-		setclip(clip)
+		character:setclip(clip)
 		cliptext.value = clip
 	end
 	local frame = pose.frame
@@ -237,7 +249,6 @@ local function pose2table(character)
 end
 
 local function savepose(filename)
-	autopose(filename)
 	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
@@ -256,8 +267,74 @@ function saveposebutton.action()
 	savepose(poselist.value)
 end
 
+-- == Scenes ==
+
+local function loadscene(filename)
+	assert(filename ~= "")
+	local path = aau_path(scenesdir, filename) .. ".scene"
+	log.spam("Poser: Loading scene %s", path)
+	local data = readfile(path)
+	if data then
+		local ok, scene = pcall(json.decode, data)
+		if not ok then
+			error("Error decoding scene %s data:" % filename)
+		end
+		if scene then
+			for i,loadchara in ipairs(scene.characters or {}) do
+				local chara = charamgr.characters[i]
+				if chara then
+					log.spam("table2pose")
+					table2pose(loadchara.pose, chara)
+				end
+			end
+		end
+	end
+end
+
+function loadscenebutton.action()
+	local name = scenelist.value
+	local ok, ret = pcall(loadscene, name)
+	if not ok then
+		log.error("Error loading pose %s:", name)
+		log.error(ret)
+	end
+end
+
+local function savescene(filename)
+	autopose(filename)
+	local path = aau_path(scenesdir, filename) .. ".scene"
+	log.spam("Poser: Saving scene %s to %s", filename, path)
+	local scene = {
+		VERSION = 1,
+		characters = {},
+	}
+	local characters = scene.characters
+	
+	for _,chara in ipairs(charamgr.characters) do
+		local character = {
+			pose = pose2table(chara)
+		}
+		table.insert(characters, character)
+	end
+	
+	local file = io.open(path, "w")
+	if not file then return nil end
+	file:write(json.encode(scene))
+	file:close()
+	log.spam("Poser: Scene %s saved", filename)
+	populatescenelist()
+end
+
+function savescenebutton.action()
+	savescene(scenelist.value)
+end
+
+
+-- == Pose Mapping ==
+
 function mapposebutton.action()
 	autopose(poselist.value)
+	savepose(poselist.value)
 end
 
 cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
