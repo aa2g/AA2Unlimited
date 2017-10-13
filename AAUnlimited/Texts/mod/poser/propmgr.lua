@@ -30,7 +30,7 @@ local loaded = {}
 local function walk_fixlight(f)
 	for i=0,f.m_nChildren-1 do
 		local c = f:m_children(i)
-		c:m_meshFlags(1,2)
+		c.m_meshFlagLightData = 2
 		walk_fixlight(c)
 	end
 end
