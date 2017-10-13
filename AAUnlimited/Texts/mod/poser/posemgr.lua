@@ -386,7 +386,6 @@ _M.dialogposes = iup.dialog {
 				iup.hbox { 
 					loadposebutton,
 					saveposebutton,
-					mapposebutton,
 					deleteposebutton,
 				},
 				tabtitle = "Poses"
@@ -406,8 +405,8 @@ _M.dialogposes = iup.dialog {
 			iup.hbox { 
 				iup.label { title = "Clip" },
 				cliptext,
-				iup.label { title = "Map" },
-				maptext,
+--				iup.label { title = "Map" },
+--				maptext,
 				iup.label { title = "Frame" },
 				frametext,
 				gap = 3,
@@ -415,7 +414,8 @@ _M.dialogposes = iup.dialog {
 			},
 		},
 		resetposebutton,
-		unmapposebutton,
+--		mapposebutton,
+--		unmapposebutton,
 	},
 	nmargin = "3x3",
 	maxbox = "no",
