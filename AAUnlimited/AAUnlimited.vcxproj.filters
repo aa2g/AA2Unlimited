@@ -527,5 +527,8 @@
     <None Include="Texts\mod\fader.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\hirestex.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -89,15 +89,67 @@ patches.homosex2 = {
 
 -----------------------------------------------------------------
 
+local load_res_x = parse_asm[[
+00000000  8B530C            mov edx,[ebx+0xc]
+00000003  85D2              test edx,edx
+00000005  7507              jnz 0xe
+00000007  8B5310            mov edx,[ebx+0x10]
+0000000A  85D2              test edx,edx
+0000000C  7403              jz 0x11
+0000000E  DB420C            fild dword [edx+0xc]
+00000011  90                nop
+00000012  90                nop
+00000013  90                nop
+00000014  90                nop
+00000015  90                nop
+00000016  90                nop
+00000017  90                nop
+]]
+
+
+local load_res_y = parse_asm[[
+00000000  8B530C            mov edx,[ebx+0xc]
+00000003  85D2              test edx,edx
+00000005  7507              jnz 0xe
+00000007  8B5310            mov edx,[ebx+0x10]
+0000000A  85D2              test edx,edx
+0000000C  7403              jz 0x11
+0000000E  DB4210            fild dword [edx+0x10]
+00000011  90                nop
+00000012  90                nop
+00000013  90                nop
+00000014  90                nop
+00000015  90                nop
+00000016  90                nop
+00000017  90                nop
+]]
+
+
 patches.play = {
 	-- hue onload check
 	["\x67\x01"] = {
 		0x12C0B0
 	},
+	-- dont hardcode eye resolution (128x128), copy it from bitmap instead
+--[[	["\xDB\x46\x0C\x90"] = {
+		-0x12A778,
+	},
+	["\xDB\x46\x10\x90"] = {
+		-0x12A7B8,
+	},]]
 }
 
 
 patches.edit = {
+	-- sitagi/skirt scaler
+--[[
+	-- clothing textures scaler
+	[load_res_x] = {
+		-0x12EF82,
+	},
+	[load_res_y] = {
+		-0x12EFD3,
+	},
 
 	-- dont hardcode eye resolution (128x128), copy it from bitmap instead
 	["\xDB\x46\x0C\x90"] = {
@@ -106,7 +158,7 @@ patches.edit = {
 	["\xDB\x46\x10\x90"] = {
 		-0x118CC8,
 	},
-
+]]
 	-- nop out hue check
 	["\x67\x01"] = {
 		0x0002058A,
