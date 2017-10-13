@@ -298,7 +298,6 @@ local function buildtabs() return
 			iup.vbox {
 			nmargin="8x",
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering" }),
-				gsdt("rim", iup.toggle {title = "Rim lighting" }),
 				gsdt("dynlight", iup.toggle {title = "Draw skin textures" }),
 				gsdt("outline", iup.toggle {title = "Outline shader" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer (fast)" }),

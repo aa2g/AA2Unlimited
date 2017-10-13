@@ -33,7 +33,10 @@ namespace EditInjections {
 						if (General::IsAAEdit) {
 							// TODO do this better
 							Shared::PNG::Reset();
-							AAEdit::g_currChar.Reset();
+							if (AAEdit::g_currChar.Editable()) {
+								AAEdit::g_currChar.m_cardData.Reset();
+								AAEdit::g_currChar.m_char = NULL;
+							}
 						}
 						break;
 					}
