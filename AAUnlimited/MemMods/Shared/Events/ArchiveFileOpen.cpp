@@ -264,8 +264,8 @@ out:
 		LOGSPAM << " size=" << std::dec << *readBytes;
 		LOGSPAM << "\r\n";
 	}
-	//if (std::wstring(pfile) == L"A00_40_00_00_00.tga")
-	//	__debugbreak();
+//	if (std::wstring(pfile) == L"A00_12_00_00_00.bmp")
+//		__debugbreak();
 	return outBuffer;
 }
 
