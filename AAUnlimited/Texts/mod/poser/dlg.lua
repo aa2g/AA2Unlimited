@@ -655,10 +655,10 @@ local restoreuitable = {
 		eyespin.value = v
 	end,
 	eyebrow = function(v)
-		eyebrowshapescontrols.shapecontrols[v + 1].value = "ON"
+		eyebrowshapescontrols.shapecontrols[v % 7 + 1].value = "ON"
 	end,
 	mouth = function(v)
-		mouthshapescontrols.shapecontrols[v + 1].value = "ON"
+		mouthshapescontrols.shapecontrols[v % 7 + 1].value = "ON"
 	end,
 	mouthopen = function(v)
 		mouthspin.value = v
