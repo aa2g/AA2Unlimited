@@ -301,7 +301,10 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	propmgr.loadprop(getpropfile("poser\\items\\*.xx"))
+	local selected = getpropfile("poser\\items\\*.xx")
+	if selected then
+		propmgr.loadprop(selected)
+	end
 end
 
 function removepropbutton.action()
