@@ -6,7 +6,9 @@ local _M = {}
 local signals = require "poser.signals"
 local json = require "json"
 local lists = require "poser.lists"
+local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
+local propmgr = require "poser.propmgr"
 local toggles = require "poser.toggles"
 
 local clipchanged= signals.signal()
@@ -130,7 +132,6 @@ local function table2pose(pose, character)
 	end
 	local frame = pose.frame
 	if pose.sliders then
-		log.spam("Setting sliders")
 		for k,v in pairs(pose.sliders) do
 			local slider = character:getslider(k)
 			if slider then
@@ -267,6 +268,7 @@ function saveposebutton.action()
 	savepose(poselist.value)
 end
 
+
 -- == Scenes ==
 
 local function loadscene(filename)
@@ -280,12 +282,52 @@ local function loadscene(filename)
 			error("Error decoding scene %s data:" % filename)
 		end
 		if scene then
-			for i,loadchara in ipairs(scene.characters or {}) do
+			local characters = scene.characters or {}
+			local props = scene.props or {}
+			
+			local loadedprops = {}
+			for i,v in pairs(propmgr.props) do
+				loadedprops[i] = v
+			end
+			
+			for i,readchara in ipairs(characters) do
 				local chara = charamgr.characters[i]
 				if chara then
-					log.spam("table2pose")
-					table2pose(loadchara.pose, chara)
+					table2pose(readchara.pose, chara)
 				end
+			end
+			
+			for i,readprop in ipairs(props) do
+				local find
+				for j,p in pairs(loadedprops) do
+					if p.name == readprop.name then
+						find = j
+						break
+					end
+				end
+				find = table.remove(loadedprops, find)
+				if find then
+					for k,v in pairs(readprop.sliders) do
+						local slider = find:getslider(k)
+						if slider then
+							slider:rotation(0,v[1])
+							slider:rotation(1,v[2])
+							slider:rotation(2,v[3])
+							slider:rotation(3,v[4])
+							slider:translate(0,v[5])
+							slider:translate(1,v[6])
+							slider:translate(2,v[7])
+							slider:scale(0,v[8])
+							slider:scale(1,v[9])
+							slider:scale(2,v[10])
+							slider:Apply()
+						end
+					end
+				end
+			end
+			
+			for k,v in pairs(scene.camera or {}) do
+				camera[k] = v
 			end
 		end
 	end
@@ -304,11 +346,15 @@ local function savescene(filename)
 	autopose(filename)
 	local path = aau_path(scenesdir, filename) .. ".scene"
 	log.spam("Poser: Saving scene %s to %s", filename, path)
+
+	local characters = {}
+	local props = {}
+
 	local scene = {
 		VERSION = 1,
-		characters = {},
+		characters = characters,
+		props = props,
 	}
-	local characters = scene.characters
 	
 	for _,chara in ipairs(charamgr.characters) do
 		local character = {
@@ -316,6 +362,35 @@ local function savescene(filename)
 		}
 		table.insert(characters, character)
 	end
+	
+	for _,prop in ipairs(propmgr.props) do
+		local sliders = {}
+		for k,v in prop:sliders() do
+			sliders[k] = {
+				v:rotation(0),
+				v:rotation(1),
+				v:rotation(2),
+				v:rotation(3),
+				v:translate(0),
+				v:translate(1),
+				v:translate(2),
+				v:scale(0),
+				v:scale(1),
+				v:scale(2),
+			}
+		end
+		local prop = {
+			name = prop.name,
+			sliders = sliders,
+		}
+		table.insert(props, prop)
+	end
+	
+	local c = {}
+	for _,k in ipairs(camera.keys) do
+		c[k] = camera[k]
+	end
+	scene.camera = c
 	
 	local file = io.open(path, "w")
 	if not file then return nil end

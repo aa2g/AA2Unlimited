@@ -7,8 +7,9 @@
 namespace ExtClass {
 
 class HInfo;
+class Frame;
 
-class HCamera {
+class Camera {
 public:
 	DWORD m_unknown1;
 	float m_xRotRad; //pitch
@@ -22,7 +23,7 @@ public:
 	float m_yShift;
 	float m_xShift;
 
-#define LUA_CLASS ExtClass::HCamera
+#define LUA_CLASS ExtClass::Camera
 	static inline void bindLua() {
 	LUA_BIND(m_xShift)
 	LUA_BIND(m_yShift)
@@ -35,6 +36,10 @@ public:
 	LUA_BINDARRE(m_matrix, .m[0], 16)
 	}
 #undef LUA_CLASS
+	inline static Camera* GetCamera() {
+		DWORD rule[] { (General::IsAAPlay?0x376164:0x35315C), 0x38, 0x24, 0x4, 0x198, 0 };
+		return (Camera*)ExtVars::ApplyRule(rule);
+	}
 	static void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
 	static int SetFocusBone(ExtClass::Frame* bone, double x, double y, double z, bool);
 

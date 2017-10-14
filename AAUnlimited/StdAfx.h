@@ -43,7 +43,7 @@
 #include "External/ExternalClasses/CharacterStruct.h"
 #include "External/ExternalClasses/ConversationStruct.h"
 #include "External/ExternalClasses/Frame.h"
-#include "External/ExternalClasses/HClasses/HCamera.h"
+#include "External/ExternalClasses/Camera.h"
 #include "External/ExternalClasses/HClasses/HGUIButton.h"
 #include "External/ExternalClasses/HClasses/HInfo.h"
 #include "External/ExternalClasses/HClasses/HParticipant.h"
