@@ -16,9 +16,8 @@ local roomptr
 local loaded = {}
 
 
-
--- 0x1bd is offset in struct Frame which seems to denote index into some sort of table
--- with lightning entries populated from xl files loaded prior.
+-- byte 1 of m_meshFlags denotes some sort of lightning type or slot. loaded props
+-- dont have it set, so we have to fix it manually.
 --
 -- 2 is value used by most of character frames, so we force that value for props as well.
 -- Note that character (and its xl) must be loaded for that index to be populated.
@@ -31,7 +30,7 @@ local loaded = {}
 local function walk_fixlight(f)
 	for i=0,f.m_nChildren-1 do
 		local c = f:m_children(i)
-		c.m_lightData = 2
+		c.m_meshFlagLightData = 2
 		walk_fixlight(c)
 	end
 end

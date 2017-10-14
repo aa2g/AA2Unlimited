@@ -62,13 +62,17 @@ public:
 	float m_someXXCopy; //some value copied from the xx file. usually 1
 
 	DWORD m_unkint;
-	BYTE m_renderFlag2; // used by skirt hiding - First byte of SB3U Mesh Flags
-	BYTE m_lightData; // sets up light, used by fixed light for custom props
-	BYTE m_unkflags[0x40-2];
+	union {
+		BYTE m_meshFlags[0x40];
+		struct {
+			BYTE m_meshFlagHide; // 0 show, 2 - dont show, this particular mesh only.
+			BYTE m_meshFlagLightData;
+		};
+	};
 
 	XXFile* m_xxPartOf; //xx file that this frame belongs to
 	BYTE m_unknown4[0x9]; //there are several flags here. dont know what they do. some crash if changed.
-	BYTE m_renderFlag; //0: show, 2: dont show?
+	BYTE m_renderFlag; //0: show, 2: dont show? works recursively.
 	BYTE m_unknown5[0x40EA];
 
 	inline Frame* GetChild(int n) {
@@ -113,9 +117,9 @@ public:
 		LUA_BINDARREP(m_bones,,_self->m_nBones)
 		LUA_BIND(m_xxPartOf)
 		LUA_BIND(m_renderFlag)
-		LUA_BIND(m_renderFlag2)
-		LUA_BIND(m_lightData)
-		LUA_BINDP(m_unkflags)
+		LUA_BINDARR(m_meshFlags)
+		LUA_BIND(m_meshFlagHide)
+		LUA_BIND(m_meshFlagLightData)
 		LUA_METHOD(FindFrame, {
 			Frame* child = nullptr;
 			if (_gl.top() == 2) {

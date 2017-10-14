@@ -533,5 +533,8 @@
     <None Include="Texts\mod\poser\camera.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\meshfix.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

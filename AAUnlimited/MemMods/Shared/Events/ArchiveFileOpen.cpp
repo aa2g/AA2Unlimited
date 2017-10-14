@@ -72,8 +72,9 @@ skip:
 }
 
 
-void *__stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
-	void *ret = CallOpenXX(this_, archname, pploadclass, file, a);
+ExtClass::XXFile* __stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
+	ExtClass::XXFile *ret = CallOpenXX(this_, archname, pploadclass, file, a);
+	LUA_EVENT("load_xx", ret, a)
 //	if (!wcscmp(*file, L"MP_BOYROOM_FLOOR.xx"))
 //		__debugbreak();
 	if (g_Config.bLogPPAccess & 2) {

@@ -36,18 +36,6 @@ screenshotFormat = 2
 bHAiOnNoPromptH = true				
 
 sFont = "MS Gothic"
-------------------
--- Card Options --
-------------------
-
---determines how eye files that were saved into the card data are handled.
---unlike eye textures, these can not be loaded from memory, are probably huge,
---and might be malicious, so take caution
---0: on first load, check if all files are there. If not, give a pop up
---   informing about the missing files and extract if wanted
---1: same as 0, but do not ask for permission just extract
---2: do not extract files
-savedFileUsage = 1					
 
 -- Set log level
 --0: spam
@@ -68,7 +56,7 @@ PP2Cache = 800
 
 -- MB cache memory for decompressed audio
 PP2AudioCache = 200
-PP2Buffers = 100
+PP2Buffers = 200
 PP2Profiling = true
 
 -- The modified launcher of MKIII decensor
@@ -85,6 +73,7 @@ mods = {
 	{ "aaface" },
 	{ "poser" },
 	{ "editfix" },
+	{ "hirestex" },
 	{ "unlocks" },
 	{ "fixlocale" },
 	{ "makertrans" },
