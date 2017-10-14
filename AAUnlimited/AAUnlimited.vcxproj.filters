@@ -125,6 +125,7 @@
     <ClCompile Include="MemMods\AAPlay\Events\UiEvent.cpp" />
     <ClCompile Include="Files\PNGData.cpp" />
     <ClCompile Include="External\ExternalClasses\Camera.cpp" />
+    <ClCompile Include="External\ExternalClasses\Light.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -241,6 +242,7 @@
     <ClInclude Include="External\ExternalClasses\Material.h" />
     <ClInclude Include="Files\PNGData.h" />
     <ClInclude Include="External\ExternalClasses\Camera.h" />
+    <ClInclude Include="External\ExternalClasses\Light.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

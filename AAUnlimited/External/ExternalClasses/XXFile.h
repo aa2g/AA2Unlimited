@@ -6,6 +6,7 @@
 #include "Script/ScriptLua.h"
 #include "Script/glua_stl.h"
 #include "External/ExternalClasses/Material.h"
+#include "External/ExternalClasses/Light.h"
 
 
 namespace ExtClass {
@@ -45,7 +46,19 @@ public:
 	float m_mouthOpenMax;
 	float m_mouthOpenMin;
 
-	BYTE m_unknown10[0x78];
+	BYTE m_unknown9[0x34]; // 0x2B8
+	size_t m_lightsCount; // Only the skeleton seems to have this
+	Light* m_lightsArray;
+
+	DWORD m_unknownLight; // unused?
+
+	// The whole DWORD is checked for not null for the setting to have effect
+	BYTE m_ambientLightBlue;
+	BYTE m_ambientLightGreen;
+	BYTE m_ambientLightRed;
+	BYTE m_ambientLightPadding;
+
+	BYTE m_unknown10[0x34];
 	uint32_t m_materialCount; // 0x330
 	Material* m_materialArray;
 	BYTE m_unknown11[0x1C];
@@ -77,6 +90,14 @@ public:
 			LUA_MGETTER1(FindBone);
 			LUA_MGETTER1(FindMaterial);
 			LUA_MGETTER1(Unload);
+
+			LUA_BINDARREP(m_lightsArray, , _self->m_lightsCount);
+			LUA_BIND(m_lightsCount);
+
+			LUA_BIND(m_ambientLightRed);
+			LUA_BIND(m_ambientLightGreen);
+			LUA_BIND(m_ambientLightBlue);
+			LUA_BIND(m_ambientLightPadding);
 
 			LUA_BIND(m_mouth);
 			LUA_BIND(m_eye);
