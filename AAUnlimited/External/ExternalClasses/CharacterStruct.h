@@ -15,7 +15,7 @@
 #include "Script/ScriptLua.h"
 
 namespace ExtClass {
-extern DWORD g_anim_data[25][10];
+extern bool g_anim_data[25][14];
 
 #pragma pack(push, 1)
 	/*
@@ -64,6 +64,17 @@ extern DWORD g_anim_data[25][10];
 		/* #10 */ virtual DWORD fn10();
 		/* #11 */ virtual DWORD Animate1(DWORD a, DWORD b, DWORD c);
 		/* #12 */ virtual DWORD Animate2(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f);
+		inline bool AnimateFace() {
+			DWORD fn = General::GameBase + 0x10CF20;//+ 0xFBAB0;
+			bool retv;
+			__asm {
+				mov eax, this
+				call [fn]
+				mov retv, al
+			}
+			return retv;
+		}
+
 		BYTE m_unknown4[4];
 		void *m_xxinstance1;
 		BYTE m_unknown8[8];
@@ -154,8 +165,8 @@ extern DWORD g_anim_data[25][10];
 	LUA_METHOD(SetAnimData, {
 		int seat = _self->m_seat;
 		g_anim_data[seat][0] = 1;
-		for (int i = 0; i < 9; i++) {
-			g_anim_data[seat][i + 1] = _gl.get(2 + i);
+		for (int i = 0; i < 14; i++) {
+			g_anim_data[seat][i] = _gl.get(2 + i);
 		}
 		return 0;
 	});

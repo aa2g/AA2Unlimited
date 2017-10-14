@@ -104,6 +104,26 @@ public:
 		}
 		return unload(kls, this);
 	}
+	
+	// play only
+	inline int Animate(int a2, int a3, int a4, int a5, int a6, int a7) {
+		if (!this) return -1;
+		DWORD animfn = General::GameBase + 0x201940;
+		int retv;
+		__asm {
+			mov eax, this
+			push a7
+			push a6
+			push a5
+			push a4
+			push a3
+			push a2
+			call [animfn]
+			add esp, 24
+			mov retv, eax
+		}
+		return retv;
+	}
 
 	//finds a bone belonging to this xx file in depth-first-search
 	//with a maximum depth of maxDepth (or infinity if maxDepth < 0)

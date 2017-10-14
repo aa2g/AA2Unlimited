@@ -205,7 +205,7 @@ local function updatecharacterlist()
 			cur = i
 		end
 		log.spam("Insert character %s %s", v, v.name)
-		table.insert(list, v.name)
+		table.insert(list, '#%d: %s' % {v.struct.m_seat, v.name})
 	end
 	characterlist.setlist(list)
 	characterlist.value = cur

@@ -151,7 +151,7 @@ function _M.spawn(character, clothstate, pose)
 	local slot = #spawned + 1
 	spawned[slot] = wrapper
 	wrapper.spawned = slot
-	wrapper.struct:SetAnimData(0,0,1,1,1,1,0,1,1)
+	wrapper.struct:SetAnimData(true)
 	wrapper:reload(clothstate or 1, pose or 0, slot + 1)
 	_M.is_spawning = false
 end
@@ -176,8 +176,13 @@ end
 
 
 function _M.load_xa(character, pose)
-	local pp = host_path("data", "jg2%s01_00_00.pp" % exe_type:sub(1,1))
-	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(character.struct.m_charData.m_figure)) & 0xff })
+	local pp_typ = exe_type:sub(1,1)
+	local xa_typ = exe_type == "play" and "K" or "E"
+	pp_typ = 'e'
+	xa_typ = "E"
+	local pp = host_path("data", "jg2%s01_00_00.pp" % pp_typ)
+	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { xa_typ, character.struct.m_charData.m_figure.height })
+--	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(character.struct.m_charData.m_figure)) & 0xff })
 	character.struct:LoadXA(pp, xa, pose or 0, 0, 0)
 end
 
