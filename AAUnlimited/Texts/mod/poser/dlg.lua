@@ -46,12 +46,12 @@ local framecfg = require "poser.framelist"
 local dummyslider = {}
 local dummymt = {
 	__call = function()
-		log.warn("calling dummy slider")
+		-- log.spam("calling dummy slider")
 		return dummyslider
 	end,
 	
 	__index = function()
-		log.warn("indexing dummy slider")
+		-- log.spam("indexing dummy slider")
 		return dummyslider
 	end
 }
@@ -301,7 +301,10 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	propmgr.loadprop(getpropfile("poser\\items\\*.xx"))
+	local selected = getpropfile("poser\\items\\*.xx")
+	if selected then
+		propmgr.loadprop(selected)
+	end
 end
 
 function removepropbutton.action()

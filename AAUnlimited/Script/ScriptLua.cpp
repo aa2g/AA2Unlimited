@@ -86,6 +86,8 @@ void Lua::bindLua() {
 	Material::bindLua();
 	TimeData::bindLua();
 	XXFile::bindLua();
+	Light::LightMaterial::bindLua();
+	Light::bindLua();
 
 	// Character/interaction
 	CharacterActivity::bindLua();

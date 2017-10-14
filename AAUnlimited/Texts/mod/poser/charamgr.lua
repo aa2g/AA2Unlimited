@@ -60,7 +60,6 @@ function _M.character_updated(character, data)
 	log.warn("Didn't find character to update", character)
 end
 
-local charcount = 0 -- this counts only characters spawned by the game, not us
 function _M.addcharacter(character)
 	log.spam("Poser: Add character %s", character)
 	local new
@@ -70,11 +69,7 @@ function _M.addcharacter(character)
 			break
 		end
 	end
-	log.spam("new: %s", new)
 	if not new then
-		if not _M.is_spawning then
-			charcount = charcount + 1
-		end
 		new = proxy.wrap(character, _M)
 		log.spam("Poser: new character %s", character.name)
 		new.spawned = new.spawned or false
@@ -110,9 +105,15 @@ function _M.removecharacter(character)
 	if removed.spawned then
 		spawned[removed.spawned] = nil
 	end
-	charcount = charcount - 1
-	assert(charcount >= 0)
+	
+	local charcount = 0
+	for i,v in pairs(spawned) do
+		charcount = charcount + 1
+	end
+	charcount = #characters - charcount
+	
 	log.spam("Poser: charcount %d", charcount)
+	assert(charcount >= 0)
 	-- the legit character despawned, this means the scene is ending - despawn all our injected characters, too
 	if charcount == 0 then
 		if _M.opts.prunecharacters == 1 then
@@ -145,7 +146,6 @@ end
 -- NOTE: these are separated from the proxy because we want to use those *without* the entity proxy,
 -- too. Proxy routes to these delegates via entmgr (our _M) argument.
 function _M.spawn(character, clothstate, pose)
-	_M.is_spawning = true
 	local wrapper = proxy.wrap(character, _M)
 	characters[#characters + 1] = wrapper
 	local slot = #spawned + 1
@@ -153,7 +153,6 @@ function _M.spawn(character, clothstate, pose)
 	wrapper.spawned = slot
 	wrapper.struct:SetAnimData(true)
 	wrapper:reload(clothstate or 1, pose or 0, slot + 1)
-	_M.is_spawning = false
 end
 
 function _M.despawn(character)
@@ -192,6 +191,5 @@ _M.setcurrentcharacter = setcurrentcharacter
 _M.currentcharacterchanged = currentcharacterchanged
 _M.characterschanged = characterschanged
 _M.on_character_updated = on_character_updated -- RFC: would be probably nice to distinguish signals by on_ prefix
-_M.is_spawning = false
 
 return _M

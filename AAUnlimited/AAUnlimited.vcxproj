@@ -30,6 +30,7 @@
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
     <ClCompile Include="External\ExternalClasses\Camera.cpp" />
+    <ClCompile Include="External\ExternalClasses\Light.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
+    <ClInclude Include="External\ExternalClasses\Light.h" />
     <ClInclude Include="External\ExternalClasses\LoverData.h" />
     <ClInclude Include="External\ExternalClasses\Material.h" />
     <ClInclude Include="External\ExternalClasses\TimeData.h" />

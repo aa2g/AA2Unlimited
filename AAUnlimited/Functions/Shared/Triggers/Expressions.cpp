@@ -765,6 +765,20 @@ namespace Shared {
 				return inst->m_char->m_charData->m_pregnancyRisks[dayOfCycle];
 			}
 		}
+		//int(int, int)
+		Value Thread::GetSexCompatibility(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int target = params[1].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			CharInstData* targetInst = &AAPlay::g_characters[target];
+			
+			if (!cardInst->IsValid() || !targetInst->IsValid()) {
+				return 0;
+			}
+			else {
+				return Value((int)cardInst->m_char->m_charData->m_hCompatibility[target]);
+			}
+		}
 
 		//int(int)
 		Value Thread::GetCurrentSyle(std::vector<Value>& params) {
@@ -914,7 +928,42 @@ namespace Shared {
 				return Value((int)instance->m_char->m_hStats->m_classesSkipped);
 			}
 		}
+		
+		//string(int)
+		Value Thread::GetCardLoversItem(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_charData->m_item1);
+			}
+		}
 
+		//string(int)
+		Value Thread::GetCardFriendItem(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_charData->m_item2);
+			}
+		}
+
+		//string(int)
+		Value Thread::GetCardSexualItem(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value("-");
+			}
+			else {
+				return Value(instance->m_char->m_charData->m_item3);
+			}
+		}
 
 
 		/*
@@ -1555,6 +1604,12 @@ namespace Shared {
 					{ (TYPE_INT) }, (TYPE_INT),
 					&Thread::GetStrongestMood
 				},
+				{
+					67, EXPRCAT_CHARPROP,
+					TEXT("Get H compatibility"), TEXT("%p ::Compatibility( %p )"), TEXT("Get compatibility with the selected character"),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetSexCompatibility
+				},
 			},
 
 			{ //BOOL
@@ -1960,6 +2015,24 @@ namespace Shared {
 					TEXT("First Anal Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstAnalPartner
+				},
+				{
+					17, EXPRCAT_CHARPROP,
+					TEXT("Item - Lover's"), TEXT("%p ::LoverItem"), TEXT("Returns the Lover's item"),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardLoversItem
+				},
+				{
+					18, EXPRCAT_CHARPROP,
+					TEXT("Item - Friend's"), TEXT("%p ::FriendItem"), TEXT("Returns the Friend's item"),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardFriendItem
+				},
+				{
+					19, EXPRCAT_CHARPROP,
+					TEXT("Item - Sexual"), TEXT("%p ::SexualItem"), TEXT("Returns the Sexual item"),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardSexualItem
 				},
 			}
 
