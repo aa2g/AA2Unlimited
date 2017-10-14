@@ -396,6 +396,57 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.sociability = sociability;
 		}
 
+		//int seat, string item
+		void Thread::SetCardLoversItem(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			auto item = params[1].strVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
+				item->c_str(),
+				item->size()
+			);
+		}
+
+		//int seat, string item
+		void Thread::SetCardFriendItem(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			auto item = params[1].strVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
+				item->c_str(),
+				item->size()
+			);
+		}
+
+		//int seat, string item
+		void Thread::SetCardSexualItem(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			auto item = params[1].strVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
+				item->c_str(),
+				item->size()
+			);
+		}
+
 		//int seat, string name
 		void Thread::SetCardFirstName(std::vector<Value>& params)
 		{
@@ -481,6 +532,19 @@ namespace Shared {
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.a_h_experience = experience;
+		}
+
+		//int seat, int target, int compatibility
+		void Thread::SetCardSexCompatibility(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int target = params[1].bVal;
+			int compatibility = params[2].bVal;
+			if (!AAPlay::g_characters[seat].m_char || !AAPlay::g_characters[target].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_hCompatibility[target] = compatibility % 1000;
 		}
 
 		//int seat, int newset
@@ -1038,6 +1102,30 @@ namespace Shared {
 				TEXT("Replace mood 1 with mood 2 up to strength."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::ReplaceMood
+			},
+			{
+				56, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Lover's"), TEXT("%p ::LoverItem = %p"),
+				TEXT("Rename Lover's item."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardLoversItem
+			},
+			{
+				57, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Friend's"), TEXT("%p ::FriendItem = %p"),
+				TEXT("Rename Friend's item."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardFriendItem
+			},
+			{
+				58, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Sexual"), TEXT("%p ::SexualItem = %p"),
+				TEXT("Rename Sexual item."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardSexualItem
+			},
+			{
+				59, ACTIONCAT_MODIFY_CARD, TEXT("Set H Compatibility"), TEXT("%p ::Compatibility( %p ) = %p"),
+				TEXT("Set card's H compatibility with the selected character. 0-999 values"),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardSexCompatibility
 			},
 		};
 

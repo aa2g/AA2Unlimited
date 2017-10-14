@@ -76,12 +76,16 @@ namespace Shared {
 			void SetCardStrengthValue(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
 			void SetCardSociability(std::vector<Value>& params);
+			void SetCardLoversItem(std::vector<Value>& params);
+			void SetCardFriendItem(std::vector<Value>& params);
+			void SetCardSexualItem(std::vector<Value>& params);
 			void SetCardFirstName(std::vector<Value>& params);
 			void SetCardSecondName(std::vector<Value>& params);
 			void SetCardDescription(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
 			void SetCardSexExperience(std::vector<Value>& params);
 			void SetCardAnalSexExperience(std::vector<Value>& params);
+			void SetCardSexCompatibility(std::vector<Value>& params);
 
 			void NpcMoveRoom(std::vector<Value>& params);
 			void NpcActionNoTarget(std::vector<Value>& params);
@@ -152,6 +156,7 @@ namespace Shared {
 			Value GetStrongestMood(std::vector<Value>& params); //int(int)
 			Value GetMoodStrength(std::vector<Value>& params); //int(int, int)
 			Value GetPregnancyRisk(std::vector<Value>& params); //int(int, int)
+			Value GetSexCompatibility(std::vector<Value>& params); //int(int,int)
 			Value GetCurrentSyle(std::vector<Value>& params); //int(int)
 			Value GetStyle(std::vector<Value>& params); //int(string)
 			Value GetSexExperience(std::vector<Value>& params); //bool(int)
@@ -164,6 +169,9 @@ namespace Shared {
 			Value GetCardWinCount(std::vector<Value>& params); //int(int)
 			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
 			Value GetCardSkipCount(std::vector<Value>& params); //int(int)
+			Value GetCardLoversItem(std::vector<Value>& params);	//string(int)
+			Value GetCardFriendItem(std::vector<Value>& params);	//string(int)
+			Value GetCardSexualItem(std::vector<Value>& params);	//string(int)
 
 			//basic int stuff
 			Value GetRandomInt(std::vector<Value>& params); //int(int,int)
