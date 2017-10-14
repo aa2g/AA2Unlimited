@@ -6,6 +6,7 @@ local _M = {}
 local signals = require "poser.signals"
 local json = require "json"
 local lists = require "poser.lists"
+local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
 local toggles = require "poser.toggles"
@@ -131,7 +132,6 @@ local function table2pose(pose, character)
 	end
 	local frame = pose.frame
 	if pose.sliders then
-		log.spam("Setting sliders")
 		for k,v in pairs(pose.sliders) do
 			local slider = character:getslider(k)
 			if slider then
@@ -293,7 +293,6 @@ local function loadscene(filename)
 			for i,readchara in ipairs(characters) do
 				local chara = charamgr.characters[i]
 				if chara then
-					log.spam("table2pose")
 					table2pose(readchara.pose, chara)
 				end
 			end
@@ -325,6 +324,10 @@ local function loadscene(filename)
 						end
 					end
 				end
+			end
+			
+			for k,v in pairs(scene.camera or {}) do
+				camera[k] = v
 			end
 		end
 	end
@@ -382,6 +385,12 @@ local function savescene(filename)
 		}
 		table.insert(props, prop)
 	end
+	
+	local c = {}
+	for _,k in ipairs(camera.keys) do
+		c[k] = camera[k]
+	end
+	scene.camera = c
 	
 	local file = io.open(path, "w")
 	if not file then return nil end

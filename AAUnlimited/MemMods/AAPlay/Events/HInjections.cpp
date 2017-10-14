@@ -60,7 +60,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		}
 	}
 
-	ExtClass::HCamera::PostTick(hInfo,contScene);
+	ExtClass::Camera::PostTick(hInfo,contScene);
 	if (contScene && !loc_HStartEventFired) {
 		Poser::StartEvent(Poser::HScene);
 		loc_HStartEventFired = true;

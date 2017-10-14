@@ -29,7 +29,7 @@
   <ItemGroup>
     <ClCompile Include="External\ExternalClasses\CharacterActivity.cpp" />
     <ClCompile Include="External\ExternalClasses\CharacterRelation.cpp" />
-    <ClCompile Include="External\ExternalClasses\HClasses\HCamera.cpp" />
+    <ClCompile Include="External\ExternalClasses\Camera.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFile.cpp" />
     <ClCompile Include="External\ExternalClasses\XXFileFace.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\RefreshTable.cpp" />
@@ -135,7 +135,7 @@
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
-    <ClInclude Include="External\ExternalClasses\HClasses\HCamera.h" />
+    <ClInclude Include="External\ExternalClasses\Camera.h" />
     <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
@@ -322,6 +322,7 @@
     <None Include="Texts\mod\pl\url.lua" />
     <None Include="Texts\mod\pl\utils.lua" />
     <None Include="Texts\mod\pl\xml.lua" />
+    <None Include="Texts\mod\poser\camera.lua" />
     <None Include="Texts\mod\poser\charamgr.lua" />
     <None Include="Texts\mod\poser\dlg.lua" />
     <None Include="Texts\mod\poser\fileutils.lua" />

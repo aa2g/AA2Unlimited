@@ -101,7 +101,7 @@ void Lua::bindLua() {
 	PlayInjections::NpcActions::AnswerStruct::bindLua();
 
 	// H
-	HCamera::bindLua();
+	Camera::bindLua();
 	HGUIButton::bindLua();
 	HInfo::bindLua();
 	HParticipant::bindLua();
@@ -264,8 +264,12 @@ void Lua::bindLua() {
 		Shared::Triggers::SafeAddCardPoints(s.get(1), s.get(2), s.get(3), s.get(4));
 	});
 
+	_BINDING["GetCamera"] = LUA_LAMBDA({
+		s.push(Camera::GetCamera());
+	});
+
 	_BINDING["SetFocusBone"] = LUA_LAMBDA0({
-		HCamera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
+		Camera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
 	});
 
 	_BINDING["SetClassJSONData"] = LUA_LAMBDA({
