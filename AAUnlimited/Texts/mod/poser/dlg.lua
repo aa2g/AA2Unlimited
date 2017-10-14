@@ -46,12 +46,12 @@ local framecfg = require "poser.framelist"
 local dummyslider = {}
 local dummymt = {
 	__call = function()
-		log.warn("calling dummy slider")
+		-- log.spam("calling dummy slider")
 		return dummyslider
 	end,
 	
 	__index = function()
-		log.warn("indexing dummy slider")
+		-- log.spam("indexing dummy slider")
 		return dummyslider
 	end
 }
