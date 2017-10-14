@@ -37,7 +37,7 @@ public:
 	}
 #undef LUA_CLASS
 	inline static Camera* GetCamera() {
-		const static DWORD rule[]{ 0x376164, 0x38, 0x24, 0x4, 0x198, 0 };
+		DWORD rule[] { (General::IsAAPlay?0x376164:0x35315C), 0x38, 0x24, 0x4, 0x198, 0 };
 		return (Camera*)ExtVars::ApplyRule(rule);
 	}
 	static void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
