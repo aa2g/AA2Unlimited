@@ -56,7 +56,7 @@ local vtaddr
 local backup
 
 local exempts = {
---	[11]=true,
+	[11]=true,
 	[12]=true,
 	[20]=true,
 }
@@ -77,7 +77,7 @@ function _M:load()
 			local argstr = table.concat(artab, ",")
 			if (not exempts[i]) and artab[3] ~= 768 then
 				log.info("female vtable %x.%s(%s) " % {this,(names[i+1] or "" ).."#"..i, argstr})
-			elseif false then
+			elseif true then
 				local f = "vtable#%d(%x,%s)" % {i, this, argstr}
 				if not ticks[f] then
 					ticks[f] = 0
@@ -87,13 +87,6 @@ function _M:load()
 					last = os.time() + 1
 					print(p(ticks))
 				end
-			end
-			if i == 11 and artab[1] == 0 and artab[3] == 1 then
-				log.info("skipping artab!")
-				return 0
-			end
-			if i == 12 then
-				return 0
 			end
 			if i == 9 then
 --				log.info('-> vtcall(GetPlayerCharacter(), 9, utf8_to_unicode(%q), utf8_to_unicode(%q), %d,0,0)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])

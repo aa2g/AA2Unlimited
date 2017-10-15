@@ -15,7 +15,7 @@
 #include "Script/ScriptLua.h"
 
 namespace ExtClass {
-extern bool g_anim_data[25][14];
+extern BYTE g_anim_data[25][6];
 
 #pragma pack(push, 1)
 	/*
@@ -63,7 +63,7 @@ extern bool g_anim_data[25][14];
 		/* #9 */ virtual DWORD LoadXA(const wchar_t *pp, const wchar_t *xa, int pose, int z0, int z1);
 		/* #10 */ virtual DWORD fn10();
 		/* #11 */ virtual DWORD Animate1(DWORD a, DWORD b, DWORD c);
-		/* #12 */ virtual DWORD Animate2(DWORD a, DWORD b, DWORD c, DWORD d, DWORD e, DWORD f);
+		/* #12 */ virtual DWORD Animate2(DWORD a, void *b, DWORD c, DWORD d, DWORD e, DWORD f);
 		inline bool AnimateFace() {
 			DWORD fn = General::GameBase + 0x10CF20;//+ 0xFBAB0;
 			bool retv;
@@ -82,7 +82,7 @@ extern bool g_anim_data[25][14];
 		BYTE m_unknown18[0x10];
 		CharacterData* m_charData; // 0x28
 		void* m_somePointer; // 0x2c
-		void* m_somePointer2;
+		void* m_charPos;
 		void* m_somePointer3;
 		int m_materialSlot;
 		int m_seat; //seat number; from top to bottom, right to left, zero based, teacher is exception and 24 //3c
@@ -164,15 +164,13 @@ extern bool g_anim_data[25][14];
 	});
 	LUA_METHOD(SetAnimData, {
 		int seat = _self->m_seat;
-		g_anim_data[seat][0] = 1;
-		for (int i = 0; i < 14; i++) {
+		for (int i = 0; i < 6; i++)
 			g_anim_data[seat][i] = _gl.get(2 + i);
-		}
 		return 0;
 	});
 
 	LUA_BIND(m_somePointer)
-	LUA_BIND(m_somePointer2)
+	LUA_BIND(m_charPos)
 	LUA_BIND(m_somePointer3)
 	LUA_BIND(m_materialSlot)
 	LUA_BIND(m_charData)

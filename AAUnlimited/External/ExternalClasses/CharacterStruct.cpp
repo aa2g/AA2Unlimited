@@ -1,18 +1,23 @@
 #include "StdAfx.h"
 namespace ExtClass {
-bool g_anim_data[25][14];
+// b entry
+// b anim skeleton
+// b b anim body 1
+// anim1(b,b) // 1 1
+// anim2(b,b,b,b) // 1 1 1 1
+BYTE g_anim_data[25][6];
+D3DMATRIX mtx[25];
 void CharacterStruct::ApplyAnimData() {
 	if (!General::IsAAPlay) return;
 
 
 	for (int i = 0; i < 25; i++) {
-		bool *d = &g_anim_data[i][0];
-		if (d[0] && AAPlay::g_characters[i].IsValid()) {
-			auto ch = AAPlay::g_characters[i].m_char;
-			ch->m_xxSkeleton->Animate(d[1], d[2], d[3], d[4], d[5], d[6]);
-			ch->m_xxBody->Animate(d[7], d[8], d[9], d[10], d[11], d[12]);
-			if (!d[13])
-				ch->AnimateFace();
+		BYTE *e = &g_anim_data[i][0];
+		if (e[0] && AAPlay::g_characters[i].IsValid()) {
+			auto ch = AAPlay::g_characters[i].m_char;				
+			if (e[1]) ch->m_xxSkeleton->Animate(0, 0, 0, 0, 0, 0);
+			ch->Animate2(0, NULL, 1, 1, e[2], e[3]);
+			ch->Animate1(0, e[4], e[5]);
 		}
 	}
 }

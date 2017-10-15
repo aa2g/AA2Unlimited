@@ -151,7 +151,7 @@ function _M.spawn(character, clothstate, pose)
 	local slot = #spawned + 1
 	spawned[slot] = wrapper
 	wrapper.spawned = slot
-	wrapper.struct:SetAnimData(true)
+	wrapper.struct:SetAnimData(1,1,1,1,1,1)
 	wrapper:reload(clothstate or 1, pose or 0, slot + 1)
 end
 
