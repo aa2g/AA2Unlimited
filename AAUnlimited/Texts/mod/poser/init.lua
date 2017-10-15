@@ -19,7 +19,7 @@ local opts = {
 	{"autofocus", 1, "Window auto-focus: %b"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
-	{"hairfix", 1, "Enable spawned hair physics: %b"}
+	{"hairfix", 0, "Spawned hair physics (BREAKS HEADS SIZES!): %b"}
 }
 
 
