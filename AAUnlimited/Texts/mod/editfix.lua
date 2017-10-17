@@ -8,6 +8,11 @@ local GEN_PNG = 0x12 -- alt key
 
 local CARD_OPTIONS = 0x11 -- ctrlkey
 
+local opts = {
+	{ "face", 1, "Generate face on save: %b" },
+	{ "roster", 1, "Generate roster on save: %b"},
+}
+
 
 local _M = {}
 
@@ -94,7 +99,21 @@ function on.pre_save_card(char,outbufp,outlenp)
 	local facesz = cd.m_pngBufferSize
 	local rosterptr = fixptr(cd.m_pngRosterBuffer)
 	local rostersz = cd.m_pngRosterBufferSize
-	if not is_key_pressed(CARD_OPTIONS) then return end
+
+
+	if not is_key_pressed(CARD_OPTIONS) then
+		if opts.face == 1 then
+			free(faceptr)
+			cd.m_pngBuffer = 0
+		end
+
+		if opts.roster == 1 then
+			free(rosterpng)
+			cd.m_pngRosterBuffer = 0
+		end
+
+		return
+	end
 	local chname = sjis_to_utf8(string.format("%s %s", cd.m_forename, cd.m_surname))
 	local ok, rainbow, club, face, roster,
 		currpose, vres, facebg, rosterbg, genface, genroster = iup.GetParam("Card saving options for '%s'" % chname, nil, [[
@@ -111,7 +130,7 @@ Roster background %f[OPEN|*.bmp|YES|NO]
 Render face %b]
 Render roster %b]
 ]], cd:m_traitBools(38), cd.m_club, keep, keep,
-1, "200x300", gdef, gdef, 0, 0)
+1, "200x300", gdef, gdef, opts.face, opts.roster)
 
 	if not ok then return end
 	log("tweaking card save path")
@@ -183,6 +202,8 @@ local function select_eye(dir,field)
 end
 
 function _M:load()
+	mod_load_config(self, opts)
+
 	_M.patcher = patcher()
 	local p = _M.patcher
 	require "iuplua"
@@ -322,6 +343,10 @@ end
 
 function _M:unload()
 	_M.patcher:unload()
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Editfix options")
 end
 
 
