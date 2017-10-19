@@ -277,6 +277,12 @@ extern BYTE g_anim_data[25][6];
 		case TONGUE:
 			return m_xxTounge;
 			break;
+		case SKIRT:
+			return m_xxSkirt;
+			break;
+		case LEGS:
+			return m_xxLegs;
+			break;
 
 		default:
 			return NULL;
