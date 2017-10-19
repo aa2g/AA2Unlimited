@@ -142,7 +142,7 @@ namespace Shared {
 	/* body modifications */
 	/**********************/
 
-	std::vector<std::pair<ExtClass::Frame*,D3DMATRIX>> g_xxMods[ExtClass::CharacterStruct::N_MODELS];
+	std::vector<Loc_FrameSaveDataV1> g_xxMods[ExtClass::CharacterStruct::N_MODELS];
 	std::vector<Loc_BoneSaveDataV2> g_xxBoneParents[ExtClass::CharacterStruct::N_MODELS];
 	void XXFileModification(ExtClass::XXFile* xxFile, bool saveMods) {
 		using namespace ExtClass;
@@ -245,10 +245,11 @@ namespace Shared {
 						}
 					}
 					if (makeSave) {
-						std::pair<ExtClass::Frame*,D3DMATRIX> p1;
-						D3DMATRIX str = { scales.x, scales.y, scales.z, 0, vecRot.x, vecRot.y, vecRot.z, 0, trans.x, trans.y, trans.z, 0 };
-						p1 = std::make_pair(bone,std::move(str));
-						g_xxMods[model].push_back(std::move(p1));
+						Loc_FrameSaveDataV1 data;
+						data.xxFile = xxFile;
+						data.frame = bone;
+						data.matrix = { scales.x, scales.y, scales.z, 0, vecRot.x, vecRot.y, vecRot.z, 0, trans.x, trans.y, trans.z, 0 };
+						g_xxMods[model].push_back(data);
 					}
 					if (smatch && sit != smatch->end()) {
 						for (auto mod : sit->second) {
@@ -349,7 +350,7 @@ namespace Shared {
 							for(auto& elem : g_xxBoneParents[model]) {
 								if(elem.boneName == name) {
 									added = true;
-									elem.parents.push_back(frame);
+									elem.parents.push_back(std::make_pair(xxFile, frame));
 									break;
 								}
 							}
@@ -359,7 +360,7 @@ namespace Shared {
 								data.srtMatrix = str;
 								data.origMatrix = bone->m_matrix;
 								data.boneName = name;
-								data.parents.push_back(frame);
+								data.parents.push_back(std::make_pair(xxFile, frame));
 								g_xxBoneParents[model].push_back(data);
 							}
 						}

@@ -1794,7 +1794,10 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 		if(m_sliders[index].currVal == slider->GetNeutralValue()) {
 			if(slider->flags & AAUCardData::MODIFY_FRAME) {
 				for (auto& elem : Shared::g_xxMods[slider->target]) {
-					ExtClass::Frame* frame = elem.first;
+					ExtClass::XXFile* loadedXXFile = ExtVars::AAEdit::GetCurrentCharacter()->GetXXFile(slider->target);
+					if (elem.xxFile != loadedXXFile)
+						continue;
+					ExtClass::Frame* frame = elem.frame;
 					if (!frame->m_name)
 						continue;
 					TCHAR buff[256];
@@ -1812,9 +1815,12 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 				for (auto& elem : Shared::g_xxBoneParents[slider->target]) {
 					std::string mbBoneName(elem.boneName.begin(),elem.boneName.end());
 					if (elem.boneName == slider->boneName) {
-						for(auto& frameParents : elem.parents) {
-							for(int i = 0; i < frameParents->m_nBones; i++) {
-								ExtClass::Bone* bone = &frameParents->m_bones[i];
+						for(auto& frameParent : elem.parents) {
+							ExtClass::XXFile* loadedXXFile = ExtVars::AAEdit::GetCurrentCharacter()->GetXXFile(slider->target);
+							if (frameParent.first != loadedXXFile)
+								continue;
+							for(int i = 0; i < frameParent.second->m_nBones; i++) {
+								ExtClass::Bone* bone = &frameParent.second->m_bones[i];
 								if(bone->m_name == mbBoneName) {
 									bone->m_matrix = elem.origMatrix;
 									break;
@@ -1832,7 +1838,10 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 
 	for (ExtClass::CharacterStruct::Models model : renewFiles) {
 		for(auto& elem : Shared::g_xxMods[model]) {
-			ExtClass::Frame* frame = (ExtClass::Frame*)elem.first;
+			ExtClass::XXFile* loadedXXFile = ExtVars::AAEdit::GetCurrentCharacter()->GetXXFile(model);
+			if (elem.xxFile != loadedXXFile)
+				continue;
+			ExtClass::Frame* frame = elem.frame;
 			if (!frame->m_name)
 				continue;
 			TCHAR buff[256];
@@ -1841,7 +1850,7 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			std::wstring str(buff);
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
 			if(rule != NULL) {
-				D3DMATRIX& mat = elem.second;
+				D3DMATRIX& mat = elem.matrix;
 				D3DXVECTOR3 scale = { mat._11, mat._12, mat._13 };
 				D3DXVECTOR3 rot = { mat._21, mat._22, mat._23 };
 				D3DXVECTOR3 trans = { mat._31, mat._32, mat._33 };
@@ -1854,10 +1863,15 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 			}
 		}
 		for (auto& elem : Shared::g_xxBoneParents[model]) {
+			ExtClass::XXFile* loadedXXFile = ExtVars::AAEdit::GetCurrentCharacter()->GetXXFile(model);
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,elem.boneName);
 			if(rule != NULL) {
 				std::string strBoneName(elem.boneName.begin(), elem.boneName.end());
-				for(auto* frame : elem.parents) {
+				ExtClass::Frame* frame;
+				for(auto& parent : elem.parents) {
+					if (parent.first != loadedXXFile)
+						continue;
+					frame = parent.second;
 					for(int i = 0; i < frame->m_nBones; i++) {
 						ExtClass::Bone* bone = &frame->m_bones[i];
 						if(bone->m_name == strBoneName) {
