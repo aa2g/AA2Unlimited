@@ -1778,7 +1778,6 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 		//every character has a skeleton, and the current character is only filled in the editor (previews dont count). therefor,
 		//if neither is true, we are not currently editing a valid model
 		for(int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
-			Shared::g_xxBoneMods[i].clear();
 			Shared::g_xxBoneParents[i].clear();
 			Shared::g_xxMods[i].clear();
 		}
@@ -1877,32 +1876,6 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 				}
 			}
 		}
-		/*for(auto& elem : Shared::g_xxBoneMods[model]) {
-			for(auto& savedBone : elem.bones) {
-				ExtClass::Bone* bone = savedBone.ptr;
-				if (bone->m_name == NULL) {
-					LOGPRIO(Logger::Priority::WARN) << "bone name is NULL for some reason\r\n";
-					continue;
-				}
-				TCHAR buff[256];
-				size_t written;
-				mbstowcs_s(&written,buff,bone->m_name,256);
-				std::wstring str(buff);
-				auto* rule = Shared::g_currentChar->m_cardData.GetSliderBoneRule(model,str);
-				if (rule != NULL) {
-					D3DMATRIX& mat = elem.srtMatrix;
-					D3DMATRIX& origMat = elem.origMatrix;
-					D3DVECTOR3 scale = { mat._11, mat._12, mat._13 };
-					D3DVECTOR3 rot = { mat._21, mat._22, mat._23 };
-					D3DVECTOR3 trans = { mat._31, mat._32, mat._33 };
-					for (auto& elem : *rule) {
-						Shared::Slider::ModifySRT(&scale,&rot,&trans,elem.first->op,elem.second);
-					}
-					auto res = General::MatrixFromSRT(scale,rot,trans);
-					(*Shared::D3DXMatrixMultiply)(&bone->m_matrix,&res,&origMat);
-				}
-			}
-		}*/
 	}
 
 	if(faceSliderRenew) {

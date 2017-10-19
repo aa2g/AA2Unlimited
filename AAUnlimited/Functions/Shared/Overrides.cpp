@@ -378,7 +378,6 @@ namespace Shared {
 	}
 
 
-	std::vector<Loc_BoneSaveData> g_xxBoneMods[ExtClass::CharacterStruct::N_MODELS];
 	void XXBoneModification(ExtClass::Frame* boneParent,bool saveMods) {
 		using namespace ExtClass;
 		if (!Shared::GameState::getIsOverriding()) return;
@@ -455,56 +454,6 @@ namespace Shared {
 					for (auto mod : mit->second) {
 						Shared::Slider::ModifySRT(&scales,&vecRot,&trans,Shared::Slider::ADD,mod);
 					}
-				}
-				if (makeSave) {
-					//save this bone in the global struct for the gui to access
-					D3DMATRIX str = { scales.x, scales.y, scales.z, 0, vecRot.x, vecRot.y, vecRot.z, 0, trans.x, trans.y, trans.z, 0 };
-					//search for the bone first
-					int foundIndex;
-					for (foundIndex = 0; foundIndex < g_xxBoneMods[model].size(); foundIndex++) {
-						auto& elem = g_xxBoneMods[model][foundIndex];
-						if(elem.name == name) {
-							//bone name known; search for this bone specifically
-							bool boneReplaced = false;
-							for(auto savedBone : elem.bones) {
-								if(savedBone.meshParentName == frameName && savedBone.parent != boneParent) {
-									//found this bone specifically. that means we reread this mesh
-									/*for(int i = 0; i < g_xxBoneMods[model].size(); i++) {
-										auto& boneVec = g_xxBoneMods[model][i].bones;
-										for(int j = 0; j < boneVec.size(); j++) {
-											auto& bone = boneVec[j];
-											if(bone.meshParentName == frameName) {
-												boneVec.erase(boneVec.begin() + j);
-												j--;
-											}
-										}
-										if(boneVec.size() == 0) {
-											g_xxBoneMods[model].erase(g_xxBoneMods[model].begin() + i);
-											i--;
-											foundIndex = -1;
-										}
-									}*/
-									foundIndex = 0;
-									g_xxBoneMods[model].clear();
-									break;
-								}
-							}
-							break;
-						}
-					}
-					if(foundIndex == g_xxBoneMods[model].size() || foundIndex < 0) {
-						Loc_BoneSaveData data;
-						data.name = name;
-						data.origMatrix = bone->m_matrix;
-						data.srtMatrix = str;
-						data.bones.push_back({ frameName, frame, bone });
-						g_xxBoneMods[model].push_back(data);
-					}
-					else {
-						g_xxBoneMods[model][foundIndex].bones.push_back({ frameName, frame, bone });
-					}
-					
-					
 				}
 				if (smatch && sit != smatch->end()) {
 					for (auto mod : sit->second) {
