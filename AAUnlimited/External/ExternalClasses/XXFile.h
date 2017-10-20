@@ -22,7 +22,8 @@ class XXFile
 public:
 	DWORD m_unknown;
 	char m_name[0x200];
-	BYTE m_unknown2[0x8];
+	BYTE m_unknown2[0x4];
+	Frame* m_attachmentFramePrev; // no clear function, but used when attaching xx files. root of the parent?
 	Frame* m_attachmentFrame; // 0x20C
 	BYTE m_unknown3[0x8];
 	Frame* m_root; // 0x218
@@ -80,6 +81,7 @@ public:
 #define LUA_CLASS ExtClass::XXFile
 			LUA_NAME;
 			LUA_BINDSTR(m_name)
+			LUA_BIND(m_attachmentFramePrev);
 			LUA_BIND(m_attachmentFrame);
 			LUA_BIND(m_root);
 			LUA_BINDARREP(m_animArray, , _self->m_animArraySize);
