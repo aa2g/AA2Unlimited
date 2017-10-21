@@ -88,6 +88,11 @@ local _M = {
 		GLASSES = 12,
 		H3DROOM = 13,
 
+		LB_SETCURSEL = 0x186,
+		LB_ADDSTRING = 0x180,
+		TBM_SETRANGEMAX = 0x408,
+		EM_SETLIMITTEXT = 0xc5,
+
 }
 
 return _M

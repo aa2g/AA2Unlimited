@@ -32,6 +32,9 @@
     <Filter Include="Lua\pl">
       <UniqueIdentifier>{fc673826-81e7-4924-84cc-c00b7e904890}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua\edit">
+      <UniqueIdentifier>{e7df2fc0-9757-4e6e-87b9-f9a138235b7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -505,9 +508,6 @@
     <None Include="Texts\mod\poser\propmgr.lua">
       <Filter>Lua\poser</Filter>
     </None>
-    <None Include="Texts\mod\editfix.lua">
-      <Filter>Lua</Filter>
-    </None>
     <None Include="Texts\mod\poser\proxy.lua">
       <Filter>Lua\poser</Filter>
     </None>
@@ -537,6 +537,18 @@
     </None>
     <None Include="Texts\mod\meshfix.lua">
       <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\edit\init.lua">
+      <Filter>Lua\edit</Filter>
+    </None>
+    <None Include="Texts\mod\edit\snowflake.lua">
+      <Filter>Lua\edit</Filter>
+    </None>
+    <None Include="Texts\mod\edit\eyeselect.lua">
+      <Filter>Lua\edit</Filter>
+    </None>
+    <None Include="Texts\mod\edit\sliders.lua">
+      <Filter>Lua\edit</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -72,7 +72,7 @@ bListFilenames = false
 mods = {
 	{ "aaface" },
 	{ "poser" },
-	{ "editfix" },
+	{ "edit" },
 	{ "hirestex" },
 	{ "unlocks" },
 	{ "fixlocale" },

@@ -261,7 +261,10 @@
     <None Include="Texts\mod\com.lua" />
     <None Include="Texts\mod\const.lua" />
     <None Include="Texts\mod\dx.lua" />
-    <None Include="Texts\mod\editfix.lua" />
+    <None Include="Texts\mod\edit\eyeselect.lua" />
+    <None Include="Texts\mod\edit\init.lua" />
+    <None Include="Texts\mod\edit\sliders.lua" />
+    <None Include="Texts\mod\edit\snowflake.lua" />
     <None Include="Texts\mod\extsave.lua" />
     <None Include="Texts\mod\fader.lua" />
     <None Include="Texts\mod\font.lua" />

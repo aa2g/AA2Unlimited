@@ -49,3 +49,10 @@ end
 function sjis_to_utf8(text)
 	return unicode_to_utf8(sjis_to_unicode(text))
 end
+
+function illusion_string(s)
+	local buf, slen = cp_strdup(65001, s, 16)
+	local meta = buf-16
+	poke(meta, string.pack("<IIII", GameBase + 0x36f638, slen, 2048, 999))
+	return buf
+end
