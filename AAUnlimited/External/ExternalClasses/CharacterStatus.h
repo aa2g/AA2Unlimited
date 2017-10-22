@@ -5,13 +5,16 @@
 
 namespace ExtClass {
 
+class NpcStatus;
 
 #pragma pack(push, 1)
 
-class HStatistics {
+class CharacterStatus {
 public:
-	BYTE m_unknown[0x1DC];
-	DWORD m_victoryCount;
+	BYTE m_unknown0[0x28];
+	NpcStatus* m_npcStatus; //28
+	BYTE m_unknown1[0x1B0]; //from TAA2: pointers to meet, date and lewd promises
+	DWORD m_victoryCount; //1DC
 	DWORD m_classesSkipped;
 	DWORD m_winningOverSomeoneCount;
 	DWORD m_partnerCount;
@@ -36,8 +39,9 @@ public:
 	DWORD m_cumInAnal[25];
 	DWORD m_cumSwallowed[25];
 
-#define LUA_CLASS HStatistics
+#define LUA_CLASS ExtClass::CharacterStatus
 	static inline void bindLua() {
+		LUA_NAME;
 		LUA_BIND(m_victoryCount)
 		LUA_BIND(m_classesSkipped)
 		LUA_BIND(m_winningOverSomeoneCount)
@@ -46,7 +50,7 @@ public:
 		LUA_BIND(m_academicGrade)
 		LUA_BIND(m_sportGrade)
 		LUA_BIND(m_clubGrade)
-
+		LUA_BIND(m_npcStatus)
 		// TODO check these are actually strings
 		LUA_BINDSTR(m_firstHPartner)
 		LUA_BINDSTR(m_firstAnalPartner)
@@ -65,8 +69,8 @@ public:
 	}
 #undef LUA_CLASS
 
-	HStatistics() = delete;
-	~HStatistics() = delete;
+	CharacterStatus() = delete;
+	~CharacterStatus() = delete;
 };
 
 #pragma pack(pop)

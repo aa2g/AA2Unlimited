@@ -99,6 +99,9 @@ void Lua::bindLua() {
 	PcConversationStruct::bindLua();
 	CharInstData::ActionParamStruct::bindLua();
 	CharInstData::bindLua();
+	CharacterStatus::bindLua();
+	NpcData::bindLua();
+	NpcStatus::bindLua();
 
 	PlayInjections::NpcActions::AnswerStruct::bindLua();
 
@@ -108,7 +111,6 @@ void Lua::bindLua() {
 	HInfo::bindLua();
 	HParticipant::bindLua();
 	HPosButtonList::bindLua();
-	HStatistics::bindLua();
 
 	Poser::bindLua();
 	Poser::PoserController::PoserCharacter::bindLua();

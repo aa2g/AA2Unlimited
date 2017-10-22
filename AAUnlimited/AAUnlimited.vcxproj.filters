@@ -222,7 +222,6 @@
     <ClInclude Include="Functions\Serialize.h" />
     <ClInclude Include="Files\ModuleFile.h" />
     <ClInclude Include="Functions\Shared\Triggers\Module.h" />
-    <ClInclude Include="External\ExternalClasses\HStatistics.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterNpcAiData.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ScreenCapture.h" />
@@ -246,6 +245,9 @@
     <ClInclude Include="Files\PNGData.h" />
     <ClInclude Include="External\ExternalClasses\Camera.h" />
     <ClInclude Include="External\ExternalClasses\Light.h" />
+    <ClInclude Include="External\ExternalClasses\NpcStatus.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterStatus.h" />
+    <ClInclude Include="External\ExternalClasses\NpcData.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

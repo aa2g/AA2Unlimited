@@ -517,7 +517,7 @@ namespace Shared {
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(0);
 
-			return Value((int)cardInst->m_char->m_hStats->m_partnerCount);
+			return Value((int)cardInst->m_char->m_characterStatus->m_partnerCount);
 
 		}
 
@@ -854,7 +854,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value(instance->m_char->m_hStats->m_latestHPartner);
+				return Value(instance->m_char->m_characterStatus->m_latestHPartner);
 			}
 		}
 		//string(int)
@@ -865,7 +865,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value(instance->m_char->m_hStats->m_firstHPartner);
+				return Value(instance->m_char->m_characterStatus->m_firstHPartner);
 			}
 		}
 
@@ -877,7 +877,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value(instance->m_char->m_hStats->m_firstAnalPartner);
+				return Value(instance->m_char->m_characterStatus->m_firstAnalPartner);
 			}
 		}
 
@@ -889,7 +889,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value((int)instance->m_char->m_hStats->m_rejectCount);
+				return Value((int)instance->m_char->m_characterStatus->m_rejectCount);
 			}
 		}
 
@@ -901,7 +901,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value((int)instance->m_char->m_hStats->m_winningOverSomeoneCount);
+				return Value((int)instance->m_char->m_characterStatus->m_winningOverSomeoneCount);
 			}
 		}
 
@@ -913,7 +913,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value((int)instance->m_char->m_hStats->m_victoryCount);
+				return Value((int)instance->m_char->m_characterStatus->m_victoryCount);
 			}
 		}
 
@@ -925,7 +925,7 @@ namespace Shared {
 				return Value("-");
 			}
 			else {
-				return Value((int)instance->m_char->m_hStats->m_classesSkipped);
+				return Value((int)instance->m_char->m_characterStatus->m_classesSkipped);
 			}
 		}
 		

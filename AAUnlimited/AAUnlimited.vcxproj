@@ -137,12 +137,14 @@
     <ClInclude Include="External\ExternalClasses\CharacterNpcReactData.h" />
     <ClInclude Include="External\ExternalClasses\CharacterRelation.h" />
     <ClInclude Include="External\ExternalClasses\Camera.h" />
-    <ClInclude Include="External\ExternalClasses\HStatistics.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterStatus.h" />
     <ClInclude Include="External\ExternalClasses\IllusionArray.h" />
     <ClInclude Include="External\ExternalClasses\Keyframe.h" />
     <ClInclude Include="External\ExternalClasses\Light.h" />
     <ClInclude Include="External\ExternalClasses\LoverData.h" />
     <ClInclude Include="External\ExternalClasses\Material.h" />
+    <ClInclude Include="External\ExternalClasses\NpcData.h" />
+    <ClInclude Include="External\ExternalClasses\NpcStatus.h" />
     <ClInclude Include="External\ExternalClasses\TimeData.h" />
     <ClInclude Include="External\ExternalClasses\XXFileFace.h" />
     <ClInclude Include="External\ExternalVariables\AAEdit\RefreshTable.h" />

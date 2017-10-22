@@ -9,7 +9,8 @@
 #include "Frame.h"
 #include "CharacterData.h"
 #include "CharacterActivity.h"
-#include "HStatistics.h"
+#include "CharacterStatus.h"
+#include "NpcData.h"
 #include "XXFile.h"
 #include "XXFileFace.h"
 #include "Script/ScriptLua.h"
@@ -114,12 +115,14 @@ extern BYTE g_anim_data[25][6];
 		Frame** m_bonePtrArrayEnd; //(exclusive, not part of array anymore)
 		BYTE m_unknown7[0xD78];
 		BYTE m_lovers[0x19];	//array of lovers, by seat	//F20
-		BYTE m_unknown7_1[0x23];
-		void* m_somedata;
+		BYTE m_daysLovers[0x19];
+		BYTE m_unknown7_1[0x6];
+		NpcData* m_npcData;
+		void* m_somedata; //F5C
 		void* m_moreUnknownData;
 		void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
 		void* m_evenMoreData;	//m_evenMoreData+0x30 is pointer to moods array1; m_evenMoreData+0x40 is pointer to moods array2	  //F68
-		HStatistics* m_hStats;
+		CharacterStatus* m_characterStatus; //F6C
 		BYTE m_unknown9[0x4];
 		void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
 		BYTE m_unknown10[0x4];
@@ -189,7 +192,8 @@ extern BYTE g_anim_data[25][6];
 	LUA_BIND(m_xxLegs)
 	LUA_BIND(m_xxSkirt)
 	LUA_BINDARRE(m_bonePtrArray,,_self->m_bonePtrArrayEnd-_self->m_bonePtrArray)
-	LUA_BIND(m_hStats)
+	LUA_BIND(m_characterStatus)
+	LUA_BIND(m_npcData)
 
 	LUA_MGETTER0(GetActivity)
 	LUA_MGETTER1(GetXXFile)
