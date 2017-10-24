@@ -12,12 +12,28 @@
 namespace SharedInjections {
 namespace MeshTexture {
 
+TextureImage* loc_shadowTextureOverride = nullptr;
+static wchar_t loc_shadowTextureOverridePath[255] = L"Mesh_overrides\\";;
 const TextureImage* MeshTextureEvent(wchar_t* fileName) {
 	const TextureImage* ret = NULL;
+
 	ret = Shared::MeshTextureOverrideRules(fileName);
 	if (ret != NULL) return ret;
+
 	ret = Shared::HairHighlightOverride(fileName);
 	if (ret != NULL) return ret;
+
+	wcscpy(loc_shadowTextureOverridePath + 15, fileName);
+	if (loc_shadowTextureOverride && loc_shadowTextureOverride->GetRelPath() != loc_shadowTextureOverridePath) {
+		delete loc_shadowTextureOverride;
+		loc_shadowTextureOverride = nullptr;
+	}
+	if (!loc_shadowTextureOverride) {
+		loc_shadowTextureOverride = new TextureImage(loc_shadowTextureOverridePath, OverrideFile::OVERRIDE);
+	}
+	if (loc_shadowTextureOverride->IsGood())
+		return loc_shadowTextureOverride;
+
 	return NULL;
 }
 
