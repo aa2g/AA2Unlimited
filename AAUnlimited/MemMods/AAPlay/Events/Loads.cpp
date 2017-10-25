@@ -60,6 +60,7 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	Poser::LoadCharacter(loadCharacter);
 
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
+	Shared::GameState::setIsOverriding(true);
 	HiPolyLoadStartEvent(loadCharacter, cloth, partial);
 
 	DWORD retv;
@@ -82,6 +83,7 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	}
 
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
+	Shared::GameState::setIsOverriding(false);
 	HiPolyLoadEndEvent(loadCharacter);
 	loc_loadingCharacter = false;
 	return retv;
@@ -93,6 +95,7 @@ DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWOR
 	Poser::UpdateCharacter(loadCharacter);
 
 	LUA_EVENT_NORET("char_update", loadCharacter, a, b);
+	Shared::GameState::setIsOverriding(true);
 
 	HiPolyLoadStartEvent(loadCharacter, a, b);
 
@@ -113,6 +116,7 @@ DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWOR
 
 	HiPolyLoadEndEvent(loadCharacter);
 	LUA_EVENT_NORET("char_update_end", retv, loadCharacter, a, b);
+	Shared::GameState::setIsOverriding(false);
 
 	return retv;
 }
