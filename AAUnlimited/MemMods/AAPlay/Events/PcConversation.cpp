@@ -47,7 +47,7 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 		data.action = substruct->m_conversationId;
 		data.m_bStartH = &(substruct->m_bStartH);
-		data.card = (*(Shared::GameState::getPlayerCharacter()))->m_seat;
+		data.card = (Shared::GameState::getPlayerCharacter())->m_seat;
 		LUA_EVENT_NORET("convo", data.state);
 		Shared::Triggers::ThrowEvent(&data);
 	}

@@ -18,7 +18,7 @@ namespace Shared {
 		}
 
 		Value Thread::GetPC(std::vector<Value>&) {
-			auto pc = *(Shared::GameState::getPlayerCharacter());
+			auto pc = Shared::GameState::getPlayerCharacter();
 			return pc->m_seat;
 		}
 
@@ -846,6 +846,20 @@ namespace Shared {
 			return Value(-1);
 		}
 
+		//int(int)
+		Value Thread::GetNpcStatus(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_status);
+			}
+		}
+
 		//string(int)
 		Value Thread::GetCardLastHPartner(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1609,6 +1623,12 @@ namespace Shared {
 					TEXT("Get H compatibility"), TEXT("%p ::Compatibility( %p )"), TEXT("Get compatibility with the selected character"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetSexCompatibility
+				},
+				{
+					68, EXPRCAT_CHARPROP,
+					TEXT("Get NPC Status"), TEXT("%p ::NpcStatus"), TEXT("Get NPC status of the character. Returns -1=invalid, 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetNpcStatus
 				},
 			},
 

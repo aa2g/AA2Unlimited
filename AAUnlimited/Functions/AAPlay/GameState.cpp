@@ -25,6 +25,11 @@ struct GameStateStruct {
 	bool m_isPcConversation;			//true if PC is in conversation mode
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
+	
+	bool m_isPeeping;					//true if the current H scene does not involve the PC
+	ExtClass::CharacterStruct* m_voyeur;//the observer of the H scene. Virtually always the PC regardless of what the game thinks about it
+	ExtClass::NpcData* m_voyeurTarget;//the NPC voyeur is peeping at. Usually the first actor in the H scene
+
 	std::wstring m_classSaveName;
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
 #define CONVERSATION_CHARACTERS_N 2
@@ -86,6 +91,36 @@ bool Shared::GameState::getIsHighPolyLoaded()
 	return loc_gameState.m_isHighPolyLoaded;
 }
 
+void Shared::GameState::setIsPeeping(bool value)
+{
+	loc_gameState.m_isPeeping = value;
+}
+
+bool Shared::GameState::getIsPeeping()
+{
+	return loc_gameState.m_isPeeping;
+}
+
+void Shared::GameState::setVoyeur(ExtClass::CharacterStruct* voyeur)
+{
+	loc_gameState.m_voyeur = voyeur;
+}
+
+ExtClass::CharacterStruct* Shared::GameState::getVoyeur()
+{
+	return loc_gameState.m_voyeur;
+}
+
+void Shared::GameState::setVoyeurTarget(ExtClass::NpcData* target)
+{
+	loc_gameState.m_voyeurTarget = target;
+}
+
+ExtClass::NpcData* Shared::GameState::getVoyeurTarget()
+{
+	return loc_gameState.m_voyeurTarget;
+}
+
 void Shared::GameState::setPCConversationState(DWORD value)
 {
 	loc_gameState.m_PCConversationState = value;
@@ -122,8 +157,9 @@ void Shared::GameState::clearConversationCharacter(int idx) {
 
 void Shared::GameState::setPlayerCharacter(int seat) {
 	if (AAPlay::g_characters[seat].IsValid()) {
-		auto currentChar = getPlayerCharacter();
-		*currentChar = AAPlay::g_characters[seat].m_char;
+		const DWORD offstPC[] = { 0x376164, 0x88 };
+		auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
+		*pc = AAPlay::g_characters[seat].m_char;
 	}
 }
 
