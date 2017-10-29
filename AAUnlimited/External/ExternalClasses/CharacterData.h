@@ -324,8 +324,8 @@ namespace ExtClass {
 		void* m_pngBuffer; // 0x34 card image, exluding the aa2 data (just the image part)
 		BYTE m_unknown2[4]; // 0x38
 		BYTE m_gender; //0x3c, 0=male, 1=female. no tumbler, thats all.
-		char m_forename[260]; // 0x3d
-		char m_surname[260];
+		char m_forename[260]; // 0x3d	//Family Name
+		char m_surname[260];			//Given Name
 		char m_description[260];
 		BYTE m_unknown3[0xFC];
 		BYTE m_bPersonality;

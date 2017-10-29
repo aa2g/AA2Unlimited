@@ -21,6 +21,15 @@ namespace Shared {
 		void setIsHighPolyLoaded(bool value);
 		bool getIsHighPolyLoaded();
 
+		void setIsPeeping(bool value);
+		bool getIsPeeping();
+
+		void setVoyeur(ExtClass::CharacterStruct * voyeur);
+		ExtClass::CharacterStruct * getVoyeur();
+
+		void setVoyeurTarget(ExtClass::NpcData * target);
+		ExtClass::NpcData * getVoyeurTarget();
+
 		void setPCConversationState(DWORD value);
 		DWORD getPCConversationState();
 
@@ -29,10 +38,9 @@ namespace Shared {
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
 		void clearConversationCharacter(int idx);
 
-
-		inline ExtClass::CharacterStruct ** getPlayerCharacter()
+		inline ExtClass::CharacterStruct * getPlayerCharacter()
 		{
-			return ExtVars::AAPlay::PlayerCharacterPtr();
+			return *(ExtVars::AAPlay::PlayerCharacterPtr());
 		}
 		void setPlayerCharacter(int seat);
 
