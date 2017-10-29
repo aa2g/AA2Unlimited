@@ -1555,31 +1555,31 @@ namespace Shared {
 				{
 					56, EXPRCAT_GENERAL,
 					TEXT("Find Seat"), TEXT("Seat( %p )"), TEXT("Find a character with the provided full name(last name first name). Returns -1 if no such character is found"),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::FindSeat
 				},
 				{
 					57, EXPRCAT_CHARPROP,
 					TEXT("Reject Count"), TEXT("%p ::Rejects"), TEXT("Returns how many times this character was rejected."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardRejectCount
 				},
 				{
 					58, EXPRCAT_CHARPROP,
 					TEXT("Win Count"), TEXT("%p ::Wins"), TEXT("Returns how many times this character won when competing over someone."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardWinCount
 				},
 				{
 					59, EXPRCAT_CHARPROP,
 					TEXT("Victory Count"), TEXT("%p ::Victories"), TEXT("Returns how many times this character won in a fight."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVictoryCount
 				},
 				{
 					60, EXPRCAT_CHARPROP,
 					TEXT("Skip Count"), TEXT("%p ::Skips"), TEXT("Returns how many times this character skipped a class."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardSkipCount
 				},
 				{
