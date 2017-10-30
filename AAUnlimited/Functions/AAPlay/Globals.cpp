@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "Files\PersistentStorage.h"
 
 using namespace Shared::Triggers;
 
@@ -43,6 +44,12 @@ void InitOnLoad() {
 		//throw init event
 		CardInitializeData data;
 		data.card = seat;
+
+		auto inst = &AAPlay::g_characters[seat];
+		auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+		if (storage.getCardInt(inst, L"m_currCardStyle").isValid)
+			inst->m_cardData.m_currCardStyle = storage.getCardInt(inst, L"m_currCardStyle").value;
+
 		ThrowEvent(&data);
 
 		// ditto for lua
