@@ -1555,7 +1555,7 @@ namespace Shared {
 				{
 					56, EXPRCAT_GENERAL,
 					TEXT("Find Seat"), TEXT("Seat( %p )"), TEXT("Find a character with the provided full name(last name first name). Returns -1 if no such character is found"),
-					{ TYPE_INT }, (TYPE_INT),
+					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::FindSeat
 				},
 				{
