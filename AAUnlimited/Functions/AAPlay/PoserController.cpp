@@ -257,7 +257,13 @@ namespace Poser {
 		{
 			auto it = m_loadCharacter->m_sliders.begin();
 			while (it != m_loadCharacter->m_sliders.end()) {
+				// When the skeleton isn't reloaded consider its sliders non-transient
 				if (skipSkeleton && it->second->source == ExtClass::CharacterStruct::SKELETON) {
+					m_loadCharacter->m_transientSliders[it->first] = it->second;
+					it = m_loadCharacter->m_sliders.erase(it);
+				}
+				// It seems face is never reloaded. Always non-transient.
+				else if (it->second->source == ExtClass::CharacterStruct::FACE) {
 					m_loadCharacter->m_transientSliders[it->first] = it->second;
 					it = m_loadCharacter->m_sliders.erase(it);
 				}
