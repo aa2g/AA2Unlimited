@@ -551,12 +551,15 @@ namespace Shared {
 		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int newset = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
 			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
+
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", newset);
 		}
 
 		//int card, string keyname, int value
