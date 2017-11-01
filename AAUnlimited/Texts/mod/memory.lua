@@ -140,12 +140,13 @@ g_hook_func = g_wrap(hook_func)
 _alloced = 0
 function malloc(n)
 	_alloced = _alloced + n
-	return _WIN32.LocalAlloc(0, n)
+	return _WIN32.HeapAlloc(_WIN32.GetProcessHeap(), 0, n)
 end
 
 function free(m)
-	_alloced = _alloced - _WIN32.LocalSize(m)
-	_WIN32.LocalFree(m)
+	if fixptr(m) == 0 then return end
+	_alloced = _alloced - _WIN32.HeapSize(_WIN32.GetProcessHeap(),0,m)
+	_WIN32.HeapFree(_WIN32.GetProcessHeap(), 0, m)
 end
 
 
