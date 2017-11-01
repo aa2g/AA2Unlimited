@@ -104,6 +104,8 @@ namespace Shared {
 
 			void SetPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
+			void SetNpcStatus(std::vector<Value>& params);
+			void ResetVoyeur(std::vector<Value>& params);
 
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
@@ -162,6 +164,7 @@ namespace Shared {
 			Value GetSexExperience(std::vector<Value>& params); //bool(int)
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)
+			Value GetNpcStatus(std::vector<Value>& params); //int(int)
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)

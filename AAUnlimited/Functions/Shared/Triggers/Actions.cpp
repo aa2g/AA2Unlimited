@@ -551,12 +551,15 @@ namespace Shared {
 		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int newset = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
 			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
+
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", newset);
 		}
 
 		//int card, string keyname, int value
@@ -662,23 +665,56 @@ namespace Shared {
 			int seatPartner = params[1].iVal;
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
 			if (!instPartner->IsValid()) return;
-			
 
-			//setup PC for the H scene
-			Shared::GameState::setPlayerCharacter(seatPC);
-			//setup partner for H scene
-			static const DWORD partnerOffsets[]{ 0x376164, 0x28, 0x28 };
-			static const DWORD chrOffset[]{ 0x3761CC, 0x28, 0x2C, 0x20, instPartner->charOffset };
-			void* ptrPartner = (void*)ExtVars::ApplyRule(partnerOffsets);
-			*static_cast<int*>(ptrPartner) = (int)ExtVars::ApplyRule(chrOffset);
+			//save the original PC and its target
+			GameState::setVoyeur(GameState::getPlayerCharacter());
+			GameState::setVoyeurTarget(GameState::getVoyeur()->m_npcData->m_target);
+			GameState::setIsPeeping(true);
 
-			if (this->eventData->GetId() == PC_CONVERSATION_STATE_UPDATED) {
-				((PCConversationStateUpdatedData*)this->eventData)->m_bStartH++;
+			const DWORD offset1[]{ 0x376164, 0x88 };
+			ExtClass::CharacterStruct** pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offset1);
+			*pc = instPC->m_char;
+
+			const DWORD offset2[]{ 0x376164, 0x28, 0x28 };
+			ExtClass::NpcStatus** pcNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset2);
+			*pcNpcStatus = instPC->m_char->m_characterStatus->m_npcStatus;
+
+			const DWORD offset3[]{ 0x376164, 0x34, 0x14, 0x8C };
+			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset3);
+			*partnerNpcStatus = instPartner->m_char->m_characterStatus->m_npcStatus;
+
+			const DWORD offset4[]{ 0x3761CC, 0x28, 0x28 };
+			DWORD* HSceneTrigger = (DWORD*)ExtVars::ApplyRule(offset4);
+			*HSceneTrigger = 1;
+		}
+
+		//int seat, int status
+		void Thread::SetNpcStatus(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) return;
+			int status = params[1].iVal % 9;
+			inst->m_char->m_characterStatus->m_npcStatus->m_status = status;
+		}
+
+		//
+		void Thread::ResetVoyeur(std::vector<Value>& params)
+		{
+			if (Shared::GameState::getIsPeeping())	//clean up any voyerism
+			{
+				const DWORD offstPC[] = { 0x376164, 0x88 };
+				const DWORD offstPCNPC[] = { 0x376164, 0x28, 0x28 };
+				auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
+				auto pcnpc = (ExtClass::NpcData**)ExtVars::ApplyRule(offstPCNPC);
+				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
+				*pc = Shared::GameState::getVoyeur();
+				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
+				*pcnpc = Shared::GameState::getVoyeurTarget();
+				Shared::GameState::setVoyeur(nullptr);
+				Shared::GameState::setVoyeurTarget(nullptr);
+				Shared::GameState::setIsPeeping(false);
 			}
-			static const DWORD hOffsets[]{ 0x3761CC, 0x28, 0x28 };
-			void* hTrigger = (void*)ExtVars::ApplyRule(hOffsets);
-			(*(static_cast<int*>(hTrigger)))++;	//I'm sorry
-
 		}
 
 		//int seat, int mood, int moodStr
@@ -1126,6 +1162,18 @@ namespace Shared {
 				TEXT("Set card's H compatibility with the selected character. 0-999 values"),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardSexCompatibility
+			},
+			{
+				60, ACTIONCAT_NPCACTION, TEXT("Set NPC status"), TEXT("%p ::NpcStatus = %p"),
+				TEXT("Set NPC status. 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetNpcStatus
+			},
+			{
+				61, ACTIONCAT_NPCACTION, TEXT("Voyeur Clean Up"), TEXT("Voyeur Clean Up"),
+				TEXT("Celans up after voyeur sex"),
+				{ },
+				&Thread::ResetVoyeur
 			},
 		};
 

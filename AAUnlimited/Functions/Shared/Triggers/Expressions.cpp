@@ -18,7 +18,7 @@ namespace Shared {
 		}
 
 		Value Thread::GetPC(std::vector<Value>&) {
-			auto pc = *(Shared::GameState::getPlayerCharacter());
+			auto pc = Shared::GameState::getPlayerCharacter();
 			return pc->m_seat;
 		}
 
@@ -362,7 +362,7 @@ namespace Shared {
 		Value Thread::GetCardVirtue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.virtue);
 		}
@@ -372,7 +372,7 @@ namespace Shared {
 			int card = params[0].iVal;
 			int trait = params[1].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
 		}
@@ -381,7 +381,7 @@ namespace Shared {
 		Value Thread::GetCardPersonality(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_bPersonality);
 		}
@@ -390,7 +390,7 @@ namespace Shared {
 		Value Thread::GetCardVoicePitch(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_voicePitch);
 		}
@@ -399,7 +399,7 @@ namespace Shared {
 		Value Thread::GetCardClub(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_club);
 		}
@@ -408,7 +408,7 @@ namespace Shared {
 		Value Thread::GetCardClubValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value((int)cardInst->m_char->m_charData->m_character.clubValue);
 		}
@@ -417,7 +417,7 @@ namespace Shared {
 		Value Thread::GetCardClubRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.clubClassRanking);
 		}
@@ -426,7 +426,7 @@ namespace Shared {
 		Value Thread::GetCardIntelligence(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.intelligence);
 		}
@@ -435,7 +435,7 @@ namespace Shared {
 		Value Thread::GetCardIntelligenceValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value((int)cardInst->m_char->m_charData->m_character.intelligenceValue);
 		}
@@ -444,7 +444,7 @@ namespace Shared {
 		Value Thread::GetCardIntelligenceRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.intelligenceClassRank);
 		}
@@ -453,7 +453,7 @@ namespace Shared {
 		Value Thread::GetCardStrength(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.strength);
 		}
@@ -462,7 +462,7 @@ namespace Shared {
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value((int)cardInst->m_char->m_charData->m_character.strengthValue);
 		}
@@ -471,7 +471,7 @@ namespace Shared {
 		Value Thread::GetCardStrengthRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.strengthClassRank);
 		}
@@ -479,7 +479,7 @@ namespace Shared {
 		Value Thread::GetCardSociability(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_character.sociability);
 		}
@@ -488,7 +488,7 @@ namespace Shared {
 		Value Thread::GetCardFirstName(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_forename);
 		}
@@ -497,7 +497,7 @@ namespace Shared {
 		Value Thread::GetCardSecondName(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_surname);
 		}
@@ -506,7 +506,7 @@ namespace Shared {
 		Value Thread::GetCardDescription(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (cardInst == NULL) return Value(TEXT(""));
+			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_description);
 		}
@@ -837,13 +837,27 @@ namespace Shared {
 				}
 				else {
 					std::wstring iFullName;
-					iFullName += *Value(instance->m_char->m_charData->m_surname).strVal;
-					iFullName += L" ";
 					iFullName += *Value(instance->m_char->m_charData->m_forename).strVal;
+					iFullName += L" ";
+					iFullName += *Value(instance->m_char->m_charData->m_surname).strVal;
 					if (iFullName == *fullName) return Value(i);
 				}
 			}
 			return Value(-1);
+		}
+
+		//int(int)
+		Value Thread::GetNpcStatus(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_status);
+			}
 		}
 
 		//string(int)
@@ -1547,25 +1561,25 @@ namespace Shared {
 				{
 					57, EXPRCAT_CHARPROP,
 					TEXT("Reject Count"), TEXT("%p ::Rejects"), TEXT("Returns how many times this character was rejected."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardRejectCount
 				},
 				{
 					58, EXPRCAT_CHARPROP,
 					TEXT("Win Count"), TEXT("%p ::Wins"), TEXT("Returns how many times this character won when competing over someone."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardWinCount
 				},
 				{
 					59, EXPRCAT_CHARPROP,
 					TEXT("Victory Count"), TEXT("%p ::Victories"), TEXT("Returns how many times this character won in a fight."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVictoryCount
 				},
 				{
 					60, EXPRCAT_CHARPROP,
 					TEXT("Skip Count"), TEXT("%p ::Skips"), TEXT("Returns how many times this character skipped a class."),
-					{ TYPE_STRING }, (TYPE_INT),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardSkipCount
 				},
 				{
@@ -1609,6 +1623,12 @@ namespace Shared {
 					TEXT("Get H compatibility"), TEXT("%p ::Compatibility( %p )"), TEXT("Get compatibility with the selected character"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetSexCompatibility
+				},
+				{
+					68, EXPRCAT_CHARPROP,
+					TEXT("Get NPC Status"), TEXT("%p ::NpcStatus"), TEXT("Get NPC status of the character. Returns -1=invalid, 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetNpcStatus
 				},
 			},
 
