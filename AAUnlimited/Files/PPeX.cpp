@@ -28,6 +28,33 @@ bool PPeX::Connect(const wchar_t *path) {
 	return true;
 }
 
+static bool is_pp_path(const wchar_t *path) {
+    int pplen = wcslen(path);
+    if (pplen < 5)
+        return false;
+    return !wcscmp(path + pplen - 4, L"*.pp");
+}
+
+set<wstring> *PPeX::FList(const wchar_t *path) {
+    static set<wstring> list;
+    list.clear();
+
+    if (!is_pp_path(path))
+        return NULL;
+
+    PutString(L"matchfiles");
+    PutString(path);
+    while (1) {
+        auto str = GetString();
+        if (str == L"")
+            break;
+        list.insert(str);
+    }
+    if (list.empty())
+        return NULL;
+    return &list;
+}
+
 size_t PPeX::Read(char *buf, DWORD len) {
 	DWORD got = 0;
 	while (got < len) {
