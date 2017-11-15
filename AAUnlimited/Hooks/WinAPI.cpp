@@ -81,7 +81,10 @@ static HANDLE WINAPI MyFF(const wchar_t *path, LPWIN32_FIND_DATAW data) {
 	FFList = 0;
 	if (!FFList && g_Config.bUsePP2)
 		FFList = g_PP2.FList(path);
-	if (!FFList) {
+    if (!FFList && g_Config.bUsePPeX)
+        FFList = g_PPeX.FList(path);
+
+    if (!FFList) {
 		SetLastError(err);
 		return h;
 	}

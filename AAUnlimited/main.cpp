@@ -212,6 +212,8 @@ void WINAPI CALLBACK AA2UPatcher(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, 
 
 	InitLogger();
 	InitLua();
+	g_Lua.bindLua();
+
 	try {
 		g_Lua["require"]("patcher")((const char*)lpszCmdLine, nCmdShow);
 	}

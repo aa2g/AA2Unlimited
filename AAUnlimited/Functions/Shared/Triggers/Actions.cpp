@@ -233,6 +233,49 @@ namespace Shared {
 
 			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
 		}
+		
+		//int cardFrom, int cardTowards, int ptsLove, int ptsLike, int ptsDislike, int ptsHate, int ptsSpare
+		void Thread::SetCardPoints(std::vector<Value>& params) {
+			int iCardFrom = params[0].iVal;
+			int iCardTowards = params[1].iVal;
+			float ptsLove = params[2].fVal;
+			float ptsLike = params[3].fVal;
+			float ptsDislike = params[4].fVal;
+			float ptsHate = params[5].fVal;
+			float ptsSpare = params[6].fVal;
+
+			CharInstData* cardFrom = &AAPlay::g_characters[iCardFrom];
+			CharInstData* cardTowards = &AAPlay::g_characters[iCardTowards];
+			if (!cardFrom->IsValid()) return;
+			if (!cardTowards->IsValid()) return;
+			if (cardFrom == cardTowards) return;
+
+			auto* ptrRel = cardFrom->m_char->GetRelations();
+			auto* rel = ptrRel->m_start;
+			if (ptrRel == NULL) return;
+			for (rel; rel != ptrRel->m_end; rel++) {
+				if (rel->m_targetSeat == iCardTowards) {
+					break;
+				}
+			}
+			if (rel == ptrRel->m_end) return;
+
+			//normalize the points
+			float ptsSum = ptsLove + ptsLike + ptsDislike + ptsHate + ptsSpare;
+			float normalizer = 900.0 / ptsSum;
+			ptsLove *= normalizer;
+			ptsLike *= normalizer;
+			ptsDislike *= normalizer;
+			ptsHate *= normalizer;
+
+			//apply the points, discard the decimals
+			rel->m_lovePoints = ptsLove;
+			rel->m_likePoints = ptsLike;
+			rel->m_dislikePoints = ptsDislike;
+			rel->m_hatePoints = ptsHate;
+
+			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
+		}
 
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
@@ -661,10 +704,10 @@ namespace Shared {
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
 			CharInstData* instPC = &AAPlay::g_characters[seatPC];
-			if (!instPC->IsValid()) return;
+			if (!(instPC->IsValid() && instPC->m_char->m_seat == seatPC)) return;
 			int seatPartner = params[1].iVal;
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
-			if (!instPartner->IsValid()) return;
+			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
 
 			//save the original PC and its target
 			GameState::setVoyeur(GameState::getPlayerCharacter());
@@ -708,6 +751,7 @@ namespace Shared {
 				auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
 				auto pcnpc = (ExtClass::NpcData**)ExtVars::ApplyRule(offstPCNPC);
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
+				if (!Shared::GameState::getVoyeur()) return;
 				*pc = Shared::GameState::getVoyeur();
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
 				*pcnpc = Shared::GameState::getVoyeurTarget();
@@ -914,7 +958,7 @@ namespace Shared {
 				&Thread::NpcMoveRoom
 			},
 			{
-				21, ACTIONCAT_NPCACTION, TEXT("Make Npc do Action with no Target"), TEXT("%p ::Do(action:  %p )"),
+				21, ACTIONCAT_NPCACTION, TEXT("Make Npc do Action with no Target"), TEXT("%p ::Do(action: %p )"),
 				TEXT("If the target character is controlled by the Computer, this Action makes them do an Action that does not require another character to execute. "
 				"If the Character is allready walking somewhere, it will do this instead. "
 				"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
@@ -1171,9 +1215,15 @@ namespace Shared {
 			},
 			{
 				61, ACTIONCAT_NPCACTION, TEXT("Voyeur Clean Up"), TEXT("Voyeur Clean Up"),
-				TEXT("Celans up after voyeur sex"),
+				TEXT("Cleans up after voyeur sex"),
 				{ },
 				&Thread::ResetVoyeur
+			},
+			{
+				62, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Points"), TEXT("%p ::SetPoints( towards: %p , LOVE: %p , LIKE: %p , DISLIKE: %p , HATE: %p , SPARE: %p )"),
+				TEXT("Sets the full set of relationship points. The points are normalized, meaning you don't have to have them add up to 900 - the action will do it for you using the values as weights.\nIf you do have them add up to 900.0 they would be aplied as you provide them, minus the decimals."),
+				{ TYPE_INT, TYPE_INT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT },
+				&Thread::SetCardPoints
 			},
 		};
 

@@ -48,6 +48,8 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		data.action = substruct->m_conversationId;
 		data.m_bStartH = &(substruct->m_bStartH);
 		data.card = (Shared::GameState::getPlayerCharacter())->m_seat;
+		data.conversationAnswerId = substruct->m_conversationAnswerId;
+		data.currentlyAnswering = substruct->m_bCurrentlyAnswering;
 		LUA_EVENT_NORET("convo", data.state);
 		Shared::Triggers::ThrowEvent(&data);
 	}
