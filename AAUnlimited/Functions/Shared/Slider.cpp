@@ -146,8 +146,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,31, TEXT("a_J_ana03"),		{ 0,0,0, 0,0,0, 0,0,1 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //not sure why these exist twice
 			{ ExtClass::CharacterStruct::SKELETON,32, TEXT("a_J_dan02"),		{ 1,1,0, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //girth
 			{ ExtClass::CharacterStruct::SKELETON,33, TEXT("a_J_ana02"),		{ 1,1,0, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //
-			{ ExtClass::CharacterStruct::SKELETON,34, TEXT("a_J_dan06"),		{ 1,1,1, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //apply to females too
-			{ ExtClass::CharacterStruct::SKELETON,35, TEXT("a_J_ana06"),		{ 1,1,1, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //not sure why these exist twice
+			{ ExtClass::CharacterStruct::SKELETON,34, TEXT("a_J_dan07"),		{ 1,1,1, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //apply to females too
+			{ ExtClass::CharacterStruct::SKELETON,35, TEXT("a_J_ana07"),		{ 1,1,1, 0,0,0, 0,0,0 },		Slider::MULTIPLY, AAUCardData::MODIFY_FRAME }, //not sure why these exist twice
 			{ ExtClass::CharacterStruct::SKELETON,36, TEXT("a01_J_KataL_02"),	{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //left shoulder width
 			{ ExtClass::CharacterStruct::SKELETON,37, TEXT("a01_J_KataR_02"),	{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //right shoulder width
 			// Sliders above are flawed and obsolete
