@@ -25,7 +25,38 @@ bool PPeX::Connect(const wchar_t *path) {
 		Sleep(500);
 		LOGPRIO(Logger::Priority::ERR) << "Waiting for server ready, status: " << wstring(status) << "\r\n";
 	}
+	is_connected = true;
 	return true;
+}
+
+static bool is_pp_path(const wchar_t *path) {
+    int pplen = wcslen(path);
+    if (pplen < 5)
+        return false;
+    return !wcscmp(path + pplen - 4, L"*.pp");
+}
+
+static set<wstring> list;
+
+set<wstring> *PPeX::FList(const wchar_t *path) {
+	if (!is_connected)
+		return NULL;
+	if (!is_pp_path(path))
+		return NULL;
+
+	list.clear();
+
+	PutString(L"matchfiles");
+	PutString(path);
+	while (1) {
+	auto str = GetString();
+		if (str == L"")
+		    break;
+		list.insert(str);
+	}
+	if (list.empty())
+		return NULL;
+	return &list;
 }
 
 size_t PPeX::Read(char *buf, DWORD len) {

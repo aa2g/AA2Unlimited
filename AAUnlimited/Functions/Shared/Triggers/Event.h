@@ -148,6 +148,8 @@ namespace Triggers {
 		int npc_response;
 		int pc_response;
 		int action;
+		int conversationAnswerId;
+		int currentlyAnswering;
 		BYTE* m_bStartH;
 	EDC_END
 		
