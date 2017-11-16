@@ -1738,6 +1738,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			}
 		}
 		break; }
+	case WM_MOUSEWHEEL: {
+		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+
+		WPARAM type = GET_WHEEL_DELTA_WPARAM(wparam) < 0 ? SB_PAGEDOWN : SB_PAGEUP;
+		General::ScrollWindow(hwndDlg, type);
+		return TRUE;
+		break; }
 	case WM_VSCROLL: {
 		BSDialog* thisPtr = (BSDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
