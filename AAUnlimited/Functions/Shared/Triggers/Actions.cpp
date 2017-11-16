@@ -541,6 +541,13 @@ namespace Shared {
 			);
 		}
 
+		//string str
+		void Thread::WriteLog(std::vector<Value>& params)
+		{
+			auto str = params[0].strVal;
+			LOGPRIO(Logger::Priority::INFO) << *str << "\n";
+		}
+
 		//int seat, int orientation
 		void Thread::SetCardOrientation(std::vector<Value>& params)
 		{
@@ -1224,6 +1231,12 @@ namespace Shared {
 				TEXT("Sets the full set of relationship points. The points are normalized, meaning you don't have to have them add up to 900 - the action will do it for you using the values as weights.\nIf you do have them add up to 900.0 they would be aplied as you provide them, minus the decimals."),
 				{ TYPE_INT, TYPE_INT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT },
 				&Thread::SetCardPoints
+			},
+			{
+				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
+				TEXT("Writes the string to the SPAM log."),
+				{ TYPE_STRING },
+				&Thread::WriteLog
 			},
 		};
 

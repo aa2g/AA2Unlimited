@@ -83,6 +83,7 @@ namespace Shared {
 			void SetCardFirstName(std::vector<Value>& params);
 			void SetCardSecondName(std::vector<Value>& params);
 			void SetCardDescription(std::vector<Value>& params);
+			void WriteLog(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
 			void SetCardSexExperience(std::vector<Value>& params);
 			void SetCardAnalSexExperience(std::vector<Value>& params);
