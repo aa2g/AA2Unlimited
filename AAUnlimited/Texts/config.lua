@@ -1,5 +1,11 @@
 bUnlimitedOnTop = false
 
+-- What to do with modfiles in cards
+-- 0 - Ask
+-- 1 - Always extract
+-- 2 - Don't extract
+savedFileUsage = 0
+
 -- Flat UI (but not in maker)
 bUseVisualStyles = true
 
@@ -43,7 +49,7 @@ sFont = "MS Gothic"
 --2: warn
 --3: err
 --4: crit
-logPrio = 1
+logPrio = 2
 
 -- load .ppx files
 bUsePPeX = false
@@ -69,6 +75,9 @@ bUseMKIII = true
 -- List file names instead of name in card select (AA2Play)
 bListFilenames = false
 
+-- Enable card triggers
+bTriggers = true
+
 mods = {
 	{ "aaface" },
 	{ "poser" },
@@ -77,6 +86,7 @@ mods = {
 	{ "unlocks" },
 	{ "fixlocale" },
 	{ "makertrans" },
+	{ "playtrans" },
 	{ "facecam" }, 
 	{ "geass"},
 	{ "jizou"},
