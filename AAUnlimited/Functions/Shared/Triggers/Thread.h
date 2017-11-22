@@ -62,6 +62,7 @@ namespace Shared {
 			void AddCardDislikePoints(std::vector<Value>& params);
 			void AddCardHatePoints(std::vector<Value>& params);
 			void AddCardPoints(std::vector<Value>& params);
+			void SetCardPoints(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -148,6 +149,7 @@ namespace Shared {
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
+			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)
 			Value GetCardGender(std::vector<Value>& params); //int(int)
 			Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)
@@ -172,6 +174,26 @@ namespace Shared {
 			Value GetCardWinCount(std::vector<Value>& params); //int(int)
 			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
 			Value GetCardSkipCount(std::vector<Value>& params); //int(int)
+			Value GetCardCumStatInVagina(std::vector<Value>& params); //int(int, int)
+			Value GetCardCumStatInAnal(std::vector<Value>& params); //int(int, int)
+			Value GetCardCumStatInMouth(std::vector<Value>& params); //int(int, int)
+			Value GetCardCumStatInVaginaTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatInAnalTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatInMouthTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatTotalCum(std::vector<Value>& params);	//int(int, int)
+			Value GetCardCumStatTotalCumTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatClimaxCount(std::vector<Value>& params);	//int(int, int)
+			Value GetCardCumStatClimaxCountTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatSimClimaxCount(std::vector<Value>& params);	//int(int, int)
+			Value GetCardCumStatSimClimaxCountTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatCondomsUsed(std::vector<Value>& params);	//int(int, int)
+			Value GetCardCumStatCondomsUsedTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardVaginalSex(std::vector<Value>& params);	//int(int, int)	
+			Value GetCardVaginalSexTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardAnalSex(std::vector<Value>& params);	//int(int, int)
+			Value GetCardAnalSexTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardAllSex(std::vector<Value>& params);	//int(int, int)
+			Value GetCardAllSexTotal(std::vector<Value>& params);	//int(int)
 			Value GetCardLoversItem(std::vector<Value>& params);	//string(int)
 			Value GetCardFriendItem(std::vector<Value>& params);	//string(int)
 			Value GetCardSexualItem(std::vector<Value>& params);	//string(int)
@@ -265,10 +287,12 @@ namespace Shared {
 
 			//PC_CONVERSATION_STATE_UPDATED
 			Value GetConversationState(std::vector<Value>& params);
-			Value GetConversationAnswer(std::vector<Value>& params);
+			Value GetConversationNpcResponse(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
 			Value GetConversationPcResponse(std::vector<Value>& params);
 			Value GetConversationAction(std::vector<Value>& params);
+			Value GetConversationAnswerId(std::vector<Value>& params);
+			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 
 

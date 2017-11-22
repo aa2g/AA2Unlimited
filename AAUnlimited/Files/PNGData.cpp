@@ -22,6 +22,7 @@ void Reset() {
 }
 
 
+AAUCardData openCardData;
 // This gets called when a png card data read routine asks about png size. First, we try to
 // extract override files, as well as fetch aau data in case of aaedit. Secondly, we lie
 // about the file size returned - we omit the large data blobs, so that those dont end
@@ -50,7 +51,7 @@ DWORD OpenCard(HANDLE fh, DWORD *hi, bool simple) {
 		return sz - footer.aaublob_delta;
 	}
 
-	AAUCardData &cd = g_currentChar->m_cardData;
+	AAUCardData &cd = General::IsAAEdit ? g_currentChar->m_cardData : openCardData;
 	cd.Reset();
 
 	LUA_EVENT_NORET("open_card", DWORD(fh));

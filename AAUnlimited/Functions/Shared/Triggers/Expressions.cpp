@@ -525,9 +525,34 @@ namespace Shared {
 		Value Thread::GetCardOrientation(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (!cardInst->IsValid()) return Value(0);
+			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value((int)cardInst->m_char->m_charData->m_character.orientation);
+		}
+
+		//float(int, int)
+		Value Thread::GetCardOrientationMultiplier(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+
+			int towards = params[0].iVal;
+			CharInstData* towardsInst = &AAPlay::g_characters[towards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			float multiplier = 0.0;
+			if (cardInst->m_char->m_charData->m_gender == towardsInst->m_char->m_charData->m_gender)
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation >= 2) multiplier = 1.0;	//bi, lean homos, homos
+				else if (cardInst->m_char->m_charData->m_character.orientation != 0) multiplier = 0.5;	//lean het
+			}
+			else
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//het, lean het, bi
+				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+
+			return Value(multiplier);
 		}
 
 		//int(int)
@@ -900,7 +925,7 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value(0);
 			}
 			else {
 				return Value((int)instance->m_char->m_characterStatus->m_rejectCount);
@@ -912,7 +937,7 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value(0);
 			}
 			else {
 				return Value((int)instance->m_char->m_characterStatus->m_winningOverSomeoneCount);
@@ -924,7 +949,7 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value(0);
 			}
 			else {
 				return Value((int)instance->m_char->m_characterStatus->m_victoryCount);
@@ -936,19 +961,379 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value(0);
 			}
 			else {
 				return Value((int)instance->m_char->m_characterStatus->m_classesSkipped);
 			}
 		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatInVagina(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_cumInVagina[target]);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatInAnal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_cumInAnal[target]);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatInMouth(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_cumSwallowed[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatInVaginaTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_cumInVagina[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatInAnalTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_cumInAnal[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
 		
+		//int(int)
+		Value Thread::GetCardCumStatInMouthTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_cumSwallowed[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatTotalCum(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_totalCum[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatTotalCumTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_totalCum[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatClimaxCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_climaxCount[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatClimaxCountTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_climaxCount[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatSimClimaxCount(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_simultaneousClimax[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatSimClimaxCountTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_simultaneousClimax[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardCumStatCondomsUsed(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_condomsUsed[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardCumStatCondomsUsedTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_condomsUsed[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardVaginalSex(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_vaginalH[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardVaginalSexTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_vaginalH[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardAnalSex(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_analH[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardAnalSexTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_analH[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
+		//int(int, int)
+		Value Thread::GetCardAllSex(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_totalH[target]);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardAllSexTotal(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				int totalCums = 0;
+				for (int i = 0; i < 25; i++)
+				{
+					if (i != seat && AAPlay::g_characters[i].IsValid())
+					{
+						totalCums += (int)instance->m_char->m_characterStatus->m_totalH[i];
+					}
+				}
+				return Value(totalCums);
+			}
+		}
+
 		//string(int)
 		Value Thread::GetCardLoversItem(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value("");
 			}
 			else {
 				return Value(instance->m_char->m_charData->m_item1);
@@ -960,7 +1345,7 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value("");
 			}
 			else {
 				return Value(instance->m_char->m_charData->m_item2);
@@ -972,7 +1357,7 @@ namespace Shared {
 			int seat = params[0].iVal;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) {
-				return Value("-");
+				return Value("");
 			}
 			else {
 				return Value(instance->m_char->m_charData->m_item3);
@@ -1100,14 +1485,11 @@ namespace Shared {
 		}
 
 		//int()
-		Value Thread::GetConversationAnswer(std::vector<Value>& params) {
+		Value Thread::GetConversationNpcResponse(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				if (((PCConversationStateUpdatedData*)eventData)->npc_response >= 0) {
 					return ((PCConversationStateUpdatedData*)eventData)->npc_response;
-				}
-				else if (((PCConversationStateUpdatedData*)eventData)->pc_response >= 0) {
-					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
 				}
 				else return -1;
 				break;
@@ -1135,9 +1517,9 @@ namespace Shared {
 		Value Thread::GetConversationPcResponse(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
-				if (((PCConversationStateUpdatedData*)this->eventData)->pc_response < 3 &&
-					((PCConversationStateUpdatedData*)this->eventData)->pc_response >= 0)
-					return Value(((PCConversationStateUpdatedData*)this->eventData)->pc_response);
+				if (((PCConversationStateUpdatedData*)eventData)->pc_response >= 0) {
+					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
+				}
 				else return Value(-1);
 				break;
 			default:
@@ -1158,6 +1540,29 @@ namespace Shared {
 			}
 		}
 
+		//int()
+		Value Thread::GetConversationAnswerId(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return Value(((PCConversationStateUpdatedData*)this->eventData)->conversationAnswerId);
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
+
+		//int()
+		Value Thread::GetConversationCurrentlyAnswering(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return Value(((PCConversationStateUpdatedData*)this->eventData)->currentlyAnswering);
+				break;
+			default:
+				return 0;
+				break;
+			}
+		}
 
 		//int()
 		Value Thread::GetEventID(std::vector<Value>& params) {
@@ -1542,9 +1947,9 @@ namespace Shared {
 				},
 				{
 					54, EXPRCAT_CONVERSATION,
-					TEXT("Answer"), TEXT("ConversationAnswer"), TEXT("Conversation answer, either given by PC or NPC."),
+					TEXT("NPC Response"), TEXT("NPC Response"), TEXT("Returns NPC response in a conversation. 0 is \"Yes\", 1 is \"No\", 2 is \"Huh?\", -1 is undefined."),
 					{}, (TYPE_INT),
-					&Thread::GetConversationAnswer
+					&Thread::GetConversationNpcResponse
 				},
 				{
 					55, EXPRCAT_GENERAL,
@@ -1595,7 +2000,7 @@ namespace Shared {
 					&Thread::GetConversationAction
 				},
 				{
-					63, EXPRCAT_CONVERSATION,
+					63, EXPRCAT_GENERAL,
 					TEXT("Event ID"), TEXT("Event"), TEXT("Returns EventId."),
 					{}, (TYPE_INT),
 					&Thread::GetEventID
@@ -1629,6 +2034,138 @@ namespace Shared {
 					TEXT("Get NPC Status"), TEXT("%p ::NpcStatus"), TEXT("Get NPC status of the character. Returns -1=invalid, 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetNpcStatus
+				},
+				{
+					69, EXPRCAT_CONVERSATION,
+					TEXT("Answer Action"), TEXT("AnswerId"), TEXT("After the npc made a positive or negative answer, this id will be what he answers with."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationAnswerId
+				},
+				{
+					70, EXPRCAT_CONVERSATION,
+					TEXT("Is Answering"), TEXT("IsAnswering"), TEXT("¯\\_(´*-*`)_/¯"),
+					{}, (TYPE_INT),
+					&Thread::GetConversationCurrentlyAnswering
+				},
+				{
+					71, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Vaginal"), TEXT("%p ::VaginalCums( %p )"), TEXT("Returns how many times this character got cummed inside their vagina by the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInVagina
+				},
+				{
+					72, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Anal"), TEXT("%p ::AnalCums( %p )"), TEXT("Returns how many times this character got cummed inside their rectum by the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInAnal
+				},
+				{
+					73, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Oral"), TEXT("%p ::OralCums( %p )"), TEXT("Returns how many times this character got cummed inside their mouth by the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInMouth
+				},
+				{
+					74, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Total Vaginal"), TEXT("%p ::VaginalCumsTotal"), TEXT("Returns how many times this character got cummed inside their vagina."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInVaginaTotal
+				},
+				{
+					75, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Total Anal"), TEXT("%p ::AnalCumsTotal"), TEXT("Returns how many times this character got cummed inside their rectum."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInAnalTotal
+				},
+				{
+					76, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Total Oral"), TEXT("%p ::OralCumsTotal"), TEXT("Returns how many times this character got cummed inside their mouth."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatInMouthTotal
+				},
+				{
+					77, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - All"), TEXT("%p ::AllCums( %p )"), TEXT("Returns how many times this character got cummed inside by the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatTotalCum
+				},
+				{
+					78, EXPRCAT_CHARPROP,
+					TEXT("Cum Stat - Total All"), TEXT("%p ::AllCumsTotal"), TEXT("Returns how many times this character got cummed inside."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatTotalCumTotal
+				},
+				{
+					79, EXPRCAT_CHARPROP,
+					TEXT("Climax Stat - Single"), TEXT("%p ::SingleClimax( %p )"), TEXT("Returns how many times this character climaxed while having sex with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatClimaxCount
+				},
+				{
+					80, EXPRCAT_CHARPROP,
+					TEXT("Climax Stat - Total Single"), TEXT("%p ::SingleClimaxTotal"), TEXT("Returns how many times this character climaxed while having sex."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatClimaxCountTotal
+				},
+				{
+					81, EXPRCAT_CHARPROP,
+					TEXT("Climax Stat - Simultaneous"), TEXT("%p ::SimClimax( %p )"), TEXT("Returns how many times this character climaxed together with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatClimaxCount
+				},
+				{
+					82, EXPRCAT_CHARPROP,
+					TEXT("Climax Stat - Total Simultaneous"), TEXT("%p ::SimClimaxTotal"), TEXT("Returns how many times this character climaxed together with everyone."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatClimaxCountTotal
+				},
+				{
+					83, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Condoms Used"), TEXT("%p ::CondomsUsed( %p )"), TEXT("Returns how many times this character used condoms with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatCondomsUsed
+				},
+				{
+					84, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Total Condoms Used"), TEXT("%p ::CondomsUsedTotal"), TEXT("Returns how many times this character used condoms."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardCumStatCondomsUsedTotal
+				},
+				{
+					85, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Vaginal"), TEXT("%p ::VaginalH( %p )"), TEXT("Returns how many times this character had vaginal sex with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardVaginalSex
+				},
+				{
+					86, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Total Vaginal"), TEXT("%p ::VaginalHTotal"), TEXT("Returns how many times this character had vaginal sex."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardVaginalSexTotal
+				},
+				{
+					87, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Anal"), TEXT("%p ::VaginalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAnalSex
+				},
+				{
+					88, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Total Anal"), TEXT("%p ::AnalHTotal"), TEXT("Returns how many times this character had anal sex."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAnalSexTotal
+				},
+				{
+					89, EXPRCAT_CHARPROP,
+					TEXT("H Stat - All"), TEXT("%p ::AllH( %p )"), TEXT("Returns how many times this character had sex with the other character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAllSex
+				},
+				{
+					90, EXPRCAT_CHARPROP,
+					TEXT("H Stat - Total All"), TEXT("%p ::AllHTotal"), TEXT("Returns how many times this character had sex."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAllSexTotal
 				},
 			},
 
@@ -1932,6 +2469,13 @@ namespace Shared {
 					TEXT("String to Float"), TEXT("Float( %p )"), TEXT("Converts a String to a Float."),
 					{ TYPE_STRING }, (TYPE_FLOAT),
 					&Thread::String2Float
+				},
+				{
+					12, EXPRCAT_CHARPROP,
+					TEXT("Sex Orientation Multiplier"), TEXT("%p ::OrientationMultiplier(towards: %p )"),
+					TEXT("The multiplier used when calculating interaction chances depending on actors' sex orientations and genders. Returns either 1.0, 0.5 or 0.0"),
+					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
+					&Thread::GetCardOrientationMultiplier
 				},
 			},
 			{ //STRING

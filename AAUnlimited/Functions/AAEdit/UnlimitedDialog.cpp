@@ -1561,11 +1561,11 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 29 } },
 				0.5f, 1.5f
 			},
-			{ TEXT("Strapon Length"),
+			{ TEXT("Strapon/Dick Length"),
 				{ { CharacterStruct::SKELETON, 30 },{ CharacterStruct::SKELETON, 31 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Strapon Girth"),
+			{ TEXT("Strapon/Dick Girth"),
 				{ { CharacterStruct::SKELETON, 32 },{ CharacterStruct::SKELETON, 33 } },
 				0.5f, 1.5f
 			},
@@ -1581,11 +1581,11 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
-			{ TEXT("Ass Cheeks Thickness"),
+			{ TEXT("Ass Cheeks Width"),
 				{ { CharacterStruct::SKELETON, 9 },{ CharacterStruct::SKELETON, 10 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Ass Cheeks Width"),
+			{ TEXT("Ass Cheeks Thickness"),
 				{ { CharacterStruct::SKELETON, 11 },{ CharacterStruct::SKELETON, 12 } },
 				-0.5f, 0.5f
 			},
