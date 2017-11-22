@@ -47,7 +47,7 @@ public:;
 	bool PP2Profiling;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
-	bool bExtractOnCursor;
+	bool bExtractOnListing;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
