@@ -38,6 +38,8 @@ struct Footer {
 // move this somewhere relevant when needed
 #pragma pack(push, 1)
 struct CardClothes {
+	char buf[91];
+/*
 	DWORD slot;
 	BYTE skirtLength;
 	BYTE socks;
@@ -68,7 +70,7 @@ struct CardClothes {
 	DWORD textureUnderwearHue;
 	DWORD textureUnderwearLightness;
 	DWORD shadowUnderwearHue;
-	DWORD shadowUnderwearLightness;
+	DWORD shadowUnderwearLightness;*/
 };
 extern CardClothes saved_clothes[4];
 extern bool have_clothes;

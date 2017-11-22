@@ -47,6 +47,7 @@ public:;
 	bool PP2Profiling;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
+	bool bExtractOnCursor;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -70,6 +71,7 @@ public:;
 			LUA_BIND(PP2Profiling)
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
+			LUA_BIND(bExtractOnListing)
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;
