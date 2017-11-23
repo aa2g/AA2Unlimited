@@ -4,6 +4,7 @@
 
 #include "External\ExternalClasses\CharacterStruct.h"
 #include "Functions\AAUCardData.h"
+#include "Files/PNGData.h"
 
 /*
  * Contains data about a character that currently exists in a game.
@@ -68,7 +69,10 @@ public:
 	}
 
 	inline bool LoadAAUData() {
-		return m_cardData.FromPNGBuffer((char*)m_char->m_charData->m_pngBuffer, m_char->m_charData->m_pngBufferSize);
+		bool ok = m_cardData.FromPNGBuffer((char*)m_char->m_charData->m_pngBuffer, m_char->m_charData->m_pngBufferSize);
+		if (ok && m_cardData.m_version < m_cardData.CurrentVersion)
+			Shared::PNG::SavePNGChunk(m_char, (BYTE**)&m_char->m_charData->m_pngBuffer, &m_char->m_charData->m_pngBufferSize);
+		return ok;
 	}
 
 };
