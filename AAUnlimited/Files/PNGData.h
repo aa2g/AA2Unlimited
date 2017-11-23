@@ -1,3 +1,4 @@
+#pragma once
 // v2 modcards:
 // PNG
 // IHDR
@@ -20,6 +21,7 @@
 // DWORD [offsetof(aaud_data)]
 // DWORD [sizeof(illusion_data)+sizeof(aaud_blob_data)+16]
 
+#include "External\ExternalClasses\CharacterStruct.h"
 
 
 namespace Shared {
@@ -33,7 +35,7 @@ struct Footer {
 	DWORD aaud_delta;		// filesize-aaud_delta must point to data part of AAUD chunk
 	DWORD illusion_delta;	// filesize-illusion_delta points to illusion data
 };
-
+void SavePNGChunk(ExtClass::CharacterStruct *chr, BYTE **outbuf, DWORD *outlen);
 // this is similiar to CharacterDataTypes::Clothes, yet not quite
 // move this somewhere relevant when needed
 #pragma pack(push, 1)

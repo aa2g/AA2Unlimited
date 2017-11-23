@@ -184,7 +184,7 @@ out:
 
 static int aaud_off;
 
-static void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
+void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
 	BYTE *aaudata = General::FindPngChunk(*outbuf, *outlen, AAUCardData::PngChunkIdBigEndian);
 	// if no aaud found, just nuke the IEND
 	if (!aaudata)
