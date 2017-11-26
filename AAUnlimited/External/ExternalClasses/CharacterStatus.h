@@ -26,18 +26,24 @@ public:
 	char m_firstHPartner[32];
 	char m_firstAnalPartner[32];
 	char m_latestHPartner[32];
-	DWORD m_unknownArray1[25]; //i do not know what these represent, but they have one element per character
-	DWORD m_unknownArray2[25]; //(addressed by seat)
-	DWORD m_totalH[25];
-	DWORD m_vaginalH[25];
-	DWORD m_analH[25];
-	DWORD m_condomsUsed[25];
-	DWORD m_climaxCount[25];
-	DWORD m_simultaneousClimax[25];
-	DWORD m_totalCum[25]; //displayed as (value*3)cc (so it stores displayed cc value /3)
-	DWORD m_cumInVagina[25];
-	DWORD m_cumInAnal[25];
-	DWORD m_cumSwallowed[25];
+	union {
+		struct {
+			DWORD m_unknownArray1[25]; //i do not know what these represent, but they have one element per character
+			DWORD m_unknownArray2[25]; //(addressed by seat)
+			DWORD m_totalH[25];
+			DWORD m_vaginalH[25];
+			DWORD m_analH[25];
+			DWORD m_condomsUsed[25];
+			DWORD m_climaxCount[25];
+			DWORD m_simultaneousClimax[25];
+			DWORD m_totalCum[25]; //displayed as (value*3)cc (so it stores displayed cc value /3)
+			DWORD m_cumInVagina[25];
+			DWORD m_cumInAnal[25];
+			DWORD m_cumSwallowed[25];
+		};
+		DWORD m_statArrays[16][25];
+		DWORD m_stats[16*25];
+	};
 
 #define LUA_CLASS ExtClass::CharacterStatus
 	static inline void bindLua() {
@@ -65,7 +71,7 @@ public:
 		LUA_BINDARR(m_totalCum)
 		LUA_BINDARR(m_cumInVagina)
 		LUA_BINDARR(m_cumInAnal)
-
+		LUA_BINDARR(m_stats)
 	}
 #undef LUA_CLASS
 
