@@ -41,8 +41,8 @@ public:
 			DWORD m_cumInAnal[25];
 			DWORD m_cumSwallowed[25];
 		};
-		DWORD m_statArrays[16][25];
-		DWORD m_stats[16*25];
+		DWORD m_statArrays[17][25];
+		DWORD m_stats[17*25];
 	};
 
 #define LUA_CLASS ExtClass::CharacterStatus
