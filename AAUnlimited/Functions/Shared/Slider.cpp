@@ -244,6 +244,9 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::HAIR_FRONT,3, TEXT("A00_N_kamiFtop"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 			{ ExtClass::CharacterStruct::HAIR_FRONT,4, TEXT("A00_N_kamiF"),{ 1,0,0, 0,0,0, 0,0,0 },			Slider::ADD, AAUCardData::MODIFY_FRAME },
 			{ ExtClass::CharacterStruct::HAIR_FRONT,5, TEXT("A00_N_kamiFtop"),{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,6, TEXT("A00_N_kamiFtop00"),{ 1,1,1, 0,0,0, 0,0,0 },			Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,7, TEXT("A00_N_kamiFtop00"),{ 0,0,0, 0,0,0, 0,0.09f,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::HAIR_FRONT,8, TEXT("A00_N_kamiFtop00"),{ 1,0,0, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME },
 		},
 		{
 			//HAIR_SIDE
