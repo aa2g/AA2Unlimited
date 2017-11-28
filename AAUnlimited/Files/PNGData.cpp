@@ -184,7 +184,7 @@ out:
 
 static int aaud_off;
 
-static void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
+void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
 	BYTE *aaudata = General::FindPngChunk(*outbuf, *outlen, AAUCardData::PngChunkIdBigEndian);
 	// if no aaud found, just nuke the IEND
 	if (!aaudata)
@@ -319,7 +319,7 @@ DWORD __stdcall GetFileSizeHook(HANDLE fh, DWORD *hi) {
 }
 
 DWORD __stdcall GetFileSizeHookSimple(HANDLE fh, DWORD *hi) {
-	return OpenCard(fh, hi, true);
+	return OpenCard(fh, hi, g_Config.bExtractOnListing ? false : true);
 }
 
 DWORD LoadChrDataFun;

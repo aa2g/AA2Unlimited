@@ -49,7 +49,7 @@ set<wstring> *PPeX::FList(const wchar_t *path) {
 	PutString(L"matchfiles");
 	PutString(path);
 	while (1) {
-	auto str = GetString();
+		auto str = GetString();
 		if (str == L"")
 		    break;
 		list.insert(str);
