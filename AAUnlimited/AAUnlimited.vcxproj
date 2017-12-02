@@ -571,7 +571,7 @@ xcopy /Y ".\AAUnlimitedDll.dll" "..\..\..\Game\AAUnlimited\"</Command>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zm1000  /std:c++latest %(AdditionalOptions)</AdditionalOptions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
