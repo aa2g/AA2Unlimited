@@ -89,9 +89,13 @@ namespace PlayInjections {
 
 		void __declspec(naked) SaveRedirect() {
 			__asm {
-				lea ecx, [esp + 0x6C]
-				mov edx, [esp + 0x3C]
-				push [esp+0xDC]
+				mov edx, [esp + 0xb8]
+				mov eax, [edx] // name
+
+				lea ecx, [esp + 0x6C] //bmap info
+				mov edx, [esp + 0x3C] //bmap data
+
+				push eax
 				push edx
 				push ecx
 				call SaveAs
