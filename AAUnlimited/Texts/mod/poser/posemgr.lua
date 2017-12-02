@@ -209,20 +209,16 @@ local function pose2table(character)
 		t.pose = character.pose
 		t.frame = character.frame
 		local sliders = {}
+		local function tolist(v)
+		  return { v:rotation(0), v:rotation(1), v:rotation(2),	v:rotation(3),
+				v:translate(0), v:translate(1), v:translate(2),
+				v:scale(0), v:scale(1), v:scale(2) }
+		end
 		for k,v in character:sliders() do
-			local slider = {
-				v:rotation(0),
-				v:rotation(1),
-				v:rotation(2),
-				v:rotation(3),
-				v:translate(0),
-				v:translate(1),
-				v:translate(2),
-				v:scale(0),
-				v:scale(1),
-				v:scale(2),
-			}
-			sliders[k] = slider
+			sliders[k] = tolist(v)
+		end
+		for k,v in character:props() do
+			sliders[k] = tolist(v)
 		end
 		t.sliders = sliders
 		
