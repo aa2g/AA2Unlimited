@@ -235,6 +235,17 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::LEGS,6, TEXT("a01_J_UplegR_020"),{ 0,0.15f,0, 0,0,0, 0,-1.5f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //upperthigh height
 			{ ExtClass::CharacterStruct::LEGS,7, TEXT("a01_J_UplegL_020"),{ 0,0.15f,0, 0,0,0, 0,-1.5f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //upperthigh height
+
+			{ ExtClass::CharacterStruct::LEGS,8, TEXT("a01_J_Kosi_010"),{ 1,0,0, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::LEGS,9, TEXT("a01_J_Kosi_010"),{ 0,0,1, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::LEGS,10, TEXT("a01_J_Kosi_010"),{ 0.15f,0,0.06f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //hip size
+
+			{ ExtClass::CharacterStruct::LEGS,11, TEXT("a01_J_Spin_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist thickness
+			{ ExtClass::CharacterStruct::LEGS,12, TEXT("a01_J_Kosi_010"),{ 0,0,0.10f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist thickness
+
+			{ ExtClass::CharacterStruct::LEGS,13, TEXT("a01_J_Spin_010"),{ 0,0.1f,0, 0,0,0, 0,-1.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist height
+			{ ExtClass::CharacterStruct::SKIRT,14, TEXT("a01_J_Spin_010"),{ 0,0,0, 0,0,0, 0,1.0f,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //waist position
 		},
 		{
 			//HAIR_FRONT

@@ -1445,19 +1445,23 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Waist Thickness"),
 				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 },
-				{ CharacterStruct::SKIRT, 12 },{ CharacterStruct::SKIRT, 13 } },
+				{ CharacterStruct::SKIRT, 12 },{ CharacterStruct::SKIRT, 13 },
+				{ CharacterStruct::LEGS, 11 },{ CharacterStruct::LEGS, 12 } },
 				-1, 1
 			},
 			{ TEXT("Waist Height"),
-				{ { CharacterStruct::BODY, 22 },{ CharacterStruct::SKIRT, 8 } },
+				{ { CharacterStruct::BODY, 22 },{ CharacterStruct::SKIRT, 8 },
+				{ CharacterStruct::SKIRT, 13 } },
 				-1, 1
 			},
 			{ TEXT("Waist Position"),
-				{ { CharacterStruct::BODY, 23 },{ CharacterStruct::SKIRT, 9 } },
+				{ { CharacterStruct::BODY, 23 },{ CharacterStruct::SKIRT, 9 },
+				{ CharacterStruct::SKIRT, 14 } },
 				-1, 1
 			},
 			{ TEXT("Hip Size"),
 				{ { CharacterStruct::BODY,   15 }, { CharacterStruct::SKIRT, 0 },
+				{ CharacterStruct::LEGS, 10 }, 
 				{ CharacterStruct::SKELETON, 45 },
 				{ CharacterStruct::SKELETON, 46 }, { CharacterStruct::SKELETON, 47 } },
 				-0.6f, 0.6f
@@ -1467,11 +1471,15 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-1, 1
 			},
 			{ TEXT("Hip Width"),
-				{ { CharacterStruct::BODY, 0 },{ CharacterStruct::SKIRT, 26 } },
+				{ { CharacterStruct::BODY, 0 },{ CharacterStruct::SKIRT, 26 },
+				{ CharacterStruct::LEGS, 8 }
+				},
 				-0.5f, 0.5f
 			},
 			{ TEXT("Hip Thickness"),
-				{ { CharacterStruct::BODY, 1 },{ CharacterStruct::SKIRT, 27 } },
+				{ { CharacterStruct::BODY, 1 },{ CharacterStruct::SKIRT, 27 },
+				{ CharacterStruct::LEGS, 9 }
+				},
 				-0.5f, 0.5f
 			},
 			{ TEXT("Legs Distance"),
