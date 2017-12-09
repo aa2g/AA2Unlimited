@@ -1451,12 +1451,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Waist Height"),
 				{ { CharacterStruct::BODY, 22 },{ CharacterStruct::SKIRT, 8 },
-				{ CharacterStruct::SKIRT, 13 } },
+				{ CharacterStruct::LEGS, 13 } },
 				-1, 1
 			},
 			{ TEXT("Waist Position"),
 				{ { CharacterStruct::BODY, 23 },{ CharacterStruct::SKIRT, 9 },
-				{ CharacterStruct::SKIRT, 14 } },
+				{ CharacterStruct::LEGS, 14 } },
 				-1, 1
 			},
 			{ TEXT("Hip Size"),
