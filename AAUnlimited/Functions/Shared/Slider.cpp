@@ -336,6 +336,9 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKIRT,29, TEXT("a01_J_MuneR_01"),{ 0.25f,0,0, 0,0,0, 0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::SKIRT,30, TEXT("a01_J_MuneL_02"),{ 0.1f,0,0, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::SKIRT,31, TEXT("a01_J_MuneR_02"),{ 0.1f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::SKIRT,32, TEXT("a01_J_ArmL_02"),{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,33, TEXT("a01_J_ArmR_02"),{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 		}
 	};
 
