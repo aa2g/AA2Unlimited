@@ -1445,6 +1445,13 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 30 },{ CharacterStruct::SKIRT, 31 }, },
 				-1, 1
 			},
+			{ TEXT("Breasts Size"),
+				{ { CharacterStruct::SKELETON, 56 },{ CharacterStruct::SKELETON, 57 },
+				{ CharacterStruct::BODY, 34 },{ CharacterStruct::BODY, 35 },
+				{ CharacterStruct::SKIRT, 34 },{ CharacterStruct::SKIRT, 35 },
+				{ CharacterStruct::SKIRT, 36 },{ CharacterStruct::SKIRT, 37 }, },
+				0, 1
+			},
 			{ TEXT("Waist Thickness"),
 				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 },
 				{ CharacterStruct::SKIRT, 12 },{ CharacterStruct::SKIRT, 13 },

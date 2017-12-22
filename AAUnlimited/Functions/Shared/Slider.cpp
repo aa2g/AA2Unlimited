@@ -177,6 +177,8 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::SKELETON,55, TEXT("a01_N_Zentai_010"),{ 1,1,1, 0,0,0, 0,-0.4f,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //body size
 
+			{ ExtClass::CharacterStruct::SKELETON,56, TEXT("a01_J_MuneL_02"),{ 0.3f,0.4f,0.2f, 0,0,0, -0.18f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },		//breasts size
+			{ ExtClass::CharacterStruct::SKELETON,57, TEXT("a01_J_MuneR_02"),{ 0.3f,0.4f,0.2f, 0,0,0, 0.18f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME },	//breasts size
 		},
 		{
 			//BODY
@@ -222,6 +224,9 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,31, TEXT("a01_J_MuneR_01"),{ 0.25f,0,0, 0,0,0, 0.22f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::BODY,32, TEXT("a01_J_MuneL_02"),{ 0.1f,0,0, 0,0,0, -0.1f,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::BODY,33, TEXT("a01_J_MuneR_02"),{ 0.1f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::BODY,34, TEXT("a01_J_MuneL_01"),{ 0.2f,0.29f,0, 0,0,0, -0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },	//breasts size
+			{ ExtClass::CharacterStruct::BODY,35, TEXT("a01_J_MuneR_01"),{ 0.2f,0.29f,0, 0,0,0, 0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },		//breasts size
 		},
 		{
 			//LEGS
@@ -339,6 +344,11 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::SKIRT,32, TEXT("a01_J_ArmL_02"),{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::SKIRT,33, TEXT("a01_J_ArmR_02"),{ 0,1,1, 0,0,0, 0,-15.795f,0.264981031f },	Slider::ADD, AAUCardData::MODIFY_BONE },
+
+			{ ExtClass::CharacterStruct::SKIRT,34, TEXT("a01_J_MuneL_01"),{ 0.2f,0.29f,0, 0,0,0, -0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,35, TEXT("a01_J_MuneR_01"),{ 0.2f,0.29f,0, 0,0,0, 0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
+			{ ExtClass::CharacterStruct::SKIRT,36, TEXT("a01_J_MuneL_02"),{ 0.3f,0.4f,0.2f, 0,0,0, -0.18f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::SKIRT,37, TEXT("a01_J_MuneR_02"),{ 0.3f,0.4f,0.2f, 0,0,0, 0.18f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME },
 		}
 	};
 
