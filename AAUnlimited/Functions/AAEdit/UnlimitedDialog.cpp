@@ -1491,6 +1491,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				},
 				-0.5f, 0.5f
 			},
+			{ TEXT("Hip Depth Correction"),
+				{ { CharacterStruct::BODY, 36 },{ CharacterStruct::SKIRT, 38 },
+				{ CharacterStruct::LEGS, 15 }
+				},
+				-0.5f, 0.5f
+			},
 			{ TEXT("Legs Distance"),
 				{ { CharacterStruct::SKELETON, 48 },{ CharacterStruct::SKELETON, 49 },
 				{ CharacterStruct::SKELETON, 50 } ,{ CharacterStruct::SKELETON, 51 },

@@ -227,6 +227,8 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::BODY,34, TEXT("a01_J_MuneL_01"),{ 0.2f,0.29f,0, 0,0,0, -0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },	//breasts size
 			{ ExtClass::CharacterStruct::BODY,35, TEXT("a01_J_MuneR_01"),{ 0.2f,0.29f,0, 0,0,0, 0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },		//breasts size
+
+			{ ExtClass::CharacterStruct::BODY, 36, TEXT("a01_J_Kosi_010"),{ 0,0,0, 0,0,0, 0,0,-0.75f },				Slider::ADD, AAUCardData::MODIFY_BONE }, //hip depth correction
 		},
 		{
 			//LEGS
@@ -251,6 +253,8 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::LEGS,13, TEXT("a01_J_Spin_010"),{ 0,0.1f,0, 0,0,0, 0,-1.2f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //waist height
 			{ ExtClass::CharacterStruct::LEGS,14, TEXT("a01_J_Spin_010"),{ 0,0,0, 0,0,0, 0,1.0f,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //waist position
+
+			{ ExtClass::CharacterStruct::LEGS, 15, TEXT("a01_J_Kosi_010"),{ 0,0,0, 0,0,0, 0,0,-0.75f },				Slider::ADD, AAUCardData::MODIFY_BONE }, //hip depth correction
 		},
 		{
 			//HAIR_FRONT
@@ -349,6 +353,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKIRT,35, TEXT("a01_J_MuneR_01"),{ 0.2f,0.29f,0, 0,0,0, 0.4f,-4.4f,0 },	Slider::ADD, AAUCardData::MODIFY_BONE },
 			{ ExtClass::CharacterStruct::SKIRT,36, TEXT("a01_J_MuneL_02"),{ 0.3f,0.4f,0.2f, 0,0,0, -0.18f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME },
 			{ ExtClass::CharacterStruct::SKIRT,37, TEXT("a01_J_MuneR_02"),{ 0.3f,0.4f,0.2f, 0,0,0, 0.18f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME },
+
+			{ ExtClass::CharacterStruct::SKIRT, 38, TEXT("a01_J_Kosi_010"),{ 0,0,0, 0,0,0, 0,0,-0.75f },			Slider::ADD, AAUCardData::MODIFY_BONE }, //hip depth correction
 		}
 	};
 
