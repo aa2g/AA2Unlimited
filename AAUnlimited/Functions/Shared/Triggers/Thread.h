@@ -89,6 +89,18 @@ namespace Shared {
 			void SetCardAnalSexExperience(std::vector<Value>& params);
 			void SetCardSexCompatibility(std::vector<Value>& params);
 
+			void SetCardCumStatInVagina(std::vector<Value>& params);
+			void SetCardCumStatInAnal(std::vector<Value>& params);
+			void SetCardCumStatInMouth(std::vector<Value>& params);
+			void SetCardCumStatTotalCum(std::vector<Value>& params);
+			void SetCardCumStatClimaxCount(std::vector<Value>& params);
+			void SetCardCumStatSimClimaxCount(std::vector<Value>& params);
+			void SetCardCumStatCondomsUsed(std::vector<Value>& params);
+			void SetCardCumStatRiskyCums(std::vector<Value>& params);
+			void SetCardVaginalSex(std::vector<Value>& params);
+			void SetCardAnalSex(std::vector<Value>& params);
+			void SetCardAllSex(std::vector<Value>& params);
+
 			void NpcMoveRoom(std::vector<Value>& params);
 			void NpcActionNoTarget(std::vector<Value>& params);
 			void NpcTalkTo(std::vector<Value>& params);
@@ -189,6 +201,8 @@ namespace Shared {
 			Value GetCardCumStatSimClimaxCountTotal(std::vector<Value>& params);	//int(int)
 			Value GetCardCumStatCondomsUsed(std::vector<Value>& params);	//int(int, int)
 			Value GetCardCumStatCondomsUsedTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatRiskyCums(std::vector<Value>& params);
+			Value GetCardCumStatRiskyCumsTotal(std::vector<Value>& params);
 			Value GetCardVaginalSex(std::vector<Value>& params);	//int(int, int)	
 			Value GetCardVaginalSexTotal(std::vector<Value>& params);	//int(int)
 			Value GetCardAnalSex(std::vector<Value>& params);	//int(int, int)

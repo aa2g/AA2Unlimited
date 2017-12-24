@@ -1476,7 +1476,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.6f, 0.6f
 			},
 			{ TEXT("Hip Height"),
-				{ { CharacterStruct::BODY, 21 }/*,{ CharacterStruct::SKIRT, 7 }*/ },
+				{	{ CharacterStruct::BODY, 21 },
+				//	{ CharacterStruct::SKIRT, 7 },
+					{ CharacterStruct::LEGS, 16 }
+				},
 				-1, 1
 			},
 			{ TEXT("Hip Width"),

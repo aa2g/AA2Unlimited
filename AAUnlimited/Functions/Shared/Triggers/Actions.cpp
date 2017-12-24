@@ -597,6 +597,173 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_hCompatibility[target] = compatibility % 1000;
 		}
 
+		//int seat, int target, int amount
+		void Thread::SetCardCumStatInVagina(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumInVagina[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatInAnal(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumInAnal[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatInMouth(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumSwallowed[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatTotalCum(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_totalCum[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatClimaxCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_climaxCount[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatSimClimaxCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_simultaneousClimax[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatCondomsUsed(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_condomsUsed[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatRiskyCums(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_riskyCum[target] = amount;
+			}
+		}
+		void Thread::SetCardVaginalSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_vaginalH[target] = amount;
+			}
+		}
+		void Thread::SetCardAnalSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_analH[target] = amount;
+			}
+		}
+		void Thread::SetCardAllSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_totalH[target] = amount;
+			}
+		}
+
 		//int seat, int newset
 		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1237,6 +1404,72 @@ namespace Shared {
 				TEXT("Writes the string to the SPAM log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
+			},
+			{
+				64, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Vaginal"), TEXT("%p ::SetVaginalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their vagina by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInVagina
+			},
+			{
+				65, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Anal"), TEXT("%p ::SetAnalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their rectum by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInAnal
+			},
+			{
+				66, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Oral"), TEXT("%p ::SetOralCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their mouth by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInMouth
+			},
+			{
+				67, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - All"), TEXT("%p ::SetTotalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatTotalCum
+			},
+			{
+				68, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Single"), TEXT("%p ::SetSingleClimax(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character climaxed while having sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatClimaxCount
+			},
+			{
+				69, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Simultaneous"), TEXT("%p ::SetSimlimax(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character climaxed together with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatSimClimaxCount
+			},
+			{
+				70, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Condoms Used"), TEXT("%p ::SetCondomsUsed(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character used condoms with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatCondomsUsed
+			},
+			{
+				71, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Vaginal"), TEXT("%p ::SetVaginalH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had vaginal sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardVaginalSex
+			},
+			{
+				72, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Anal"), TEXT("%p ::SetAnalH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had anal sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardAnalSex
+			},
+			{
+				73, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - All"), TEXT("%p ::SetAllH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardAllSex
+			},
+			{
+				74, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Risky"), TEXT("%p ::SetRiskyCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside on their risky days by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatRiskyCums
 			},
 		};
 
