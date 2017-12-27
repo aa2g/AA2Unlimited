@@ -258,15 +258,43 @@ namespace Shared {
 					break;
 				}
 			}
-			if (rel == ptrRel->m_end) return;
+			if (rel == ptrRel->m_end) return;	//if we didn't find the relationship data for the target we do nothing
 
 			//normalize the points
 			float ptsSum = ptsLove + ptsLike + ptsDislike + ptsHate + ptsSpare;
-			float normalizer = 900.0 / ptsSum;
+			float normalizer;
+			if (ptsSum > 0)
+			{
+				normalizer = 900.0f / ptsSum;
+			}
+			else
+			{
+				normalizer = 0.0f;
+			}
 			ptsLove *= normalizer;
 			ptsLike *= normalizer;
 			ptsDislike *= normalizer;
 			ptsHate *= normalizer;
+
+			//nuke old relationship data
+			rel->m_loveCount = 0;
+			rel->m_likeCount = 0;
+			rel->m_dislikeCount = 0;
+			rel->m_hateCount = 0;
+
+			rel->m_love = 2;
+			rel->m_like = 2;
+			rel->m_dislike = 2;
+			rel->m_hate = 2;
+
+			rel->m_lovePoints = 0;
+			rel->m_likePoints = 0;
+			rel->m_dislikePoints = 0;
+			rel->m_hatePoints = 0;
+
+			rel->m_poin = 0;
+			
+			rel->m_actionBacklog.m_end = rel->m_actionBacklog.m_start;
 
 			//apply the points, discard the decimals
 			rel->m_lovePoints = ptsLove;
