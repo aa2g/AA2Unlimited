@@ -1422,7 +1422,7 @@ namespace Shared {
 			{
 				59, ACTIONCAT_MODIFY_CARD, TEXT("Set H Compatibility"), TEXT("%p ::Compatibility( %p ) = %p"),
 				TEXT("Set card's H compatibility with the selected character. 0-999 values"),
-				{ TYPE_INT, TYPE_STRING },
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardSexCompatibility
 			},
 			{
