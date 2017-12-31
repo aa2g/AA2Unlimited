@@ -485,7 +485,7 @@ namespace Shared {
 		}
 
 		//string(int)
-		Value Thread::GetCardFirstName(std::vector<Value>& params) {
+		Value Thread::GetCardLastName(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(TEXT(""));
@@ -494,12 +494,21 @@ namespace Shared {
 		}
 
 		//string(int)
-		Value Thread::GetCardSecondName(std::vector<Value>& params) {
+		Value Thread::GetCardFirstName(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(TEXT(""));
 
 			return Value(cardInst->m_char->m_charData->m_surname);
+		}
+
+		//string(int)
+		Value Thread::GetCardFullName(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(TEXT(""));
+
+			return Value(General::CastToWString(cardInst->m_char->m_charData->m_forename) + L" " + General::CastToWString(cardInst->m_char->m_charData->m_surname));
 		}
 
 		//string(int)
@@ -2554,17 +2563,15 @@ namespace Shared {
 				},
 				{
 					5, EXPRCAT_CHARPROP,
-					TEXT("Last Name"), TEXT("%p ::LastName"), TEXT("The first name this character was given (the upper one on the default card image). "
-					"Note that this may or may not be the family name depending on how the card maker ordered these."),
+					TEXT("Last Name"), TEXT("%p ::LastName"), TEXT("Last name of this character. Family name. The top name in the maker."),
 					{  TYPE_INT }, (TYPE_STRING),
-						&Thread::GetCardFirstName
+					&Thread::GetCardLastName
 				},
 				{
 					6, EXPRCAT_CHARPROP,
-					TEXT("First Name"), TEXT("%p ::FirstName"), TEXT("The second name this character was given (the lower one on the default card image). "
-					"Note that this may or may not be the family name depending on how the card maker ordered these."),
+					TEXT("First Name"), TEXT("%p ::FirstName"), TEXT("First name of this character. Given name. The bottom name in the maker."),
 					{ TYPE_INT }, (TYPE_STRING),
-						&Thread::GetCardSecondName
+					&Thread::GetCardFirstName
 				},
 				{
 					7, EXPRCAT_CHARPROP,
@@ -2572,7 +2579,7 @@ namespace Shared {
 					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
-						&Thread::GetCardStorageString
+					&Thread::GetCardStorageString
 				},
 				{
 					8, EXPRCAT_CHARPROP,
@@ -2645,6 +2652,12 @@ namespace Shared {
 					TEXT("Item - Sexual"), TEXT("%p ::SexualItem"), TEXT("Returns the Sexual item"),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardSexualItem
+				},
+				{
+					20, EXPRCAT_CHARPROP,
+					TEXT("Full Name"), TEXT("%p ::FullName"), TEXT("Full name of the character in \"LastName FirstName\" format."),
+					{ TYPE_INT }, (TYPE_STRING),
+					&Thread::GetCardFullName
 				},
 			}
 

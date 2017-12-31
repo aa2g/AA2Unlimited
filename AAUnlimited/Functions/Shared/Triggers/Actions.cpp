@@ -305,6 +305,22 @@ namespace Shared {
 			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
 		}
 
+		//int seat, int target, bool flag
+		void Thread::SetLover(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* seatInst = &AAPlay::g_characters[seat];
+			if (!seatInst->IsValid()) return;
+
+			int target = params[1].iVal;
+			CharInstData* targetInst = &AAPlay::g_characters[target];
+			if (!targetInst->IsValid()) return;
+
+			bool flag = params[2].bVal;
+
+			seatInst->m_char->m_lovers[target] = flag;
+		}
+
+
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -618,8 +634,8 @@ namespace Shared {
 			int seat = params[0].iVal;
 			int target = params[1].bVal;
 			int compatibility = params[2].bVal;
-			if (!AAPlay::g_characters[seat].m_char || !AAPlay::g_characters[target].m_char) {
-				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+			if (!AAPlay::g_characters[seat].IsValid() || !AAPlay::g_characters[target].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card.\r\n";
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_hCompatibility[target] = compatibility % 1000;
@@ -1498,6 +1514,12 @@ namespace Shared {
 				TEXT("Sets the amount of times this character got cummed inside on their risky days by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatRiskyCums
+			},
+			{
+				75, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Lover"), TEXT("%p ::SetLover(target: %p ) = %p"),
+				TEXT("Set this card's lover flag for the target. NOTE: Lovers status can be one-sided."),
+				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
+				&Thread::SetLover
 			},
 		};
 

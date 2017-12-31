@@ -63,6 +63,7 @@ namespace Shared {
 			void AddCardHatePoints(std::vector<Value>& params);
 			void AddCardPoints(std::vector<Value>& params);
 			void SetCardPoints(std::vector<Value>& params);
+			void SetLover(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -157,8 +158,9 @@ namespace Shared {
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
+			Value GetCardLastName(std::vector<Value>& params); //string(int)
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
-			Value GetCardSecondName(std::vector<Value>& params); //string(int)
+			Value GetCardFullName(std::vector<Value>& params);	//string(int)
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
