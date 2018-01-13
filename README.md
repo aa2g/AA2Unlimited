@@ -15,7 +15,7 @@ As a part of this, it puts additional Information into the card images in form o
 - **H-Ai**: AI that does H for you. Activates when the player is forced or at evil no prompt h.
 	- NO means YES when forced by an npc
 - **Position Buttons during H** are aligned in rows if there are too many buttons per category, allowing to add more buttons before they go out of the screen
-- **POV**: in H-Mode press `A` to switch between POVs of participants. Press `Q``W``E` to restore to normal view.
+- **POV**: in H-Mode press `A` to switch between POVs of participants. Press `Q` `W` `E` to restore to normal view.
 - **Poser**: in clothing menu, frames can be rotated. Sliders are defined in poserframes.txt. Poses can be saved and loaded.
 
 ### General:
