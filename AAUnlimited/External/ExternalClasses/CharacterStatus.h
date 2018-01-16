@@ -40,6 +40,8 @@ public:
 			DWORD m_cumInVagina[25];
 			DWORD m_cumInAnal[25];
 			DWORD m_cumSwallowed[25];
+			DWORD m_unknown[25];
+			DWORD m_riskyCum[25];
 		};
 		DWORD m_statArrays[17][25];
 		DWORD m_stats[17*25];
@@ -71,6 +73,8 @@ public:
 		LUA_BINDARR(m_totalCum)
 		LUA_BINDARR(m_cumInVagina)
 		LUA_BINDARR(m_cumInAnal)
+		LUA_BINDARR(m_cumSwallowed)
+		LUA_BINDARR(m_riskyCum)
 		LUA_BINDARR(m_stats)
 	}
 #undef LUA_CLASS

@@ -78,6 +78,8 @@ skip:
 }
 ///////////////////////////////////////////////
 
+	using namespace Shared::Triggers;
+	using namespace AAPlay;
 
 
 // When this routine is called, the roll result (0 or 1) is in as->answer
@@ -92,17 +94,13 @@ void __stdcall Answer(AnswerStruct *as) {
 
 	LUA_EVENT("answer", as->answer, as);
 
-	CallAnswer(as);
 
-#if REGRESSIONS
-	using namespace Shared::Triggers;
-	using namespace AAPlay;
 	NpcResponseData data;
 	data.card = GetSeatFromStruct(as->answerChar->m_thisChar);
 	data.answeredTowards = GetSeatFromStruct(as->askingChar->m_thisChar);
 	data.originalResponse = as->answer;
 	data.changedResponse = as->answer;
-	data.conversationId = as->askingChar->m_currConversationId; //this id is not set for the answerChar in case of minna
+	data.conversationId = as->askingChar->m_currConversationId; //this id is set to -1 for the answerChar in case of minna
 	data.originalChance = as->answerChar->m_lastConversationAnswerPercent;
 	data.changedChance = data.originalChance;
 	ThrowEvent(&data);
@@ -113,8 +111,15 @@ void __stdcall Answer(AnswerStruct *as) {
 	// plaster over it only if something actually wants it changed.
 	if (data.changedResponse != data.originalResponse)
 		as->answer = data.changedResponse;
+	if (data.conversationId != as->askingChar->m_currConversationId)
+	{
+		as->askingChar->m_currConversationId = data.conversationId;
+		as->answerChar->m_currConversationId = data.conversationId;
+		as->conversationId = data.conversationId;
+	}
+
+	CallAnswer(as);
 	LUA_EVENT("answer_after", as->answer, as);
-#endif
 }
 
 // Some speculation what this does:

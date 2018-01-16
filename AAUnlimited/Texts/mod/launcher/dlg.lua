@@ -152,6 +152,11 @@ local launch = function()
 	action=function()
 		for _,v in ipairs(buts) do v.active="no" end
 		wantexit  = true
+
+		if (Config.bUsePPeX) then
+			loadPPeX()
+		end
+
 		iup.ExitLoop()
 		if nocloseafterlaunch then
 			function dlg:close_cb()
@@ -162,6 +167,10 @@ local launch = function()
 	table.insert(buts, b)
 	return b
 end
+
+local function loadPPeX() {
+	os.execute("START " .. aau_path("ppex", "PPeXM64.exe \"" .. play_path("data") .. "\""))
+}
 
 local console = iup.text {
 	appendnewline="no",

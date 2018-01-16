@@ -258,15 +258,43 @@ namespace Shared {
 					break;
 				}
 			}
-			if (rel == ptrRel->m_end) return;
+			if (rel == ptrRel->m_end) return;	//if we didn't find the relationship data for the target we do nothing
 
 			//normalize the points
 			float ptsSum = ptsLove + ptsLike + ptsDislike + ptsHate + ptsSpare;
-			float normalizer = 900.0 / ptsSum;
+			float normalizer;
+			if (ptsSum > 0)
+			{
+				normalizer = 900.0f / ptsSum;
+			}
+			else
+			{
+				normalizer = 0.0f;
+			}
 			ptsLove *= normalizer;
 			ptsLike *= normalizer;
 			ptsDislike *= normalizer;
 			ptsHate *= normalizer;
+
+			//nuke old relationship data
+			rel->m_loveCount = 0;
+			rel->m_likeCount = 0;
+			rel->m_dislikeCount = 0;
+			rel->m_hateCount = 0;
+
+			rel->m_love = 2;
+			rel->m_like = 2;
+			rel->m_dislike = 2;
+			rel->m_hate = 2;
+
+			rel->m_lovePoints = 0;
+			rel->m_likePoints = 0;
+			rel->m_dislikePoints = 0;
+			rel->m_hatePoints = 0;
+
+			rel->m_poin = 0;
+			
+			rel->m_actionBacklog.m_end = rel->m_actionBacklog.m_start;
 
 			//apply the points, discard the decimals
 			rel->m_lovePoints = ptsLove;
@@ -276,6 +304,22 @@ namespace Shared {
 
 			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
 		}
+
+		//int seat, int target, bool flag
+		void Thread::SetLover(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* seatInst = &AAPlay::g_characters[seat];
+			if (!seatInst->IsValid()) return;
+
+			int target = params[1].iVal;
+			CharInstData* targetInst = &AAPlay::g_characters[target];
+			if (!targetInst->IsValid()) return;
+
+			bool flag = params[2].bVal;
+
+			seatInst->m_char->m_lovers[target] = flag;
+		}
+
 
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
@@ -590,11 +634,178 @@ namespace Shared {
 			int seat = params[0].iVal;
 			int target = params[1].bVal;
 			int compatibility = params[2].bVal;
-			if (!AAPlay::g_characters[seat].m_char || !AAPlay::g_characters[target].m_char) {
-				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+			if (!AAPlay::g_characters[seat].IsValid() || !AAPlay::g_characters[target].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card.\r\n";
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_hCompatibility[target] = compatibility % 1000;
+		}
+
+		//int seat, int target, int amount
+		void Thread::SetCardCumStatInVagina(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumInVagina[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatInAnal(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumInAnal[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatInMouth(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_cumSwallowed[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatTotalCum(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_totalCum[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatClimaxCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_climaxCount[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatSimClimaxCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_simultaneousClimax[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatCondomsUsed(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_condomsUsed[target] = amount;
+			}
+		}
+		void Thread::SetCardCumStatRiskyCums(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_riskyCum[target] = amount;
+			}
+		}
+		void Thread::SetCardVaginalSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_vaginalH[target] = amount;
+			}
+		}
+		void Thread::SetCardAnalSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_analH[target] = amount;
+			}
+		}
+		void Thread::SetCardAllSex(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			int target = params[1].iVal;
+			CharInstData* targetInstance = &AAPlay::g_characters[target];
+			int amount = params[2].iVal;
+
+			if (!instance->IsValid() || !targetInstance->IsValid()) {
+				return;
+			}
+			else {
+				instance->m_char->m_characterStatus->m_totalH[target] = amount;
+			}
 		}
 
 		//int seat, int newset
@@ -1211,7 +1422,7 @@ namespace Shared {
 			{
 				59, ACTIONCAT_MODIFY_CARD, TEXT("Set H Compatibility"), TEXT("%p ::Compatibility( %p ) = %p"),
 				TEXT("Set card's H compatibility with the selected character. 0-999 values"),
-				{ TYPE_INT, TYPE_STRING },
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardSexCompatibility
 			},
 			{
@@ -1237,6 +1448,78 @@ namespace Shared {
 				TEXT("Writes the string to the SPAM log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
+			},
+			{
+				64, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Vaginal"), TEXT("%p ::SetVaginalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their vagina by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInVagina
+			},
+			{
+				65, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Anal"), TEXT("%p ::SetAnalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their rectum by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInAnal
+			},
+			{
+				66, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Oral"), TEXT("%p ::SetOralCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside their mouth by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatInMouth
+			},
+			{
+				67, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - All"), TEXT("%p ::SetTotalCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatTotalCum
+			},
+			{
+				68, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Single"), TEXT("%p ::SetSingleClimax(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character climaxed while having sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatClimaxCount
+			},
+			{
+				69, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Simultaneous"), TEXT("%p ::SetSimlimax(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character climaxed together with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatSimClimaxCount
+			},
+			{
+				70, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Condoms Used"), TEXT("%p ::SetCondomsUsed(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character used condoms with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatCondomsUsed
+			},
+			{
+				71, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Vaginal"), TEXT("%p ::SetVaginalH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had vaginal sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardVaginalSex
+			},
+			{
+				72, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Anal"), TEXT("%p ::SetAnalH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had anal sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardAnalSex
+			},
+			{
+				73, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - All"), TEXT("%p ::SetAllH(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character had sex with the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardAllSex
+			},
+			{
+				74, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Risky"), TEXT("%p ::SetRiskyCums(target: %p , amount: %p )"),
+				TEXT("Sets the amount of times this character got cummed inside on their risky days by the target."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardCumStatRiskyCums
+			},
+			{
+				75, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Lover"), TEXT("%p ::SetLover(target: %p ) = %p"),
+				TEXT("Set this card's lover flag for the target. NOTE: Lovers status can be one-sided."),
+				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
+				&Thread::SetLover
 			},
 		};
 

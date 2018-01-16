@@ -123,7 +123,7 @@ namespace Triggers {
 		int originalChance;
 		int changedChance;
 	EDC_END
-
+		
 	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
 		int targetRoom;
 	EDC_END

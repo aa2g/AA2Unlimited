@@ -15,7 +15,7 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 	if (!trg->IsInitalized()) trg->Initialize(NULL,-1);
 	if (trg->IsBroken()) return;
 	executeCount = 0;
-	maxExecuteCount = 1000;
+	maxExecuteCount = INT_MAX;
 	execTrigger = trg;
 	execStarted = true;
 	execFinished = false;

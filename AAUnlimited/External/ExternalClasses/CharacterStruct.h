@@ -123,8 +123,8 @@ extern BYTE g_anim_data[25][6];
 		void* m_moreData;		//where m_moreData+0x16A18 is pointer to array of CharacterRelation, m_moreData+0x16A1C is end (typical array structure)
 		void* m_evenMoreData;	//m_evenMoreData+0x30 is pointer to moods array1; m_evenMoreData+0x40 is pointer to moods array2	  //F68
 		CharacterStatus* m_characterStatus; //F6C
-		BYTE m_unknown9[0x4];
-		void* m_moreData2;		//m_moreData2+0x18 is pointer to CharacterActivity struct
+		CharacterNpcAiData* m_moreData1;	//F70	//m_moreData1+18 is pointer to CharacterActivity struct
+		CharacterNpcAiData* m_moreData2;	//F74	//m_moreData2+0x18 is pointer to CharacterActivity struct
 		BYTE m_unknown10[0x4];
 		XXFile* m_xxSkirt;
 		BYTE m_unknown11[0x1C];

@@ -63,6 +63,7 @@ namespace Shared {
 			void AddCardHatePoints(std::vector<Value>& params);
 			void AddCardPoints(std::vector<Value>& params);
 			void SetCardPoints(std::vector<Value>& params);
+			void SetLover(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -88,6 +89,18 @@ namespace Shared {
 			void SetCardSexExperience(std::vector<Value>& params);
 			void SetCardAnalSexExperience(std::vector<Value>& params);
 			void SetCardSexCompatibility(std::vector<Value>& params);
+
+			void SetCardCumStatInVagina(std::vector<Value>& params);
+			void SetCardCumStatInAnal(std::vector<Value>& params);
+			void SetCardCumStatInMouth(std::vector<Value>& params);
+			void SetCardCumStatTotalCum(std::vector<Value>& params);
+			void SetCardCumStatClimaxCount(std::vector<Value>& params);
+			void SetCardCumStatSimClimaxCount(std::vector<Value>& params);
+			void SetCardCumStatCondomsUsed(std::vector<Value>& params);
+			void SetCardCumStatRiskyCums(std::vector<Value>& params);
+			void SetCardVaginalSex(std::vector<Value>& params);
+			void SetCardAnalSex(std::vector<Value>& params);
+			void SetCardAllSex(std::vector<Value>& params);
 
 			void NpcMoveRoom(std::vector<Value>& params);
 			void NpcActionNoTarget(std::vector<Value>& params);
@@ -145,8 +158,9 @@ namespace Shared {
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
+			Value GetCardLastName(std::vector<Value>& params); //string(int)
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
-			Value GetCardSecondName(std::vector<Value>& params); //string(int)
+			Value GetCardFullName(std::vector<Value>& params);	//string(int)
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
@@ -189,6 +203,8 @@ namespace Shared {
 			Value GetCardCumStatSimClimaxCountTotal(std::vector<Value>& params);	//int(int)
 			Value GetCardCumStatCondomsUsed(std::vector<Value>& params);	//int(int, int)
 			Value GetCardCumStatCondomsUsedTotal(std::vector<Value>& params);	//int(int)
+			Value GetCardCumStatRiskyCums(std::vector<Value>& params);
+			Value GetCardCumStatRiskyCumsTotal(std::vector<Value>& params);
 			Value GetCardVaginalSex(std::vector<Value>& params);	//int(int, int)	
 			Value GetCardVaginalSexTotal(std::vector<Value>& params);	//int(int)
 			Value GetCardAnalSex(std::vector<Value>& params);	//int(int, int)
