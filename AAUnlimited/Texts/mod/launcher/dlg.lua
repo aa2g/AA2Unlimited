@@ -146,12 +146,21 @@ end
 
 local step = "x6"
 
+local function loadPPeX()
+	os.execute("START /B " .. aau_path("ppex", "PPeXM64.exe \"" .. play_path("data") .. "\" -nowindow"))
+end
+
 local buts = {}
 local launch = function()
 	local b = iup.button{title="Launch the " .. (_BINDING.IsAAPlay and "game" or "editor"), expand="HORIZONTAL", size="x32", margin="8x8",
 	action=function()
 		for _,v in ipairs(buts) do v.active="no" end
 		wantexit  = true
+
+		if (Config.bUsePPeX) then
+			loadPPeX()
+		end
+		
 		iup.ExitLoop()
 		if nocloseafterlaunch then
 			function dlg:close_cb()
