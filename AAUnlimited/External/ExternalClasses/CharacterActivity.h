@@ -55,6 +55,8 @@ public:
 
 		LUA_BIND(m_idleAnimationProgress)
 
+		LUA_BIND(m_isMasturbating)
+
 		LUA_BIND(m_thisChar)
 #undef LUA_CLASS
 	};
