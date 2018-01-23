@@ -13,7 +13,7 @@ namespace SharedInjections {
 namespace MeshTexture {
 
 TextureImage* loc_shadowTextureOverride = nullptr;
-static wchar_t loc_shadowTextureOverridePath[255] = L"Mesh_overrides\\";;
+static wchar_t loc_shadowTextureOverridePath[255] = L"global\\";;
 const TextureImage* MeshTextureEvent(wchar_t* fileName) {
 	const TextureImage* ret = NULL;
 
