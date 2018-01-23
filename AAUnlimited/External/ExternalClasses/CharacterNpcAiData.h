@@ -13,6 +13,7 @@ namespace ExtClass {
 * contains a lot of ai data
 */
 class CharacterNpcAiData {
+public:
 	BYTE m_unknown[0x18];
 	CharacterActivity* m_activity;
 	struct {

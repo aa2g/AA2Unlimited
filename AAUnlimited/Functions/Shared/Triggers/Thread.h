@@ -75,6 +75,8 @@ namespace Shared {
 			void SetCardIntelligenceValue(std::vector<Value>& params);
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
+			void SetCharacterLocked(std::vector<Value>& params);
+			void SetMasturbating(std::vector<Value>& params);
 			void SetCardStrengthValue(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
 			void SetCardSociability(std::vector<Value>& params);
@@ -118,6 +120,7 @@ namespace Shared {
 			void RemoveCardStorageBool(std::vector<Value>& params);
 
 			void SetPC(std::vector<Value>& params);
+			void IsConsensualH(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
@@ -155,6 +158,8 @@ namespace Shared {
 			Value GetCardIntelligenceValue(std::vector<Value>& params); //int(int)
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
+			Value GetCardLocked(std::vector<Value>& params);
+			Value GetCardFapping(std::vector<Value>& params);
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
