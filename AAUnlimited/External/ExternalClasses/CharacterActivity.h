@@ -14,11 +14,12 @@ public:
 	BYTE m_unknown1[0x10]; // +4
 	BYTE m_animLocked;	//? // +20
 	BYTE m_loading; //statue or conversation loading?
-	BYTE m_unknown2[3];
+	BYTE m_interactionLock;
+	BYTE m_unknown2[2];
 	BYTE m_isInConversation;
 	BYTE m_conversationLoading; //?
 	BYTE m_currentlyTalking; //?
-	BYTE m_unknown3[0x20];
+	BYTE m_unknown3[0x20]; //37
 	BYTE m_currentMovementType; //0=stand, 1=move, 2=roam, 3=walk to character, 4 = follow, 7 = talk, 8=mina
 	BYTE m_unknown4[3];
 	DWORD m_currConversationId; //if this is an npc that plans a conversation, this is set once the character starts walking towards its target
@@ -28,8 +29,10 @@ public:
 	DWORD m_lastConversationSuccess; //(3=trumpet, 2 = nice, 1 = normal)
 	BYTE m_unknown7[4];
 	DWORD m_lastConversationAnswerPercent;
-	DWORD m_lastConversationAnswer;
-	BYTE m_unknown8[0x3C];
+	DWORD m_lastConversationAnswer; //52
+	BYTE m_unknown11[0xc];
+	DWORD m_isMasturbating;
+	BYTE m_unknown8[0x2c];
 	DWORD m_idleAnimationProgress;
 	BYTE m_unknown9[0x40];
 	CharacterStruct* m_thisChar;

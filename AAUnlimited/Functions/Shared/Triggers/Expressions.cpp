@@ -458,6 +458,25 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_character.strength);
 		}
 
+		Value Thread::GetCardLocked(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(TEXT(""));
+
+			return Value(cardInst->m_char->m_moreData1->m_activity->m_interactionLock);
+		}
+		//int(int)
+
+		Value Thread::GetMasturbating(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(TEXT(""));
+
+			return Value((int)cardInst->m_char->m_moreData1->m_activity->m_isMasturbating);
+		}
+		//int(int)
+
+
 		//int(int)
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2224,6 +2243,19 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatRiskyCumsTotal
 				},
+				{
+					93, EXPRCAT_CHARPROP,
+					TEXT("Locked state"), TEXT("%p ::LockState"), TEXT("Returns whether the character has the red circle around them or not. 1 is yes, 0 is no."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardLocked
+				},
+				{
+					94, EXPRCAT_CHARPROP,
+					TEXT("FapState"), TEXT("%p ::FapState"), TEXT("Returns whether the character is fapping or not. 1 is yes, -1 is no."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetMasturbating
+				},
+
 			},
 
 			{ //BOOL

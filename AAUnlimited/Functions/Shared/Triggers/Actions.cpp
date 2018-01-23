@@ -449,6 +449,29 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.strength = strength % 6;
 		}
 		//int seat, int value
+
+		void Thread::SetCharacterLocked(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int lockedValue = params[1].iVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_interactionLock = lockedValue;
+		}
+
+		void Thread::SetMasturbating(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int masturbatingValue = params[1].iVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_isMasturbating = masturbatingValue;
+		}
+
 		void Thread::SetCardStrengthValue(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -919,6 +942,14 @@ namespace Shared {
 		}
 
 		//int seatPC, int seatPartner
+
+		void Thread::IsConsensualH(std::vector<Value>& params) {
+			int forceVal = params[0].bVal ? 0 : 4;
+			const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x2C, 0x14, 0x9C };
+			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
+			*forcedh = forceVal;
+		}
+
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
 			CharInstData* instPC = &AAPlay::g_characters[seatPC];
@@ -1520,6 +1551,24 @@ namespace Shared {
 				TEXT("Set this card's lover flag for the target. NOTE: Lovers status can be one-sided."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetLover
+			},
+			{
+				76, ACTIONCAT_NPCACTION, TEXT("Sex Consensual"), TEXT("SexConsensual = %p"),
+				TEXT("Set whether the sex will be consensual or not."),
+				{ TYPE_BOOL },
+				&Thread::IsConsensualH
+			},
+			{
+				77, ACTIONCAT_NPCACTION, TEXT("Lock character"), TEXT("%p ::LockState = %p"),
+				TEXT("Locks the character from interacting. Adds the red circle around them. 1 - set red circle, 0 - unset it."),
+				{ TYPE_INT, TYPE_INT },
+					&Thread::SetCharacterLocked
+			},
+			{
+				78, ACTIONCAT_NPCACTION, TEXT("Set fap state"), TEXT("%p ::FapState = %p"),
+				TEXT("Set masturbation state of the character. 1 - to fap, -1 - not to fap."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetMasturbating
 			},
 		};
 
