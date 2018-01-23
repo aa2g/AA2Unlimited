@@ -1553,7 +1553,7 @@ namespace Shared {
 				&Thread::SetLover
 			},
 			{
-				76, ACTIONCAT_NPCACTION, TEXT("Sex Sonsensual"), TEXT("SexConsensual = %p"),
+				76, ACTIONCAT_NPCACTION, TEXT("Sex Consensual"), TEXT("SexConsensual = %p"),
 				TEXT("Set whether the sex will be consensual or not."),
 				{ TYPE_BOOL },
 				&Thread::IsConsensualH

@@ -30,9 +30,9 @@ public:
 	BYTE m_unknown7[4];
 	DWORD m_lastConversationAnswerPercent;
 	DWORD m_lastConversationAnswer; //52
-	BYTE m_unknown11[12];
+	BYTE m_unknown11[0xc];
 	DWORD m_isMasturbating;
-	BYTE m_unknown8[44];
+	BYTE m_unknown8[0x2c];
 	DWORD m_idleAnimationProgress;
 	BYTE m_unknown9[0x40];
 	CharacterStruct* m_thisChar;

@@ -467,7 +467,7 @@ namespace Shared {
 		}
 		//int(int)
 
-		Value Thread::GetCardFapping(std::vector<Value>& params) {
+		Value Thread::GetMasturbating(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(TEXT(""));
@@ -2253,7 +2253,7 @@ namespace Shared {
 					94, EXPRCAT_CHARPROP,
 					TEXT("FapState"), TEXT("%p ::FapState"), TEXT("Returns whether the character is fapping or not. 1 is yes, -1 is no."),
 					{ TYPE_INT }, (TYPE_INT),
-					&Thread::GetCardFapping
+					&Thread::GetMasturbating
 				},
 
 			},

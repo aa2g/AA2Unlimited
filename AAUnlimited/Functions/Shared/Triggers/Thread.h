@@ -159,7 +159,7 @@ namespace Shared {
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
 			Value GetCardLocked(std::vector<Value>& params);
-			Value GetCardFapping(std::vector<Value>& params);
+			Value GetMasturbating(std::vector<Value>& params);
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
