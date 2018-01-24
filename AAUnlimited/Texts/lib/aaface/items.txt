@@ -10,46 +10,46 @@
 16: Face 1 Short A
 17: Face 1 Short B
 18: Face 1 Earless
-19: Face 2 Long A
-20: Face 2 Long B
-21: Face 2 Long C
-22: Face 2 Long X
-23: Face 2 Medium A
-24: Face 2 Medium B
-25: Face 2 Medium X
-26: Face 2 Short A
-27: Face 2 Short B
-28: Face 2 Earless
-29: Face 3 Long A
-30: Face 3 Long B
-31: Face 3 Long C
-32: Face 3 Long X
-33: Face 3 Medium A
-34: Face 3 Medium B
-35: Face 3 Medium X
-36: Face 3 Short A
-37: Face 3 Short B
-38: Face 3 Earless
-39: Face 4 Long A
-40: Face 4 Long B
-41: Face 4 Long C
-42: Face 4 Long X
-43: Face 4 Medium A
-44: Face 4 Medium B
-45: Face 4 Medium X
-46: Face 4 Short A
-47: Face 4 Short B
-48: Face 4 Earless
-49: Face 5 Long A
-50: Face 5 Long B
-51: Face 5 Long C
-52: Face 5 Long X
-53: Face 5 Medium A
-54: Face 5 Medium B
-55: Face 5 Medium X
-56: Face 5 Short A
-57: Face 5 Short B
-58: Face 5 Earless
+19: --NOT SPECIFIED--
+20: wwc ddh1
+21: wwc ddh1 e_e
+22: wwc ddh2
+23: wwc ddh3
+24: wwc ddh4
+25: wwc ddh5
+26: wwc ddh6
+27: wwc ddh9
+28: wwc ddh10
+29: wwc ddh11
+30: wwc ddh12
+31: wwc ddh13
+32: wwc ddh14
+33: wwc ddh15
+34: --NOT SPECIFIED--
+35: --NOT SPECIFIED--
+36: --NOT SPECIFIED--
+37: --NOT SPECIFIED--
+38: --NOT SPECIFIED--
+39: --NOT SPECIFIED--
+40: --NOT SPECIFIED--
+41: --NOT SPECIFIED--
+42: --NOT SPECIFIED--
+43: --NOT SPECIFIED--
+44: --NOT SPECIFIED--
+45: --NOT SPECIFIED--
+46: --NOT SPECIFIED--
+47: --NOT SPECIFIED--
+48: --NOT SPECIFIED--
+49: --NOT SPECIFIED--
+50: --NOT SPECIFIED--
+51: --NOT SPECIFIED--
+52: --NOT SPECIFIED--
+53: --NOT SPECIFIED--
+54: --NOT SPECIFIED--
+55: --NOT SPECIFIED--
+56: --NOT SPECIFIED--
+57: --NOT SPECIFIED--
+58: --NOT SPECIFIED--
 59: Mitcher
 60: Tuman Garie
 61: Micha Jawkan

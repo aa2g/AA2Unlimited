@@ -108,6 +108,8 @@ return {
 
 	{ "A00_N_hitomiL",		 { "Face" },		"Left Iris" },
 	{ "A00_N_hitomiR",		 { "Face" },		"Right Iris" },
+	{ "S00_N_hitomiL",		 { "Face" },		"Left Iris (M)" },
+	{ "S00_N_hitomiR",		 { "Face" },		"Right Iris (M)" },
 	{ "A00_J_mayuLrot",		 { "Face" },		"Left Eyebrow" },
 	{ "A00_J_mayuRrot",		 { "Face" },		"Right Eyebrow" },
 	{ "AS00_N_megane",		 { "Face" },		"Glasses" },
