@@ -63,7 +63,11 @@ namespace Shared {
 				{}
 			},
 			{ PC_CONVERSATION_STATE_UPDATED, EVENTCAT_CONVERSATION, TEXT("PC conversation state updated"), TEXT("PC Conversation state updated"),
-			TEXT("Whenever PC conversation has moved on."),
+				TEXT("Whenever PC conversation has moved on."),
+				{}
+			},
+			{ PC_RESPONSE, EVENTCAT_CONVERSATION, TEXT("Pc Answers in a Conversation"), TEXT("Pc Answers in a Conversation"),
+				TEXT("Right before the PC answer is processed. Triggering card is the PC"),
 				{}
 			}
 		};
