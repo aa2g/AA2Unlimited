@@ -321,7 +321,8 @@ namespace Shared {
 		}
 
 		void Thread::SetPCResponse(std::vector<Value>& params) {
-			((PCConversationStateUpdatedData*)eventData)->pc_response = params[0].iVal;
+			if (eventData->GetId() != PC_RESPONSE) return;
+			((PcResponseData*)eventData)->substruct->m_playerAnswer = params[0].iVal;
 		}
 
 		//int seat, int virtue
