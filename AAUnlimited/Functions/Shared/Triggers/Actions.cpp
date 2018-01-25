@@ -320,6 +320,9 @@ namespace Shared {
 			seatInst->m_char->m_lovers[target] = flag;
 		}
 
+		void Thread::SetPCResponse(std::vector<Value>& params) {
+			((PCConversationStateUpdatedData*)eventData)->pc_response = params[0].iVal;
+		}
 
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
@@ -949,6 +952,15 @@ namespace Shared {
 			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
 			*forcedh = forceVal;
 		}
+		//bool consensual
+
+		void Thread::AutoPC(std::vector<Value>& params) {
+			int autoVal = params[0].bVal ? 1 : 0;
+			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
+			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
+			*autopc = autoVal;
+		}
+		//bool auto-pc
 
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
@@ -1565,10 +1577,22 @@ namespace Shared {
 					&Thread::SetCharacterLocked
 			},
 			{
-				78, ACTIONCAT_NPCACTION, TEXT("Set fap state"), TEXT("%p ::FapState = %p"),
+				78, ACTIONCAT_NPCACTION, TEXT("Set Fap State"), TEXT("%p ::FapState = %p"),
 				TEXT("Set masturbation state of the character. 1 - to fap, -1 - not to fap."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetMasturbating
+			},
+			{
+				79, ACTIONCAT_NPCACTION, TEXT("Set Auto-PC state"), TEXT("AutoPC = %p"),
+				TEXT("Toggle AutoPC on or off."),
+				{ TYPE_BOOL },
+				&Thread::AutoPC
+			},
+			{
+				80, ACTIONCAT_EVENT, TEXT("Set PC Response"), TEXT("PCResponse = %p"),
+				TEXT("Modify PC's answer."),
+				{ TYPE_INT },
+				&Thread::SetPCResponse
 			},
 		};
 
