@@ -6,7 +6,7 @@ namespace PlayInjections {
  */
 namespace PcConversation {
 
-	Shared::Triggers::PCConversationStateUpdatedData data;
+	Shared::Triggers::PCConversationStateUpdatedData pcConvoStateUpdatedData;
 /********************
  * Start / End Event
  ********************/
@@ -19,9 +19,9 @@ void __stdcall StartEvent() {
 
 void __stdcall EndEvent() {
 	Shared::GameState::setIsPcConversation(false);
-	data.state = -1;
+	pcConvoStateUpdatedData.state = -1;
 	LUA_EVENT_NORET("convo", false);
-	Shared::Triggers::ThrowEvent(&data);
+	Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 
 	Shared::GameState::clearConversationCharacter(-1);
 	Poser::EndEvent();
@@ -42,16 +42,16 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		Shared::GameState::setPCConversationState(substruct->m_npcTalkState);
 
 		//Shared::Triggers::PCConversationStateUpdatedData data;
-		data.state = substruct->m_npcTalkState;
-		data.npc_response = (substruct->m_response < arbitraryMaxResponse) ? substruct->m_response : -1;
-		data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
-		data.action = substruct->m_conversationId;
-		data.m_bStartH = &(substruct->m_bStartH);
-		data.card = (Shared::GameState::getPlayerCharacter())->m_seat;
-		data.conversationAnswerId = substruct->m_conversationAnswerId;
-		data.currentlyAnswering = substruct->m_bCurrentlyAnswering;
-		LUA_EVENT_NORET("convo", data.state);
-		Shared::Triggers::ThrowEvent(&data);
+		pcConvoStateUpdatedData.state = substruct->m_npcTalkState;
+		pcConvoStateUpdatedData.npc_response = (substruct->m_response < arbitraryMaxResponse) ? substruct->m_response : -1;
+		pcConvoStateUpdatedData.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
+		pcConvoStateUpdatedData.action = substruct->m_conversationId;
+		pcConvoStateUpdatedData.m_bStartH = &(substruct->m_bStartH);
+		pcConvoStateUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_seat;
+		pcConvoStateUpdatedData.conversationAnswerId = substruct->m_conversationAnswerId;
+		pcConvoStateUpdatedData.currentlyAnswering = substruct->m_bCurrentlyAnswering;
+		LUA_EVENT_NORET("convo", pcConvoStateUpdatedData.state);
+		Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 	}
 }
 
@@ -97,7 +97,15 @@ void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
  *******************/
 void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	LUA_EVENT_NORET("convo_pc_answer", param->GetSubStruct());
-	HAi::ConversationPcResponse(param);
+	auto substruct = param->GetSubStruct();
+	Shared::Triggers::PcResponseData data;
+	data.forceResponse = false;
+	data.substruct = substruct;
+	data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
+	Shared::Triggers::ThrowEvent(&data);
+	if (!data.forceResponse) {
+		HAi::ConversationPcResponse(param);
+	}
 }
 
 

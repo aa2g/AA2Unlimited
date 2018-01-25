@@ -3,6 +3,8 @@
 #include "Value.h"
 #include "Expressions.h"
 #include "InfoData.h"
+#include "External\ExternalClasses.h"
+#include "MemMods\AAPlay\Events\NpcActions.h"
 
 #include <vector>
 
@@ -44,7 +46,7 @@ namespace Triggers {
 		NPC_RESPONSE,
 		NPC_WALK_TO_ROOM, NPC_WANT_ACTION_NOTARGET, NPC_WANT_TALK_WITH, NPC_WANT_TALK_WITH_ABOUT,
 		PC_CONVERSATION_STATE_UPDATED,
-		PC_CONVERSATION_ENDED,
+		PC_RESPONSE,
 		
 		
 		N_EVENTS
@@ -116,12 +118,15 @@ namespace Triggers {
 	EDC_END
 
 	EDC_DECLARE(NpcResponseData,NPC_RESPONSE)
+
+		PlayInjections::NpcActions::AnswerStruct* substruct;
 		int answeredTowards;
 		int conversationId;
 		bool originalResponse;
 		bool changedResponse;
 		int originalChance;
 		int changedChance;
+
 	EDC_END
 		
 	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
@@ -151,6 +156,11 @@ namespace Triggers {
 		int conversationAnswerId;
 		int currentlyAnswering;
 		BYTE* m_bStartH;
+	EDC_END
+
+	EDC_DECLARE(PcResponseData, PC_RESPONSE)
+		ExtClass::ConversationSubStruct* substruct;
+		bool forceResponse;
 	EDC_END
 		
 

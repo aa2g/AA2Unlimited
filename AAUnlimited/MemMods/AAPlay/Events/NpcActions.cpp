@@ -103,6 +103,7 @@ void __stdcall Answer(AnswerStruct *as) {
 	data.conversationId = as->askingChar->m_currConversationId; //this id is set to -1 for the answerChar in case of minna
 	data.originalChance = as->answerChar->m_lastConversationAnswerPercent;
 	data.changedChance = data.originalChance;
+	data.substruct = as;
 	ThrowEvent(&data);
 
 	as->answerChar->m_lastConversationAnswerPercent = data.changedChance;

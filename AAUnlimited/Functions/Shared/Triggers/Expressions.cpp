@@ -1458,6 +1458,13 @@ namespace Shared {
 			return ((NpcResponseData*)eventData)->changedResponse;
 		}
 
+		//bool()
+		Value Thread::GetAutoPC(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
+			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
+			return *autopc == 1;
+		}
+
 		//int()
 		Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return 0;
@@ -2488,6 +2495,13 @@ namespace Shared {
 					TEXT("Has Lovers"), TEXT("%p ::HasLovers"), TEXT("Returns true if the character is in at least one rleationship."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetHasLovers
+				},
+				{
+					38, EXPRCAT_EVENT,
+					TEXT("Get Auto-PC"), TEXT("AutoPC"),
+					TEXT("Returns whether AutoPC is toggled on or off."),
+					{}, (TYPE_BOOL),
+						&Thread::GetAutoPC
 				},
 			},
 			{ //FLOAT

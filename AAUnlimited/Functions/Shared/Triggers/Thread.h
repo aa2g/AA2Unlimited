@@ -64,6 +64,7 @@ namespace Shared {
 			void AddCardPoints(std::vector<Value>& params);
 			void SetCardPoints(std::vector<Value>& params);
 			void SetLover(std::vector<Value>& params);
+			void SetPCResponse(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -121,6 +122,7 @@ namespace Shared {
 
 			void SetPC(std::vector<Value>& params);
 			void IsConsensualH(std::vector<Value>& params);
+			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
@@ -290,6 +292,7 @@ namespace Shared {
 			//NPC_RESPONSE
 			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()
+			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
 			Value GetNpcResponseOriginalPercent(std::vector<Value>& params);	//int()
