@@ -1492,8 +1492,18 @@ namespace Shared {
 		//NPC_WALK_TO_ROOM
 		//int()
 		Value Thread::GetNpcRoomTarget(std::vector<Value>& params) {
-			if (this->eventData->GetId() != NPC_RESPONSE) return 0;
-			return ((NpcResponseData*)eventData)->changedChance;
+			switch (this->eventData->GetId()) {
+			case NPC_WALK_TO_ROOM:
+				return ((NpcWalkToRoomData*)eventData)->targetRoom;
+			case NPC_WANT_ACTION_NOTARGET:
+				return Value((int)((NpcWantActionNoTargetData*)eventData)->substruct->roomTarget);
+			case NPC_WANT_TALK_WITH:
+				return Value((int)((NpcWantTalkWithData*)eventData)->substruct->roomTarget);
+			case NPC_WANT_TALK_WITH_ABOUT:
+				return Value((int)((NpcWantTalkWithAboutData*)eventData)->substruct->roomTarget);
+			default:
+				return 0;
+			}
 		}
 
 		//int()
@@ -1505,13 +1515,10 @@ namespace Shared {
 				return ((NpcWantTalkWithData*)eventData)->action;
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->action;
-				break;
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->action;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1523,10 +1530,8 @@ namespace Shared {
 				return ((NpcWantTalkWithData*)eventData)->conversationTarget;
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->conversationTarget;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1536,10 +1541,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->conversationAbout;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1548,10 +1551,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->state;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1563,10 +1564,8 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->npc_response;
 				}
 				else return -1;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1577,10 +1576,8 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1592,10 +1589,8 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
 				}
 				else return Value(-1);
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1604,10 +1599,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->action);
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1616,10 +1609,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->conversationAnswerId);
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 
@@ -1628,10 +1619,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->currentlyAnswering);
-				break;
 			default:
 				return 0;
-				break;
 			}
 		}
 

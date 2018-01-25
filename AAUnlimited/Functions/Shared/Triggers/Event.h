@@ -127,25 +127,37 @@ namespace Triggers {
 		int originalChance;
 		int changedChance;
 
-	EDC_END
-		
-	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
+		EDC_END
+
+	EDC_DECLARE(NpcWalkToRoomData, NPC_WALK_TO_ROOM)
+
+		CharInstData::ActionParamStruct* substruct;
 		int targetRoom;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantActionNoTargetData,NPC_WANT_ACTION_NOTARGET)
+
+		CharInstData::ActionParamStruct* substruct;
 		int action;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantTalkWithData,NPC_WANT_TALK_WITH)
+
+		CharInstData::ActionParamStruct* substruct;
 		int action;
 		int conversationTarget;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantTalkWithAboutData,NPC_WANT_TALK_WITH_ABOUT)
+
+		CharInstData::ActionParamStruct* substruct;
 		int action;
 		int conversationTarget;
 		int conversationAbout;
+
 	EDC_END
 
 	EDC_DECLARE(PCConversationStateUpdatedData, PC_CONVERSATION_STATE_UPDATED)
