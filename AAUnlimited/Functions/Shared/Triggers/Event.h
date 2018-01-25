@@ -4,6 +4,7 @@
 #include "Expressions.h"
 #include "InfoData.h"
 #include "External\ExternalClasses.h"
+#include "MemMods\AAPlay\Events\NpcActions.h"
 
 #include <vector>
 
@@ -117,13 +118,15 @@ namespace Triggers {
 	EDC_END
 
 	EDC_DECLARE(NpcResponseData,NPC_RESPONSE)
+
+		PlayInjections::NpcActions::AnswerStruct* substruct;
 		int answeredTowards;
 		int conversationId;
 		bool originalResponse;
 		bool changedResponse;
 		int originalChance;
 		int changedChance;
-		PlayInjections::NpcActions::AnswerStruct* substruct;
+
 	EDC_END
 		
 	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
