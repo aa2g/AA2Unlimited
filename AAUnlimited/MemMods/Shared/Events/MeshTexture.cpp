@@ -23,7 +23,7 @@ const TextureImage* MeshTextureEvent(wchar_t* fileName) {
 	ret = Shared::HairHighlightOverride(fileName);
 	if (ret != NULL) return ret;
 
-	wcscpy(loc_shadowTextureOverridePath + 15, fileName);
+	wcscpy(loc_shadowTextureOverridePath + 7, fileName);
 	if (loc_shadowTextureOverride && loc_shadowTextureOverride->GetRelPath() != loc_shadowTextureOverridePath) {
 		delete loc_shadowTextureOverride;
 		loc_shadowTextureOverride = nullptr;
