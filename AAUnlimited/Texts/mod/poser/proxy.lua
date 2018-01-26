@@ -3,8 +3,8 @@ local _M = {}
 local facetoggles = { tears = "00_O_namida", dimeyes = "00_O_mehi", mouthjuice = "A00_O_kutisiru", tonguejuice = "A00_O_sitasiru" }
 local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpenMax", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpenMin", eyetracking = "m_eyeTracking" }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
-local charkeys = { clothstate = "m_clothState", materialslot = "m_materialSlot" }
-local structfuncs = { destroy = "Destroy", unload = "Unload" }
+local charkeys = { clothtype = "m_currClothes", clothstate = "m_clothState", materialslot = "m_materialSlot" }
+local structfuncs = { destroy = "Destroy", unload = "Unload", update = "Update", spawn = "Spawn" }
 local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props" }
 
 function _M.wrap(entity, entmgr)

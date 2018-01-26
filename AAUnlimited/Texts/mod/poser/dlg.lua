@@ -179,7 +179,6 @@ signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
 local characterlist = lists.listbox { lines = 8, expand = "yes" }
-local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
@@ -677,6 +676,30 @@ end
 
 
 -- -----------
+-- Clothing UI
+-- -----------
+
+-- local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
+
+local clothing = require "poser.clothing"
+local clothslot = clothing.slotbuttons("Slot", { "1", "2", "3", "4" }, function(type)
+	local character = charamgr.current
+	if character then
+		character.clothtype = type
+	end
+end)
+
+local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, function(state)
+	local character = charamgr.current
+	if character then
+		log("test222")
+		log.spam("call state %d", state)
+		character:update(state)
+	end
+end)
+
+
+-- -----------
 -- UI Layout
 -- -----------
 
@@ -698,27 +721,10 @@ local dialogsliders = iup.dialog {
 					attachpropsbutton,
 					detachpropsbutton,
 				},
-				iup.label { title = "Style" },
-				stylelist,
-				iup.hbox {
-					iup.flatbutton { title = "Uniform", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Sports", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Swimsuit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Club", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					ngap = 3,
-				},
-				iup.hbox {
-					iup.flatbutton { title = "Edit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.hbox {
-						iup.flatbutton { title = "0", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "21x10", expand = "horizontal" },
-						iup.flatbutton { title = "1", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "2", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "3", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "4", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-					},
-					iup.flatbutton { title = "Reload", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					ngap = 3,
-				},
+				--iup.label { title = "Style" },
+				-- stylelist,
+				clothslot,
+				clothstate,
 				expand = "yes",
 			},
 			iup.vbox {
