@@ -352,7 +352,7 @@ void NpcAnswerInjection() {
 
 #endif
 
-void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionParamStruct* params) {
+void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParamStruct* params) {
 
 	ExtClass::CharacterStruct* user = NULL;
 	for(int i = 0; i < 25; i++) {
@@ -374,6 +374,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 	case 2: {
 		//walk somewhere
 		NpcWalkToRoomData data;
+		data.substruct = params;
 		data.card = AAPlay::GetSeatFromStruct(user);
 		data.targetRoom = params->roomTarget;
 		ThrowEvent(&data);
@@ -382,12 +383,14 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 		//talk to someone
 		if(params->target1 == NULL) {
 			NpcWantActionNoTargetData data;
+			data.substruct = params;
 			data.card = AAPlay::GetSeatFromStruct(user);
 			data.action = params->conversationId;
 			ThrowEvent(&data);
 		}
 		else if(params->target2 == NULL) {
 			NpcWantTalkWithData data;
+			data.substruct = params;
 			data.card = AAPlay::GetSeatFromStruct(user);
 			data.action = params->conversationId;
 			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
@@ -395,6 +398,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionP
 		}
 		else {
 			NpcWantTalkWithAboutData data;
+			data.substruct = params;
 			data.card = AAPlay::GetSeatFromStruct(user);
 			data.action = params->conversationId;
 			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
@@ -441,7 +445,7 @@ void NpcMovingActionInjection() {
 		(DWORD*)(&loc_NpcMovingActionFuncion));						//save old function to call in our redirect function
 }
 
-bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
+bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct, ExtClass::ActionParamStruct* params, bool success) {
 	ExtClass::CharacterStruct* user = NULL;
 	for (int i = 0; i < 25; i++) {
 		ExtClass::CharacterStruct* it = AAPlay::g_characters[i].m_char;

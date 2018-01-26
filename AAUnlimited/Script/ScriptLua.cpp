@@ -97,7 +97,7 @@ void Lua::bindLua() {
 	ConversationSubStruct::bindLua();
 	NpcPcInteractiveConversationStruct::bindLua();
 	PcConversationStruct::bindLua();
-	CharInstData::ActionParamStruct::bindLua();
+	ExtClass::ActionParamStruct::bindLua();
 	CharInstData::bindLua();
 	CharacterStatus::bindLua();
 	NpcData::bindLua();
