@@ -19,4 +19,14 @@ function _M.splitfilepath(path)
 	return directory, filename, extension
 end
 
+function _M.readfile(path)
+    local file = io.open(path, "rb")
+    if not file then return nil end
+    local data = file:read "*a"
+    local size = file:seek()
+    file:close()
+    return data, size
+end
+
+
 return _M

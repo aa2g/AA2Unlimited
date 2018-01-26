@@ -31,6 +31,7 @@ local lists = require "poser.lists"
 local toggles = require "poser.toggles"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
+local fileutils = require "poser.fileutils"
 local unpack = table.unpack
 
 local boneentries = {}
@@ -278,8 +279,7 @@ end
 -- UI Props
 -- ----------
 
-local function getpropfile(pattern)
-	local pattern = aau_path(pattern)
+local function getfile(pattern)
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)
@@ -300,7 +300,7 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	local selected = getpropfile("poser\\items\\*.xx")
+	local selected = getfile(aau_path("poser\\items\\*.xx"))
 	if selected then
 		propmgr.loadprop(selected)
 	end
@@ -315,7 +315,7 @@ function removepropbutton.action()
 end
 
 function attachpropsbutton.action()
-	local path = getpropfile("poser\\charitems\\*.xx")
+	local path = getfile(aau_path("poser\\charitems\\*.xx"))
 	if not path then return end
 	log.spam("loading charitem %s", path)
 	local character = charamgr.current
@@ -692,11 +692,19 @@ end)
 local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, function(state)
 	local character = charamgr.current
 	if character then
-		log("test222")
-		log.spam("call state %d", state)
 		character:update(state)
 	end
 end)
+
+local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
+	local character = charamgr.current
+	if character then
+		local file = getfile(play_path("data\\save\\cloth\\*.cloth"))
+		local size
+		if file then file, size = fileutils.readfile(file) end
+		if file and size == 92 then character:loadcloth(file) end
+	end
+end}
 
 
 -- -----------
@@ -725,7 +733,9 @@ local dialogsliders = iup.dialog {
 				-- stylelist,
 				clothslot,
 				clothstate,
+				loadclothbutton,
 				expand = "yes",
+				gap = 3,
 			},
 			iup.vbox {
 				tabtitle = "Props",

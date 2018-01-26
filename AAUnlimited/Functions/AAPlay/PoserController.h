@@ -282,6 +282,8 @@ namespace Poser {
 			SliderInfo* GetPropSlider(const char* name);
 			void SetHidden(const char* name, bool hidden);
 
+			void LoadCloth(const char *file);
+
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
@@ -316,6 +318,9 @@ namespace Poser {
 				LUA_METHOD(SetHidden, {
 					_self->SetHidden(_gl.get(2), _gl.get(3));
 				});
+				LUA_METHOD(LoadCloth, {
+					_self->LoadCloth(_gl.get(2));
+				})
 			}
 #undef LUA_CLASS
 		}; // PoserCharacter
@@ -355,8 +360,6 @@ namespace Poser {
 		void StartPoser();
 		void StopPoser();
 		void Clear();
-
-		void LoadCloth(std::vector<BYTE> &file);
 
 		void SwapTransientSliders(bool skipSkeleton);
 		void FrameModEvent(ExtClass::XXFile* xxFile);

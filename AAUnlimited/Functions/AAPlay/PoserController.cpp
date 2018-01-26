@@ -496,10 +496,10 @@ namespace Poser {
 		return poserCharacter;
 	}
 	
-	void PoserController::LoadCloth(std::vector<BYTE> &file) {
+	void PoserController::PoserCharacter::LoadCloth(const char *file) {
 		ClothFile load(file);
 		if (!load.IsValid()) return;
-		ExtClass::CharacterData::Clothes* cloth = nullptr;
+		ExtClass::CharacterData::Clothes* cloth = &m_character->m_charData->m_clothes[m_character->m_currClothes];
 		cloth->slot = load.m_slot;
 		cloth->skirtLength = load.m_shortSkirt;
 		cloth->socks = load.m_socksId;
