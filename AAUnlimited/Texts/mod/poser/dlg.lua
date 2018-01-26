@@ -413,18 +413,18 @@ end
 
 local function updatemodifier()
 	modifier = modifiers[currentoperation][currentmodifier]
-	log.spam("increment modifier set to %f", modifier)
+	-- log.spam("increment modifier set to %f", modifier)
 end
 
 local function slidersetmodifier(modifier)
-	log.spam("set current modifier to %d", modifier)
+	-- log.spam("set current modifier to %d", modifier)
 	currentmodifier = modifier
 	updatemodifier()
 end
 
 local function slidersetoperation(operation)
 	currentoperation = operation
-	log.spam("set current slider operation to %d", currentoperation)
+	-- log.spam("set current slider operation to %d", currentoperation)
 	if currentslider then
 		currentslider:SetCurrentOperation(operation - 1)
 	end
@@ -434,7 +434,7 @@ end
 
 local function setcurrentslider(slider)
 	currentslider = slider or dummyslider
-	log.spam("Poser: Set slider to %s", currentslider)
+	-- log.spam("Poser: Set slider to %s", currentslider)
 	setslidervalues()
 end
 
@@ -463,7 +463,7 @@ end
 local function sliderchanged()
 	local slidername = bonelist[bonelist.value or ""]
 	slidername = bones.bonemap[slidername] or slidername or ""
-	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
+	-- log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
 		local slider = charamgr.current:getslider(slidername)
 		setcurrentslider(slider)
