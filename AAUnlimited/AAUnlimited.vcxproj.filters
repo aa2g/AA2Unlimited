@@ -248,6 +248,7 @@
     <ClInclude Include="External\ExternalClasses\NpcStatus.h" />
     <ClInclude Include="External\ExternalClasses\CharacterStatus.h" />
     <ClInclude Include="External\ExternalClasses\NpcData.h" />
+    <ClInclude Include="External\ExternalClasses\ActionParamStruct.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

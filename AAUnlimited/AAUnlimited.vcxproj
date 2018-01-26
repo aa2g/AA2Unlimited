@@ -130,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
+    <ClInclude Include="External\ExternalClasses\ActionParamStruct.h" />
     <ClInclude Include="External\ExternalClasses\Animation.h" />
     <ClInclude Include="External\ExternalClasses\Bone.h" />
     <ClInclude Include="External\ExternalClasses\CharacterActivity.h" />
