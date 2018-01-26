@@ -352,7 +352,7 @@ void NpcAnswerInjection() {
 
 #endif
 
-void __stdcall NpcMovingActionEvent(void* moreUnknownData, CharInstData::ActionParamStruct* params) {
+void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParamStruct* params) {
 
 	ExtClass::CharacterStruct* user = NULL;
 	for(int i = 0; i < 25; i++) {
@@ -445,7 +445,7 @@ void NpcMovingActionInjection() {
 		(DWORD*)(&loc_NpcMovingActionFuncion));						//save old function to call in our redirect function
 }
 
-bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct,CharInstData::ActionParamStruct* params, bool success) {
+bool __stdcall NpcMovingActionPlanEvent(void* unknownStruct, ExtClass::ActionParamStruct* params, bool success) {
 	ExtClass::CharacterStruct* user = NULL;
 	for (int i = 0; i < 25; i++) {
 		ExtClass::CharacterStruct* it = AAPlay::g_characters[i].m_char;
