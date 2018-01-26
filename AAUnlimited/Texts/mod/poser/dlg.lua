@@ -31,6 +31,7 @@ local lists = require "poser.lists"
 local toggles = require "poser.toggles"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
+local fileutils = require "poser.fileutils"
 local unpack = table.unpack
 
 local boneentries = {}
@@ -179,7 +180,6 @@ signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
 local characterlist = lists.listbox { lines = 8, expand = "yes" }
-local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
@@ -279,8 +279,7 @@ end
 -- UI Props
 -- ----------
 
-local function getpropfile(pattern)
-	local pattern = aau_path(pattern)
+local function getfile(pattern)
 	local file
 	local ret
 	file, ret = iup.GetFile(pattern)
@@ -301,7 +300,7 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	local selected = getpropfile("poser\\items\\*.xx")
+	local selected = getfile(aau_path("poser\\items\\*.xx"))
 	if selected then
 		propmgr.loadprop(selected)
 	end
@@ -316,7 +315,7 @@ function removepropbutton.action()
 end
 
 function attachpropsbutton.action()
-	local path = getpropfile("poser\\charitems\\*.xx")
+	local path = getfile(aau_path("poser\\charitems\\*.xx"))
 	if not path then return end
 	log.spam("loading charitem %s", path)
 	local character = charamgr.current
@@ -414,18 +413,18 @@ end
 
 local function updatemodifier()
 	modifier = modifiers[currentoperation][currentmodifier]
-	log.spam("increment modifier set to %f", modifier)
+	-- log.spam("increment modifier set to %f", modifier)
 end
 
 local function slidersetmodifier(modifier)
-	log.spam("set current modifier to %d", modifier)
+	-- log.spam("set current modifier to %d", modifier)
 	currentmodifier = modifier
 	updatemodifier()
 end
 
 local function slidersetoperation(operation)
 	currentoperation = operation
-	log.spam("set current slider operation to %d", currentoperation)
+	-- log.spam("set current slider operation to %d", currentoperation)
 	if currentslider then
 		currentslider:SetCurrentOperation(operation - 1)
 	end
@@ -435,7 +434,7 @@ end
 
 local function setcurrentslider(slider)
 	currentslider = slider or dummyslider
-	log.spam("Poser: Set slider to %s", currentslider)
+	-- log.spam("Poser: Set slider to %s", currentslider)
 	setslidervalues()
 end
 
@@ -464,7 +463,7 @@ end
 local function sliderchanged()
 	local slidername = bonelist[bonelist.value or ""]
 	slidername = bones.bonemap[slidername] or slidername or ""
-	log.spam("Try to get slider %s from %s", slidername, charamgr.current)
+	-- log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
 		local slider = charamgr.current:getslider(slidername)
 		setcurrentslider(slider)
@@ -677,6 +676,38 @@ end
 
 
 -- -----------
+-- Clothing UI
+-- -----------
+
+-- local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
+
+local clothing = require "poser.clothing"
+local clothslot = clothing.slotbuttons("Slot", { "1", "2", "3", "4" }, function(type)
+	local character = charamgr.current
+	if character then
+		character.clothtype = type
+	end
+end)
+
+local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, function(state)
+	local character = charamgr.current
+	if character then
+		character:update(state)
+	end
+end)
+
+local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
+	local character = charamgr.current
+	if character then
+		local file = getfile(play_path("data\\save\\cloth\\*.cloth"))
+		local size
+		if file then file, size = fileutils.readfile(file) end
+		if file and size == 92 then character:loadcloth(file) end
+	end
+end}
+
+
+-- -----------
 -- UI Layout
 -- -----------
 
@@ -698,28 +729,13 @@ local dialogsliders = iup.dialog {
 					attachpropsbutton,
 					detachpropsbutton,
 				},
-				iup.label { title = "Style" },
-				stylelist,
-				iup.hbox {
-					iup.flatbutton { title = "Uniform", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Sports", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Swimsuit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.flatbutton { title = "Club", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					ngap = 3,
-				},
-				iup.hbox {
-					iup.flatbutton { title = "Edit", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					iup.hbox {
-						iup.flatbutton { title = "0", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "21x10", expand = "horizontal" },
-						iup.flatbutton { title = "1", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "2", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "3", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-						iup.flatbutton { title = "4", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "15x10", expand = "horizontal" },
-					},
-					iup.flatbutton { title = "Reload", border = "yes", padding = 3, font = "Serif, Courier, 8", size = "40x10" },
-					ngap = 3,
-				},
+				--iup.label { title = "Style" },
+				-- stylelist,
+				clothslot,
+				clothstate,
+				loadclothbutton,
 				expand = "yes",
+				gap = 3,
 			},
 			iup.vbox {
 				tabtitle = "Props",

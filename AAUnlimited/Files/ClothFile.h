@@ -10,6 +10,18 @@ public:
 	ClothFile(std::vector<BYTE> &file) : m_isValid(false) {
 		if (file.size() == 92) {
 			const char* buffer = (const char*)file.data();
+			fromBuffer(buffer);
+			m_isValid = true;
+		}
+	}
+
+	ClothFile(const char *buffer) : m_isValid(false) {
+		fromBuffer(buffer);
+		m_isValid = true;
+	}
+
+private:
+	void fromBuffer(const char *buffer) {
 #define R(buffer, type, var) var = *(type*)(buffer); buffer += sizeof(type);
 			R(buffer, BYTE, m_gender);
 			R(buffer, int, m_slot);
@@ -41,10 +53,9 @@ public:
 			R(buffer, int, m_underwearShadowHue);
 			R(buffer, int, m_underwearShadowBrightness);
 #undef R
-			m_isValid = true;
-		}
 	}
 
+public:
 	inline bool IsValid() {
 		return m_isValid;
 	}
