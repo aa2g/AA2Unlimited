@@ -348,6 +348,16 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_traitBools[trait] = enable;
 		}
 
+		void Thread::SetClothingState(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			int state = params[1].iVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->Update(state, 0);
+		}
+
 		//int seat, int personality
 		void Thread::SetCardPersonality(std::vector<Value>& params)
 		{
@@ -1593,6 +1603,12 @@ namespace Shared {
 				TEXT("Modify PC's answer."),
 				{ TYPE_INT },
 				&Thread::SetPCResponse
+			},
+			{
+				81, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Clothing State"), TEXT("%p ::ClothingState = %p"),
+				TEXT("Set the clothing state of some card."),
+				{ TYPE_INT, TYPE_INT},
+				&Thread::SetClothingState
 			},
 		};
 

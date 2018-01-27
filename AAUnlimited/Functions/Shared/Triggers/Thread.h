@@ -67,6 +67,7 @@ namespace Shared {
 			void SetPCResponse(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
+			void SetClothingState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
 			void SetCardVoicePitch(std::vector<Value>& params);
 			void SetCardClub(std::vector<Value>& params);
