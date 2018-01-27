@@ -113,8 +113,10 @@ namespace Triggers {
 	EDC_END
 
 	EDC_DECLARE(PeriodEndsData,PERIOD_ENDS)
+
 		int oldPeriod;
 		int newPeriod;
+
 	EDC_END
 
 	EDC_DECLARE(NpcResponseData,NPC_RESPONSE)
@@ -128,27 +130,40 @@ namespace Triggers {
 		int changedChance;
 
 	EDC_END
-		
-	EDC_DECLARE(NpcWalkToRoomData,NPC_WALK_TO_ROOM)
+
+	EDC_DECLARE(NpcWalkToRoomData, NPC_WALK_TO_ROOM)
+
+		ExtClass::ActionParamStruct* substruct;
 		int targetRoom;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantActionNoTargetData,NPC_WANT_ACTION_NOTARGET)
+
+		ExtClass::ActionParamStruct* substruct;
 		int action;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantTalkWithData,NPC_WANT_TALK_WITH)
+
+		ExtClass::ActionParamStruct* substruct;
 		int action;
 		int conversationTarget;
+
 	EDC_END
 
 	EDC_DECLARE(NpcWantTalkWithAboutData,NPC_WANT_TALK_WITH_ABOUT)
+
+		ExtClass::ActionParamStruct* substruct;
 		int action;
 		int conversationTarget;
 		int conversationAbout;
+
 	EDC_END
 
 	EDC_DECLARE(PCConversationStateUpdatedData, PC_CONVERSATION_STATE_UPDATED)
+
 		int state;
 		int npc_response;
 		int pc_response;
@@ -156,11 +171,14 @@ namespace Triggers {
 		int conversationAnswerId;
 		int currentlyAnswering;
 		BYTE* m_bStartH;
+
 	EDC_END
 
 	EDC_DECLARE(PcResponseData, PC_RESPONSE)
+
 		ExtClass::ConversationSubStruct* substruct;
 		bool forceResponse;
+
 	EDC_END
 		
 
