@@ -239,10 +239,18 @@ void Lua::bindLua() {
 	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
 		int idx = s.get(1);
-		if ((idx < 0) || (idx > 25) || !g_characters[idx].IsValid())
+		if ((idx < 0) || (idx > 24) || !g_characters[idx].IsValid())
 			return 0;
 		s.push(g_characters[idx].m_char);
 	});
+
+	_BINDING["GetCharInstData"] = LUA_LAMBDA({
+		int idx = s.get(1);
+		if ((idx < 0) || (idx > 24) || !g_characters[idx].IsValid())
+			return 0;
+		s.push(&g_characters[idx]);
+	});
+
 
 	using namespace ExtVars::AAPlay;
 	_BINDING["GetGameTimeData"] = LUA_LAMBDA({
