@@ -10,7 +10,11 @@ namespace ExtClass {
 class NpcData
 {
 public:
-	BYTE m_unknown[0x26C];
+	DWORD m_unknown[82];
+	DWORD* routeStart;
+	DWORD* routeEnd;
+	DWORD* routeUnknown;
+	DWORD m_unknown1[70];
 	NpcData* m_target;
 
 	static inline void bindLua() {

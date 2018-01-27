@@ -25,12 +25,12 @@ namespace NpcActions {
 		BYTE unk3[400 - 12];
 
 		// These dwords seem to be used for something
-		DWORD unk428;
-		DWORD unk432;
-		DWORD unk436;
-		ExtClass::CharacterActivity *answerChar; // + 440
-		ExtClass::CharacterActivity *askingChar; // + 444
-		DWORD unk448;
+		ExtClass::CharacterStruct* answerCharStruct;
+		ExtClass::CharacterStruct* askingCharStruct;
+		ExtClass::CharacterStruct* interruptingCharStruct;
+		ExtClass::CharacterActivity* answerChar; // + 440
+		ExtClass::CharacterActivity* askingChar; // + 444
+		ExtClass::CharacterActivity* interruptingChar; // + 448
 
 		// Rest is a mystery too
 		static inline void bindLua() {
