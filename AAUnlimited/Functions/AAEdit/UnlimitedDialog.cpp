@@ -1577,7 +1577,27 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Ear Height"),
 				{ { CharacterStruct::FACE, 1 } },
-				-0.05f, 0.05f
+				-0.5f, 0.5f
+			},
+			{ TEXT("Ear (Split) Scale X"),
+			{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				-0.3f, 0.3f
+			},
+			{ TEXT("Ear (Split) Scale Y"),
+			{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				-0.3f, 0.3f
+			},
+			{ TEXT("Ear (Split) Scale Z"),
+			{ { CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 } },
+				-0.3f, 0.3f
+			},
+			{ TEXT("Ear (Split) Spacing"),
+			{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Ear (Split) Position Z"),
+			{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 } },
+				-0.1f, 0.1f
 			},
 			{ TEXT("Mouth Width"),
 				{ { CharacterStruct::FACE, 0 } },
@@ -1655,10 +1675,6 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("*Foot Width"),
 				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
 				-0.2f, 0.2f
-			},
-			{ TEXT("*[split] Ear Height"),
-				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
-				-0.5f, 1.5f
 			},
 		};
 		

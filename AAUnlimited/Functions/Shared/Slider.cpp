@@ -102,13 +102,20 @@ namespace Shared {
 			x 0.64346
 			y 0.38282
 			z 0.4461*/
-			{ ExtClass::CharacterStruct::FACE, 6,	TEXT("A00_O_mimi"),		{ 1,0,0, 0,0,0, 0.64346f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear stuff; doesnt make sense without split ears
-			{ ExtClass::CharacterStruct::FACE, 7,	TEXT("A00_O_mimiL"),	{ 1,0,0, 0,0,0, -0.64346f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear stuff; doesnt make sense without split ears
-			{ ExtClass::CharacterStruct::FACE, 8,	TEXT("A00_O_mimi"),		{ 0,1,0, 0,0,0, 0,0.38282f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear stuff; doesnt make sense without split ears
-			{ ExtClass::CharacterStruct::FACE, 9,	TEXT("A00_O_mimiL"),	{ 0,1,0, 0,0,0, 0,0.38282f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear stuff; doesnt make sense without split ears
+			{ ExtClass::CharacterStruct::FACE, 6,	TEXT("A00_O_mimiR"),{ 1,0,0, 0,0,0, 0.64346f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Left
+			{ ExtClass::CharacterStruct::FACE, 7,	TEXT("A00_O_mimiL"),{ 1,0,0, 0,0,0, -0.64346f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Right
+			{ ExtClass::CharacterStruct::FACE, 8,	TEXT("A00_O_mimiR"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Left
+			{ ExtClass::CharacterStruct::FACE, 9,	TEXT("A00_O_mimiL"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Right
 			{ ExtClass::CharacterStruct::FACE, 10,	TEXT("AS00_N_megane"),	{ 0,0,0, 0,0,0, 0,1,0 },			Slider::ADD, AAUCardData::MODIFY_FRAME }, //glasses Y
 			{ ExtClass::CharacterStruct::FACE, 11,	TEXT("AS00_N_megane"),	{ 0,0,0, 0,0,0, 0,0,1 },			Slider::ADD, AAUCardData::MODIFY_FRAME }, //glasses Z
 			{ ExtClass::CharacterStruct::FACE, 12,	TEXT("AS00_N_megane"),	{ 0,0,0, 1,0,0, 0,0,0 },			Slider::ADD, AAUCardData::MODIFY_FRAME }, //glasses Z
+			{ ExtClass::CharacterStruct::FACE, 13,	TEXT("A00_O_mimiL"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Left
+			{ ExtClass::CharacterStruct::FACE, 14,	TEXT("A00_O_mimiR"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Right
+			{ ExtClass::CharacterStruct::FACE, 15,	TEXT("A00_O_mimiL"),{ 0,0,0, 0,0,0, 1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Left
+			{ ExtClass::CharacterStruct::FACE, 16,	TEXT("A00_O_mimiR"),{ 0,0,0, 0,0,0, -1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Right
+			{ ExtClass::CharacterStruct::FACE, 17,	TEXT("A00_O_mimiL"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Left
+			{ ExtClass::CharacterStruct::FACE, 18,	TEXT("A00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
+
 		},
 		{
 			//SKELETON
