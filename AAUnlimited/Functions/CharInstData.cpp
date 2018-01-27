@@ -10,7 +10,7 @@ CharInstData::CharInstData() : m_char(NULL) {
 CharInstData::~CharInstData() {
 }
 
-std::string styleName;
+static std::string styleName;
 
 void CharInstData::SetCurrentStyle(int index)
 {
