@@ -80,7 +80,7 @@ public:
 		LUA_NAME;
 		LUA_BIND(m_char);
 		LUA_METHOD(SetCurrentStyle, {
-			_self->SetCurrentStyle(_gl.get(1));
+			_self->SetCurrentStyle(_gl.get(2));
 		});
 		LUA_METHOD(GetStyleCount, {
 			return _gl.push(_self->GetStyleCount()).one;
@@ -89,7 +89,7 @@ public:
 			return _gl.push(_self->GetCurrentStyle()).one;
 		});
 		LUA_METHOD(GetStyleName, {
-			return _gl.push(_self->GetStyleName(_gl.get(1))).one;
+			return _gl.push(_self->GetStyleName(_gl.get(2))).one;
 		});
 
 #undef LUA_CLASS
