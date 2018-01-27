@@ -10,6 +10,8 @@ CharInstData::CharInstData() : m_char(NULL) {
 CharInstData::~CharInstData() {
 }
 
+std::string styleName;
+
 void CharInstData::SetCurrentStyle(int index)
 {
 	if (index > GetStyleCount()) return;
@@ -32,7 +34,8 @@ int CharInstData::GetCurrentStyle()
 const char* CharInstData::GetStyleName(int index)
 {
 	if (index > GetStyleCount()) return "";
-	return General::CastToString(m_cardData.m_styles[index].m_name).c_str();
+	styleName = General::CastToString(m_cardData.m_styles[index].m_name);
+	return styleName.c_str();
 }
 
 void CharInstData::Reset() {
