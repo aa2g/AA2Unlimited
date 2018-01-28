@@ -1599,6 +1599,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->action);
+			case PC_RESPONSE:
+				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationId);
 			default:
 				return 0;
 			}
