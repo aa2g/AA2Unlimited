@@ -706,6 +706,15 @@ local loadclothbutton = iup.button { title = "Load Cloth", action = function(sel
 	end
 end}
 
+local loadnextstyle  = exe_type == "play" and iup.button { title = "Load Next Style", action = function(self)
+	local character = charamgr.current
+	if character then
+		local characterdata = GetCharInstData(character.struct.m_seat)
+		characterdata:SetCurrentStyle((characterdata:GetCurrentStyle() + 1) % characterdata:GetStyleCount())
+		character:update(character.struct.m_clothState)
+	end
+end}
+
 
 -- -----------
 -- UI Layout
@@ -733,7 +742,10 @@ local dialogsliders = iup.dialog {
 				-- stylelist,
 				clothslot,
 				clothstate,
-				loadclothbutton,
+				iup.hbox {
+					loadclothbutton,
+					loadnextstyle,
+				},
 				expand = "yes",
 				gap = 3,
 			},
