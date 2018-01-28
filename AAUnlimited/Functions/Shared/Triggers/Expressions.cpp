@@ -1576,6 +1576,10 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
+			case PC_RESPONSE:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 			default:
 				return 0;
 			}
@@ -1587,6 +1591,11 @@ namespace Shared {
 			case PC_CONVERSATION_STATE_UPDATED:
 				if (((PCConversationStateUpdatedData*)eventData)->pc_response >= 0) {
 					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
+				}
+				else return Value(-1);
+			case PC_RESPONSE:
+				if (((PcResponseData*)eventData)->substruct->m_response >= 0) {
+					return ((int)(((PcResponseData*)eventData)->substruct->m_response));
 				}
 				else return Value(-1);
 			default:
@@ -1611,6 +1620,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->conversationAnswerId);
+			case PC_RESPONSE:
+				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationAnswerId);
 			default:
 				return 0;
 			}
@@ -1621,6 +1632,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->currentlyAnswering);
+			case PC_RESPONSE:
+				return Value((bool)(((PcResponseData*)this->eventData)->substruct->m_bCurrentlyAnswering));
 			default:
 				return 0;
 			}
