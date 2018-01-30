@@ -324,6 +324,8 @@ inline const TextureImage* AAUCardData::GetMeshOverrideTexture(const TCHAR* text
 inline const std::vector<AAUCardData::ArchiveOverrideRule>& AAUCardData::GetArchiveOverrideList() const { return m_styles[m_currCardStyle].m_archiveOverrides; }
 inline const OverrideFile* AAUCardData::GetArchiveOverrideFile(const TCHAR* archive, const TCHAR* texture) const {
 	auto it = m_styles[m_currCardStyle].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, texture));
+	if (it == m_styles[m_currCardStyle].m_archiveOverrideMap.end())
+		it = m_styles[m_currCardStyle].m_archiveOverrideMap.find(std::make_pair<std::wstring, std::wstring>(std::wstring(), texture));
 	return it == m_styles[m_currCardStyle].m_archiveOverrideMap.end() ? NULL : &it->second;
 }
 inline const std::vector<AAUCardData::ArchiveRedirectRule>& AAUCardData::GetArchiveRedirectList() const { return m_styles[m_currCardStyle].m_archiveRedirects; }
