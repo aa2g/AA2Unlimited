@@ -1731,7 +1731,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (ed == thisPtr->m_sliders[i].edit) {
 					ignoreNextSlider = true;
 					thisPtr->m_sliders[i].Sync(true);
-					thisPtr->ApplySlider(i);
+					//thisPtr->ApplySlider(i);
 					break;
 				}
 			}
@@ -1816,8 +1816,22 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 				continue;
 			TCHAR buff[256];
 			size_t written;
-			mbstowcs_s(&written,buff,frame->m_name+5,256);
+			mbstowcs_s(&written,buff,frame->m_name,256);
 			std::wstring str(buff);
+
+			//remove the prefixes
+			auto prefix = std::wstring(L"pose_tr_");
+			auto prefixIdx = str.find(prefix, 0);
+			if (prefixIdx != std::wstring::npos) {
+				str = str.erase(prefixIdx, prefix.length());
+			}
+
+			prefix = std::wstring(L"artf_");
+			prefixIdx = str.find(prefix, 0);
+			if (prefixIdx != std::wstring::npos) {
+				str = str.erase(prefixIdx, prefix.length());
+			}
+
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
 			if(rule != NULL) {
 				D3DMATRIX& mat = elem.matrix;
