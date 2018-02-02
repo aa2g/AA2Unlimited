@@ -1821,15 +1821,13 @@ void UnlimitedDialog::BSDialog::ApplySlider(int index) {
 
 			//remove the prefixes
 			auto prefix = std::wstring(L"pose_tr_");
-			auto prefixIdx = str.find(prefix, 0);
-			if (prefixIdx != std::wstring::npos) {
-				str = str.erase(prefixIdx, prefix.length());
+			if (General::StartsWith(str, prefix)) {
+				str = str.erase(0, prefix.length());
 			}
 
 			prefix = std::wstring(L"artf_");
-			prefixIdx = str.find(prefix, 0);
-			if (prefixIdx != std::wstring::npos) {
-				str = str.erase(prefixIdx, prefix.length());
+			if (General::StartsWith(str, prefix)) {
+				str = str.erase(0, prefix.length());
 			}
 
 			auto* rule = Shared::g_currentChar->m_cardData.GetSliderFrameRule(model,str);
