@@ -187,15 +187,6 @@ local function updatecurrentcharacter(_, index)
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
-local function update_showui()
-	if _M.opts.hideui ~= 1 then return end
-	if _M.visible and #charamgr.characters > 0 then
-		SetHideUI(true)
-	else
-		SetHideUI(false)
-	end
-end
-
 local function updatecharacterlist()
 	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur
@@ -209,9 +200,11 @@ local function updatecharacterlist()
 	end
 	characterlist.setlist(list)
 	characterlist.value = cur
-	update_showui()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
+
+local charswapprevbutton = iup.button { title = "/\\", expand = "vertical", action = function() charamgr.swapprev(tonumber(characterlist.value)) end }
+local charswapnextbutton = iup.button { title = "\\/", expand = "vertical", action = function() charamgr.swapnext(tonumber(characterlist.value)) end }
 
 
 -- -----------------
@@ -696,6 +689,24 @@ local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, fu
 	end
 end)
 
+local loadstyle = exe_type == "play" and clothing.slotbuttons("Style", { "1", "2", "3", "4", ">" }, function(state)
+	local character = charamgr.current
+	if character then
+		local characterdata = GetCharInstData(character.struct.m_seat)
+		local stylecount = characterdata:GetStyleCount()
+		if stylecount > 1 then
+			local style
+			if state == 4 then
+				style = (characterdata:GetCurrentStyle() + 1) % stylecount
+			else
+				style = state
+			end
+			characterdata:SetCurrentStyle(style)
+			character:update(character.struct.m_clothState)
+		end
+	end
+end)
+
 local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
 	local character = charamgr.current
 	if character then
@@ -703,15 +714,6 @@ local loadclothbutton = iup.button { title = "Load Cloth", action = function(sel
 		local size
 		if file then file, size = fileutils.readfile(file) end
 		if file and size == 92 then character:loadcloth(file) end
-	end
-end}
-
-local loadnextstyle  = exe_type == "play" and iup.button { title = "Load Next Style", action = function(self)
-	local character = charamgr.current
-	if character then
-		local characterdata = GetCharInstData(character.struct.m_seat)
-		characterdata:SetCurrentStyle((characterdata:GetCurrentStyle() + 1) % characterdata:GetStyleCount())
-		character:update(character.struct.m_clothState)
 	end
 end}
 
@@ -729,7 +731,13 @@ local dialogsliders = iup.dialog {
 			end,
 			iup.vbox {
 				tabtitle = "Characters",
-				characterlist,
+				iup.hbox {
+					characterlist,
+					iup.vbox {
+						charswapprevbutton,
+						charswapnextbutton,
+					},
+				},
 				iup.hbox {
 					addcharbutton,
 					removecharbutton,
@@ -738,13 +746,15 @@ local dialogsliders = iup.dialog {
 					attachpropsbutton,
 					detachpropsbutton,
 				},
-				--iup.label { title = "Style" },
-				-- stylelist,
 				clothslot,
 				clothstate,
+				loadstyle,
 				iup.hbox {
 					loadclothbutton,
-					loadnextstyle,
+				},
+				iup.hbox {
+					iup.button { title = "Show UI", action = function() SetHideUI(false) end },
+					iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
 				},
 				expand = "yes",
 				gap = 3,
@@ -866,7 +876,7 @@ local function adjust_parenting(v)
 	v:map()
 	set_window_proc(v.hwnd, function(orig, this, hwnd, msg, wparam, lparam)
 		-- left click, grab-mvoe
-		if msg == 0x201 and _M.opts.grab and hwnd == fixptr(v.hwnd) then
+		if msg == 0x201 and _M.opts.grab == 1 and hwnd == fixptr(v.hwnd) then
 			ReleaseCapture()
 			SendMessageW(hwnd, 0xA1, 2, 0)
 		-- mouse moves onto the window, grab focus
@@ -887,14 +897,12 @@ function _M.togglevisible()
 		end
 		_M.visible = true
 		_M.block_mouse = true
-		update_showui()
 	else
 		for _,v in ipairs(dialogs) do
 			v:hide()
 		end
 		_M.visible = false
 		_M.block_mouse = false
-		update_showui()
 	end
 	SetForegroundWindow(GetGameHwnd())
 end

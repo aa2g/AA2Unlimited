@@ -143,6 +143,20 @@ function _M.clear_characters()
 	end
 end
 
+function _M.swapnext(index)
+	if index < #characters then
+		characters[index + 1], characters[index] = characters[index], characters[index + 1]
+		characterschanged()
+	end
+end
+
+function _M.swapprev(index)
+	if index > 1 then
+		characters[index - 1], characters[index] = characters[index], characters[index - 1]
+		characterschanged()
+	end
+end
+
 -- NOTE: these are separated from the proxy because we want to use those *without* the entity proxy,
 -- too. Proxy routes to these delegates via entmgr (our _M) argument.
 function _M.spawn(character, clothstate, pose)
