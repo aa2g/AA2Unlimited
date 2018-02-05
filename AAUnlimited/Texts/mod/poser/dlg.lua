@@ -509,7 +509,7 @@ tears.expand = "horizontal"
 local eyetracking = iup.flatbutton { title = "Eye Tracking", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" and 1 or 0 end end, expand = "horizontal" }
 eyetracking.size = "x12"
 eyetracking.expand = "horizontal"
-local yogurt = toggles.button { title = "Yogurt" }
+local yogurt = iup.flatbutton { title = "Yogurt", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tonguejuice = self.value == "OFF"; charamgr.current.mouthjuice = self.value == "OFF" end end, expand = "horizontal" }
 yogurt.size = "x12"
 yogurt.expand = "horizontal"
 
