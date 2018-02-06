@@ -476,6 +476,15 @@ namespace Shared {
 		}
 		//int(int)
 
+		Value Thread::GetCherryStatus(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int target = params[1].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (!cardInst->IsValid()) return Value(TEXT(""));
+
+			return Value((int)AAPlay::g_characters[seat].m_char->m_characterStatus->m_cherry[target]);
+		}
 
 		//int(int)
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
@@ -2250,6 +2259,12 @@ namespace Shared {
 					TEXT("FapState"), TEXT("%p ::FapState"), TEXT("Returns whether the character is fapping or not. 1 is yes, -1 is no."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetMasturbating
+				},
+				{
+					95, EXPRCAT_CHARPROP,
+					TEXT("Cherry Status"), TEXT("%p ::GetCherryState( %p )"), TEXT("Returns whether other character attempted to take virginity of the card passed as the first argument. 1 - yes, 0 - no."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCherryStatus
 				},
 
 			},

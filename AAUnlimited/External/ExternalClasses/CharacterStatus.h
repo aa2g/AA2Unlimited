@@ -42,6 +42,8 @@ public:
 			DWORD m_cumSwallowed[25];
 			DWORD m_unknown[25];
 			DWORD m_riskyCum[25];
+			DWORD m_unknown4[25];
+			DWORD m_cherry[25];
 		};
 		DWORD m_statArrays[17][25];
 		DWORD m_stats[17*25];
