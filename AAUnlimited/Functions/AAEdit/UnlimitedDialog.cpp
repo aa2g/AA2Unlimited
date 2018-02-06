@@ -1517,12 +1517,6 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKELETON, 46 }, { CharacterStruct::SKELETON, 47 } },
 				-0.6f, 0.6f
 			},
-			{ TEXT("Butt Size"), //Split from Hip Size, same thing - Vertical scaling.
-				{ { CharacterStruct::BODY, 51 },{ CharacterStruct::SKIRT, 51 },
-				{ CharacterStruct::LEGS, 17 },
-				{ CharacterStruct::SKELETON, 73 },{ CharacterStruct::SKELETON, 74 } },
-				-0.5f, 1.0f
-			},
 			{ TEXT("Hip Height"),
 				{	{ CharacterStruct::BODY, 21 },
 				//	{ CharacterStruct::SKIRT, 7 },
@@ -1547,6 +1541,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::LEGS, 15 }
 				},
 				-0.5f, 0.5f
+			},
+			{ TEXT("Butt Size"), //Split from Hip Size, same thing - Vertical scaling.
+				{ { CharacterStruct::BODY, 51 },{ CharacterStruct::SKIRT, 51 },
+				{ CharacterStruct::LEGS, 17 },
+				{ CharacterStruct::SKELETON, 73 },{ CharacterStruct::SKELETON, 74 } },
+				-0.5f, 1.0f
 			},
 			{ TEXT("Ass Cheeks Width"),
 				{ { CharacterStruct::SKELETON, 9 },{ CharacterStruct::SKELETON, 10 } },
