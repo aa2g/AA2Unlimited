@@ -1401,6 +1401,17 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 1 }, },
 				-0.6f, 0.6f
 			},
+			{ TEXT("Chest Width"), //Split from Chest Size
+				{ { CharacterStruct::BODY, 39 },{ CharacterStruct::SKELETON, 68 },
+				{ CharacterStruct::SKELETON, 69 } ,{ CharacterStruct::SKIRT, 39 }, },
+				-0.6f, 0.6f
+			},
+			{ TEXT("Chest Thickness"), //Split from Chest Size
+				{ { CharacterStruct::BODY, 40 },{ CharacterStruct::SKELETON, 70 },
+				{ CharacterStruct::SKELETON, 71 } ,{ CharacterStruct::SKELETON, 72 },
+				{ CharacterStruct::SKIRT, 40 }, },
+				-0.6f, 0.6f
+			},
 			{ TEXT("Chest Height"),
 				{ { CharacterStruct::BODY, 20 }, { CharacterStruct::SKIRT, 6 }, },
 				-1, 1
@@ -1409,6 +1420,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::BODY, 2 },{ CharacterStruct::BODY, 3 },
 				{ CharacterStruct::SKIRT, 24 },{ CharacterStruct::SKIRT, 25 } },
 				-0.5f, 0.5f
+			},
+			{ TEXT("Neck Height"),
+				{ { CharacterStruct::SKELETON, 66 },{ CharacterStruct::SKELETON, 67 }, },
+				-1, 1
 			},
 			{ TEXT("Shoulders Width"),
 				{ { CharacterStruct::SKELETON, 36 },{ CharacterStruct::SKELETON, 37 } },
@@ -1443,7 +1458,21 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 33 } },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Breasts Shape"),
+			{ TEXT("Upper Arm Thickness"), //Split from Arm Thickness.
+				{ { CharacterStruct::BODY, 41 },{ CharacterStruct::BODY, 42 },{ CharacterStruct::BODY, 43 },
+				{ CharacterStruct::BODY,  44 },{ CharacterStruct::BODY,  45 },{ CharacterStruct::BODY, 46 },
+				{ CharacterStruct::SKIRT, 41 },{ CharacterStruct::SKIRT, 42 },{ CharacterStruct::SKIRT, 43 },
+				{ CharacterStruct::SKIRT, 44 },{ CharacterStruct::SKIRT, 45 },{ CharacterStruct::SKIRT, 46 }, },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Under Arm Thickness"), //Split from Arm Thickness.
+				{ { CharacterStruct::BODY, 47 },{ CharacterStruct::BODY, 48 },{ CharacterStruct::BODY, 49 },
+				{ CharacterStruct::BODY,  50 },
+				{ CharacterStruct::SKIRT, 47 },{ CharacterStruct::SKIRT, 48 },{ CharacterStruct::SKIRT, 49 },
+				{ CharacterStruct::SKIRT, 50 }, },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Breasts Width"),
 				{ { CharacterStruct::BODY, 30 },{ CharacterStruct::BODY, 31 },
 				{ CharacterStruct::BODY, 32 },{ CharacterStruct::BODY, 33 },
 				{ CharacterStruct::SKIRT, 28 },{ CharacterStruct::SKIRT, 29 },
@@ -1456,6 +1485,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 34 },{ CharacterStruct::SKIRT, 35 },
 				{ CharacterStruct::SKIRT, 36 },{ CharacterStruct::SKIRT, 37 }, },
 				0, 1
+			},
+			{ TEXT("Breasts Pushup"),
+				{ { CharacterStruct::SKELETON, 64 },{ CharacterStruct::SKELETON, 65 }, },
+				-1, 1
+			},
+			{ TEXT("Nipple Size"),
+				{ { CharacterStruct::BODY, 37 },{ CharacterStruct::BODY, 38 },{ CharacterStruct::SKIRT, 64 },{ CharacterStruct::SKIRT, 65 }, },
+				-0.2, 1
 			},
 			{ TEXT("Waist Thickness"),
 				{ { CharacterStruct::BODY, 26 },{ CharacterStruct::BODY, 27 },
@@ -1479,6 +1516,12 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKELETON, 45 },
 				{ CharacterStruct::SKELETON, 46 }, { CharacterStruct::SKELETON, 47 } },
 				-0.6f, 0.6f
+			},
+			{ TEXT("Butt Size"), //Split from Hip Size, same thing - Vertical scaling.
+				{ { CharacterStruct::BODY, 51 },{ CharacterStruct::SKIRT, 51 },
+				{ CharacterStruct::LEGS, 17 },
+				{ CharacterStruct::SKELETON, 73 },{ CharacterStruct::SKELETON, 74 } },
+				-0.5f, 1.0f
 			},
 			{ TEXT("Hip Height"),
 				{	{ CharacterStruct::BODY, 21 },
@@ -1519,16 +1562,46 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKELETON, 52 } ,{ CharacterStruct::SKELETON, 53 }, },
 				-0.5f, 0.5f
 			},
-			{ TEXT("Thighs Thickness 1"),
+			{ TEXT("Leg Depth Correction"),
+				{ { CharacterStruct::SKELETON, 58 },{ CharacterStruct::SKELETON, 59 },
+				{ CharacterStruct::SKELETON, 60 } ,{ CharacterStruct::SKELETON, 61 },
+				{ CharacterStruct::SKELETON, 62 } ,{ CharacterStruct::SKELETON, 63 }, },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Upper Thigh Size"),
 				{ { CharacterStruct::BODY, 16 },{ CharacterStruct::BODY, 18 },
 				{ CharacterStruct::LEGS, 2 },{ CharacterStruct::LEGS, 3 },
 				{ CharacterStruct::SKIRT, 2 },{ CharacterStruct::SKIRT, 4 } },
 				-1.0f, 1.0f
 			},
-			{ TEXT("Thighs Thickness 2"),
+			{ TEXT("Upper Thigh Width"),
+				{ { CharacterStruct::BODY, 52 },{ CharacterStruct::BODY, 53 },
+				{ CharacterStruct::LEGS, 18 },{ CharacterStruct::LEGS, 19 },
+				{ CharacterStruct::SKIRT, 52 },{ CharacterStruct::SKIRT, 53 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Upper Thigh Thickness"),
+				{ { CharacterStruct::BODY, 54 },{ CharacterStruct::BODY, 55 },
+				{ CharacterStruct::LEGS, 20 },{ CharacterStruct::LEGS, 21 },
+				{ CharacterStruct::SKIRT, 54 },{ CharacterStruct::SKIRT, 55 } },
+					-1.0f, 1.0f
+			},
+			{ TEXT("Lower Thigh Size"),
 				{ { CharacterStruct::BODY, 17 },{ CharacterStruct::BODY, 19 },
 				{ CharacterStruct::LEGS, 0 },{ CharacterStruct::LEGS, 1 },
 				{ CharacterStruct::SKIRT, 3 },{ CharacterStruct::SKIRT, 5 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Lower Thigh Width"),
+				{ { CharacterStruct::BODY, 56 },{ CharacterStruct::BODY, 57 },
+				{ CharacterStruct::LEGS, 22 },{ CharacterStruct::LEGS, 23 },
+				{ CharacterStruct::SKIRT, 56 },{ CharacterStruct::SKIRT, 57 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Lower Thigh Thickness"),
+				{ { CharacterStruct::BODY, 58 },{ CharacterStruct::BODY, 59 },
+				{ CharacterStruct::LEGS, 24 },{ CharacterStruct::LEGS, 25 },
+				{ CharacterStruct::SKIRT, 58 },{ CharacterStruct::SKIRT, 59 } },
 				-1.0f, 1.0f
 			},
 			{ TEXT("Zetthigh Ryouiki"),
@@ -1537,9 +1610,19 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				/*{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 }*/ },
 				-3.0f, 3.0f
 			},
-			{ TEXT("Calves Thickness"),
+			{ TEXT("Calves Size"),
 				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 },
 				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Calves Width"),
+				{ { CharacterStruct::LEGS, 26 },{ CharacterStruct::LEGS, 27 },
+				{ CharacterStruct::SKIRT, 60 },{ CharacterStruct::SKIRT, 61 } },
+				-0.5f, 0.5f
+			},
+			{ TEXT("Calves Thickness"),
+				{ { CharacterStruct::LEGS, 28 },{ CharacterStruct::LEGS, 29 },
+				{ CharacterStruct::SKIRT, 62 },{ CharacterStruct::SKIRT, 63 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Head Size"),
@@ -1579,25 +1662,25 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 1 } },
 				-0.5f, 0.5f
 			},
+			{ TEXT("Ear (Split) Spacing"),
+				{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Ear (Split) Depth"),
+				{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 } },
+				-0.1f, 0.1f
+			},
 			{ TEXT("Ear (Split) Scale X"),
-			{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Y"),
-			{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Z"),
 			{ { CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 } },
 				-0.3f, 0.3f
-			},
-			{ TEXT("Ear (Split) Spacing"),
-			{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 } },
-				-0.1f, 0.1f
-			},
-			{ TEXT("Ear (Split) Position Z"),
-			{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 } },
-				-0.1f, 0.1f
 			},
 			{ TEXT("Mouth Width"),
 				{ { CharacterStruct::FACE, 0 } },
