@@ -349,6 +349,19 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_traitBools[trait] = enable;
 		}
 
+		//int seat, int trait, bool enable
+		void Thread::SetCherryStatus(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int target = params[1].iVal;
+			int value = params[2].iVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_cherry[target] = value;
+		}
+
 		void Thread::SetClothingState(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int state = params[1].iVal;
@@ -1610,6 +1623,12 @@ namespace Shared {
 				TEXT("Set the clothing state of some card."),
 				{ TYPE_INT, TYPE_INT},
 				&Thread::SetClothingState
+			},
+			{
+				82, ACTIONCAT_NPCACTION, TEXT("Set Cherry Status"), TEXT("%p ::SetCherryStatus(target: %p ) = %p"),
+				TEXT("Sets whether the character's virginity was attempted to be taken by the target. 0 - no, 1 - yes."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCherryStatus
 			},
 		};
 

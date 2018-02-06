@@ -322,7 +322,7 @@ namespace ExtClass {
 		void* m_pngRosterBuffer; // roster image
 		DWORD m_pngBufferSize; // 0x30
 		void* m_pngBuffer; // 0x34 card image, exluding the aa2 data (just the image part)
-		BYTE m_unknown2[4]; // 0x38
+		DWORD m_unknown2; // 0x38
 		BYTE m_gender; //0x3c, 0=male, 1=female. no tumbler, thats all.
 		char m_forename[260]; // 0x3d	//Family Name
 		char m_surname[260];			//Given Name
