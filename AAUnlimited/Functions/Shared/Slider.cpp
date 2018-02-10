@@ -116,6 +116,25 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 17,	TEXT("A00_O_mimiL"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Left
 			{ ExtClass::CharacterStruct::FACE, 18,	TEXT("A00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
 
+			//Tot sliders
+
+			{ ExtClass::CharacterStruct::FACE, 19,	TEXT("A00_J_nose"),{ 0,0,0, 1,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 20,	TEXT("A00_J_nose"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 21,	TEXT("A00_J_nose"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 22,	TEXT("A00_J_nose"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 23,	TEXT("A00_J_nosebridge"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 24,	TEXT("A00_J_chin"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 25,	TEXT("A00_J_chin"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 26,	TEXT("A00_J_jaw"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 27,	TEXT("A00_J_jaw"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 28,	TEXT("A00_J_jaw"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 29,	TEXT("A00_J_cheek"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 30,	TEXT("A00_J_cheek"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 31,	TEXT("A00_J_cheek"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 32,	TEXT("A00_J_jaw_back"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+
+
+
 		},
 		{
 			//SKELETON

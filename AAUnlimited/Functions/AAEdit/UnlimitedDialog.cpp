@@ -1759,6 +1759,69 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
 				-0.2f, 0.2f
 			},
+
+
+				//Tot Sliders
+
+
+
+
+			{ TEXT("Nose Tilt"),
+	     		{ { CharacterStruct::FACE, 19 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Nose Width"),
+	    		{ { CharacterStruct::FACE, 20 } },
+				-0.2f, 0.2f
+			},
+			{ TEXT("Nose Height"),
+		    	{ { CharacterStruct::FACE, 21 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Nose Length"),
+		    	{ { CharacterStruct::FACE, 22 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Nose Bridge Depth"),
+	    		{ { CharacterStruct::FACE, 23 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Chin Height"),
+	    		{ { CharacterStruct::FACE, 24 } },
+				-0.15f, 0.5f
+			},
+			{ TEXT("Chin Depth"),
+	    		{ { CharacterStruct::FACE, 25 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Jaw Width"),
+	    		{ { CharacterStruct::FACE, 26 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Jaw Shape 1"),
+		    	{ { CharacterStruct::FACE, 27 } },
+				-0.05f, 0.3f
+			},
+			{ TEXT("Jaw Shape 2"),
+	    		{ { CharacterStruct::FACE, 28 } },
+				-0.1f, 0
+			},
+			{ TEXT("Cheek Height"),
+	    		{ { CharacterStruct::FACE, 29 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Cheek Depth"),
+	    		{ { CharacterStruct::FACE, 30 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Cheek Width"),
+	    		{ { CharacterStruct::FACE, 31 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Face Bottom Position?"),
+	    		{ { CharacterStruct::FACE, 32 } },
+				-0.3f, 0
+			},
 		};
 		
 		int xpos = 10,ypos = 10;
