@@ -17,8 +17,18 @@ local framechanged= signals.signal()
 local posesdir = "poser\\poses"
 local scenesdir = "poser\\scenes"
 
+local lock_camera = false
+local lock_face = false
+local lock_props = false
 local lock_world = false
 local lock_world_bone = "a01_N_Zentai_010"
+
+local lockfacetoggle2
+lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
+lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
+lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
+lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
+lockcameratoggle = iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
 
 local function setclip(clip)
 	if charamgr.current then
@@ -115,7 +125,7 @@ local function table2pose(pose, character)
 	local frame = pose.frame
 	if pose.sliders then
 		for k,v in pairs(pose.sliders) do
-			local slider = k ~= lock_world_bone and character:getslider(k)
+			local slider = not (k == lock_world_bone and lock_world) and character:getslider(k)
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
@@ -136,7 +146,7 @@ local function table2pose(pose, character)
 		end
 	end
 	local face = pose.face
-	if face then
+	if face and not lock_face then
 		if face.mouth then character.mouth = face.mouth end
 		if face.mouthopen then character.mouthopen = face.mouthopen end
 		if face.eye then character.eye = face.eye end
@@ -275,37 +285,41 @@ local function loadscene(filename)
 				end
 			end
 			
-			for i,readprop in ipairs(props) do
-				local find
-				for j,p in pairs(loadedprops) do
-					if p.name == readprop.name then
-						find = j
-						break
+			if not lock_props then
+				for i,readprop in ipairs(props) do
+					local find
+					for j,p in pairs(loadedprops) do
+						if p.name == readprop.name then
+							find = j
+							break
+						end
 					end
-				end
-				find = table.remove(loadedprops, find)
-				if find then
-					for k,v in pairs(readprop.sliders) do
-						local slider = find:getslider(k)
-						if slider then
-							slider:rotation(0,v[1])
-							slider:rotation(1,v[2])
-							slider:rotation(2,v[3])
-							slider:rotation(3,v[4])
-							slider:translate(0,v[5])
-							slider:translate(1,v[6])
-							slider:translate(2,v[7])
-							slider:scale(0,v[8])
-							slider:scale(1,v[9])
-							slider:scale(2,v[10])
-							slider:Apply()
+					find = table.remove(loadedprops, find)
+					if find then
+						for k,v in pairs(readprop.sliders) do
+							local slider = find:getslider(k)
+							if slider then
+								slider:rotation(0,v[1])
+								slider:rotation(1,v[2])
+								slider:rotation(2,v[3])
+								slider:rotation(3,v[4])
+								slider:translate(0,v[5])
+								slider:translate(1,v[6])
+								slider:translate(2,v[7])
+								slider:scale(0,v[8])
+								slider:scale(1,v[9])
+								slider:scale(2,v[10])
+								slider:Apply()
+							end
 						end
 					end
 				end
 			end
 			
-			for k,v in pairs(scene.camera or {}) do
-				camera[k] = v
+			if not lock_camera then
+				for k,v in pairs(scene.camera or {}) do
+					camera[k] = v
+				end
 			end
 		end
 	end
@@ -435,11 +449,13 @@ _M.dialogposes = iup.dialog {
 						saveposebutton,
 					},
 					iup.label { title = "Locks" },
-					iup.toggle { title = "Lock World Bone", action = function(state) lock_world = state == 1 end },
+					lockworldtoggle,
+					lockfacetoggle1,
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
 				},
 				tabtitle = "Poses",
+				gap = 3,
 			},
 			iup.hbox {
 				iup.vbox {
@@ -454,10 +470,15 @@ _M.dialogposes = iup.dialog {
 						loadscenebutton,
 						savescenebutton,
 					},
+					iup.label { title = "Locks" },
+					lockfacetoggle2,
+					lockpropstoggle,
+					lockcameratoggle,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
 				},
-				tabtitle = "Scenes"
+				tabtitle = "Scenes",
+				gap = 3,
 			},
 		},
 		iup.frame {
