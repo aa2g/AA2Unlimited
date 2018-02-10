@@ -431,6 +431,8 @@ _M.dialogposes = iup.dialog {
 						loadposebutton,
 						saveposebutton,
 					},
+					iup.label { title = "Locks" },
+					iup.toggle { "World" },
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
 				},
