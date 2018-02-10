@@ -17,6 +17,9 @@ local framechanged= signals.signal()
 local posesdir = "poser\\poses"
 local scenesdir = "poser\\scenes"
 
+local lock_world = false
+local lock_world_bone = "a01_N_Zentai_010"
+
 local function setclip(clip)
 	if charamgr.current then
 		charamgr.current:setclip(clip)
@@ -112,7 +115,7 @@ local function table2pose(pose, character)
 	local frame = pose.frame
 	if pose.sliders then
 		for k,v in pairs(pose.sliders) do
-			local slider = character:getslider(k)
+			local slider = k ~= lock_world_bone and character:getslider(k)
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
@@ -432,7 +435,7 @@ _M.dialogposes = iup.dialog {
 						saveposebutton,
 					},
 					iup.label { title = "Locks" },
-					iup.toggle { "World" },
+					iup.toggle { title = "Lock World Bone", action = function(state) lock_world = state == 1 end },
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
 				},
