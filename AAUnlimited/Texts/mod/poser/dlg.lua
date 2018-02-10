@@ -30,6 +30,7 @@ local signals = require "poser.signals"
 local lists = require "poser.lists"
 local toggles = require "poser.toggles"
 local charamgr = require "poser.charamgr"
+local posemgr = require "poser.posemgr"
 local propmgr = require "poser.propmgr"
 local fileutils = require "poser.fileutils"
 local unpack = table.unpack
@@ -755,6 +756,7 @@ local dialogsliders = iup.dialog {
 				iup.hbox {
 					iup.button { title = "Show UI", action = function() SetHideUI(false) end },
 					iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
+					iup.button { title = "Reset Pose", action = function() posemgr.resetpose(charamgr.current) end }
 				},
 				expand = "yes",
 				gap = 3,
@@ -859,7 +861,6 @@ local dialogsliders = iup.dialog {
 	minbox = "no",
 }
 
-local posemgr = require "poser.posemgr"
 dialogposes = posemgr.dialogposes
 signals.connect(dialogposes, "loadpose", _M, "loadpose")
 signals.connect(dialogposes, "savepose", _M, "savepose")

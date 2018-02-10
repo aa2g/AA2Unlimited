@@ -13,7 +13,6 @@ local toggles = require "poser.toggles"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
-local posemap = signals.signal()
 
 local posesdir = "poser\\poses"
 local scenesdir = "poser\\scenes"
@@ -35,67 +34,56 @@ end
 
 
 local cliptext
-local poselist = lists.listbox { editbox = "yes" }
-local scenelist = lists.listbox { editbox = "yes" }
+local posename = iup.text { expand = "horizontal", visiblecolumns = 20 }
+local scenename = iup.text { expand = "horizontal", visiblecolumns = 20 }
+local posefilter = lists.listfilter()
+local poselist = lists.listbox { expand = "yes", chars = 20 }
+local scenefilter = lists.listfilter()
+local scenelist = lists.listbox { expand = "yes", chars = 20 }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
-local mapposebutton = iup.button { title = "Map", expand = "horizontal" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
-local resetposebutton = iup.button { title = "Reset Pose", expand = "horizontal" }
-local unmapposebutton = iup.button { title = "Unmap pose", expand = "horizontal" }
 
+signals.connect(poselist, "selectionchanged", function() posename.value = poselist[poselist.value] end )
+signals.connect(scenelist, "selectionchanged", function() scenename.value = scenelist[scenelist.value] end )
+signals.connect(posefilter, "setfilter", poselist, "setfilter")
+signals.connect(scenefilter, "setfilter", scenelist, "setfilter")
 
 local function populateposelist()
+	local newlist = {}
 	local i = 1
 	for f in savedposes() do
 		f = f:match("^(.*)%.pose$")
 		if f then
-			poselist[i] = f
+			newlist[i] = f
 			i = i + 1
 		end
 	end
-	poselist[i] = nil
+	poselist.setlist(newlist)
 end
 populateposelist()
 
 local function populatescenelist()
+	local newlist = {}
 	local i = 1
 	for f in savedscenes() do
 		f = f:match("^(.*)%.scene$")
 		if f then
-			scenelist[i] = f
+			newlist[i] = f
 			i = i + 1
 		end
 	end
-	scenelist[i] = nil
+	scenelist.setlist(newlist)
 end
 populatescenelist()
 
-function unmapposebutton.action()
-	local chr = charamgr.current 
-	if chr then
-		_M.cfg.autoload[chr:context_name()] = nil
-		set_class_key(chr:context_name(), nil)
-	end
-end
-
-function resetposebutton.action()
-	if charamgr.current then
-		-- TODO: make this sane
-		for _,v in charamgr.current:sliders() do
-			v:Reset()
-			v:Apply()
-		end
-	end
-end
-
 function deleteposebutton.action()
-	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete the selected pose?", "Yes", "No")
+	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this pose?", "Yes", "No")
 	if resp == 1 then
-		local path = aau_path(posesdir, poselist.value .. ".pose")
+		local path = aau_path(posesdir, posename.value .. ".pose")
 		local ret, msg = os.remove(path)
 		if not ret then
 			log.error(msg)
@@ -112,15 +100,6 @@ local function readfile(path)
     local data = file:read "*a"
     file:close()
     return data
-end
-
-local function autopose(fname)
-	local chr = charamgr.current
-	local ctx = chr:context_name()
-	log.info("Autopose: saving autopose %s %s",ctx,fname)
-	set_class_key(ctx, fname)
-	_M.cfg.autoload[ctx] = fname
-	Config.save()
 end
 
 local function table2pose(pose, character)
@@ -168,7 +147,7 @@ local function table2pose(pose, character)
 		end
 		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen") 
 		if material then
-			material:m_lightingAttributes(3, face.blush / 9)
+			material:m_lightingAttributes(3, face.blushlines / 9)
 		end
 	end
 end
@@ -194,10 +173,10 @@ local function loadpose(filename)
 end
 
 function loadposebutton.action()
-	local fn = poselist.value
+	local fn = posename.value
 	local ok, ret = pcall(loadpose, fn)
 	if not ok then
-		log.error("Error loading pose %s:", poselist.value)
+		log.error("Error loading pose %s:", posename.value)
 		log.error(ret)
 	end
 end
@@ -246,6 +225,7 @@ local function pose2table(character)
 end
 
 local function savepose(filename)
+	if filename == "" then return end
 	local path = aau_path(posesdir, filename) .. ".pose"
 	log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
@@ -261,14 +241,13 @@ local function savepose(filename)
 end
 
 function saveposebutton.action()
-	savepose(poselist.value)
+	savepose(posename.value)
 end
 
 
 -- == Scenes ==
 
 local function loadscene(filename)
-	assert(filename ~= "")
 	local path = aau_path(scenesdir, filename) .. ".scene"
 	log.spam("Poser: Loading scene %s", path)
 	local data = readfile(path)
@@ -330,7 +309,7 @@ local function loadscene(filename)
 end
 
 function loadscenebutton.action()
-	local name = scenelist.value
+	local name = scenename.value
 	local ok, ret = pcall(loadscene, name)
 	if not ok then
 		log.error("Error loading pose %s:", name)
@@ -339,7 +318,6 @@ function loadscenebutton.action()
 end
 
 local function savescene(filename)
-	autopose(filename)
 	local path = aau_path(scenesdir, filename) .. ".scene"
 	log.spam("Poser: Saving scene %s to %s", filename, path)
 
@@ -397,19 +375,24 @@ local function savescene(filename)
 end
 
 function savescenebutton.action()
-	savescene(scenelist.value)
+	savescene(scenename.value)
 end
 
-
--- == Pose Mapping ==
-
-function mapposebutton.action()
-	autopose(poselist.value)
-	savepose(poselist.value)
+function deletescenebutton.action()
+	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this scene?", "Yes", "No")
+	if resp == 1 then
+		local path = aau_path(scenesdir, scenename.value .. ".scene")
+		local ret, msg = os.remove(path)
+		if not ret then
+			log.error(msg)
+		end
+		log.spam("Removed %s", path)
+		populatescenelist()
+	end
 end
+
 
 cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
-local maptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
 function cliptext.valuechanged_cb(self)
 	log.spam("clip text changed to %s", self.value)
 	local n = tonumber(self.value)
@@ -428,44 +411,45 @@ charamgr.on_character_updated.connect(function(chr)
 		log.warn("updating non-current character")
 		return
 	end
-	maptext.value = chr.startpose
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
 	cliptext.value = p
-	if (_M.opts.autoloading == 1) and (not chr.first_update) then
-		chr.first_update = true
-		local ctname = chr:context_name()
-		local auto = get_class_key(ctname) or _M.cfg.autoload[ctname]
-		if auto then
-			log.spam("Autoloading pose %s",auto)
-			if pcall(loadpose,auto) then
-				-- focus the autoloaded pose in the list
-				poselist.select(auto)
-			else
-				log.warn("Poser: Autoload for %s failed", ctname)
-			end
-		else
-			log.warn("Poser: Autoload for %s not found", ctname)
-		end
-	end
 end)
 
 _M.dialogposes = iup.dialog {
 	iup.vbox {
 		iup.tabs {
-			iup.vbox {
-				poselist,
-				iup.hbox { 
-					loadposebutton,
-					saveposebutton,
+			iup.hbox {
+				iup.vbox {
+					posefilter,
+					poselist,
+					expand = "no",
+				},
+				iup.vbox {
+					iup.label { title = "Pose:" },
+					posename,
+					iup.hbox {
+						loadposebutton,
+						saveposebutton,
+					},
+					iup.label { title = "Delete pose:" },
 					deleteposebutton,
 				},
-				tabtitle = "Poses"
+				tabtitle = "Poses",
 			},
-			iup.vbox {
-				scenelist,
-				iup.hbox { 
-					loadscenebutton,
-					savescenebutton,
+			iup.hbox {
+				iup.vbox {
+					scenefilter,
+					scenelist,
+					expand = "no",
+				},
+				iup.vbox {
+					iup.label { title = "Scene:" },
+					scenename,
+					iup.hbox {
+						loadscenebutton,
+						savescenebutton,
+					},
+					iup.label { title = "Delete scene:" },
 					deletescenebutton,
 				},
 				tabtitle = "Scenes"
@@ -476,21 +460,23 @@ _M.dialogposes = iup.dialog {
 			iup.hbox { 
 				iup.label { title = "Clip" },
 				cliptext,
---				iup.label { title = "Map" },
---				maptext,
-				iup.label { title = "Frame" },
-				frametext,
+--				iup.label { title = "Frame" },
+--				frametext,
 				gap = 3,
 				alignment = "acenter"
 			},
 		},
-		resetposebutton,
---		mapposebutton,
---		unmapposebutton,
 	},
 	nmargin = "3x3",
 	maxbox = "no",
 	minbox = "no",
 }
+
+function _M.resetpose(character)
+	for _,v in character:sliders() do
+		v:Reset()
+		v:Apply()
+	end
+end
 
 return _M

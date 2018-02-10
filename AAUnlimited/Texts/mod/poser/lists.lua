@@ -40,6 +40,9 @@ function _M.listbox(opts)
 			end
 		end,
 	}
+	if opts.chars then
+		list.visiblecolumns = opts.chars
+	end
 	
 	updatelist = function()
 		local newlist
@@ -98,6 +101,7 @@ function _M.listfilter()
 		clear,
 		alignment = "acenter",
 		setfilter = setfilter,
+		expand = "horizontal",
 	}
 end
 
