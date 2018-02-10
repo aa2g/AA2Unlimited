@@ -30,6 +30,7 @@ local signals = require "poser.signals"
 local lists = require "poser.lists"
 local toggles = require "poser.toggles"
 local charamgr = require "poser.charamgr"
+local posemgr = require "poser.posemgr"
 local propmgr = require "poser.propmgr"
 local fileutils = require "poser.fileutils"
 local unpack = table.unpack
@@ -187,15 +188,6 @@ local function updatecurrentcharacter(_, index)
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
-local function update_showui()
-	if _M.opts.hideui ~= 1 then return end
-	if _M.visible and #charamgr.characters > 0 then
-		SetHideUI(true)
-	else
-		SetHideUI(false)
-	end
-end
-
 local function updatecharacterlist()
 	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur
@@ -209,9 +201,11 @@ local function updatecharacterlist()
 	end
 	characterlist.setlist(list)
 	characterlist.value = cur
-	update_showui()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
+
+local charswapprevbutton = iup.button { title = "/\\", expand = "vertical", action = function() charamgr.swapprev(tonumber(characterlist.value)) end }
+local charswapnextbutton = iup.button { title = "\\/", expand = "vertical", action = function() charamgr.swapnext(tonumber(characterlist.value)) end }
 
 
 -- -----------------
@@ -516,7 +510,7 @@ tears.expand = "horizontal"
 local eyetracking = iup.flatbutton { title = "Eye Tracking", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" and 1 or 0 end end, expand = "horizontal" }
 eyetracking.size = "x12"
 eyetracking.expand = "horizontal"
-local yogurt = toggles.button { title = "Yogurt" }
+local yogurt = iup.flatbutton { title = "Yogurt", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tonguejuice = self.value == "OFF"; charamgr.current.mouthjuice = self.value == "OFF" end end, expand = "horizontal" }
 yogurt.size = "x12"
 yogurt.expand = "horizontal"
 
@@ -696,6 +690,24 @@ local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, fu
 	end
 end)
 
+local loadstyle = exe_type == "play" and clothing.slotbuttons("Style", { "1", "2", "3", "4", ">" }, function(state)
+	local character = charamgr.current
+	if character then
+		local characterdata = GetCharInstData(character.struct.m_seat)
+		local stylecount = characterdata:GetStyleCount()
+		if stylecount > 1 then
+			local style
+			if state == 4 then
+				style = (characterdata:GetCurrentStyle() + 1) % stylecount
+			else
+				style = state
+			end
+			characterdata:SetCurrentStyle(style)
+			character:update(character.struct.m_clothState)
+		end
+	end
+end)
+
 local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
 	local character = charamgr.current
 	if character then
@@ -720,7 +732,13 @@ local dialogsliders = iup.dialog {
 			end,
 			iup.vbox {
 				tabtitle = "Characters",
-				characterlist,
+				iup.hbox {
+					characterlist,
+					iup.vbox {
+						charswapprevbutton,
+						charswapnextbutton,
+					},
+				},
 				iup.hbox {
 					addcharbutton,
 					removecharbutton,
@@ -729,11 +747,17 @@ local dialogsliders = iup.dialog {
 					attachpropsbutton,
 					detachpropsbutton,
 				},
-				--iup.label { title = "Style" },
-				-- stylelist,
 				clothslot,
 				clothstate,
-				loadclothbutton,
+				loadstyle,
+				iup.hbox {
+					loadclothbutton,
+				},
+				iup.hbox {
+					iup.button { title = "Show UI", action = function() SetHideUI(false) end },
+					iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
+					iup.button { title = "Reset Pose", action = function() posemgr.resetpose(charamgr.current) end }
+				},
 				expand = "yes",
 				gap = 3,
 			},
@@ -837,7 +861,6 @@ local dialogsliders = iup.dialog {
 	minbox = "no",
 }
 
-local posemgr = require "poser.posemgr"
 dialogposes = posemgr.dialogposes
 signals.connect(dialogposes, "loadpose", _M, "loadpose")
 signals.connect(dialogposes, "savepose", _M, "savepose")
@@ -854,7 +877,7 @@ local function adjust_parenting(v)
 	v:map()
 	set_window_proc(v.hwnd, function(orig, this, hwnd, msg, wparam, lparam)
 		-- left click, grab-mvoe
-		if msg == 0x201 and _M.opts.grab and hwnd == fixptr(v.hwnd) then
+		if msg == 0x201 and _M.opts.grab == 1 and hwnd == fixptr(v.hwnd) then
 			ReleaseCapture()
 			SendMessageW(hwnd, 0xA1, 2, 0)
 		-- mouse moves onto the window, grab focus
@@ -875,14 +898,12 @@ function _M.togglevisible()
 		end
 		_M.visible = true
 		_M.block_mouse = true
-		update_showui()
 	else
 		for _,v in ipairs(dialogs) do
 			v:hide()
 		end
 		_M.visible = false
 		_M.block_mouse = false
-		update_showui()
 	end
 	SetForegroundWindow(GetGameHwnd())
 end

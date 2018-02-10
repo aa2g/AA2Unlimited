@@ -11,7 +11,6 @@ local charamgr = require "poser.charamgr"
 local posemgr
 local propmgr = require "poser.propmgr"
 local opts = {
-	{"hideui", 0, "Hide game 2D UI: %b"},
 	{"autoloading", 0, "Autoload character pose: %b"},
 	{"ontop", 2, "Single-window mode: %l|Never|In fullscreen|Always|"},
 	{"notitle", 1, "No titlebar: %l|Never|In fullscreen|Always|"},
