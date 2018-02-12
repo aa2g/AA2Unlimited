@@ -1822,6 +1822,55 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	    		{ { CharacterStruct::FACE, 32 } },
 				-0.3f, 0
 			},
+
+					//Tot Teeth Sliders.
+
+			{ TEXT("Shark Teeth"),
+			{ { CharacterStruct::FACE, 33 },{ CharacterStruct::FACE, 43 } },
+					-0.03f, 0.03f
+			},
+			{ TEXT("Upper Canines"),
+			{ { CharacterStruct::FACE, 34 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Lower Canines"),
+			{ { CharacterStruct::FACE, 37 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Upper Incisors"),
+			{ { CharacterStruct::FACE, 40 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Lower Incisors"),
+			{ { CharacterStruct::FACE, 42 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Upper Premolars"),
+			{ { CharacterStruct::FACE, 41 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Upper Left Snaggle"),
+			{ { CharacterStruct::FACE, 35 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Upper Right Snaggle"),
+			{ { CharacterStruct::FACE, 36 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Lower Left Snaggle"),  
+			{ { CharacterStruct::FACE, 38 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Lower Right Snaggle"),
+			{ { CharacterStruct::FACE, 39 } },
+					-0.05f, 0.05f
+			},
+
+
+
+
+
+
 		};
 		
 		int xpos = 10,ypos = 10;

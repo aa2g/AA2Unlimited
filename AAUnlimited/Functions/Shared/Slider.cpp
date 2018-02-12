@@ -133,6 +133,19 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 31,	TEXT("A00_J_cheek"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 			{ ExtClass::CharacterStruct::FACE, 32,	TEXT("A00_J_jaw_back"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 
+			//Tot Teeth Sliders
+			{ ExtClass::CharacterStruct::FACE, 33,	TEXT("A00_J_shark"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Shark 1 Needs Shark 2 for proper Shark, Waiting for tot Shark 2 bone
+			{ ExtClass::CharacterStruct::FACE, 34,	TEXT("A00_J_fangT01"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Upper Canines
+			{ ExtClass::CharacterStruct::FACE, 35,	TEXT("A00_J_snaggleR"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Top Left Snaggle  (it is left snaggle, don't be confused by the bone name)
+			{ ExtClass::CharacterStruct::FACE, 36,	TEXT("A00_J_snaggleL"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Top Right Snaggle (Snaggle is front part of tooth being translated, Canines is both front and back part)
+			{ ExtClass::CharacterStruct::FACE, 37,	TEXT("A00_J_fangB01"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Lower Canines
+			{ ExtClass::CharacterStruct::FACE, 38,	TEXT("A00_J_snaggleBR"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Bottom Left Snaggle (edits the premolar bone for some reason)
+			{ ExtClass::CharacterStruct::FACE, 39,	TEXT("A00_J_snaggleBL"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Bottom Right Snaggle (edits the premolar bone for some reason)
+			{ ExtClass::CharacterStruct::FACE, 40,	TEXT("A00_J_fangT00"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Upper Incisor
+			{ ExtClass::CharacterStruct::FACE, 41,	TEXT("A00_J_fangT02"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Upper Premolar (There is no lower Premolar)
+			{ ExtClass::CharacterStruct::FACE, 42,	TEXT("A00_J_fangB00"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Lower Incisor
+			{ ExtClass::CharacterStruct::FACE, 43,	TEXT("A00_J_sharkB"),{ 0,0,0, 0,0,0, 0,-1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, // Shark 2    
+
 
 
 		},
