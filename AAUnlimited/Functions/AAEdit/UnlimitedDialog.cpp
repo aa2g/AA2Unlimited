@@ -1788,7 +1788,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Chin Height"),
 	    		{ { CharacterStruct::FACE, 24 } },
-				-0.15f, 0.5f
+				-0.20f, 0.05f
 			},
 			{ TEXT("Chin Depth"),
 	    		{ { CharacterStruct::FACE, 25 } },
