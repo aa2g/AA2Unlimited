@@ -1825,46 +1825,64 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 					//Tot Teeth Sliders.
 
-			{ TEXT("Shark Teeth"),
-			{ { CharacterStruct::FACE, 33 },{ CharacterStruct::FACE, 43 } },
+			{ TEXT("Upper Shark Teeth"),
+	    		{ { CharacterStruct::FACE, 33 },{ CharacterStruct::FACE, 34 } },
 					-0.03f, 0.03f
 			},
-			{ TEXT("Upper Canines"),
-			{ { CharacterStruct::FACE, 34 } },
-					-0.05f, 0.05f
+			{ TEXT("Upper Shark Teeth"),
+		    	{ { CharacterStruct::FACE, 35 },{ CharacterStruct::FACE, 36 } },
+				-0.03f, 0.03f
 			},
-			{ TEXT("Lower Canines"),
-			{ { CharacterStruct::FACE, 37 } },
-					-0.05f, 0.05f
+			{ TEXT("Upper Left Incisor"),
+		    	{ { CharacterStruct::FACE, 37 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Upper Incisors"),
-			{ { CharacterStruct::FACE, 40 } },
-					-0.05f, 0.05f
+			{ TEXT("Upper Right Incisor"),
+		    	{ { CharacterStruct::FACE, 38 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Lower Incisors"),
-			{ { CharacterStruct::FACE, 42 } },
-					-0.05f, 0.05f
+			{ TEXT("Lower Left Incisor"),
+		    	{ { CharacterStruct::FACE, 39 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Upper Premolars"),
-			{ { CharacterStruct::FACE, 41 } },
-					-0.05f, 0.05f
+			{ TEXT("Lower Right Incisor"),
+		    	{ { CharacterStruct::FACE, 40 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Upper Left Snaggle"),
-			{ { CharacterStruct::FACE, 35 } },
-					-0.05f, 0.05f
+			{ TEXT("Upper Left Canine"),
+		    	{ { CharacterStruct::FACE, 41 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Upper Right Snaggle"),
-			{ { CharacterStruct::FACE, 36 } },
-					-0.05f, 0.05f
+			{ TEXT("Lower Right Canine"),
+	    		{ { CharacterStruct::FACE, 42 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Lower Left Snaggle"),  
-			{ { CharacterStruct::FACE, 38 } },
-					-0.05f, 0.05f
+			{ TEXT("Lower Left Canine"),
+	    		{ { CharacterStruct::FACE, 43 } },
+				-0.05f, 0.05f
 			},
-			{ TEXT("Lower Right Snaggle"),
-			{ { CharacterStruct::FACE, 39 } },
-					-0.05f, 0.05f
+			{ TEXT("Upper Right Canine"),
+	    		{ { CharacterStruct::FACE, 44 } },
+				-0.05f, 0.05f
 			},
+			{ TEXT("Upper Left Premolar"),
+	    		{ { CharacterStruct::FACE, 45 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Upper Right Premolar"),
+	    		{ { CharacterStruct::FACE, 46 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Left Premolar"),
+	    		{ { CharacterStruct::FACE, 47 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Right Premolar"),
+	    		{ { CharacterStruct::FACE, 48 } },
+				-0.03f, 0.03f
+			},
+
+
 
 
 
