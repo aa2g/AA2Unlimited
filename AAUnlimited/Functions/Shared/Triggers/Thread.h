@@ -71,6 +71,10 @@ namespace Shared {
 			void SetClothingState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
 			void SetCardVoicePitch(std::vector<Value>& params);
+			void SetCum(std::vector<Value>& params);
+			void SetTears(std::vector<Value>& params);
+			void SetHighlight(std::vector<Value>& params);
+			void SetGlasses(std::vector<Value>& params);
 			void SetCardClub(std::vector<Value>& params);
 			void SetCardClubValue(std::vector<Value>& params);
 			void SetCardClubRank(std::vector<Value>& params);
@@ -143,6 +147,14 @@ namespace Shared {
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
+
+			Value GetCum(std::vector<Value>& params);
+
+			Value GetTears(std::vector<Value>& params);
+
+			Value GetGlasses(std::vector<Value>& params);
+
+			Value GetHighlight(std::vector<Value>& params);
 
 			//time info
 			Value GetDaysPassed(std::vector<Value>& params); //int ()

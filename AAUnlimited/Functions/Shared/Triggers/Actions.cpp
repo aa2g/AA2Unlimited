@@ -396,6 +396,87 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_voicePitch = pitch;
 		}
 
+		//int seat, int cum
+		void Thread::SetCum(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "A00_O_kutisiru") || strstr((*frame)->m_name, "A00_O_sitasiru")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetTears(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_namida")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetHighlight(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_mehi")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetGlasses(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "megane")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+		
 		//int seat, int club
 		void Thread::SetCardClub(std::vector<Value>& params)
 		{
@@ -1629,6 +1710,30 @@ namespace Shared {
 				TEXT("Sets whether the character's virginity was attempted to be taken by the target. 0 - no, 1 - yes."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCherryStatus
+			},
+			{
+				83, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Cum"), TEXT("%p ::SetCum = %p"),
+				TEXT("Set whether the character has cum in mouth."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCum
+			},
+			{
+				84, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Tears"), TEXT("%p ::SetTears = %p"),
+				TEXT("Set whether the character is crying."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetTears
+			},
+			{
+				85, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Highlight"), TEXT("%p ::SetHighlight = %p"),
+				TEXT("Set whether the character has highlight in their eyes."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetHighlight
+			},
+			{
+				86, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Glasses"), TEXT("%p ::SetGlasses = %p"),
+				TEXT("Set whether the character has their glasses on."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetGlasses
 			},
 		};
 
