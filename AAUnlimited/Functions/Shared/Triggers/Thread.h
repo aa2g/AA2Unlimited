@@ -123,6 +123,7 @@ namespace Shared {
 			void RemoveCardStorageBool(std::vector<Value>& params);
 
 			void SetPC(std::vector<Value>& params);
+			void SetPose(std::vector<Value>& params);
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
@@ -315,6 +316,7 @@ namespace Shared {
 
 			//PC_CONVERSATION_STATE_UPDATED
 			Value GetConversationState(std::vector<Value>& params);
+			Value GetConversationLine(std::vector<Value>& params);
 			Value GetConversationNpcResponse(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
 			Value GetConversationPcResponse(std::vector<Value>& params);

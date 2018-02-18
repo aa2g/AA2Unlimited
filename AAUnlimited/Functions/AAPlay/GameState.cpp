@@ -32,6 +32,7 @@ struct GameStateStruct {
 
 	std::wstring m_classSaveName;
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
+	DWORD m_NPCLineState;				//increments from 0 to whatever
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -129,6 +130,16 @@ void Shared::GameState::setPCConversationState(DWORD value)
 DWORD Shared::GameState::getPCConversationState()
 {
 	return loc_gameState.m_PCConversationState;
+}
+
+void Shared::GameState::setNPCLineState(DWORD value)
+{
+	loc_gameState.m_NPCLineState = value;
+}
+
+DWORD Shared::GameState::getNPCLineState()
+{
+	return loc_gameState.m_NPCLineState;
 }
 
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {

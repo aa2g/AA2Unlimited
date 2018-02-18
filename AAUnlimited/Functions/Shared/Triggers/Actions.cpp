@@ -968,24 +968,32 @@ namespace Shared {
 			}
 		}
 
-		//int seatPC, int seatPartner
+		//int actor, string pose
+		void Thread::SetPose(std::vector<Value>& params) {
+			auto actor = params[0].iVal;								//scene actor
+			auto posename = General::CastToString(*params[1].strVal);	//posename
 
+			LUA_EVENT_NORET("pose_load", actor, posename);
+		}
+
+
+		//bool consensual
 		void Thread::IsConsensualH(std::vector<Value>& params) {
 			int forceVal = params[0].bVal ? 0 : 4;
 			const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x2C, 0x14, 0x9C };
 			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
 			*forcedh = forceVal;
 		}
-		//bool consensual
 
+		//bool auto-pc
 		void Thread::AutoPC(std::vector<Value>& params) {
 			int autoVal = params[0].bVal ? 1 : 0;
 			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
 			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
 			*autopc = autoVal;
 		}
-		//bool auto-pc
 
+		//int seatPC, int seatPartner
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
 			CharInstData* instPC = &AAPlay::g_characters[seatPC];
@@ -1629,6 +1637,12 @@ namespace Shared {
 				TEXT("Sets whether the character's virginity was attempted to be taken by the target. 0 - no, 1 - yes."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCherryStatus
+			},
+			{
+				83, ACTIONCAT_NPCACTION, TEXT("Set Pose"), TEXT("%p ::Pose = %p"),
+				TEXT("Sets pose for the scene actor."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetPose
 			},
 		};
 

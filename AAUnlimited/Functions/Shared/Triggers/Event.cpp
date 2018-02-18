@@ -69,6 +69,10 @@ namespace Shared {
 			{ PC_RESPONSE, EVENTCAT_CONVERSATION, TEXT("Pc Answers in a Conversation"), TEXT("Pc Answers in a Conversation"),
 				TEXT("Right before the PC answer is processed. Triggering card is the PC"),
 				{}
+			},
+			{ PC_CONVERSATION_LINE_UPDATED, EVENTCAT_CONVERSATION, TEXT("PC conversation line updated"), TEXT("PC Conversation line updated"),
+				TEXT("Whenever NPC speaks a line of dialogue in PC conversation."),
+				{}
 			}
 		};
 

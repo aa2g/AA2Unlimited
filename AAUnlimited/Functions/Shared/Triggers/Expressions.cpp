@@ -1526,6 +1526,8 @@ namespace Shared {
 				return ((NpcWantTalkWithAboutData*)eventData)->action;
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->action;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return ((PCConversationLineUpdatedData*)eventData)->action;
 			default:
 				return 0;
 			}
@@ -1560,6 +1562,20 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->state;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return ((PCConversationLineUpdatedData*)eventData)->state;
+			default:
+				return 0;
+			}
+		}
+
+		//int()
+		Value Thread::GetConversationLine(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return (int)((PCConversationStateUpdatedData*)eventData)->substruct->GetSubStruct()->m_conversationState;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return (int)((PCConversationLineUpdatedData*)eventData)->substruct->GetSubStruct()->m_conversationState;
 			default:
 				return 0;
 			}
@@ -1573,6 +1589,11 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->npc_response;
 				}
 				else return -1;
+			case PC_CONVERSATION_LINE_UPDATED:
+				if (((PCConversationLineUpdatedData*)eventData)->npc_response >= 0) {
+					return ((PCConversationLineUpdatedData*)eventData)->npc_response;
+				}
+				else return -1;
 			default:
 				return 0;
 			}
@@ -1582,6 +1603,10 @@ namespace Shared {
 		Value Thread::GetConversationActor(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
+			case PC_CONVERSATION_LINE_UPDATED:
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
@@ -1602,6 +1627,11 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
 				}
 				else return Value(-1);
+			case PC_CONVERSATION_LINE_UPDATED:
+				if (((PCConversationLineUpdatedData*)eventData)->pc_response >= 0) {
+					return ((PCConversationLineUpdatedData*)eventData)->pc_response;
+				}
+				else return Value(-1);
 			case PC_RESPONSE:
 				if (((PcResponseData*)eventData)->substruct->m_response >= 0) {
 					return ((int)(((PcResponseData*)eventData)->substruct->m_response));
@@ -1617,6 +1647,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->action);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->action);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationId);
 			default:
@@ -1629,6 +1661,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->conversationAnswerId);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->conversationAnswerId);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationAnswerId);
 			default:
@@ -1641,6 +1675,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->currentlyAnswering);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->currentlyAnswering);
 			case PC_RESPONSE:
 				return Value((bool)(((PcResponseData*)this->eventData)->substruct->m_bCurrentlyAnswering));
 			default:
@@ -2280,6 +2316,12 @@ namespace Shared {
 					TEXT("Cherry Status"), TEXT("%p ::GetCherryState( %p )"), TEXT("Returns whether other character attempted to take virginity of the card passed as the first argument. 1 - yes, 0 - no."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCherryStatus
+				},
+				{
+					96, EXPRCAT_CONVERSATION,
+					TEXT("Line"), TEXT("ConversationLine"), TEXT("Current conversation line."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationLine
 				},
 
 			},

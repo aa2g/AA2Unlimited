@@ -47,6 +47,7 @@ namespace Triggers {
 		NPC_WALK_TO_ROOM, NPC_WANT_ACTION_NOTARGET, NPC_WANT_TALK_WITH, NPC_WANT_TALK_WITH_ABOUT,
 		PC_CONVERSATION_STATE_UPDATED,
 		PC_RESPONSE,
+		PC_CONVERSATION_LINE_UPDATED,
 		
 		
 		N_EVENTS
@@ -164,6 +165,20 @@ namespace Triggers {
 
 	EDC_DECLARE(PCConversationStateUpdatedData, PC_CONVERSATION_STATE_UPDATED)
 
+		ExtClass::MainConversationStruct* substruct;
+		int state;
+		int npc_response;
+		int pc_response;
+		int action;
+		int conversationAnswerId;
+		int currentlyAnswering;
+		BYTE* m_bStartH;
+
+	EDC_END
+
+	EDC_DECLARE(PCConversationLineUpdatedData, PC_CONVERSATION_LINE_UPDATED)
+
+		ExtClass::MainConversationStruct* substruct;
 		int state;
 		int npc_response;
 		int pc_response;
