@@ -497,6 +497,8 @@ _M.dialogposes = iup.dialog {
 	minbox = "no",
 }
 
+_M.loadpose = loadpose
+
 function _M.resetpose(character)
 	for _,v in character:sliders() do
 		v:Reset()
