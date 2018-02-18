@@ -153,7 +153,7 @@ local function table2pose(pose, character)
 		if face.eyeopen then character.eyeopen = face.eyeopen end
 		if face.eyebrow then character.eyebrow = face.eyebrow end
 
-		local facestruct = charamgr.current.struct.m_xxFace
+		local facestruct = character.struct.m_xxFace
 		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho") 
 		if material then
 			material:m_lightingAttributes(3, face.blush / 9)
@@ -165,10 +165,9 @@ local function table2pose(pose, character)
 	end
 end
 
-local function loadpose(filename)
+local function loadpose(character, filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
-	local character = charamgr.current
 	if character and character.ischaracter == true then
 		local path = aau_path(posesdir, filename) .. ".pose"
 		log.spam("Poser: Reading %s", path)
@@ -187,7 +186,7 @@ end
 
 function loadposebutton.action()
 	local fn = posename.value
-	local ok, ret = pcall(loadpose, fn)
+	local ok, ret = pcall(loadpose, charamgr.current, fn)
 	if not ok then
 		log.error("Error loading pose %s:", posename.value)
 		log.error(ret)
@@ -222,7 +221,7 @@ local function pose2table(character)
 			mouthopen = character.mouthopen,
 		}
 
-		local facestruct = charamgr.current.struct.m_xxFace
+		local facestruct = character.struct.m_xxFace
 		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho")
 		if material then
 			face.blush = material:m_lightingAttributes(3) * 9
