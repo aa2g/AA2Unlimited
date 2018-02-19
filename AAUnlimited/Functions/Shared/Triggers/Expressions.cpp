@@ -1005,6 +1005,21 @@ namespace Shared {
 			}
 		}
 
+		//int(int)
+		Value Thread::PCTalkAbout(std::vector<Value>& params) {
+			auto pc = Shared::GameState::getPlayerCharacter();
+			int seat = pc->m_seat;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
+			}
+		}
+
 		//string(int)
 		Value Thread::GetCardLastHPartner(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -2363,6 +2378,12 @@ namespace Shared {
 					TEXT("Cherry Status"), TEXT("%p ::GetCherryState( %p )"), TEXT("Returns whether other character attempted to take virginity of the card passed as the first argument. 1 - yes, 0 - no."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCherryStatus
+				},
+				{
+					96, EXPRCAT_CHARPROP,
+					TEXT("Get PC TalkAbout"), TEXT("PCTalkAbout"), TEXT("Get the seat of the NPC that PC is talking about."),
+					{}, (TYPE_INT),
+					&Thread::PCTalkAbout
 				},
 
 			},
