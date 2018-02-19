@@ -42,7 +42,8 @@ public:
 	BYTE m_isInConversation;
 	BYTE m_conversationLoading; //?
 	BYTE m_currentlyTalking; //?
-	BYTE m_unknown3[0x20];
+	BYTE m_unknown3[28];
+	CharacterActivity* m_refto;
 	DWORD m_status; //3C //0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna
 	DWORD m_actionId;
 	DWORD m_currConversationId; //if this is an npc that plans a conversation, this is set once the character starts walking towards its target

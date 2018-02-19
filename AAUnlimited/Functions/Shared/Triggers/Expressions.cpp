@@ -30,6 +30,89 @@ namespace Shared {
 			return Value(cardInst->IsValid());
 		}
 
+		//bool (int)
+		Value Thread::GetCum(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "A00_O_kutisiru")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+		}
+		//bool (int)
+
+		Value Thread::GetTears(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_namida")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+		}
+
+		Value Thread::GetGlasses(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "megane")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+		}
+		Value Thread::GetHighlight(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			bool highlight = false;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_mehi")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							highlight = true;
+						}
+					}
+				}
+				frame++;
+			}
+			return Value(highlight);
+		}
+
 		//int ()
 		Value Thread::GetDaysPassed(std::vector<Value>& params) {
 			return ExtVars::AAPlay::GameTimeData()->nDays;
@@ -919,6 +1002,21 @@ namespace Shared {
 			else
 			{
 				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_status);
+			}
+		}
+
+		//int(int)
+		Value Thread::PCTalkAbout(std::vector<Value>& params) {
+			auto pc = Shared::GameState::getPlayerCharacter();
+			int seat = pc->m_seat;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
 			}
 		}
 
@@ -2281,6 +2379,12 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCherryStatus
 				},
+				{
+					96, EXPRCAT_CHARPROP,
+					TEXT("Get PC TalkAbout"), TEXT("PCTalkAbout"), TEXT("Get the seat of the NPC that PC is talking about."),
+					{}, (TYPE_INT),
+					&Thread::PCTalkAbout
+				},
 
 			},
 
@@ -2521,6 +2625,30 @@ namespace Shared {
 					TEXT("Returns whether AutoPC is toggled on or off."),
 					{}, (TYPE_BOOL),
 						&Thread::GetAutoPC
+				},
+				{
+					39, EXPRCAT_CHARPROP,
+					TEXT("Get Cum"), TEXT("%p ::GetCum"), TEXT("Returns true if the character has cum in their mouth."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetCum
+				},
+				{
+					40, EXPRCAT_CHARPROP,
+					TEXT("Get Tears"), TEXT("%p ::GetTears"), TEXT("Returns true if the character is crying."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetTears
+				},
+				{
+					41, EXPRCAT_CHARPROP,
+					TEXT("Get Highlight"), TEXT("%p ::GetHighlight"), TEXT("Returns true if the character has highlight in their eyes."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetHighlight
+				},
+				{
+					42, EXPRCAT_CHARPROP,
+					TEXT("Get Glasses"), TEXT("%p ::GetGlasses"), TEXT("Returns true if the character has their glasses on."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetGlasses
 				},
 			},
 			{ //FLOAT
