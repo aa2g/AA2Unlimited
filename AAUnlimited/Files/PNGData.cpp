@@ -345,7 +345,7 @@ bool __stdcall MyLoadChrData(DWORD *esi, wchar_t *eax, ExtClass::CharacterData *
 		memcpy(chr->m_surname, ce.m_surname, sizeof(ce.m_surname));
 		memcpy(chr->m_forename, ce.m_forename, sizeof(ce.m_forename));
 		chr->m_bPersonality = ce.personality;
-		chr->m_unknown2 = 0x67;
+		chr->m_unknown2[0] = 0x67;
 	}
 	else {
 		loc_indirscan = true;
