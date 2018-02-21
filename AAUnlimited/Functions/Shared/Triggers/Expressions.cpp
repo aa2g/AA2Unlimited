@@ -50,6 +50,7 @@ namespace Shared {
 				}
 				frame++;
 			}
+			return Value(false);
 		}
 		//bool (int)
 
@@ -72,6 +73,7 @@ namespace Shared {
 				}
 				frame++;
 			}
+			return Value(false);
 		}
 
 		Value Thread::GetGlasses(std::vector<Value>& params) {
@@ -93,6 +95,7 @@ namespace Shared {
 				}
 				frame++;
 			}
+			return Value(false);
 		}
 		Value Thread::GetHighlight(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1002,6 +1005,21 @@ namespace Shared {
 			else
 			{
 				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_status);
+			}
+		}
+
+		//int(int)
+		Value Thread::PCTalkAbout(std::vector<Value>& params) {
+			auto pc = Shared::GameState::getPlayerCharacter();
+			int seat = pc->m_seat;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
 			}
 		}
 
@@ -2423,6 +2441,12 @@ namespace Shared {
 					TEXT("Current Room"), TEXT("CurrentRoom"), TEXT("Current room the character is in."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcCurrentRoom
+				},
+				{
+					98, EXPRCAT_CHARPROP,
+					TEXT("Get PC TalkAbout"), TEXT("PCTalkAbout"), TEXT("Get the seat of the NPC that PC is talking about."),
+					{}, (TYPE_INT),
+					&Thread::PCTalkAbout
 				},
 
 			},

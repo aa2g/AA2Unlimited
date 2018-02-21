@@ -205,6 +205,7 @@ namespace Shared {
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)
 			Value GetNpcStatus(std::vector<Value>& params); //int(int)
+			Value PCTalkAbout(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
