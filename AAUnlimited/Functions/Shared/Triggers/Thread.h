@@ -237,6 +237,7 @@ namespace Shared {
 			Value FirstIndexOf(std::vector<Value>& params); //int(string, string)
 			Value FirstIndexOfFrom(std::vector<Value>& params); //int(string, int, string)
 			Value String2Int(std::vector<Value>& params); //int(string)
+			Value GetNpcCurrentRoom(std::vector<Value>& params);
 			
 			//basic float stuff
 			Value GetRandomFloat(std::vector<Value>& params); //float(float,float)
@@ -304,7 +305,7 @@ namespace Shared {
 
 			//NPC_WALK_TO_ROOM
 			Value GetNpcRoomTarget(std::vector<Value>& params);
-
+			
 			//NPC_WANT_ACTION_NOTARGET
 			Value GetNpcActionId(std::vector<Value>& params);
 

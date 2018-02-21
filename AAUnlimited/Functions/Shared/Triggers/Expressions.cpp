@@ -1515,6 +1515,18 @@ namespace Shared {
 			}
 		}
 
+		//NPC_WALK_TO_ROOM
+		//int()
+		Value Thread::GetNpcCurrentRoom(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (seat < 0 || seat >= 25) return -1;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) return -1;
+			auto roomno = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
+			return roomno;
+
+		}
+
 		//int()
 		Value Thread::GetNpcActionId(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
@@ -2322,6 +2334,12 @@ namespace Shared {
 					TEXT("Line"), TEXT("ConversationLine"), TEXT("Current conversation line."),
 					{}, (TYPE_INT),
 					&Thread::GetConversationLine
+				},
+				{
+					97, EXPRCAT_CHARPROP,
+					TEXT("Current Room"), TEXT("CurrentRoom"), TEXT("Current room the character is in."),
+					{}, (TYPE_INT),
+					&Thread::GetNpcCurrentRoom
 				},
 
 			},
