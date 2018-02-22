@@ -1627,6 +1627,15 @@ namespace Shared {
 			return roomno;
 
 		}
+		//int()
+		Value Thread::GetEventPreviousRoom(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case ROOM_CHANGE:
+				return ((RoomChangeData*)eventData)->prevRoom;
+			default:
+				return -1;
+			}
+		}
 
 		//int()
 		Value Thread::GetNpcActionId(std::vector<Value>& params) {
@@ -2447,6 +2456,12 @@ namespace Shared {
 					TEXT("Get PC TalkAbout"), TEXT("PCTalkAbout"), TEXT("Get the seat of the NPC that PC is talking about."),
 					{}, (TYPE_INT),
 					&Thread::PCTalkAbout
+				},
+				{
+					99, EXPRCAT_EVENT,
+					TEXT("Room - Previous Room"), TEXT("PreviousRoom"), TEXT("For Room Changed event return the previous room"),
+					{}, (TYPE_INT),
+					&Thread::GetEventPreviousRoom
 				},
 
 			},

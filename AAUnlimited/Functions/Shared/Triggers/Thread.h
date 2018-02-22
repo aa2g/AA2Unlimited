@@ -251,6 +251,7 @@ namespace Shared {
 			Value FirstIndexOfFrom(std::vector<Value>& params); //int(string, int, string)
 			Value String2Int(std::vector<Value>& params); //int(string)
 			Value GetNpcCurrentRoom(std::vector<Value>& params);
+
 			
 			//basic float stuff
 			Value GetRandomFloat(std::vector<Value>& params); //float(float,float)
@@ -339,7 +340,8 @@ namespace Shared {
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 
-
+			//ROOM_CHANGE
+			Value GetEventPreviousRoom(std::vector<Value>& params);
 
 		private:
 			Value EvaluateExpression(ParameterisedExpression& expr);
