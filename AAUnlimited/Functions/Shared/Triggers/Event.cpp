@@ -73,6 +73,10 @@ namespace Shared {
 			{ PC_CONVERSATION_LINE_UPDATED, EVENTCAT_CONVERSATION, TEXT("PC conversation line updated"), TEXT("PC Conversation line updated"),
 				TEXT("Whenever NPC speaks a line of dialogue in PC conversation."),
 				{}
+			},
+			{ ROOM_CHANGE, EVENTCAT_CONVERSATION, TEXT("Card Changes Room"), TEXT("Card Changes Room"),
+			TEXT("Card enters a new room. Works for all cards."),
+				{}
 			}
 		};
 

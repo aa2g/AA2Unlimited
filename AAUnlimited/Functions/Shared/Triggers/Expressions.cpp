@@ -2438,8 +2438,8 @@ namespace Shared {
 				},
 				{
 					97, EXPRCAT_CHARPROP,
-					TEXT("Current Room"), TEXT("CurrentRoom"), TEXT("Current room the character is in."),
-					{}, (TYPE_INT),
+					TEXT("Current Room"), TEXT("%p ::CurrentRoom"), TEXT("Current room the character is in."),
+					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetNpcCurrentRoom
 				},
 				{

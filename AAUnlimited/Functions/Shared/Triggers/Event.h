@@ -48,6 +48,7 @@ namespace Triggers {
 		PC_CONVERSATION_STATE_UPDATED,
 		PC_RESPONSE,
 		PC_CONVERSATION_LINE_UPDATED,
+		ROOM_CHANGE,
 		
 		
 		N_EVENTS
@@ -196,6 +197,14 @@ namespace Triggers {
 
 	EDC_END
 		
+	EDC_DECLARE(RoomChangeData, ROOM_CHANGE)
+
+		int prevRoom;
+		int roomTarget;
+		int action;
+		int convotarget;
+
+	EDC_END
 
 #undef EDC_DECLARE
 #undef EDC_END
