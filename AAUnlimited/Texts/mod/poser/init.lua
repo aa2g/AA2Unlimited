@@ -115,7 +115,7 @@ function _M:config()
 end
 
 function on.pose_load(charidx, posename)
-	local ok, ret = pcall(posemgr.loadpose, charamgr.characters[charidx], posename)
+	local ok, ret = pcall(posemgr.loadpose, charamgr.characters[charidx+1], posename)
 	if not ok then
 		log.error("Error loading pose %s:", posename)
 		log.error(ret)
