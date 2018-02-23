@@ -25,7 +25,7 @@ namespace Shared {
 		//bool (int)
 		Value Thread::IsSeatFilled(std::vector<Value>& params) {
 			int card = params[0].iVal;
-			if (card > 24) return Value(false);
+			if (card > 24 || card < 0) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			return Value(cardInst->IsValid());
 		}

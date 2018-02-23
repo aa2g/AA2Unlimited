@@ -1060,7 +1060,7 @@ namespace Shared {
 
 		//bool consensual
 		void Thread::IsConsensualH(std::vector<Value>& params) {
-			int forceVal = params[0].bVal ? 0 : 4;
+			int forceVal = params[0].iVal;
 			const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x2C, 0x14, 0x9C };
 			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
 			*forcedh = forceVal;
@@ -1679,8 +1679,8 @@ namespace Shared {
 			},
 			{
 				76, ACTIONCAT_NPCACTION, TEXT("Sex Consensual"), TEXT("SexConsensual = %p"),
-				TEXT("Set whether the sex will be consensual or not."),
-				{ TYPE_BOOL },
+				TEXT("Set whether the sex will be consensual or not. 0 - consensual, 4 - Actor 0 will be raped, 8 - PC will be raped, 10 - both will be raped. "),
+				{ TYPE_INT },
 				&Thread::IsConsensualH
 			},
 			{
