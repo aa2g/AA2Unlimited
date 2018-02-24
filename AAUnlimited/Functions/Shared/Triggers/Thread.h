@@ -115,6 +115,7 @@ namespace Shared {
 			void NpcActionNoTarget(std::vector<Value>& params);
 			void NpcTalkTo(std::vector<Value>& params);
 			void NpcTalkToAbout(std::vector<Value>& params);
+			void NpcCancelAction(std::vector<Value>& params);
 
 			void SetCardStorageInt(std::vector<Value>& params);
 			void SetCardStorageFloat(std::vector<Value>& params);

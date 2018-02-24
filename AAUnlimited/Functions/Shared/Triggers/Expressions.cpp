@@ -1559,13 +1559,15 @@ namespace Shared {
 		//bool()
 		Value Thread::GetNpcResponseOriginalAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return false;
-			return ((NpcResponseData*)eventData)->originalResponse;
+			bool bResponse = ((NpcResponseData*)eventData)->originalResponse == 0;
+			return bResponse;
 		}
 
 		//bool()
 		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return false;
-			return ((NpcResponseData*)eventData)->changedResponse;
+			bool bResponse = ((NpcResponseData*)eventData)->changedResponse == 0;
+			return bResponse;
 		}
 
 		//bool()

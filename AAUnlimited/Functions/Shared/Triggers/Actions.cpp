@@ -102,12 +102,29 @@ namespace Shared {
 			card->m_forceAction.unknown2 = 1;
 		}
 
+		//int card
+		void Thread::NpcCancelAction(std::vector<Value>& params) {
+			int cardSeat = params[0].iVal;
+			CharInstData* card = &AAPlay::g_characters[cardSeat];
+			if (!card->IsValid()) return;
+
+			card->m_forceAction.conversationId = 0;
+			card->m_forceAction.movementType = 0;
+			card->m_char->m_characterStatus->m_npcStatus->m_status = 0;
+			card->m_forceAction.roomTarget = -1;
+			card->m_forceAction.target1 = nullptr;
+			card->m_forceAction.target2 = nullptr;
+			card->m_forceAction.unknown = -1;
+			card->m_forceAction.unknown2 = 1;
+		}
+
 		//event response
 
 		//bool newAnswer
 		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
-			((NpcResponseData*)eventData)->changedResponse = params[0].bVal;
+			int iResponse = params[0].bVal ? 0 : 1;
+			((NpcResponseData*)eventData)->changedResponse = iResponse;
 		}
 
 		//int percent
@@ -1748,6 +1765,12 @@ namespace Shared {
 				TEXT("Sets pose for the scene actor."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetPose
+			},
+			{
+				88, ACTIONCAT_NPCACTION, TEXT("Cancel NPC's action"), TEXT("%p ::CancelAction"),
+				TEXT("Cancels NPC's currently issued action"),
+				{ TYPE_INT },
+				&Thread::NpcCancelAction
 			},
 		};
 

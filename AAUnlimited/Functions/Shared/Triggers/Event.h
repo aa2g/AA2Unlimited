@@ -126,8 +126,8 @@ namespace Triggers {
 		PlayInjections::NpcActions::AnswerStruct* substruct;
 		int answeredTowards;
 		int conversationId;
-		bool originalResponse;
-		bool changedResponse;
+		int originalResponse;
+		int changedResponse;
 		int originalChance;
 		int changedChance;
 
