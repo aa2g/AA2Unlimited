@@ -1077,7 +1077,7 @@ namespace Shared {
 
 		//bool consensual
 		void Thread::IsConsensualH(std::vector<Value>& params) {
-			int forceVal = params[0].bVal ? 0 : 4;
+			int forceVal = params[0].iVal;
 			const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x2C, 0x14, 0x9C };
 			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
 			*forcedh = forceVal;
@@ -1099,6 +1099,13 @@ namespace Shared {
 			int seatPartner = params[1].iVal;
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
+
+
+			//save interrupts
+			const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
+			DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
+			GameState::setInterrupt(*interrupt);
+			*interrupt = 1;
 
 			//save the original PC and its target
 			GameState::setVoyeur(GameState::getPlayerCharacter());
@@ -1137,14 +1144,17 @@ namespace Shared {
 		{
 			if (Shared::GameState::getIsPeeping())	//clean up any voyerism
 			{
+				const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
 				const DWORD offstPC[] = { 0x376164, 0x88 };
 				const DWORD offstPCNPC[] = { 0x376164, 0x28, 0x28 };
 				auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
 				auto pcnpc = (ExtClass::NpcData**)ExtVars::ApplyRule(offstPCNPC);
+				DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
 				if (!Shared::GameState::getVoyeur()) return;
 				*pc = Shared::GameState::getVoyeur();
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
+				*interrupt = Shared::GameState::getInterrupt();
 				*pcnpc = Shared::GameState::getVoyeurTarget();
 				Shared::GameState::setVoyeur(nullptr);
 				Shared::GameState::setVoyeurTarget(nullptr);
@@ -1696,8 +1706,8 @@ namespace Shared {
 			},
 			{
 				76, ACTIONCAT_NPCACTION, TEXT("Sex Consensual"), TEXT("SexConsensual = %p"),
-				TEXT("Set whether the sex will be consensual or not."),
-				{ TYPE_BOOL },
+				TEXT("Set whether the sex will be consensual or not. 0 - consensual, 4 - Actor 0 will be raped, 8 - PC will be raped, 10 - both will be raped. "),
+				{ TYPE_INT },
 				&Thread::IsConsensualH
 			},
 			{

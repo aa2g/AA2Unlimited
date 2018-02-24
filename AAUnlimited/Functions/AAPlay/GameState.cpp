@@ -38,6 +38,7 @@ struct GameStateStruct {
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
 	DWORD m_NPCLineState;				//increments from 0 to whatever
 	int roomNumber[25];					//Current room ID
+	DWORD interrupt;					//Disabled interruptions
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -120,6 +121,16 @@ ExtClass::CharacterStruct* Shared::GameState::getVoyeur()
 void Shared::GameState::setVoyeurTarget(ExtClass::NpcData* target)
 {
 	loc_gameState.m_voyeurTarget = target;
+}
+
+void Shared::GameState::setInterrupt(DWORD value)
+{
+	loc_gameState.interrupt = value;
+}
+
+DWORD Shared::GameState::getInterrupt()
+{
+	return loc_gameState.interrupt;
 }
 
 ExtClass::NpcData* Shared::GameState::getVoyeurTarget()
