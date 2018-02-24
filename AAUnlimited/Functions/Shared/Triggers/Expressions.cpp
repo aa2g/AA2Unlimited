@@ -1557,17 +1557,29 @@ namespace Shared {
 		}
 
 		//bool()
-		Value Thread::GetNpcResponseOriginalAnswer(std::vector<Value>& params) {
+		Value Thread::GetNpcResponseOriginalAnswerSuccess(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return false;
 			bool bResponse = ((NpcResponseData*)eventData)->originalResponse == 0;
 			return bResponse;
 		}
 
+		//int()
+		Value Thread::GetNpcResponseOriginalAnswer(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return false;
+			return ((NpcResponseData*)eventData)->originalResponse;
+		}
+
 		//bool()
-		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
+		Value Thread::GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return false;
 			bool bResponse = ((NpcResponseData*)eventData)->changedResponse == 0;
 			return bResponse;
+		}
+
+		//int()
+		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return false;
+			return ((NpcResponseData*)eventData)->changedResponse;
 		}
 
 		//bool()
@@ -2465,6 +2477,21 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetEventPreviousRoom
 				},
+				{
+					100, EXPRCAT_EVENT,
+					TEXT("Npc Original Response"), TEXT("OriginalResponse"),
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the original Answer the NPC made"),
+					{}, (TYPE_BOOL),
+					&Thread::GetNpcResponseOriginalAnswer
+				},
+				{
+					101, EXPRCAT_EVENT,
+					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
+					"using the Set Npc Response Answer Action"),
+					{}, (TYPE_BOOL),
+					&Thread::GetNpcResponseCurrentAnswer
+				},
 
 			},
 
@@ -2549,18 +2576,18 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Original Response"), TEXT("OriginalResponse"),
+					TEXT("Npc Original Response Success"), TEXT("OriginalResponseSuccess"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the original Answer the NPC made"),
 					{ }, (TYPE_BOOL),
-					&Thread::GetNpcResponseOriginalAnswer
+					&Thread::GetNpcResponseOriginalAnswerSuccess
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
+					TEXT("Npc Current Response Success"), TEXT("CurrentResponseSuccess"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
-					"using the Set Npc Response Answer Action"),
+					"using the Set Npc Response Answer Success Action"),
 					{ }, (TYPE_BOOL),
-					&Thread::GetNpcResponseCurrentAnswer
+					&Thread::GetNpcResponseCurrentAnswerSuccess
 				},
 				{
 					16, EXPRCAT_CHARPROP,

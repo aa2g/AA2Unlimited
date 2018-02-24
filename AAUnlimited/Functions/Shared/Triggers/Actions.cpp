@@ -121,10 +121,16 @@ namespace Shared {
 		//event response
 
 		//bool newAnswer
-		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
+		void Thread::SetNpcResponseSuccess(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
 			int iResponse = params[0].bVal ? 0 : 1;
 			((NpcResponseData*)eventData)->changedResponse = iResponse;
+		}
+
+		//
+		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return;
+			((NpcResponseData*)eventData)->changedResponse = params[0].iVal % 3;
 		}
 
 		//int percent
@@ -1338,10 +1344,10 @@ namespace Shared {
 				&Thread::ConditionalEndExecution
 			},
 			{
-				18, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Answer"), TEXT("CurrentResponseAnswer = %p"),
+				18, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Success"), TEXT("CurrentResponseSuccess = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
 				{ TYPE_BOOL },
-				&Thread::SetNpcResponseAnswer
+				&Thread::SetNpcResponseSuccess
 			},
 			{
 				19, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Percent"), TEXT("CurrentResponsePercent = %p"),
@@ -1781,6 +1787,12 @@ namespace Shared {
 				TEXT("Cancels NPC's currently issued action"),
 				{ TYPE_INT },
 				&Thread::NpcCancelAction
+			},
+			{
+				89, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Answer"), TEXT("CurrentResponseAnswer = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
+				{ TYPE_INT },
+				&Thread::SetNpcResponseAnswer
 			},
 		};
 

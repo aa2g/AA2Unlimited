@@ -139,6 +139,7 @@ namespace Shared {
 			void ReplaceMood(std::vector<Value>& params);
 
 			//event response
+			void SetNpcResponseSuccess(std::vector<Value>& params);
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
@@ -310,8 +311,10 @@ namespace Shared {
 			Value GetStartingPeriod(std::vector<Value>& params);
 
 			//NPC_RESPONSE
-			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
-			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()
+			Value GetNpcResponseOriginalAnswerSuccess(std::vector<Value>& params); //bool()
+			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params);
+			Value GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params);	//bool()
+			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
