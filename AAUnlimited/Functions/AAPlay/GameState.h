@@ -33,6 +33,18 @@ namespace Shared {
 		void setPCConversationState(DWORD value);
 		DWORD getPCConversationState();
 
+		void setNPCLineState(DWORD value);
+		DWORD getNPCLineState();
+
+		void setInterrupt(DWORD value);
+		DWORD getInterrupt();
+
+		void SetRoomNumber(int seat, int room);
+		int GetRoomNumber(int seat);
+
+		void setInterrupt(int value);
+		DWORD getInterrupt();
+
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);

@@ -396,6 +396,87 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_voicePitch = pitch;
 		}
 
+		//int seat, int cum
+		void Thread::SetCum(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "A00_O_kutisiru") || strstr((*frame)->m_name, "A00_O_sitasiru")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetTears(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_namida")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetHighlight(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_mehi")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+
+		void Thread::SetGlasses(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			bool hidden = params[1].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "megane")) {
+						(*frame)->m_renderFlag = hidden ? 0 : 2;
+					}
+				}
+				frame++;
+			}
+		}
+		
 		//int seat, int club
 		void Thread::SetCardClub(std::vector<Value>& params)
 		{
@@ -968,24 +1049,32 @@ namespace Shared {
 			}
 		}
 
-		//int seatPC, int seatPartner
+		//int actor, string pose
+		void Thread::SetPose(std::vector<Value>& params) {
+			auto actor = params[0].iVal;								//scene actor
+			auto posename = General::CastToString(*params[1].strVal);	//posename
 
+			LUA_EVENT_NORET("pose_load", actor, posename);
+		}
+
+
+		//bool consensual
 		void Thread::IsConsensualH(std::vector<Value>& params) {
-			int forceVal = params[0].bVal ? 0 : 4;
+			int forceVal = params[0].iVal;
 			const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x2C, 0x14, 0x9C };
 			DWORD* forcedh = (DWORD*)ExtVars::ApplyRule(offset);
 			*forcedh = forceVal;
 		}
-		//bool consensual
 
+		//bool auto-pc
 		void Thread::AutoPC(std::vector<Value>& params) {
 			int autoVal = params[0].bVal ? 1 : 0;
 			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
 			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
 			*autopc = autoVal;
 		}
-		//bool auto-pc
 
+		//int seatPC, int seatPartner
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
 			CharInstData* instPC = &AAPlay::g_characters[seatPC];
@@ -993,6 +1082,13 @@ namespace Shared {
 			int seatPartner = params[1].iVal;
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
+
+
+			//save interrupts
+			const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
+			DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
+			GameState::setInterrupt(*interrupt);
+			*interrupt = 1;
 
 			//save the original PC and its target
 			GameState::setVoyeur(GameState::getPlayerCharacter());
@@ -1031,14 +1127,17 @@ namespace Shared {
 		{
 			if (Shared::GameState::getIsPeeping())	//clean up any voyerism
 			{
+				const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
 				const DWORD offstPC[] = { 0x376164, 0x88 };
 				const DWORD offstPCNPC[] = { 0x376164, 0x28, 0x28 };
 				auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
 				auto pcnpc = (ExtClass::NpcData**)ExtVars::ApplyRule(offstPCNPC);
+				DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
 				if (!Shared::GameState::getVoyeur()) return;
 				*pc = Shared::GameState::getVoyeur();
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
+				*interrupt = Shared::GameState::getInterrupt();
 				*pcnpc = Shared::GameState::getVoyeurTarget();
 				Shared::GameState::setVoyeur(nullptr);
 				Shared::GameState::setVoyeurTarget(nullptr);
@@ -1590,8 +1689,8 @@ namespace Shared {
 			},
 			{
 				76, ACTIONCAT_NPCACTION, TEXT("Sex Consensual"), TEXT("SexConsensual = %p"),
-				TEXT("Set whether the sex will be consensual or not."),
-				{ TYPE_BOOL },
+				TEXT("Set whether the sex will be consensual or not. 0 - consensual, 4 - Actor 0 will be raped, 8 - PC will be raped, 10 - both will be raped. "),
+				{ TYPE_INT },
 				&Thread::IsConsensualH
 			},
 			{
@@ -1629,6 +1728,36 @@ namespace Shared {
 				TEXT("Sets whether the character's virginity was attempted to be taken by the target. 0 - no, 1 - yes."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCherryStatus
+			},
+			{
+				83, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Cum"), TEXT("%p ::SetCum = %p"),
+				TEXT("Set whether the character has cum in mouth."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetCum
+			},
+			{
+				84, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Tears"), TEXT("%p ::SetTears = %p"),
+				TEXT("Set whether the character is crying."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetTears
+			},
+			{
+				85, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Highlight"), TEXT("%p ::SetHighlight = %p"),
+				TEXT("Set whether the character has highlight in their eyes."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetHighlight
+			},
+			{
+				86, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Glasses"), TEXT("%p ::SetGlasses = %p"),
+				TEXT("Set whether the character has their glasses on."),
+				{ TYPE_INT, TYPE_BOOL },
+				&Thread::SetGlasses
+			},
+			{
+				87, ACTIONCAT_NPCACTION, TEXT("Set Pose"), TEXT("%p ::Pose = %p"),
+				TEXT("Sets pose for the scene actor."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetPose
 			},
 		};
 

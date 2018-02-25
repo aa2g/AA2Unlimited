@@ -18,6 +18,10 @@ struct GameStateStruct {
 		m_classSaveName = L"";
 		m_char[0] = nullptr;
 		m_char[1] = nullptr;
+		for (int i = 0; i < 25; i++)
+		{
+			roomNumber[i] = -1;
+		}
 	}
 
 	//Game state indicators
@@ -32,6 +36,9 @@ struct GameStateStruct {
 
 	std::wstring m_classSaveName;
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
+	DWORD m_NPCLineState;				//increments from 0 to whatever
+	int roomNumber[25];					//Current room ID
+	DWORD interrupt;					//Disabled interruptions
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -116,6 +123,16 @@ void Shared::GameState::setVoyeurTarget(ExtClass::NpcData* target)
 	loc_gameState.m_voyeurTarget = target;
 }
 
+void Shared::GameState::setInterrupt(DWORD value)
+{
+	loc_gameState.interrupt = value;
+}
+
+DWORD Shared::GameState::getInterrupt()
+{
+	return loc_gameState.interrupt;
+}
+
 ExtClass::NpcData* Shared::GameState::getVoyeurTarget()
 {
 	return loc_gameState.m_voyeurTarget;
@@ -130,6 +147,27 @@ DWORD Shared::GameState::getPCConversationState()
 {
 	return loc_gameState.m_PCConversationState;
 }
+
+void Shared::GameState::setNPCLineState(DWORD value)
+{
+	loc_gameState.m_NPCLineState = value;
+}
+
+DWORD Shared::GameState::getNPCLineState()
+{
+	return loc_gameState.m_NPCLineState;
+}
+
+void Shared::GameState::SetRoomNumber(int seat, int room) {
+	if (seat < 0 || seat >= 25) return;
+	loc_gameState.roomNumber[seat] = room;
+}
+
+int Shared::GameState::GetRoomNumber(int seat) {
+	if (seat < 0 || seat >= 25) return -1;
+	return loc_gameState.roomNumber[seat];
+}
+
 
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {

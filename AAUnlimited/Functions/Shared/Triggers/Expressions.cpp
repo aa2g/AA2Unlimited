@@ -25,9 +25,95 @@ namespace Shared {
 		//bool (int)
 		Value Thread::IsSeatFilled(std::vector<Value>& params) {
 			int card = params[0].iVal;
-			if (card > 24) return Value(false);
+			if (card > 24 || card < 0) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			return Value(cardInst->IsValid());
+		}
+
+		//bool (int)
+		Value Thread::GetCum(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "A00_O_kutisiru")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+			return Value(false);
+		}
+		//bool (int)
+
+		Value Thread::GetTears(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_namida")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+			return Value(false);
+		}
+
+		Value Thread::GetGlasses(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "megane")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							return Value(true);
+						}
+						else
+						{
+							return Value(false);
+						}
+					}
+				}
+				frame++;
+			}
+			return Value(false);
+		}
+		Value Thread::GetHighlight(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			bool highlight = false;
+			while (frame < arrayEnd) {
+				if (*frame != nullptr) {
+					if (strstr((*frame)->m_name, "00_O_mehi")) {
+						if ((*frame)->m_renderFlag == 0)
+						{
+							highlight = true;
+						}
+					}
+				}
+				frame++;
+			}
+			return Value(highlight);
 		}
 
 		//int ()
@@ -922,6 +1008,21 @@ namespace Shared {
 			}
 		}
 
+		//int(int)
+		Value Thread::PCTalkAbout(std::vector<Value>& params) {
+			auto pc = Shared::GameState::getPlayerCharacter();
+			int seat = pc->m_seat;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
+			}
+		}
+
 		//string(int)
 		Value Thread::GetCardLastHPartner(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1515,6 +1616,27 @@ namespace Shared {
 			}
 		}
 
+		//NPC_WALK_TO_ROOM
+		//int()
+		Value Thread::GetNpcCurrentRoom(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (seat < 0 || seat >= 25) return -1;
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) return -1;
+			auto roomno = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
+			return roomno;
+
+		}
+		//int()
+		Value Thread::GetEventPreviousRoom(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case ROOM_CHANGE:
+				return ((RoomChangeData*)eventData)->prevRoom;
+			default:
+				return -1;
+			}
+		}
+
 		//int()
 		Value Thread::GetNpcActionId(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
@@ -1526,6 +1648,8 @@ namespace Shared {
 				return ((NpcWantTalkWithAboutData*)eventData)->action;
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->action;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return ((PCConversationLineUpdatedData*)eventData)->action;
 			default:
 				return 0;
 			}
@@ -1560,6 +1684,20 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return ((PCConversationStateUpdatedData*)eventData)->state;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return ((PCConversationLineUpdatedData*)eventData)->state;
+			default:
+				return 0;
+			}
+		}
+
+		//int()
+		Value Thread::GetConversationLine(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_CONVERSATION_STATE_UPDATED:
+				return (int)((PCConversationStateUpdatedData*)eventData)->substruct->GetSubStruct()->m_conversationState;
+			case PC_CONVERSATION_LINE_UPDATED:
+				return (int)((PCConversationLineUpdatedData*)eventData)->substruct->GetSubStruct()->m_conversationState;
 			default:
 				return 0;
 			}
@@ -1573,6 +1711,11 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->npc_response;
 				}
 				else return -1;
+			case PC_CONVERSATION_LINE_UPDATED:
+				if (((PCConversationLineUpdatedData*)eventData)->npc_response >= 0) {
+					return ((PCConversationLineUpdatedData*)eventData)->npc_response;
+				}
+				else return -1;
 			default:
 				return 0;
 			}
@@ -1582,6 +1725,10 @@ namespace Shared {
 		Value Thread::GetConversationActor(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
+			case PC_CONVERSATION_LINE_UPDATED:
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
@@ -1602,6 +1749,11 @@ namespace Shared {
 					return ((PCConversationStateUpdatedData*)eventData)->pc_response;
 				}
 				else return Value(-1);
+			case PC_CONVERSATION_LINE_UPDATED:
+				if (((PCConversationLineUpdatedData*)eventData)->pc_response >= 0) {
+					return ((PCConversationLineUpdatedData*)eventData)->pc_response;
+				}
+				else return Value(-1);
 			case PC_RESPONSE:
 				if (((PcResponseData*)eventData)->substruct->m_response >= 0) {
 					return ((int)(((PcResponseData*)eventData)->substruct->m_response));
@@ -1617,6 +1769,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->action);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->action);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationId);
 			default:
@@ -1629,6 +1783,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->conversationAnswerId);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->conversationAnswerId);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationAnswerId);
 			default:
@@ -1641,6 +1797,8 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case PC_CONVERSATION_STATE_UPDATED:
 				return Value(((PCConversationStateUpdatedData*)this->eventData)->currentlyAnswering);
+			case PC_CONVERSATION_LINE_UPDATED:
+				return Value(((PCConversationLineUpdatedData*)this->eventData)->currentlyAnswering);
 			case PC_RESPONSE:
 				return Value((bool)(((PcResponseData*)this->eventData)->substruct->m_bCurrentlyAnswering));
 			default:
@@ -2281,6 +2439,30 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCherryStatus
 				},
+				{
+					96, EXPRCAT_CONVERSATION,
+					TEXT("Line"), TEXT("ConversationLine"), TEXT("Current conversation line."),
+					{}, (TYPE_INT),
+					&Thread::GetConversationLine
+				},
+				{
+					97, EXPRCAT_CHARPROP,
+					TEXT("Current Room"), TEXT("%p ::CurrentRoom"), TEXT("Current room the character is in."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetNpcCurrentRoom
+				},
+				{
+					98, EXPRCAT_CHARPROP,
+					TEXT("Get PC TalkAbout"), TEXT("PCTalkAbout"), TEXT("Get the seat of the NPC that PC is talking about."),
+					{}, (TYPE_INT),
+					&Thread::PCTalkAbout
+				},
+				{
+					99, EXPRCAT_EVENT,
+					TEXT("Room - Previous Room"), TEXT("PreviousRoom"), TEXT("For Room Changed event return the previous room"),
+					{}, (TYPE_INT),
+					&Thread::GetEventPreviousRoom
+				},
 
 			},
 
@@ -2521,6 +2703,30 @@ namespace Shared {
 					TEXT("Returns whether AutoPC is toggled on or off."),
 					{}, (TYPE_BOOL),
 						&Thread::GetAutoPC
+				},
+				{
+					39, EXPRCAT_CHARPROP,
+					TEXT("Get Cum"), TEXT("%p ::GetCum"), TEXT("Returns true if the character has cum in their mouth."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetCum
+				},
+				{
+					40, EXPRCAT_CHARPROP,
+					TEXT("Get Tears"), TEXT("%p ::GetTears"), TEXT("Returns true if the character is crying."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetTears
+				},
+				{
+					41, EXPRCAT_CHARPROP,
+					TEXT("Get Highlight"), TEXT("%p ::GetHighlight"), TEXT("Returns true if the character has highlight in their eyes."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetHighlight
+				},
+				{
+					42, EXPRCAT_CHARPROP,
+					TEXT("Get Glasses"), TEXT("%p ::GetGlasses"), TEXT("Returns true if the character has their glasses on."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetGlasses
 				},
 			},
 			{ //FLOAT
