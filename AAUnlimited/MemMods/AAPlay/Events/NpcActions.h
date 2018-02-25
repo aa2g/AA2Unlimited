@@ -22,7 +22,7 @@ namespace NpcActions {
 		DWORD conversationId; // +36, on entry says what is going on, it is later set to -1
 
 							  // Mystery
-		BYTE unk3[400 - 12];
+		DWORD unk3[97];
 
 		// These dwords seem to be used for something
 		ExtClass::CharacterStruct* answerCharStruct;

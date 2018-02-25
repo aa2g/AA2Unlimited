@@ -123,7 +123,7 @@ namespace Shared {
 		//bool newAnswer
 		void Thread::SetNpcResponseSuccess(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
-			int iResponse = params[0].bVal ? 0 : 1;
+			int iResponse = params[0].bVal ? 1 : 0;
 			((NpcResponseData*)eventData)->changedResponse = iResponse;
 		}
 
