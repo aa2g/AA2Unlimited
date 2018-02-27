@@ -3,7 +3,14 @@
 
 namespace Shared {
 	namespace Triggers {
-		
+
+		bool ActionSeatValid(int seat) {
+			return seat >= 0 && seat < 25;
+		}
+		bool ActionSeatInvalid(int seat) {
+			return !ActionSeatValid(seat);
+		}
+
 		void Thread::ShouldNotBeImplemented(std::vector<Value>& params) {
 			MessageBox(NULL, TEXT("This message should not have been executed."), TEXT("Error"), 0);
 		}
@@ -33,6 +40,7 @@ namespace Shared {
 		void Thread::NpcMoveRoom(std::vector<Value>& params) {
 			int cardSeat = params[0].iVal;
 			int roomId = params[1].iVal;
+			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
 
@@ -49,6 +57,7 @@ namespace Shared {
 		void Thread::NpcActionNoTarget(std::vector<Value>& params) {
 			int cardSeat = params[0].iVal;
 			int actionId = params[1].iVal;
+			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
 
@@ -66,8 +75,10 @@ namespace Shared {
 			int cardSeat = params[0].iVal;
 			int actionId = params[1].iVal;
 			int cardTarget = params[2].iVal;
+			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
+			if (ActionSeatInvalid(cardTarget)) return;
 			CharInstData* target = &AAPlay::g_characters[cardTarget];
 			if (!card->IsValid()) return;
 
@@ -86,10 +97,13 @@ namespace Shared {
 			int actionId = params[1].iVal;
 			int cardTarget = params[2].iVal;
 			int cardAbout = params[3].iVal;
+			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
+			if (ActionSeatInvalid(cardTarget)) return;
 			CharInstData* target = &AAPlay::g_characters[cardTarget];
 			if (!card->IsValid()) return;
+			if (ActionSeatInvalid(cardAbout)) return;
 			CharInstData* about = &AAPlay::g_characters[cardAbout];
 			if (!card->IsValid()) return;
 
@@ -105,6 +119,7 @@ namespace Shared {
 		//int card
 		void Thread::NpcCancelAction(std::vector<Value>& params) {
 			int cardSeat = params[0].iVal;
+			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
 
@@ -141,6 +156,8 @@ namespace Shared {
 
 		int SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
 			if (pointKind < 0 || pointKind > 3) return 0;
+			if (ActionSeatInvalid(iCardFrom)) return 0;
+			if (ActionSeatInvalid(iCardTowards)) return 0;
 			CharInstData* cardFrom = &AAPlay::g_characters[iCardFrom];
 			CharInstData* cardTowards = &AAPlay::g_characters[iCardTowards];
 			if (!cardFrom->IsValid()) return 0;
@@ -182,6 +199,7 @@ namespace Shared {
 			int nPoints = params[2].iVal;
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 
 			SafeAddCardPoints(nPoints, 0, iCardFrom, iCardTowards);
 		}
@@ -191,6 +209,7 @@ namespace Shared {
 			int nPoints = params[2].iVal;
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 
 			SafeAddCardPoints(nPoints, 1, iCardFrom, iCardTowards);
 		}
@@ -200,6 +219,7 @@ namespace Shared {
 			int nPoints = params[2].iVal;
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 
 			SafeAddCardPoints(nPoints, 2, iCardFrom, iCardTowards);
 		}
@@ -209,6 +229,7 @@ namespace Shared {
 			int nPoints = params[2].iVal;
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 
 			SafeAddCardPoints(nPoints, 3, iCardFrom, iCardTowards);
 		}
@@ -217,6 +238,7 @@ namespace Shared {
 		void Thread::AddCardPoints(std::vector<Value>& params) {
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 			int pointKind = params[2].iVal;
 			int nPoints = params[3].iVal;
 
@@ -261,6 +283,7 @@ namespace Shared {
 		void Thread::SetCardPoints(std::vector<Value>& params) {
 			int iCardFrom = params[0].iVal;
 			int iCardTowards = params[1].iVal;
+			if (ActionSeatInvalid(iCardFrom) || ActionSeatInvalid(iCardTowards)) return;
 			float ptsLove = params[2].fVal;
 			float ptsLike = params[3].fVal;
 			float ptsDislike = params[4].fVal;
@@ -331,10 +354,12 @@ namespace Shared {
 		//int seat, int target, bool flag
 		void Thread::SetLover(std::vector<Value>& params) {
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* seatInst = &AAPlay::g_characters[seat];
 			if (!seatInst->IsValid()) return;
 
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInst = &AAPlay::g_characters[target];
 			if (!targetInst->IsValid()) return;
 
@@ -352,6 +377,7 @@ namespace Shared {
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			int virtue = params[1].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			if (!AAPlay::g_characters[seat].m_char) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
@@ -364,6 +390,7 @@ namespace Shared {
 		{
 			int seat = params[0].iVal;
 			int trait = params[1].iVal;
+			if (ActionSeatInvalid(seat) || trait > ExtClass::Trait::TRAIT_RAINBOW	) return;
 			bool enable = params[2].bVal;
 			if (!AAPlay::g_characters[seat].m_char) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
@@ -376,9 +403,11 @@ namespace Shared {
 		void Thread::SetCherryStatus(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			int value = params[2].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -387,8 +416,9 @@ namespace Shared {
 
 		void Thread::SetClothingState(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			int state = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (ActionSeatInvalid(seat)) return;
+			int state = params[1].iVal % 5;
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -399,8 +429,9 @@ namespace Shared {
 		void Thread::SetCardPersonality(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int personality = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -411,8 +442,9 @@ namespace Shared {
 		void Thread::SetCardVoicePitch(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
-			int pitch = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (ActionSeatInvalid(seat)) return;
+			int pitch = params[1].iVal % 5;
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -423,8 +455,9 @@ namespace Shared {
 		void Thread::SetCum(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			bool hidden = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -443,8 +476,9 @@ namespace Shared {
 		void Thread::SetTears(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			bool hidden = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -463,8 +497,9 @@ namespace Shared {
 		void Thread::SetHighlight(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			bool hidden = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -483,8 +518,9 @@ namespace Shared {
 		void Thread::SetGlasses(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			bool hidden = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -504,8 +540,9 @@ namespace Shared {
 		void Thread::SetCardClub(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
-			int club = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (ActionSeatInvalid(seat)) return;
+			int club = params[1].iVal % 8;
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -526,8 +563,9 @@ namespace Shared {
 		void Thread::SetCardClubRank(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int rank = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -538,8 +576,9 @@ namespace Shared {
 		void Thread::SetCardIntelligence(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int intelligence = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -549,8 +588,9 @@ namespace Shared {
 		void Thread::SetCardIntelligenceValue(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int value = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -560,8 +600,9 @@ namespace Shared {
 		void Thread::SetCardIntelligenceRank(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int rank = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -572,8 +613,9 @@ namespace Shared {
 		void Thread::SetCardStrength(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int strength = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -584,8 +626,9 @@ namespace Shared {
 		void Thread::SetCharacterLocked(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int lockedValue = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -595,8 +638,9 @@ namespace Shared {
 		void Thread::SetMasturbating(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int masturbatingValue = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -606,8 +650,9 @@ namespace Shared {
 		void Thread::SetCardStrengthValue(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int value = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -617,8 +662,9 @@ namespace Shared {
 		void Thread::SetCardStrengthRank(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int rank = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -629,8 +675,9 @@ namespace Shared {
 		void Thread::SetCardSociability(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int sociability = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -641,8 +688,9 @@ namespace Shared {
 		void Thread::SetCardLoversItem(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto item = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -658,8 +706,9 @@ namespace Shared {
 		void Thread::SetCardFriendItem(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto item = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -675,8 +724,9 @@ namespace Shared {
 		void Thread::SetCardSexualItem(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto item = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -692,8 +742,9 @@ namespace Shared {
 		void Thread::SetCardFirstName(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto name = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -709,8 +760,9 @@ namespace Shared {
 		void Thread::SetCardSecondName(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto name = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -726,8 +778,9 @@ namespace Shared {
 		void Thread::SetCardDescription(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			auto name = params[1].strVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -750,8 +803,9 @@ namespace Shared {
 		void Thread::SetCardOrientation(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
-			int orientation = params[1].iVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (ActionSeatInvalid(seat)) return;
+			int orientation = params[1].iVal % 5;
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -762,8 +816,9 @@ namespace Shared {
 		void Thread::SetCardSexExperience(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int experience = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -774,8 +829,9 @@ namespace Shared {
 		void Thread::SetCardAnalSexExperience(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int experience = params[1].bVal;
-			if (!AAPlay::g_characters[seat].m_char) {
+			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
@@ -786,7 +842,9 @@ namespace Shared {
 		void Thread::SetCardSexCompatibility(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int target = params[1].bVal;
+			if (ActionSeatInvalid(target)) return;
 			int compatibility = params[2].bVal;
 			if (!AAPlay::g_characters[seat].IsValid() || !AAPlay::g_characters[target].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card.\r\n";
@@ -799,8 +857,10 @@ namespace Shared {
 		void Thread::SetCardCumStatInVagina(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -814,8 +874,10 @@ namespace Shared {
 		void Thread::SetCardCumStatInAnal(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -829,8 +891,10 @@ namespace Shared {
 		void Thread::SetCardCumStatInMouth(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -844,8 +908,10 @@ namespace Shared {
 		void Thread::SetCardCumStatTotalCum(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -859,8 +925,10 @@ namespace Shared {
 		void Thread::SetCardCumStatClimaxCount(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -874,8 +942,10 @@ namespace Shared {
 		void Thread::SetCardCumStatSimClimaxCount(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -889,8 +959,10 @@ namespace Shared {
 		void Thread::SetCardCumStatCondomsUsed(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -904,8 +976,10 @@ namespace Shared {
 		void Thread::SetCardCumStatRiskyCums(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -919,8 +993,10 @@ namespace Shared {
 		void Thread::SetCardVaginalSex(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -934,8 +1010,10 @@ namespace Shared {
 		void Thread::SetCardAnalSex(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -949,8 +1027,10 @@ namespace Shared {
 		void Thread::SetCardAllSex(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			int target = params[1].iVal;
+			if (ActionSeatInvalid(target)) return;
 			CharInstData* targetInstance = &AAPlay::g_characters[target];
 			int amount = params[2].iVal;
 
@@ -965,6 +1045,7 @@ namespace Shared {
 		//int seat, int newset
 		void Thread::SwitchCardStyle(std::vector<Value>& params) {
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			int newset = params[1].iVal;
 			if (!AAPlay::g_characters[seat].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
@@ -980,6 +1061,7 @@ namespace Shared {
 		//int card, string keyname, int value
 		void Thread::SetCardStorageInt(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
@@ -989,6 +1071,7 @@ namespace Shared {
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
@@ -998,6 +1081,7 @@ namespace Shared {
 		//int card, string keyname, string value
 		void Thread::SetCardStorageString(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
@@ -1007,6 +1091,7 @@ namespace Shared {
 		//int card, string keyname, bool value
 		void Thread::SetCardStorageBool(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
@@ -1017,6 +1102,7 @@ namespace Shared {
 		//int card, string keyname
 		void Thread::RemoveCardStorageInt(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			auto& atoms = inst->m_cardData.GetCardStorage();
@@ -1029,6 +1115,7 @@ namespace Shared {
 		//int card, string keyname
 		void Thread::RemoveCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			auto& atoms = inst->m_cardData.GetCardStorage();
@@ -1041,6 +1128,7 @@ namespace Shared {
 		//int card, string keyname
 		void Thread::RemoveCardStorageString(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			auto& atoms = inst->m_cardData.GetCardStorage();
@@ -1053,6 +1141,7 @@ namespace Shared {
 		//int card, string keyname
 		void Thread::RemoveCardStorageBool(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return;
 			auto& atoms = inst->m_cardData.GetCardStorage();
@@ -1065,6 +1154,7 @@ namespace Shared {
 		//int seat
 		void Thread::SetPC(std::vector<Value>& params) {
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* inst = &AAPlay::g_characters[seat];
 			if (!inst->IsValid()) return;
 			else {
@@ -1100,9 +1190,11 @@ namespace Shared {
 		//int seatPC, int seatPartner
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
+			if (ActionSeatInvalid(seatPC)) return;
 			CharInstData* instPC = &AAPlay::g_characters[seatPC];
 			if (!(instPC->IsValid() && instPC->m_char->m_seat == seatPC)) return;
 			int seatPartner = params[1].iVal;
+			if (ActionSeatInvalid(seatPartner)) return;
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
 
@@ -1139,6 +1231,7 @@ namespace Shared {
 		void Thread::SetNpcStatus(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
 			CharInstData* inst = &AAPlay::g_characters[seat];
 			if (!inst->IsValid()) return;
 			int status = params[1].iVal % 9;
@@ -1171,6 +1264,7 @@ namespace Shared {
 		//int seat, int mood, int moodStr
 		void Thread::AddMood(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			int mood = params[1].iVal;
 			int moodStr = params[2].iVal;
@@ -1194,6 +1288,7 @@ namespace Shared {
 		//int seat, int mood1, int mood2, int moodStr
 		void Thread::ReplaceMood(std::vector<Value>& params) {
 			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
 			CharInstData* inst = &AAPlay::g_characters[card];
 			int mood1 = params[1].iVal;
 			int mood2 = params[2].iVal;

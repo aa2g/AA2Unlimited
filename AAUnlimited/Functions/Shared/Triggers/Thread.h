@@ -46,6 +46,8 @@ namespace Shared {
 
 			} globalStorage;
 
+
+
 		public:
 			void ExecuteTrigger(Trigger* trg);
 
