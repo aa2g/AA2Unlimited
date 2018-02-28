@@ -176,7 +176,7 @@ void __declspec(naked) ClothesChangedRedirect() {
 
 		push eax
 		push ecx
-		call ClothesChangedRedirect
+		call ClothesChangedEvent
 
 		pop edx
 		pop ecx
