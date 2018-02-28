@@ -296,6 +296,9 @@ namespace Poser {
 		size_t len = filter? strlen(filter) : 0;
 
 		tree->EnumTreeLevelOrder([this, &slider, &modFrame, &source, &filter, &len](ExtClass::Frame* frame) {
+			// skip body slider bones
+			if (General::StartsWith(frame->m_name, "artf_"))
+				return true;
 			// limit the frames we work on based on a starts-with filter criteria
 			// Filter out nipple bones as they glitch on breast animations
 			if (!filter || strncmp(frame->m_name, filter, len) == 0 && strncmp(frame->m_name, "a01_J_Chiku", 11) != 0) {
