@@ -22,6 +22,7 @@ struct GameStateStruct {
 		{
 			roomNumber[i] = -1;
 		}
+		h_ai = false;
 	}
 
 	//Game state indicators
@@ -39,6 +40,7 @@ struct GameStateStruct {
 	DWORD m_NPCLineState;				//increments from 0 to whatever
 	int roomNumber[25];					//Current room ID
 	DWORD interrupt;					//Disabled interruptions
+	bool h_ai;							//Disable or enable h-ai
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -106,6 +108,16 @@ void Shared::GameState::setIsPeeping(bool value)
 bool Shared::GameState::getIsPeeping()
 {
 	return loc_gameState.m_isPeeping;
+}
+
+void Shared::GameState::setH_AI(bool value)
+{
+	loc_gameState.h_ai = value;
+}
+
+bool Shared::GameState::getH_AI()
+{
+	return loc_gameState.h_ai;
 }
 
 void Shared::GameState::setVoyeur(ExtClass::CharacterStruct* voyeur)

@@ -137,6 +137,8 @@ namespace Shared {
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
+			void SetH_AI(std::vector<Value>& params);
+
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 
