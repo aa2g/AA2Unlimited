@@ -46,6 +46,8 @@ namespace Shared {
 
 			} globalStorage;
 
+
+
 		public:
 			void ExecuteTrigger(Trigger* trg);
 
@@ -71,6 +73,10 @@ namespace Shared {
 			void SetClothingState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
 			void SetCardVoicePitch(std::vector<Value>& params);
+			void SetCum(std::vector<Value>& params);
+			void SetTears(std::vector<Value>& params);
+			void SetHighlight(std::vector<Value>& params);
+			void SetGlasses(std::vector<Value>& params);
 			void SetCardClub(std::vector<Value>& params);
 			void SetCardClubValue(std::vector<Value>& params);
 			void SetCardClubRank(std::vector<Value>& params);
@@ -111,6 +117,7 @@ namespace Shared {
 			void NpcActionNoTarget(std::vector<Value>& params);
 			void NpcTalkTo(std::vector<Value>& params);
 			void NpcTalkToAbout(std::vector<Value>& params);
+			void NpcCancelAction(std::vector<Value>& params);
 
 			void SetCardStorageInt(std::vector<Value>& params);
 			void SetCardStorageFloat(std::vector<Value>& params);
@@ -123,16 +130,20 @@ namespace Shared {
 			void RemoveCardStorageBool(std::vector<Value>& params);
 
 			void SetPC(std::vector<Value>& params);
+			void SetPose(std::vector<Value>& params);
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
+			void SetH_AI(std::vector<Value>& params);
+
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 
 			//event response
+			void SetNpcResponseSuccess(std::vector<Value>& params);
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
@@ -143,6 +154,14 @@ namespace Shared {
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
+
+			Value GetCum(std::vector<Value>& params);
+
+			Value GetTears(std::vector<Value>& params);
+
+			Value GetGlasses(std::vector<Value>& params);
+
+			Value GetHighlight(std::vector<Value>& params);
 
 			//time info
 			Value GetDaysPassed(std::vector<Value>& params); //int ()
@@ -192,6 +211,7 @@ namespace Shared {
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)
 			Value GetNpcStatus(std::vector<Value>& params); //int(int)
+			Value PCTalkAbout(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
@@ -236,6 +256,8 @@ namespace Shared {
 			Value FirstIndexOf(std::vector<Value>& params); //int(string, string)
 			Value FirstIndexOfFrom(std::vector<Value>& params); //int(string, int, string)
 			Value String2Int(std::vector<Value>& params); //int(string)
+			Value GetNpcCurrentRoom(std::vector<Value>& params);
+
 			
 			//basic float stuff
 			Value GetRandomFloat(std::vector<Value>& params); //float(float,float)
@@ -293,8 +315,10 @@ namespace Shared {
 			Value GetStartingPeriod(std::vector<Value>& params);
 
 			//NPC_RESPONSE
-			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params); //bool()
-			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);	//bool()
+			Value GetNpcResponseOriginalAnswerSuccess(std::vector<Value>& params); //bool()
+			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params);
+			Value GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params);	//bool()
+			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
@@ -303,7 +327,7 @@ namespace Shared {
 
 			//NPC_WALK_TO_ROOM
 			Value GetNpcRoomTarget(std::vector<Value>& params);
-
+			
 			//NPC_WANT_ACTION_NOTARGET
 			Value GetNpcActionId(std::vector<Value>& params);
 
@@ -315,6 +339,7 @@ namespace Shared {
 
 			//PC_CONVERSATION_STATE_UPDATED
 			Value GetConversationState(std::vector<Value>& params);
+			Value GetConversationLine(std::vector<Value>& params);
 			Value GetConversationNpcResponse(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
 			Value GetConversationPcResponse(std::vector<Value>& params);
@@ -323,7 +348,8 @@ namespace Shared {
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 
-
+			//ROOM_CHANGE
+			Value GetEventPreviousRoom(std::vector<Value>& params);
 
 		private:
 			Value EvaluateExpression(ParameterisedExpression& expr);

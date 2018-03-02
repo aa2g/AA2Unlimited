@@ -3,6 +3,8 @@
 
 namespace GameTick {
 
+Shared::Triggers::RoomChangeData roomChangeData;
+
 int (__stdcall *orig_MsgHandler)(void *ptr, MSG *msg);
 int (__stdcall *orig_GameTick)();
 
@@ -37,6 +39,32 @@ void AddTimer(int when, void *fn) {
 }
 */
 
+void CheckRoomChange() {
+
+	for (int seat = 0; seat < 25; seat = seat + 1) {
+		auto roomValue = Shared::GameState::GetRoomNumber(seat);
+		CharInstData* instance = &AAPlay::g_characters[seat];
+		if (instance->IsValid()) {
+			if  (instance->m_char->m_npcData->roomPtr != nullptr){
+				auto roomID = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
+				if (roomValue != roomID) {
+					roomChangeData.action = instance->m_forceAction.conversationId;
+					roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
+					if (instance->m_forceAction.target1 != nullptr) {
+						roomChangeData.convotarget = int(instance->m_forceAction.target1->m_thisChar);
+					}
+
+					roomChangeData.prevRoom = roomValue;
+					Shared::GameState::SetRoomNumber(seat, roomID);
+
+					roomChangeData.card = seat;
+					Shared::Triggers::ThrowEvent(&roomChangeData);
+				}
+			}
+		}
+	}
+}
+
 int __stdcall GameTick() {
 	if (tick == 0) {
 		first_now = GetTickCount();
@@ -60,8 +88,10 @@ int __stdcall GameTick() {
 		}
 		else break;
 	}*/
+	CheckRoomChange();
 	return orig_GameTick();
 }
+
 
 void Initialize() {
 	hwnd = (HANDLE*)(General::GameBase + 0x34526C);

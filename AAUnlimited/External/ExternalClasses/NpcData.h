@@ -14,7 +14,9 @@ public:
 	DWORD* routeStart;
 	DWORD* routeEnd;
 	DWORD* routeUnknown;
-	DWORD m_unknown1[70];
+	DWORD m_unknown1[40];
+	void* roomPtr;
+	DWORD m_unknown2[29];
 	NpcData* m_target;
 
 	static inline void bindLua() {

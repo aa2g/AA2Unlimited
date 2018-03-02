@@ -114,4 +114,12 @@ function _M:config()
 	mod_edit_config(self, opts, "Poser settings")
 end
 
+function on.pose_load(charidx, posename)
+	local ok, ret = pcall(posemgr.loadpose, charamgr.characters[charidx+1], posename)
+	if not ok then
+		log.error("Error loading pose %s:", posename)
+		log.error(ret)
+	end
+end
+
 return _M

@@ -43,7 +43,9 @@ enum PcConversationTypes{
 */
 class ConversationSubStruct {
 public:
-	BYTE m_unknown[0x25];
+	DWORD m_unknownPtrs[0x8];
+	ConversationSubStruct* m_targetSubstruct;
+	BYTE m_unknownBool;
 	BYTE m_bStartH;
 	BYTE m_unknown2[0x6];
 	BYTE m_unknown3;

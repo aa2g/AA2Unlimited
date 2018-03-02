@@ -21,7 +21,7 @@ void Initialize(HInfo* info) {
 void PreTick(HInfo* hinfo)
 {
 	if (!g_Config.bUseHAi) return;
-	if (!loc_isForcedH) return; //only do something if forced
+	if (!loc_isForcedH && !Shared::GameState::getH_AI()) return; //only do something if forced
 	if (!loc_initialized) return;
 	loc_forceAi.Tick(hinfo);
 
@@ -30,7 +30,7 @@ void PreTick(HInfo* hinfo)
 void PostTick(HInfo* hinfo, bool notEnd)
 {
 	if (!g_Config.bUseHAi) return;
-	if (!loc_isForcedH) return; //only do something if forced
+	if (!loc_isForcedH && !Shared::GameState::getH_AI()) return; //only do something if forced
 	if (!loc_initialized) {
 		//initialize
 		LOGPRIO(Logger::Priority::SPAM) << "initializing H-Ai\r\n";
@@ -41,10 +41,11 @@ void PostTick(HInfo* hinfo, bool notEnd)
 		loc_initialized = false;
 		loc_isForcedH = false;
 		loc_isTalkedTo = false;
+		Shared::GameState::setH_AI(false);
 	}
 }
 
-void ConversationTickPost(ExtClass::NpcPcInteractiveConversationStruct* param) {
+void ConversationTickPost(ExtClass::NpcPcInteractiveConversationStruct* param) { //sets whether PC was talked to or not
 	if (!g_Config.bUseHAi) return;
 
 	ConversationSubStruct* convData = param->GetSubStruct();
@@ -65,7 +66,7 @@ void ConversationTickPost(ExtClass::NpcPcInteractiveConversationStruct* param) {
 	}
 }
 
-void ConversationTickPost(ExtClass::NpcPcNonInteractiveConversationStruct* param) {
+void ConversationTickPost(ExtClass::NpcPcNonInteractiveConversationStruct* param) { //sets whether PC was talked to or not
 	if (!g_Config.bUseHAi) return;
 	ConversationSubStruct* convData = param->GetSubStruct();
 	/*if (g_Config.GetKeyValue(Config::NO_PROMPT_IS_FORCE).bVal) {
@@ -82,12 +83,20 @@ void ConversationTickPost(ExtClass::NpcPcNonInteractiveConversationStruct* param
 	}
 }
 
-void ConversationPcResponse(ExtClass::BaseConversationStruct* param) {
+void ConversationPcResponse(ExtClass::BaseConversationStruct* param) { //sets PC response to yes and sets the bool that starts h-ai
 	if (loc_isTalkedTo) {
-		ConversationSubStruct* convData = param->GetSubStruct();
-		convData->m_playerAnswer = 0; //positive player answer
-		convData->m_response = 1;
-		loc_isForcedH = true;
+		auto pc = Shared::GameState::getPlayerCharacter();
+		int card = pc->m_seat;
+		CharInstData* cardInst = &AAPlay::g_characters[card];
+		if (cardInst->m_char->m_charData->m_traitBools[Trait::TRAIT_EXPLOITABLE]) {
+			ConversationSubStruct* convData = param->GetSubStruct();
+			convData->m_playerAnswer = 0; //positive player answer
+			convData->m_response = 1;
+			loc_isForcedH = true;
+		}
+		else {
+			loc_isTalkedTo = false;
+		}
 	}
 }
 

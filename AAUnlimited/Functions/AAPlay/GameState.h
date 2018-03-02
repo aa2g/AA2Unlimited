@@ -24,6 +24,9 @@ namespace Shared {
 		void setIsPeeping(bool value);
 		bool getIsPeeping();
 
+		void setH_AI(bool value);
+		bool getH_AI();
+
 		void setVoyeur(ExtClass::CharacterStruct * voyeur);
 		ExtClass::CharacterStruct * getVoyeur();
 
@@ -32,6 +35,18 @@ namespace Shared {
 
 		void setPCConversationState(DWORD value);
 		DWORD getPCConversationState();
+
+		void setNPCLineState(DWORD value);
+		DWORD getNPCLineState();
+
+		void setInterrupt(DWORD value);
+		DWORD getInterrupt();
+
+		void SetRoomNumber(int seat, int room);
+		int GetRoomNumber(int seat);
+
+		void setInterrupt(int value);
+		DWORD getInterrupt();
 
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);

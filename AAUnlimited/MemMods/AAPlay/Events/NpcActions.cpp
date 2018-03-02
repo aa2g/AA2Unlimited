@@ -110,14 +110,10 @@ void __stdcall Answer(AnswerStruct *as) {
 
 	// we can't just carry over because the data is DWORD (with potential deaf=2 state), not bool.
 	// plaster over it only if something actually wants it changed.
-	if (data.changedResponse != data.originalResponse)
-		as->answer = data.changedResponse;
-	if (data.conversationId != as->askingChar->m_currConversationId)
-	{
-		as->askingChar->m_currConversationId = data.conversationId;
-		as->answerChar->m_currConversationId = data.conversationId;
-		as->conversationId = data.conversationId;
-	}
+	as->answer = data.changedResponse;
+	as->answerChar->m_lastConversationAnswerPercent = data.changedChance;
+	as->askingChar->m_currConversationId = data.conversationId;
+	as->answerChar->m_currConversationId = data.conversationId;
 
 	CallAnswer(as);
 	LUA_EVENT("answer_after", as->answer, as);
@@ -180,7 +176,7 @@ void __declspec(naked) ClothesChangedRedirect() {
 
 		push eax
 		push ecx
-		call ClothesChangedRedirect
+		call ClothesChangedEvent
 
 		pop edx
 		pop ecx

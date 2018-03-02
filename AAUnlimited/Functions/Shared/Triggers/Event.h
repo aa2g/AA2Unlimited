@@ -47,6 +47,8 @@ namespace Triggers {
 		NPC_WALK_TO_ROOM, NPC_WANT_ACTION_NOTARGET, NPC_WANT_TALK_WITH, NPC_WANT_TALK_WITH_ABOUT,
 		PC_CONVERSATION_STATE_UPDATED,
 		PC_RESPONSE,
+		PC_CONVERSATION_LINE_UPDATED,
+		ROOM_CHANGE,
 		
 		
 		N_EVENTS
@@ -124,8 +126,8 @@ namespace Triggers {
 		PlayInjections::NpcActions::AnswerStruct* substruct;
 		int answeredTowards;
 		int conversationId;
-		bool originalResponse;
-		bool changedResponse;
+		int originalResponse;
+		int changedResponse;
 		int originalChance;
 		int changedChance;
 
@@ -164,6 +166,20 @@ namespace Triggers {
 
 	EDC_DECLARE(PCConversationStateUpdatedData, PC_CONVERSATION_STATE_UPDATED)
 
+		ExtClass::MainConversationStruct* substruct;
+		int state;
+		int npc_response;
+		int pc_response;
+		int action;
+		int conversationAnswerId;
+		int currentlyAnswering;
+		BYTE* m_bStartH;
+
+	EDC_END
+
+	EDC_DECLARE(PCConversationLineUpdatedData, PC_CONVERSATION_LINE_UPDATED)
+
+		ExtClass::MainConversationStruct* substruct;
 		int state;
 		int npc_response;
 		int pc_response;
@@ -181,6 +197,14 @@ namespace Triggers {
 
 	EDC_END
 		
+	EDC_DECLARE(RoomChangeData, ROOM_CHANGE)
+
+		int prevRoom;
+		int roomTarget;
+		int action;
+		int convotarget;
+
+	EDC_END
 
 #undef EDC_DECLARE
 #undef EDC_END

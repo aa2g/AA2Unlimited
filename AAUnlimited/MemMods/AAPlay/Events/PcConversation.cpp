@@ -7,6 +7,7 @@ namespace PlayInjections {
 namespace PcConversation {
 
 	Shared::Triggers::PCConversationStateUpdatedData pcConvoStateUpdatedData;
+	Shared::Triggers::PCConversationLineUpdatedData pcConvoLineUpdatedData;
 /********************
  * Start / End Event
  ********************/
@@ -37,11 +38,13 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 
 	auto substruct = param->GetSubStruct();
 	auto prevState = Shared::GameState::getPCConversationState();
+	auto prevLineState = Shared::GameState::getNPCLineState();
 
 	if (prevState != substruct->m_npcTalkState) {
 		Shared::GameState::setPCConversationState(substruct->m_npcTalkState);
 
 		//Shared::Triggers::PCConversationStateUpdatedData data;
+		pcConvoStateUpdatedData.substruct = param;
 		pcConvoStateUpdatedData.state = substruct->m_npcTalkState;
 		pcConvoStateUpdatedData.npc_response = (substruct->m_response < arbitraryMaxResponse) ? substruct->m_response : -1;
 		pcConvoStateUpdatedData.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
@@ -50,9 +53,27 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		pcConvoStateUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_seat;
 		pcConvoStateUpdatedData.conversationAnswerId = substruct->m_conversationAnswerId;
 		pcConvoStateUpdatedData.currentlyAnswering = substruct->m_bCurrentlyAnswering;
-		LUA_EVENT_NORET("convo", pcConvoStateUpdatedData.state);
+		LUA_EVENT_NORET("convo_state_update", pcConvoStateUpdatedData.state);
 		Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 	}
+
+	if (prevLineState != substruct->m_conversationState || prevState != substruct->m_npcTalkState) {
+		Shared::GameState::setNPCLineState(substruct->m_conversationState);
+
+		//Shared::Triggers::PCConversationStateUpdatedData data;
+		pcConvoLineUpdatedData.substruct = param;
+		pcConvoLineUpdatedData.state = substruct->m_npcTalkState;
+		pcConvoLineUpdatedData.npc_response = (substruct->m_response < arbitraryMaxResponse) ? substruct->m_response : -1;
+		pcConvoLineUpdatedData.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
+		pcConvoLineUpdatedData.action = substruct->m_conversationId;
+		pcConvoLineUpdatedData.m_bStartH = &(substruct->m_bStartH);
+		pcConvoLineUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_seat;
+		pcConvoLineUpdatedData.conversationAnswerId = substruct->m_conversationAnswerId;
+		pcConvoLineUpdatedData.currentlyAnswering = substruct->m_bCurrentlyAnswering;
+		LUA_EVENT_NORET("convo_line_update", substruct->m_conversationState);
+		Shared::Triggers::ThrowEvent(&pcConvoLineUpdatedData);
+	}
+
 }
 
 void __stdcall GeneralPostTick(ExtClass::MainConversationStruct* param) {
