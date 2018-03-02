@@ -437,6 +437,8 @@ local function propsliderchanged()
 	local prop = propmgr.props[tonumber(proplist.value)]
 	if prop and bone then
 		setcurrentslider(prop:getslider(bone))
+	else
+		setcurrentslider(dummyslider)
 	end
 end
 
@@ -454,13 +456,19 @@ local function propchanged()
 	end
 end
 
-local function sliderchanged()
+local function sliderchanged(slidertype)
+	if slidertype == 1 then -- if prop bones tab
+		propsliderchanged()
+		return
+	end
 	local slidername = bonelist[bonelist.value or ""]
 	slidername = bones.bonemap[slidername] or slidername or ""
 	-- log.spam("Try to get slider %s from %s", slidername, charamgr.current)
 	if charamgr.current then
 		local slider = charamgr.current:getslider(slidername)
 		setcurrentslider(slider)
+	else
+		setcurrentslider(dummyslider)
 	end
 	slidersetoperation(currentoperation)
 end
@@ -675,49 +683,7 @@ end
 
 -- local stylelist = iup.list { lines = 4, expand = "horizontal", dropdown = "yes" }
 
-local clothing = require "poser.clothing"
-local clothslot = clothing.slotbuttons("Slot", { "1", "2", "3", "4" }, function(type)
-	local character = charamgr.current
-	if character then
-		character.clothtype = type
-	end
-end)
-
-local clothstate = clothing.slotbuttons("State", { "0", "1", "2", "3", "4" }, function(state)
-	local character = charamgr.current
-	if character then
-		character:update(state)
-	end
-end)
-
-local loadstyle = exe_type == "play" and clothing.slotbuttons("Style", { "1", "2", "3", "4", ">" }, function(state)
-	local character = charamgr.current
-	if character then
-		local characterdata = GetCharInstData(character.struct.m_seat)
-		local stylecount = characterdata:GetStyleCount()
-		if stylecount > 1 then
-			local style
-			if state == 4 then
-				style = (characterdata:GetCurrentStyle() + 1) % stylecount
-			else
-				style = state
-			end
-			characterdata:SetCurrentStyle(style)
-			character:update(character.struct.m_clothState)
-		end
-	end
-end)
-
-local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
-	local character = charamgr.current
-	if character then
-		local file = getfile(play_path("data\\save\\cloth\\*.cloth"))
-		local size
-		if file then file, size = fileutils.readfile(file) end
-		if file and size == 92 then character:loadcloth(file) end
-	end
-end}
-
+local dlgclothes = require "poser.dlgclothes"
 
 -- -----------
 -- UI Layout
@@ -729,6 +695,7 @@ local dialogsliders = iup.dialog {
 		iup.tabs {
 			tabchangepos_cb = function(self, new, old)
 				bonelistzbox.valuepos = new
+				sliderchanged(new)
 			end,
 			iup.vbox {
 				tabtitle = "Characters",
@@ -746,12 +713,6 @@ local dialogsliders = iup.dialog {
 				iup.hbox {
 					attachpropsbutton,
 					detachpropsbutton,
-				},
-				clothslot,
-				clothstate,
-				loadstyle,
-				iup.hbox {
-					loadclothbutton,
 				},
 				iup.hbox {
 					iup.button { title = "Show UI", action = function() SetHideUI(false) end },
@@ -773,86 +734,98 @@ local dialogsliders = iup.dialog {
 				expand = "yes",
 			},
 		},
-		iup.frame {
-			title = "Bones",
-			ncmargin = "3x3",
-			iup.vbox {
-				bonelistzbox,
-				expand = "yes",
-			}
-		},
-		iup.vbox {
-			iup.frame {
-				title = "Sliders",
-				expand = "horizontal",
+		iup.tabs {
+			iup.hbox {
+				ncmargin = "3x3",
+				tabtitle = "Bones",
 				iup.vbox {
-					iup.hbox {
-						iup.label { title = "Operation" },
-						iup.radio {
+					bonelistzbox,
+					expand = "yes",
+				},
+				iup.vbox {
+					iup.frame {
+						title = "Sliders",
+						expand = "horizontal",
+						iup.vbox {
 							iup.hbox {
-								rotatebutton,
-								scalebutton,
-								translatebutton,
-								gap = 3,
-							}
+								iup.label { title = "Operation" },
+								iup.radio {
+									iup.hbox {
+										rotatebutton,
+										scalebutton,
+										translatebutton,
+										gap = 3,
+									}
+								},
+								iup.label { separator = "vertical" },
+								iup.label { title = "Modifier" },
+								iup.radio {
+									iup.hbox {
+										modifierx1,
+										modifierx10,
+										modifierx100,
+										gap = 3,
+									}
+								},
+								iup.vbox {
+									resetsliderbutton,
+									alignment = "aright",
+									expand = "horizontal",
+								},
+								alignment = "acenter",
+								expand = "horizontal",
+								gap = 7
+							},
+							sliderx,
+							slidery,
+							sliderz,
 						},
-						iup.label { separator = "vertical" },
-						iup.label { title = "Modifier" },
-						iup.radio {
-							iup.hbox {
-								modifierx1,
-								modifierx10,
-								modifierx100,
-								gap = 3,
-							}
+					},
+					iup.hbox {
+						iup.frame { title = "Mouth",
+							iup.vbox {
+								mouthshapes,
+							},
+							expand = "no",
+						},
+						iup.frame { title = "Eyes",
+							iup.vbox {
+								eyeshapes,
+								dimeyes,
+								tears,
+								eyetracking,
+							},
+								expand = "no"
 						},
 						iup.vbox {
-							resetsliderbutton,
-							alignment = "aright",
-							expand = "horizontal",
+							iup.frame { title = "Eyebrow",
+								iup.vbox {
+									eyebrowshapes
+								},
+							},
+							iup.frame { title = "Blush",
+								iup.vbox {
+									blushslider,
+									blushlinesslider,
+								},
+								expand ="yes",
+							},
+							expand = "no",
 						},
-						alignment = "acenter",
-						expand = "horizontal",
-						gap = 7
 					},
-					sliderx,
-					slidery,
-					sliderz,
+					expand = "no",
 				},
 			},
 			iup.hbox {
-				iup.frame { title = "Mouth",
-					iup.vbox {
-						mouthshapes,
-					},
-					expand = "no",
-				},
-				iup.frame { title = "Eyes",
-					iup.vbox {
-						eyeshapes,
-						dimeyes,
-						tears,
-						eyetracking,
-					},
-						expand = "no"
-				},
-				iup.vbox {
-					iup.frame { title = "Eyebrow",
-						iup.vbox {
-							eyebrowshapes
-						},
-					},
-					iup.frame { title = "Blush",
-						iup.vbox {
-							blushslider,
-							blushlinesslider,
-						},
-						expand ="yes",
-					},
-					expand = "no",
-				},
+				tabtitle = "Clothes",
+				dlgclothes,
 			},
-			expand = "no",
+			iup.hbox {
+				tabtitle = "Meshes",
+			},
+			iup.hbox {
+				tabtitle = "Frames",
+			},
 		},
 		--gap = 3,
 	},
