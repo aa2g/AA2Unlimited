@@ -58,6 +58,7 @@ void CheckRoomChange() {
 					Shared::GameState::SetRoomNumber(seat, roomID);
 
 					roomChangeData.card = seat;
+					if (roomChangeData.prevRoom < 0) return;
 					Shared::Triggers::ThrowEvent(&roomChangeData);
 				}
 			}
