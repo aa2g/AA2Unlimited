@@ -134,10 +134,10 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 32,	TEXT("A00_J_jaw_back"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 
 			//Tot Teeth Sliders
-			{ ExtClass::CharacterStruct::FACE, 33,	TEXT("A00_J_sharkU0"),{ 0,0,0, 0,0,0, 0,1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
-			{ ExtClass::CharacterStruct::FACE, 34,	TEXT("A00_J_sharkU1"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
-			{ ExtClass::CharacterStruct::FACE, 35,	TEXT("A00_J_sharkB0"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
-			{ ExtClass::CharacterStruct::FACE, 36,	TEXT("A00_J_sharkB1"),{ 0,0,0, 0,0,0, 0,-1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 33,	TEXT("A00_J_sharkU0"),{ 0,0,0, 0,0,0, 0,1,0.4f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 34,	TEXT("A00_J_sharkU1"),{ 0,0,0, 0,0,0, 0,-1,-0.4f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 35,	TEXT("A00_J_sharkB0"),{ 0,0,0, 0,0,0, 0,1,0.4f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 36,	TEXT("A00_J_sharkB1"),{ 0,0,0, 0,0,0, 0,-1,-0.4f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
 			{ ExtClass::CharacterStruct::FACE, 37,	TEXT("A00_J_incisorUR"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
 			{ ExtClass::CharacterStruct::FACE, 38,	TEXT("A00_J_incisorUL"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
 			{ ExtClass::CharacterStruct::FACE, 39,	TEXT("A00_J_incisorBR"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
