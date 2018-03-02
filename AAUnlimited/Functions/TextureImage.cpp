@@ -19,6 +19,9 @@ TextureImage::TextureImage(const TCHAR* path,PathStart tryPathStarts)
 		else if (wcscmp(fileName+length - 4, TEXT(".tga")) == 0) {
 			m_type = TGA;
 		}
+		else if (wcscmp(fileName + length - 4, TEXT(".png")) == 0) {
+			m_type = PNG;
+		}
 	}
 	if (m_type == UNKNOWN) {
 		//unknown file format
@@ -33,6 +36,7 @@ TextureImage::TextureImage(const TCHAR* path,PathStart tryPathStarts)
 
 	if (m_type == BMP) FromBmp(file);
 	else if (m_type == TGA) FromTga(file);
+	else if (m_type == PNG) FromPng(file);
 
 	CloseHandle(file);
 
@@ -51,6 +55,16 @@ void TextureImage::FromTga(HANDLE handle)
 	ReadFile(handle, &tgaHeader, sizeof(tgaHeader), &read, 0);
 	m_height = tgaHeader.height;
 	m_width = tgaHeader.width;
+	m_good = true;
+}
+
+void TextureImage::FromPng(HANDLE handle)
+{
+	DWORD read;
+	PngHeader pngHeader;
+	ReadFile(handle, &pngHeader, sizeof(pngHeader), &read, 0);
+	m_height = _byteswap_ulong(pngHeader.height);
+	m_width = _byteswap_ulong(pngHeader.width);
 	m_good = true;
 }
 

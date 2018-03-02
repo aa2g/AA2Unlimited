@@ -199,6 +199,13 @@ function _M.load_xa(character, pose)
 	character.struct:LoadXA(pp, xa, pose or 0, 0, 0)
 end
 
+function _M.currentcharacter()
+	local char = _M.current
+	if char.ischaracter ~= true then
+		return nil
+	end
+	return char
+end
 
 _M.characters = characters
 _M.setcurrentcharacter = setcurrentcharacter

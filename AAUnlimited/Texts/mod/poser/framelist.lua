@@ -2,9 +2,6 @@
 -- Friendly names must be unique
 -- Bones are shown in the poser as ordered here
 return {
-	{ "a01_N_Zentai_010",	 { "Other" },		"World" },
-	{ "a01_N_Skeleton_010", { "Other" },		"Skeleton" },
-
 	{ "a01_N_Zentai_010",	 { "Torso" },		"World" },
 	{ "a01_N_Skeleton_010",	 { "Torso" },		"Skeleton" },
 	{ "a01_J_Neck_01",		 { "Torso" },		"Neck 1" },

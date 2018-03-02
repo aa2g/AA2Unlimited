@@ -22,6 +22,22 @@ struct TgaHeader {
 };
 #pragma pack(pop)
 
+#pragma pack(push, 1)
+struct PngHeader {
+	BYTE signature[8];
+	DWORD IHDRlength;
+	BYTE IHDRtag[4];
+	DWORD width;
+	DWORD height;
+	BYTE bitDepth;
+	BYTE colorType;
+	BYTE compressionMethod;
+	BYTE filterMethod;
+	BYTE interlaceMethod;
+	DWORD IHDRcrc;
+};
+#pragma pack(pop)
+
 /*
  * Represents a texture file. Holds dimensions and file size. used for texture overrides.
  */
@@ -40,12 +56,13 @@ private:
 	int m_height;
 
 	enum ImageType {
-		UNKNOWN, TGA, BMP
+		UNKNOWN, TGA, BMP, PNG
 	};
 	ImageType m_type;
 
 private:
 	void FromTga(HANDLE handle);
 	void FromBmp(HANDLE handle);
+	void FromPng(HANDLE handle);
 };
 
