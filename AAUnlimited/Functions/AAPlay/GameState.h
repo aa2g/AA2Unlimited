@@ -24,6 +24,9 @@ namespace Shared {
 		void setIsPeeping(bool value);
 		bool getIsPeeping();
 
+		void setH_AI(bool value);
+		bool getH_AI();
+
 		void setVoyeur(ExtClass::CharacterStruct * voyeur);
 		ExtClass::CharacterStruct * getVoyeur();
 

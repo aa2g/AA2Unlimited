@@ -1259,6 +1259,14 @@ namespace Shared {
 				Shared::GameState::setVoyeurTarget(nullptr);
 				Shared::GameState::setIsPeeping(false);
 			}
+
+		}
+
+		//H_AI
+		void Thread::SetH_AI(std::vector<Value>& params)
+		{
+			bool val = params[0].bVal;
+			Shared::GameState::setH_AI(val);
 		}
 
 		//int seat, int mood, int moodStr
@@ -1888,6 +1896,12 @@ namespace Shared {
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
 				{ TYPE_INT },
 				&Thread::SetNpcResponseAnswer
+			},
+			{
+				90, ACTIONCAT_MODIFY_CHARACTER, TEXT("Turn on H-AI"), TEXT("H-AI = %p"),
+				TEXT("Turn on H-AI"),
+				{ TYPE_BOOL },
+				&Thread::SetH_AI
 			},
 		};
 
