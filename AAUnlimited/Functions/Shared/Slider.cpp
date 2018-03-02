@@ -116,6 +116,43 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 17,	TEXT("A00_O_mimiL"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Left
 			{ ExtClass::CharacterStruct::FACE, 18,	TEXT("A00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
 
+			//Tot sliders
+
+			{ ExtClass::CharacterStruct::FACE, 19,	TEXT("A00_J_nose"),{ 0,0,0, 1,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 20,	TEXT("A00_J_nose"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 21,	TEXT("A00_J_nose"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 22,	TEXT("A00_J_nose"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 23,	TEXT("A00_J_nosebridge"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 24,	TEXT("A00_J_chin"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 25,	TEXT("A00_J_chin"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 26,	TEXT("A00_J_jaw"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 27,	TEXT("A00_J_jaw"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 28,	TEXT("A00_J_jaw"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 29,	TEXT("A00_J_cheek"),{ 0,0,0, 0,0,0, 0,1,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 30,	TEXT("A00_J_cheek"),{ 0,0,1, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 31,	TEXT("A00_J_cheek"),{ 1,0,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+			{ ExtClass::CharacterStruct::FACE, 32,	TEXT("A00_J_jaw_back"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+
+			//Tot Teeth Sliders
+			{ ExtClass::CharacterStruct::FACE, 33,	TEXT("A00_J_sharkU0"),{ 0,0,0, 0,0,0, 0,1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 34,	TEXT("A00_J_sharkU1"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 35,	TEXT("A00_J_sharkB0"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 36,	TEXT("A00_J_sharkB1"),{ 0,0,0, 0,0,0, 0,-1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 37,	TEXT("A00_J_incisorUR"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 38,	TEXT("A00_J_incisorUL"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 39,	TEXT("A00_J_incisorBR"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 40,	TEXT("A00_J_incisorBL"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 41,	TEXT("A00_J_canineUR"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 42,	TEXT("A00_J_canineUL"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 43,	TEXT("A00_J_canineBR"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 44,	TEXT("A00_J_canineBL"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 45,	TEXT("A00_J_premolarUR"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 46,	TEXT("A00_J_premolarUL"),{ 0,0,0, 0,0,0, 0,-1,-0.2f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 47,	TEXT("A00_J_premolarBR"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+			{ ExtClass::CharacterStruct::FACE, 48,	TEXT("A00_J_premolarBL"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
+
+
+
 		},
 		{
 			//SKELETON
