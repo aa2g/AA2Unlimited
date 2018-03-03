@@ -553,5 +553,11 @@
     <None Include="Texts\mod\edit\sliders.lua">
       <Filter>Lua\edit</Filter>
     </None>
+    <None Include="Texts\mod\poser\dlgclothes.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\dlgmeshes.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
   </ItemGroup>
 </Project>

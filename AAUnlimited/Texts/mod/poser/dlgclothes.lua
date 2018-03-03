@@ -78,7 +78,8 @@ local populateskirt = function()
 		return
 	end
 	skirtlist[1] = nil
-	if not char.struct.m_xxSkirt then
+	-- males misuse the m_xxSkirt member for something other than a xx file
+	if char.struct.m_boobs == 0 or not char.struct.m_xxSkirt then
 		return
 	end
 	local skirtbaseframe = char.struct.m_xxSkirt:FindBone("A00_null_sukato")

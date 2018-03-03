@@ -334,6 +334,8 @@
     <None Include="Texts\mod\poser\camera.lua" />
     <None Include="Texts\mod\poser\charamgr.lua" />
     <None Include="Texts\mod\poser\dlg.lua" />
+    <None Include="Texts\mod\poser\dlgclothes.lua" />
+    <None Include="Texts\mod\poser\dlgmeshes.lua" />
     <None Include="Texts\mod\poser\fileutils.lua" />
     <None Include="Texts\mod\poser\framelist.lua" />
     <None Include="Texts\mod\poser\init.lua" />
