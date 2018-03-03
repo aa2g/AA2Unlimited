@@ -273,15 +273,6 @@ end
 -- UI Props
 -- ----------
 
-local function getfile(pattern)
-	local file
-	local ret
-	file, ret = iup.GetFile(pattern)
-	if ret == 0 then
-		return file
-	end
-end
-
 local proplist = lists.listbox { lines = 8, expand = "yes" }
 local addpropbutton = iup.button { title = "Add", expand = "horizontal" }
 local removepropbutton = iup.button { title = "Remove", expand = "horizontal" }
@@ -294,7 +285,7 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	local selected = getfile(aau_path("poser\\items\\*.xx"))
+	local selected = fileutils.getfiledialog(aau_path("poser\\items\\*.xx"))
 	if selected then
 		propmgr.loadprop(selected)
 	end
@@ -309,7 +300,7 @@ function removepropbutton.action()
 end
 
 function attachpropsbutton.action()
-	local path = getfile(aau_path("poser\\charitems\\*.xx"))
+	local path = fileutils.getfiledialog(aau_path("poser\\charitems\\*.xx"))
 	if not path then return end
 	log.spam("loading charitem %s", path)
 	local character = charamgr.current

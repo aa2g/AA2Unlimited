@@ -28,5 +28,14 @@ function _M.readfile(path)
     return data, size
 end
 
+function _M.getfiledialog(pattern)
+	local file
+	local ret
+	file, ret = iup.GetFile(pattern)
+	if ret == 0 then
+		return file
+	end
+end
+
 
 return _M

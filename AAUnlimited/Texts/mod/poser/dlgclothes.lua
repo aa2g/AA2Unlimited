@@ -1,3 +1,4 @@
+local fileutils = require "poser.fileutils"
 local signals = require "poser.signals"
 local lists = require "poser.lists"
 local toggles = require "poser.toggles"
@@ -43,6 +44,9 @@ charamgr.currentcharacterchanged.connect(populatelegs)
 local selectlegs = function(index)
 	local char = charamgr.currentcharacter()
 	if not char then
+		return
+	end
+	if not char.struct.m_xxLegs then
 		return
 	end
 	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu")
@@ -91,6 +95,9 @@ charamgr.currentcharacterchanged.connect(populateskirt)
 local selectskirt = function(index)
 	local char = charamgr.currentcharacter()
 	if not char then
+		return
+	end
+	if not char.struct.m_xxSkirt then
 		return
 	end
 	local skirtbaseframe = char.struct.m_xxSkirt:FindBone("A00_null_sukato")
@@ -152,7 +159,7 @@ end)
 local loadclothbutton = iup.button { title = "Load Cloth", action = function(self)
 	local character = charamgr.current
 	if character then
-		local file = getfile(play_path("data\\save\\cloth\\*.cloth"))
+		local file = fileutils.getfiledialog(play_path("data\\save\\cloth\\*.cloth"))
 		local size
 		if file then file, size = fileutils.readfile(file) end
 		if file and size == 92 then character:loadcloth(file) end
