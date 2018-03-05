@@ -2255,8 +2255,17 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		DWORD notification = HIWORD(wparam);
 		HWND wnd = (HWND)lparam;
 		switch (identifier) {
-		case IDC_MD_LBAVAILABLE:
 		case IDC_MD_LBINUSE:
+			if (notification == LBN_SELCHANGE) {
+				int sel = SendMessage(wnd, LB_GETCURSEL, 0, 0);
+				if (sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].name.c_str());
+					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].description.c_str());
+					return TRUE;
+				}
+			}
+			break;
+		case IDC_MD_LBAVAILABLE:
 			if(notification == LBN_SELCHANGE) {
 				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
 				if(sel != LB_ERR) {
@@ -2296,6 +2305,39 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->Refresh();
 			}
 			break;
+		case IDC_MD_BTNUPD:
+			if (notification == BN_CLICKED) {
+				//save the list of modules in use
+				std::vector<Shared::Triggers::Module> noFileModules;
+				std::vector<int> modulesList;
+				modulesList.reserve(g_currChar.m_cardData.GetModules().size());
+				for (int i = 0; i < g_currChar.m_cardData.GetModules().size(); i++) {
+					bool hasFile = false;
+					for (int j = 0; j < thisPtr->m_modules.size(); j++) {
+						if (g_currChar.m_cardData.GetModules()[i].name == thisPtr->m_modules[j].mod.name) {
+							modulesList.push_back(j);
+							hasFile = true;
+							break;
+						}
+					}
+					if (!hasFile) {
+						noFileModules.push_back(g_currChar.m_cardData.GetModules()[i]);
+					}
+				}
+				//clear modules in use
+				g_currChar.m_cardData.GetModules().clear();
+				//readd modules with no file on disk
+				for (int i = 0; i < noFileModules.size(); i++) {
+					g_currChar.m_cardData.AddModule(noFileModules[i]);
+				}
+				//readd updated modules
+				for (int i = 0; i < modulesList.size(); i++) {
+					g_currChar.m_cardData.AddModule(thisPtr->m_modules[modulesList[i]].mod);
+				}
+				thisPtr->Refresh();
+			}
+			break;
+
 		}
 		break; }
 	}
