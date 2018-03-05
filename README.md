@@ -17,6 +17,7 @@ As a part of this, it puts additional Information into the card images in form o
 - **Position Buttons during H** are aligned in rows if there are too many buttons per category, allowing to add more buttons before they go out of the screen
 - **POV**: in H-Mode press `A` to switch between POVs of participants. Press `Q` `W` `E` to restore to normal view.
 - **Poser**: in clothing menu, frames can be rotated. Sliders are defined in poserframes.txt. Poses can be saved and loaded.
+- **Modules**: Modules, or AAU traits allow for custom AI behaviour for your characters. List of pre-made traits can be found [here.](https://pastebin.com/R4DW0dxw)
 
 ### General:
 - **Shadow Files**: Instead of only loading files from a .pp file, the game checks for a folder of the same name (without the pp ending) first. If this folder exists and contains a file of the required name, this file is loaded instead.
