@@ -1580,7 +1580,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 52 },{ CharacterStruct::SKIRT, 53 } },
 				-1.0f, 1.0f
 			},
-			{ TEXT("Upper Thigh Thickness"),
+			{ TEXT("Upper Thigh Thick"),
 				{ { CharacterStruct::BODY, 54 },{ CharacterStruct::BODY, 55 },
 				{ CharacterStruct::LEGS, 20 },{ CharacterStruct::LEGS, 21 },
 				{ CharacterStruct::SKIRT, 54 },{ CharacterStruct::SKIRT, 55 } },
@@ -1598,7 +1598,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 56 },{ CharacterStruct::SKIRT, 57 } },
 				-1.0f, 1.0f
 			},
-			{ TEXT("Lower Thigh Thickness"),
+			{ TEXT("Lower Thigh Thick"),
 				{ { CharacterStruct::BODY, 58 },{ CharacterStruct::BODY, 59 },
 				{ CharacterStruct::LEGS, 24 },{ CharacterStruct::LEGS, 25 },
 				{ CharacterStruct::SKIRT, 58 },{ CharacterStruct::SKIRT, 59 } },
@@ -1807,7 +1807,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ { CharacterStruct::FACE, 41 } },
 					-0.05f, 0.05f
 			},
-			{ TEXT("Lower Right Canine"),
+			{ TEXT("Upper Right Canine"),
 			{ { CharacterStruct::FACE, 42 } },
 					-0.05f, 0.05f
 			},
@@ -1815,7 +1815,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ { CharacterStruct::FACE, 43 } },
 					-0.05f, 0.05f
 			},
-			{ TEXT("Upper Right Canine"),
+			{ TEXT("Lower Right Canine"),
 			{ { CharacterStruct::FACE, 44 } },
 					-0.05f, 0.05f
 			},
