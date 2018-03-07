@@ -59,7 +59,18 @@ public:
 
 
 	void Reset();
-	inline bool IsValid() { return m_char != NULL; }
+	inline bool IsValid() {
+		ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
+		ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
+		for (start; start != end; start++) {
+			ExtClass::CharacterStruct* it = *start;
+			if (it == m_char) {
+				return m_char->m_seat + 1;
+			}
+		}
+		return false;	
+	}
+
 	inline bool Editable() {
 		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
 		const DWORD maleRule[]{ 0x353254, 0x30, 0 };
