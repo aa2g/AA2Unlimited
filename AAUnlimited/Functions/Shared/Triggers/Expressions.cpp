@@ -125,7 +125,8 @@ namespace Shared {
 
 		//int ()
 		Value Thread::GetDaysPassed(std::vector<Value>& params) {
-			return ExtVars::AAPlay::GameTimeData()->nDays;
+			auto gametime = ExtVars::AAPlay::GameTimeData();
+			return (gametime->nDays) - 1;
 		}
 
 		Value Thread::GetCurrentDay(std::vector<Value>& params) {
@@ -956,7 +957,7 @@ namespace Shared {
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(3);
-			int dayOfCycle = (params[1].iVal - 1) % 14; // 2 weeks cycle, first Monday is a 2nd day in DaysPassed but 1st index in pregnancyRisks, so -1
+			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, first Monday is a 1nd day in DaysPassed but 1st index in pregnancyRisks
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) {
 				return 3;
