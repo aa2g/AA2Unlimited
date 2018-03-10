@@ -383,6 +383,9 @@ namespace Shared {
 		using namespace ExtClass;
 		if (!Shared::GameState::getIsOverriding()) return;
 
+		static std::map<std::wstring, std::vector<AAUCardData::BoneMod>> matchany;
+		matchany.clear();
+
 		static const char prefix[]{ "artf_" };
 		ExtClass::XXFile* xxFile = boneParent->m_xxPartOf;
 
@@ -394,6 +397,16 @@ namespace Shared {
 		TCHAR name[256];
 		mbstowcs_s(&written,name,xxFile->m_name,256);
 		const auto* rmatch = Shared::g_currentChar->m_cardData.GetBoneRule(name);
+		if (rmatch)
+			matchany = *rmatch;
+		rmatch = Shared::g_currentChar->m_cardData.GetBoneRule(L"");
+		if (rmatch)
+			for (auto it = rmatch->cbegin(); it != rmatch->cend(); ++it)
+			{
+				if (matchany.find(it->first) == matchany.end())
+					matchany[it->first] = it->second;
+			}
+		rmatch = &matchany;
 
 		//find model type of xx file and slider rule if existant
 		const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
@@ -404,7 +417,7 @@ namespace Shared {
 			smatch = &Shared::g_currentChar->m_cardData.GetSliderBoneRuleMap(model);
 		}
 
-		if (rmatch == NULL && smatch == NULL) return;
+		if ((rmatch == NULL || rmatch->empty()) && smatch == NULL) return;
 
 		ExtClass::Frame* frame = boneParent;
 		for (int i = 0; i < frame->m_nBones; i++) {
