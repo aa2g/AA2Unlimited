@@ -152,6 +152,9 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 48,	TEXT("A00_J_premolarBL"),{ 0,0,0, 0,0,0, 0,1,0.5f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, 
 
 
+			//onemoreslider.
+			{ ExtClass::CharacterStruct::FACE, 49,	TEXT("A00_J_chin"),{ 1,1,0.4f, 0,0,0, 0,0.4f,-0.16f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
+
 
 		},
 		{
