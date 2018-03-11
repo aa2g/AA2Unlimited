@@ -1379,6 +1379,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_STEXAMPLE),SW_HIDE);
 		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_SLDEXAMPLE),SW_HIDE);
 		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_EDEXAMPLE),SW_HIDE);
+		ShowWindow(GetDlgItem(hwndDlg,IDC_BS_BTNRST), SW_HIDE);
 
 		using namespace ExtClass;
 		static struct GUISlider { //this needs a name for some reason, else it wont compile
@@ -1917,6 +1918,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		if (wnd == NULL) break; //not slider control, but automatic scroll
 		for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
 			if(wnd == thisPtr->m_sliders[i].slider) {
+				if (thisPtr->m_sliders[i].isModified) break;
 				ignoreNextSlider = true;
 				thisPtr->m_sliders[i].Sync(false);
 				thisPtr->ApplySlider(i);
@@ -1953,6 +1955,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			HWND ed = (HWND)lparam;
 			for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
 				if (ed == thisPtr->m_sliders[i].edit) {
+					if (thisPtr->m_sliders[i].isModified) break;
 					ignoreNextSlider = true;
 					thisPtr->m_sliders[i].Sync(true);
 					thisPtr->ApplySlider(i);
@@ -1960,6 +1963,23 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				}
 			}
 			return TRUE; }
+		case BN_CLICKED: {
+			if (ignoreNextSlider) {
+				ignoreNextSlider = false;
+				return TRUE;
+			}
+			HWND ed = (HWND)lparam;
+			for (size_t i = 0; i < thisPtr->m_sliders.size(); i++) {
+				if (ed == thisPtr->m_sliders[i].btnReset) {
+					if (thisPtr->m_sliders[i].isModified) break;
+					ignoreNextSlider = true;
+					thisPtr->m_sliders[i].Reset();
+					thisPtr->ApplySlider(i);
+					break;
+				}
+			}
+			return TRUE;
+		}
 		};
 		break; }
 	};
@@ -2114,6 +2134,17 @@ void UnlimitedDialog::BSDialog::BodySlider::Sync(bool useEdit) {
 	}
 }
 
+void UnlimitedDialog::BSDialog::BodySlider::Reset() {
+	currVal = sliderData[0]->GetNeutralValue();
+	isModified = true;
+	int ret = SendMessage(slider, TBM_SETPOS, TRUE, Val2Sld(currVal));
+	TCHAR number[52];
+	swprintf_s(number, TEXT("%f"), currVal);
+	SendMessage(edit, WM_SETTEXT, 0, (LPARAM)number);
+	isModified = false;
+	ret++;
+}
+
 
 UnlimitedDialog::BSDialog::BodySlider::BodySlider()  {
 
@@ -2121,10 +2152,11 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider()  {
 
 UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* label, int xStart, int yStart,
 												std::vector<const Shared::Slider*> sliderData, float min, float max)
-	: sliderData(sliderData) {
+	: sliderData(sliderData) {	
 	HWND templateStatic = GetDlgItem(dialog,IDC_BS_STEXAMPLE);
 	HWND templateSlider = GetDlgItem(dialog,IDC_BS_SLDEXAMPLE);
 	HWND templateEdit = GetDlgItem(dialog,IDC_BS_EDEXAMPLE);
+	HWND templateReset = GetDlgItem(dialog, IDC_BS_BTNRST);
 
 	this->stLabel = CreateWindowEx(0,TEXT("STATIC"),label,WS_CHILD | WS_VISIBLE,
 		0,0,0,0,
@@ -2135,6 +2167,9 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* labe
 	this->edit = CreateWindowEx(WS_EX_CLIENTEDGE,TEXT("EDIT"),label,WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
 		0,0,0,0,
 		dialog,0,General::DllInst,0);
+	this->btnReset = CreateWindowEx(0, TEXT("BUTTON"), L"Reset", WS_CHILD | WS_VISIBLE,
+		0, 0, 0, 0,
+		dialog, 0, General::DllInst, 0);
 
 	using namespace General;
 
@@ -2147,28 +2182,32 @@ UnlimitedDialog::BSDialog::BodySlider::BodySlider(HWND dialog, const TCHAR* labe
 		SendMessage(to,WM_SETFONT,(WPARAM)font,FALSE);
 	};
 
-	//adjust style from templace
+	//adjust style from template
 	CopyStyleFromWindow(stLabel,templateStatic);
 	CopyStyleFromWindow(slider,templateSlider);
 	CopyStyleFromWindow(edit,templateEdit);
+	CopyStyleFromWindow(btnReset,templateReset);
 
 	//move window according to template
-	RECT rctTmplStatic,rctTmplSlider,rctTmplEdit;
+	RECT rctTmplStatic,rctTmplSlider,rctTmplEdit,rctTmplReset;
 	GetWindowRect(templateStatic,&rctTmplStatic);
 	GetWindowRect(templateSlider,&rctTmplSlider);
 	GetWindowRect(templateEdit,&rctTmplEdit);
+	GetWindowRect(templateReset,&rctTmplReset);
 	//get top left corner
-	LONG left = rctTmplStatic.left,top = min(rctTmplStatic.top,min(rctTmplSlider.top,rctTmplEdit.top));
+	LONG left = rctTmplStatic.left,top = min(rctTmplStatic.top,min(rctTmplSlider.top,min(rctTmplEdit.top, rctTmplReset.top)));
 	//adjust top left corner to (xStart|yStart)
 	RectMoveBy(rctTmplStatic,-left+xStart,-top+yStart);
 	RectMoveBy(rctTmplSlider,-left+xStart,-top+yStart);
 	RectMoveBy(rctTmplEdit,-left+xStart,-top+yStart);
+	RectMoveBy(rctTmplReset, -left + xStart, -top + yStart);
 	//move actual window
 	MoveWindowRect(stLabel,rctTmplStatic,FALSE);
 	MoveWindowRect(slider,rctTmplSlider,FALSE);
 	MoveWindowRect(edit,rctTmplEdit,FALSE);
+	MoveWindowRect(btnReset,rctTmplReset,FALSE);
 
-
+	isModified = false;
 
 	sliderMin = min;
 	sliderMax = max;

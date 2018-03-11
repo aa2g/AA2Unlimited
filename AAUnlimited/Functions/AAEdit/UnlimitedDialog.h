@@ -181,12 +181,14 @@ namespace AAEdit {
 			HWND stLabel;
 			HWND slider;
 			HWND edit;
+			HWND btnReset;
 
 			//slider data
 			float sliderMin;
 			float sliderMax;
 			std::vector<const Shared::Slider*> sliderData;
 			const TCHAR* staticLabel;
+			bool isModified;
 
 			//current selection
 			float currVal;
@@ -197,6 +199,7 @@ namespace AAEdit {
 
 			float GetCoeffFromMod(AAUCardData::BoneMod);
 			void Sync(bool useEdit);
+			void Reset();
 			void FromCard();
 
 			float Sld2Val(int sld);
