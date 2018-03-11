@@ -1750,6 +1750,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ { CharacterStruct::FACE, 25 } },
 					-0.1f, 0.1f
 			},
+			{ TEXT("Chin Width"),
+			{ { CharacterStruct::FACE, 49 } },
+				-1, 0
+			},
 			{ TEXT("Jaw Width"),
 			{ { CharacterStruct::FACE, 26 } },
 					-0.1f, 0.1f
@@ -1878,8 +1882,6 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 17 },{ CharacterStruct::SKELETON, 18 } },
 				-0.2f, 0.2f
 			},
-
-
 
 
 
