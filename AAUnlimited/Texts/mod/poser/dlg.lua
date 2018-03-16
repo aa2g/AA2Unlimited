@@ -188,6 +188,8 @@ local function updatecurrentcharacter(_, index)
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 
+posemgr.poseloaded.connect(function(character) if character == charamgr.current then _M.restorecharui() end end)
+
 local function updatecharacterlist()
 	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur

@@ -13,6 +13,11 @@ local toggles = require "poser.toggles"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
+local poseloaded = signals.signal()
+local sceneloaded = signals.signal()
+
+_M.poseloaded = poseloaded
+_M.sceneloaded = sceneloaded
 
 local posesdir = "poser\\poses"
 local scenesdir = "poser\\scenes"
@@ -182,6 +187,7 @@ local function loadpose(character, filename)
 			end
 		end
 	end
+	poseloaded(character)
 end
 
 function loadposebutton.action()
@@ -322,6 +328,7 @@ local function loadscene(filename)
 			end
 		end
 	end
+	sceneloaded()
 end
 
 function loadscenebutton.action()
