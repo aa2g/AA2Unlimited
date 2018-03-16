@@ -95,7 +95,7 @@ end
 
 function _M.save_gsd(cfg)
 	_M.check_gsd(cfg)
-	cfg["fullscreen"] = false
+	cfg["fullscreen"] = 0
 	local fn = host_path("data", "gsd.cfg")
 	--log("saving gsd to "..fn)
 	local f = io.open(fn, "w")
