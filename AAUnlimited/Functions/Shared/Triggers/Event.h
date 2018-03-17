@@ -107,7 +107,10 @@ namespace Triggers {
 	EDC_END
 
 	EDC_DECLARE(HiPolyInitData,HI_POLY_INIT)
-		
+
+		ExtClass::CharacterStruct* character;
+		DWORD* clothState;
+
 	EDC_END
 
 	EDC_DECLARE(HiPolyEndData,HI_POLY_END)
