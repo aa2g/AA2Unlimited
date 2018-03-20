@@ -6,6 +6,7 @@
 #include "Script/ScriptLua.h"
 
 #include "Bone.h"
+#include "Material.h"
 
 
 namespace ExtClass {
@@ -25,7 +26,10 @@ public:
 		Material* m_material;
 		uint32_t m_vertexCount;
 		BYTE m_unknown1[24]; //unknown
-		BYTE m_flagsUnknown2[20]; //SB3U submesh unknown2 flags
+		union {
+			BYTE m_flagsUnknown2[20]; //SB3U submesh unknown2 flags
+			float m_submeshOutline[5];
+		};
 		BYTE m_unknown2[136]; //unknown
 		//BYTE m_flagsUnknown3[]; //unsure about the location of this one
 		BYTE m_flagsUnknown4[284];
@@ -93,6 +97,26 @@ public:
 		return child;
 	}
 
+	inline std::vector<std::pair<Frame*, int>> ListSubmeshesByMaterial(const char* material) {
+		std::vector<std::pair<Frame*, int>> accumulator;
+		EnumTreeLevelOrder([&accumulator, &material](Frame* frame) {
+			if (frame->m_nSubmeshes < 1) return true;
+			else {
+				for (int i = 0; i < frame->m_nSubmeshes; i++) {
+					if (!strcmp(frame->m_subMeshes[i].m_material->m_name, material)) {
+						std::pair<Frame*, int> submesh { frame, i };
+						accumulator.push_back(submesh);
+					}
+				}
+				return true;
+			}
+		});
+		return accumulator;
+	}
+
+	std::vector<DWORD> Frame::GetSubmeshOutlineColorArray(int idxSubmesh);
+	void Frame::SetSubmeshOutlineColorArray(int idxSubmesh, std::vector<DWORD> color);
+
 	template<class Callback>
 	void EnumTreeLevelOrder(Callback& callback);
 
@@ -149,6 +173,8 @@ void Frame::EnumTreeLevelOrder(Callback& callback) {
 		if (!ret) break;
 	}
 }
+
+
 
 static_assert(sizeof(Frame) == 0x42F4,"size mismatch");
 static_assert(sizeof(Frame::Submesh) == 0x248, "size mismatch");

@@ -33,7 +33,7 @@ public:
 	static const DWORD PngChunkId = 'aaUd';
 	static const DWORD PngChunkIdBigEndian = 'dUaa';
 	enum MeshModFlag {
-		MODIFY_FRAME = 1, MODIFY_BONE = 2
+		MODIFY_FRAME = 1, MODIFY_BONE = 2, SUBMESH_OUTLINE = 4, SUBMESH_SHADOW = 8
 	};
 	static const int CurrentVersion = 3;
 
@@ -83,6 +83,9 @@ public:
 	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, BoneMod mod);
 	bool RemoveBoneRule(int index);
 
+	bool AddSubmeshRule(MeshModFlag flags, const TCHAR * xxFileName, const TCHAR * boneName, const TCHAR * materialName, std::vector<DWORD> color);
+	bool RemoveSubmeshRule(int index, MeshModFlag flags);
+
 	void SetSliderValue(int sliderTarget, int sliderIndex, float value);
 
 	bool SetEyeTexture(int leftright, const TCHAR* texName, bool save);
@@ -115,6 +118,11 @@ public:
 	typedef std::pair<std::pair<std::wstring, std::wstring>, std::pair<std::wstring, std::wstring>> ArchiveRedirectRule;
 	typedef std::pair<std::wstring, std::wstring> ObjectOverrideRule;
 	typedef std::pair<std::wstring, D3DMATRIX> BoneRule;
+	//first.first.first - file name
+	//first.first.second - frame name
+	//first.second - material name
+	//second - color
+	typedef std::pair<std::pair<std::pair<std::wstring, std::wstring>, std::wstring>, std::vector<DWORD>> SubmeshColorRule;
 	typedef std::pair<std::pair<int, std::wstring>, std::vector<BYTE>> SavedFile; //int identifying base path (aaplay = 0 or aaedit = 1)
 	// first.first - type
 	// first.second - name
@@ -179,6 +187,9 @@ public:
 	const DWORD									SetOutlineColor(COLORREF color);
 	const bool									HasOutlineColor();
 	const DWORD									SetHasOutlineColor(bool has);
+
+	const std::vector<DWORD>					GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material);
+	const std::vector<DWORD>					SetSubmeshOulineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
 
 	const DWORD									GetTanColor();
 	const DWORD									SetTanColor(COLORREF color);
@@ -249,6 +260,8 @@ public:
 
 		bool m_bOutlineColor;
 		DWORD m_outlineColor;
+
+		std::vector<SubmeshColorRule> m_submeshOutlines;
 
 		bool m_bTanColor;
 		DWORD m_tanColor;
@@ -361,6 +374,32 @@ inline const DWORD AAUCardData::GetOutlineColor() { return m_styles[m_currCardSt
 inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { return m_styles[m_currCardStyle].m_outlineColor = color; }
 inline const bool AAUCardData::HasOutlineColor() { return m_styles[m_currCardStyle].m_bOutlineColor; }
 inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_styles[m_currCardStyle].m_bOutlineColor = has; }
+
+inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material){
+
+	std::vector<DWORD> blankColor{ 0, 0, 0, (DWORD)1.0f };
+	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ {mesh, frame}, material };
+	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
+		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) return m_styles[m_currCardStyle].m_submeshOutlines[i].second;
+	}
+
+	return blankColor;
+}
+
+inline const std::vector<DWORD> AAUCardData::SetSubmeshOulineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color){
+
+	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
+	SubmeshColorRule newColor{ key, color };
+	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
+		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) {
+			m_styles[m_currCardStyle].m_submeshOutlines[i].second = color;
+			return m_styles[m_currCardStyle].m_submeshOutlines[i].second;
+		}
+	}
+	m_styles[m_currCardStyle].m_submeshOutlines.push_back(newColor);
+
+	return color;
+}
 
 inline const DWORD AAUCardData::GetTanColor() { return m_styles[m_currCardStyle].m_tanColor; }
 inline const DWORD AAUCardData::SetTanColor(COLORREF color) { return m_styles[m_currCardStyle].m_tanColor = color; }

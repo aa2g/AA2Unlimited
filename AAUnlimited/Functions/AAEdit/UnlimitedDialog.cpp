@@ -1104,16 +1104,24 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorRed = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_RED);
 		thisPtr->m_edOutlineColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_GREEN);
 		thisPtr->m_edOutlineColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDOUTLINECOLOR_BLUE);
+		thisPtr->m_edOutlineColorHue = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_HUE);
+		thisPtr->m_edOutlineColorSat = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_SAT);
+		thisPtr->m_edOutlineColorVal = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_VAL);
 
 		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg,IDC_BD_CBTANCOLOR);
-		thisPtr->m_edTanColorRed = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_RED);
-		thisPtr->m_edTanColorGreen = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_GREEN);
-		thisPtr->m_edTanColorBlue = GetDlgItem(hwndDlg,IDC_BD_EDTANCOLOR_BLUE);
+		thisPtr->m_edTanColorRed	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_RED);
+		thisPtr->m_edTanColorGreen	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_GREEN);
+		thisPtr->m_edTanColorBlue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_BLUE);
+		thisPtr->m_edTanColorHue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
+		thisPtr->m_edTanColorSat	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
+		thisPtr->m_edTanColorVal	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
 
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
 		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
-		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg,IDC_BD_BM_CBBONE);
+		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg, IDC_BD_BM_CBBONE);
+		thisPtr->m_bmCbMaterial = GetDlgItem(hwndDlg,IDC_BD_BM_CBMAT);
 		thisPtr->m_bmList = GetDlgItem(hwndDlg,IDC_BD_BM_LIST);
+		thisPtr->m_bmSMList = GetDlgItem(hwndDlg, IDC_BD_SM_LIST);
 		thisPtr->m_bmEdMatrix[0][0] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR11);
 		thisPtr->m_bmEdMatrix[0][1] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR12);
 		thisPtr->m_bmEdMatrix[0][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR13);
@@ -1125,6 +1133,15 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_bmEdMatrix[2][2] = GetDlgItem(hwndDlg,IDC_BD_BM_EDMATR33);
 		thisPtr->m_bmRbFrameMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME);
 		thisPtr->m_bmRbBoneMod = GetDlgItem(hwndDlg,IDC_BD_BM_RBBONE);
+		thisPtr->m_bmRbSMOL = GetDlgItem(hwndDlg, IDC_BD_BM_RBSMOL);
+		thisPtr->m_bmRbSMSH = GetDlgItem(hwndDlg, IDC_BD_BM_RBSMSH);
+		thisPtr->m_edSubmeshColorRed = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_RED);
+		thisPtr->m_edSubmeshColorGreen = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_GREEN);
+		thisPtr->m_edSubmeshColorBlue = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_BLUE);
+		thisPtr->m_edSubmeshColorHue = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_HUE);
+		thisPtr->m_edSubmeshColorSat = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SAT);
+		thisPtr->m_edSubmeshColorVal = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_VAL);
+		thisPtr->m_edSubmeshColorAT = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_AT);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -1140,6 +1157,10 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREENTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUETAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMRED), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMGREEN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMBLUE), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
 		return TRUE; }
@@ -1147,19 +1168,44 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		//DEL-key was pressed while the list box had the focus.
 		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
+		HWND wnd = (HWND)lparam;
 		if (LOWORD(wparam) == VK_DELETE) {
-			//get current selection text
-			int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
-			if (sel == LB_ERR) return TRUE;
-			//remove this rule
-			g_currChar.m_cardData.RemoveBoneRule(sel);
-			thisPtr->Refresh();
-			return TRUE;
+			if (wnd == thisPtr->m_bmList) {
+				//get current selection text
+				int sel = SendMessage(thisPtr->m_bmList, LB_GETCURSEL, 0, 0);
+				if (sel == LB_ERR) return TRUE;
+				//remove this rule
+				g_currChar.m_cardData.RemoveBoneRule(sel);
+				thisPtr->Refresh();
+				return TRUE;
+			}
+			else if (wnd == thisPtr->m_bmSMList) {
+				//get current selection text
+				int sel = SendMessage(thisPtr->m_bmSMList, LB_GETCURSEL, 0, 0);
+				if (sel == LB_ERR) return TRUE;
+				//remove this rule
+
+				TCHAR text[10];
+				std::wstring listEntry;
+				int strLen = (int)SendMessage(thisPtr->m_bmSMList, LB_GETTEXTLEN, (WPARAM)sel, 0);
+				TCHAR * textBuffer = new TCHAR[strLen + 1];
+				SendMessage(thisPtr->m_bmSMList, LB_GETTEXT, (WPARAM)sel, (LPARAM)textBuffer);
+				listEntry = textBuffer;
+				int flag = 0;
+				if (General::StartsWith(listEntry, L"[SMOL]")) {
+					flag |= AAUCardData::SUBMESH_OUTLINE;
+				}
+				else if (General::StartsWith(listEntry, L"[SMSH]")) {
+					flag |= AAUCardData::SUBMESH_SHADOW;
+				}
+				g_currChar.m_cardData.RemoveSubmeshRule(sel, (AAUCardData::MeshModFlag)flag);
+				thisPtr->Refresh();
+				return TRUE;
+			}
 		}
 		break; }
 	case WM_COMMAND: {
 		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
-		if (thisPtr == NULL) return FALSE;
 		if (thisPtr == NULL) return FALSE;
 		switch (HIWORD(wparam)) {
 		case BN_CLICKED: {
@@ -1221,6 +1267,24 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
 				}
 			}
+			else if (ed == thisPtr->m_edSubmeshColorRed
+				|| ed == thisPtr->m_edSubmeshColorGreen
+				|| ed == thisPtr->m_edSubmeshColorBlue)
+			{
+				int newval = General::GetEditInt(ed);
+				if (newval < 0) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
+				}
+				else if (newval > 255) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
+				}
+				//else {
+				//	int red = General::GetEditInt(thisPtr->m_edSubmeshColorRed);
+				//	int green = General::GetEditInt(thisPtr->m_edSubmeshColorGreen);
+				//	int blue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
+				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
+				//}
+			}
 			else {
 				//make sure its a valid float
 				TCHAR num[128];
@@ -1239,7 +1303,14 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if(wnd == thisPtr->m_bmList) {
 				int sel = SendMessage(thisPtr->m_bmList,LB_GETCURSEL,0,0);
 				if(sel != LB_ERR) {
-					thisPtr->LoadData(sel);
+					thisPtr->LoadMatrixData(sel);
+				}
+				return TRUE;
+			}
+			else if (wnd == thisPtr->m_bmSMList) {
+				int sel = SendMessage(thisPtr->m_bmSMList, LB_GETCURSEL, 0, 0);
+				if (sel != LB_ERR) {
+					thisPtr->LoadColorData(sel);
 				}
 				return TRUE;
 			}
@@ -1250,7 +1321,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	return FALSE;
 }
 
-void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
+void UnlimitedDialog::BDDialog::LoadMatrixData(int listboxId) {
 	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 	const auto& rule = vec[listboxId];
 	//combo box with title
@@ -1274,55 +1345,178 @@ void UnlimitedDialog::BDDialog::LoadData(int listboxId) {
 	//
 }
 
+void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
+	TCHAR text[10];
+	std::wstring listEntry;
+	int strLen = (int) SendMessage(m_bmSMList, LB_GETTEXTLEN, (WPARAM)listboxId, 0);
+	TCHAR * textBuffer = new TCHAR[strLen + 1];
+	SendMessage(m_bmSMList, LB_GETTEXT, (WPARAM)listboxId, (LPARAM)textBuffer);
+
+	listEntry = textBuffer;
+
+	//first.first.first - file name
+	//first.first.second - frame name
+	//first.second - material name
+	//second - color
+	if (General::StartsWith(listEntry, L"[SMOL]")) {
+		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbFrameMod, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbSMSH, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbSMOL, BM_SETCHECK, BST_CHECKED, 0);
+
+		auto rule = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshOutlines[listboxId];
+		SendMessage(m_bmCbXXFile, WM_SETTEXT, 0, (LPARAM)rule.first.first.first.c_str());
+		SendMessage(m_bmCbBone, WM_SETTEXT, 0, (LPARAM)rule.first.first.second.c_str());
+		SendMessage(m_bmCbMaterial, WM_SETTEXT, 0, (LPARAM)rule.first.second.c_str());
+
+		auto submeshOutlineColor = rule.second;
+		_itow_s(submeshOutlineColor[0], text, 10);
+		SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshOutlineColor[1], text, 10);
+		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshOutlineColor[2], text, 10);
+		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(submeshOutlineColor[3]).c_str());
+	}
+	else if (General::StartsWith(listEntry, L"[SMSH]")) {
+		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbFrameMod, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbSMOL, BM_SETCHECK, BST_UNCHECKED, 0);
+		SendMessage(m_bmRbSMSH, BM_SETCHECK, BST_CHECKED, 0);
+
+	}
+
+	delete[] textBuffer;
+	textBuffer = nullptr;
+	//
+}
+
+
 void UnlimitedDialog::BDDialog::ApplyInput() {
 	TCHAR xxname[128];
 	SendMessage(m_bmCbXXFile,WM_GETTEXT,128,(LPARAM)xxname);
 	TCHAR bonename[128];
 	SendMessage(m_bmCbBone,WM_GETTEXT,128,(LPARAM)bonename);
+	TCHAR materialName[128];
+	SendMessage(m_bmCbMaterial, WM_GETTEXT, 128, (LPARAM)materialName);
 	int flags = 0;
-	if (SendMessage(m_bmRbBoneMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_BONE;
-	if (SendMessage(m_bmRbFrameMod,BM_GETCHECK,0,0) == BST_CHECKED) flags |= AAUCardData::MODIFY_FRAME;
-	//remove transformation if it allready exists
-	const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
-	unsigned int match;
-	for(match = 0; match < vec.size(); match++) {
-		if (vec[match].first.first == flags && vec[match].first.second.first == xxname && vec[match].first.second.second == bonename) break;
+	bool submeshMod = false;
+	if (SendMessage(m_bmRbBoneMod, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::MODIFY_BONE;
+		submeshMod = false;
 	}
-	if (match < vec.size()) g_currChar.m_cardData.RemoveBoneRule(match);
+	if (SendMessage(m_bmRbFrameMod, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::MODIFY_FRAME;
+		submeshMod = false;
+	}
+	if (SendMessage(m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::SUBMESH_OUTLINE;
+		submeshMod = true;
+	}
+	if (SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::SUBMESH_SHADOW;
+		submeshMod = true;
+	}
+	
+	if (submeshMod){
 
-	//get matrix
-	AAUCardData::BoneMod mod;
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			TCHAR num[128];
-			SendMessage(m_bmEdMatrix[i][j],WM_GETTEXT,128,(LPARAM)num);
-			float f = wcstof(num, NULL);
-			mod.mods[i][j] = f;
-		}
+		int red = General::GetEditInt(m_edSubmeshColorRed);
+		int green = General::GetEditInt(m_edSubmeshColorGreen);
+		int blue = General::GetEditInt(m_edSubmeshColorBlue);
+		float thickness = General::GetEditFloat(m_edSubmeshColorAT);
+		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, (DWORD)thickness };
+		g_currChar.m_cardData.AddSubmeshRule((AAUCardData::MeshModFlag)flags, xxname, bonename, materialName, color);
+
 	}
-	//save
-	g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname,bonename,mod);
+	else {
+		//remove transformation if it allready exists
+		const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
+		unsigned int match;
+		for (match = 0; match < vec.size(); match++) {
+			if (vec[match].first.first == flags && vec[match].first.second.first == xxname && vec[match].first.second.second == bonename) break;
+		}
+		if (match < vec.size()) g_currChar.m_cardData.RemoveBoneRule(match);
+
+		//get matrix
+		AAUCardData::BoneMod mod;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				TCHAR num[128];
+				SendMessage(m_bmEdMatrix[i][j], WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL);
+				mod.mods[i][j] = f;
+			}
+		}
+		//save
+		g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname, bonename, mod);
+	}
 	Refresh();
 
 }
 
 void UnlimitedDialog::BDDialog::Refresh() {
-	bool bOutline = g_currChar.m_cardData.HasOutlineColor();
-	
-	EnableWindow(this->m_edOutlineColorRed,bOutline);
-	EnableWindow(this->m_edOutlineColorGreen,bOutline);
-	EnableWindow(this->m_edOutlineColorBlue,bOutline);
-
-	COLORREF color = g_currChar.m_cardData.GetOutlineColor();
 	TCHAR text[10];
-	_itow_s(GetRValue(color),text,10);
+
+	bool bGlobalOutline = g_currChar.m_cardData.HasOutlineColor();	
+	EnableWindow(this->m_edOutlineColorRed,bGlobalOutline);
+	EnableWindow(this->m_edOutlineColorGreen,bGlobalOutline);
+	EnableWindow(this->m_edOutlineColorBlue,bGlobalOutline);
+	COLORREF globalOutlineColor = g_currChar.m_cardData.GetOutlineColor();
+	_itow_s(GetRValue(globalOutlineColor),text,10);
 	SendMessage(this->m_edOutlineColorRed,WM_SETTEXT,0,(LPARAM)text);
-	_itow_s(GetGValue(color),text,10);
+	_itow_s(GetGValue(globalOutlineColor),text,10);
 	SendMessage(this->m_edOutlineColorGreen,WM_SETTEXT,0,(LPARAM)text);
-	_itow_s(GetBValue(color),text,10);
+	_itow_s(GetBValue(globalOutlineColor),text,10);
 	SendMessage(this->m_edOutlineColorBlue,WM_SETTEXT,0,(LPARAM)text);
 
-	//listbox
+
+	bool bTan = g_currChar.m_cardData.HasTanColor();
+	EnableWindow(this->m_edTanColorRed, bTan);
+	EnableWindow(this->m_edTanColorGreen, bTan);
+	EnableWindow(this->m_edTanColorBlue, bTan);
+	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
+	_itow_s(GetRValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetGValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetBValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+
+	TCHAR xxname[128];
+	SendMessage(m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
+	TCHAR bonename[128];
+	SendMessage(m_bmCbBone, WM_GETTEXT, 128, (LPARAM)bonename);
+	TCHAR materialName[128];
+	SendMessage(m_bmCbMaterial, WM_GETTEXT, 128, (LPARAM)materialName);
+	bool bSubmesh = SendMessage(m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED || SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED;
+	//EnableWindow(this->m_edSubmeshColorRed, bSubmesh);
+	//EnableWindow(this->m_edSubmeshColorGreen, bSubmesh);
+	//EnableWindow(this->m_edSubmeshColorBlue, bSubmesh);
+	auto submeshOutlineColor = g_currChar.m_cardData.GetSubmeshOutlineColor(xxname, bonename, materialName);
+	_itow_s(submeshOutlineColor[0], text, 10);
+	SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(submeshOutlineColor[1], text, 10);
+	SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(submeshOutlineColor[2], text, 10);
+	SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+	SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(submeshOutlineColor[3]).c_str());
+	
+	//submesh mods listbox
+	SendMessage(this->m_bmSMList, LB_RESETCONTENT, 0, 0);
+	const auto& submeshList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshOutlines;
+	for (size_t i = 0; i < submeshList.size(); i++) {
+		//first.first.first - file name
+		//first.first.second - frame name
+		//first.second - material name
+		//second - color
+		std::wstring listEntry(TEXT("["));
+		listEntry += TEXT("SMOL");
+		listEntry += TEXT("]");
+		listEntry += submeshList[i].first.first.first + TEXT("|") + submeshList[i].first.first.second + TEXT("|") + submeshList[i].first.second + TEXT("]");
+		SendMessage(this->m_bmSMList, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
+	}
+
+	//frame mods listbox
 	SendMessage(this->m_bmList,LB_RESETCONTENT,0,0);
 	const auto& list = AAEdit::g_currChar.m_cardData.GetMeshRuleList();
 	for (size_t i = 0; i < list.size(); i++) {
@@ -1337,6 +1531,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	//list possible bones
 	ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
 	if(curr != NULL) {
+		SendMessage(m_bmCbBone, CB_RESETCONTENT, 0, 0);
 		ExtClass::XXFile* xxlist[] = {
 			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
 			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
