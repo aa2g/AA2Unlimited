@@ -30,7 +30,7 @@ local populatelegs = function()
 	if not char.struct.m_xxLegs then
 		return
 	end
-	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu")
+	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu") or char.struct.m_xxLegs:FindBone("S00_null_kutu")
 	if not legsbaseframe then
 		return
 	end
@@ -49,7 +49,7 @@ local selectlegs = function(index)
 	if not char.struct.m_xxLegs then
 		return
 	end
-	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu")
+	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu") or char.struct.m_xxLegs:FindBone("S00_null_kutu")
 	local legcount = legsbaseframe.m_nChildren
 	for i = 1, legcount, 1 do
 		legsbaseframe:m_children(i - 1).m_renderFlag = i == index and 0 or 2
@@ -121,6 +121,59 @@ skirtlist.action = function(self, text, item, state)
 end
 
 
+-- #######
+-- Strapon
+-- #######
+
+local straplist = iup.list {
+	expand = "yes",
+	visiblelines = 8,
+}
+
+local populatestrap = function()
+	local char = charamgr.currentcharacter()
+	if not char then
+		return
+	end
+	straplist[1] = nil
+	local strapbaseframe = char.struct.m_xxBody:FindBone("A00_null_dan") or char.struct.m_xxBody:FindBone("S00_null_dan")
+	local last = 0
+	if strapbaseframe then
+		local strapcount = strapbaseframe.m_nChildren
+		for i = 0, strapcount - 1, 1 do
+			straplist[i + 1] = strapbaseframe:m_children(i).m_name
+			last = i + 1
+		end
+	end
+	straplist[last + 1] = "None"
+end
+charamgr.currentcharacterchanged.connect(populatestrap)
+
+local selectstrap = function(index)
+	local char = charamgr.currentcharacter()
+	if not char then
+		return
+	end
+	local strapbaseframe = char.struct.m_xxBody:FindBone("A00_null_dan") or char.struct.m_xxBody:FindBone("S00_null_dan")
+	local strapcount = strapbaseframe.m_nChildren
+	for i = 1, strapcount, 1 do
+		if i == index then
+			local frame = strapbaseframe:m_children(i - 1)
+			unhidemeshes(frame)
+			frame.m_renderFlag = 0
+		else
+			strapbaseframe:m_children(i - 1).m_renderFlag = 2
+		end
+	end
+end
+
+straplist.action = function(self, text, item, state)
+	if state == 1 then
+		selectstrap(item)
+	end
+end
+
+
 -- ########
 -- Clothing
 -- ########
@@ -187,6 +240,10 @@ local _M = iup.hbox {
 	iup.frame {
 		title = "Skirt",
 		skirtlist,
+	},
+	iup.frame {
+		title = "Strap-on",
+		straplist,
 	},
 }
 
