@@ -685,8 +685,9 @@ bool AAUCardData::RemoveSubmeshRule(int index, MeshModFlag flags)
 	auto idxOffset = 0;
 	if (flags & SUBMESH_OUTLINE) {
 		idxOffset = 0;
-
-		m_styles[m_currCardStyle].m_submeshOutlines.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + index - idxOffset);
+		if (index - idxOffset < m_styles[m_currCardStyle].m_submeshOutlines.size()) {
+			m_styles[m_currCardStyle].m_submeshOutlines.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + index - idxOffset);
+		}
 
 		return true;
 	}
