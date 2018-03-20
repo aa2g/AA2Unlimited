@@ -255,6 +255,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				m_cardStorage = ReadData<decltype(m_cardStorage)>(buffer, size);
 				LOGPRIO(Logger::Priority::SPAM) << "found TrAt, loaded " << m_cardStorage.size() << " elements\r\n";
 				break;
+			case 'SMOL':
+				m_styles[m_currCardStyle].m_submeshOutlines = ReadData<decltype(m_styles[m_currCardStyle].m_submeshOutlines)>(buffer, size);
+				LOGPRIO(Logger::Priority::SPAM) << "found SMOL, loaded " << m_styles[m_currCardStyle].m_submeshOutlines.size() << " elements\r\n";
+				break;
 			}
 		}
 		catch (InsufficientBufferException e) {
@@ -371,12 +375,16 @@ int AAUCardData::ToBuffer(char** buffer) {
 		DUMP_MEMBER_AAUSET('HrHl', m_hairHighlightName);
 		//bone transforms
 		DUMP_MEMBER_CONTAINER_AAUSET('BnTr', m_boneTransforms);
+		//global outline color
 		if (m_styles[i].m_bOutlineColor) {
 			DUMP_MEMBER_AAUSET('OlCl', m_outlineColor);
 		}
+		//tan color
 		if (m_styles[i].m_bTanColor) {
 			DUMP_MEMBER_AAUSET('TnCl', m_tanColor);
 		}
+		//submesh outline color
+		DUMP_MEMBER_CONTAINER_AAUSET('SMOL', m_submeshOutlines);
 
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA0', m_hairs[0]);
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA1', m_hairs[1]);
@@ -658,6 +666,39 @@ bool AAUCardData::RemoveBoneRule(int index) {
 	}
 	m_styles[m_currCardStyle].m_boneRules.erase(vIt);
 	return true;
+}
+
+bool AAUCardData::AddSubmeshRule(MeshModFlag flags, const TCHAR * xxFileName, const TCHAR * boneName, const TCHAR * materialName, std::vector<DWORD> color)
+{
+	if (flags & SUBMESH_OUTLINE) {
+		SetSubmeshOulineColor(xxFileName, boneName, materialName, color);
+		return true;
+	}
+	if (flags & SUBMESH_SHADOW) {
+
+	}
+	return false;
+}
+
+bool AAUCardData::RemoveSubmeshRule(int index, MeshModFlag flags)
+{
+	auto idxOffset = 0;
+	if (flags & SUBMESH_OUTLINE) {
+		idxOffset = 0;
+
+		m_styles[m_currCardStyle].m_submeshOutlines.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + index - idxOffset);
+
+		return true;
+	}
+	if (flags & SUBMESH_SHADOW) {
+		idxOffset = m_styles[m_currCardStyle].m_submeshOutlines.size();
+
+		//m_styles[m_currCardStyle].m_submeshShadows.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + index - idxOffset);
+
+		return true;
+	}
+
+	return false;
 }
 
 void AAUCardData::SetSliderValue(int sliderTarget, int sliderIndex, float value) {

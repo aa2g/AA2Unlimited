@@ -156,21 +156,39 @@ namespace AAEdit {
 		HWND m_edOutlineColorRed;
 		HWND m_edOutlineColorGreen;
 		HWND m_edOutlineColorBlue;
+		HWND m_edOutlineColorHue;
+		HWND m_edOutlineColorSat;
+		HWND m_edOutlineColorVal;
 
 		HWND m_cbTanColor;
 		HWND m_edTanColorRed;
 		HWND m_edTanColorGreen;
 		HWND m_edTanColorBlue;
+		HWND m_edTanColorHue;
+		HWND m_edTanColorSat;
+		HWND m_edTanColorVal;
 
 		HWND m_bmBtnAdd;
 		HWND m_bmCbXXFile;
 		HWND m_bmCbBone;
+		HWND m_bmCbMaterial;
 		HWND m_bmList;
+		HWND m_bmSMList;
 		HWND m_bmRbFrameMod;
 		HWND m_bmRbBoneMod;
+		HWND m_bmRbSMOL;
+		HWND m_bmRbSMSH;
 		HWND m_bmEdMatrix[3][3];
+		HWND m_edSubmeshColorRed;
+		HWND m_edSubmeshColorGreen;
+		HWND m_edSubmeshColorBlue;
+		HWND m_edSubmeshColorHue;
+		HWND m_edSubmeshColorSat;
+		HWND m_edSubmeshColorVal;
+		HWND m_edSubmeshColorAT;
 		
-		void LoadData(int listboxId);
+		void LoadMatrixData(int listboxId);
+		void LoadColorData(int listboxId);
 		void ApplyInput();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
