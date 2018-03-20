@@ -77,7 +77,11 @@ namespace Shared {
 			{ ROOM_CHANGE, EVENTCAT_CONVERSATION, TEXT("Card Changes Room"), TEXT("Card Changes Room"),
 			TEXT("Card enters a new room. Works for all cards."),
 				{}
-			}
+			},
+			{ KEY_PRESS, EVENTCAT_CONVERSATION, TEXT("Key Press"), TEXT("Key was pressed"),
+			TEXT("Key was pressed"),
+			{}
+		}
 		};
 
 		/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {

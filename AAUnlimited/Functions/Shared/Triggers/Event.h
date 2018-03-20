@@ -49,6 +49,7 @@ namespace Triggers {
 		PC_RESPONSE,
 		PC_CONVERSATION_LINE_UPDATED,
 		ROOM_CHANGE,
+		KEY_PRESS,
 		
 		
 		N_EVENTS
@@ -206,6 +207,12 @@ namespace Triggers {
 		int roomTarget;
 		int action;
 		int convotarget;
+
+	EDC_END
+
+	EDC_DECLARE(KeyPressData, KEY_PRESS)
+
+	int keyVal;
 
 	EDC_END
 
