@@ -388,6 +388,13 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring
 
 inline const std::vector<DWORD> AAUCardData::SetSubmeshOulineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color){
 
+	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
+	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
+	auto newMaterialSize = material.size() % 2 == 0 ? material.size() : (material.size() + 1);
+	mesh.resize(newMeshSize);
+	frame.resize(newFrameSize);
+	material.resize(newMaterialSize);
+
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
 	SubmeshColorRule newColor{ key, color };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
