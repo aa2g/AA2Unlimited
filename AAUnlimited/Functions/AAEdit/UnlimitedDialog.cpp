@@ -1528,7 +1528,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second + TEXT("]");
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
-
 	//list possible bones
 	ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
 	if(curr != NULL) {
@@ -1549,11 +1548,22 @@ void UnlimitedDialog::BDDialog::Refresh() {
 				fileQueue.pop();
 				size_t conv;
 				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
-				SendMessage(m_bmCbBone,CB_ADDSTRING,0,(LPARAM)tmpBuff);
+
+				if (SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a frame with this name is not already present in the list
+					SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
+				}
 				for (unsigned int i = 0; i < bone->m_nChildren; i++) {
 					fileQueue.push(bone->m_children + i);
 				}
 			}
+		}
+		auto selIdx = SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)bonename);
+		if (selIdx == CB_ERR) {
+			SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)bonename);
+			SendMessage(m_bmCbBone, CB_SELECTSTRING, -1, (LPARAM)bonename);
+		}
+		else {
+			SendMessage(m_bmCbBone, CB_SETCURSEL, (WPARAM)selIdx, 0);
 		}
 	}
 	
