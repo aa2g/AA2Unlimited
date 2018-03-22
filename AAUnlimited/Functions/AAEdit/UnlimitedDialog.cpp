@@ -1287,6 +1287,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			}
 			else {
 				//make sure its a valid float
+				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
 				SendMessage(ed,WM_GETTEXT,128,(LPARAM)num);
 				float f = wcstof(num,NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
@@ -1295,6 +1296,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if(str != num) {
 					SendMessage(ed,WM_SETTEXT,0,(LPARAM)str.c_str());
 				}
+				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 			}
 			
 			return TRUE; }
@@ -1567,6 +1569,34 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		}
 	}
 	
+	//list loaded files
+	if (curr != NULL) {
+		SendMessage(m_bmCbXXFile, CB_RESETCONTENT, 0, 0);
+		ExtClass::XXFile* xxlist[] = {
+			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+			curr->m_xxBody, curr->m_xxLegs
+		};
+		TCHAR tmpBuff[512];
+		for (ExtClass::XXFile* file : xxlist) {
+			if (file == NULL) continue;
+			size_t conv;
+			mbstowcs_s(&conv, tmpBuff, file->m_name, 512);
+
+			if (SendMessage(m_bmCbXXFile, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a file with this name is not already present in the list
+				SendMessage(m_bmCbXXFile, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
+			}
+		}
+		auto selIdx = SendMessage(m_bmCbXXFile, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)xxname);
+		if (selIdx == CB_ERR) {
+			SendMessage(m_bmCbXXFile, CB_ADDSTRING, 0, (LPARAM)xxname);
+			SendMessage(m_bmCbXXFile, CB_SELECTSTRING, -1, (LPARAM)xxname);
+		}
+		else {
+			SendMessage(m_bmCbXXFile, CB_SETCURSEL, (WPARAM)xxname, 0);
+		}
+
+	}
 }
 
 /**********************/
