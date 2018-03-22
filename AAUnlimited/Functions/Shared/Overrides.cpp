@@ -149,6 +149,9 @@ namespace Shared {
 		if (xxFile == NULL) return;
 		if (!Shared::GameState::getIsOverriding()) return;
 
+		static std::map<std::wstring, std::vector<AAUCardData::BoneMod>> matchany;
+		matchany.clear();
+
 		static const char prefix[] {"artf_"};
 
 		//first do the frame rules, then the bone rules
@@ -158,6 +161,18 @@ namespace Shared {
 		TCHAR name[256];
 		mbstowcs_s(&written,name,xxFile->m_name,256);
 		const auto* rmatch = Shared::g_currentChar->m_cardData.GetFrameRule(name);
+		if (rmatch)
+			matchany = *rmatch;
+		rmatch = Shared::g_currentChar->m_cardData.GetFrameRule(L"");
+		if (rmatch)
+		{
+			for (auto it = rmatch->cbegin(); it != rmatch->cend(); ++it)
+			{
+				if (matchany.find(it->first) == matchany.end())
+					matchany[it->first] = it->second;
+			}
+		}
+		rmatch = &matchany;
 
 		//find model type of xx file and slider rule if existant
 		const std::map<std::wstring,std::vector<std::pair<const Shared::Slider*,AAUCardData::BoneMod>>>* smatch = NULL;
@@ -175,7 +190,7 @@ namespace Shared {
 		
 		
 
-		if (rmatch != NULL || smatch != NULL) {
+		if ((rmatch != NULL && !rmatch->empty()) || smatch != NULL) {
 			//adjust bone matrizes
 			xxFile->EnumBonesPostOrder([&](ExtClass::Frame* bone) {
 				mbstowcs_s(&written,name,bone->m_name,256);
