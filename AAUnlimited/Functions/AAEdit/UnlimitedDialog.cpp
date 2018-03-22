@@ -1262,7 +1262,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
 					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(blue,green,red));
+					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
 					using namespace ExtVars::AAEdit;
 					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
 				}
@@ -1364,6 +1364,7 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		SendMessage(m_bmRbSMSH, BM_SETCHECK, BST_UNCHECKED, 0);
 		SendMessage(m_bmRbSMOL, BM_SETCHECK, BST_CHECKED, 0);
 
+		if (listboxId >= g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshOutlines.size()) return;
 		auto rule = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshOutlines[listboxId];
 		SendMessage(m_bmCbXXFile, WM_SETTEXT, 0, (LPARAM)rule.first.first.first.c_str());
 		SendMessage(m_bmCbBone, WM_SETTEXT, 0, (LPARAM)rule.first.first.second.c_str());
