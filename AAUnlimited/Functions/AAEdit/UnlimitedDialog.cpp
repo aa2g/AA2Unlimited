@@ -1624,7 +1624,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMOL");
 		listEntry += TEXT("]");
-		listEntry += submeshOutlinesList[i].first.first.first + TEXT("|") + submeshOutlinesList[i].first.first.second + TEXT("|") + submeshOutlinesList[i].first.second;
+		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_last_not_of(L"\0"));
+		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_last_not_of(L"\0"));
+		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_last_not_of(L"\0"));
+		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 	const auto& submeshShadowsList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshShadows;
@@ -1636,7 +1639,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMSH");
 		listEntry += TEXT("]");
-		listEntry += submeshShadowsList[i].first.first.first + TEXT("|") + submeshShadowsList[i].first.first.second + TEXT("|") + submeshShadowsList[i].first.second;
+		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_last_not_of(L"\0"));
+		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_last_not_of(L"\0"));
+		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_last_not_of(L"\0"));
+		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 
