@@ -837,15 +837,36 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_cbSelect = GetDlgItem(hwndDlg, IDC_TS_CBSELECTION);
-		
-		thisPtr->LoadTanList();
 
+		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg, IDC_BD_CBTANCOLOR);
+		thisPtr->m_edTanColorRed = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_RED);
+		thisPtr->m_edTanColorGreen = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_GREEN);
+		thisPtr->m_edTanColorBlue = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_BLUE);
+		thisPtr->m_edTanColorHue = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
+		thisPtr->m_edTanColorSat = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
+		thisPtr->m_edTanColorVal = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
+
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINREDTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINGREENTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINBLUETAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+
+		thisPtr->LoadTanList();
+		thisPtr->m_bRefreshingColorBoxes = false;
 		return TRUE;
 		break; }
 	case WM_COMMAND: {
 		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
 		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_BD_CBTANCOLOR) {
+				BOOL visible = SendMessage(thisPtr->m_cbTanColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
+				thisPtr->Refresh();
+				return TRUE;
+			}
+		}
 		case CBN_SELCHANGE: {
 			int sel = SendMessage(thisPtr->m_cbSelect, CB_GETCURSEL, 0, 0);
 			TCHAR name[256];
@@ -857,8 +878,32 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//redraw tan
 			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_TAN);
 			break; }
+		case EN_CHANGE: {
+			HWND ed = (HWND)lparam;
+			if (ed == thisPtr->m_edTanColorRed
+				|| ed == thisPtr->m_edTanColorGreen
+				|| ed == thisPtr->m_edTanColorBlue)
+			{
+				if (thisPtr->m_bRefreshingColorBoxes) break;
+				int newval = General::GetEditInt(ed);
+				if (newval < 0) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
+				}
+				else if (newval > 255) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
+				}
+				else {
+					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
+					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
+					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
+					auto color = RGB(red, green, blue);	//WHY
+					g_currChar.m_cardData.SetTanColor(color);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_SKINTONE);
+				}
+			}
+			break;}
 		}
-		break; }
+	}
 	}
 	return FALSE;
 }
@@ -917,6 +962,21 @@ void UnlimitedDialog::TSDialog::Refresh() {
 	std::wstring name = g_currChar.m_cardData.GetTanName();
 	LRESULT i = SendMessage(m_cbSelect, CB_FINDSTRINGEXACT, -1, (LPARAM)name.c_str());
 	SendMessage(m_cbSelect, CB_SETCURSEL, i == CB_ERR ? 0 : i, NULL);
+
+	TCHAR text[10];
+	bool bTan = g_currChar.m_cardData.HasTanColor();
+	EnableWindow(this->m_edTanColorRed, bTan);
+	EnableWindow(this->m_edTanColorGreen, bTan);
+	EnableWindow(this->m_edTanColorBlue, bTan);
+	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
+	m_bRefreshingColorBoxes = true;
+	_itow_s(GetRValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetGValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetBValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+	m_bRefreshingColorBoxes = false;
 }
 
 /***************/
@@ -1108,14 +1168,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorSat = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_SAT);
 		thisPtr->m_edOutlineColorVal = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_VAL);
 
-		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg,IDC_BD_CBTANCOLOR);
-		thisPtr->m_edTanColorRed	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_RED);
-		thisPtr->m_edTanColorGreen	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_GREEN);
-		thisPtr->m_edTanColorBlue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_BLUE);
-		thisPtr->m_edTanColorHue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
-		thisPtr->m_edTanColorSat	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
-		thisPtr->m_edTanColorVal	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
-
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
 		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
 		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg, IDC_BD_BM_CBBONE);
@@ -1143,6 +1195,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edSubmeshColorVal = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_VAL);
 		thisPtr->m_edSubmeshColorAT = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_AT);
 
+		thisPtr->m_edSubmeshColorSH1 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH1);
+		thisPtr->m_edSubmeshColorSH2 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH2);
+
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				SendMessage(thisPtr->m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)TEXT("0"));
@@ -1153,15 +1208,13 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
 
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINREDTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREENTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUETAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
-
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMRED), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMGREEN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMBLUE), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMAT), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMSH1), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMSH2), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
@@ -1218,12 +1271,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->Refresh();
 				return TRUE;
 			}
-			else if (identifier == IDC_BD_CBTANCOLOR) {
-				BOOL visible = SendMessage(thisPtr->m_cbTanColor,BM_GETCHECK,0,0) == BST_CHECKED;
-				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
-				thisPtr->Refresh();
-				return TRUE;
-			}
 			else if(identifier == IDC_BD_BM_BTNADD) {
 				thisPtr->ApplyInput();
 				return TRUE;
@@ -1249,26 +1296,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					g_currChar.m_cardData.SetOutlineColor(RGB(red, green, blue));
 				}
 			}
-			else if (ed == thisPtr->m_edTanColorRed
-				|| ed == thisPtr->m_edTanColorGreen
-				|| ed == thisPtr->m_edTanColorBlue)
-			{
-				int newval = General::GetEditInt(ed);
-				if (newval < 0) {
-					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
-				}
-				else if (newval > 255) {
-					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
-				}
-				else {
-					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
-					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
-					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(red, green, blue));
-					using namespace ExtVars::AAEdit;
-					RedrawBodyPart(BODY_COLOR, BODYCOLOR_SKINTONE);
-				}
-			}
 			else if (ed == thisPtr->m_edSubmeshColorRed
 				|| ed == thisPtr->m_edSubmeshColorGreen
 				|| ed == thisPtr->m_edSubmeshColorBlue)
@@ -1287,7 +1314,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
 				//}
 			}
-			else if (ed == thisPtr->m_edSubmeshColorAT) {
+			else if (ed == thisPtr->m_edSubmeshColorAT || 
+				ed == thisPtr->m_edSubmeshColorSH1 ||
+				ed == thisPtr->m_edSubmeshColorSH2) {
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
 				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
@@ -1306,7 +1335,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		}
 		case EN_KILLFOCUS: {
 			HWND ed = (HWND)lparam;
-			if (ed == thisPtr->m_edSubmeshColorAT) {
+			if (ed == thisPtr->m_edSubmeshColorAT ||
+				ed == thisPtr->m_edSubmeshColorSH1 ||
+				ed == thisPtr->m_edSubmeshColorSH2) {
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
 				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
@@ -1360,15 +1391,34 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
 		auto ncode = ((LPNMHDR)lparam)->code;
+		auto sender = HWND(lparam);
 		switch (ncode) {
 		case UDN_DELTAPOS:
-			if (wparam == IDC_BD_SPINSMAT) {
+			switch (wparam) {
+			case IDC_BD_SPINSMAT: {
 				auto lpnmud = (LPNMUPDOWN)lparam;
 				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorAT);
 				value += lpnmud->iDelta * 0.01f;
 				TCHAR num[128];
 				auto formatted = swprintf_s(num, L"%g", value);
 				SendMessage(thisPtr->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)num);
+				break; }
+			case IDC_BD_SPINSMSH1: {
+				auto lpnmud = (LPNMUPDOWN)lparam;
+				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorSH1);
+				value += lpnmud->iDelta * 0.01f;
+				TCHAR num[128];
+				auto formatted = swprintf_s(num, L"%g", value);
+				SendMessage(thisPtr->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)num);
+				break; }
+			case IDC_BD_SPINSMSH2: {
+				auto lpnmud = (LPNMUPDOWN)lparam;
+				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorSH2);
+				value += lpnmud->iDelta * 0.01f;
+				TCHAR num[128];
+				auto formatted = swprintf_s(num, L"%g", value);
+				SendMessage(thisPtr->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)num);
+				break; }
 			}
 		}
 
@@ -1453,7 +1503,15 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		SendMessage(m_bmCbBone, WM_SETTEXT, 0, (LPARAM)rule.first.first.second.c_str());
 		SendMessage(m_bmCbMaterial, WM_SETTEXT, 0, (LPARAM)rule.first.second.c_str());
 
-		auto submeshShadowColor = rule.second;
+		auto submeshShadowColor = rule.second;		
+		if (submeshShadowColor.size() < 5) {	//couple safeguards
+			floatyDWORD.f = 0.6;	//took it from the body mesh
+			submeshShadowColor.push_back(floatyDWORD.i);
+		}
+		if (submeshShadowColor.size() < 6) {
+			floatyDWORD.f = 0.0015;	//took it from the body mesh
+			submeshShadowColor.push_back(floatyDWORD.i);
+		}
 		_itow_s(submeshShadowColor[0], text, 10);
 		SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
 		_itow_s(submeshShadowColor[1], text, 10);
@@ -1462,6 +1520,10 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[3];
 		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		floatyDWORD.i = submeshShadowColor[4];
+		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		floatyDWORD.i = submeshShadowColor[5];
+		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
 	}
 
 	delete[] textBuffer;
@@ -1504,9 +1566,19 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		union {
 			DWORD i;
 			float f;
-		} floatyDWORD;
-		floatyDWORD.f = General::GetEditFloat(m_edSubmeshColorAT);
-		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, floatyDWORD.i };
+		} floatyDWORDAT;
+		union {
+			DWORD i;
+			float f;
+		} floatyDWORDSH1;
+		union {
+			DWORD i;
+			float f;
+		} floatyDWORDSH2;
+		floatyDWORDAT.f = General::GetEditFloat(m_edSubmeshColorAT);
+		floatyDWORDSH1.f = General::GetEditFloat(m_edSubmeshColorSH1);
+		floatyDWORDSH2.f = General::GetEditFloat(m_edSubmeshColorSH2);
+		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
 		g_currChar.m_cardData.AddSubmeshRule((AAUCardData::MeshModFlag)flags, xxname, bonename, materialName, color);
 
 	}
@@ -1552,17 +1624,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	SendMessage(this->m_edOutlineColorBlue,WM_SETTEXT,0,(LPARAM)text);
 
 
-	bool bTan = g_currChar.m_cardData.HasTanColor();
-	EnableWindow(this->m_edTanColorRed, bTan);
-	EnableWindow(this->m_edTanColorGreen, bTan);
-	EnableWindow(this->m_edTanColorBlue, bTan);
-	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
-	_itow_s(GetRValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(GetGValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(GetBValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 
 	TCHAR xxname[128];
 	SendMessage(m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
@@ -1600,6 +1661,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[3];
 		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		floatyDWORD.i = submeshShadowColor[4];
+		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		floatyDWORD.i = submeshShadowColor[5];
+		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
 	}
 	
 	//submesh mods listbox
@@ -1613,7 +1678,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMOL");
 		listEntry += TEXT("]");
-		listEntry += submeshOutlinesList[i].first.first.first + TEXT("|") + submeshOutlinesList[i].first.first.second + TEXT("|") + submeshOutlinesList[i].first.second;
+		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_last_not_of(L"\0"));
+		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_last_not_of(L"\0"));
+		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_last_not_of(L"\0"));
+		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 	const auto& submeshShadowsList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshShadows;
@@ -1625,7 +1693,10 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMSH");
 		listEntry += TEXT("]");
-		listEntry += submeshShadowsList[i].first.first.first + TEXT("|") + submeshShadowsList[i].first.first.second + TEXT("|") + submeshShadowsList[i].first.second;
+		auto clnFilename = submeshShadowsList[i].first.first.first.substr(0, submeshShadowsList[i].first.first.first.find_last_not_of(L"\0"));
+		auto clnFramename = submeshShadowsList[i].first.first.second.substr(0, submeshShadowsList[i].first.first.second.find_last_not_of(L"\0"));
+		auto clnMaterialname = submeshShadowsList[i].first.second.substr(0, submeshShadowsList[i].first.second.find_last_not_of(L"\0"));
+		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 

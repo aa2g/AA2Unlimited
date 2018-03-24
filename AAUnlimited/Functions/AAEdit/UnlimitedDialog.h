@@ -134,6 +134,16 @@ namespace AAEdit {
 	struct TSDialog : public Dialog {
 		HWND m_cbSelect;
 
+		HWND m_cbTanColor;
+		HWND m_edTanColorRed;
+		HWND m_edTanColorGreen;
+		HWND m_edTanColorBlue;
+		HWND m_edTanColorHue;
+		HWND m_edTanColorSat;
+		HWND m_edTanColorVal;
+
+		bool m_bRefreshingColorBoxes;
+
 		void LoadTanList();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg, _In_ UINT msg, _In_ WPARAM wparam, _In_ LPARAM lparam);
@@ -160,14 +170,6 @@ namespace AAEdit {
 		HWND m_edOutlineColorSat;
 		HWND m_edOutlineColorVal;
 
-		HWND m_cbTanColor;
-		HWND m_edTanColorRed;
-		HWND m_edTanColorGreen;
-		HWND m_edTanColorBlue;
-		HWND m_edTanColorHue;
-		HWND m_edTanColorSat;
-		HWND m_edTanColorVal;
-
 		HWND m_bmBtnAdd;
 		HWND m_bmCbXXFile;
 		HWND m_bmCbBone;
@@ -186,6 +188,9 @@ namespace AAEdit {
 		HWND m_edSubmeshColorSat;
 		HWND m_edSubmeshColorVal;
 		HWND m_edSubmeshColorAT;
+
+		HWND m_edSubmeshColorSH1;
+		HWND m_edSubmeshColorSH2;
 		
 		void LoadMatrixData(int listboxId);
 		void LoadColorData(int listboxId);
