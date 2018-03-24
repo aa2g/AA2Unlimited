@@ -390,7 +390,7 @@ int AAUCardData::ToBuffer(char** buffer) {
 		//submesh outline color
 		DUMP_MEMBER_CONTAINER_AAUSET('SMOL', m_submeshOutlines);
 		//submesh shadow color
-		DUMP_MEMBER_CONTAINER_AAUSET('SMOL', m_submeshShadows);
+		DUMP_MEMBER_CONTAINER_AAUSET('SMSH', m_submeshShadows);
 
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA0', m_hairs[0]);
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA1', m_hairs[1]);
