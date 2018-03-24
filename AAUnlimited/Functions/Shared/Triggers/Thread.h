@@ -151,6 +151,7 @@ namespace Shared {
 			// Expressions
 
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
+			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)

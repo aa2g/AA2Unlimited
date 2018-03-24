@@ -50,6 +50,7 @@ namespace Triggers {
 		PC_CONVERSATION_LINE_UPDATED,
 		ROOM_CHANGE,
 		KEY_PRESS,
+		HPOSITION_CHANGE,
 		
 		
 		N_EVENTS
@@ -213,6 +214,12 @@ namespace Triggers {
 	EDC_DECLARE(KeyPressData, KEY_PRESS)
 
 	int keyVal;
+
+	EDC_END
+
+	EDC_DECLARE(HPositionData, HPOSITION_CHANGE)
+
+	int position;
 
 	EDC_END
 

@@ -19,8 +19,20 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case KEY_PRESS:
 				return Shared::GameState::getPlayerCharacter()->m_seat;
+			case HPOSITION_CHANGE:
+				return Shared::GameState::getPlayerCharacter()->m_seat;
 			default:
 				return this->eventData->card;
+			}
+		}
+
+		//int ()
+		Value Thread::GetHPosition(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return ((HPositionData*)eventData)->position;
+			default:
+				return -1;
 			}
 		}
 
@@ -2664,7 +2676,12 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCurrentConvo
 				},
-
+				{
+					105, EXPRCAT_EVENT,
+					TEXT("H Position"), TEXT("HPosition"), TEXT("The index of the current H position of PC."),
+					{}, (TYPE_INT),
+					&Thread::GetHPosition
+				},
 			},
 
 			{ //BOOL

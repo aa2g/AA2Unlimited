@@ -80,8 +80,12 @@ namespace Shared {
 			},
 			{ KEY_PRESS, EVENTCAT_CONVERSATION, TEXT("Key Press"), TEXT("Key was pressed"),
 			TEXT("Key was pressed"),
-			{}
-		}
+				{}
+			},
+			{ HPOSITION_CHANGE, EVENTCAT_CONVERSATION, TEXT("H Position Change"), TEXT("H Position Change"),
+			TEXT("The H position changed."),
+				{}
+			}
 		};
 
 		/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {
