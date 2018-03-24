@@ -1287,6 +1287,21 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
 				//}
 			}
+			else if (ed == thisPtr->m_edSubmeshColorAT) {
+				auto selection = Edit_GetSel(ed);
+				TCHAR num[128];
+				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
+				if (f < 0) f = 0;
+				TCHAR str[128];
+				swprintf_s(str, L"%g", f);
+				//if the value was changed, take the new one
+				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
+				if (unequal) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
+				}
+				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+			}
 			return TRUE;
 		}
 		case EN_KILLFOCUS: {

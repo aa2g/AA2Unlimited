@@ -373,14 +373,37 @@ inline const TextureImage& AAUCardData::GetTanTex(int i) {
 	return m_styles[m_currCardStyle].m_tanImages[0];
 }
 
-inline const DWORD AAUCardData::GetOutlineColor() { return m_styles[m_currCardStyle].m_outlineColor; }
-inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { return m_styles[m_currCardStyle].m_outlineColor = color; }
+inline const DWORD AAUCardData::GetOutlineColor() {
+	auto color = GetSubmeshOutlineColor(L"", L"", L"");
+	auto result = RGB(color[0], color[1], color[2]);
+	return result;
+}
+
+inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) { 
+	std::vector<DWORD> colorArray;
+	colorArray.push_back(GetRValue(color));
+	colorArray.push_back(GetGValue(color));
+	colorArray.push_back(GetBValue(color));
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORD;
+	floatyDWORD.f = 1;
+	colorArray.push_back(floatyDWORD.i);
+	SetSubmeshOutlineColor(L"", L"", L"", colorArray);
+	return color;
+}
 inline const bool AAUCardData::HasOutlineColor() { return m_styles[m_currCardStyle].m_bOutlineColor; }
 inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_styles[m_currCardStyle].m_bOutlineColor = has; }
 
 inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material){
 
-	std::vector<DWORD> blankColor{ 0, 0, 0, (DWORD)1.0f };
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORD;
+	floatyDWORD.f = 1;
+	std::vector<DWORD> blankColor{ 0, 0, 0, floatyDWORD.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ {mesh, frame}, material };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
 		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) return m_styles[m_currCardStyle].m_submeshOutlines[i].second;
