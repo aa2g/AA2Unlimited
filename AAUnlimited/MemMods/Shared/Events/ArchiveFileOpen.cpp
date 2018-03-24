@@ -75,6 +75,7 @@ skip:
 ExtClass::XXFile* __stdcall OpenXXEvent(void *this_, wchar_t **archname, void *pploadclass, wchar_t **file, DWORD a) {
 	ExtClass::XXFile *ret = CallOpenXX(this_, archname, pploadclass, file, a);
 	Shared::FrameSubmeshOutlineOverride(ret, false);
+	Shared::FrameSubmeshShadowOverride(ret, false);
 	LUA_EVENT("load_xx", ret, a)
 //	if (!wcscmp(*file, L"MP_BOYROOM_FLOOR.xx"))
 //		__debugbreak();

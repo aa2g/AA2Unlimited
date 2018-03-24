@@ -259,6 +259,10 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 				m_styles[m_currCardStyle].m_submeshOutlines = ReadData<decltype(m_styles[m_currCardStyle].m_submeshOutlines)>(buffer, size);
 				LOGPRIO(Logger::Priority::SPAM) << "found SMOL, loaded " << m_styles[m_currCardStyle].m_submeshOutlines.size() << " elements\r\n";
 				break;
+			case 'SMSH':
+				m_styles[m_currCardStyle].m_submeshShadows = ReadData<decltype(m_styles[m_currCardStyle].m_submeshShadows)>(buffer, size);
+				LOGPRIO(Logger::Priority::SPAM) << "found SMSH, loaded " << m_styles[m_currCardStyle].m_submeshShadows.size() << " elements\r\n";
+				break;
 			}
 		}
 		catch (InsufficientBufferException e) {
@@ -385,6 +389,8 @@ int AAUCardData::ToBuffer(char** buffer) {
 		}
 		//submesh outline color
 		DUMP_MEMBER_CONTAINER_AAUSET('SMOL', m_submeshOutlines);
+		//submesh shadow color
+		DUMP_MEMBER_CONTAINER_AAUSET('SMOL', m_submeshShadows);
 
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA0', m_hairs[0]);
 		DUMP_MEMBER_CONTAINER_AAUSET('HrA1', m_hairs[1]);
@@ -671,11 +677,12 @@ bool AAUCardData::RemoveBoneRule(int index) {
 bool AAUCardData::AddSubmeshRule(MeshModFlag flags, const TCHAR * xxFileName, const TCHAR * boneName, const TCHAR * materialName, std::vector<DWORD> color)
 {
 	if (flags & SUBMESH_OUTLINE) {
-		SetSubmeshOulineColor(xxFileName, boneName, materialName, color);
+		SetSubmeshOutlineColor(xxFileName, boneName, materialName, color);
 		return true;
 	}
 	if (flags & SUBMESH_SHADOW) {
-
+		SetSubmeshShadowColor(xxFileName, boneName, materialName, color);
+		return true;
 	}
 	return false;
 }
@@ -693,8 +700,9 @@ bool AAUCardData::RemoveSubmeshRule(int index, MeshModFlag flags)
 	}
 	if (flags & SUBMESH_SHADOW) {
 		idxOffset = m_styles[m_currCardStyle].m_submeshOutlines.size();
-
-		//m_styles[m_currCardStyle].m_submeshShadows.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + index - idxOffset);
+		if (index - idxOffset < m_styles[m_currCardStyle].m_submeshShadows.size()) {
+			m_styles[m_currCardStyle].m_submeshShadows.erase(m_styles[m_currCardStyle].m_submeshShadows.begin() + index - idxOffset);
+		}
 
 		return true;
 	}

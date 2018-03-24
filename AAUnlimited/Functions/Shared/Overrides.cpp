@@ -693,4 +693,46 @@ namespace Shared {
 
 	}
 
+	void FrameSubmeshShadowOverride(ExtClass::XXFile* xxFile, bool backup) {
+		//first.first.first - file name
+		//first.first.second - frame name
+		//first.second - material name
+		//second - color
+
+		using namespace ExtClass;
+		if (xxFile == NULL) return;
+		if (!Shared::GameState::getIsOverriding()) return;
+		if (g_currentChar == nullptr) return;
+		auto shadows = g_currentChar->m_cardData.m_styles[g_currentChar->GetCurrentStyle()].m_submeshShadows;
+		for (int i = 0; i < shadows.size(); i++) {
+
+			if (!strcmp(xxFile->m_name, General::CastToString(shadows[i].first.first.first).c_str()) || shadows[i].first.first.first.length() == 0) {	//optional filename check
+
+				auto submeshes = xxFile->m_root->ListSubmeshesByMaterial(General::CastToString(shadows[i].first.second).c_str());	//all the submeshes that match the material
+				for (int j = 0; j < submeshes.size(); j++) {
+					if (!strcmp(submeshes[j].first->m_name, General::CastToString(shadows[i].first.first.second).c_str()) || shadows[i].first.first.second.length() == 0) {	//optional frame name check
+						submeshes[j].first->SetSubmeshShadowColorArray(submeshes[j].second, shadows[i].second);
+					}
+				}
+				if (shadows[i].first.second.length() == 0) {
+					auto frameName = shadows[i].first.first.second;
+					auto color = shadows[i].second;
+					xxFile->m_root->EnumTreeLevelOrder([&frameName, &color](Frame* frame) {
+						if (frame->m_nSubmeshes < 1) return true;
+						else if (!strcmp(frame->m_name, General::CastToString(frameName).c_str()) || frameName.length() == 0) {
+							for (int ii = 0; ii < frame->m_nSubmeshes; ii++) {
+								frame->SetSubmeshShadowColorArray(ii, color);
+							}
+							return true;
+						}
+					}
+					);
+				}
+			}
+			else { continue; }
+
+		}
+
+	}
+
 }

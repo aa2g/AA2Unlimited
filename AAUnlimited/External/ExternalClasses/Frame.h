@@ -32,7 +32,15 @@ public:
 		};
 		BYTE m_unknown2[136]; //unknown
 		//BYTE m_flagsUnknown3[]; //unsure about the location of this one
-		BYTE m_flagsUnknown4[284];
+		union {
+			BYTE m_flagsUnknown4[284];
+			struct {
+				BYTE m_flagsUnknown4_1[256];
+				float m_submeshShadow[4];
+				float m_flagsUnknown4_lastFloats[2];
+				DWORD m_flagsUnknown4_lastInt;
+			};
+		};
 		BYTE m_unknown3[32];
 		//BYTE m_flagsUnknown5[]; //unsure about the location of this one
 	};
@@ -116,6 +124,9 @@ public:
 
 	std::vector<DWORD> Frame::GetSubmeshOutlineColorArray(int idxSubmesh);
 	void Frame::SetSubmeshOutlineColorArray(int idxSubmesh, std::vector<DWORD> color);
+
+	std::vector<DWORD> Frame::GetSubmeshShadowColorArray(int idxSubmesh);
+	void SetSubmeshShadowColorArray(int idxSubmesh, std::vector<DWORD> color);
 
 	template<class Callback>
 	void EnumTreeLevelOrder(Callback& callback);
