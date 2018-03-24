@@ -435,7 +435,22 @@ inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring
 
 inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material) {
 
-	std::vector<DWORD> blankColor{ 100, 30, 30, (DWORD)0.196078f };
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDAT;
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDSH1;
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDSH2;
+	floatyDWORDAT.f = 0.196078f;
+	floatyDWORDSH1.f = 0.6;
+	floatyDWORDSH2.f = 0.0015;
+	std::vector<DWORD> blankColor{ 100, 30, 30, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {
 		if (key == m_styles[m_currCardStyle].m_submeshShadows[i].first) return m_styles[m_currCardStyle].m_submeshShadows[i].second;

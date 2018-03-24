@@ -58,6 +58,14 @@ namespace ExtClass {
 			DWORD i;
 			float f;
 		} uShadowA;
+		union {
+			DWORD i;
+			float f;
+		} uShadowSH1;
+		union {
+			DWORD i;
+			float f;
+		} uShadowSH2;
 
 		auto colorHex = this->m_subMeshes[idxSubmesh].m_submeshShadow;
 
@@ -65,13 +73,15 @@ namespace ExtClass {
 		float fShadowG = colorHex[1];
 		float fShadowB = colorHex[2];
 		uShadowA.f = colorHex[3];
+		uShadowSH1.f = this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[0];
+		uShadowSH2.f = this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[1];
 
 		DWORD iShadowR = 255 * fShadowR;
 		DWORD iShadowG = 255 * fShadowG;
 		DWORD iShadowB = 255 * fShadowB;
 		DWORD iShadowA = uShadowA.i;
 
-		std::vector<DWORD> color{ iShadowR , iShadowG , iShadowB , iShadowA };
+		std::vector<DWORD> color{ iShadowR , iShadowG , iShadowB , iShadowA, uShadowSH1.i, uShadowSH2.i };
 
 		return color;
 
@@ -96,6 +106,18 @@ namespace ExtClass {
 		colorHex[1] = fShadowG;
 		colorHex[2] = fShadowB;
 		colorHex[3] = fShadowA;
+
+		uShadowA.f = this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[0];
+		if (color.size() > 4) {
+			uShadowA.i = color[4];
+		}
+		this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[0] = uShadowA.f;
+
+		uShadowA.f = this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[1];
+		if (color.size() > 5) {
+			uShadowA.i = color[5];
+		}
+		this->m_subMeshes[idxSubmesh].m_flagsUnknown4_lastFloats[1] = uShadowA.f;
 
 	}
 
