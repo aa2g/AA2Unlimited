@@ -837,15 +837,36 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lparam); //register class to this hwnd
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_cbSelect = GetDlgItem(hwndDlg, IDC_TS_CBSELECTION);
-		
-		thisPtr->LoadTanList();
 
+		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg, IDC_BD_CBTANCOLOR);
+		thisPtr->m_edTanColorRed = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_RED);
+		thisPtr->m_edTanColorGreen = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_GREEN);
+		thisPtr->m_edTanColorBlue = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_BLUE);
+		thisPtr->m_edTanColorHue = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
+		thisPtr->m_edTanColorSat = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
+		thisPtr->m_edTanColorVal = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
+
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINREDTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINGREENTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINBLUETAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+
+		thisPtr->LoadTanList();
+		thisPtr->m_bRefreshingColorBoxes = false;
 		return TRUE;
 		break; }
 	case WM_COMMAND: {
 		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
 		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_BD_CBTANCOLOR) {
+				BOOL visible = SendMessage(thisPtr->m_cbTanColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
+				thisPtr->Refresh();
+				return TRUE;
+			}
+		}
 		case CBN_SELCHANGE: {
 			int sel = SendMessage(thisPtr->m_cbSelect, CB_GETCURSEL, 0, 0);
 			TCHAR name[256];
@@ -857,8 +878,32 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			//redraw tan
 			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_TAN);
 			break; }
+		case EN_CHANGE: {
+			HWND ed = (HWND)lparam;
+			if (ed == thisPtr->m_edTanColorRed
+				|| ed == thisPtr->m_edTanColorGreen
+				|| ed == thisPtr->m_edTanColorBlue)
+			{
+				if (thisPtr->m_bRefreshingColorBoxes) break;
+				int newval = General::GetEditInt(ed);
+				if (newval < 0) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
+				}
+				else if (newval > 255) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
+				}
+				else {
+					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
+					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
+					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
+					auto color = RGB(red, green, blue);	//WHY
+					g_currChar.m_cardData.SetTanColor(color);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_SKINTONE);
+				}
+			}
+			break;}
 		}
-		break; }
+	}
 	}
 	return FALSE;
 }
@@ -917,6 +962,21 @@ void UnlimitedDialog::TSDialog::Refresh() {
 	std::wstring name = g_currChar.m_cardData.GetTanName();
 	LRESULT i = SendMessage(m_cbSelect, CB_FINDSTRINGEXACT, -1, (LPARAM)name.c_str());
 	SendMessage(m_cbSelect, CB_SETCURSEL, i == CB_ERR ? 0 : i, NULL);
+
+	TCHAR text[10];
+	bool bTan = g_currChar.m_cardData.HasTanColor();
+	EnableWindow(this->m_edTanColorRed, bTan);
+	EnableWindow(this->m_edTanColorGreen, bTan);
+	EnableWindow(this->m_edTanColorBlue, bTan);
+	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
+	m_bRefreshingColorBoxes = true;
+	_itow_s(GetRValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetGValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+	_itow_s(GetBValue(tanColor), text, 10);
+	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+	m_bRefreshingColorBoxes = false;
 }
 
 /***************/
@@ -1108,14 +1168,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edOutlineColorSat = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_SAT);
 		thisPtr->m_edOutlineColorVal = GetDlgItem(hwndDlg, IDC_BD_EDOUTLINECOLOR_VAL);
 
-		thisPtr->m_cbTanColor = GetDlgItem(hwndDlg,IDC_BD_CBTANCOLOR);
-		thisPtr->m_edTanColorRed	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_RED);
-		thisPtr->m_edTanColorGreen	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_GREEN);
-		thisPtr->m_edTanColorBlue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_BLUE);
-		thisPtr->m_edTanColorHue	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
-		thisPtr->m_edTanColorSat	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
-		thisPtr->m_edTanColorVal	 = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
-
 		thisPtr->m_bmBtnAdd = GetDlgItem(hwndDlg,IDC_BD_BM_BTNADD);
 		thisPtr->m_bmCbXXFile = GetDlgItem(hwndDlg,IDC_BD_BM_CBXXFILE);
 		thisPtr->m_bmCbBone = GetDlgItem(hwndDlg, IDC_BD_BM_CBBONE);
@@ -1152,10 +1204,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINRED),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREEN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUE),UDM_SETRANGE,0,MAKELPARAM(255,0));
-
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINREDTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINGREENTAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
-		SendMessage(GetDlgItem(hwndDlg,IDC_BD_SPINBLUETAN),UDM_SETRANGE,0,MAKELPARAM(255,0));
 
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMRED), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMGREEN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
@@ -1218,12 +1266,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->Refresh();
 				return TRUE;
 			}
-			else if (identifier == IDC_BD_CBTANCOLOR) {
-				BOOL visible = SendMessage(thisPtr->m_cbTanColor,BM_GETCHECK,0,0) == BST_CHECKED;
-				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
-				thisPtr->Refresh();
-				return TRUE;
-			}
 			else if(identifier == IDC_BD_BM_BTNADD) {
 				thisPtr->ApplyInput();
 				return TRUE;
@@ -1247,26 +1289,6 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
 					g_currChar.m_cardData.SetOutlineColor(RGB(red, green, blue));
-				}
-			}
-			else if (ed == thisPtr->m_edTanColorRed
-				|| ed == thisPtr->m_edTanColorGreen
-				|| ed == thisPtr->m_edTanColorBlue)
-			{
-				int newval = General::GetEditInt(ed);
-				if (newval < 0) {
-					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
-				}
-				else if (newval > 255) {
-					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
-				}
-				else {
-					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
-					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
-					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(red, green, blue));
-					using namespace ExtVars::AAEdit;
-					RedrawBodyPart(BODY_COLOR, BODYCOLOR_SKINTONE);
 				}
 			}
 			else if (ed == thisPtr->m_edSubmeshColorRed
@@ -1552,17 +1574,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	SendMessage(this->m_edOutlineColorBlue,WM_SETTEXT,0,(LPARAM)text);
 
 
-	bool bTan = g_currChar.m_cardData.HasTanColor();
-	EnableWindow(this->m_edTanColorRed, bTan);
-	EnableWindow(this->m_edTanColorGreen, bTan);
-	EnableWindow(this->m_edTanColorBlue, bTan);
-	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
-	_itow_s(GetRValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(GetGValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(GetBValue(tanColor), text, 10);
-	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 
 	TCHAR xxname[128];
 	SendMessage(m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
