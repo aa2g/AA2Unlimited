@@ -187,6 +187,7 @@ void AAUCardData::FromBuffer(char* buffer, int size) {
 			case 'OlCl':
 				m_styles[m_currCardStyle].m_bOutlineColor = true;
 				m_styles[m_currCardStyle].m_outlineColor = ReadData<DWORD>(buffer, size);
+				SetOutlineColor(m_styles[m_currCardStyle].m_outlineColor);
 				LOGPRIO(Logger::Priority::SPAM) << "found OlCl, value " << m_styles[m_currCardStyle].m_outlineColor << "\r\n";
 				break;
 			case 'TnCl':
@@ -380,9 +381,10 @@ int AAUCardData::ToBuffer(char** buffer) {
 		//bone transforms
 		DUMP_MEMBER_CONTAINER_AAUSET('BnTr', m_boneTransforms);
 		//global outline color
-		if (m_styles[i].m_bOutlineColor) {
-			DUMP_MEMBER_AAUSET('OlCl', m_outlineColor);
-		}
+		//obsoleted by SMOL
+		//if (m_styles[i].m_bOutlineColor) {
+		//	DUMP_MEMBER_AAUSET('OlCl', m_outlineColor);
+		//}
 		//tan color
 		if (m_styles[i].m_bTanColor) {
 			DUMP_MEMBER_AAUSET('TnCl', m_tanColor);

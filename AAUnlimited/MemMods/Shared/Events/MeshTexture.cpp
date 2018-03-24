@@ -637,13 +637,13 @@ void OverrideFileInject() {
 }
 
 void __stdcall OverrideOutlineColorFunc(float* colors) {
-	if (!Shared::GameState::getIsOverriding()) return;
-	if (!Shared::g_currentChar->m_cardData.HasOutlineColor()) return;
-	COLORREF color = Shared::g_currentChar->m_cardData.GetOutlineColor();
-	//colors are sequentially in rgba order in *colors
-	*colors++ = GetRValue(color)/255.0f;
-	*colors++ = GetGValue(color)/255.0f;
-	*colors++ = GetBValue(color)/255.0f;
+	//if (!Shared::GameState::getIsOverriding()) return;
+	//if (!Shared::g_currentChar->m_cardData.HasOutlineColor()) return;
+	//COLORREF color = Shared::g_currentChar->m_cardData.GetOutlineColor();
+	////colors are sequentially in rgba order in *colors
+	//*colors++ = GetRValue(color)/255.0f;
+	//*colors++ = GetGValue(color)/255.0f;
+	//*colors++ = GetBValue(color)/255.0f;
 }
 
 void __declspec(naked) OverrideOutlineColorRedirect() {

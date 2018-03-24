@@ -1161,6 +1161,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMGREEN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMBLUE), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMAT), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
+
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
 
 		return TRUE; }
@@ -1226,45 +1228,45 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->ApplyInput();
 				return TRUE;
 			}
-			break; }
+			return TRUE; }
 		case EN_CHANGE: {
 			HWND ed = (HWND)lparam;
-			if(ed == thisPtr->m_edOutlineColorBlue
+			if (ed == thisPtr->m_edOutlineColorBlue
 				|| ed == thisPtr->m_edOutlineColorGreen
-				|| ed == thisPtr->m_edOutlineColorRed) 
+				|| ed == thisPtr->m_edOutlineColorRed)
 			{
 				int newval = General::GetEditInt(ed);
 				if (newval < 0) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
 				}
 				else if (newval > 255) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
 				}
 				else {
 					int red = General::GetEditInt(thisPtr->m_edOutlineColorRed);
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
-					g_currChar.m_cardData.SetOutlineColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetOutlineColor(RGB(red, green, blue));
 				}
 			}
-			else if(ed == thisPtr->m_edTanColorRed
-				     || ed == thisPtr->m_edTanColorGreen
-					 || ed == thisPtr->m_edTanColorBlue)
+			else if (ed == thisPtr->m_edTanColorRed
+				|| ed == thisPtr->m_edTanColorGreen
+				|| ed == thisPtr->m_edTanColorBlue)
 			{
 				int newval = General::GetEditInt(ed);
 				if (newval < 0) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
 				}
 				else if (newval > 255) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
 				}
 				else {
 					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
 					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetTanColor(RGB(red, green, blue));
 					using namespace ExtVars::AAEdit;
-					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
+					RedrawBodyPart(BODY_COLOR, BODYCOLOR_SKINTONE);
 				}
 			}
 			else if (ed == thisPtr->m_edSubmeshColorRed
@@ -1285,16 +1287,51 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
 				//}
 			}
-			else {
-				//make sure its a valid float
+			else if (ed == thisPtr->m_edSubmeshColorAT) {
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
-				SendMessage(ed,WM_GETTEXT,128,(LPARAM)num);
-				float f = wcstof(num,NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
-				std::wstring str = std::to_wstring(f);
+				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
+				if (f < 0) f = 0;
+				TCHAR str[128];
+				swprintf_s(str, L"%g", f);
 				//if the value was changed, take the new one
-				if(str != num) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)str.c_str());
+				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
+				if (unequal) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
+				}
+				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+			}
+			return TRUE;
+		}
+		case EN_KILLFOCUS: {
+			HWND ed = (HWND)lparam;
+			if (ed == thisPtr->m_edSubmeshColorAT) {
+				auto selection = Edit_GetSel(ed);
+				TCHAR num[128];
+				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
+				if (f < 0) f = 0;
+				TCHAR str[128];
+				swprintf_s(str, L"%g", f);
+				//if the value was changed, take the new one
+				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
+				if (unequal) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
+				}
+				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+			}
+			else {
+				auto selection = Edit_GetSel(ed);
+				TCHAR num[128];
+				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
+				TCHAR str[128];
+				swprintf_s(str, L"%g", f);
+				//if the value was changed, take the new one
+				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
+				if (unequal) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
 				}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 			}
@@ -1319,6 +1356,24 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			break; }
 		};
 		break; }
+	case WM_NOTIFY: {
+		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		auto ncode = ((LPNMHDR)lparam)->code;
+		switch (ncode) {
+		case UDN_DELTAPOS:
+			if (wparam == IDC_BD_SPINSMAT) {
+				auto lpnmud = (LPNMUPDOWN)lparam;
+				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorAT);
+				value += lpnmud->iDelta * 0.01f;
+				TCHAR num[128];
+				auto formatted = swprintf_s(num, L"%g", value);
+				SendMessage(thisPtr->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)num);
+			}
+		}
+
+		break; }
+
 	};
 	return FALSE;
 }
@@ -1592,7 +1647,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		ExtClass::XXFile* xxlist[] = {
 			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
 			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
-			curr->m_xxBody, curr->m_xxLegs
+			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
 		};
 		TCHAR tmpBuff[256];
 		std::queue<ExtClass::Frame*> fileQueue;
@@ -1630,7 +1685,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		ExtClass::XXFile* xxlist[] = {
 			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
 			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
-			curr->m_xxBody, curr->m_xxLegs
+			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
 		};
 		TCHAR tmpBuff[512];
 		for (ExtClass::XXFile* file : xxlist) {
@@ -1641,6 +1696,9 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			if (SendMessage(m_bmCbXXFile, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a file with this name is not already present in the list
 				SendMessage(m_bmCbXXFile, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
 			}
+
+			Shared::FrameSubmeshOutlineOverride(file, false);
+			Shared::FrameSubmeshShadowOverride(file, false);
 		}
 		auto selIdx = SendMessage(m_bmCbXXFile, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)xxname);
 		if (selIdx == CB_ERR) {
@@ -1653,6 +1711,34 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	}
 
 	//list loaded materials
+	if (curr != NULL) {
+		SendMessage(m_bmCbMaterial, CB_RESETCONTENT, 0, 0);
+		ExtClass::XXFile* xxlist[] = {
+			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
+		};
+
+		for (ExtClass::XXFile* file : xxlist) {
+			if (file == NULL) continue;
+			for (int i = 0; i < file->m_materialCount; i++) {
+				TCHAR tmpBuff[512];
+				size_t conv;
+				mbstowcs_s(&conv, tmpBuff, file->m_materialArray[i].m_name, file->m_materialArray[i].m_nameLength);
+				if (SendMessage(m_bmCbMaterial, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a material with this name is not already present in the list
+					SendMessage(m_bmCbMaterial, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
+				}
+			}
+		}
+		auto selIdx = SendMessage(m_bmCbMaterial, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)materialName);
+		if (selIdx == CB_ERR) {
+			SendMessage(m_bmCbMaterial, CB_ADDSTRING, 0, (LPARAM)materialName);
+			SendMessage(m_bmCbMaterial, CB_SELECTSTRING, -1, (LPARAM)materialName);
+		}
+		else {
+			SendMessage(m_bmCbMaterial, CB_SETCURSEL, (WPARAM)materialName, 0);
+		}
+	}
 }
 
 /**********************/
