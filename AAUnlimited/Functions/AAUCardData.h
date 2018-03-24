@@ -189,7 +189,9 @@ public:
 	const DWORD									SetHasOutlineColor(bool has);
 
 	const std::vector<DWORD>					GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material);
-	const std::vector<DWORD>					SetSubmeshOulineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
+	const std::vector<DWORD>					SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
+	const std::vector<DWORD>					GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material);
+	const std::vector<DWORD>					SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
 
 	const DWORD									GetTanColor();
 	const DWORD									SetTanColor(COLORREF color);
@@ -262,6 +264,7 @@ public:
 		DWORD m_outlineColor;
 
 		std::vector<SubmeshColorRule> m_submeshOutlines;
+		std::vector<SubmeshColorRule> m_submeshShadows;
 
 		bool m_bTanColor;
 		DWORD m_tanColor;
@@ -386,7 +389,7 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring
 	return blankColor;
 }
 
-inline const std::vector<DWORD> AAUCardData::SetSubmeshOulineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color){
+inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color){
 
 	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
 	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
@@ -399,14 +402,46 @@ inline const std::vector<DWORD> AAUCardData::SetSubmeshOulineColor(std::wstring 
 	SubmeshColorRule newColor{ key, color };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
 		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) {
-			m_styles[m_currCardStyle].m_submeshOutlines[i].second = color;
-			return m_styles[m_currCardStyle].m_submeshOutlines[i].second;
+			m_styles[m_currCardStyle].m_submeshOutlines.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + i);
 		}
 	}
 	m_styles[m_currCardStyle].m_submeshOutlines.push_back(newColor);
 
 	return color;
 }
+
+inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material) {
+
+	std::vector<DWORD> blankColor{ 100, 30, 30, (DWORD)0.196078f };
+	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
+	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {
+		if (key == m_styles[m_currCardStyle].m_submeshShadows[i].first) return m_styles[m_currCardStyle].m_submeshShadows[i].second;
+	}
+
+	return blankColor;
+}
+
+inline const std::vector<DWORD> AAUCardData::SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color) {
+
+	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
+	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
+	auto newMaterialSize = material.size() % 2 == 0 ? material.size() : (material.size() + 1);
+	mesh.resize(newMeshSize);
+	frame.resize(newFrameSize);
+	material.resize(newMaterialSize);
+
+	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
+	SubmeshColorRule newColor{ key, color };
+	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {
+		if (key == m_styles[m_currCardStyle].m_submeshShadows[i].first) {
+			m_styles[m_currCardStyle].m_submeshShadows.erase(m_styles[m_currCardStyle].m_submeshShadows.begin() + i);
+		}
+	}
+	m_styles[m_currCardStyle].m_submeshShadows.push_back(newColor);
+
+	return color;
+}
+
 
 inline const DWORD AAUCardData::GetTanColor() { return m_styles[m_currCardStyle].m_tanColor; }
 inline const DWORD AAUCardData::SetTanColor(COLORREF color) { return m_styles[m_currCardStyle].m_tanColor = color; }

@@ -1360,6 +1360,10 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 	//first.first.second - frame name
 	//first.second - material name
 	//second - color
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORD;
 	if (General::StartsWith(listEntry, L"[SMOL]")) {
 		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
 		SendMessage(m_bmRbFrameMod, BM_SETCHECK, BST_UNCHECKED, 0);
@@ -1379,14 +1383,30 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
 		_itow_s(submeshOutlineColor[2], text, 10);
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
-		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(submeshOutlineColor[3]).c_str());
+		floatyDWORD.i = submeshOutlineColor[3];
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
 	}
 	else if (General::StartsWith(listEntry, L"[SMSH]")) {
 		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
 		SendMessage(m_bmRbFrameMod, BM_SETCHECK, BST_UNCHECKED, 0);
 		SendMessage(m_bmRbSMOL, BM_SETCHECK, BST_UNCHECKED, 0);
 		SendMessage(m_bmRbSMSH, BM_SETCHECK, BST_CHECKED, 0);
+		int offst = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshOutlines.size();
+		if (listboxId >= offst + g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshShadows.size()) return;
+		auto rule = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_submeshShadows[listboxId - offst];
+		SendMessage(m_bmCbXXFile, WM_SETTEXT, 0, (LPARAM)rule.first.first.first.c_str());
+		SendMessage(m_bmCbBone, WM_SETTEXT, 0, (LPARAM)rule.first.first.second.c_str());
+		SendMessage(m_bmCbMaterial, WM_SETTEXT, 0, (LPARAM)rule.first.second.c_str());
 
+		auto submeshShadowColor = rule.second;
+		_itow_s(submeshShadowColor[0], text, 10);
+		SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshShadowColor[1], text, 10);
+		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshShadowColor[2], text, 10);
+		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+		floatyDWORD.i = submeshShadowColor[3];
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
 	}
 
 	delete[] textBuffer;
@@ -1426,8 +1446,12 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		int red = General::GetEditInt(m_edSubmeshColorRed);
 		int green = General::GetEditInt(m_edSubmeshColorGreen);
 		int blue = General::GetEditInt(m_edSubmeshColorBlue);
-		float thickness = General::GetEditFloat(m_edSubmeshColorAT);
-		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, (DWORD)thickness };
+		union {
+			DWORD i;
+			float f;
+		} floatyDWORD;
+		floatyDWORD.f = General::GetEditFloat(m_edSubmeshColorAT);
+		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, floatyDWORD.i };
 		g_currChar.m_cardData.AddSubmeshRule((AAUCardData::MeshModFlag)flags, xxname, bonename, materialName, color);
 
 	}
@@ -1491,23 +1515,42 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	SendMessage(m_bmCbBone, WM_GETTEXT, 128, (LPARAM)bonename);
 	TCHAR materialName[128];
 	SendMessage(m_bmCbMaterial, WM_GETTEXT, 128, (LPARAM)materialName);
-	bool bSubmesh = SendMessage(m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED || SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED;
+	bool bSubmeshOutline = SendMessage(m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED;
+	bool bSubmeshShadow = SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED;
 	//EnableWindow(this->m_edSubmeshColorRed, bSubmesh);
 	//EnableWindow(this->m_edSubmeshColorGreen, bSubmesh);
 	//EnableWindow(this->m_edSubmeshColorBlue, bSubmesh);
-	auto submeshOutlineColor = g_currChar.m_cardData.GetSubmeshOutlineColor(xxname, bonename, materialName);
-	_itow_s(submeshOutlineColor[0], text, 10);
-	SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(submeshOutlineColor[1], text, 10);
-	SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
-	_itow_s(submeshOutlineColor[2], text, 10);
-	SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
-	SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(submeshOutlineColor[3]).c_str());
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORD;
+	if (bSubmeshOutline) {
+		auto submeshOutlineColor = g_currChar.m_cardData.GetSubmeshOutlineColor(xxname, bonename, materialName);
+		_itow_s(submeshOutlineColor[0], text, 10);
+		SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshOutlineColor[1], text, 10);
+		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshOutlineColor[2], text, 10);
+		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+		floatyDWORD.i = submeshOutlineColor[3];
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+	}
+	else if (bSubmeshShadow) {
+		auto submeshShadowColor = g_currChar.m_cardData.GetSubmeshShadowColor(xxname, bonename, materialName);
+		_itow_s(submeshShadowColor[0], text, 10);
+		SendMessage(this->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshShadowColor[1], text, 10);
+		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+		_itow_s(submeshShadowColor[2], text, 10);
+		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+		floatyDWORD.i = submeshShadowColor[3];
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+	}
 	
 	//submesh mods listbox
 	SendMessage(this->m_bmSMList, LB_RESETCONTENT, 0, 0);
-	const auto& submeshList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshOutlines;
-	for (size_t i = 0; i < submeshList.size(); i++) {
+	const auto& submeshOutlinesList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshOutlines;
+	for (size_t i = 0; i < submeshOutlinesList.size(); i++) {
 		//first.first.first - file name
 		//first.first.second - frame name
 		//first.second - material name
@@ -1515,8 +1558,20 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMOL");
 		listEntry += TEXT("]");
-		listEntry += submeshList[i].first.first.first + TEXT("|") + submeshList[i].first.first.second + TEXT("|") + submeshList[i].first.second + TEXT("]");
-		SendMessage(this->m_bmSMList, LB_INSERTSTRING, i, (LPARAM)listEntry.c_str());
+		listEntry += submeshOutlinesList[i].first.first.first + TEXT("|") + submeshOutlinesList[i].first.first.second + TEXT("|") + submeshOutlinesList[i].first.second;
+		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
+	}
+	const auto& submeshShadowsList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshShadows;
+	for (size_t i = 0; i < submeshShadowsList.size(); i++) {
+		//first.first.first - file name
+		//first.first.second - frame name
+		//first.second - material name
+		//second - color
+		std::wstring listEntry(TEXT("["));
+		listEntry += TEXT("SMSH");
+		listEntry += TEXT("]");
+		listEntry += submeshShadowsList[i].first.first.first + TEXT("|") + submeshShadowsList[i].first.first.second + TEXT("|") + submeshShadowsList[i].first.second;
+		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 
 	//frame mods listbox
@@ -1527,7 +1582,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		if (list[i].first.first & AAUCardData::MODIFY_BONE) listEntry += TEXT("BONE");
 		else listEntry += TEXT("FRAME");
 		listEntry += TEXT("]");
-		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second + TEXT("]");
+		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second;
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 	//list possible bones
@@ -1595,8 +1650,9 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		else {
 			SendMessage(m_bmCbXXFile, CB_SETCURSEL, (WPARAM)xxname, 0);
 		}
-
 	}
+
+	//list loaded materials
 }
 
 /**********************/

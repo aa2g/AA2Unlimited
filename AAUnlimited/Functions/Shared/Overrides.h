@@ -43,6 +43,7 @@ namespace Shared {
 	void XXBoneModification(ExtClass::Frame* boneParent, bool backup);
 	void XXFileModification(ExtClass::XXFile* file, bool backup);
 	void FrameSubmeshOutlineOverride(ExtClass::XXFile* xxFile, bool backup);
+	void FrameSubmeshShadowOverride(ExtClass::XXFile* xxFile, bool backup);
 
 	//this data is used in aaedit only to make sliders instantly visible. the matrix is an SRT matrix
 	struct Loc_FrameSaveDataV1 {
