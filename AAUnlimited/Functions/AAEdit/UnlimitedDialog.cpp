@@ -1228,45 +1228,45 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				thisPtr->ApplyInput();
 				return TRUE;
 			}
-			break; }
+			return TRUE; }
 		case EN_CHANGE: {
 			HWND ed = (HWND)lparam;
-			if(ed == thisPtr->m_edOutlineColorBlue
+			if (ed == thisPtr->m_edOutlineColorBlue
 				|| ed == thisPtr->m_edOutlineColorGreen
-				|| ed == thisPtr->m_edOutlineColorRed) 
+				|| ed == thisPtr->m_edOutlineColorRed)
 			{
 				int newval = General::GetEditInt(ed);
 				if (newval < 0) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
 				}
 				else if (newval > 255) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
 				}
 				else {
 					int red = General::GetEditInt(thisPtr->m_edOutlineColorRed);
 					int green = General::GetEditInt(thisPtr->m_edOutlineColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
-					g_currChar.m_cardData.SetOutlineColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetOutlineColor(RGB(red, green, blue));
 				}
 			}
-			else if(ed == thisPtr->m_edTanColorRed
-				     || ed == thisPtr->m_edTanColorGreen
-					 || ed == thisPtr->m_edTanColorBlue)
+			else if (ed == thisPtr->m_edTanColorRed
+				|| ed == thisPtr->m_edTanColorGreen
+				|| ed == thisPtr->m_edTanColorBlue)
 			{
 				int newval = General::GetEditInt(ed);
 				if (newval < 0) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("0"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
 				}
 				else if (newval > 255) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)TEXT("255"));
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("255"));
 				}
 				else {
 					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
 					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					g_currChar.m_cardData.SetTanColor(RGB(red,green,blue));
+					g_currChar.m_cardData.SetTanColor(RGB(red, green, blue));
 					using namespace ExtVars::AAEdit;
-					RedrawBodyPart(BODY_COLOR,BODYCOLOR_SKINTONE);
+					RedrawBodyPart(BODY_COLOR, BODYCOLOR_SKINTONE);
 				}
 			}
 			else if (ed == thisPtr->m_edSubmeshColorRed
@@ -1287,7 +1287,11 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
 				//}
 			}
-			else if (ed == thisPtr->m_edSubmeshColorAT) {
+			return TRUE;
+		}
+		case EN_KILLFOCUS: {
+			HWND ed = (HWND)lparam;
+			if (ed == thisPtr->m_edSubmeshColorAT) {
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
 				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
@@ -1303,15 +1307,16 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 			}
 			else {
-				//make sure its a valid float
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
-				SendMessage(ed,WM_GETTEXT,128,(LPARAM)num);
-				float f = wcstof(num,NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
-				std::wstring str = std::to_wstring(f);
+				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
+				float f = wcstof(num, NULL); //returns 0 on errornous string, so invalid stuff will just turn to a 0
+				TCHAR str[128];
+				swprintf_s(str, L"%g", f);
 				//if the value was changed, take the new one
-				if(str != num) {
-					SendMessage(ed,WM_SETTEXT,0,(LPARAM)str.c_str());
+				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
+				if (unequal) {
+					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
 				}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 			}
