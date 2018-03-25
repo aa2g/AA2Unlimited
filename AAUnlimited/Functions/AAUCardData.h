@@ -398,11 +398,19 @@ inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_styles[m
 
 inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material){
 
+	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
+	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
+	auto newMaterialSize = material.size() % 2 == 0 ? material.size() : (material.size() + 1);
+	mesh.resize(newMeshSize);
+	frame.resize(newFrameSize);
+	material.resize(newMaterialSize);
+
 	union {
 		DWORD i;
 		float f;
 	} floatyDWORD;
 	floatyDWORD.f = 1;
+
 	std::vector<DWORD> blankColor{ 0, 0, 0, floatyDWORD.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ {mesh, frame}, material };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
@@ -434,7 +442,14 @@ inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring
 }
 
 inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material) {
-
+	
+	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
+	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
+	auto newMaterialSize = material.size() % 2 == 0 ? material.size() : (material.size() + 1);
+	mesh.resize(newMeshSize);
+	frame.resize(newFrameSize);
+	material.resize(newMaterialSize);
+		
 	union {
 		DWORD i;
 		float f;
@@ -450,6 +465,7 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring 
 	floatyDWORDAT.f = 0.196078f;
 	floatyDWORDSH1.f = 0.6;
 	floatyDWORDSH2.f = 0.0015;
+
 	std::vector<DWORD> blankColor{ 100, 30, 30, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
 	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {

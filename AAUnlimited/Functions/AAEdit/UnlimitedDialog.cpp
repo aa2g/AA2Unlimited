@@ -1414,7 +1414,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_BD_SPINSMSH2: {
 				auto lpnmud = (LPNMUPDOWN)lparam;
 				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorSH2);
-				value += lpnmud->iDelta * 0.01f;
+				value += lpnmud->iDelta * 0.0001f;
 				TCHAR num[128];
 				auto formatted = swprintf_s(num, L"%g", value);
 				SendMessage(thisPtr->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)num);
@@ -1677,11 +1677,12 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		//second - color
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMOL");
-		listEntry += TEXT("]");
-		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_last_not_of(L"\0"));
-		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_last_not_of(L"\0"));
-		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_last_not_of(L"\0"));
-		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
+		listEntry += TEXT("] File: ");
+		wchar_t terminator = '\0';
+		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_first_of(terminator));
+		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_first_of(terminator));
+		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_first_of(terminator));
+		listEntry += clnFilename + TEXT("| Frame: ") + clnFramename + TEXT("| Material:") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 	const auto& submeshShadowsList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshShadows;
@@ -1692,11 +1693,12 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		//second - color
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMSH");
-		listEntry += TEXT("]");
-		auto clnFilename = submeshShadowsList[i].first.first.first.substr(0, submeshShadowsList[i].first.first.first.find_last_not_of(L"\0"));
-		auto clnFramename = submeshShadowsList[i].first.first.second.substr(0, submeshShadowsList[i].first.first.second.find_last_not_of(L"\0"));
-		auto clnMaterialname = submeshShadowsList[i].first.second.substr(0, submeshShadowsList[i].first.second.find_last_not_of(L"\0"));
-		listEntry += clnFilename + TEXT("|") + clnFramename + TEXT("|") + clnMaterialname;
+		listEntry += TEXT("] File: ");
+		wchar_t terminator = '\0';
+		auto clnFilename = submeshShadowsList[i].first.first.first.substr(0, submeshShadowsList[i].first.first.first.find_first_of(terminator));
+		auto clnFramename = submeshShadowsList[i].first.first.second.substr(0, submeshShadowsList[i].first.first.second.find_first_of(terminator));
+		auto clnMaterialname = submeshShadowsList[i].first.second.substr(0, submeshShadowsList[i].first.second.find_first_of(terminator));
+		listEntry += clnFilename + TEXT("| Frame: ") + clnFramename + TEXT("| Material: ") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 
@@ -1707,8 +1709,8 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		if (list[i].first.first & AAUCardData::MODIFY_BONE) listEntry += TEXT("BONE");
 		else listEntry += TEXT("FRAME");
-		listEntry += TEXT("]");
-		listEntry += list[i].first.second.first + TEXT("|") + list[i].first.second.second;
+		listEntry += TEXT("] File: ");
+		listEntry += list[i].first.second.first + TEXT("| Frame: ") + list[i].first.second.second;
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 	//list possible bones
@@ -1777,7 +1779,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			SendMessage(m_bmCbXXFile, CB_SELECTSTRING, -1, (LPARAM)xxname);
 		}
 		else {
-			SendMessage(m_bmCbXXFile, CB_SETCURSEL, (WPARAM)xxname, 0);
+			SendMessage(m_bmCbXXFile, CB_SETCURSEL, (WPARAM)selIdx, 0);
 		}
 	}
 
@@ -1807,7 +1809,7 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			SendMessage(m_bmCbMaterial, CB_SELECTSTRING, -1, (LPARAM)materialName);
 		}
 		else {
-			SendMessage(m_bmCbMaterial, CB_SETCURSEL, (WPARAM)materialName, 0);
+			SendMessage(m_bmCbMaterial, CB_SETCURSEL, (WPARAM)selIdx, 0);
 		}
 	}
 }
