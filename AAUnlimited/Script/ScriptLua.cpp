@@ -8,6 +8,7 @@
 
 Lua *g_Lua_p;
 using namespace General;
+Shared::Triggers::KeyPressData keyPressData;
 
 // direct assembly code callback, stdcall/thiscall/cdecl
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
@@ -362,6 +363,12 @@ void Lua::bindLua() {
 
 		if (mstr) {
 			LUA_EVENT(mstr, m->wParam, m->lParam, (DWORD)m->hwnd, m->pt.x, m->pt.y);
+			if (mstr == "keydown") {
+				if (General::IsAAPlay) {
+					keyPressData.keyVal = m->wParam;
+					Shared::Triggers::ThrowEvent(&keyPressData);
+				}
+			}
 			if (m->wParam == -1)
 				return true;
 		}

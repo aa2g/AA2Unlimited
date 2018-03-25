@@ -1,7 +1,7 @@
 local _M = {}
 
 local facetoggles = { tears = "00_O_namida", dimeyes = "00_O_mehi", mouthjuice = "A00_O_kutisiru", tonguejuice = "A00_O_sitasiru" }
-local facekeys = { eye = "m_eye", eyeopen = "m_eyeOpenMax", eyebrow = "m_eyebrow", mouth = "m_mouth", mouthopen = "m_mouthOpenMin", eyetracking = "m_eyeTracking" }
+local facekeys = { eye = { "m_eye" }, eyeopen = { "m_eyeOpenMax", "m_eyeOpenMin" }, eyebrow = { "m_eyebrow" }, mouth = { "m_mouth" }, mouthopen = { "m_mouthOpenMin", "m_mouthOpenMax" }, eyetracking = { "m_eyeTracking" } }
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothtype = "m_currClothes", clothstate = "m_clothState", materialslot = "m_materialSlot" }
 local structfuncs = { destroy = "Destroy", unload = "Unload", update = "Update", spawn = "Spawn" }
@@ -38,7 +38,7 @@ function _M.wrap(entity, entmgr)
 			if cached ~= nil then return cached end
 			if ischaracter then
 				if facekeys[k] then
-					return struct.m_xxFace[facekeys[k]]
+					return struct.m_xxFace[facekeys[k][1]]
 				end
 				if skelkeys[k] then
 					return struct.m_xxSkeleton[skelkeys[k]]
@@ -69,7 +69,9 @@ function _M.wrap(entity, entmgr)
 						local offset = eyebrow % 7
 						v = eyebrow - offset + v % 7
 					end
-					face[facekeys[k]] = v
+					for _,prop in ipairs(facekeys[k]) do
+						face[prop] = v
+					end
 					-- character:update_face()
 				elseif facetoggles[k] then
 					rawset(cache, k, v)

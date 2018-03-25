@@ -422,7 +422,12 @@ namespace Shared {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
-			AAPlay::g_characters[seat].m_char->Update(state, 0);
+			if (eventData->GetId() == HI_POLY_INIT && eventData->card == seat) {
+				*((HiPolyInitData*)eventData)->clothState = state;
+			}
+			else {
+				AAPlay::g_characters[seat].m_char->Update(state, 0);
+			}
 		}
 
 		//int seat, int personality

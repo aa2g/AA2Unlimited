@@ -183,6 +183,7 @@ namespace Shared {
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
 			Value GetCardLocked(std::vector<Value>& params);
 			Value GetMasturbating(std::vector<Value>& params);
+			Value GetCurrentConvo(std::vector<Value>& params);
 			Value GetCherryStatus(std::vector<Value>& params);
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
@@ -211,6 +212,7 @@ namespace Shared {
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)
 			Value GetNpcStatus(std::vector<Value>& params); //int(int)
+			Value GetTarget(std::vector<Value>& params);
 			Value PCTalkAbout(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
@@ -350,7 +352,7 @@ namespace Shared {
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);
-
+			Value GetKeyPressVal(std::vector<Value>& params);
 		private:
 			Value EvaluateExpression(ParameterisedExpression& expr);
 			bool ExecuteAction(ParameterisedAction& action);

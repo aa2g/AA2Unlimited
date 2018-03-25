@@ -16,7 +16,12 @@ namespace Shared {
 		 */
 
 		Value Thread::GetTriggeringCard(std::vector<Value>&) {
-			return this->eventData->card;
+			switch (this->eventData->GetId()) {
+			case KEY_PRESS:
+				return Shared::GameState::getPlayerCharacter()->m_seat;
+			default:
+				return this->eventData->card;
+			}
 		}
 
 		//int ()
@@ -581,6 +586,16 @@ namespace Shared {
 
 			return Value((int)cardInst->m_char->m_moreData1->m_activity->m_isMasturbating);
 		}
+
+		Value Thread::GetCurrentConvo(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value((int)cardInst->m_char->m_moreData1->m_activity->m_currConversationId);
+		}
+
 		//int(int)
 
 		Value Thread::GetCherryStatus(std::vector<Value>& params)
@@ -1065,6 +1080,30 @@ namespace Shared {
 			else
 			{
 				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_status);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetTarget(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			int default_return = -1;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				for (int character = 0; character < 25; character = character + 1) {
+					CharInstData* inst2 = &AAPlay::g_characters[character];
+					if (inst2->IsValid()) {
+						if (inst2->m_char->m_npcData == inst->m_char->m_npcData->m_target) {
+							default_return = inst2->m_char->m_seat;
+						}
+					}
+				}
+				return Value(default_return);
 			}
 		}
 
@@ -1756,6 +1795,16 @@ namespace Shared {
 		}
 
 		//int()
+		Value Thread::GetKeyPressVal(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case KEY_PRESS:
+				return ((KeyPressData*)eventData)->keyVal;
+			default:
+				return -1;
+			}
+		}
+
+		//int()
 		Value Thread::GetNpcActionId(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
 			case NPC_WANT_ACTION_NOTARGET:
@@ -1785,6 +1834,7 @@ namespace Shared {
 				return 0;
 			}
 		}
+
 
 
 		//int()
@@ -2595,6 +2645,24 @@ namespace Shared {
 					"using the Set Npc Response Answer Action"),
 					{}, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswer
+				},
+				{
+					102, EXPRCAT_GENERAL,
+					TEXT("Key pressed"), TEXT("KeyPress"), TEXT("Returns which key was pressed."),
+					{}, (TYPE_INT),
+					&Thread::GetKeyPressVal
+				},
+				{
+					103, EXPRCAT_GENERAL,
+					TEXT("Get Target"), TEXT("%p ::GetTarget"), TEXT("Returns the seat of the card that is the current target of the specified card."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetTarget
+				},
+				{
+					104, EXPRCAT_CHARPROP,
+					TEXT("Current Conversation"), TEXT("%p ::CurrConvo"), TEXT("Get the conversation that some character is currently in."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCurrentConvo
 				},
 
 			},

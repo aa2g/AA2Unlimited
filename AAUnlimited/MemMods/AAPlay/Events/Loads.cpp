@@ -26,7 +26,7 @@ static DWORD OrigDespawnMale, OrigDespawnFemale;
 static DWORD OrigLoadXAMale, OrigLoadXAFemale;
 
 bool loc_loadingCharacter = false;
-void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, BYTE partial) {
+void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth, BYTE partial) {
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
@@ -37,6 +37,8 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, BYTE cloth, 
 	}
 	//throw high poly event
 	HiPolyInitData data;
+	data.character = loadCharacter;
+	data.clothState = &cloth;
 	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
 	loc_hiPolyLoaded = data.card;
 	ThrowEvent(&data);
