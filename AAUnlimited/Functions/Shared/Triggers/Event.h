@@ -220,6 +220,8 @@ namespace Triggers {
 	EDC_DECLARE(HPositionData, HPOSITION_CHANGE)
 
 	int position;
+	int actor0;
+	int actor1;
 
 	EDC_END
 

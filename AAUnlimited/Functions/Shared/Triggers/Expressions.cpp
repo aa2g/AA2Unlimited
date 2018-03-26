@@ -1096,6 +1096,22 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetHeight(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_charData->m_figure.height);
+			}
+		}
+
+
+		//int(int)
 		Value Thread::GetTarget(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			if (ExpressionSeatInvalid(seat)) return Value(-1);
@@ -1916,6 +1932,13 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
+			case HPOSITION_CHANGE:
+				if (params[0].iVal == 0){
+					return (int)((HPositionData*)eventData)->actor0;
+				}
+				else {
+					return (int)((HPositionData*)eventData)->actor1;
+				}
 			default:
 				return 0;
 			}
@@ -2681,6 +2704,12 @@ namespace Shared {
 					TEXT("H Position"), TEXT("HPosition"), TEXT("The index of the current H position of PC."),
 					{}, (TYPE_INT),
 					&Thread::GetHPosition
+				},
+				{
+					106, EXPRCAT_CHARPROP,
+					TEXT("Get Height"), TEXT("%p ::GetHeight"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetHeight
 				},
 			},
 
