@@ -151,6 +151,7 @@ namespace Shared {
 			// Expressions
 
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
+			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
@@ -212,6 +213,7 @@ namespace Shared {
 			Value GetAnalSexExperience(std::vector<Value>& params); //bool(int)
 			Value FindSeat(std::vector<Value>& params); //int(string)
 			Value GetNpcStatus(std::vector<Value>& params); //int(int)
+			Value GetHeight(std::vector<Value>& params);
 			Value GetTarget(std::vector<Value>& params);
 			Value PCTalkAbout(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)

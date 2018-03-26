@@ -42,11 +42,11 @@ namespace Shared {
 		void setInterrupt(DWORD value);
 		DWORD getInterrupt();
 
+		DWORD getHPosition();
+		void setHPosition(DWORD value);
+
 		void SetRoomNumber(int seat, int room);
 		int GetRoomNumber(int seat);
-
-		void setInterrupt(int value);
-		DWORD getInterrupt();
 
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);

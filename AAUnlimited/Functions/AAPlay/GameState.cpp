@@ -23,6 +23,7 @@ struct GameStateStruct {
 			roomNumber[i] = -1;
 		}
 		h_ai = false;
+		m_HPosition = -1;
 	}
 
 	//Game state indicators
@@ -41,6 +42,7 @@ struct GameStateStruct {
 	int roomNumber[25];					//Current room ID
 	DWORD interrupt;					//Disabled interruptions
 	bool h_ai;							//Disable or enable h-ai
+	DWORD m_HPosition;					//H position ID
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -180,6 +182,15 @@ int Shared::GameState::GetRoomNumber(int seat) {
 	return loc_gameState.roomNumber[seat];
 }
 
+DWORD Shared::GameState::getHPosition()
+{
+	return loc_gameState.m_HPosition;
+}
+
+void Shared::GameState::setHPosition(DWORD value)
+{
+	loc_gameState.m_HPosition = value;
+}
 
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
