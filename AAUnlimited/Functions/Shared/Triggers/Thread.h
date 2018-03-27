@@ -151,6 +151,8 @@ namespace Shared {
 			// Expressions
 
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
+			Value GetDominantInH(std::vector<Value>&);
+			Value GetSubmissiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()

@@ -26,6 +26,24 @@ namespace Shared {
 			}
 		}
 
+		Value Thread::GetDominantInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return (int)((HPositionData*)eventData)->actor0;
+			default:
+				return -1;
+			}
+		}
+
+		Value Thread::GetSubmissiveInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return (int)((HPositionData*)eventData)->actor1;
+			default:
+				return -1;
+			}
+		}
+
 		//int ()
 		Value Thread::GetHPosition(std::vector<Value>&) {
 			switch (this->eventData->GetId()) {
@@ -1933,12 +1951,9 @@ namespace Shared {
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
 			case HPOSITION_CHANGE:
-				if (params[0].iVal == 0){
-					return (int)((HPositionData*)eventData)->actor0;
-				}
-				else {
-					return (int)((HPositionData*)eventData)->actor1;
-				}
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 			default:
 				return 0;
 			}
@@ -2710,6 +2725,18 @@ namespace Shared {
 					TEXT("Get Height"), TEXT("%p ::GetHeight"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetHeight
+				},
+				{
+					107, EXPRCAT_EVENT,
+					TEXT("Dominant actor"), TEXT("Dominant"), TEXT("Get the dominant actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetDominantInH
+				},
+				{
+					108, EXPRCAT_EVENT,
+					TEXT("Submissive actor"), TEXT("Submissive"), TEXT("Get the submissive actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetSubmissiveInH
 				},
 			},
 

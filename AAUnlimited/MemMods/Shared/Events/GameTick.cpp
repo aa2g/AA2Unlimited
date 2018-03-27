@@ -79,16 +79,6 @@ void hPositionChange() {
 	if (hPosition != nullptr) {
 		if (*hPosition != hPositionValue) {
 			Shared::GameState::setHPosition(*hPosition);
-			auto pc = Shared::GameState::getPlayerCharacter();
-			CharInstData* inst1 = &AAPlay::g_characters[pc->m_seat];
-			for (int character = 0; character < 25; character = character + 1) {
-				CharInstData* inst2 = &AAPlay::g_characters[character];
-				if (inst2->IsValid()) {
-					if (inst2->m_char->m_npcData == pc->m_npcData->m_target) {
-						inst1 = inst2;
-					}
-				}
-			}
 
 			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);

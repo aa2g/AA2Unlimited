@@ -27,6 +27,9 @@ namespace Shared {
 		void setH_AI(bool value);
 		bool getH_AI();
 
+		void setIsInH(bool value);
+		bool getIsInH();
+
 		void setVoyeur(ExtClass::CharacterStruct * voyeur);
 		ExtClass::CharacterStruct * getVoyeur();
 

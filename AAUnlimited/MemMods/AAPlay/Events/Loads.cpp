@@ -30,10 +30,23 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
+
+
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	//Add the character to the conversation list
 	if (Shared::GameState::getIsPcConversation()) {
 		Shared::GameState::addConversationCharacter(loadCharacter);
+	}	
+
+	//Add the character to conversation list in h
+	if (General::IsAAPlay) {
+		const DWORD offset4[]{ 0x3761CC, 0x28, 0x28 };
+		BYTE* HSceneTrigger = (BYTE*)ExtVars::ApplyRule(offset4);
+
+		if (*HSceneTrigger == 1) {
+			Shared::GameState::addConversationCharacter(loadCharacter);
+			Shared::GameState::setIsInH(true);
+		}
 	}
 	//throw high poly event
 	HiPolyInitData data;
@@ -133,6 +146,16 @@ DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWOR
 
 DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
+
+	if (General::IsAAPlay) {
+		const DWORD offset4[]{ 0x3761CC, 0x28, 0x28 };
+		BYTE* HSceneTrigger = (BYTE*)ExtVars::ApplyRule(offset4);
+
+		if (*HSceneTrigger == 0 && Shared::GameState::getIsInH()) {
+			Shared::GameState::clearConversationCharacter(-1);
+			Shared::GameState::setIsInH(false);
+		}
+	}
 
 	if (!loc_loadingCharacter) {
 		LUA_EVENT_NORET("char_despawn", loadCharacter);
