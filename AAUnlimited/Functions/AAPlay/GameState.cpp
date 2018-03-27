@@ -24,7 +24,7 @@ struct GameStateStruct {
 		}
 		h_ai = false;
 		m_HPosition = -1;
-		is_in_h = 0;
+		is_in_h = false;
 	}
 
 	//Game state indicators
@@ -44,7 +44,7 @@ struct GameStateStruct {
 	DWORD interrupt;					//Disabled interruptions
 	bool h_ai;							//Disable or enable h-ai
 	DWORD m_HPosition;					//H position ID
-	DWORD is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
+	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
