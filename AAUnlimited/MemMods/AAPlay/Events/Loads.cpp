@@ -50,11 +50,11 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth
 	}
 	//throw high poly event
 	HiPolyInitData data;
-data.character = loadCharacter;
-data.clothState = &cloth;
-data.card = AAPlay::GetSeatFromStruct(loadCharacter);
-loc_hiPolyLoaded = data.card;
-ThrowEvent(&data);
+	data.character = loadCharacter;
+	data.clothState = &cloth;
+	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+	loc_hiPolyLoaded = data.card;
+	ThrowEvent(&data);
 }
 
 void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {

@@ -75,8 +75,7 @@ namespace Shared {
 		//bool (int)
 		Value Thread::PoseExists(std::vector<Value>& params) {
 			
-			auto fileName = General::AAUPath + L"poser\\poses\\triggers\\" + *(params[0].strVal);
-			LOGPRIO(Logger::Priority::WARN) << "[Trigger] maijm " << fileName << "\r\n";
+			auto fileName = General::AAUPath + L"poser\\poses\\" + *(params[0].strVal);
 
 			std::ifstream infile(fileName);
 			return infile.good();
@@ -3016,7 +3015,7 @@ namespace Shared {
 				},
 				{
 					43, EXPRCAT_GENERAL,
-					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a pose exists."),
+					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a .pose exists."),
 					{ TYPE_STRING }, (TYPE_BOOL),
 					&Thread::PoseExists
 				},
