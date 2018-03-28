@@ -447,13 +447,9 @@ namespace Poser {
 				}
 			}
 			root->EnumTreeLevelOrder([&prop, &slider, &modFrame](ExtClass::Frame* frame) {
-				bool isProp = false;
-				if (frame->m_nSubmeshes) {
-					isProp = true;
-				}
-				if (isProp) {
+				auto MakeSlider = [&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 					// Search for this frame slider if it exists
-					slider = prop->GetSlider(frame->m_name);
+					SliderInfo *slider = prop->GetSlider(frame->m_name);
 					// If it doesn't exist we create a new one and claim it for this model source
 					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 					if (!slider) {
@@ -462,13 +458,28 @@ namespace Poser {
 						slider->Reset();
 						slider->source = ExtClass::CharacterStruct::SKELETON;
 						prop->m_sliders.emplace(frame->m_name, slider);
+
+						FrameMod(&frame, &modFrame);
+
+						slider->frame = modFrame;
+						slider->Apply();
 					}
 
-					FrameMod(&frame, &modFrame);
-
-					slider->frame = modFrame;
-					slider->Apply();
 					slider = nullptr;
+				};
+
+				if (frame->m_nBones) {
+					for (int i = 0; i < frame->m_nBones; ++i) {
+						ExtClass::Bone* bone = &frame->m_bones[i];
+						ExtClass::Frame* boneFrame = bone->GetFrame();
+						MakeSlider(boneFrame);
+						//if (strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
+							bone->SetFrame(boneFrame->m_children);
+						//}
+					}
+				}
+				else if (frame->m_nSubmeshes) {
+					MakeSlider(frame);
 				}
 				return true;
 			});

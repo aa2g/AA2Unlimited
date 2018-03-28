@@ -94,7 +94,7 @@ local categorylist = lists.listbox { }
 local bonelist = lists.listbox {}
 
 local propbonefilter = lists.listfilter()
-local propbonelist = lists.listbox {}
+local propbonelist = lists.listbox { sort = "yes" }
 
 local function showframe(frame, show)
 	show = show and 0 or 2

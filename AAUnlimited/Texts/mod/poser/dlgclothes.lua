@@ -52,7 +52,13 @@ local selectlegs = function(index)
 	local legsbaseframe = char.struct.m_xxLegs:FindBone("A00_null_kutu") or char.struct.m_xxLegs:FindBone("S00_null_kutu")
 	local legcount = legsbaseframe.m_nChildren
 	for i = 1, legcount, 1 do
-		legsbaseframe:m_children(i - 1).m_renderFlag = i == index and 0 or 2
+		local frame = legsbaseframe:m_children(i - 1)
+		if i == index then
+			unhidemeshes(frame)
+			frame.m_renderFlag = 0
+		else
+			frame.m_renderFlag = 2
+		end
 	end
 end
 
