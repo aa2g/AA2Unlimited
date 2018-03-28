@@ -409,7 +409,7 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring
 		DWORD i;
 		float f;
 	} floatyDWORD;
-	floatyDWORD.f = 1;
+	floatyDWORD.f = 0.01;
 
 	std::vector<DWORD> blankColor{ 0, 0, 0, floatyDWORD.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ {mesh, frame}, material };

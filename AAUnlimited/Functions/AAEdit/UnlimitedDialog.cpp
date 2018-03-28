@@ -896,7 +896,7 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 					int red = General::GetEditInt(thisPtr->m_edTanColorRed);
 					int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
-					auto color = RGB(red, green, blue);	//WHY
+					auto color = RGB(red, green, blue);
 					g_currChar.m_cardData.SetTanColor(color);
 					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_SKINTONE);
 				}
@@ -969,7 +969,9 @@ void UnlimitedDialog::TSDialog::Refresh() {
 	EnableWindow(this->m_edTanColorGreen, bTan);
 	EnableWindow(this->m_edTanColorBlue, bTan);
 	COLORREF tanColor = g_currChar.m_cardData.GetTanColor();
+	BOOL visible = g_currChar.m_cardData.HasTanColor();
 	m_bRefreshingColorBoxes = true;
+	SendMessage(this->m_cbTanColor, BM_SETCHECK, visible ? BST_CHECKED : BST_UNCHECKED, 0);
 	_itow_s(GetRValue(tanColor), text, 10);
 	SendMessage(this->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
 	_itow_s(GetGValue(tanColor), text, 10);
@@ -1326,9 +1328,10 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				swprintf_s(str, L"%g", f);
 				//if the value was changed, take the new one
 				int unequal = strcmp(General::CastToString(str).c_str(), General::CastToString(num).c_str());
-				if (unequal) {
-					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
-				}
+				//and do nothing with all of it
+				//if (unequal) {
+				//	SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
+				//}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 			}
 			return TRUE;
@@ -1398,7 +1401,10 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_BD_SPINSMAT: {
 				auto lpnmud = (LPNMUPDOWN)lparam;
 				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorAT);
-				value += lpnmud->iDelta * 0.01f;
+				float tick = SendMessage(thisPtr->m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED ? 0.0001f : 0.01f;
+				value += lpnmud->iDelta * tick;
+				if (value < 0) value = 0;
+				if (value > 0.01 && SendMessage(thisPtr->m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED) value = 0.01f;
 				TCHAR num[128];
 				auto formatted = swprintf_s(num, L"%g", value);
 				SendMessage(thisPtr->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)num);
@@ -1406,7 +1412,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_BD_SPINSMSH1: {
 				auto lpnmud = (LPNMUPDOWN)lparam;
 				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorSH1);
-				value += lpnmud->iDelta * 0.01f;
+				float tick = SendMessage(thisPtr->m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED ? 0.01f : 0.01f;
+				value += lpnmud->iDelta * tick;
+				if (value < 0) value = 0;
 				TCHAR num[128];
 				auto formatted = swprintf_s(num, L"%g", value);
 				SendMessage(thisPtr->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)num);
@@ -1414,7 +1422,9 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_BD_SPINSMSH2: {
 				auto lpnmud = (LPNMUPDOWN)lparam;
 				float value = General::GetEditFloat(thisPtr->m_edSubmeshColorSH2);
-				value += lpnmud->iDelta * 0.0001f;
+				float tick = SendMessage(thisPtr->m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED ? 0.0001f : 0.0001f;
+				value += lpnmud->iDelta * tick;
+				if (value < 0) value = 0;
 				TCHAR num[128];
 				auto formatted = swprintf_s(num, L"%g", value);
 				SendMessage(thisPtr->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)num);
@@ -1489,7 +1499,8 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		_itow_s(submeshOutlineColor[2], text, 10);
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshOutlineColor[3];
-		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
 	}
 	else if (General::StartsWith(listEntry, L"[SMSH]")) {
 		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
@@ -1519,11 +1530,14 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		_itow_s(submeshShadowColor[2], text, 10);
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[3];
-		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[4];
-		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[5];
-		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)text);
 	}
 
 	delete[] textBuffer;
@@ -1649,7 +1663,8 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		_itow_s(submeshOutlineColor[2], text, 10);
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshOutlineColor[3];
-		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
 	}
 	else if (bSubmeshShadow) {
 		auto submeshShadowColor = g_currChar.m_cardData.GetSubmeshShadowColor(xxname, bonename, materialName);
@@ -1659,12 +1674,16 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		SendMessage(this->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
 		_itow_s(submeshShadowColor[2], text, 10);
 		SendMessage(this->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+		
 		floatyDWORD.i = submeshShadowColor[3];
-		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[4];
-		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorSH1, WM_SETTEXT, 0, (LPARAM)text);
 		floatyDWORD.i = submeshShadowColor[5];
-		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)std::to_wstring(floatyDWORD.f).c_str());
+		swprintf_s(text, L"%g", floatyDWORD.f);
+		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)text);
 	}
 	
 	//submesh mods listbox
@@ -1677,12 +1696,12 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		//second - color
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMOL");
-		listEntry += TEXT("] File: ");
+		listEntry += TEXT("] Fi: ");
 		wchar_t terminator = '\0';
 		auto clnFilename = submeshOutlinesList[i].first.first.first.substr(0, submeshOutlinesList[i].first.first.first.find_first_of(terminator));
 		auto clnFramename = submeshOutlinesList[i].first.first.second.substr(0, submeshOutlinesList[i].first.first.second.find_first_of(terminator));
 		auto clnMaterialname = submeshOutlinesList[i].first.second.substr(0, submeshOutlinesList[i].first.second.find_first_of(terminator));
-		listEntry += clnFilename + TEXT("| Frame: ") + clnFramename + TEXT("| Material:") + clnMaterialname;
+		listEntry += clnFilename + TEXT("| Fr: ") + clnFramename + TEXT("| Ma:") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 	const auto& submeshShadowsList = AAEdit::g_currChar.m_cardData.m_styles[AAEdit::g_currChar.m_cardData.m_currCardStyle].m_submeshShadows;
@@ -1693,12 +1712,12 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		//second - color
 		std::wstring listEntry(TEXT("["));
 		listEntry += TEXT("SMSH");
-		listEntry += TEXT("] File: ");
+		listEntry += TEXT("] Fi: ");
 		wchar_t terminator = '\0';
 		auto clnFilename = submeshShadowsList[i].first.first.first.substr(0, submeshShadowsList[i].first.first.first.find_first_of(terminator));
 		auto clnFramename = submeshShadowsList[i].first.first.second.substr(0, submeshShadowsList[i].first.first.second.find_first_of(terminator));
 		auto clnMaterialname = submeshShadowsList[i].first.second.substr(0, submeshShadowsList[i].first.second.find_first_of(terminator));
-		listEntry += clnFilename + TEXT("| Frame: ") + clnFramename + TEXT("| Material: ") + clnMaterialname;
+		listEntry += clnFilename + TEXT("| Fr: ") + clnFramename + TEXT("| Ma: ") + clnMaterialname;
 		SendMessage(this->m_bmSMList, LB_ADDSTRING, 0, (LPARAM)listEntry.c_str());
 	}
 
@@ -1709,8 +1728,8 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		std::wstring listEntry(TEXT("["));
 		if (list[i].first.first & AAUCardData::MODIFY_BONE) listEntry += TEXT("BONE");
 		else listEntry += TEXT("FRAME");
-		listEntry += TEXT("] File: ");
-		listEntry += list[i].first.second.first + TEXT("| Frame: ") + list[i].first.second.second;
+		listEntry += TEXT("] Fi: ");
+		listEntry += list[i].first.second.first + TEXT("| Fr: ") + list[i].first.second.second;
 		SendMessage(this->m_bmList,LB_INSERTSTRING,i,(LPARAM)listEntry.c_str());
 	}
 	//list possible bones
