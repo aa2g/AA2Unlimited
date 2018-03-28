@@ -463,22 +463,22 @@ namespace Poser {
 
 						slider->frame = modFrame;
 						slider->Apply();
+						return true;
 					}
-
-					slider = nullptr;
 				};
 
 				if (frame->m_nBones) {
 					for (int i = 0; i < frame->m_nBones; ++i) {
 						ExtClass::Bone* bone = &frame->m_bones[i];
 						ExtClass::Frame* boneFrame = bone->GetFrame();
-						MakeSlider(boneFrame);
+						if (strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) != 0)
+							MakeSlider(boneFrame);
 						//if (strncmp(boneFrame->m_name, prefixTrans, sizeof(prefixTrans) - 1) == 0) {
-							bone->SetFrame(boneFrame->m_children);
+						bone->SetFrame(boneFrame->m_children);
 						//}
 					}
 				}
-				else if (frame->m_nSubmeshes) {
+				if (frame->m_nSubmeshes) {
 					MakeSlider(frame);
 				}
 				return true;
