@@ -73,6 +73,16 @@ namespace Shared {
 		}
 
 		//bool (int)
+		Value Thread::PoseExists(std::vector<Value>& params) {
+			
+			auto fileName = General::AAUPath + L"poser\\poses\\triggers\\" + *(params[0].strVal);
+			LOGPRIO(Logger::Priority::WARN) << "[Trigger] maijm " << fileName << "\r\n";
+
+			std::ifstream infile(fileName);
+			return infile.good();
+		}
+
+		//bool (int)
 		Value Thread::GetCum(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
@@ -1431,6 +1441,8 @@ namespace Shared {
 				return Value((int)instance->m_char->m_characterStatus->m_climaxCount[target]);
 			}
 		}
+
+
 
 		//int(int)
 		Value Thread::GetCardCumStatClimaxCountTotal(std::vector<Value>& params) {
@@ -3001,6 +3013,12 @@ namespace Shared {
 					TEXT("Get Glasses"), TEXT("%p ::GetGlasses"), TEXT("Returns true if the character has their glasses on."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetGlasses
+				},
+				{
+					43, EXPRCAT_GENERAL,
+					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a pose exists."),
+					{ TYPE_STRING }, (TYPE_BOOL),
+					&Thread::PoseExists
 				},
 			},
 			{ //FLOAT

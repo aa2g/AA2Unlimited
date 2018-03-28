@@ -50,11 +50,11 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth
 	}
 	//throw high poly event
 	HiPolyInitData data;
-	data.character = loadCharacter;
-	data.clothState = &cloth;
-	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
-	loc_hiPolyLoaded = data.card;
-	ThrowEvent(&data);
+data.character = loadCharacter;
+data.clothState = &cloth;
+data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+loc_hiPolyLoaded = data.card;
+ThrowEvent(&data);
 }
 
 void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
@@ -77,20 +77,20 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
 	// Extra Hairs low poly infection fix
 	// Maker loads hair twice. Once after character is loaded. Fix can be safely ignored in Maker
-	if(General::IsAAPlay)
+	if (General::IsAAPlay)
 		Shared::GameState::setIsOverriding(true);
 	HiPolyLoadStartEvent(loadCharacter, cloth, partial);
 
 	DWORD retv;
 
 	__asm {
-/*		lea eax, [who]
-		push dword ptr [eax+20]
-		push dword ptr [eax+16]
-		push dword ptr [eax+12]
-		push dword ptr [eax+8]
-		mov ecx, [eax+4]
-		call dword ptr [eax]*/
+		/*		lea eax, [who]
+				push dword ptr [eax+20]
+				push dword ptr [eax+16]
+				push dword ptr [eax+12]
+				push dword ptr [eax+8]
+				mov ecx, [eax+4]
+				call dword ptr [eax]*/
 		push partial
 		push a4
 		push a3
@@ -124,11 +124,11 @@ DWORD __declspec(noinline) __stdcall CallOrigUpdate(DWORD who, void *_this, DWOR
 	DWORD retv;
 
 	__asm {
-/*		lea eax, [who]
-		push dword ptr[eax + 12]
-		push dword ptr[eax + 8]
-		mov ecx, [eax + 4]
-		call dword ptr[eax]*/
+		/*		lea eax, [who]
+				push dword ptr[eax + 12]
+				push dword ptr[eax + 8]
+				mov ecx, [eax + 4]
+				call dword ptr[eax]*/
 		push b
 		push a
 		mov ecx, _this
@@ -150,10 +150,11 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	if (General::IsAAPlay) {
 		const DWORD offset4[]{ 0x3761CC, 0x28, 0x28 };
 		BYTE* HSceneTrigger = (BYTE*)ExtVars::ApplyRule(offset4);
-
-		if (*HSceneTrigger == 0 && Shared::GameState::getIsInH()) {
-			Shared::GameState::clearConversationCharacter(-1);
-			Shared::GameState::setIsInH(false);
+		if (HSceneTrigger != nullptr) {
+			if (*HSceneTrigger == 0 && Shared::GameState::getIsInH()) {
+				Shared::GameState::clearConversationCharacter(-1);
+				Shared::GameState::setIsInH(false);
+			}
 		}
 	}
 

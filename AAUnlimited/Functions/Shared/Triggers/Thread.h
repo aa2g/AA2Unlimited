@@ -158,6 +158,8 @@ namespace Shared {
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
+			Value PoseExists(std::vector<Value>& params);
+
 			Value GetCum(std::vector<Value>& params);
 
 			Value GetTears(std::vector<Value>& params);
