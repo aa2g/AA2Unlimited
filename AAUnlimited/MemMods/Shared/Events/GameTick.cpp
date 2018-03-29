@@ -117,8 +117,10 @@ int __stdcall GameTick() {
 		}
 		else break;
 	}*/
-	CheckRoomChange();
-	hPositionChange();
+	if (g_Config.bTriggers) {
+		CheckRoomChange();
+		hPositionChange();
+	}
 	return orig_GameTick();
 }
 
