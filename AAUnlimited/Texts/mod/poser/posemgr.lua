@@ -290,6 +290,8 @@ local function loadscene(filename)
 				end
 			end
 			
+			local not_found = {}
+
 			if not lock_props then
 				for i,readprop in ipairs(props) do
 					local find
@@ -298,6 +300,9 @@ local function loadscene(filename)
 							find = j
 							break
 						end
+					end
+					if not find then
+						table.insert(not_found, readprop.name)
 					end
 					find = table.remove(loadedprops, find)
 					if find then
@@ -318,6 +323,9 @@ local function loadscene(filename)
 							end
 						end
 					end
+				end
+				if #not_found > 0 then
+					log.error("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
 				end
 			end
 			
