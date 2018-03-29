@@ -23,6 +23,8 @@ struct GameStateStruct {
 			roomNumber[i] = -1;
 		}
 		h_ai = false;
+		m_HPosition = -1;
+		is_in_h = false;
 	}
 
 	//Game state indicators
@@ -41,6 +43,8 @@ struct GameStateStruct {
 	int roomNumber[25];					//Current room ID
 	DWORD interrupt;					//Disabled interruptions
 	bool h_ai;							//Disable or enable h-ai
+	DWORD m_HPosition;					//H position ID
+	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -120,6 +124,16 @@ bool Shared::GameState::getH_AI()
 	return loc_gameState.h_ai;
 }
 
+void Shared::GameState::setIsInH(bool value)
+{
+	loc_gameState.is_in_h = value;
+}
+
+bool Shared::GameState::getIsInH()
+{
+	return loc_gameState.is_in_h;
+}
+
 void Shared::GameState::setVoyeur(ExtClass::CharacterStruct* voyeur)
 {
 	loc_gameState.m_voyeur = voyeur;
@@ -180,6 +194,15 @@ int Shared::GameState::GetRoomNumber(int seat) {
 	return loc_gameState.roomNumber[seat];
 }
 
+DWORD Shared::GameState::getHPosition()
+{
+	return loc_gameState.m_HPosition;
+}
+
+void Shared::GameState::setHPosition(DWORD value)
+{
+	loc_gameState.m_HPosition = value;
+}
 
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {

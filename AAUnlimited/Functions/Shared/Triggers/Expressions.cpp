@@ -19,8 +19,38 @@ namespace Shared {
 			switch (this->eventData->GetId()) {
 			case KEY_PRESS:
 				return Shared::GameState::getPlayerCharacter()->m_seat;
+			case HPOSITION_CHANGE:
+				return Shared::GameState::getPlayerCharacter()->m_seat;
 			default:
 				return this->eventData->card;
+			}
+		}
+
+		Value Thread::GetDominantInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return (int)((HPositionData*)eventData)->actor0;
+			default:
+				return -1;
+			}
+		}
+
+		Value Thread::GetSubmissiveInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return (int)((HPositionData*)eventData)->actor1;
+			default:
+				return -1;
+			}
+		}
+
+		//int ()
+		Value Thread::GetHPosition(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case HPOSITION_CHANGE:
+				return ((HPositionData*)eventData)->position;
+			default:
+				return -1;
 			}
 		}
 
@@ -40,6 +70,15 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card)) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			return Value(cardInst->IsValid());
+		}
+
+		//bool (int)
+		Value Thread::PoseExists(std::vector<Value>& params) {
+			
+			auto fileName = General::AAUPath + L"poser\\poses\\" + *(params[0].strVal);
+
+			std::ifstream infile(fileName);
+			return infile.good();
 		}
 
 		//bool (int)
@@ -1084,6 +1123,22 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetHeight(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_charData->m_figure.height);
+			}
+		}
+
+
+		//int(int)
 		Value Thread::GetTarget(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			if (ExpressionSeatInvalid(seat)) return Value(-1);
@@ -1385,6 +1440,8 @@ namespace Shared {
 				return Value((int)instance->m_char->m_characterStatus->m_climaxCount[target]);
 			}
 		}
+
+
 
 		//int(int)
 		Value Thread::GetCardCumStatClimaxCountTotal(std::vector<Value>& params) {
@@ -1901,6 +1958,10 @@ namespace Shared {
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
 			case PC_RESPONSE:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
+			case HPOSITION_CHANGE:
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
@@ -2664,7 +2725,30 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCurrentConvo
 				},
-
+				{
+					105, EXPRCAT_EVENT,
+					TEXT("H Position"), TEXT("HPosition"), TEXT("The index of the current H position of PC."),
+					{}, (TYPE_INT),
+					&Thread::GetHPosition
+				},
+				{
+					106, EXPRCAT_CHARPROP,
+					TEXT("Get Height"), TEXT("%p ::GetHeight"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetHeight
+				},
+				{
+					107, EXPRCAT_EVENT,
+					TEXT("Dominant actor"), TEXT("Dominant"), TEXT("Get the dominant actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetDominantInH
+				},
+				{
+					108, EXPRCAT_EVENT,
+					TEXT("Submissive actor"), TEXT("Submissive"), TEXT("Get the submissive actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetSubmissiveInH
+				},
 			},
 
 			{ //BOOL
@@ -2928,6 +3012,12 @@ namespace Shared {
 					TEXT("Get Glasses"), TEXT("%p ::GetGlasses"), TEXT("Returns true if the character has their glasses on."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetGlasses
+				},
+				{
+					43, EXPRCAT_GENERAL,
+					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a .pose exists."),
+					{ TYPE_STRING }, (TYPE_BOOL),
+					&Thread::PoseExists
 				},
 			},
 			{ //FLOAT

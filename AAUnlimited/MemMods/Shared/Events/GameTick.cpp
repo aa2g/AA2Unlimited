@@ -4,6 +4,7 @@
 namespace GameTick {
 
 Shared::Triggers::RoomChangeData roomChangeData;
+Shared::Triggers::HPositionData hPositionData;
 
 int (__stdcall *orig_MsgHandler)(void *ptr, MSG *msg);
 int (__stdcall *orig_GameTick)();
@@ -71,6 +72,28 @@ void CheckRoomChange() {
 	}
 }
 
+void hPositionChange() {
+	auto hPositionValue = Shared::GameState::getHPosition();
+	const DWORD offset[]{ 0x3761CC, 0x28, 0x38, 0x5F4 };
+	DWORD* hPosition = (DWORD*)ExtVars::ApplyRule(offset);
+	if (hPosition != nullptr) {
+		if (*hPosition != hPositionValue) {
+			Shared::GameState::setHPosition(*hPosition);
+
+			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
+			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
+
+			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
+			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
+
+			hPositionData.actor0 = *actor0;
+			hPositionData.actor1 = *actor1;
+			hPositionData.position = *hPosition;
+			Shared::Triggers::ThrowEvent(&hPositionData);
+		}
+	}
+}
+
 int __stdcall GameTick() {
 	if (tick == 0) {
 		first_now = GetTickCount();
@@ -95,6 +118,7 @@ int __stdcall GameTick() {
 		else break;
 	}*/
 	CheckRoomChange();
+	hPositionChange();
 	return orig_GameTick();
 }
 
