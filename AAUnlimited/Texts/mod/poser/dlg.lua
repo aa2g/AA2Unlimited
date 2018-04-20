@@ -871,7 +871,6 @@ function _M.togglevisible()
 		_M.visible = false
 		_M.block_mouse = false
 	end
-	SetForegroundWindow(GetGameHwnd())
 end
 
 function _M.updatefloating(d)
