@@ -1984,8 +1984,8 @@ namespace Shared {
 				}
 				else return Value(-1);
 			case PC_RESPONSE:
-				if (((PcResponseData*)eventData)->substruct->m_response >= 0) {
-					return ((int)(((PcResponseData*)eventData)->substruct->m_response));
+				if (((PcResponseData*)eventData)->pc_response >= 0) {
+					return ((PcResponseData*)eventData)->pc_response;
 				}
 				else return Value(-1);
 			default:

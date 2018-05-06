@@ -78,18 +78,21 @@ void hPositionChange() {
 	DWORD* hPosition = (DWORD*)ExtVars::ApplyRule(offset);
 	if (hPosition != nullptr) {
 		if (*hPosition != hPositionValue) {
-			Shared::GameState::setHPosition(*hPosition);
 
 			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
-
 			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
 			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
 
-			hPositionData.actor0 = *actor0;
-			hPositionData.actor1 = *actor1;
-			hPositionData.position = *hPosition;
-			Shared::Triggers::ThrowEvent(&hPositionData);
+			if (actor0 != nullptr && actor1 != nullptr) {
+				Shared::GameState::setHPosition(*hPosition);
+
+				hPositionData.actor0 = *actor0;
+				hPositionData.actor1 = *actor1;
+
+				hPositionData.position = *hPosition;
+				Shared::Triggers::ThrowEvent(&hPositionData);
+			}
 		}
 	}
 }
