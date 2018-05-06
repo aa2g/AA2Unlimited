@@ -119,8 +119,10 @@ void __stdcall NpcAnswer(ExtClass::BaseConversationStruct* param) {
 void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	LUA_EVENT_NORET("convo_pc_answer", param->GetSubStruct());
 	auto substruct = param->GetSubStruct();
+	const int arbitraryMaxResponse = 10;
 	Shared::Triggers::PcResponseData data;
 	data.forceResponse = false;
+	data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 	data.substruct = substruct;
 	data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
 	Shared::Triggers::ThrowEvent(&data);

@@ -373,6 +373,12 @@ namespace Shared {
 			((PcResponseData*)eventData)->substruct->m_playerAnswer = params[0].iVal;
 		}
 
+		void Thread::AddChar(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			CharInstData* seatInst = &AAPlay::g_characters[seat];
+			seatInst->m_char->Spawn(0, 1, 1, 1);
+		}	
+
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1907,6 +1913,12 @@ namespace Shared {
 				TEXT("Turn on H-AI"),
 				{ TYPE_BOOL },
 				&Thread::SetH_AI
+			},
+			{
+				91, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Char"), TEXT("AddChar = %p"),
+				TEXT("Add char"),
+				{ TYPE_INT },
+				&Thread::AddChar
 			},
 		};
 

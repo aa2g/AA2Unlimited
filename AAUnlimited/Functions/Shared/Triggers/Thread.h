@@ -67,6 +67,7 @@ namespace Shared {
 			void SetCardPoints(std::vector<Value>& params);
 			void SetLover(std::vector<Value>& params);
 			void SetPCResponse(std::vector<Value>& params);
+			void AddChar(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);

@@ -198,6 +198,7 @@ namespace Triggers {
 	EDC_DECLARE(PcResponseData, PC_RESPONSE)
 
 		ExtClass::ConversationSubStruct* substruct;
+		int pc_response;
 		bool forceResponse;
 
 	EDC_END
