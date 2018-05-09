@@ -63,28 +63,29 @@ bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
 }
 
 void AAUCardData::UpdateModules() {
-	for (auto module = m_modules.begin(); module != m_modules.end(); module++)
-	{
-		auto fileName = General::AAEditPath + L"data\\override\\module\\" + module->name;
-		ModuleFile modfile(fileName.c_str());
-		if (modfile.IsGood()) {
-			*module = modfile.mod;
-			for (int index = 0; index < modfile.mod.globals.size(); index++) {
-				bool global_added = false;
-				for (auto global = m_globalVars.begin(); global != m_globalVars.end(); global++) {
-					if (global->name == modfile.mod.globals[index].name) {
-						global->currentValue = modfile.mod.globals[index].currentValue;
-						global->defaultValue = modfile.mod.globals[index].defaultValue;
-						global_added = true;
-						LOGPRIO(Logger::Priority::INFO) << "Put a breakpoint here and check global->defaultValue";
+	if (General::IsAAPlay) {
+		for (auto module = m_modules.begin(); module != m_modules.end(); module++)
+		{
+			auto fileName = General::AAEditPath + L"data\\override\\module\\" + module->name;
+			ModuleFile modfile(fileName.c_str());
+			if (modfile.IsGood()) {
+				*module = modfile.mod;
+				for (int index = 0; index < modfile.mod.globals.size(); index++) {
+					bool global_added = false;
+					for (auto global = m_globalVars.begin(); global != m_globalVars.end(); global++) {
+						if (global->name == modfile.mod.globals[index].name) {
+							global->currentValue = modfile.mod.globals[index].currentValue;
+							global->defaultValue = modfile.mod.globals[index].defaultValue;
+							global_added = true;
+						}
+					}
+					if (!global_added) {
+						m_globalVars.push_back(modfile.mod.globals[index]);
+
 					}
 				}
-				if (!global_added) {
-					m_globalVars.push_back(modfile.mod.globals[index]);
 
-				}
 			}
-
 		}
 	}
 }
