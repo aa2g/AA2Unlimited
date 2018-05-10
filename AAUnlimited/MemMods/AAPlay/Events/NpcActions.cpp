@@ -97,6 +97,10 @@ void __stdcall Answer(AnswerStruct *as) {
 
 	NpcResponseData data;
 	data.card = GetSeatFromStruct(as->answerChar->m_thisChar);
+	data.absoluteChance = -1;
+	data.absoluteResponse = -1;
+	data.strongChance = -1;
+	data.strongResponse = -1;
 	data.answeredTowards = GetSeatFromStruct(as->askingChar->m_thisChar);
 	data.originalResponse = as->answer;
 	data.changedResponse = as->answer;
@@ -106,17 +110,36 @@ void __stdcall Answer(AnswerStruct *as) {
 	data.substruct = as;
 	ThrowEvent(&data);
 
-	as->answerChar->m_lastConversationAnswerPercent = data.changedChance;
-
 	// we can't just carry over because the data is DWORD (with potential deaf=2 state), not bool.
 	// plaster over it only if something actually wants it changed.
 	as->answer = data.changedResponse;
 	as->answerChar->m_lastConversationAnswerPercent = data.changedChance;
-	as->askingChar->m_currConversationId = data.conversationId;
-	as->answerChar->m_currConversationId = data.conversationId;
+	
+	if (data.strongResponse != -1) {
+		as->answer = data.strongResponse;
+		if (data.strongChance != -1) {
+			as->answerChar->m_lastConversationAnswerPercent = data.strongChance;
+		}
+	}
+
+	if (data.absoluteResponse != -1) {
+		as->answer = data.absoluteResponse;
+		if (data.absoluteChance != -1) {
+			as->answerChar->m_lastConversationAnswerPercent = data.absoluteChance;
+		}
+	}
 
 	CallAnswer(as);
 	LUA_EVENT("answer_after", as->answer, as);
+	NPCAfterResponseData afterResponseData;
+	afterResponseData.card = GetSeatFromStruct(as->answerChar->m_thisChar);
+	afterResponseData.answeredTowards = GetSeatFromStruct(as->askingChar->m_thisChar);
+	afterResponseData.conversationId = as->askingChar->m_currConversationId;
+	afterResponseData.substruct = as;
+	afterResponseData.effectiveChance = as->answerChar->m_lastConversationAnswerPercent;
+	afterResponseData.effectiveResponse = as->answer;
+	ThrowEvent(&afterResponseData);
+
 }
 
 // Some speculation what this does:

@@ -51,6 +51,8 @@ namespace Triggers {
 		ROOM_CHANGE,
 		KEY_PRESS,
 		HPOSITION_CHANGE,
+		PC_AFTER_RESPONSE,
+		NPC_AFTER_RESPONSE,
 		
 		
 		N_EVENTS
@@ -135,8 +137,23 @@ namespace Triggers {
 		int changedResponse;
 		int originalChance;
 		int changedChance;
+		int absoluteResponse;
+		int absoluteChance;
+		int strongResponse;
+		int strongChance;
 
 	EDC_END
+
+		EDC_DECLARE(NPCAfterResponseData, NPC_AFTER_RESPONSE)
+
+		PlayInjections::NpcActions::AnswerStruct* substruct;
+		int answeredTowards;
+		int conversationId;
+		int effectiveResponse;
+		int effectiveChance;
+
+	EDC_END
+
 
 	EDC_DECLARE(NpcWalkToRoomData, NPC_WALK_TO_ROOM)
 
@@ -200,6 +217,15 @@ namespace Triggers {
 		ExtClass::ConversationSubStruct* substruct;
 		int pc_response;
 		bool forceResponse;
+		int absolute_response;
+		int strong_response;
+
+	EDC_END
+
+	EDC_DECLARE(PcAfterResponseData, PC_AFTER_RESPONSE)
+
+		ExtClass::ConversationSubStruct* substruct;
+		int effective_response;
 
 	EDC_END
 		

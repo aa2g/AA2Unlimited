@@ -1776,6 +1776,12 @@ namespace Shared {
 			return bResponse;
 		}
 
+		Value Thread::GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return false;
+			bool bResponse = ((NPCAfterResponseData*)eventData)->effectiveResponse == 1;
+			return bResponse;
+		}
+
 		//int()
 		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return false;
@@ -1791,14 +1797,26 @@ namespace Shared {
 
 		//int()
 		Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
-			if (this->eventData->GetId() != NPC_RESPONSE) return 0;
-			return ((NpcResponseData*)eventData)->answeredTowards;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				return ((NpcResponseData*)eventData)->answeredTowards;
+			case NPC_AFTER_RESPONSE:
+				return ((NPCAfterResponseData*)eventData)->answeredTowards;
+			default:
+				return -1;
+			}
 		}
 
 		//int()
 		Value Thread::GetNpcResponseConversation(std::vector<Value>& params) {
-			if (this->eventData->GetId() != NPC_RESPONSE) return 0;
-			return ((NpcResponseData*)eventData)->conversationId;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				return ((NpcResponseData*)eventData)->conversationId;
+			case NPC_AFTER_RESPONSE:
+				return ((NPCAfterResponseData*)eventData)->conversationId;
+			default:
+				return -1;
+			}
 		}
 
 		//int()
@@ -1811,6 +1829,12 @@ namespace Shared {
 		Value Thread::GetNpcResponseCurrentPercent(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return 0;
 			return ((NpcResponseData*)eventData)->changedChance;
+		}
+
+		//int()
+		Value Thread::GetNpcResponseEffectivePercent(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return 0;
+			return ((NPCAfterResponseData*)eventData)->effectiveChance;
 		}
 
 		//NPC_WALK_TO_ROOM
@@ -1961,6 +1985,10 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
+			case PC_AFTER_RESPONSE:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 			case HPOSITION_CHANGE:
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
@@ -1993,6 +2021,18 @@ namespace Shared {
 			}
 		}
 
+		Value Thread::GetEffectivePcResponse(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case PC_AFTER_RESPONSE:
+				if (((PcAfterResponseData*)eventData)->effective_response >= 0) {
+					return ((PcAfterResponseData*)eventData)->effective_response;
+				}
+				else return Value(-1);
+			default:
+				return 0;
+			}
+		}
+
 		//int()
 		Value Thread::GetConversationAction(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
@@ -2002,6 +2042,8 @@ namespace Shared {
 				return Value(((PCConversationLineUpdatedData*)this->eventData)->action);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationId);
+			case PC_AFTER_RESPONSE:
+				return Value((int)((PcAfterResponseData*)this->eventData)->substruct->m_conversationId);
 			default:
 				return 0;
 			}
@@ -2016,6 +2058,8 @@ namespace Shared {
 				return Value(((PCConversationLineUpdatedData*)this->eventData)->conversationAnswerId);
 			case PC_RESPONSE:
 				return Value((int)((PcResponseData*)this->eventData)->substruct->m_conversationAnswerId);
+			case PC_AFTER_RESPONSE:
+				return Value((int)((PcAfterResponseData*)this->eventData)->substruct->m_conversationAnswerId);
 			default:
 				return 0;
 			}
@@ -2030,6 +2074,8 @@ namespace Shared {
 				return Value(((PCConversationLineUpdatedData*)this->eventData)->currentlyAnswering);
 			case PC_RESPONSE:
 				return Value((bool)(((PcResponseData*)this->eventData)->substruct->m_bCurrentlyAnswering));
+			case PC_AFTER_RESPONSE:
+				return Value((bool)(((PcAfterResponseData*)this->eventData)->substruct->m_bCurrentlyAnswering));
 			default:
 				return 0;
 			}
@@ -2332,7 +2378,7 @@ namespace Shared {
 				{
 					40, EXPRCAT_EVENT,
 					TEXT("Npc Current Response Chance"), TEXT("CurrentResponsePercent"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is the current interaction percent, modified by this or previously executed triggers "
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the current interaction percent, modified by this or previously executed triggers of normal priority. Will not work for super or absolute priority."
 					"using the Set Npc Response Percent Action"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentPercent
@@ -2460,7 +2506,7 @@ namespace Shared {
 				},
 				{
 					61, EXPRCAT_CONVERSATION,
-					TEXT("PC Response"), TEXT("PC Response"), TEXT("Returns PC response in a conversation. 0 is \"Yes\", 1 is \"No\", 2 is \"Huh?\", -1 is undefined."),
+					TEXT("PC Original Response"), TEXT("PC Original Response"), TEXT("Returns PC's original response in a conversation. 0 is \"Yes\", 1 is \"No\", 2 is \"Huh?\", -1 is undefined."),
 					{}, (TYPE_INT),
 					&Thread::GetConversationPcResponse
 				},
@@ -2749,6 +2795,20 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetSubmissiveInH
 				},
+				{
+					109, EXPRCAT_CONVERSATION,
+					TEXT("PC Effective Response"), TEXT("PCEffectiveResponse"), TEXT("Returns the answer that PC is going to act upon. Use only in After PC Response event. 0 is \"Yes\", 1 is \"No\", 2 is \"Huh?\", -1 is undefined."),
+					{}, (TYPE_INT),
+					&Thread::GetEffectivePcResponse
+				},
+				{
+					110, EXPRCAT_EVENT,
+					TEXT("Npc Effective Response Chance"), TEXT("EffectiveResponsePercent"),
+					TEXT("If executed in a trigger with the After NPC Answers Event, this is the current interaction percent, modified by any triggers of any priority."
+					"using the Set Npc Response Percent Action"),
+					{}, (TYPE_INT),
+					&Thread::GetNpcResponseEffectivePercent
+				},
 			},
 
 			{ //BOOL
@@ -2840,7 +2900,7 @@ namespace Shared {
 				{
 					15, EXPRCAT_EVENT,
 					TEXT("Npc Current Response Success"), TEXT("CurrentResponseSuccess"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. Will not work for super or absolute priority."
 					"using the Set Npc Response Answer Success Action"),
 					{ }, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswerSuccess
@@ -3018,6 +3078,13 @@ namespace Shared {
 					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a .pose exists."),
 					{ TYPE_STRING }, (TYPE_BOOL),
 					&Thread::PoseExists
+				},
+				{
+					44, EXPRCAT_EVENT,
+					TEXT("Npc Effective Response Success"), TEXT("EffectiveResponseSuccess"),
+					TEXT("If executed in a trigger with the After NPC Answers Event, this is the current answer that the NPC will act upon, modified by any previously executed Triggers."),
+					{}, (TYPE_BOOL),
+					&Thread::GetNpcResponseCurrentAnswerSuccess
 				},
 			},
 			{ //FLOAT

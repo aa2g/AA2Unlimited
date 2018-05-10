@@ -148,10 +148,35 @@ namespace Shared {
 			((NpcResponseData*)eventData)->changedResponse = params[0].iVal % 3;
 		}
 
+		//bool newAnswer
+		void Thread::SetNpcStrongResponseSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return;
+			int iResponse = params[0].bVal ? 1 : 0;
+			((NpcResponseData*)eventData)->strongResponse = iResponse;
+		}
+
+		void Thread::SetNpcAbsoluteResponseSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return;
+			int iResponse = params[0].bVal ? 1 : 0;
+			((NpcResponseData*)eventData)->absoluteResponse = iResponse;
+		}
+
 		//int percent
 		void Thread::SetNpcResponsePercent(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
 			((NpcResponseData*)eventData)->changedChance = params[0].iVal;
+		}
+
+		//int percent
+		void Thread::SetNpcResponseStrongPercent(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return;
+			((NpcResponseData*)eventData)->strongChance = params[0].iVal;
+		}
+
+		//int percent
+		void Thread::SetNpcResponseAbsolutePercent(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_RESPONSE) return;
+			((NpcResponseData*)eventData)->absoluteChance = params[0].iVal;
 		}
 
 		int SafeAddCardPoints(int nPoints, int pointKind, int iCardFrom, int iCardTowards) {
@@ -371,6 +396,16 @@ namespace Shared {
 		void Thread::SetPCResponse(std::vector<Value>& params) {
 			if (eventData->GetId() != PC_RESPONSE) return;
 			((PcResponseData*)eventData)->substruct->m_playerAnswer = params[0].iVal;
+		}
+
+		void Thread::SetStrongResponse(std::vector<Value>& params) {
+			if (eventData->GetId() != PC_RESPONSE) return;
+			((PcResponseData*)eventData)->strong_response= params[0].iVal;
+		}
+
+		void Thread::SeAbsoluteResponse(std::vector<Value>& params) {
+			if (eventData->GetId() != PC_RESPONSE) return;
+			((PcResponseData*)eventData)->absolute_response = params[0].iVal;
 		}
 
 		void Thread::AddChar(std::vector<Value>& params) {
@@ -1458,15 +1493,15 @@ namespace Shared {
 				&Thread::ConditionalEndExecution
 			},
 			{
-				18, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Success"), TEXT("CurrentResponseSuccess = %p"),
-				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do."),
+				18, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Success"), TEXT("NormalResponseSuccess = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_BOOL },
 				&Thread::SetNpcResponseSuccess
 			},
 			{
-				19, ACTIONCAT_EVENT, TEXT("Set Npc Current Response Percent"), TEXT("CurrentResponsePercent = %p"),
+				19, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Percent"), TEXT("NormalResponsePercent = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
-				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI."),
+				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
 				&Thread::SetNpcResponsePercent
 			},
@@ -1849,8 +1884,8 @@ namespace Shared {
 				&Thread::AutoPC
 			},
 			{
-				80, ACTIONCAT_EVENT, TEXT("Set PC Response"), TEXT("PCResponse = %p"),
-				TEXT("Modify PC's answer."),
+				80, ACTIONCAT_EVENT, TEXT("Set Normal PC Response"), TEXT("PCResponse = %p"),
+				TEXT("Sets the PC's response. Responses adhere to the following priority and override each other: Normal < Strong < Absolute. Use normal unless you know what you're doing. 0 is 'Yes', 1 is 'No', 2 is 'Huh ?', -1 is undefined"),
 				{ TYPE_INT },
 				&Thread::SetPCResponse
 			},
@@ -1919,6 +1954,44 @@ namespace Shared {
 				TEXT("Add char"),
 				{ TYPE_INT },
 				&Thread::AddChar
+			},
+			{
+				92, ACTIONCAT_EVENT, TEXT("Set Strong PC Response"), TEXT("StrongResponse = %p"),
+				TEXT("Sets the PC's response. Responses adhere to the following priority and override each other: Normal < Strong < Absolute. Use normal unless you know what you're doing. 0 is 'Yes', 1 is 'No', 2 is 'Huh ?', -1 is undefined"),
+				{ TYPE_INT },
+				&Thread::SetStrongResponse
+			},
+			{
+				93, ACTIONCAT_EVENT, TEXT("Set Absolute PC Response"), TEXT("AbsoluteResponse = %p"),
+				TEXT("Sets the PC's response. Responses adhere to the following priority and override each other: Normal < Strong < Absolute. Use normal unless you know what you're doing. 0 is 'Yes', 1 is 'No', 2 is 'Huh ?', -1 is undefined"),
+				{ TYPE_INT },
+				&Thread::SeAbsoluteResponse
+			},
+			{
+				94, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Success"), TEXT("StrongResponseSuccess = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
+				{ TYPE_BOOL },
+				&Thread::SetNpcStrongResponseSuccess
+			},
+			{
+				95, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("StrongResponsePercent = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
+				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
+				{ TYPE_INT },
+				&Thread::SetNpcResponseStrongPercent
+			},
+			{
+				96, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("StrongResponsePercent = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
+				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
+				{ TYPE_INT },
+				&Thread::SetNpcResponseAbsolutePercent
+			},
+			{
+				97, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Success"), TEXT("AbsoluteResponseSuccess = %p"),
+				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
+				{ TYPE_BOOL },
+				&Thread::SetNpcAbsoluteResponseSuccess
 			},
 		};
 
