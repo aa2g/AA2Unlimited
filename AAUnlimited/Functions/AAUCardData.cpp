@@ -77,6 +77,7 @@ void AAUCardData::UpdateModules() {
 							global->currentValue = modfile.mod.globals[index].currentValue;
 							global->defaultValue = modfile.mod.globals[index].defaultValue;
 							global_added = true;
+							break;
 						}
 					}
 					if (!global_added) {
