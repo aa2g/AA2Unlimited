@@ -68,7 +68,7 @@ namespace Shared {
 			void SetLover(std::vector<Value>& params);
 			void SetPCResponse(std::vector<Value>& params);
 			void SetStrongResponse(std::vector<Value>& params);
-			void SeAbsoluteResponse(std::vector<Value>& params);
+			void SetAbsoluteResponse(std::vector<Value>& params);
 			void AddChar(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
