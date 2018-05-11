@@ -517,6 +517,34 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
 		}
 
+
+		//bool(int, int)
+		Value Thread::GetCardPreference(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(false);
+			int preference = params[1].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(false);
+
+			return Value(cardInst->m_char->m_charData->m_preferenceBools[preference]);
+		}
+
+		Value Thread::GetCardFigure(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				return Value((int)inst->m_char->m_charData->m_figure.figure);
+			}
+		}
+
+
+
 		//int(int)
 		Value Thread::GetCardPersonality(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2809,6 +2837,12 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseEffectivePercent
 				},
+				{
+					111, EXPRCAT_CHARPROP,
+					TEXT("Get Figure"), TEXT("%p ::GetFigure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardFigure
+				},
 			},
 
 			{ //BOOL
@@ -3085,6 +3119,12 @@ namespace Shared {
 					TEXT("If executed in a trigger with the After NPC Answers Event, this is the current answer that the NPC will act upon, modified by any previously executed Triggers."),
 					{}, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswerSuccess
+				},
+				{
+					45, EXPRCAT_CHARPROP,
+					TEXT("Preference"), TEXT("%p ::Preference( %p )"), TEXT(""),
+					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+					&Thread::GetCardPreference
 				},
 			},
 			{ //FLOAT

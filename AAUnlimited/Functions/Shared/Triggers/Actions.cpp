@@ -441,6 +441,20 @@ namespace Shared {
 		}
 
 		//int seat, int trait, bool enable
+		void Thread::SetCardPreference(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int preference = params[1].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			bool enable = params[2].bVal;
+			if (!AAPlay::g_characters[seat].m_char) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_preferenceBools[preference] = enable;
+		}
+
+		//int seat, int trait, bool enable
 		void Thread::SetCherryStatus(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -1992,6 +2006,12 @@ namespace Shared {
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_BOOL },
 				&Thread::SetNpcAbsoluteResponseSuccess
+			},
+			{
+				98, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Preference"), TEXT("%p ::Preference( %p ) = %p"),
+				TEXT("Enable or disable selected character's preference."),
+				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
+				&Thread::SetCardPreference
 			},
 		};
 

@@ -72,6 +72,7 @@ namespace Shared {
 			void AddChar(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
+			void SetCardPreference(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);
 			void SetClothingState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -187,7 +188,11 @@ namespace Shared {
 
 			//card info
 			Value GetCardVirtue(std::vector<Value>& params); //int(int)
-			Value GetCardTrait(std::vector<Value>& params); //bool(int, int)
+			Value GetCardTrait(std::vector<Value>& params);
+			Value GetCardPreference(std::vector<Value>& params);
+			Value GetCardFigure(std::vector<Value>& params);
+
+			//bool(int, int)
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)
 			Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
 			Value GetCardClub(std::vector<Value>& params); //int(int)
