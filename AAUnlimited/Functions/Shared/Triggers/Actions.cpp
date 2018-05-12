@@ -80,7 +80,7 @@ namespace Shared {
 			if (!card->IsValid()) return;
 			if (ActionSeatInvalid(cardTarget)) return;
 			CharInstData* target = &AAPlay::g_characters[cardTarget];
-			if (!card->IsValid()) return;
+			if (!target->IsValid()) return;
 
 			card->m_forceAction.conversationId = actionId;
 			card->m_forceAction.movementType = 3;
