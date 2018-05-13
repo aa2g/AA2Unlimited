@@ -2008,8 +2008,8 @@ namespace Shared {
 				&Thread::SetNpcAbsoluteResponseSuccess
 			},
 			{
-				98, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Preference"), TEXT("%p ::Preference( %p ) = %p"),
-				TEXT("Enable or disable selected character's preference."),
+				98, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Preference"), TEXT("%p ::SetHPreference( %p ) = %p"),
+				TEXT("Enable or disable selected character's H preference."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardPreference
 			},
