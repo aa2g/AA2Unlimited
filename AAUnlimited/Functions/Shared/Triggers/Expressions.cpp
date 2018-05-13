@@ -3122,7 +3122,7 @@ namespace Shared {
 				},
 				{
 					45, EXPRCAT_CHARPROP,
-					TEXT("Preference"), TEXT("%p ::GetHPreference( %p )"), TEXT("Returns whether the card has some H preference."),
+					TEXT("Get H Preference"), TEXT("%p ::HPreference( %p )"), TEXT("Returns whether the card has some H preference."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardPreference
 				},
