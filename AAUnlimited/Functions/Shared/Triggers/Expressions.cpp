@@ -2406,7 +2406,7 @@ namespace Shared {
 				{
 					40, EXPRCAT_EVENT,
 					TEXT("Npc Current Response Chance"), TEXT("CurrentResponsePercent"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is the current interaction percent, modified by this or previously executed triggers of normal priority. Will not work for super or absolute priority."
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the current interaction percent, modified by this or previously executed triggers of normal priority. Will not work for strong or absolute responses."
 					"using the Set Npc Response Percent Action"),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentPercent
@@ -2807,7 +2807,7 @@ namespace Shared {
 				},
 				{
 					106, EXPRCAT_CHARPROP,
-					TEXT("Get Height"), TEXT("%p ::GetHeight"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
+					TEXT("Get Height"), TEXT("%p ::Height"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetHeight
 				},
@@ -2839,7 +2839,7 @@ namespace Shared {
 				},
 				{
 					111, EXPRCAT_CHARPROP,
-					TEXT("Get Figure"), TEXT("%p ::GetFigure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
+					TEXT("Get Figure"), TEXT("%p ::Figure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardFigure
 				},
@@ -2933,9 +2933,9 @@ namespace Shared {
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Current Response Success"), TEXT("CurrentResponseSuccess"),
-					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. Will not work for super or absolute priority."
-					"using the Set Npc Response Answer Success Action"),
+					TEXT("Npc Normal Response Success"), TEXT("NormalResponseSuccess"),
+					TEXT("If executed in a trigger with the Npc Answers Event, this is the normal answer, modified by this or previously executed Triggers"
+					"using the Set Npc Response Answer Success Action. Will not work for strong or absolute responses."),
 					{ }, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswerSuccess
 				},
@@ -3081,7 +3081,7 @@ namespace Shared {
 					TEXT("Get Auto-PC"), TEXT("AutoPC"),
 					TEXT("Returns whether AutoPC is toggled on or off."),
 					{}, (TYPE_BOOL),
-						&Thread::GetAutoPC
+					&Thread::GetAutoPC
 				},
 				{
 					39, EXPRCAT_CHARPROP,
@@ -3118,11 +3118,11 @@ namespace Shared {
 					TEXT("Npc Effective Response Success"), TEXT("EffectiveResponseSuccess"),
 					TEXT("If executed in a trigger with the After NPC Answers Event, this is the current answer that the NPC will act upon, modified by any previously executed Triggers."),
 					{}, (TYPE_BOOL),
-					&Thread::GetNpcResponseCurrentAnswerSuccess
+					&Thread::GetNpcResponseEffectiveAnswerSuccess
 				},
 				{
 					45, EXPRCAT_CHARPROP,
-					TEXT("Preference"), TEXT("%p ::Preference( %p )"), TEXT(""),
+					TEXT("Get H Preference"), TEXT("%p ::HPreference( %p )"), TEXT("Returns whether the card has some H preference."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardPreference
 				},
