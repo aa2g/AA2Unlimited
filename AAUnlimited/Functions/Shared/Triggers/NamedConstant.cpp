@@ -13,7 +13,8 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Time (Period)"),
 	TEXT("Character (Pregnancy Risk)"),
 	TEXT("Event Type"),
-	TEXT("Mood")
+	TEXT("Mood"),
+	TEXT("Preferences")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -1024,6 +1025,72 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			199, NCONSTCAT_MOOD,
 			TEXT("NORMAL"), TEXT("NORMAL"), TEXT("NORMAL"),
 			Value(8)
+		},
+		//Preferences
+		{
+			200, NCONSTCAT_PREFERENCE,
+			TEXT("Kissing"), TEXT("Kissing"), TEXT("Kissing"),
+			Value(0)
+		},
+		{
+			201, NCONSTCAT_PREFERENCE,
+			TEXT("Breast Caress"), TEXT("Breast Caress"), TEXT("Breast Caress"),
+			Value(1)
+		},
+		{
+			202, NCONSTCAT_PREFERENCE,
+			TEXT("Vagina Caress"), TEXT("Vagina Caress"), TEXT("Vagina Caress"),
+			Value(2)
+		},
+		{
+			203, NCONSTCAT_PREFERENCE,
+			TEXT("Penis Caress"), TEXT("Penis Caress"), TEXT("Penis Caress"),
+			Value(3)
+		},
+		{
+			204, NCONSTCAT_PREFERENCE,
+			TEXT("Cunningus"), TEXT("Cunningus"), TEXT("Cunningus"),
+			Value(4)
+		},
+		{
+			205, NCONSTCAT_PREFERENCE,
+			TEXT("Fellation"), TEXT("Fellation"), TEXT("Fellation"),
+			Value(5)
+		},
+		{
+			206, NCONSTCAT_PREFERENCE,
+			TEXT("Doggy Style"), TEXT("Doggy Style"), TEXT("Doggy Style"),
+			Value(6)
+		},
+		{
+			207, NCONSTCAT_PREFERENCE,
+			TEXT("Femdom"), TEXT("Femdom"), TEXT("Femdom"),
+			Value(7)
+		},
+		{
+			208, NCONSTCAT_PREFERENCE,
+			TEXT("Anal"), TEXT("Anal"), TEXT("Anal"),
+			Value(8)
+		},
+		{
+			209, NCONSTCAT_PREFERENCE,
+			TEXT("No Condom"), TEXT("No Condom"), TEXT("No Condom"),
+			Value(9)
+		},
+		{
+			210, NCONSTCAT_PREFERENCE,
+			TEXT("Swallow"), TEXT("Swallow"), TEXT("Swallow"),
+			Value(10)
+		},
+		{
+			211, NCONSTCAT_PREFERENCE,
+			TEXT("Creampies"), TEXT("Creampies"), TEXT("Creampies"),
+			Value(11)
+		},
+		{
+			212, NCONSTCAT_PREFERENCE,
+			TEXT("Bukkake"), TEXT("Bukkake"), TEXT("Bukkake"),
+			Value(12)
 		},
 		
 	},

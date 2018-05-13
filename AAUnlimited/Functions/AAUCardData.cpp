@@ -13,6 +13,7 @@
 #include "Functions\Shared\TriggerEventDistributor.h"
 #include "MemMods/Shared/Events/ArchiveFileOpen.h"
 
+
 const AAUCardData AAUCardData::g_defaultValues;
 
 AAUCardData::AAUCardData()
@@ -53,6 +54,7 @@ bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
 	if (chunk) {
 		int size = _byteswap_ulong(*(DWORD*)(chunk)); chunk += 8;
 		FromBuffer((char*)chunk, size);
+		UpdateModules();
 		GenAllFileMaps();
 		return true;
 	}
@@ -60,6 +62,34 @@ bool AAUCardData::FromPNGBuffer(char* buffer, DWORD size) {
 	return false;
 }
 
+void AAUCardData::UpdateModules() {
+	if (General::IsAAPlay) {
+		for (auto module = m_modules.begin(); module != m_modules.end(); module++)
+		{
+			auto fileName = General::AAEditPath + L"data\\override\\module\\" + module->name;
+			ModuleFile modfile(fileName.c_str());
+			if (modfile.IsGood()) {
+				*module = modfile.mod;
+				for (int index = 0; index < modfile.mod.globals.size(); index++) {
+					bool global_added = false;
+					for (auto global = m_globalVars.begin(); global != m_globalVars.end(); global++) {
+						if (global->name == modfile.mod.globals[index].name) {
+							global->currentValue = modfile.mod.globals[index].currentValue;
+							global->defaultValue = modfile.mod.globals[index].defaultValue;
+							global_added = true;
+							break;
+						}
+					}
+					if (!global_added) {
+						m_globalVars.push_back(modfile.mod.globals[index]);
+
+					}
+				}
+
+			}
+		}
+	}
+}
 
 void AAUCardData::FromBuffer(char* buffer, int size) {
 	using namespace Serialize;
@@ -1303,4 +1333,3 @@ bool AAUCardData::DumpBlob() {
 
 	return success;
 }
-

@@ -67,9 +67,12 @@ namespace Shared {
 			void SetCardPoints(std::vector<Value>& params);
 			void SetLover(std::vector<Value>& params);
 			void SetPCResponse(std::vector<Value>& params);
+			void SetStrongResponse(std::vector<Value>& params);
+			void SetAbsoluteResponse(std::vector<Value>& params);
 			void AddChar(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
+			void SetCardPreference(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);
 			void SetClothingState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
@@ -148,6 +151,14 @@ namespace Shared {
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
+			void SetNpcResponseStrongPercent(std::vector<Value>& params);
+
+			void SetNpcResponseAbsolutePercent(std::vector<Value>& params);
+
+			void SetNpcStrongResponseSuccess(std::vector<Value>& params);
+
+			void SetNpcAbsoluteResponseSuccess(std::vector<Value>& params);
+
 			///////////////////////
 			// Expressions
 
@@ -177,7 +188,11 @@ namespace Shared {
 
 			//card info
 			Value GetCardVirtue(std::vector<Value>& params); //int(int)
-			Value GetCardTrait(std::vector<Value>& params); //bool(int, int)
+			Value GetCardTrait(std::vector<Value>& params);
+			Value GetCardPreference(std::vector<Value>& params);
+			Value GetCardFigure(std::vector<Value>& params);
+
+			//bool(int, int)
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)
 			Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
 			Value GetCardClub(std::vector<Value>& params); //int(int)
@@ -327,12 +342,15 @@ namespace Shared {
 			Value GetNpcResponseOriginalAnswerSuccess(std::vector<Value>& params); //bool()
 			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params);	//bool()
+			Value GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
 			Value GetNpcResponseOriginalPercent(std::vector<Value>& params);	//int()
 			Value GetNpcResponseCurrentPercent(std::vector<Value>& params);	//int()
+
+			Value GetNpcResponseEffectivePercent(std::vector<Value>& params);
 
 			//NPC_WALK_TO_ROOM
 			Value GetNpcRoomTarget(std::vector<Value>& params);
@@ -352,6 +370,7 @@ namespace Shared {
 			Value GetConversationNpcResponse(std::vector<Value>& params);
 			Value GetConversationActor(std::vector<Value>& params);
 			Value GetConversationPcResponse(std::vector<Value>& params);
+			Value GetEffectivePcResponse(std::vector<Value>& params);
 			Value GetConversationAction(std::vector<Value>& params);
 			Value GetConversationAnswerId(std::vector<Value>& params);
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);

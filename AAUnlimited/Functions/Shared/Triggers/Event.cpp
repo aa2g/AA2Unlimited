@@ -85,7 +85,15 @@ namespace Shared {
 			{ HPOSITION_CHANGE, EVENTCAT_CONVERSATION, TEXT("H Position Change"), TEXT("H Position Change"),
 			TEXT("The H position changed."),
 				{}
-			}
+			},
+			{ PC_AFTER_RESPONSE, EVENTCAT_CONVERSATION, TEXT("After PC Response"), TEXT("After PC Response"),
+			TEXT("The event is fired after all the triggers have finished editing PC Response."),
+				{}
+			},
+			{ NPC_AFTER_RESPONSE, EVENTCAT_CONVERSATION, TEXT("After NPC Response"), TEXT("After NPC Response"),
+			TEXT("The event is fired after all the triggers have finished editing NPC Response."),
+			{}
+		}
 		};
 
 		/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {

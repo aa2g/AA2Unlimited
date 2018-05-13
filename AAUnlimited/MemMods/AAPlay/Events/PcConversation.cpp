@@ -121,7 +121,11 @@ void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	auto substruct = param->GetSubStruct();
 	const int arbitraryMaxResponse = 10;
 	Shared::Triggers::PcResponseData data;
+	Shared::Triggers::PcAfterResponseData effective_data;
 	data.forceResponse = false;
+	data.strong_response = -1;
+	data.absolute_response = -1;
+
 	data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 	data.substruct = substruct;
 	data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
@@ -129,6 +133,16 @@ void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	if (!data.forceResponse) {
 		HAi::ConversationPcResponse(param);
 	}
+	if (data.strong_response != -1) {
+		substruct->m_playerAnswer = data.strong_response;
+	}
+	if (data.absolute_response != -1) {
+		substruct->m_playerAnswer = data.absolute_response;
+	}
+	effective_data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
+	effective_data.substruct = substruct;
+	effective_data.effective_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
+	Shared::Triggers::ThrowEvent(&effective_data);
 }
 
 

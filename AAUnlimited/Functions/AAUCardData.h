@@ -310,6 +310,8 @@ public:
 	void FromBuffer(char* buffer, int size);
 	bool FromPNGBuffer(char* buffer, DWORD size);
 
+	void UpdateModules();
+
 	DWORD m_currReadMemberId;	//used exclusively by FromBuffer, so that ReadData can print a precise error message
 	static const AAUCardData g_defaultValues; //used to determine if a variable is not default and should be written to buffer/file
 
