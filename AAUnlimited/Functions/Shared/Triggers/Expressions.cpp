@@ -2807,7 +2807,7 @@ namespace Shared {
 				},
 				{
 					106, EXPRCAT_CHARPROP,
-					TEXT("Get Height"), TEXT("%p ::GetHeight"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
+					TEXT("Get Height"), TEXT("%p ::Height"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetHeight
 				},
@@ -2839,7 +2839,7 @@ namespace Shared {
 				},
 				{
 					111, EXPRCAT_CHARPROP,
-					TEXT("Get Figure"), TEXT("%p ::GetFigure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
+					TEXT("Get Figure"), TEXT("%p ::Figure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardFigure
 				},
