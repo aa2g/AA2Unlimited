@@ -905,7 +905,7 @@ namespace Shared {
 			if (ActionSeatInvalid(seat)) return;
 			int target = params[1].bVal;
 			if (ActionSeatInvalid(target)) return;
-			int compatibility = params[2].bVal;
+			int compatibility = params[2].iVal;
 			if (!AAPlay::g_characters[seat].IsValid() || !AAPlay::g_characters[target].IsValid()) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card.\r\n";
 				return;
