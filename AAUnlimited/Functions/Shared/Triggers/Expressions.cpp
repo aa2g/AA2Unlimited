@@ -529,6 +529,22 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_preferenceBools[preference]);
 		}
 
+		Value Thread::GetCardOpinion(std::vector<Value>& params) {
+				int seat = params[0].iVal;
+				int feeling = params[1].iVal;
+				int towards = params[2].iVal;
+
+				if (!AAPlay::g_characters[seat].IsValid()) return -1;
+				if (!AAPlay::g_characters[towards].IsValid()) return -1;
+
+				towards = (AAPlay::g_characters[towards].idxSave);
+				if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
+				if (AAPlay::g_characters[seat].idxSave == towards) return -1;
+				int decValue = 92 * towards + feeling;
+				return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
+
+			}
+
 		Value Thread::GetCardFigure(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			if (ExpressionSeatInvalid(seat)) return Value(-1);
@@ -2842,6 +2858,12 @@ namespace Shared {
 					TEXT("Get Figure"), TEXT("%p ::Figure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardFigure
+				},
+				{
+					112, EXPRCAT_CHARPROP,
+					TEXT("Get Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p )"), TEXT("Get the state of some opinion of the first character towards the second character."),
+					{ TYPE_INT, TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardOpinion
 				},
 			},
 

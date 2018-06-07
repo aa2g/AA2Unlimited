@@ -27,7 +27,7 @@ void InitOnLoad() {
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].LoadAAUData();		
-		g_characters[seat].charOffset = 0x04 * idxCharacter;
+		g_characters[seat].idxSave = idxCharacter;
 
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
@@ -74,7 +74,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	for (start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
 		if (it->m_seat == seat) {
-			g_characters[seat].charOffset = 0x04 * idxCharacter;
+			g_characters[seat].idxSave = idxCharacter;
 		}
 	}
 
