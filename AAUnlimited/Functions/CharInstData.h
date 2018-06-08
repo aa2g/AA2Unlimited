@@ -50,7 +50,7 @@ public:
 
 	ExtClass::ActionParamStruct m_forceAction;
 
-	int charOffset;
+	int idxSave; //Illusion's load order
 
 	void SetCurrentStyle(int index);
 	int GetStyleCount();

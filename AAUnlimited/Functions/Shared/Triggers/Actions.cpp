@@ -898,6 +898,33 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.a_h_experience = experience;
 		}
 
+		void Thread::SetCardOpinion(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			int feeling = params[1].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int towards = params[2].iVal;
+			int value = params[3].iVal;
+
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+
+			if (ActionSeatInvalid(towards)) return;
+			if (!AAPlay::g_characters[towards].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << towards << "\r\n";
+				return;
+			}
+
+			towards = (AAPlay::g_characters[towards].idxSave);
+			if (AAPlay::g_characters[seat].idxSave == towards) return;
+			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
+			int decValue = 92*towards + feeling;
+			AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue] = value;
+
+		}
+
 		//int seat, int target, int compatibility
 		void Thread::SetCardSexCompatibility(std::vector<Value>& params)
 		{
@@ -1883,7 +1910,7 @@ namespace Shared {
 				77, ACTIONCAT_NPCACTION, TEXT("Lock character"), TEXT("%p ::LockState = %p"),
 				TEXT("Locks the character from interacting. Adds the red circle around them. 1 - set red circle, 0 - unset it."),
 				{ TYPE_INT, TYPE_INT },
-					&Thread::SetCharacterLocked
+				&Thread::SetCharacterLocked
 			},
 			{
 				78, ACTIONCAT_NPCACTION, TEXT("Set Fap State"), TEXT("%p ::FapState = %p"),
@@ -2012,6 +2039,12 @@ namespace Shared {
 				TEXT("Enable or disable selected character's H preference."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardPreference
+			},
+			{
+				99, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p ) = %p"),
+				TEXT("Set the state of opinion of first character towards the second character."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetCardOpinion
 			},
 		};
 

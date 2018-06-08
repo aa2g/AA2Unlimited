@@ -103,6 +103,7 @@ namespace Shared {
 			void SetCardOrientation(std::vector<Value>& params);
 			void SetCardSexExperience(std::vector<Value>& params);
 			void SetCardAnalSexExperience(std::vector<Value>& params);
+			void SetCardOpinion(std::vector<Value>& params);
 			void SetCardSexCompatibility(std::vector<Value>& params);
 
 			void SetCardCumStatInVagina(std::vector<Value>& params);
@@ -190,7 +191,10 @@ namespace Shared {
 			Value GetCardVirtue(std::vector<Value>& params); //int(int)
 			Value GetCardTrait(std::vector<Value>& params);
 			Value GetCardPreference(std::vector<Value>& params);
+			Value GetCardOpinion(std::vector<Value>& params);
 			Value GetCardFigure(std::vector<Value>& params);
+
+			Value GetCardBreastSize(std::vector<Value>& params);
 
 			//bool(int, int)
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)
