@@ -538,8 +538,8 @@ namespace Shared {
 				if (!AAPlay::g_characters[towards].IsValid()) return -1;
 
 				towards = (AAPlay::g_characters[towards].idxSave);
-				if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
 				if (AAPlay::g_characters[seat].idxSave == towards) return -1;
+				if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
 				int decValue = 92 * towards + feeling;
 				return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
 
@@ -556,6 +556,24 @@ namespace Shared {
 			else
 			{
 				return Value((int)inst->m_char->m_charData->m_figure.figure);
+			}
+		}
+
+
+		Value Thread::GetCardBreastSize(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				int size = (int)(inst->m_char->m_charData->m_chest.size);
+				if (size <= 33) return Value(0);
+				if ((size > 33) && (size <=66)) return Value(1);
+				if (size > 66) return Value(2);
 			}
 		}
 
@@ -2864,6 +2882,12 @@ namespace Shared {
 					TEXT("Get Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p )"), TEXT("Get the state of some opinion of the first character towards the second character."),
 					{ TYPE_INT, TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardOpinion
+				},
+				{
+					113, EXPRCAT_CHARPROP,
+					TEXT("Get Breast Size"), TEXT("%p ::Breast"), TEXT("Get breast size of the character. 0=small, 1=normal, 2=large"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardBreastSize
 				},
 			},
 

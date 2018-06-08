@@ -194,6 +194,8 @@ namespace Shared {
 			Value GetCardOpinion(std::vector<Value>& params);
 			Value GetCardFigure(std::vector<Value>& params);
 
+			Value GetCardBreastSize(std::vector<Value>& params);
+
 			//bool(int, int)
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)
 			Value GetCardVoicePitch(std::vector<Value>& params); //int(int)

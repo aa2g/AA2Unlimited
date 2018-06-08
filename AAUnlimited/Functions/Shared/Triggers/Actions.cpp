@@ -918,8 +918,8 @@ namespace Shared {
 			}
 
 			towards = (AAPlay::g_characters[towards].idxSave);
-			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
 			if (AAPlay::g_characters[seat].idxSave == towards) return;
+			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
 			int decValue = 92*towards + feeling;
 			AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue] = value;
 
@@ -2041,8 +2041,8 @@ namespace Shared {
 				&Thread::SetCardPreference
 			},
 			{
-				99, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Feelings"), TEXT("%p ::Feeling(id: %p , towards: %p ) = %p"),
-				TEXT("Set the feeling of  first character towards the second character."),
+				99, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p ) = %p"),
+				TEXT("Set the state of opinion of first character towards the second character."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardOpinion
 			},
