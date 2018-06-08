@@ -14,7 +14,8 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Character (Pregnancy Risk)"),
 	TEXT("Event Type"),
 	TEXT("Mood"),
-	TEXT("Preferences")
+	TEXT("Preferences"),
+	TEXT("Opinions")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -1092,7 +1093,437 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("Bukkake"), TEXT("Bukkake"), TEXT("Bukkake"),
 			Value(12)
 		},
-		
+		//Opinions
+		{
+			213, NCONSTCAT_OPINIONS,
+			TEXT("Together Forever"), TEXT("Together Forever"), TEXT("Together Forever"),
+			Value(4)
+		},
+		{
+			214, NCONSTCAT_OPINIONS,
+			TEXT("I'll get you"), TEXT("I'll get you"), TEXT("I'll get you"),
+			Value(5)
+		},
+		{
+			215, NCONSTCAT_OPINIONS,
+			TEXT("Unforgivable"), TEXT("Unforgivable"), TEXT("Unforgivable"),
+			Value(6)
+		},
+		{
+			216, NCONSTCAT_OPINIONS,
+			TEXT("Cheater"), TEXT("Cheater"), TEXT("Cheater"),
+			Value(7)
+		},
+		{
+			217, NCONSTCAT_OPINIONS,
+			TEXT("Opinion5"), TEXT("Opinion5"), TEXT("Opinion5"),
+			Value(8)
+		},
+		{
+			218, NCONSTCAT_OPINIONS,
+			TEXT("Opinion6"), TEXT("Opinion6"), TEXT("Opinion6"),
+			Value(9)
+		},
+		{
+			219, NCONSTCAT_OPINIONS,
+			TEXT("Opinion7"), TEXT("Opinion7"), TEXT("Opinion7"),
+			Value(10)
+		},
+		{
+			220, NCONSTCAT_OPINIONS,
+			TEXT("Opinion8"), TEXT("Opinion8"), TEXT("Opinion8"),
+			Value(11)
+		},
+		{
+			221, NCONSTCAT_OPINIONS,
+			TEXT("Opinion9"), TEXT("Opinion9"), TEXT("Opinion9"),
+			Value(12)
+		},
+		{
+			222, NCONSTCAT_OPINIONS,
+			TEXT("Opinion10"), TEXT("Opinion10"), TEXT("Opinion10"),
+			Value(13)
+		},
+		{
+			223, NCONSTCAT_OPINIONS,
+			TEXT("Opinion11"), TEXT("Opinion11"), TEXT("Opinion11"),
+			Value(14)
+		},
+		{
+			224, NCONSTCAT_OPINIONS,
+			TEXT("Opinion12"), TEXT("Opinion12"), TEXT("Opinion12"),
+			Value(15)
+		},
+		{
+			225, NCONSTCAT_OPINIONS,
+			TEXT("Opinion13"), TEXT("Opinion13"), TEXT("Opinion13"),
+			Value(16)
+		},
+		{
+			226, NCONSTCAT_OPINIONS,
+			TEXT("Opinion14"), TEXT("Opinion14"), TEXT("Opinion14"),
+			Value(17)
+		},
+		{
+			227, NCONSTCAT_OPINIONS,
+			TEXT("Opinion15"), TEXT("Opinion15"), TEXT("Opinion15"),
+			Value(18)
+		},
+		{
+			228, NCONSTCAT_OPINIONS,
+			TEXT("Opinion16"), TEXT("Opinion16"), TEXT("Opinion16"),
+			Value(19)
+		},
+		{
+			229, NCONSTCAT_OPINIONS,
+			TEXT("Opinion17"), TEXT("Opinion17"), TEXT("Opinion17"),
+			Value(20)
+		},
+		{
+			230, NCONSTCAT_OPINIONS,
+			TEXT("Opinion18"), TEXT("Opinion18"), TEXT("Opinion18"),
+			Value(21)
+		},
+		{
+			231, NCONSTCAT_OPINIONS,
+			TEXT("Opinion19"), TEXT("Opinion19"), TEXT("Opinion19"),
+			Value(22)
+		},
+		{
+			232, NCONSTCAT_OPINIONS,
+			TEXT("Opinion20"), TEXT("Opinion20"), TEXT("Opinion20"),
+			Value(23)
+		},
+		{
+			233, NCONSTCAT_OPINIONS,
+			TEXT("Opinion21"), TEXT("Opinion21"), TEXT("Opinion21"),
+			Value(24)
+		},
+		{
+			234, NCONSTCAT_OPINIONS,
+			TEXT("Opinion22"), TEXT("Opinion22"), TEXT("Opinion22"),
+			Value(25)
+		},
+		{
+			235, NCONSTCAT_OPINIONS,
+			TEXT("Opinion23"), TEXT("Opinion23"), TEXT("Opinion23"),
+			Value(26)
+		},
+		{
+			236, NCONSTCAT_OPINIONS,
+			TEXT("Opinion24"), TEXT("Opinion24"), TEXT("Opinion24"),
+			Value(27)
+		},
+		{
+			237, NCONSTCAT_OPINIONS,
+			TEXT("Opinion25"), TEXT("Opinion25"), TEXT("Opinion25"),
+			Value(28)
+		},
+		{
+			238, NCONSTCAT_OPINIONS,
+			TEXT("Opinion26"), TEXT("Opinion26"), TEXT("Opinion26"),
+			Value(29)
+		},
+		{
+			239, NCONSTCAT_OPINIONS,
+			TEXT("Opinion27"), TEXT("Opinion27"), TEXT("Opinion27"),
+			Value(30)
+		},
+		{
+			240, NCONSTCAT_OPINIONS,
+			TEXT("Opinion28"), TEXT("Opinion28"), TEXT("Opinion28"),
+			Value(31)
+		},
+		{
+			241, NCONSTCAT_OPINIONS,
+			TEXT("Opinion29"), TEXT("Opinion29"), TEXT("Opinion29"),
+			Value(32)
+		},
+		{
+			242, NCONSTCAT_OPINIONS,
+			TEXT("Opinion30"), TEXT("Opinion30"), TEXT("Opinion30"),
+			Value(33)
+		},
+		{
+			243, NCONSTCAT_OPINIONS,
+			TEXT("Opinion31"), TEXT("Opinion31"), TEXT("Opinion31"),
+			Value(34)
+		},
+		{
+			244, NCONSTCAT_OPINIONS,
+			TEXT("Opinion32"), TEXT("Opinion32"), TEXT("Opinion32"),
+			Value(35)
+		},
+		{
+			245, NCONSTCAT_OPINIONS,
+			TEXT("Opinion33"), TEXT("Opinion33"), TEXT("Opinion33"),
+			Value(36)
+		},
+		{
+			246, NCONSTCAT_OPINIONS,
+			TEXT("Opinion34"), TEXT("Opinion34"), TEXT("Opinion34"),
+			Value(37)
+		},
+		{
+			247, NCONSTCAT_OPINIONS,
+			TEXT("Opinion35"), TEXT("Opinion35"), TEXT("Opinion35"),
+			Value(38)
+		},
+		{
+			248, NCONSTCAT_OPINIONS,
+			TEXT("Opinion36"), TEXT("Opinion36"), TEXT("Opinion36"),
+			Value(39)
+		},
+		{
+			249, NCONSTCAT_OPINIONS,
+			TEXT("Opinion37"), TEXT("Opinion37"), TEXT("Opinion37"),
+			Value(40)
+		},
+		{
+			250, NCONSTCAT_OPINIONS,
+			TEXT("Opinion38"), TEXT("Opinion38"), TEXT("Opinion38"),
+			Value(41)
+		},
+		{
+			251, NCONSTCAT_OPINIONS,
+			TEXT("Opinion39"), TEXT("Opinion39"), TEXT("Opinion39"),
+			Value(42)
+		},
+		{
+			252, NCONSTCAT_OPINIONS,
+			TEXT("Opinion40"), TEXT("Opinion40"), TEXT("Opinion40"),
+			Value(43)
+		},
+		{
+			253, NCONSTCAT_OPINIONS,
+			TEXT("Opinion41"), TEXT("Opinion41"), TEXT("Opinion41"),
+			Value(44)
+		},
+		{
+			254, NCONSTCAT_OPINIONS,
+			TEXT("Opinion42"), TEXT("Opinion42"), TEXT("Opinion42"),
+			Value(45)
+		},
+		{
+			255, NCONSTCAT_OPINIONS,
+			TEXT("Opinion43"), TEXT("Opinion43"), TEXT("Opinion43"),
+			Value(46)
+		},
+		{
+			256, NCONSTCAT_OPINIONS,
+			TEXT("Opinion44"), TEXT("Opinion44"), TEXT("Opinion44"),
+			Value(47)
+		},
+		{
+			257, NCONSTCAT_OPINIONS,
+			TEXT("Opinion45"), TEXT("Opinion45"), TEXT("Opinion45"),
+			Value(48)
+		},
+		{
+			258, NCONSTCAT_OPINIONS,
+			TEXT("Opinion46"), TEXT("Opinion46"), TEXT("Opinion46"),
+			Value(49)
+		},
+		{
+			259, NCONSTCAT_OPINIONS,
+			TEXT("Opinion47"), TEXT("Opinion47"), TEXT("Opinion47"),
+			Value(50)
+		},
+		{
+			260, NCONSTCAT_OPINIONS,
+			TEXT("Opinion48"), TEXT("Opinion48"), TEXT("Opinion48"),
+			Value(51)
+		},
+		{
+			261, NCONSTCAT_OPINIONS,
+			TEXT("Opinion49"), TEXT("Opinion49"), TEXT("Opinion49"),
+			Value(52)
+		},
+		{
+			262, NCONSTCAT_OPINIONS,
+			TEXT("Opinion50"), TEXT("Opinion50"), TEXT("Opinion50"),
+			Value(53)
+		},
+		{
+			263, NCONSTCAT_OPINIONS,
+			TEXT("Opinion51"), TEXT("Opinion51"), TEXT("Opinion51"),
+			Value(54)
+		},
+		{
+			264, NCONSTCAT_OPINIONS,
+			TEXT("Opinion52"), TEXT("Opinion52"), TEXT("Opinion52"),
+			Value(55)
+		},
+		{
+			265, NCONSTCAT_OPINIONS,
+			TEXT("Opinion53"), TEXT("Opinion53"), TEXT("Opinion53"),
+			Value(56)
+		},
+		{
+			266, NCONSTCAT_OPINIONS,
+			TEXT("Opinion54"), TEXT("Opinion54"), TEXT("Opinion54"),
+			Value(57)
+		},
+		{
+			267, NCONSTCAT_OPINIONS,
+			TEXT("Opinion55"), TEXT("Opinion55"), TEXT("Opinion55"),
+			Value(58)
+		},
+		{
+			268, NCONSTCAT_OPINIONS,
+			TEXT("Opinion56"), TEXT("Opinion56"), TEXT("Opinion56"),
+			Value(59)
+		},
+		{
+			269, NCONSTCAT_OPINIONS,
+			TEXT("Opinion57"), TEXT("Opinion57"), TEXT("Opinion57"),
+			Value(60)
+		},
+		{
+			270, NCONSTCAT_OPINIONS,
+			TEXT("Opinion58"), TEXT("Opinion58"), TEXT("Opinion58"),
+			Value(61)
+		},
+		{
+			271, NCONSTCAT_OPINIONS,
+			TEXT("Opinion59"), TEXT("Opinion59"), TEXT("Opinion59"),
+			Value(62)
+		},
+		{
+			272, NCONSTCAT_OPINIONS,
+			TEXT("Opinion60"), TEXT("Opinion60"), TEXT("Opinion60"),
+			Value(63)
+		},
+		{
+			273, NCONSTCAT_OPINIONS,
+			TEXT("Opinion61"), TEXT("Opinion61"), TEXT("Opinion61"),
+			Value(64)
+		},
+		{
+			274, NCONSTCAT_OPINIONS,
+			TEXT("Opinion62"), TEXT("Opinion62"), TEXT("Opinion62"),
+			Value(65)
+		},
+		{
+			275, NCONSTCAT_OPINIONS,
+			TEXT("Opinion63"), TEXT("Opinion63"), TEXT("Opinion63"),
+			Value(66)
+		},
+		{
+			276, NCONSTCAT_OPINIONS,
+			TEXT("Opinion64"), TEXT("Opinion64"), TEXT("Opinion64"),
+			Value(67)
+		},
+		{
+			277, NCONSTCAT_OPINIONS,
+			TEXT("Opinion65"), TEXT("Opinion65"), TEXT("Opinion65"),
+			Value(68)
+		},
+		{
+			278, NCONSTCAT_OPINIONS,
+			TEXT("Opinion66"), TEXT("Opinion66"), TEXT("Opinion66"),
+			Value(69)
+		},
+		{
+			279, NCONSTCAT_OPINIONS,
+			TEXT("Opinion67"), TEXT("Opinion67"), TEXT("Opinion67"),
+			Value(70)
+		},
+		{
+			280, NCONSTCAT_OPINIONS,
+			TEXT("Opinion68"), TEXT("Opinion68"), TEXT("Opinion68"),
+			Value(71)
+		},
+		{
+			281, NCONSTCAT_OPINIONS,
+			TEXT("Opinion69"), TEXT("Opinion69"), TEXT("Opinion69"),
+			Value(72)
+		},
+		{
+			282, NCONSTCAT_OPINIONS,
+			TEXT("Opinion70"), TEXT("Opinion70"), TEXT("Opinion70"),
+			Value(73)
+		},
+		{
+			282, NCONSTCAT_OPINIONS,
+			TEXT("Opinion70"), TEXT("Opinion70"), TEXT("Opinion70"),
+			Value(73)
+		},
+		{
+			283, NCONSTCAT_OPINIONS,
+			TEXT("Opinion71"), TEXT("Opinion71"), TEXT("Opinion71"),
+			Value(74)
+		},
+		{
+			284, NCONSTCAT_OPINIONS,
+			TEXT("Opinion72"), TEXT("Opinion72"), TEXT("Opinion72"),
+			Value(75)
+		},
+		{
+			285, NCONSTCAT_OPINIONS,
+			TEXT("Opinion73"), TEXT("Opinion73"), TEXT("Opinion73"),
+			Value(76)
+		},
+		{
+			286, NCONSTCAT_OPINIONS,
+			TEXT("Opinion74"), TEXT("Opinion74"), TEXT("Opinion74"),
+			Value(77)
+		},
+		{
+			287, NCONSTCAT_OPINIONS,
+			TEXT("Opinion75"), TEXT("Opinion75"), TEXT("Opinion75"),
+			Value(78)
+		},
+		{
+			288, NCONSTCAT_OPINIONS,
+			TEXT("Opinion76"), TEXT("Opinion76"), TEXT("Opinion76"),
+			Value(79)
+		},
+		{
+			289, NCONSTCAT_OPINIONS,
+			TEXT("Opinion77"), TEXT("Opinion77"), TEXT("Opinion77"),
+			Value(80)
+		},
+		{
+			290, NCONSTCAT_OPINIONS,
+			TEXT("Opinion78"), TEXT("Opinion78"), TEXT("Opinion78"),
+			Value(81)
+		},
+		{
+			291, NCONSTCAT_OPINIONS,
+			TEXT("Opinion79"), TEXT("Opinion79"), TEXT("Opinion79"),
+			Value(82)
+		},
+		{
+			292, NCONSTCAT_OPINIONS,
+			TEXT("Opinion80"), TEXT("Opinion80"), TEXT("Opinion80"),
+			Value(83)
+		},
+		{
+			293, NCONSTCAT_OPINIONS,
+			TEXT("Opinion81"), TEXT("Opinion81"), TEXT("Opinion81"),
+			Value(84)
+		},
+		{
+			294, NCONSTCAT_OPINIONS,
+			TEXT("Opinion82"), TEXT("Opinion82"), TEXT("Opinion82"),
+			Value(85)
+		},
+		{
+			295, NCONSTCAT_OPINIONS,
+			TEXT("Opinion83"), TEXT("Opinion83"), TEXT("Opinion83"),
+			Value(86)
+		},
+		{
+			296, NCONSTCAT_OPINIONS,
+			TEXT("Opinion84"), TEXT("Opinion84"), TEXT("Opinion84"),
+			Value(87)
+		},
+		{
+			297, NCONSTCAT_OPINIONS,
+			TEXT("Opinion85"), TEXT("Opinion85"), TEXT("Opinion85"),
+			Value(88)
+		},
 	},
 	{ //BOOL
 		
