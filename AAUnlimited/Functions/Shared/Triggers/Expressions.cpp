@@ -808,7 +808,7 @@ namespace Shared {
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(0);
 
-			int towards = params[0].iVal;
+			int towards = params[1].iVal;
 			if (ExpressionSeatInvalid(towards)) return Value(0);
 			CharInstData* towardsInst = &AAPlay::g_characters[towards];
 			if (!towardsInst->IsValid()) return Value(0);
