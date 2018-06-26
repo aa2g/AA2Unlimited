@@ -1,6 +1,6 @@
 [submodule "picojson"]
 	path = AAUnlimited/3rdparty/picojson
-	url = https://github.com/geneishouko/picojson.git
+	url = https://github.com/kazuho/picojson.git
 [submodule "3rdparty/zstd"]
 	path = 3rdparty/zstd
 	url = https://github.com/facebook/zstd.git
