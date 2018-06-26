@@ -98,7 +98,7 @@ function _M.save_gsd(cfg)
 	cfg["fullscreen"] = 0
 	local fn = host_path("data", "gsd.cfg")
 	--log("saving gsd to "..fn)
-	local f = io.open(fn, "w")
+	local f = io.open(fn, "wb")
 	for _,v in ipairs(format) do
 		if type(v) == "string" then
 			f:write(v)
