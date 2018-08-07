@@ -53,6 +53,8 @@ namespace Triggers {
 		HPOSITION_CHANGE,
 		PC_AFTER_RESPONSE,
 		NPC_AFTER_RESPONSE,
+		HI_POLY_DESPAWN,
+		H_END,
 		
 		
 		N_EVENTS
@@ -114,6 +116,17 @@ namespace Triggers {
 
 		ExtClass::CharacterStruct* character;
 		DWORD* clothState;
+
+	EDC_END
+
+	EDC_DECLARE(HiPolyDespawnData, HI_POLY_DESPAWN)
+
+		ExtClass::CharacterStruct* character;
+
+	EDC_END
+
+	EDC_DECLARE(HEndData, H_END)
+
 
 	EDC_END
 

@@ -21,27 +21,29 @@ namespace Shared {
 				return Shared::GameState::getPlayerCharacter()->m_seat;
 			case HPOSITION_CHANGE:
 				return Shared::GameState::getPlayerCharacter()->m_seat;
+			case H_END:
+				return Shared::GameState::getPlayerCharacter()->m_seat;
 			default:
 				return this->eventData->card;
 			}
 		}
 
 		Value Thread::GetDominantInH(std::vector<Value>&) {
-			switch (this->eventData->GetId()) {
-			case HPOSITION_CHANGE:
-				return (int)((HPositionData*)eventData)->actor0;
-			default:
-				return -1;
+			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
+			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
+			if (actor0) {
+				return (int)(*actor0);
 			}
+			else return -1;
 		}
 
 		Value Thread::GetSubmissiveInH(std::vector<Value>&) {
-			switch (this->eventData->GetId()) {
-			case HPOSITION_CHANGE:
-				return (int)((HPositionData*)eventData)->actor1;
-			default:
-				return -1;
+			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
+			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
+			if (actor1) {
+				return (int)(*actor1);
 			}
+			else return -1;
 		}
 
 		//int ()
@@ -791,6 +793,51 @@ namespace Shared {
 
 		}
 
+		Value Thread::GetDecals(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
+			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
+			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
+			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
+			int charoffset = 0;
+			if (actor0 && actor1) {
+				if (card == *actor0) charoffset = 0xe0;
+				if (card == *actor1) charoffset = 0xe4;
+				int position = params[1].iVal;
+				int lOffset = 0;
+				switch (position) {
+				case 0:
+					lOffset = 0x88;
+					break;
+				case 1:
+					lOffset = 0x8c;
+					break;
+				case 2:
+					lOffset = 0x90;
+					break;
+				case 3:
+					lOffset = 0x94;
+					break;
+				case 4:
+					lOffset = 0x98;
+					break;
+				default:
+					lOffset = 0x98;
+				}
+
+				const DWORD adr[]{ 0x3761CC, 0x28, 0x38, 0xAC, 0x18, charoffset, lOffset };
+				DWORD* offset = (DWORD*)ExtVars::ApplyRule(adr);
+
+				if (offset) {
+					return Value((int)*offset);
+				}
+			}
+			else return -1;
+		}
 		//int(int)
 		Value Thread::GetCardOrientation(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2888,6 +2935,12 @@ namespace Shared {
 					TEXT("Get Breast Size"), TEXT("%p ::Breast"), TEXT("Get breast size of the character. 0=small, 1=normal, 2=large"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardBreastSize
+				},
+				{
+					114, EXPRCAT_CHARPROP,
+					TEXT("Get Decals"), TEXT("%p ::Decals(position: %p )"), TEXT("Get strength of decals at certain body part of some character. Use only during h! For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetDecals
 				},
 			},
 

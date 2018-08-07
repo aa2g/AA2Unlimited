@@ -31,6 +31,9 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		if (loc_currentHInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H ended\n";
 			LUA_EVENT_NORET("end_h", hInfo);
+			Shared::Triggers::HEndData data;
+			Shared::Triggers::ThrowEvent(&data);
+			
 		}
 		loc_currentHInfo = NULL;
 

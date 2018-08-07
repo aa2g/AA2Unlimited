@@ -21,6 +21,25 @@ void CharInstData::SetCurrentStyle(int index)
 	storage.storeCardInt(&AAPlay::g_characters[this->m_char->m_seat], L"m_currCardStyle", index);
 }
 
+void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
+{
+	DWORD position = (DWORD)bodyPart;
+	DWORD strength = (DWORD)decalStrength;
+	const DWORD offset[]{ 0x151900 };
+	DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+	auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+	__asm
+	{
+		mov eax, position
+		mov edi, somepointer
+		mov ecx, strength
+		push ebp
+		push ecx
+		call [address]
+		pop ebp
+	}
+}
+
 int CharInstData::GetStyleCount()
 {
 	return m_cardData.m_styles.size();

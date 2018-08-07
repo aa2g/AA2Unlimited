@@ -92,8 +92,16 @@ namespace Shared {
 			},
 			{ NPC_AFTER_RESPONSE, EVENTCAT_CONVERSATION, TEXT("After NPC Response"), TEXT("After NPC Response"),
 			TEXT("The event is fired after all the triggers have finished editing NPC Response."),
-			{}
-		}
+				{}
+			},
+			{ HI_POLY_DESPAWN, EVENTCAT_LOADS, TEXT("HI Poly Despawn"), TEXT("HI Poly Despawn"),
+			TEXT("The event is fired as the character's hi poly is despawning."),
+				{}
+			},
+			{ H_END, EVENTCAT_LOADS, TEXT("H End"), TEXT("H Ends"),
+			TEXT("The event is fired as the H scene ends."),
+				{}
+			}
 		};
 
 		/*void ClothesChangedData::SetThreadStorage(Thread* thread) const {

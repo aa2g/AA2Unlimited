@@ -69,7 +69,7 @@ namespace Shared {
 			void SetPCResponse(std::vector<Value>& params);
 			void SetStrongResponse(std::vector<Value>& params);
 			void SetAbsoluteResponse(std::vector<Value>& params);
-			void AddChar(std::vector<Value>& params);
+			void SetPCTarget(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPreference(std::vector<Value>& params);
@@ -113,6 +113,7 @@ namespace Shared {
 			void SetCardCumStatClimaxCount(std::vector<Value>& params);
 			void SetCardCumStatSimClimaxCount(std::vector<Value>& params);
 			void SetCardCumStatCondomsUsed(std::vector<Value>& params);
+			void SetDecals(std::vector<Value>& params);
 			void SetCardCumStatRiskyCums(std::vector<Value>& params);
 			void SetCardVaginalSex(std::vector<Value>& params);
 			void SetCardAnalSex(std::vector<Value>& params);
@@ -218,6 +219,7 @@ namespace Shared {
 			Value GetCardFullName(std::vector<Value>& params);	//string(int)
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
 			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
+			Value GetDecals(std::vector<Value>& params);
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)
 			Value GetCardGender(std::vector<Value>& params); //int(int)
