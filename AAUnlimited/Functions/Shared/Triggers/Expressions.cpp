@@ -679,6 +679,15 @@ namespace Shared {
 
 			return Value(cardInst->m_char->m_moreData1->m_activity->m_interactionLock);
 		}
+
+		Value Thread::GetActionAboutRoom(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value((int)(cardInst->m_char->m_moreData1->m_activity->m_actionAboutRoom));
+		}
 		//int(int)
 
 		Value Thread::GetMasturbating(std::vector<Value>& params) {
@@ -803,7 +812,7 @@ namespace Shared {
 			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
 			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
 			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
-			int charoffset = 0;
+			int charoffset = 0xe4;
 			if (actor0 && actor1) {
 				if (card == *actor0) charoffset = 0xe0;
 				if (card == *actor1) charoffset = 0xe4;
@@ -835,6 +844,7 @@ namespace Shared {
 				if (offset) {
 					return Value((int)*offset);
 				}
+				else return -1;
 			}
 			else return -1;
 		}
@@ -2941,6 +2951,12 @@ namespace Shared {
 					TEXT("Get Decals"), TEXT("%p ::Decals(position: %p )"), TEXT("Get strength of decals at certain body part of some character. Use only during h! For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetDecals
+				},
+				{
+					115, EXPRCAT_CHARPROP,
+					TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom"), TEXT("Returns the ID of the room that the character is talking about."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetActionAboutRoom
 				},
 			},
 

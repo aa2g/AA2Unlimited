@@ -700,6 +700,20 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_interactionLock = lockedValue;
 		}
 
+
+		void Thread::SetActionAboutRoom(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int room = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_actionAboutRoom = room;
+		}
+
+
 		void Thread::SetMasturbating(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -2067,6 +2081,12 @@ namespace Shared {
 				TEXT("Adds decals to a character to a certain part of their body. Use only on characters that are currently loaded in high poly. For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetDecals
+			},
+			{
+				101, ACTIONCAT_NPCACTION, TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom = %p"),
+				TEXT("Set the room that the NPC will talk about in their action."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetActionAboutRoom
 			},
 		};
 

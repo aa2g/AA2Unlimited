@@ -23,7 +23,7 @@ public:
 	BYTE m_currentMovementType; //0=stand, 1=move, 2=roam, 3=walk to character, 4 = follow, 7 = talk, 8=mina
 	BYTE m_unknown4[3];
 	DWORD m_currConversationId; //if this is an npc that plans a conversation, this is set once the character starts walking towards its target
-	DWORD m_unknown5;
+	DWORD m_actionAboutRoom; //This is room the NPC talks about in a come here event. Has seemingly no effect in follow_me_h and follow_me
 	DWORD m_currRoomTarget; //similarily, set when getting the command to walk to a room
 	DWORD m_unknown6;
 	DWORD m_lastConversationSuccess; //(3=trumpet, 2 = nice, 1 = normal)

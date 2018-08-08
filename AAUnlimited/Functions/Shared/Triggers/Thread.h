@@ -89,6 +89,7 @@ namespace Shared {
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
 			void SetCharacterLocked(std::vector<Value>& params);
+			void SetActionAboutRoom(std::vector<Value>& params);
 			void SetMasturbating(std::vector<Value>& params);
 			void SetCardStrengthValue(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
@@ -208,6 +209,7 @@ namespace Shared {
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
 			Value GetCardLocked(std::vector<Value>& params);
+			Value GetActionAboutRoom(std::vector<Value>& params);
 			Value GetMasturbating(std::vector<Value>& params);
 			Value GetCurrentConvo(std::vector<Value>& params);
 			Value GetCherryStatus(std::vector<Value>& params);
@@ -242,6 +244,7 @@ namespace Shared {
 			Value GetHeight(std::vector<Value>& params);
 			Value GetTarget(std::vector<Value>& params);
 			Value PCTalkAbout(std::vector<Value>& params);
+			Value ActionAboutRoom(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
