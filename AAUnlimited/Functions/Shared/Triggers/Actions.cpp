@@ -1386,6 +1386,13 @@ namespace Shared {
 			Shared::GameState::setH_AI(val);
 		}
 
+		//Can_leave_H_AI
+		void Thread::Set_H_AI_LOCK(std::vector<Value>& params)
+		{
+			bool val = params[0].bVal;
+			Shared::GameState::setLockedInH(val);
+		}
+
 		//int seat, int mood, int moodStr
 		void Thread::AddMood(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2087,6 +2094,12 @@ namespace Shared {
 				TEXT("Set the room that the NPC will talk about in their action."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetActionAboutRoom
+			},
+			{
+				102, ACTIONCAT_MODIFY_CHARACTER, TEXT("H-AI Exit Lock"), TEXT("H-AI Lock = %p"),
+				TEXT("Set whether PC is locked in h while h-ai is on."),
+				{ TYPE_BOOL },
+				&Thread::Set_H_AI_LOCK
 			},
 		};
 

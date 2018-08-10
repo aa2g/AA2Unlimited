@@ -146,6 +146,7 @@ namespace Shared {
 
 			void SetH_AI(std::vector<Value>& params);
 
+			void Set_H_AI_LOCK(std::vector<Value>& params);
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 
@@ -244,7 +245,6 @@ namespace Shared {
 			Value GetHeight(std::vector<Value>& params);
 			Value GetTarget(std::vector<Value>& params);
 			Value PCTalkAbout(std::vector<Value>& params);
-			Value ActionAboutRoom(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
