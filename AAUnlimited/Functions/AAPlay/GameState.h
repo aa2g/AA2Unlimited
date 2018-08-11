@@ -27,6 +27,9 @@ namespace Shared {
 		void setH_AI(bool value);
 		bool getH_AI();
 
+		void setLockedInH(bool value);
+		bool getLockedInH();
+
 		void setIsInH(bool value);
 		bool getIsInH();
 

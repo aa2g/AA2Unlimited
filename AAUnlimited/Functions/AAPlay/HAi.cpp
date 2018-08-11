@@ -42,6 +42,7 @@ void PostTick(HInfo* hinfo, bool notEnd)
 		loc_isForcedH = false;
 		loc_isTalkedTo = false;
 		Shared::GameState::setH_AI(false);
+		Shared::GameState::setLockedInH(true);
 	}
 }
 

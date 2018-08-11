@@ -25,6 +25,7 @@ struct GameStateStruct {
 		h_ai = false;
 		m_HPosition = -1;
 		is_in_h = false;
+		h_ai_locked = true;
 	}
 
 	//Game state indicators
@@ -43,6 +44,7 @@ struct GameStateStruct {
 	int roomNumber[25];					//Current room ID
 	DWORD interrupt;					//Disabled interruptions
 	bool h_ai;							//Disable or enable h-ai
+	bool h_ai_locked;					//Disable or enable ability to leave h-ai
 	DWORD m_HPosition;					//H position ID
 	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 #define CONVERSATION_CHARACTERS_N 2
@@ -122,6 +124,16 @@ void Shared::GameState::setH_AI(bool value)
 bool Shared::GameState::getH_AI()
 {
 	return loc_gameState.h_ai;
+}
+
+void Shared::GameState::setLockedInH(bool value)
+{
+	loc_gameState.h_ai_locked = value;
+}
+
+bool Shared::GameState::getLockedInH()
+{
+	return loc_gameState.h_ai_locked;
 }
 
 void Shared::GameState::setIsInH(bool value)

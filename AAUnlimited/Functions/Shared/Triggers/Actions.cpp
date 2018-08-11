@@ -408,10 +408,15 @@ namespace Shared {
 			((PcResponseData*)eventData)->absolute_response = params[0].iVal;
 		}
 
-		void Thread::AddChar(std::vector<Value>& params) {
-			int seat = params[0].iVal;
-			CharInstData* seatInst = &AAPlay::g_characters[seat];
-			seatInst->m_char->Spawn(0, 1, 1, 1);
+		void Thread::SetPCTarget(std::vector<Value>& params) {
+			int seatPartner = params[0].iVal;
+			if (ActionSeatInvalid(seatPartner)) return;
+			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
+			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
+
+			const DWORD offset3[]{ 0x376164, 0x34, 0x14, 0x8C };
+			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset3);
+			*partnerNpcStatus = instPartner->m_char->m_characterStatus->m_npcStatus;
 		}	
 
 		//int seat, int virtue
@@ -694,6 +699,20 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_interactionLock = lockedValue;
 		}
+
+
+		void Thread::SetActionAboutRoom(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int room = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_actionAboutRoom = room;
+		}
+
 
 		void Thread::SetMasturbating(std::vector<Value>& params)
 		{
@@ -1060,6 +1079,17 @@ namespace Shared {
 				instance->m_char->m_characterStatus->m_condomsUsed[target] = amount;
 			}
 		}
+		void Thread::SetDecals(std::vector<Value>& params)
+		{
+
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto instance = &AAPlay::g_characters[seat];
+			int position = params[1].iVal;
+			int decalstrength = params[2].iVal;
+			instance->ApplyDecals(position, decalstrength);
+		}
+
 		void Thread::SetCardCumStatRiskyCums(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -1354,6 +1384,13 @@ namespace Shared {
 		{
 			bool val = params[0].bVal;
 			Shared::GameState::setH_AI(val);
+		}
+
+		//Can_leave_H_AI
+		void Thread::Set_H_AI_LOCK(std::vector<Value>& params)
+		{
+			bool val = params[0].bVal;
+			Shared::GameState::setLockedInH(val);
 		}
 
 		//int seat, int mood, int moodStr
@@ -1991,10 +2028,10 @@ namespace Shared {
 				&Thread::SetH_AI
 			},
 			{
-				91, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Char"), TEXT("AddChar = %p"),
-				TEXT("Add char"),
+				91, ACTIONCAT_MODIFY_CHARACTER, TEXT("Change PC Target"), TEXT("PCTarget = %p"),
+				TEXT("Changes PC's target. Very situational use, cannot be used to redirect PC's actions. Can be used to change second actor of h."),
 				{ TYPE_INT },
-				&Thread::AddChar
+				&Thread::SetPCTarget
 			},
 			{
 				92, ACTIONCAT_EVENT, TEXT("Set Strong PC Response"), TEXT("PCStrongResponse = %p"),
@@ -2045,6 +2082,24 @@ namespace Shared {
 				TEXT("Set the state of opinion of first character towards the second character."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardOpinion
+			},
+			{
+				100, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Decals"), TEXT("%p ::Decals(position: %p ) = %p"),
+				TEXT("Adds decals to a character to a certain part of their body. Use only on characters that are currently loaded in high poly. For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetDecals
+			},
+			{
+				101, ACTIONCAT_NPCACTION, TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom = %p"),
+				TEXT("Set the room that the NPC will talk about in their action."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetActionAboutRoom
+			},
+			{
+				102, ACTIONCAT_MODIFY_CHARACTER, TEXT("H-AI Exit Lock"), TEXT("H-AI Lock = %p"),
+				TEXT("Set whether PC is locked in h while h-ai is on."),
+				{ TYPE_BOOL },
+				&Thread::Set_H_AI_LOCK
 			},
 		};
 

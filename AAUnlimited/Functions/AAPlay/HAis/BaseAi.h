@@ -135,7 +135,12 @@ inline void BaseAi::DisableAllButtons(ExtClass::HInfo* info) {
 	it = it->next;
 	do {
 		HGUIButton* btn = (HGUIButton*)it->data;
-		btn->m_bActive = FALSE;
+		if (info->m_btnExit == btn) {
+			if (Shared::GameState::getLockedInH()) {
+				btn->m_bActive = FALSE;
+			}
+		}
+		else btn->m_bActive = FALSE;
 		it = it->next;
 	} while (it != start);
 }

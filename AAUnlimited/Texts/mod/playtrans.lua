@@ -78,6 +78,16 @@ local dict = {
 [0xE115E] = "3rd floor passage",
 [0xE11B2] = "Arts room",
 [0xE11C0] = "Multipurpose room",
+[0xE12BC] = "Machine Room",
+[0xE1268] = "Girl's Shower Stall",
+[0xE125A] = "Boys's Shower Stall",
+[0xE12AE] = "Love Hotel",
+[0xE12A0] = "Gym Storeroom",
+[0xE1292] = "Counseling Room",
+[0xE1284]= "Girls' Toilet Stall",
+[0xE1276] = "Boys' Toilet Stall",
+[0xE124C] = "Girls' room",
+[0xe123E] = "Boys' room",
 }
 
 local _M = {}

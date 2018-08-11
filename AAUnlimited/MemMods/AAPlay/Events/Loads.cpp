@@ -159,6 +159,11 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	}
 
 	if (!loc_loadingCharacter) {
+		if (General::IsAAPlay) {
+			HiPolyDespawnData data;
+			data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+			ThrowEvent(&data);
+		}
 		LUA_EVENT_NORET("char_despawn", loadCharacter);
 	}
 
