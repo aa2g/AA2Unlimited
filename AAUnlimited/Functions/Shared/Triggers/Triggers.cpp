@@ -5,6 +5,8 @@
 
 namespace Shared {
 namespace Triggers {
+	std::string triggers_log[100];
+	int triggers_idxLog = 0;
 
 namespace {
 	int CalculateJumpDistance(int jumpAction, int jumpTo) {

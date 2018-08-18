@@ -34,13 +34,13 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 	//execute actions
 	CharInstData* triggeringCardInstance = &AAPlay::g_characters[this->eventData->card];
 	CharInstData* thisCardInstance = &AAPlay::g_characters[execTrigger->owningCard];
+	Shared::Triggers::triggers_log[Shared::Triggers::triggers_idxLog] = "Trigger [" + General::CastToString(execTrigger->name) + "]" + "\tThis card: [" + std::to_string(thisCardInstance->m_char->m_seat) + "]" + "\tTriggering card: [" + std::to_string(triggeringCardInstance->m_char->m_seat) + "]\r\n";
+	Shared::Triggers::triggers_idxLog = (Shared::Triggers::triggers_idxLog + 1) % 100;
+	//triggers_log[idxLog] = "Trigger [" <<  execTrigger->name << "]" << "\tThis card: [" << std::to_string(thisCardInstance->m_char->m_seat) <<  "]" << "\tTriggering card: [" << std::to_string(triggeringCardInstance->m_char->m_seat) << "]\r\n";
 
-
-	LOGPRIO(Logger::Priority::SPAM) << "Trigger [" <<  execTrigger->name << "]" << "\tThis card: [" << std::string(thisCardInstance->m_char->m_charData->m_forename) << " " << std::string(thisCardInstance->m_char->m_charData->m_surname) << "]" << "\tTriggering card: [" << std::string(triggeringCardInstance->m_char->m_charData->m_forename) << " " << std::string(triggeringCardInstance->m_char->m_charData->m_surname) << "]\r\n";
 	for(ip = 0; ip < trg->actions.size() && !execFinished; ip++) {
 		//get action
 		auto& action = trg->actions[ip];
-		LOGPRIONC(Logger::Priority::SPAM) " - " << action.action->name << "\r\n";
 		ExecuteAction(action);
 		if(executeCount > maxExecuteCount) {
 			return;
