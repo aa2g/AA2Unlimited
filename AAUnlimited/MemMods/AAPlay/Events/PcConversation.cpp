@@ -19,13 +19,23 @@ void __stdcall StartEvent() {
 }
 
 void __stdcall EndEvent() {
-	Shared::GameState::setIsPcConversation(false);
-	pcConvoStateUpdatedData.state = -1;
-	LUA_EVENT_NORET("convo", false);
-	Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 
-	Shared::GameState::clearConversationCharacter(-1);
-	Poser::EndEvent();
+	//Event data carries over from the other event throw. This one is for PC conversation end, while stuff like pcConvoStateUpdatedData.card, pcConvoStateUpdatedData.action etc is set from the hook.
+	if (pcConvoStateUpdatedData.substruct != nullptr) {
+		if (&AAPlay::g_characters[pcConvoStateUpdatedData.card] != nullptr) {
+			if (&AAPlay::g_characters[pcConvoStateUpdatedData.card] != nullptr) {
+				if ((&AAPlay::g_characters[pcConvoStateUpdatedData.card])->IsValid()) {
+					Shared::GameState::setIsPcConversation(false);
+					pcConvoStateUpdatedData.state = -1;
+					LUA_EVENT_NORET("convo", false);
+					Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
+
+					Shared::GameState::clearConversationCharacter(-1);
+					Poser::EndEvent();
+				}
+			}
+		}
+	}
 }
 
 
