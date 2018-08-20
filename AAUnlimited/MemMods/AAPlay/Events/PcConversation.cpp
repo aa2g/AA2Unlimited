@@ -50,7 +50,7 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		pcConvoStateUpdatedData.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 		pcConvoStateUpdatedData.action = substruct->m_conversationId;
 		pcConvoStateUpdatedData.m_bStartH = &(substruct->m_bStartH);
-		pcConvoStateUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_seat;
+		pcConvoStateUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_char->m_seat;
 		pcConvoStateUpdatedData.conversationAnswerId = substruct->m_conversationAnswerId;
 		pcConvoStateUpdatedData.currentlyAnswering = substruct->m_bCurrentlyAnswering;
 		LUA_EVENT_NORET("convo_state_update", pcConvoStateUpdatedData.state);
@@ -67,7 +67,7 @@ void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
 		pcConvoLineUpdatedData.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 		pcConvoLineUpdatedData.action = substruct->m_conversationId;
 		pcConvoLineUpdatedData.m_bStartH = &(substruct->m_bStartH);
-		pcConvoLineUpdatedData.card = (Shared::GameState::getPlayerCharacter())->m_seat;
+		pcConvoLineUpdatedData.card = (Shared::GameState::getPlayerCharacter()->m_char)->m_seat;
 		pcConvoLineUpdatedData.conversationAnswerId = substruct->m_conversationAnswerId;
 		pcConvoLineUpdatedData.currentlyAnswering = substruct->m_bCurrentlyAnswering;
 		LUA_EVENT_NORET("convo_line_update", substruct->m_conversationState);
@@ -128,7 +128,7 @@ void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 
 	data.pc_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 	data.substruct = substruct;
-	data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
+	data.card = Shared::GameState::getPlayerCharacter()->m_char ? Shared::GameState::getPlayerCharacter()->m_char->m_seat : -1;
 	Shared::Triggers::ThrowEvent(&data);
 	if (!data.forceResponse) {
 		HAi::ConversationPcResponse(param);
@@ -139,7 +139,7 @@ void __stdcall PcAnswer(ExtClass::BaseConversationStruct* param) {
 	if (data.absolute_response != -1) {
 		substruct->m_playerAnswer = data.absolute_response;
 	}
-	effective_data.card = Shared::GameState::getPlayerCharacter() ? Shared::GameState::getPlayerCharacter()->m_seat : -1;
+	effective_data.card = Shared::GameState::getPlayerCharacter()->m_char ? Shared::GameState::getPlayerCharacter()->m_char->m_seat : -1;
 	effective_data.substruct = substruct;
 	effective_data.effective_response = (substruct->m_playerAnswer < arbitraryMaxResponse) ? substruct->m_playerAnswer : -1;
 	Shared::Triggers::ThrowEvent(&effective_data);

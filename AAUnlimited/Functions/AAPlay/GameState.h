@@ -59,9 +59,18 @@ namespace Shared {
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
 		void clearConversationCharacter(int idx);
 
-		inline ExtClass::CharacterStruct * getPlayerCharacter()
+		inline CharInstData* getPlayerCharacter()
 		{
-			return *(ExtVars::AAPlay::PlayerCharacterPtr());
+			ExtClass::CharacterStruct* pcPtr = *(ExtVars::AAPlay::PlayerCharacterPtr());
+			if (pcPtr != nullptr) {
+				for (int i = 0; i< 25; i++)
+				{
+					if (AAPlay::g_characters[i].m_char == pcPtr) return &AAPlay::g_characters[i];
+				}
+				return NULL;
+			}
+			else return NULL;
+			
 		}
 		void setPlayerCharacter(int seat);
 

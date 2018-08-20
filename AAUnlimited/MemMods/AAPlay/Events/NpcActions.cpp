@@ -226,6 +226,55 @@ void ClothesChangeInjection() {
 		NULL);
 }
 
+void __stdcall RoomChange(NpcData* param) {
+	for (int seat = 0; seat < 25; seat = seat + 1) {
+		CharInstData* instance = &AAPlay::g_characters[seat];
+		if (instance->IsValid()) {
+			if (instance->m_char->m_npcData == param) {
+				Shared::Triggers::RoomChangeData roomChangeData;
+				roomChangeData.action = instance->m_forceAction.conversationId;
+				roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
+				if (instance->m_forceAction.target1 != nullptr) {
+					roomChangeData.convotarget = int(instance->m_forceAction.target1->m_thisChar);
+				}
+
+				roomChangeData.card = instance->m_char->m_seat;
+				Shared::Triggers::ThrowEvent(&roomChangeData);
+				return;
+			}
+		}
+	}
+}
+
+
+void __declspec(naked) roomChangeRedirect() {
+	__asm {
+		pushad
+		push edi
+		call RoomChange
+		popad
+		//original code
+		mov eax, [edi]
+		mov ecx, [eax+04]
+		ret
+	}
+}
+
+
+void RoomChangeInjection() {
+	//edi is the m_npcData
+	//AA2Play.exe +174CF4 - 8B 07 - mov eax,[edi]
+	//AA2Play.exe + 174CF6 - 8B 48 04 - mov ecx, [eax + 04]
+
+	DWORD address = General::GameBase + 0x174CF4;
+	DWORD redirectAddress = (DWORD)(&roomChangeRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x07,
+		0x8B, 0x48, 0x04 },						//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
 
 #if !NEW_HOOK
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)

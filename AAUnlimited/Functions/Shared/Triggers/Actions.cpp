@@ -1323,7 +1323,7 @@ namespace Shared {
 			*interrupt = 1;
 
 			//save the original PC and its target
-			GameState::setVoyeur(GameState::getPlayerCharacter());
+			GameState::setVoyeur(GameState::getPlayerCharacter()->m_char);
 			GameState::setVoyeurTarget(GameState::getVoyeur()->m_npcData->m_target);
 			GameState::setIsPeeping(true);
 

@@ -244,7 +244,6 @@ namespace Triggers {
 		
 	EDC_DECLARE(RoomChangeData, ROOM_CHANGE)
 
-		int prevRoom;
 		int roomTarget;
 		int action;
 		int convotarget;

@@ -32,6 +32,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H ended\n";
 			LUA_EVENT_NORET("end_h", hInfo);
 			Shared::Triggers::HEndData data;
+			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
 			
 		}

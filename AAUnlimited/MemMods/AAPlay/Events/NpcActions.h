@@ -12,6 +12,7 @@ namespace NpcActions {
 	void NpcAnswerInjection();
 	void NpcMovingActionInjection();
 	void NpcMovingActionPlanInjection();
+	void RoomChangeInjection();
 
 #pragma pack(push, 1)
 	struct AnswerStruct {
