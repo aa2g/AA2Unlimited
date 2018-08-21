@@ -21,6 +21,7 @@ void InitOnLoad() {
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 	int idxCharacter = 0;
+	PersistentStorage::ClassStorage::reset(Shared::GameState::getCurrentClassSaveName());
 	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
 
