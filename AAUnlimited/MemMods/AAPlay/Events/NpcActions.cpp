@@ -306,7 +306,7 @@ void __declspec(naked) hPositionChangeRedirect() {
 }
 
 void hPositionChangeInjection() {
-	//roomID is in esi
+	//H Position ID is in esi
 	//AA2Play.exe + 8197F - 89 B7 F4050000 - mov[edi + 000005F4], esi
 
 

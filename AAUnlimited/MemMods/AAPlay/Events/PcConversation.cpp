@@ -20,7 +20,7 @@ void __stdcall StartEvent() {
 
 void __stdcall EndEvent() {
 
-	//Event data carries over from the other event throw. This one is for PC conversation end, while stuff like pcConvoStateUpdatedData.card, pcConvoStateUpdatedData.action etc is set from the hook.
+	//Event data carries over from the other event throw. This one is for PC conversation end, while stuff like pcConvoStateUpdatedData.card, pcConvoStateUpdatedData.action etc is set from general tick.
 	if (pcConvoStateUpdatedData.substruct != nullptr) {
 		if (&AAPlay::g_characters[pcConvoStateUpdatedData.card] != nullptr) {
 			if (&AAPlay::g_characters[pcConvoStateUpdatedData.card] != nullptr) {
