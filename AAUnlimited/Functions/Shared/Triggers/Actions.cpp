@@ -43,6 +43,7 @@ namespace Shared {
 			if (ActionSeatInvalid(cardSeat)) return;
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
+			if (roomId < 0) return;
 
 			card->m_forceAction.conversationId = 0;
 			card->m_forceAction.movementType = 2;
