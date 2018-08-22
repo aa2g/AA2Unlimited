@@ -43,6 +43,7 @@ namespace PersistentStorage {
 		Option<picojson::object> getCardObject(CharInstData* character, std::wstring key);
 
 		static ClassStorage getStorage(std::wstring file);
+		static void reset(std::wstring file);
 		ClassStorage save();
 		
 		ClassStorage() {}

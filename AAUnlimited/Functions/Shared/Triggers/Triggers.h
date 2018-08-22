@@ -18,6 +18,8 @@
 
 namespace Shared {
 namespace Triggers {
+	extern std::string triggers_log[100];
+	extern int triggers_idxLog;
 
 	/*
 	 * A Variable type.

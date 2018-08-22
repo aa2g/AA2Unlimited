@@ -365,10 +365,16 @@ void Lua::bindLua() {
 			LUA_EVENT(mstr, m->wParam, m->lParam, (DWORD)m->hwnd, m->pt.x, m->pt.y);
 			if (mstr == "keydown") {
 				if (General::IsAAPlay) {
-					keyPressData.keyVal = m->wParam;
-					Shared::Triggers::ThrowEvent(&keyPressData);
+					if (Shared::GameState::getPlayerCharacter() != nullptr) {
+						if (Shared::GameState::getPlayerCharacter()->IsValid()) {
+							keyPressData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
+							keyPressData.keyVal = m->wParam;
+							Shared::Triggers::ThrowEvent(&keyPressData);
+						}
+					}
 				}
 			}
+
 			if (m->wParam == -1)
 				return true;
 		}

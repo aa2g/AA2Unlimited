@@ -3,9 +3,6 @@
 
 namespace GameTick {
 
-Shared::Triggers::RoomChangeData roomChangeData;
-Shared::Triggers::HPositionData hPositionData;
-
 int (__stdcall *orig_MsgHandler)(void *ptr, MSG *msg);
 int (__stdcall *orig_GameTick)();
 
@@ -40,63 +37,15 @@ void AddTimer(int when, void *fn) {
 }
 */
 
-void CheckRoomChange() {
 
-	for (int seat = 0; seat < 25; seat = seat + 1) {
-		auto roomValue = Shared::GameState::GetRoomNumber(seat);
-		CharInstData* instance = &AAPlay::g_characters[seat];
-		if (instance->IsValid()) {
-			if (instance->m_char != nullptr) {
-				if (instance->m_char->m_npcData != nullptr) {
-					if (instance->m_char->m_npcData->roomPtr != nullptr) {
-						auto roomID = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
-						if (roomValue != roomID) {
-							roomChangeData.action = instance->m_forceAction.conversationId;
-							roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
-							if (instance->m_forceAction.target1 != nullptr) {
-								roomChangeData.convotarget = int(instance->m_forceAction.target1->m_thisChar);
-							}
-
-							roomChangeData.prevRoom = roomValue;
-							Shared::GameState::SetRoomNumber(seat, roomID);
-
-							roomChangeData.card = seat;
-							if (roomChangeData.prevRoom < 0) return;
-							Shared::Triggers::ThrowEvent(&roomChangeData);
-						}
-					}
-				}
-
-			}
+void ResetOnTitle() {
+	if (General::IsAAPlay) {
+		if (*(ExtVars::AAPlay::PlayerCharacterPtr()) == nullptr) {
+			for (int i = 0; i < 25; i++) AAPlay::g_characters[i].Reset();
 		}
 	}
 }
 
-void hPositionChange() {
-	auto hPositionValue = Shared::GameState::getHPosition();
-	const DWORD offset[]{ 0x3761CC, 0x28, 0x38, 0x5F4 };
-	DWORD* hPosition = (DWORD*)ExtVars::ApplyRule(offset);
-	if (hPosition != nullptr) {
-		if (*hPosition != hPositionValue) {
-
-			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
-			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
-
-			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
-			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
-
-			if (actor0 && actor1) {
-				Shared::GameState::setHPosition(*hPosition);
-
-				hPositionData.actor0 = *actor0;
-				hPositionData.actor1 = *actor1;
-
-				hPositionData.position = *hPosition;
-				Shared::Triggers::ThrowEvent(&hPositionData);
-			}
-		}
-	}
-}
 
 int __stdcall GameTick() {
 	if (tick == 0) {
@@ -121,10 +70,8 @@ int __stdcall GameTick() {
 		}
 		else break;
 	}*/
-	if (g_Config.bTriggers) {
-		CheckRoomChange();
-		hPositionChange();
-	}
+
+	ResetOnTitle();
 	return orig_GameTick();
 }
 

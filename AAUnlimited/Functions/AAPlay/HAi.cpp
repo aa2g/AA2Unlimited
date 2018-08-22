@@ -86,7 +86,7 @@ void ConversationTickPost(ExtClass::NpcPcNonInteractiveConversationStruct* param
 
 void ConversationPcResponse(ExtClass::BaseConversationStruct* param) { //sets PC response to yes and sets the bool that starts h-ai
 	if (loc_isTalkedTo) {
-		auto pc = Shared::GameState::getPlayerCharacter();
+		auto pc = Shared::GameState::getPlayerCharacter()->m_char;
 		int card = pc->m_seat;
 		CharInstData* cardInst = &AAPlay::g_characters[card];
 		if (cardInst->m_char->m_charData->m_traitBools[Trait::TRAIT_EXPLOITABLE]) {

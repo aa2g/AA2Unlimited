@@ -18,11 +18,11 @@ namespace Shared {
 		Value Thread::GetTriggeringCard(std::vector<Value>&) {
 			switch (this->eventData->GetId()) {
 			case KEY_PRESS:
-				return Shared::GameState::getPlayerCharacter()->m_seat;
+				return Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			case HPOSITION_CHANGE:
-				return Shared::GameState::getPlayerCharacter()->m_seat;
+				return Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			case H_END:
-				return Shared::GameState::getPlayerCharacter()->m_seat;
+				return Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			default:
 				return this->eventData->card;
 			}
@@ -62,8 +62,14 @@ namespace Shared {
 		}
 
 		Value Thread::GetPC(std::vector<Value>&) {
-			auto pc = Shared::GameState::getPlayerCharacter();
-			return pc->m_seat;
+			if (Shared::GameState::getPlayerCharacter() != nullptr) {
+				auto pc = Shared::GameState::getPlayerCharacter()->m_char;
+				if (pc != nullptr) {
+					return pc->m_seat;
+				}
+				else return -1;
+			}
+			else return -1;
 		}
 
 		//bool (int)
@@ -1283,18 +1289,22 @@ namespace Shared {
 
 		//int(int)
 		Value Thread::PCTalkAbout(std::vector<Value>& params) {
-			auto pc = Shared::GameState::getPlayerCharacter();
-			int seat = pc->m_seat;
-			if (ExpressionSeatInvalid(seat)) return Value(-1);
-			CharInstData* inst = &AAPlay::g_characters[seat];
-			if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
-			{
-				return -1;
+			auto ptr = Shared::GameState::getPlayerCharacter();
+			if (ptr != nullptr) {
+				auto pc = ptr->m_char;
+				int seat = pc->m_seat;
+				if (ExpressionSeatInvalid(seat)) return Value(-1);
+				CharInstData* inst = &AAPlay::g_characters[seat];
+				if (!inst->IsValid() || inst->m_char->m_characterStatus->m_npcStatus->m_refto == nullptr)
+				{
+					return -1;
+				}
+				else
+				{
+					return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
+				}
 			}
-			else
-			{
-				return Value((int)inst->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_seat);
-			}
+			else return -1;
 		}
 
 		//string(int)
@@ -1986,12 +1996,7 @@ namespace Shared {
 		}
 		//int()
 		Value Thread::GetEventPreviousRoom(std::vector<Value>& params) {
-			switch (this->eventData->GetId()) {
-			case ROOM_CHANGE:
-				return ((RoomChangeData*)eventData)->prevRoom;
-			default:
-				return -1;
-			}
+			return -1;
 		}
 
 		//int()
@@ -2853,7 +2858,7 @@ namespace Shared {
 				},
 				{
 					99, EXPRCAT_EVENT,
-					TEXT("Room - Previous Room"), TEXT("PreviousRoom"), TEXT("For Room Changed event return the previous room"),
+					TEXT("INVALID"), TEXT("INVALID"), TEXT("This expression is invalid and is only a placeholder for the future."),
 					{}, (TYPE_INT),
 					&Thread::GetEventPreviousRoom
 				},

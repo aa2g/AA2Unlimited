@@ -212,3 +212,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::getStorage(std:
 	}
 	return PersistentStorage::ClassStorage::allStorages[file];
 }
+void PersistentStorage::ClassStorage::reset(std::wstring file)
+{
+	PersistentStorage::ClassStorage::allStorages.erase(file);
+}
