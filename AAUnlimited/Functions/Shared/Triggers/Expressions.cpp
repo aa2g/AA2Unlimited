@@ -1990,9 +1990,17 @@ namespace Shared {
 			if (ExpressionSeatInvalid(seat)) return Value(-1);
 			CharInstData* instance = &AAPlay::g_characters[seat];
 			if (!instance->IsValid()) return -1;
-			auto roomno = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
-			return roomno;
-
+			if (instance->m_char->m_npcData != nullptr) {
+				if (instance->m_char->m_npcData->roomPtr != nullptr) {
+					if ((((int*)instance->m_char->m_npcData->roomPtr) + 5) != nullptr) {
+						auto roomno = *(((int*)instance->m_char->m_npcData->roomPtr) + 5);
+						return roomno;
+					}
+					else return -1;
+				}
+				else return -1;
+			}
+			else return -1;
 		}
 		//int()
 		Value Thread::GetEventPreviousRoom(std::vector<Value>& params) {
