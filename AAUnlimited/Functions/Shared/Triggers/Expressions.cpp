@@ -245,10 +245,6 @@ namespace Shared {
 		//int(string)
 		Value Thread::String2Int(std::vector<Value>& params) {
 			int i = _wtoi(params[0].strVal->c_str());
-			if (errno == EINVAL)
-			{
-				return Value(TEXT("Conversion failed"));
-			}
 			return Value(i);
 		}
 
@@ -2536,7 +2532,7 @@ namespace Shared {
 				},
 				{
 					44, EXPRCAT_MATH,
-					TEXT("String to Int"), TEXT("Int( %p )"), TEXT("Converts a String to an Int."),
+					TEXT("String to Int"), TEXT("Int( %p )"), TEXT("Converts a String to an Int. Returns 0 if string can't be converted."),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::String2Int
 				},
