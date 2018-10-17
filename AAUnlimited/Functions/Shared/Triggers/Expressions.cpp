@@ -200,7 +200,7 @@ namespace Shared {
 				int r = rand() % range + params[0].iVal;
 				return Value(r);
 			}
-			else return params[0].iVal;
+			return (rand() % 2 == 1) ? params[1] : params[0];
 		}
 
 		Value Thread::AddIntegers(std::vector<Value>& params) {
