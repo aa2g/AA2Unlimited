@@ -794,7 +794,7 @@ namespace Shared {
 			}
 			wcstombs_s(
 				NULL,
-				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
+				AAPlay::g_characters[seat].m_char->m_charData->m_item2,
 				item->c_str(),
 				item->size()
 			);
@@ -812,7 +812,7 @@ namespace Shared {
 			}
 			wcstombs_s(
 				NULL,
-				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
+				AAPlay::g_characters[seat].m_char->m_charData->m_item3,
 				item->c_str(),
 				item->size()
 			);
