@@ -196,8 +196,11 @@ namespace Shared {
 		 //int (int min, int max)
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
 			int range = params[1].iVal - params[0].iVal + 1;
-			int r = rand() % range + params[0].iVal;
-			return Value(r);
+			if (range > 0){
+				int r = rand() % range + params[0].iVal;
+				return Value(r);
+			}
+			return (rand() % 2 == 1) ? params[1] : params[0];
 		}
 
 		Value Thread::AddIntegers(std::vector<Value>& params) {
