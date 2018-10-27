@@ -16,6 +16,8 @@ namespace Shared {
 
 		void setIsOverriding(bool value);
 		bool getIsOverriding();
+		bool getIsInMainMenu();
+		void setIsInMainMenu(bool value);
 		void updateIsOverriding();
 
 		void setIsHighPolyLoaded(bool value);

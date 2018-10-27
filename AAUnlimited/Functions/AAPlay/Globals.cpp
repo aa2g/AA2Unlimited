@@ -57,6 +57,7 @@ void InitOnLoad() {
 		LUA_EVENT_NORET("load_card", seat, false);
 	}
 	LOGPRIONC(Logger::Priority::INFO) "Loaded class with " << (idxCharacter) << " cards in it.\r\n";
+	Shared::GameState::setIsInMainMenu(false);
 
 	LUA_EVENT_NORET("load_class", true);
 }

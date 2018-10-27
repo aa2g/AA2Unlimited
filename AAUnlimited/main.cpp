@@ -132,7 +132,7 @@ static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
 	for (int idx = 0; idx < 100; idx = idx + 1)
 	{
 		//Dump last triggers without slowing down the game
-		LOGPRIONC(Logger::Priority::INFO) Shared::Triggers::triggers_log[Shared::Triggers::triggers_idxLog];
+		LOGPRIONC(Logger::Priority::WARN) Shared::Triggers::triggers_log[Shared::Triggers::triggers_idxLog];
 		Shared::Triggers::triggers_idxLog = (Shared::Triggers::triggers_idxLog + 1) % 100;
 
 	}

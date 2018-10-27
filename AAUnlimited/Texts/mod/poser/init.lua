@@ -32,7 +32,7 @@ local function detect_fs(hwnd)
 	GetClientRect(hwnd, rect)
 	local left, top, right, bottom = string.unpack("<IIII", peek(rect, 16))
 	if right == screenw and bottom == screenh then
-		log.info("Forcing non-floating poser windows")
+		log.spam("Forcing non-floating poser windows")
 		return true
 	end
 end

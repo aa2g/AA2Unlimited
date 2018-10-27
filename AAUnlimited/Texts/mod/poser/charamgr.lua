@@ -6,17 +6,17 @@ local signals = require "poser.signals"
 local dummycharacter = {}
 local dummymt = {
 	__call = function()
-		-- log.warn("calling dummy character")
+		-- log.spam("calling dummy character")
 		return nil
 	end,
 	
 	__index = function()
-		-- log.warn("indexing dummy character")
+		-- log.spam("indexing dummy character")
 		return dummycharacter
 	end,
 	
 	__pairs = function()
-		-- log.warn("iterating dummy character")
+		-- log.spam("iterating dummy character")
 		return nil
 	end
 }

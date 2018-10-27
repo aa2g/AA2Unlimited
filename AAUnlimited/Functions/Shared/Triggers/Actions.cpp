@@ -774,11 +774,9 @@ namespace Shared {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
-			wcstombs_s(
-				NULL,
+			strcpy(
 				AAPlay::g_characters[seat].m_char->m_charData->m_item1,
-				item->c_str(),
-				item->size()
+				General::CastToString(*item).c_str()
 			);
 		}
 
@@ -792,11 +790,9 @@ namespace Shared {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
-			wcstombs_s(
-				NULL,
+			strcpy(
 				AAPlay::g_characters[seat].m_char->m_charData->m_item2,
-				item->c_str(),
-				item->size()
+				General::CastToString(*item).c_str()
 			);
 		}
 
@@ -810,11 +806,9 @@ namespace Shared {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
 				return;
 			}
-			wcstombs_s(
-				NULL,
+			strcpy(
 				AAPlay::g_characters[seat].m_char->m_charData->m_item3,
-				item->c_str(),
-				item->size()
+				General::CastToString(*item).c_str()
 			);
 		}
 
