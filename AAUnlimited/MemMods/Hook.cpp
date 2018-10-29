@@ -319,6 +319,7 @@ void InitializeHooks() {
 			TanSlotUnlimited::InsertLoopCall();
 			TanSlotUnlimited::InsertLoopEnd();
 		}
+		Loads::hairUpdateInject();
 
 #if 0
 		SaveCard::AddUnlimitDataInject();

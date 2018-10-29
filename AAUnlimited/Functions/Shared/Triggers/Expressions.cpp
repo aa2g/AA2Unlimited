@@ -1974,9 +1974,17 @@ namespace Shared {
 			case NPC_WANT_ACTION_NOTARGET:
 				return Value((int)((NpcWantActionNoTargetData*)eventData)->substruct->roomTarget);
 			case NPC_WANT_TALK_WITH:
-				return Value((int)((NpcWantTalkWithData*)eventData)->substruct->roomTarget);
+				return Value((int)AAPlay::g_characters[(int)((NpcWantTalkWithData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
 			case NPC_WANT_TALK_WITH_ABOUT:
-				return Value((int)((NpcWantTalkWithAboutData*)eventData)->substruct->roomTarget);
+				return Value((int)AAPlay::g_characters[(int)((NpcWantTalkWithAboutData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
+			case NPC_AFTER_RESPONSE:
+				return Value((int)AAPlay::g_characters[(int)((NPCAfterResponseData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
+			case NPC_RESPONSE:
+				return Value((int)AAPlay::g_characters[(int)((NpcResponseData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
+			case PC_RESPONSE:
+				return Value((int)AAPlay::g_characters[(int)((PcResponseData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
+			case PC_AFTER_RESPONSE:
+				return Value((int)AAPlay::g_characters[(int)((PcAfterResponseData*)eventData->card)].m_char->m_moreData1->m_activity->m_currRoomTarget);
 			default:
 				return 0;
 			}

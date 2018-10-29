@@ -68,7 +68,7 @@ function _M.listbox(opts)
 				list.value = i
 				return
 			end
-			log.warn("listbox: can't select '%s''", val)
+			log.spam("listbox: can't select '%s''", val)
 		end		
 	end
 	

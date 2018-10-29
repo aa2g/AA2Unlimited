@@ -10,7 +10,7 @@ local function patch(addr, bytes)
 	assert(addr, "no addr")
 	assert(bytes, "no bytes")
 	save[addr] = g_peek(addr, #bytes)
-	log.info("poke %x %d", addr, #bytes)
+	log.spam("poke %x %d", addr, #bytes)
 	g_poke(addr, bytes)
 end
 
@@ -38,7 +38,7 @@ end
 
 local function do_unpatch()
 	for k,v in pairs(save) do
-		log.info("unpoke %x %d", k, #v)
+		log.spam("unpoke %x %d", k, #v)
 		g_poke(k,v)
 	end
 	save = {}

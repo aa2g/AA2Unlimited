@@ -36,7 +36,7 @@ function on.ui_event(evt)
 		if is_key_pressed(keys[opts.key0]) then
 			typ = 0
 		end
-		log.info("setting roster type to %d %d %d %d", typ, opts.key0, opts.key1, opts.key2)
+		log.spam("setting roster type to %d %d %d %d", typ, opts.key0, opts.key1, opts.key2)
 		g_poke_dword(roster_offset, typ)
 	end
 	return evt

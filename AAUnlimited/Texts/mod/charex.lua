@@ -76,7 +76,7 @@ function _M:load()
 			local artab = {...}
 			local argstr = table.concat(artab, ",")
 			if (not exempts[i]) and artab[3] ~= 768 then
-				log.info("female vtable %x.%s(%s) " % {this,(names[i+1] or "" ).."#"..i, argstr})
+				log.spam("female vtable %x.%s(%s) " % {this,(names[i+1] or "" ).."#"..i, argstr})
 			elseif true then
 				local f = "vtable#%d(%x,%s)" % {i, this, argstr}
 				if not ticks[f] then
@@ -89,10 +89,10 @@ function _M:load()
 				end
 			end
 			if i == 9 then
---				log.info('-> vtcall(GetPlayerCharacter(), 9, utf8_to_unicode(%q), utf8_to_unicode(%q), %d,0,0)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
-				log.info('.Skeleton(%q, %q, %d)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
+--				log.spam('-> vtcall(GetPlayerCharacter(), 9, utf8_to_unicode(%q), utf8_to_unicode(%q), %d,0,0)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
+				log.spam('.Skeleton(%q, %q, %d)',unicode_to_utf8(artab[1]).."\x00", unicode_to_utf8(artab[2]).."\x00", artab[3])
 				local rt = proc_invoke(orig, this, ...)
-				log.info("result = %x", rt)
+				log.spam("result = %x", rt)
 				return rt
 			end
 --			if i == 12 then return 0 end -- mouth

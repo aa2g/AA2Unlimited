@@ -41,7 +41,10 @@ void AddTimer(int when, void *fn) {
 void ResetOnTitle() {
 	if (General::IsAAPlay) {
 		if (*(ExtVars::AAPlay::PlayerCharacterPtr()) == nullptr) {
-			for (int i = 0; i < 25; i++) AAPlay::g_characters[i].Reset();
+			if (!(Shared::GameState::getIsInMainMenu())) {
+				for (int i = 0; i < 25; i++) AAPlay::g_characters[i].Reset();
+				Shared::GameState::setIsInMainMenu(true);
+			}
 		}
 	}
 }

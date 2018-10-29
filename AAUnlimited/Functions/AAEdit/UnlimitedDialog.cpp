@@ -242,35 +242,38 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (path != NULL) {
 					ClothFile load(General::FileToBuffer(path));
 					if (!load.IsValid()) return FALSE;
-					auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[AAEdit::g_currChar.m_char->m_currClothes];
-					cloth->slot = load.m_slot;
-					cloth->skirtLength = load.m_shortSkirt;
-					cloth->socks = load.m_socksId;
-					cloth->indoorShoes = load.m_shoesIndoorId;
-					cloth->outdoorShoes = load.m_shoesOutdoorId;
-					cloth->isOnePiece = load.m_isOnePiece;
-					cloth->hasUnderwear = load.m_hasUnderwear;
-					cloth->hasSkirt = load.m_hasSkirt;
-					cloth->colorTop1 = load.m_colorTop1;
-					cloth->colorTop2 = load.m_colorTop2;
-					cloth->colorTop3 = load.m_colorTop3;
-					cloth->colorTop4 = load.m_colorTop4;
-					cloth->colorBottom1 = load.m_colorBottom1;
-					cloth->colorBottom2 = load.m_colorBottom2;
-					cloth->colorUnderwear = load.m_colorUnderwear;
-					cloth->colorSocks = load.m_colorSocks;
-					cloth->colorIndoorShoes = load.m_colorIndoorShoes;
-					cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
-					cloth->textureBottom1 = load.m_skirtTextureId;
-					cloth->textureUnderwear = load.m_underwearTextureId;
-					cloth->textureBottom1Hue = load.m_skirtHue;
-					cloth->textureBottom1Lightness = load.m_skirtBrightness;
-					cloth->shadowBottom1Hue = load.m_skirtShadowHue;
-					cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
-					cloth->textureUnderwearHue = load.m_underwearHue;
-					cloth->textureUnderwearLightness = load.m_underwearBrightness;
-					cloth->shadowUnderwearHue = load.m_underwearShadowHue;
-					cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+					if (g_currChar.Editable()) {
+						auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[AAEdit::g_currChar.m_char->m_currClothes];
+						cloth->slot = load.m_slot;
+						cloth->skirtLength = load.m_shortSkirt;
+						cloth->socks = load.m_socksId;
+						cloth->indoorShoes = load.m_shoesIndoorId;
+						cloth->outdoorShoes = load.m_shoesOutdoorId;
+						cloth->isOnePiece = load.m_isOnePiece;
+						cloth->hasUnderwear = load.m_hasUnderwear;
+						cloth->hasSkirt = load.m_hasSkirt;
+						cloth->colorTop1 = load.m_colorTop1;
+						cloth->colorTop2 = load.m_colorTop2;
+						cloth->colorTop3 = load.m_colorTop3;
+						cloth->colorTop4 = load.m_colorTop4;
+						cloth->colorBottom1 = load.m_colorBottom1;
+						cloth->colorBottom2 = load.m_colorBottom2;
+						cloth->colorUnderwear = load.m_colorUnderwear;
+						cloth->colorSocks = load.m_colorSocks;
+						cloth->colorIndoorShoes = load.m_colorIndoorShoes;
+						cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
+						cloth->textureBottom1 = load.m_skirtTextureId;
+						cloth->textureUnderwear = load.m_underwearTextureId;
+						cloth->textureBottom1Hue = load.m_skirtHue;
+						cloth->textureBottom1Lightness = load.m_skirtBrightness;
+						cloth->shadowBottom1Hue = load.m_skirtShadowHue;
+						cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
+						cloth->textureUnderwearHue = load.m_underwearHue;
+						cloth->textureUnderwearLightness = load.m_underwearBrightness;
+						cloth->shadowUnderwearHue = load.m_underwearShadowHue;
+						cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+						AAEdit::g_currChar.m_char->Update(1, 1);
+					}
 					return TRUE;
 				}
 			}
@@ -278,11 +281,52 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			// well this is stupid. generally the clothing stuff doesn't work very well in edit, this is just hard override
 			// for the 4 files present in saved card and pretty much nothing else.
 			if (identifier >= IDC_GN_BTNSETCLOTH0 && identifier <= IDC_GN_BTNSETCLOTH3) {
+				auto idx = IDC_GN_BTNSETCLOTH0;
 				const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
 				if (path != NULL) {
 					auto buf = General::FileToBuffer(path);
+					//Replacing the wrong bytes, that's just how it is. 
+					std::vector<BYTE> backup{ buf[9], buf[10], buf[11] };
+					buf.erase(buf.begin() + 9, buf.begin() + 12);
+					buf.insert(buf.begin() + 73, backup.begin(), backup.end());
+
 					if (buf.size() >= 92)
-						memcpy(&Shared::PNG::saved_clothes[identifier - IDC_GN_BTNSETCLOTH0], buf.data() + 1, 91);
+						memcpy(&Shared::PNG::saved_clothes[identifier - idx], buf.data()+1, 91);
+					ClothFile load(General::FileToBuffer(path));
+					if (!load.IsValid()) return FALSE;
+					if (g_currChar.Editable()) {
+						auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[identifier - idx];
+						cloth->slot = load.m_slot;
+						cloth->skirtLength = load.m_shortSkirt;
+						cloth->socks = load.m_socksId;
+						cloth->indoorShoes = load.m_shoesIndoorId;
+						cloth->outdoorShoes = load.m_shoesOutdoorId;
+						cloth->isOnePiece = load.m_isOnePiece;
+						cloth->hasUnderwear = load.m_hasUnderwear;
+						cloth->hasSkirt = load.m_hasSkirt;
+						cloth->colorTop1 = load.m_colorTop1;
+						cloth->colorTop2 = load.m_colorTop2;
+						cloth->colorTop3 = load.m_colorTop3;
+						cloth->colorTop4 = load.m_colorTop4;
+						cloth->colorBottom1 = load.m_colorBottom1;
+						cloth->colorBottom2 = load.m_colorBottom2;
+						cloth->colorUnderwear = load.m_colorUnderwear;
+						cloth->colorSocks = load.m_colorSocks;
+						cloth->colorIndoorShoes = load.m_colorIndoorShoes;
+						cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
+						cloth->textureBottom1 = load.m_skirtTextureId;
+						cloth->textureUnderwear = load.m_underwearTextureId;
+						cloth->textureBottom1Hue = load.m_skirtHue;
+						cloth->textureBottom1Lightness = load.m_skirtBrightness;
+						cloth->shadowBottom1Hue = load.m_skirtShadowHue;
+						cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
+						cloth->textureUnderwearHue = load.m_underwearHue;
+						cloth->textureUnderwearLightness = load.m_underwearBrightness;
+						cloth->shadowUnderwearHue = load.m_underwearShadowHue;
+						cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+						AAEdit::g_currChar.m_char->m_currClothes = identifier - idx;
+						AAEdit::g_currChar.m_char->Update(1, 1);
+					}
 					return TRUE;
 				}
 			}
@@ -299,7 +343,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
-					LUA_EVENT_NORET("update_edit_gui");
+					LUA_EVENT_NORET("update_edit_gui")
+					Shared::preservingFrontHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.frontHair;
+					Shared::preservingSideHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.sideHair;
+					Shared::preservingBackHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.backhair;
+					Shared::preservingExtHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.hairExtension;
 					//RedrawBodyPart(Category::FIGURE, RedrawId::FIGURE_HEIGHT);
 				}
 				return TRUE;

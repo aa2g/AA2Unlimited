@@ -20,6 +20,7 @@ namespace {
 
 using namespace ExtClass;
 
+int hairAddress;
 static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
@@ -443,6 +444,62 @@ void __declspec(naked) TransferOutRedirect() {
 
 		jmp [TransferOutOriginalFunc]
 	}
+}
+
+
+void __stdcall hairUpdate(int hairTab, int hairSlot) {
+	//Replace infected hair slot of the currently open hair tab with one in style
+	if (Shared::preservingFrontHairSlot != -1) {
+		int value = hairSlot;
+		if (hairTab == 0) {
+			value = Shared::preservingFrontHairSlot;
+		}
+		else if (hairTab == 1) {
+			value = Shared::preservingSideHairSlot;
+		}
+		else if (hairTab == 2) {
+			value = Shared::preservingBackHairSlot;
+		}
+		else if (hairTab == 3) {
+			value = Shared::preservingExtHairSlot;
+		}
+		hairAddress = value;
+		Shared::preservingFrontHairSlot = -1;
+		Shared::preservingSideHairSlot = -1;
+		Shared::preservingBackHairSlot = -1;
+		Shared::preservingExtHairSlot = -1;
+	}
+}
+
+void __declspec(naked) hairUpdateRedirect() {
+	__asm {
+		mov hairAddress, eax
+		pushad
+		push al
+		//al is the hair slot
+		push edx
+		//edx is 0-3 whether it's front hair, side hair...
+		call hairUpdate
+		//original code
+		popad
+		mov eax, hairAddress
+		mov[edx + ebx + 0x69C], al
+		ret
+	}
+}
+
+
+void hairUpdateInject() {
+	//eax is the hair slot
+	//AA2Edit.exe + 280E6 - 88 84 1A 9C060000 - mov[edx + ebx + 0000069C], al
+
+
+	DWORD address = General::GameBase + 0x280E6;
+	DWORD redirectAddress = (DWORD)(&hairUpdateRedirect);
+	Hook((BYTE*)address,
+	{ 0x88, 0x84, 0x1A, 0x9C, 0x06, 0x00, 0x00 },					//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+		NULL);
 }
 
 void TransferOutInjection() {

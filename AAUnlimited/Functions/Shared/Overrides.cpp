@@ -4,6 +4,10 @@ namespace Shared {
 
 
 	CharInstData* g_currentChar = &AAEdit::g_currChar;
+	int preservingFrontHairSlot = -1;
+	int preservingSideHairSlot = -1;
+	int preservingBackHairSlot = -1;
+	int preservingExtHairSlot = -1;
 
 	/********************/
 	/* Poly Load Events */
@@ -85,7 +89,25 @@ namespace Shared {
 
 	void __stdcall EyeTextureStart(int leftRight, TCHAR** texture) {
 		const std::wstring& eyeTexture = g_currentChar->m_cardData.GetEyeTexture(leftRight);
-		if (!eyeTexture.size()) return;
+		if (General::IsAAEdit) {
+			if (leftRight == 0) {
+				if (g_currentChar) {
+					if (g_currentChar->m_char) {
+						if (g_currentChar->m_char->m_charData) {
+							if (&g_currentChar->m_char->m_charData->m_eyes) {
+								auto *eyes = &g_currentChar->m_char->m_charData->m_eyes;
+								if (eyes->bExtTextureUsed) {
+									TCHAR buffer[256];
+									mbstowcs(buffer, eyes->texture, 260);
+									g_currentChar->m_cardData.SetEyeTexture(0, buffer, true);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (!g_currentChar->m_cardData.GetEyeTexture(0).size() || !g_currentChar->m_cardData.GetEyeTexture(1).size()) return;
 		loc_savedPointer = *texture;
 		//*texture = (TCHAR*)eyeTexture.c_str();
 		memcpy_s((void*)loc_replaceBuffer, 1024, (BYTE*)(*texture) - 16, 16);
