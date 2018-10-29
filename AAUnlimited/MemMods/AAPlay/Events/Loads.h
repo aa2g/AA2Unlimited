@@ -12,6 +12,7 @@ extern int g_eyeTracking;
 void HiPolyLoadsInjection();
 void SaveFileLoadInjection();
 void TransferInInjection();
+void hairUpdateInject();
 void TransferOutInjection();
 
 }

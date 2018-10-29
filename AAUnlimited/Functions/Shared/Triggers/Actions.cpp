@@ -1074,6 +1074,16 @@ namespace Shared {
 				instance->m_char->m_characterStatus->m_condomsUsed[target] = amount;
 			}
 		}
+
+		void Thread::SetRoomTarget(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto instance = &AAPlay::g_characters[seat];
+			int room = params[1].iVal;
+			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_currRoomTarget = room;
+		}
+
 		void Thread::SetDecals(std::vector<Value>& params)
 		{
 
@@ -2095,6 +2105,12 @@ namespace Shared {
 				TEXT("Set whether PC is locked in h while h-ai is on."),
 				{ TYPE_BOOL },
 				&Thread::Set_H_AI_LOCK
+			},
+			{
+				103, ACTIONCAT_NPCACTION, TEXT("Set Room Target"), TEXT("%p ::SetRoomTarget = %p"),
+				TEXT("Set the room that the NPC will walk to. //Probably doesn't work."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetRoomTarget
 			},
 		};
 

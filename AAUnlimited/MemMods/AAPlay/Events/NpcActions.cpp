@@ -318,6 +318,9 @@ void hPositionChangeInjection() {
 		NULL);
 }
 
+
+
+
 #if !NEW_HOOK
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
 {

@@ -4,6 +4,10 @@ namespace Shared {
 
 
 	CharInstData* g_currentChar = &AAEdit::g_currChar;
+	int preservingFrontHairSlot = -1;
+	int preservingSideHairSlot = -1;
+	int preservingBackHairSlot = -1;
+	int preservingExtHairSlot = -1;
 
 	/********************/
 	/* Poly Load Events */

@@ -343,7 +343,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
-					LUA_EVENT_NORET("update_edit_gui");
+					LUA_EVENT_NORET("update_edit_gui")
+					Shared::preservingFrontHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.frontHair;
+					Shared::preservingSideHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.sideHair;
+					Shared::preservingBackHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.backhair;
+					Shared::preservingExtHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.hairExtension;
 					//RedrawBodyPart(Category::FIGURE, RedrawId::FIGURE_HEIGHT);
 				}
 				return TRUE;
