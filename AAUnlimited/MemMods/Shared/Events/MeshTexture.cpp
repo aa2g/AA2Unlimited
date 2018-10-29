@@ -138,7 +138,7 @@ void __stdcall MeshTextureStart(BYTE* xxFile, DWORD offset) {
 			loc_oldNameLength = *ptrNameLength;
 			*ptrNameLength = matchPath.size() + 1; //plus nullterminator
 		}
-
+		CloseHandle(loc_matchFile);
 
 	}
 }
