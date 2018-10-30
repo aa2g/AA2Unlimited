@@ -205,133 +205,125 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 		return TRUE;
 		break; }
-	case WM_VKEYTOITEM: {
-		//DEL-key was pressed while the list box had the focus
-		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
-		if (LOWORD(wparam) == VK_DELETE) {
-			//get current selection text
-			int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
-			//remove this rule
-			if (g_currChar.Editable()) {
-				g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
-				g_currChar.m_cardData.RemoveCardStyle(sel);
-			}
-			thisPtr->RefreshAAuSetList();
-			return TRUE;
-		}
-		break; }
+	//case WM_VKEYTOITEM: {
+	//	//DEL-key was pressed while the list box had the focus
+	//	GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+	//	if (LOWORD(wparam) == VK_DELETE) {
+	//		//get current selection text
+	//		int sel = SendMessage(thisPtr->m_lbAAuSets,LB_GETCURSEL,0,0);
+	//		//remove this rule
+	//		if (g_currChar.Editable()) {
+	//			g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
+	//			g_currChar.m_cardData.RemoveCardStyle(sel);
+	//		}
+	//		thisPtr->RefreshAAuSetList();
+	//		return TRUE;
+	//	}
+	//	break; }
 	
 	case WM_COMMAND: {
 		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		switch(HIWORD(wparam)) {
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
-			if(identifier == IDC_GN_BTNAAUSETADD) {
-				TCHAR buf[256];
-				SendMessage(thisPtr->m_edAAuSetName,WM_GETTEXT,256,(LPARAM)&buf);
+			switch (identifier) {
+			case IDC_GN_BTNAAUSETADD:
+				{
+					TCHAR bufAdd[256];
+					SendMessage(thisPtr->m_edAAuSetName, WM_GETTEXT, 256, (LPARAM)&bufAdd);
 
-				if (g_currChar.Editable()) {
-					AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
-					AAEdit::g_currChar.m_cardData.CopyCardStyle(buf, g_currChar.m_char->m_charData);
-				}
-				thisPtr->RefreshAAuSetList();
-				return TRUE;
-			}
-			//if (identifier == IDC_GN_BTNLOADCLOTH) {
-			//	const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
-			//	if (path != NULL) {
-			//		ClothFile load(General::FileToBuffer(path));
-			//		if (!load.IsValid()) return FALSE;
-			//		if (g_currChar.Editable()) {
-			//			auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[AAEdit::g_currChar.m_char->m_currClothes];
-			//			cloth->slot = load.m_slot;
-			//			cloth->skirtLength = load.m_shortSkirt;
-			//			cloth->socks = load.m_socksId;
-			//			cloth->indoorShoes = load.m_shoesIndoorId;
-			//			cloth->outdoorShoes = load.m_shoesOutdoorId;
-			//			cloth->isOnePiece = load.m_isOnePiece;
-			//			cloth->hasUnderwear = load.m_hasUnderwear;
-			//			cloth->hasSkirt = load.m_hasSkirt;
-			//			cloth->colorTop1 = load.m_colorTop1;
-			//			cloth->colorTop2 = load.m_colorTop2;
-			//			cloth->colorTop3 = load.m_colorTop3;
-			//			cloth->colorTop4 = load.m_colorTop4;
-			//			cloth->colorBottom1 = load.m_colorBottom1;
-			//			cloth->colorBottom2 = load.m_colorBottom2;
-			//			cloth->colorUnderwear = load.m_colorUnderwear;
-			//			cloth->colorSocks = load.m_colorSocks;
-			//			cloth->colorIndoorShoes = load.m_colorIndoorShoes;
-			//			cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
-			//			cloth->textureBottom1 = load.m_skirtTextureId;
-			//			cloth->textureUnderwear = load.m_underwearTextureId;
-			//			cloth->textureBottom1Hue = load.m_skirtHue;
-			//			cloth->textureBottom1Lightness = load.m_skirtBrightness;
-			//			cloth->shadowBottom1Hue = load.m_skirtShadowHue;
-			//			cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
-			//			cloth->textureUnderwearHue = load.m_underwearHue;
-			//			cloth->textureUnderwearLightness = load.m_underwearBrightness;
-			//			cloth->shadowUnderwearHue = load.m_underwearShadowHue;
-			//			cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
-			//			AAEdit::g_currChar.m_char->Update(1, 1);
-			//		}
-			//		return TRUE;
-			//	}
-			//}
-
-			// well this is stupid. generally the clothing stuff doesn't work very well in edit, this is just hard override
-			// for the 4 files present in saved card and pretty much nothing else.
-			if (identifier >= IDC_GN_BTNSETCLOTH0 && identifier <= IDC_GN_BTNSETCLOTH3) {
-				auto idx = IDC_GN_BTNSETCLOTH0;
-				const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
-				if (path != NULL) {
-					auto buf = General::FileToBuffer(path);
-					//Replacing the wrong bytes, that's just how it is. 
-					std::vector<BYTE> backup{ buf[9], buf[10], buf[11] };
-					buf.erase(buf.begin() + 9, buf.begin() + 12);
-					buf.insert(buf.begin() + 73, backup.begin(), backup.end());
-
-					if (buf.size() >= 92)
-						memcpy(&Shared::PNG::saved_clothes[identifier - idx], buf.data()+1, 91);
-					ClothFile load(General::FileToBuffer(path));
-					if (!load.IsValid()) return FALSE;
 					if (g_currChar.Editable()) {
-						auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[identifier - idx];
-						cloth->slot = load.m_slot;
-						cloth->skirtLength = load.m_shortSkirt;
-						cloth->socks = load.m_socksId;
-						cloth->indoorShoes = load.m_shoesIndoorId;
-						cloth->outdoorShoes = load.m_shoesOutdoorId;
-						cloth->isOnePiece = load.m_isOnePiece;
-						cloth->hasUnderwear = load.m_hasUnderwear;
-						cloth->hasSkirt = load.m_hasSkirt;
-						cloth->colorTop1 = load.m_colorTop1;
-						cloth->colorTop2 = load.m_colorTop2;
-						cloth->colorTop3 = load.m_colorTop3;
-						cloth->colorTop4 = load.m_colorTop4;
-						cloth->colorBottom1 = load.m_colorBottom1;
-						cloth->colorBottom2 = load.m_colorBottom2;
-						cloth->colorUnderwear = load.m_colorUnderwear;
-						cloth->colorSocks = load.m_colorSocks;
-						cloth->colorIndoorShoes = load.m_colorIndoorShoes;
-						cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
-						cloth->textureBottom1 = load.m_skirtTextureId;
-						cloth->textureUnderwear = load.m_underwearTextureId;
-						cloth->textureBottom1Hue = load.m_skirtHue;
-						cloth->textureBottom1Lightness = load.m_skirtBrightness;
-						cloth->shadowBottom1Hue = load.m_skirtShadowHue;
-						cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
-						cloth->textureUnderwearHue = load.m_underwearHue;
-						cloth->textureUnderwearLightness = load.m_underwearBrightness;
-						cloth->shadowUnderwearHue = load.m_underwearShadowHue;
-						cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
-						AAEdit::g_currChar.m_char->m_currClothes = identifier - idx;
-						AAEdit::g_currChar.m_char->Update(1, 1);
+						AAEdit::g_currChar.m_cardData.UpdateCardStyle(AAEdit::g_currChar.m_cardData.GetCurrAAUSet(), g_currChar.m_char->m_charData);
+						AAEdit::g_currChar.m_cardData.CopyCardStyle(bufAdd, g_currChar.m_char->m_charData);
 					}
-					return TRUE;
+					thisPtr->RefreshAAuSetList();
 				}
-			}
+				return TRUE;
+			case IDC_GN_BTNAAUSETREMOVE:
+				{
+					//get current selection
+					int selRemove = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (selRemove == 0) return FALSE;
+					//remove this rule
+					if (g_currChar.Editable()) {
+						g_currChar.m_cardData.SwitchActiveCardStyle(0, g_currChar.m_char->m_charData);
+						g_currChar.m_cardData.RemoveCardStyle(selRemove);
+					}
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETRENAME:
+				{
+					TCHAR bufRename[256];
+					SendMessage(thisPtr->m_edAAuSetName, WM_GETTEXT, 256, (LPARAM)&bufRename);
+					//get current selection
+					int selRename = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (selRename == 0) return FALSE;
 
-			break; }
+					if (g_currChar.Editable()) {
+						wcscpy_s(AAEdit::g_currChar.m_cardData.m_styles[selRename].m_name, bufRename);
+					}
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNSETCLOTH0:
+			case IDC_GN_BTNSETCLOTH1:
+			case IDC_GN_BTNSETCLOTH2:
+			case IDC_GN_BTNSETCLOTH3:
+				{
+					auto idx = IDC_GN_BTNSETCLOTH0;
+					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					if (path != NULL) {
+						auto buf = General::FileToBuffer(path);
+						//Replacing the wrong bytes, that's just how it is. 
+						std::vector<BYTE> backup{ buf[9], buf[10], buf[11] };
+						buf.erase(buf.begin() + 9, buf.begin() + 12);
+						buf.insert(buf.begin() + 73, backup.begin(), backup.end());
+
+						if (buf.size() >= 92)
+							memcpy(&Shared::PNG::saved_clothes[identifier - idx], buf.data() + 1, 91);
+						ClothFile load(General::FileToBuffer(path));
+						if (!load.IsValid()) return FALSE;
+						if (g_currChar.Editable()) {
+							auto cloth = &AAEdit::g_currChar.m_char->m_charData->m_clothes[identifier - idx];
+							cloth->slot = load.m_slot;
+							cloth->skirtLength = load.m_shortSkirt;
+							cloth->socks = load.m_socksId;
+							cloth->indoorShoes = load.m_shoesIndoorId;
+							cloth->outdoorShoes = load.m_shoesOutdoorId;
+							cloth->isOnePiece = load.m_isOnePiece;
+							cloth->hasUnderwear = load.m_hasUnderwear;
+							cloth->hasSkirt = load.m_hasSkirt;
+							cloth->colorTop1 = load.m_colorTop1;
+							cloth->colorTop2 = load.m_colorTop2;
+							cloth->colorTop3 = load.m_colorTop3;
+							cloth->colorTop4 = load.m_colorTop4;
+							cloth->colorBottom1 = load.m_colorBottom1;
+							cloth->colorBottom2 = load.m_colorBottom2;
+							cloth->colorUnderwear = load.m_colorUnderwear;
+							cloth->colorSocks = load.m_colorSocks;
+							cloth->colorIndoorShoes = load.m_colorIndoorShoes;
+							cloth->colorOutdoorShoes = load.m_colorOutdoorShoes;
+							cloth->textureBottom1 = load.m_skirtTextureId;
+							cloth->textureUnderwear = load.m_underwearTextureId;
+							cloth->textureBottom1Hue = load.m_skirtHue;
+							cloth->textureBottom1Lightness = load.m_skirtBrightness;
+							cloth->shadowBottom1Hue = load.m_skirtShadowHue;
+							cloth->shadowBottom1Lightness = load.m_skirtShadowBrightness;
+							cloth->textureUnderwearHue = load.m_underwearHue;
+							cloth->textureUnderwearLightness = load.m_underwearBrightness;
+							cloth->shadowUnderwearHue = load.m_underwearShadowHue;
+							cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
+							AAEdit::g_currChar.m_char->m_currClothes = identifier - idx;
+							AAEdit::g_currChar.m_char->Update(1, 1);
+						}
+						return TRUE;
+					}
+				}
+				return FALSE;
+			}
+			break;
+		}
 		case LBN_SELCHANGE: {
 			GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 			HWND wnd = (HWND)lparam;
