@@ -208,7 +208,11 @@ void UnlimitedDialog::TRDialog::SetCurrentTrigger(int index) {
 	m_actions.clear();
 	m_variables.clear();
 	m_events.clear();
-	if (trg == NULL) return;
+	if (trg == NULL) {
+		SendMessage(m_edTitle, WM_SETTEXT, NULL, (LPARAM)"");
+		return;
+	}
+	SendMessage(m_edTitle, WM_SETTEXT, NULL, (LPARAM)m_currentTrigger->name.c_str());
 	InitializeTriggers();
 
 	TVINSERTSTRUCT telem;
@@ -565,6 +569,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_dialog = hwndDlg;
 		thisPtr->m_lbTriggers = GetDlgItem(hwndDlg,IDC_TR_LBTRIGGERLIST);
 		thisPtr->m_tvTrigger = GetDlgItem(hwndDlg,IDC_TR_TVTRIGGER);
+		thisPtr->m_edTitle = GetDlgItem(hwndDlg, IDC_TR_EDDESCR);
 		MakeTreeViewMultiselect(thisPtr->m_tvTrigger);
 
 		thisPtr->Refresh();
@@ -1917,6 +1922,16 @@ void UnlimitedDialog::TRDialog::DoAddVariable() {
 
 INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 	switch (msg) {
+	//case WM_CTLCOLORSTATIC:
+	//{
+	//	auto stInitVal = GetDlgItem(hwndDlg, IDC_TR_AV_STINITVAL);
+	//	auto dc = GetDC(stInitVal);
+	//	if ((HWND)wparam == stInitVal)
+	//	{
+	//		SetTextColor(GetDC(stInitVal), RGB(255, 0, 0));	// red
+	//	}
+	//	return TRUE;
+	//}
 	case WM_INITDIALOG: {
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,(LONG)lparam);
 		EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AV_BTNADD),FALSE);

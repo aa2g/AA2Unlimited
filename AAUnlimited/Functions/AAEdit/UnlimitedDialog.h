@@ -242,6 +242,7 @@ namespace AAEdit {
 	struct TRDialog : public Dialog {
 		HWND m_lbTriggers;
 		HWND m_tvTrigger;
+		HWND m_edTitle;
 
 		HTREEITEM m_tiEvents;
 		HTREEITEM m_tiVariables;
