@@ -1657,6 +1657,7 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		}
 		//save
 		g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname, bonename, mod);
+		g_currChar.m_char->Spawn(g_currChar.m_char->m_clothState, g_currChar.m_char->m_materialSlot, 0, 1);
 	}
 	Refresh();
 
