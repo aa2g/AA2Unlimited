@@ -1922,7 +1922,7 @@ void UnlimitedDialog::TRDialog::DoAddVariable() {
 
 INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam) {
 	switch (msg) {
-	//case WM_CTLCOLORSTATIC:
+	//case WM_CTLCOLORSTATIC:	//fuck all this, just rename the thing
 	//{
 	//	auto stInitVal = GetDlgItem(hwndDlg, IDC_TR_AV_STINITVAL);
 	//	auto dc = GetDC(stInitVal);
