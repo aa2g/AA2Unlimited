@@ -53,7 +53,7 @@ extern BYTE g_anim_data[25][6];
 
 		// original game vtable
 		/* #0 */ virtual DWORD Destroy(int free); // destroys the character, 1 frees it too i think
-		/* #1 */ virtual DWORD Spawn(BYTE clothstate, BYTE a3, BYTE light, BYTE isedit); // Loads character on scene
+		/* #1 */ virtual DWORD Spawn(BYTE clothstate, BYTE materialSlot, BYTE light, BYTE isedit); // Loads character on scene
 		/* #2 */ virtual DWORD Update(BYTE clothstate, BYTE isedit); // second argument indicates if maker/play pp
 		/* #3 */ virtual DWORD fn3();
 		/* #4 */ virtual DWORD Despawn(); // removes the character from scene
