@@ -1086,26 +1086,37 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				return TRUE;
 			}
 			else if(identifier == IDC_HR_BTNADD) {
-				BYTE kind;
-				for(kind = 0; kind < 4; kind++) {
-					if (SendMessage(thisPtr->m_rbKind[kind],BM_GETCHECK,0,0) == BST_CHECKED) break;
+				if (g_currChar.Editable()) {
+
+
+					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1) {
+
+						BYTE kind;
+						for (kind = 0; kind < 4; kind++) {
+							if (SendMessage(thisPtr->m_rbKind[kind], BM_GETCHECK, 0, 0) == BST_CHECKED) break;
+						}
+						if (kind == 4) kind = 0;
+						TCHAR buf[256];
+						SendMessage(thisPtr->m_edSlot, WM_GETTEXT, 256, (LPARAM)buf);
+						BYTE slot = _wtoi(buf);
+						SendMessage(thisPtr->m_edAdjustment, WM_GETTEXT, 256, (LPARAM)buf);
+						BYTE adjustment = _wtoi(buf);
+						bool flip = SendMessage(thisPtr->m_cbFlip, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						g_currChar.m_cardData.AddHair(kind, slot, adjustment, flip);
+						thisPtr->Refresh();
+						//redraw hair of added king
+						using namespace ExtVars::AAEdit;
+						if (kind == 0) RedrawBodyPart(HAIR, HAIR_FRONT);
+						else if (kind == 1) RedrawBodyPart(HAIR, HAIR_SIDE);
+						else if (kind == 2) RedrawBodyPart(HAIR, HAIR_BACK);
+						else if (kind == 3) RedrawBodyPart(HAIR, HAIR_EXTENSION);
+						return TRUE;
+					}
+					else {
+						MessageBox(NULL, TEXT("Extra hair does not work on boys."), TEXT("Error"), 0);
+						return TRUE;
+					}
 				}
-				if (kind == 4) kind = 0;
-				TCHAR buf[256];
-				SendMessage(thisPtr->m_edSlot,WM_GETTEXT,256,(LPARAM)buf);
-				BYTE slot = _wtoi(buf);
-				SendMessage(thisPtr->m_edAdjustment,WM_GETTEXT,256,(LPARAM)buf);
-				BYTE adjustment = _wtoi(buf);
-				bool flip = SendMessage(thisPtr->m_cbFlip,BM_GETCHECK,0,0) == BST_CHECKED;
-				g_currChar.m_cardData.AddHair(kind,slot,adjustment,flip);
-				thisPtr->Refresh();
-				//redraw hair of added king
-				using namespace ExtVars::AAEdit;
-				if(kind == 0) RedrawBodyPart(HAIR,HAIR_FRONT);
-				else if(kind == 1) RedrawBodyPart(HAIR,HAIR_SIDE);
-				else if(kind == 2) RedrawBodyPart(HAIR,HAIR_BACK);
-				else if(kind == 3) RedrawBodyPart(HAIR,HAIR_EXTENSION);
-				return TRUE;
 			}
 			
 			break; }
