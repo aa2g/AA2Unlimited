@@ -1667,8 +1667,14 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 			}
 		}
 		//save
-		g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname, bonename, mod);
-		g_currChar.m_char->Spawn(g_currChar.m_char->m_clothState, g_currChar.m_char->m_materialSlot, 0, 1);
+		if (g_currChar.Editable()) {
+			g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname, bonename, mod);
+			g_currChar.m_char->Spawn(g_currChar.m_char->m_clothState, g_currChar.m_char->m_materialSlot, 0, 1);
+			auto pp = L"data\\jg2e01_00_00.pp";
+			wchar_t xa[255];
+			swprintf(xa, L"data\\HAE00_00_%02d_00.xa", g_currChar.m_char->m_charData->m_figure.height);
+			g_currChar.m_char->LoadXA(pp, xa, 4, 0, 0);
+		}
 	}
 	Refresh();
 
