@@ -433,6 +433,7 @@ local function propsliderchanged()
 	else
 		setcurrentslider(dummyslider)
 	end
+	slidersetoperation(currentoperation)
 end
 
 local function propchanged()
