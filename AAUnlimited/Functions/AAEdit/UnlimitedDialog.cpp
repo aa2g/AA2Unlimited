@@ -1826,6 +1826,9 @@ void UnlimitedDialog::BDDialog::Refresh() {
 			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
 			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
 		};
+		if (curr->m_charData->m_gender == 0) {
+			xxlist[10] = NULL;
+		}
 		TCHAR tmpBuff[256];
 		std::queue<ExtClass::Frame*> fileQueue;
 		for (ExtClass::XXFile* file : xxlist) {
