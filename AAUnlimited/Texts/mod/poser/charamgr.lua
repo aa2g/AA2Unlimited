@@ -191,10 +191,16 @@ end
 function _M.load_xa(character, pose)
 	local pp_typ = exe_type:sub(1,1)
 	local xa_typ = exe_type == "play" and "K" or "E"
-	pp_typ = 'e'
-	xa_typ = "E"
+--	pp_typ = 'e'
+--	xa_typ = "E"
 	local pp = host_path("data", "jg2%s01_00_00.pp" % pp_typ)
-	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { xa_typ, character.struct.m_charData.m_figure.height })
+	local gender = character.struct.m_charData.m_gender
+	local fig = character.struct.m_charData.m_figure.height
+	if gender == 0 then
+		fig  = character.struct.m_charData.m_figure.height + character.struct.m_charData.m_figure.figure - 1
+	end
+	local strGender = gender == 0 and "S" or "A"	
+	local xa = host_path("data", "H%s%s00_00_%02d_00.xa" % { strGender, xa_typ, fig })
 --	local xa = host_path("data", "HA%s00_00_%02d_00.xa" % { exe_type == "play" and "K" or "E", peek_dword(fixptr(character.struct.m_charData.m_figure)) & 0xff })
 	character.struct:LoadXA(pp, xa, pose or 0, 0, 0)
 end
