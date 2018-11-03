@@ -1669,11 +1669,38 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 		//save
 		if (g_currChar.Editable()) {
 			g_currChar.m_cardData.AddBoneRule((AAUCardData::MeshModFlag)flags, xxname, bonename, mod);
+			auto clip = g_currChar.m_char->m_xxSkeleton->m_poseNumber;
 			g_currChar.m_char->Spawn(g_currChar.m_char->m_clothState, g_currChar.m_char->m_materialSlot, 0, 1);
 			auto pp = L"data\\jg2e01_00_00.pp";
 			wchar_t xa[255];
-			swprintf(xa, L"data\\HAE00_00_%02d_00.xa", g_currChar.m_char->m_charData->m_figure.height);
-			g_currChar.m_char->LoadXA(pp, xa, 4, 0, 0);
+			auto strGender = g_currChar.m_char->m_charData->m_gender == 0 ? L"S" : L"A";
+			int figure = g_currChar.m_char->m_charData->m_figure.height;
+			if (g_currChar.m_char->m_charData->m_gender == 0) {	//male
+				figure = g_currChar.m_char->m_charData->m_figure.height + g_currChar.m_char->m_charData->m_figure.figure - 1;
+				//switch (g_currChar.m_char->m_charData->m_figure.height)
+				//{
+				//case 1:
+				//	if (g_currChar.m_char->m_charData->m_figure.figure == 0) {
+				//		//Delicate
+				//		figure = 00;
+				//	}
+				//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+				//		//Normal
+				//		figure = 01;
+				//	}
+				//case 2:
+				//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+				//		//Tall
+				//		figure = 02;
+				//	}
+				//	if (g_currChar.m_char->m_charData->m_figure.figure == 2) {
+				//		//Fat
+				//		figure = 03;
+				//	}
+				//}
+			}
+			swprintf(xa, L"data\\H%sE00_00_%02d_00.xa", strGender, figure);
+			g_currChar.m_char->LoadXA(pp, xa, clip, 0, 0);
 		}
 	}
 	Refresh();
