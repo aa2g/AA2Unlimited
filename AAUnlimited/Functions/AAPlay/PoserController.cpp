@@ -258,7 +258,7 @@ namespace Poser {
 			auto it = m_loadCharacter->m_sliders.begin();
 			while (it != m_loadCharacter->m_sliders.end()) {
 				// When the skeleton isn't reloaded consider its sliders non-transient
-				if (skipSkeleton && it->second->source == ExtClass::CharacterStruct::SKELETON) {
+				if (skipSkeleton && it->second->source == ExtClass::CharacterStruct::SKELETON || it->second->source == ExtClass::CharacterStruct::TONGUE) {
 					m_loadCharacter->m_transientSliders[it->first] = it->second;
 					it = m_loadCharacter->m_sliders.erase(it);
 				}
