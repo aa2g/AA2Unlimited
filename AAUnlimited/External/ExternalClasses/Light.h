@@ -34,7 +34,7 @@ namespace ExtClass {
 
 		DWORD m_someFlag0; // first xltool data row
 
-		DWORD m_materialCount1; // material count?
+		DWORD m_origMaterialCount; // material count?
 		LightMaterial m_origMaterial[3]; // material data as is in .xl file
 
 		float m_origPosX; // fifth xltool data row
@@ -55,7 +55,7 @@ namespace ExtClass {
 		float m_unknownFloat7;
 
 		// it seems to repeat the previous structure above including the previous 7 float group
-		DWORD m_materialCount2; // again material count?
+		DWORD m_materialCount; // again material count?
 		LightMaterial m_material[3]; // material used by the game
 
 		float m_posX;
@@ -67,8 +67,10 @@ namespace ExtClass {
 		float m_float3;
 
 		// ...
-
-		BYTE m_unknown[0xCC];
+		BYTE m_unknown1[0x20];
+		float m_matrix1[4][4];
+		float m_matrix2[4][4];
+		BYTE m_unknown2[0x2c];
 
 #define LUA_CLASS ExtClass::Light
 		static inline void bindLua() {

@@ -57,6 +57,68 @@ const char* CharInstData::GetStyleName(int index)
 	return styleName.c_str();
 }
 
+ExtClass::Light * CharInstData::GetLightArray()
+{
+	if (this->IsValid()) {
+		auto result = this->m_char->m_xxSkeleton->m_lightsArray;
+		return result;
+	}
+	return nullptr;
+}
+
+int CharInstData::GetLightIndex(const char * name)
+{
+	if (this->IsValid()) {
+		for (int i = 0; i < this->m_char->m_xxSkeleton->m_lightsCount; i++) {
+			if (strlen(name) != strlen(this->m_char->m_xxSkeleton->m_lightsArray[i].m_name)) continue;
+			if (!strcmp(this->m_char->m_xxSkeleton->m_lightsArray[i].m_name, name)) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+void CharInstData::SetLightMaterialColor(int light, int materialSlot, float red, float green, float blue, float alpha)
+{
+	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
+		if (materialSlot < this->m_char->m_xxSkeleton->m_lightsArray[light].m_materialCount) {
+			if (this->m_char->m_xxSkeleton != NULL) {
+				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialRed = red;
+				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialGreen = green;
+				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialBlue = blue;
+				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialAlpha = alpha;
+			}
+		}
+	}
+}
+
+void CharInstData::SetLightDirection(int light, float x, float y, float z, float w)
+{
+	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
+		if (this->m_char->m_xxSkeleton != NULL) {
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0] = x;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1] = y;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2] = z;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][3] = w;
+		}
+	}
+}
+
+std::vector<float> CharInstData::GetLightDirection(int light)
+{
+	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
+		if (this->m_char->m_xxSkeleton != NULL) {
+			auto x = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0];
+			auto y = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1];
+			auto z = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2];
+			auto w = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][3];
+			return std::vector<float>({ x, y, z, w });
+		}
+	}
+	return std::vector<float>();
+}
+
 void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
 	m_cardData.Reset();

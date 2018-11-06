@@ -6,6 +6,7 @@
 #include "Functions\AAUCardData.h"
 #include "Files/PNGData.h"
 #include "External\ExternalClasses\ActionParamStruct.h"
+#include "External\ExternalClasses\Light.h"
 
 /*
  * Contains data about a character that currently exists in a game.
@@ -57,6 +58,11 @@ public:
 	int GetCurrentStyle();
 	const char* GetStyleName(int index);
 
+	ExtClass::Light* GetLightArray();
+	int GetLightIndex(const char* name);
+	void SetLightMaterialColor(int light, int materialSlot, float red, float green, float blue, float alpha);
+	void SetLightDirection(int light, float x, float y, float z, float w);
+	std::vector<float> GetLightDirection(int light);
 
 	void Reset();
 	inline bool IsValid() {
@@ -104,7 +110,30 @@ public:
 		LUA_METHOD(GetStyleName, {
 			return _gl.push(_self->GetStyleName(_gl.get(2))).one;
 		});
-
+		LUA_METHOD(GetLightArray, {
+			return _gl.push(_self->GetLightArray()).one;
+		});
+		LUA_METHOD(GetLightIndex, {
+			const char * name = _gl.get(2);
+			return _gl.push(_self->GetLightIndex(name)).one;
+		});
+		LUA_METHOD(SetLightMaterialColor, {
+			int light = _gl.get(2);
+			int material = _gl.get(3);
+			float r = _gl.get(4);
+			float g = _gl.get(5);
+			float b = _gl.get(6);
+			float a = _gl.get(7);
+			_self->SetLightMaterialColor(light, material, r, g, b, a);
+		});
+		LUA_METHOD(SetLightDirection, {
+			int light = _gl.get(2);
+			float x = _gl.get(3);
+			float y = _gl.get(4);
+			float z = _gl.get(5);
+			float w = _gl.get(6);
+			_self->SetLightDirection(light, x, y, z, w);
+		});
 #undef LUA_CLASS
 	}
 
