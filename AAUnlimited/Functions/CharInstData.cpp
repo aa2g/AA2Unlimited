@@ -97,10 +97,10 @@ void CharInstData::SetLightDirection(int light, float x, float y, float z, float
 {
 	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
-			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0] = x;
-			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1] = y;
-			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2] = z;
-			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][3] = w;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][0] = x;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][1] = y;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][2] = z;
+			this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][3] = w;
 		}
 	}
 }
@@ -109,10 +109,10 @@ std::vector<float> CharInstData::GetLightDirection(int light)
 {
 	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
-			auto x = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0];
-			auto y = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1];
-			auto z = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2];
-			auto w = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][3];
+			auto x = this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][0];
+			auto y = this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][1];
+			auto z = this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][2];
+			auto w = this->m_char->m_xxSkeleton->m_lightsArray[light].m_lightMatrix[2][3];
 			return std::vector<float>({ x, y, z, w });
 		}
 	}

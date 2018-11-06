@@ -68,8 +68,14 @@ namespace ExtClass {
 
 		// ...
 		BYTE m_unknown1[0x20];
-		float m_matrix1[4][4];
-		float m_matrix2[4][4];
+		union {
+			float m_origLightArray[16];
+			float m_origLightMatrix[4][4];
+		};
+		union {
+			float m_lightArray[16];
+			float m_lightMatrix[4][4];
+		};
 		BYTE m_unknown2[0x2c];
 
 #define LUA_CLASS ExtClass::Light
@@ -80,17 +86,17 @@ namespace ExtClass {
 			LUA_BIND(m_posX);
 			LUA_BIND(m_posY);
 			LUA_BIND(m_posZ);
-			LUA_BINDARRP(m_matrix1);
-			LUA_BINDARRP(m_matrix2);
+			LUA_BINDARR(m_origLightArray);
+			LUA_BINDARR(m_lightArray);
 			LUA_METHOD(SetLightDirection, {
 				float x = _gl.get(2);
 				float y = _gl.get(3);
 				float z = _gl.get(4);
 				float w = _gl.get(5);
-				_self->m_matrix2[2][0] = x;
-				_self->m_matrix2[2][1] = y;
-				_self->m_matrix2[2][2] = z;
-				_self->m_matrix2[2][3] = w;
+				_self->m_lightMatrix[2][0] = x;
+				_self->m_lightMatrix[2][1] = y;
+				_self->m_lightMatrix[2][2] = z;
+				_self->m_lightMatrix[2][3] = w;
 			});
 			LUA_METHOD(SetLightMaterialColor, {
 				int material = _gl.get(2);
@@ -104,10 +110,10 @@ namespace ExtClass {
 				_self->m_material[material].m_materialAlpha = a;
 			});
 			LUA_METHOD(GetLightDirection, {
-				float x = _self->m_matrix2[2][0];
-				float y = _self->m_matrix2[2][1];
-				float z = _self->m_matrix2[2][2];
-				float w = _self->m_matrix2[2][3];
+				float x = _self->m_lightMatrix[2][0];
+				float y = _self->m_lightMatrix[2][1];
+				float z = _self->m_lightMatrix[2][2];
+				float w = _self->m_lightMatrix[2][3];
 				float result[4];
 				result[0] = x;
 				result[1] = y;
