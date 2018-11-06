@@ -22,9 +22,9 @@ namespace ExtClass {
 #define LUA_CLASS ExtClass::Light::LightMaterial
 			static inline void bindLua() {
 				LUA_BIND(m_materialRed)
-				LUA_BIND(m_materialGreen)
-				LUA_BIND(m_materialBlue)
-				LUA_BIND(m_materialAlpha)
+					LUA_BIND(m_materialGreen)
+					LUA_BIND(m_materialBlue)
+					LUA_BIND(m_materialAlpha)
 			}
 #undef LUA_CLASS
 		};
@@ -74,16 +74,66 @@ namespace ExtClass {
 
 #define LUA_CLASS ExtClass::Light
 		static inline void bindLua() {
-			LUA_BINDSTRP(m_name)
-			LUA_BINDARRP(m_material)
-			LUA_BIND(m_posX)
-			LUA_BIND(m_posY)
-			LUA_BIND(m_posZ)
+			LUA_BINDSTRP(m_name);
+			LUA_BIND(m_materialCount);
+			LUA_BINDARRP(m_material);
+			LUA_BIND(m_posX);
+			LUA_BIND(m_posY);
+			LUA_BIND(m_posZ);
+			LUA_BINDARRP(m_matrix1);
+			LUA_BINDARRP(m_matrix2);
+			LUA_METHOD(SetLightDirection, {
+				float x = _gl.get(2);
+				float y = _gl.get(3);
+				float z = _gl.get(4);
+				float w = _gl.get(5);
+				_self->m_matrix2[2][0] = x;
+				_self->m_matrix2[2][1] = y;
+				_self->m_matrix2[2][2] = z;
+				_self->m_matrix2[2][3] = w;
+			});
+			LUA_METHOD(SetLightMaterialColor, {
+				int material = _gl.get(2);
+				float r = _gl.get(3);
+				float g = _gl.get(4);
+				float b = _gl.get(5);
+				float a = _gl.get(6);
+				_self->m_material[material].m_materialRed = r;
+				_self->m_material[material].m_materialGreen = g;
+				_self->m_material[material].m_materialBlue = b;
+				_self->m_material[material].m_materialAlpha = a;
+			});
+			LUA_METHOD(GetLightDirection, {
+				float x = _self->m_matrix2[2][0];
+				float y = _self->m_matrix2[2][1];
+				float z = _self->m_matrix2[2][2];
+				float w = _self->m_matrix2[2][3];
+				float result[4];
+				result[0] = x;
+				result[1] = y;
+				result[2] = z;
+				result[3] = w;
+				return _gl.push(result).one;
+			});
+			LUA_METHOD(GetLightMaterialColor, {
+				int material = _gl.get(2);
+				float r = _self->m_material[material].m_materialRed;
+				float g = _self->m_material[material].m_materialGreen;
+				float b = _self->m_material[material].m_materialBlue;
+				float a = _self->m_material[material].m_materialAlpha;
+				float result[4];
+				result[0] = r;
+				result[1] = g;
+				result[2] = b;
+				result[3] = a;
+				return _gl.push(result).one;
+			});
 		}
 #undef LUA_CLASS
+
 	};
 #pragma pack(pop)
 
-static_assert(sizeof(Light) == 0x18c, "Material size mismatch; must be 0x134 bytes");
+	static_assert(sizeof(Light) == 0x18c, "Material size mismatch; must be 0x134 bytes");
 
 };

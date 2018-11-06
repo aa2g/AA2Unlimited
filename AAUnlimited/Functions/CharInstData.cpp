@@ -35,7 +35,7 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 		mov ecx, strength
 		push ebp
 		push ecx
-		call [address]
+		call[address]
 		pop ebp
 	}
 }
@@ -59,7 +59,7 @@ const char* CharInstData::GetStyleName(int index)
 
 ExtClass::Light * CharInstData::GetLightArray()
 {
-	if (this->IsValid()) {
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		auto result = this->m_char->m_xxSkeleton->m_lightsArray;
 		return result;
 	}
@@ -68,9 +68,9 @@ ExtClass::Light * CharInstData::GetLightArray()
 
 int CharInstData::GetLightIndex(const char * name)
 {
-	if (this->IsValid()) {
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		for (int i = 0; i < this->m_char->m_xxSkeleton->m_lightsCount; i++) {
-			if (strlen(name) != strlen(this->m_char->m_xxSkeleton->m_lightsArray[i].m_name)) continue;
+			//if (strlen(name) != strlen(this->m_char->m_xxSkeleton->m_lightsArray[i].m_name)) continue;
 			if (!strcmp(this->m_char->m_xxSkeleton->m_lightsArray[i].m_name, name)) {
 				return i;
 			}
@@ -81,9 +81,9 @@ int CharInstData::GetLightIndex(const char * name)
 
 void CharInstData::SetLightMaterialColor(int light, int materialSlot, float red, float green, float blue, float alpha)
 {
-	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
-		if (materialSlot < this->m_char->m_xxSkeleton->m_lightsArray[light].m_materialCount) {
-			if (this->m_char->m_xxSkeleton != NULL) {
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL){
+		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
+			if (materialSlot < this->m_char->m_xxSkeleton->m_lightsArray[light].m_materialCount) {
 				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialRed = red;
 				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialGreen = green;
 				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialBlue = blue;
@@ -95,8 +95,8 @@ void CharInstData::SetLightMaterialColor(int light, int materialSlot, float red,
 
 void CharInstData::SetLightDirection(int light, float x, float y, float z, float w)
 {
-	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
-		if (this->m_char->m_xxSkeleton != NULL) {
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
+		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
 			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0] = x;
 			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1] = y;
 			this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2] = z;
@@ -107,8 +107,8 @@ void CharInstData::SetLightDirection(int light, float x, float y, float z, float
 
 std::vector<float> CharInstData::GetLightDirection(int light)
 {
-	if (this->IsValid() && light < this->m_char->m_xxSkeleton->m_lightsCount) {
-		if (this->m_char->m_xxSkeleton != NULL) {
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
+		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
 			auto x = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][0];
 			auto y = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][1];
 			auto z = this->m_char->m_xxSkeleton->m_lightsArray[light].m_matrix2[2][2];
@@ -122,6 +122,6 @@ std::vector<float> CharInstData::GetLightDirection(int light)
 void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
 	m_cardData.Reset();
-	for(int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
+	for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
 }
 
