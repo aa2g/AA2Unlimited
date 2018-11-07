@@ -194,9 +194,11 @@ namespace AAEdit {
 		
 		void LoadMatrixData(int listboxId);
 		void LoadColorData(int listboxId);
+		void ApplySubmeshRule(bool forceRefresh);
 		void ApplyInput();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
+		bool IsSubmeshRuleSelected();
 	} m_bdDialog;
 	struct BSDialog : public Dialog {
 		struct BodySlider {

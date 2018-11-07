@@ -1481,12 +1481,21 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				SendMessage(thisPtr->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)num);
 				break; }
 			}
+			if (thisPtr->IsSubmeshRuleSelected()) {
+				thisPtr->ApplySubmeshRule(true);
+			}
 		}
 
 		break; }
 
 	};
 	return FALSE;
+}
+
+bool UnlimitedDialog::BDDialog::IsSubmeshRuleSelected() {
+	int sel = SendMessage(this->m_bmSMList, LB_GETCURSEL, 0, 0);
+
+	return (sel != LB_ERR);
 }
 
 void UnlimitedDialog::BDDialog::LoadMatrixData(int listboxId) {
@@ -1596,14 +1605,115 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 	//
 }
 
+void UnlimitedDialog::BDDialog::ApplySubmeshRule(bool lightRefresh)
+{
+	int flags = 0;
+	bool submeshMod = false;
+	if (SendMessage(m_bmRbBoneMod, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::MODIFY_BONE;
+		submeshMod = false;
+	}
+	if (SendMessage(m_bmRbFrameMod, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::MODIFY_FRAME;
+		submeshMod = false;
+	}
+	if (SendMessage(m_bmRbSMOL, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::SUBMESH_OUTLINE;
+		submeshMod = true;
+	}
+	if (SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED) {
+		flags |= AAUCardData::SUBMESH_SHADOW;
+		submeshMod = true;
+	}
+	if (!submeshMod) return;
 
-void UnlimitedDialog::BDDialog::ApplyInput() {
 	TCHAR xxname[128];
-	SendMessage(m_bmCbXXFile,WM_GETTEXT,128,(LPARAM)xxname);
+	SendMessage(m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
 	TCHAR bonename[128];
-	SendMessage(m_bmCbBone,WM_GETTEXT,128,(LPARAM)bonename);
+	SendMessage(m_bmCbBone, WM_GETTEXT, 128, (LPARAM)bonename);
 	TCHAR materialName[128];
 	SendMessage(m_bmCbMaterial, WM_GETTEXT, 128, (LPARAM)materialName);
+
+	int red = General::GetEditInt(m_edSubmeshColorRed);
+	int green = General::GetEditInt(m_edSubmeshColorGreen);
+	int blue = General::GetEditInt(m_edSubmeshColorBlue);
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDAT;
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDSH1;
+	union {
+		DWORD i;
+		float f;
+	} floatyDWORDSH2;
+	floatyDWORDAT.f = General::GetEditFloat(m_edSubmeshColorAT);
+	floatyDWORDSH1.f = General::GetEditFloat(m_edSubmeshColorSH1);
+	floatyDWORDSH2.f = General::GetEditFloat(m_edSubmeshColorSH2);
+	std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
+	if (lightRefresh) {
+		ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
+		if (curr == nullptr) return;
+		ExtClass::XXFile* xxlist[] = {
+			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
+		};
+		if (curr->m_charData->m_gender == 0) {
+			xxlist[10] = NULL;
+		}
+
+		for (ExtClass::XXFile* file : xxlist) {
+			if (file == NULL) continue;
+			{
+				auto mesh = std::wstring(xxname);
+				auto frame = std::wstring(bonename);
+				auto material = std::wstring(materialName);
+				auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
+				auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
+				auto newMaterialSize = material.size() % 2 == 0 ? material.size() : (material.size() + 1);
+				mesh.resize(newMeshSize);
+				frame.resize(newFrameSize);
+				material.resize(newMaterialSize);
+				std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
+
+				auto currStyle = (Shared::g_currentChar)->GetCurrentStyle();
+				if (flags & AAUCardData::SUBMESH_OUTLINE) {
+					auto size = Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshOutlines.size();
+					for (int i = 0; i < size; i++)
+					{
+						if (key == (&Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshOutlines[i])->first)
+						{
+							(&Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshOutlines[i])->second = color;
+							break;
+						}
+					}
+					Shared::FrameSubmeshOutlineOverride(file, false);
+				}
+				if (flags & AAUCardData::SUBMESH_SHADOW) {
+					auto size = Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshShadows.size();
+					auto shadowsRules = Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshShadows;
+					for (int i = 0; i < shadowsRules.size(); i++)
+					{
+						if (key == (&Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshShadows[i])->first)
+						{
+							(&Shared::g_currentChar->m_cardData.m_styles[currStyle].m_submeshShadows[i])->second = color;
+							break;
+						}
+					}
+					Shared::FrameSubmeshShadowOverride(file, false);
+				}
+			}
+		}
+	}
+	else {
+		g_currChar.m_cardData.AddSubmeshRule((AAUCardData::MeshModFlag)flags, xxname, bonename, materialName, color);
+	}
+}
+
+void UnlimitedDialog::BDDialog::ApplyInput() {
 	int flags = 0;
 	bool submeshMod = false;
 	if (SendMessage(m_bmRbBoneMod, BM_GETCHECK, 0, 0) == BST_CHECKED) {
@@ -1624,30 +1734,16 @@ void UnlimitedDialog::BDDialog::ApplyInput() {
 	}
 	
 	if (submeshMod){
-
-		int red = General::GetEditInt(m_edSubmeshColorRed);
-		int green = General::GetEditInt(m_edSubmeshColorGreen);
-		int blue = General::GetEditInt(m_edSubmeshColorBlue);
-		union {
-			DWORD i;
-			float f;
-		} floatyDWORDAT;
-		union {
-			DWORD i;
-			float f;
-		} floatyDWORDSH1;
-		union {
-			DWORD i;
-			float f;
-		} floatyDWORDSH2;
-		floatyDWORDAT.f = General::GetEditFloat(m_edSubmeshColorAT);
-		floatyDWORDSH1.f = General::GetEditFloat(m_edSubmeshColorSH1);
-		floatyDWORDSH2.f = General::GetEditFloat(m_edSubmeshColorSH2);
-		std::vector<DWORD> color{ (DWORD)red, (DWORD)green, (DWORD)blue, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
-		g_currChar.m_cardData.AddSubmeshRule((AAUCardData::MeshModFlag)flags, xxname, bonename, materialName, color);
-
+		ApplySubmeshRule(false);
 	}
 	else {
+		TCHAR xxname[128];
+		SendMessage(m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
+		TCHAR bonename[128];
+		SendMessage(m_bmCbBone, WM_GETTEXT, 128, (LPARAM)bonename);
+		//TCHAR materialName[128];
+		//SendMessage(m_bmCbMaterial, WM_GETTEXT, 128, (LPARAM)materialName);
+
 		//remove transformation if it allready exists
 		const auto& vec = g_currChar.m_cardData.GetMeshRuleList();
 		unsigned int match;
