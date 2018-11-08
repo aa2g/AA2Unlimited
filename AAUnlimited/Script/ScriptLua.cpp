@@ -246,9 +246,11 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["GetCharInstData"] = LUA_LAMBDA({
-		if (IsAAEdit) {
-			AAEdit::g_currChar.Editable();
+		if (General::IsAAEdit) {
+			if (!AAEdit::g_currChar.Editable())
+				return 0;
 			s.push(&AAEdit::g_currChar);
+			return 1;
 		}
 		else {
 			int idx = s.get(1);

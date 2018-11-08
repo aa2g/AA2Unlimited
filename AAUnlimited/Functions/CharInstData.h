@@ -62,10 +62,14 @@ public:
 	int GetLightIndex(const char* name);
 	void SetLightMaterialColor(int light, int materialSlot, float red, float green, float blue, float alpha);
 	void SetLightDirection(int light, float x, float y, float z, float w);
+	void SetAmbientColor(BYTE red, BYTE green, BYTE blue);
+	std::vector<float> GetLightMaterialColor(int light, int materialSlot);
 	std::vector<float> GetLightDirection(int light);
+	std::vector<BYTE> GetAmbientColor();
 
 	void Reset();
 	inline bool IsValid() {
+		if (General::IsAAEdit) return Editable();
 		ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 		ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 		for (start; start != end; start++) {
@@ -110,12 +114,38 @@ public:
 		LUA_METHOD(GetStyleName, {
 			return _gl.push(_self->GetStyleName(_gl.get(2))).one;
 		});
-		LUA_METHOD(GetLightArray, {
-			return _gl.push(_self->GetLightArray()).one;
-		});
 		LUA_METHOD(GetLightIndex, {
 			const char * name = _gl.get(2);
 			return _gl.push(_self->GetLightIndex(name)).one;
+		});
+		LUA_METHOD(GetLightMaterialColor, {
+			int light = _gl.get(2);
+			int material = _gl.get(3);
+			std::vector<float> color = _self->GetLightMaterialColor(light, material);
+			float r = color[0];
+			float g = color[1];
+			float b = color[2];
+			float a = color[3];
+			_gl.push(r).push(g).push(b).push(a);
+			return 4;
+		});
+		LUA_METHOD(GetLightDirection, {
+			int light = _gl.get(2);
+			std::vector<float> direction = _self->GetLightDirection(light);
+			float x = direction[0];
+			float y = direction[1];
+			float z = direction[2];
+			float w = direction[3];
+			_gl.push(x).push(y).push(z).push(w);
+			return 4;
+		});
+		LUA_METHOD(GetAmbientColor, {
+			std::vector<BYTE> color = _self->GetAmbientColor();
+			float r = color[0];
+			float g = color[1];
+			float b = color[2];
+			_gl.push(r).push(g).push(b);
+			return 3;
 		});
 		LUA_METHOD(SetLightMaterialColor, {
 			int light = _gl.get(2);
@@ -133,6 +163,12 @@ public:
 			float z = _gl.get(5);
 			float w = _gl.get(6);
 			_self->SetLightDirection(light, x, y, z, w);
+		});
+		LUA_METHOD(SetAmbientColor, {
+			BYTE r = _gl.get(2);
+			BYTE g = _gl.get(3);
+			BYTE b = _gl.get(4);
+			_self->SetAmbientColor(r, g, b);
 		});
 #undef LUA_CLASS
 	}
