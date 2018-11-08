@@ -679,6 +679,13 @@ end
 
 local dlgclothes = require "poser.dlgclothes"
 
+
+-- -----------
+-- Light UI
+-- -----------
+
+local dlglight = require "poser.dlglight"
+
 -- -----------
 -- UI Layout
 -- -----------
@@ -815,10 +822,8 @@ local dialogsliders = iup.dialog {
 				dlgclothes,
 			},
 			iup.hbox {
-				tabtitle = "Meshes",
-			},
-			iup.hbox {
-				tabtitle = "Frames",
+				tabtitle = "Light",
+				dlglight,
 			},
 		},
 		--gap = 3,

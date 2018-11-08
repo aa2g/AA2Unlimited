@@ -114,12 +114,8 @@ namespace ExtClass {
 				float y = _self->m_lightMatrix[2][1];
 				float z = _self->m_lightMatrix[2][2];
 				float w = _self->m_lightMatrix[2][3];
-				float result[4];
-				result[0] = x;
-				result[1] = y;
-				result[2] = z;
-				result[3] = w;
-				return _gl.push(result).one;
+				_gl.push(x).push(y).push(z).push(w);
+				return 4;
 			});
 			LUA_METHOD(GetLightMaterialColor, {
 				int material = _gl.get(2);
@@ -127,12 +123,8 @@ namespace ExtClass {
 				float g = _self->m_material[material].m_materialGreen;
 				float b = _self->m_material[material].m_materialBlue;
 				float a = _self->m_material[material].m_materialAlpha;
-				float result[4];
-				result[0] = r;
-				result[1] = g;
-				result[2] = b;
-				result[3] = a;
-				return _gl.push(result).one;
+				_gl.push(r).push(g).push(b).push(a);
+				return 4;
 			});
 		}
 #undef LUA_CLASS

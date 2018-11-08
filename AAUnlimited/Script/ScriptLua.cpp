@@ -246,10 +246,16 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["GetCharInstData"] = LUA_LAMBDA({
-		int idx = s.get(1);
-		if ((idx < 0) || (idx > 24) || !g_characters[idx].IsValid())
-			return 0;
-		s.push(&g_characters[idx]);
+		if (IsAAEdit) {
+			AAEdit::g_currChar.Editable();
+			s.push(&AAEdit::g_currChar);
+		}
+		else {
+			int idx = s.get(1);
+			if ((idx < 0) || (idx > 24) || !g_characters[idx].IsValid())
+				return 0;
+			s.push(&g_characters[idx]);
+		}
 	});
 
 
