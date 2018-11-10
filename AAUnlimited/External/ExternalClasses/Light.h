@@ -22,9 +22,9 @@ namespace ExtClass {
 #define LUA_CLASS ExtClass::Light::LightMaterial
 			static inline void bindLua() {
 				LUA_BIND(m_materialRed)
-					LUA_BIND(m_materialGreen)
-					LUA_BIND(m_materialBlue)
-					LUA_BIND(m_materialAlpha)
+				LUA_BIND(m_materialGreen)
+				LUA_BIND(m_materialBlue)
+				LUA_BIND(m_materialAlpha)
 			}
 #undef LUA_CLASS
 		};
@@ -132,6 +132,6 @@ namespace ExtClass {
 	};
 #pragma pack(pop)
 
-	static_assert(sizeof(Light) == 0x18c, "Material size mismatch; must be 0x134 bytes");
+	static_assert(sizeof(Light) == 0x18c, "Light size mismatch; must be 0x18c bytes");
 
 };
