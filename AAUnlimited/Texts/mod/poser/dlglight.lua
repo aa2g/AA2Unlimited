@@ -4,7 +4,7 @@ local toggles = require "poser.toggles"
 local sliders = require "poser.sliders"
 local lists = require "poser.lists"
 
-local lights = { "kougen", "kage", "kesi01" }
+local lights = { kougen = true, kage = true, kesi01 = true }
 -- local cameralights = { "cam", "rim" }
 
 local sliderstep = 0.05
@@ -13,13 +13,16 @@ local function setlightdirection(x, y, z)
 	if x == 0 and y == 0 and z == 0 then return end
 	local norma = math.sqrt(x*x + y*y + z*z)
 	local x, y, z = x/norma, y/norma, z/norma
-	for _,c in pairs(charamgr.characters) do
-		local characterdata = GetCharInstData(c.struct.m_seat)
-		local index
-		for _,l in pairs(lights) do
-			index = characterdata:GetLightIndex(l) or 0
-			-- log.info("setting light %d direction", index)
-			characterdata:SetLightDirection(index, x, y, z, 0)
+	for _,character in pairs(charamgr.characters) do
+		if character.ischaracter == true and character.struct.m_xxSkeleton then
+			local skeleton = character.struct.m_xxSkeleton
+			local lightcount = skeleton.m_lightsCount
+			for i = 1, lightcount, 1 do
+				local light = skeleton:m_lightsArray(i - 1)
+				if lights[light.m_name] then
+					light:SetLightDirection(x, y, z, 0)
+				end
+			end
 		end
 	end
 end
@@ -36,10 +39,8 @@ local function getlight(character, name)
 	if character.ischaracter == true and character.struct.m_xxSkeleton then
 		local skeleton = character.struct.m_xxSkeleton
 		local lightcount = skeleton.m_lightsCount
-		log.info("looking for light %s from %d total", name, lightcount)
 		for i = 1, lightcount, 1 do
 			local light = skeleton:m_lightsArray(i - 1)
-			log.info("is it %s", light.m_name)
 			if light.m_name == name then
 				return light
 			end
@@ -94,7 +95,7 @@ end
 -- ----
 
 local control = iup.vbox {
-	iup.toggle { title = "Enable and control light direction" },
+	-- iup.toggle { title = "Enable and control light direction" },
 	iup.vbox {
 		iup.label { title = "Left <> Right" },
 		sliderx,
@@ -103,12 +104,14 @@ local control = iup.vbox {
 		iup.label { title = "Back <> Front" },
 		sliderz,
 	},
-	iup.toggle { title = "Enable and control light features" },
+	-- iup.toggle { title = "Enable and control light features" },
 	iup.hbox {
 		iup.tabs {
 			lightmaterialeditor("kougen"),
 			lightmaterialeditor("kage"),
 			lightmaterialeditor("kesi01"),
+			lightmaterialeditor("cam"),
+			lightmaterialeditor("rim"),
 		}
 	}
 }
