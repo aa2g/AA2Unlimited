@@ -6,6 +6,7 @@ local lists = require "poser.lists"
 
 local lights = { kougen = true, kage = true, kesi01 = true }
 -- local cameralights = { "cam", "rim" }
+local xxfiles = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 11 }
 
 local sliderstep = 0.05
 
@@ -47,6 +48,41 @@ local function getlight(character, name)
 		end
 	end
 end
+
+local baser = iup.text {}
+local baseg = iup.text {}
+local baseb = iup.text {}
+local ambientlighteditor = iup.hbox {
+		tabtitle = "ambient",
+		iup.gridbox {
+			numdiv = 4,
+			baser, baseg, baseb,
+		},
+		iup.vbox {
+			iup.button { title = "Get", action = function()
+				local character = charamgr.current
+				if character.ischaracter ~= true or not character.struct.m_xxSkeleton then return end
+				local skel = character.struct.m_xxSkeleton
+				baser.value = skel.m_ambientLightRed
+				baseg.value = skel.m_ambientLightGreen
+				baseb.value = skel.m_ambientLightBlue
+			end},
+			iup.button { title = "Set", action = function()
+				local character = charamgr.current
+				if character.ischaracter ~= true then return end
+				character = character.struct
+				for _,xx in ipairs(xxfiles) do
+					local xxfile = character:GetXXFile(xx)
+					if xxfile then
+						xxfile.m_ambientLightRed = tonumber(baser.value)
+						xxfile.m_ambientLightGreen = tonumber(baseg.value)
+						xxfile.m_ambientLightBlue = tonumber(baseb.value)
+					end
+				end
+			end},
+		}
+	}
+
 
 local function lightmaterialeditor(name)
 	local mat0r = iup.text {}
@@ -107,6 +143,7 @@ local control = iup.vbox {
 	-- iup.toggle { title = "Enable and control light features" },
 	iup.hbox {
 		iup.tabs {
+			ambientlighteditor,
 			lightmaterialeditor("kougen"),
 			lightmaterialeditor("kage"),
 			lightmaterialeditor("kesi01"),
