@@ -37,5 +37,15 @@ function _M.getfiledialog(pattern)
 	end
 end
 
+function _M.getfolderdialog(folder)
+	local dlg = iup.filedlg {
+		dialogtype = "dir",
+		directory = folder
+	}
+	dlg:popup()
+	folder = dlg.value or folder
+	return folder
+end
+
 
 return _M
