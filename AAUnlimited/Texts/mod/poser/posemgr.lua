@@ -259,7 +259,7 @@ end
 
 local function savepose(filename)
 	if filename == "" then return end
-	local path = aau_path(posesdir, filename) .. ".pose"
+	local path = posesdir .. "\\" .. filename .. ".pose"
 	log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
 	local pose = pose2table(character)
@@ -364,7 +364,7 @@ function loadscenebutton.action()
 end
 
 local function savescene(filename)
-	local path = aau_path(scenesdir, filename) .. ".scene"
+	local path = scenesdir .. "\\" .. filename .. ".scene"
 	log.spam("Poser: Saving scene %s to %s", filename, path)
 
 	local characters = {}
