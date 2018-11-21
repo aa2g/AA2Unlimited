@@ -43,13 +43,13 @@ These Features above are all simply special, wild-carded rules of one of the typ
 - **Mesh Texture Overrides**: A set of rules of the form `(TextureName)->(TextureFileOnHarddrive)`. Whenever a xx file is loaded that contains a texture of a given name, a different texture from the file system is loaded instead
 - **Archive Overrides**: A set of rules of the form `(archive.pp|file)->(fileOnHarddrive)`. Whenever a given file is read from a given archive, a different file from the harddrive will be loaded instead.
 - **Archive Redirects**: A set of rules of the form `(archive.pp|file)->(archive.pp|file)`. Whenever a given file is read from a given archive, a different file from a different archive is loaded instead.
-- **Object Overrides**:  A set of rules of the form `(ObjectName)->(file)`. Whenever a xx file is loaded that contains the given Object, it is replaced by the object in the given xxo file. The format of the given file must be exactly how it is stored inside the xx file. There is a different exe in this project that can extract those: `XXObjectExtracter`. *Note*: by the looks of it, the file is radically different depending on the xx file version. These overrides probably only work for xx files version 8.
+- **Object Overrides**:  A set of rules of the form `(FrameName)->(file.xxo)`. Whenever a xx file is loaded that contains the given FrameName, it is replaced by the object in the given xxo file. The format of the given file must be exactly how it is stored inside the xx file. There is a different exe in this project that can extract those: `XXObjectExtracter`. *Note*: by the looks of it, the file is radically different depending on the xx file version. These overrides probably only work for xx files version 8.
   
 ### Additional card based features:
 - **Save Override Files**: all files target by these overrides, can be saved inside the card; if such a card is opened or previewed in the editor, the files will be extracted automatically if they're missing.
 - **Eye Textures**: a seperate texture can be used for the right eye
 - **Body Sliders**: additional sliders for certain body parts
-- **Outline Color**: can change outline color for this character (every part of the body)
+- **Submesh Shadows/Outlines (SMSH/SMOL)**: can change outline or shadow color for this character (you can pick specific submeshes by their material names)
 - **Tan Color**: can change the tan color from its brown shade
 - **Additional Hairs**: more hairs than the original 4 can be added. Note that these hairs do not have low poly modles (yet)
 - **Body Modification**: can put an SRT(*S*cale *R*otation *T*ranslation) matrix in front of frames or modify the SRT matrix of bones. Essentially generic body(or hair, or outfit, or anything) sliders. Only use if you are aware of how AA2 handles bodies.
