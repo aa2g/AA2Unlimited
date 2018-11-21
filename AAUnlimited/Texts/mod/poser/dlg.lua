@@ -718,6 +718,15 @@ local dialogsliders = iup.dialog {
 				iup.hbox {
 					iup.button { title = "T-Pose", expand = "horizontal", action = function() posemgr.tpose(charamgr.current) end },
 					iup.button { title = "Reset Pose", expand = "horizontal", action = function() posemgr.resetpose(charamgr.current) end },
+					iup.button { title = "Load XA", expand = "horizontal", action = function()
+						local character = charamgr.current
+						local path
+						if character.ischaracter == true then path = fileutils.getfiledialog(aau_path("poser\\*.xa")) end
+						if not path then return end
+						local directory, filename, extension = fileutils.splitfilepath(path)
+						filename = filename .. ".xa"
+						character.struct:LoadXA(directory .. ".pp", filename, 0, 0, 0)
+					end},
 				},
 				expand = "yes",
 				gap = 3,
