@@ -679,6 +679,13 @@ end
 
 local dlgclothes = require "poser.dlgclothes"
 
+
+-- -----------
+-- Light UI
+-- -----------
+
+local dlglight = require "poser.dlglight"
+
 -- -----------
 -- UI Layout
 -- -----------
@@ -709,9 +716,8 @@ local dialogsliders = iup.dialog {
 					detachpropsbutton,
 				},
 				iup.hbox {
-					iup.button { title = "Show UI", action = function() SetHideUI(false) end },
-					iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
-					iup.button { title = "Reset Pose", action = function() posemgr.resetpose(charamgr.current) end }
+					iup.button { title = "T-Pose", expand = "horizontal", action = function() posemgr.tpose(charamgr.current) end },
+					iup.button { title = "Reset Pose", expand = "horizontal", action = function() posemgr.resetpose(charamgr.current) end },
 				},
 				expand = "yes",
 				gap = 3,
@@ -815,10 +821,8 @@ local dialogsliders = iup.dialog {
 				dlgclothes,
 			},
 			iup.hbox {
-				tabtitle = "Meshes",
-			},
-			iup.hbox {
-				tabtitle = "Frames",
+				tabtitle = "Light",
+				dlglight,
 			},
 		},
 		--gap = 3,

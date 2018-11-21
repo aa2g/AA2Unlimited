@@ -105,6 +105,43 @@ void CharInstData::SetLightDirection(int light, float x, float y, float z, float
 	}
 }
 
+void CharInstData::SetAmbientColor(BYTE red, BYTE green, BYTE blue)
+{
+	if (this->IsValid()) {
+		ExtClass::XXFile* xxlist[] = {
+			this->m_char->m_xxFace, this->m_char->m_xxGlasses, this->m_char->m_xxFrontHair, this->m_char->m_xxSideHair,
+			this->m_char->m_xxBackHair, this->m_char->m_xxHairExtension, this->m_char->m_xxTounge, this->m_char->m_xxSkeleton,
+			this->m_char->m_xxBody, this->m_char->m_xxLegs, this->m_char->m_xxSkirt
+		};
+		if (this->m_char->m_charData->m_gender == 0) {
+			xxlist[10] = NULL;
+		}
+
+		for (ExtClass::XXFile* file : xxlist) {
+			if (file == NULL) continue;
+			file->m_ambientLightBlue = blue;
+			file->m_ambientLightGreen = green;
+			file->m_ambientLightRed = red;
+		}
+	}
+}
+
+std::vector<float> CharInstData::GetLightMaterialColor(int light, int materialSlot)
+{
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
+		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
+			if (materialSlot < this->m_char->m_xxSkeleton->m_lightsArray[light].m_materialCount) {
+				auto r = this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialRed;
+				auto g = this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialGreen;
+				auto b = this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialBlue;
+				auto a = this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialAlpha;
+				return std::vector<float>({ r, g, b, a });
+			}
+		}
+	}
+	return std::vector<float>();
+}
+
 std::vector<float> CharInstData::GetLightDirection(int light)
 {
 	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
@@ -117,6 +154,17 @@ std::vector<float> CharInstData::GetLightDirection(int light)
 		}
 	}
 	return std::vector<float>();
+}
+
+std::vector<BYTE> CharInstData::GetAmbientColor()
+{
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
+		auto r = this->m_char->m_xxSkeleton->m_ambientLightRed;
+		auto g = this->m_char->m_xxSkeleton->m_ambientLightGreen;
+		auto b = this->m_char->m_xxSkeleton->m_ambientLightBlue;
+		return std::vector<BYTE>({ r, g, b});
+	}
+	return std::vector<BYTE>();
 }
 
 void CharInstData::Reset() {

@@ -3,6 +3,7 @@ require "iupluacontrols"
 
 local _M = {}
 
+local fileutils = require "poser.fileutils"
 local signals = require "poser.signals"
 local json = require "json"
 local lists = require "poser.lists"
@@ -19,8 +20,8 @@ local sceneloaded = signals.signal()
 _M.poseloaded = poseloaded
 _M.sceneloaded = sceneloaded
 
-local posesdir = "poser\\poses"
-local scenesdir = "poser\\scenes"
+local posesdir = aau_path("poser\\poses")
+local scenesdir = aau_path("poser\\scenes")
 
 local lock_camera = false
 local lock_face = false
@@ -43,11 +44,11 @@ end
 clipchanged.connect(setclip)
 
 local function savedposes()
-	return readdir(aau_path(posesdir .. "\\*.pose"))
+	return readdir(posesdir .. "\\*.pose")
 end
 
 local function savedscenes()
-	return readdir(aau_path(scenesdir .. "\\*.scene"))
+	return readdir(scenesdir .. "\\*.scene")
 end
 
 
@@ -64,6 +65,10 @@ local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
+local refreshposelistbutton = iup.button { title = "Refresh" }
+local refreshscenelistbutton = iup.button { title = "Refresh" }
+local useposesfolderbutton = iup.button { title = "Use Folder" }
+local usescenesfolderbutton = iup.button { title = "Use Folder" }
 
 signals.connect(poselist, "selectionchanged", function() posename.value = poselist[poselist.value] end )
 signals.connect(scenelist, "selectionchanged", function() scenename.value = scenelist[scenelist.value] end )
@@ -98,10 +103,20 @@ local function populatescenelist()
 end
 populatescenelist()
 
+function useposesfolderbutton.action()
+	posesdir = fileutils.getfolderdialog(posesdir)
+	populateposelist()
+end
+
+function usescenesfolderbutton.action()
+	scenesdir = fileutils.getfolderdialog(scenesdir)
+	populatescenelist()
+end
+
 function deleteposebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this pose?", "Yes", "No")
 	if resp == 1 then
-		local path = aau_path(posesdir, posename.value .. ".pose")
+		local path = posesdir  .. "\\" .. posename.value .. ".pose"
 		local ret, msg = os.remove(path)
 		if not ret then
 			log.error(msg)
@@ -174,7 +189,7 @@ local function loadpose(character, filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
 	if character and character.ischaracter == true then
-		local path = aau_path(posesdir, filename) .. ".pose"
+		local path = posesdir .. "\\" .. filename .. ".pose"
 		log.spam("Poser: Reading %s", path)
 		local data = readfile(path)
 		if data then
@@ -244,7 +259,7 @@ end
 
 local function savepose(filename)
 	if filename == "" then return end
-	local path = aau_path(posesdir, filename) .. ".pose"
+	local path = posesdir .. "\\" .. filename .. ".pose"
 	log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
 	local pose = pose2table(character)
@@ -266,7 +281,7 @@ end
 -- == Scenes ==
 
 local function loadscene(filename)
-	local path = aau_path(scenesdir, filename) .. ".scene"
+	local path = scenesdir .. "\\" .. filename .. ".scene"
 	log.spam("Poser: Loading scene %s", path)
 	local data = readfile(path)
 	if data then
@@ -349,7 +364,7 @@ function loadscenebutton.action()
 end
 
 local function savescene(filename)
-	local path = aau_path(scenesdir, filename) .. ".scene"
+	local path = scenesdir .. "\\" .. filename .. ".scene"
 	log.spam("Poser: Saving scene %s to %s", filename, path)
 
 	local characters = {}
@@ -412,7 +427,7 @@ end
 function deletescenebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this scene?", "Yes", "No")
 	if resp == 1 then
-		local path = aau_path(scenesdir, scenename.value .. ".scene")
+		local path = scenesdir .. "\\" .. scenename.value .. ".scene"
 		local ret, msg = os.remove(path)
 		if not ret then
 			log.error(msg)
@@ -420,6 +435,14 @@ function deletescenebutton.action()
 		log.spam("Removed %s", path)
 		populatescenelist()
 	end
+end
+
+function refreshposelistbutton.action()
+	populateposelist()
+end
+
+function refreshscenelistbutton.action()
+	populatescenelist()
 end
 
 
@@ -453,6 +476,13 @@ _M.dialogposes = iup.dialog {
 				iup.vbox {
 					posefilter,
 					poselist,
+					iup.hbox {
+						refreshposelistbutton,
+						iup.label { title = "Animation Clip" },
+						cliptext,
+						gap = 3,
+						alignment = "acenter"
+					},
 					expand = "no",
 				},
 				iup.vbox {
@@ -460,11 +490,13 @@ _M.dialogposes = iup.dialog {
 					posename,
 					iup.hbox {
 						loadposebutton,
+						iup.fill { size = 10, },
 						saveposebutton,
 					},
 					iup.label { title = "Locks" },
 					lockworldtoggle,
 					lockfacetoggle1,
+					useposesfolderbutton,
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
 				},
@@ -475,6 +507,7 @@ _M.dialogposes = iup.dialog {
 				iup.vbox {
 					scenefilter,
 					scenelist,
+					refreshscenelistbutton,
 					expand = "no",
 				},
 				iup.vbox {
@@ -482,12 +515,14 @@ _M.dialogposes = iup.dialog {
 					scenename,
 					iup.hbox {
 						loadscenebutton,
+						iup.fill { size = 10, },
 						savescenebutton,
 					},
 					iup.label { title = "Locks" },
 					lockfacetoggle2,
 					lockpropstoggle,
 					lockcameratoggle,
+					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
 				},
@@ -495,16 +530,9 @@ _M.dialogposes = iup.dialog {
 				gap = 3,
 			},
 		},
-		iup.frame {
-			title = "Animation",
-			iup.hbox { 
-				iup.label { title = "Clip" },
-				cliptext,
---				iup.label { title = "Frame" },
---				frametext,
-				gap = 3,
-				alignment = "acenter"
-			},
+		iup.hbox {
+			iup.button { title = "Show UI", action = function() SetHideUI(false) end },
+			iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
 		},
 	},
 	nmargin = "3x3",
@@ -519,6 +547,11 @@ function _M.resetpose(character)
 		v:Reset()
 		v:Apply()
 	end
+end
+
+function _M.tpose(character)
+	_M.resetpose(character)
+	character.pose = 0
 end
 
 return _M
