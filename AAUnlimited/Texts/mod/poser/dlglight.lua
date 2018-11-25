@@ -1,8 +1,4 @@
 local charamgr = require "poser.charamgr"
-local signals = require "poser.signals"
-local toggles = require "poser.toggles"
-local sliders = require "poser.sliders"
-local lists = require "poser.lists"
 
 local lights = { kougen = true, kage = true, kesi01 = true }
 -- local cameralights = { "cam", "rim" }
@@ -32,9 +28,9 @@ local sliderx, slidery, sliderz
 local function slidervaluechanged()
 	setlightdirection(sliderx.value, slidery.value, sliderz.value)
 end
-sliderx = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", mousemove_cb = slidervaluechanged }
-slidery = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", mousemove_cb = slidervaluechanged }
-sliderz = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", mousemove_cb = slidervaluechanged }
+sliderx = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", valuechanged_cb = slidervaluechanged }
+slidery = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", valuechanged_cb = slidervaluechanged }
+sliderz = iup.val { orientation = "horizontal", expand = "horizontal", min = -1, max = 1, step = sliderstep, value = 0, inverted = "yes", valuechanged_cb = slidervaluechanged }
 
 local function getlight(character, name)
 	if character.ischaracter == true and character.struct.m_xxSkeleton then
@@ -131,16 +127,18 @@ end
 -- ----
 
 local control = iup.vbox {
-	-- iup.toggle { title = "Enable and control light direction" },
-	iup.vbox {
-		iup.label { title = "Left <> Right" },
-		sliderx,
-		iup.label { title = "Bottom <> Top" },
-		slidery,
-		iup.label { title = "Back <> Front" },
-		sliderz,
+	iup.frame {
+		title = "Light Direction",
+		iup.vbox {
+			nmargin = "6x3",
+			iup.label { title = "Left <> Right" },
+			sliderx,
+			iup.label { title = "Bottom <> Top" },
+			slidery,
+			iup.label { title = "Back <> Front" },
+			sliderz,
+		},
 	},
-	-- iup.toggle { title = "Enable and control light features" },
 	iup.hbox {
 		iup.tabs {
 			ambientlighteditor,
