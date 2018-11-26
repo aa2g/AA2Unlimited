@@ -393,6 +393,19 @@ namespace Poser {
 	}
 
 	void PoserController::PoserCharacter::FrameModFace(ExtClass::XXFile* xxFile) {
+		//move all face sliders to the transient list because some faces have more bones than others and
+		//when switching faces some sliders may be stale
+		auto it = m_sliders.begin();
+		while (it != m_sliders.end()) {
+			if (it->second->source == ExtClass::CharacterStruct::FACE || it->second->source == ExtClass::CharacterStruct::TONGUE) {
+				m_transientSliders[it->first] = it->second;
+				it = m_sliders.erase(it);
+			}
+			else {
+				it++;
+			}
+		}
+
 		std::queue<std::string> targets;
 		targets.push("A00_O_mimi");
 		targets.push("A00_J_mayumaba");
