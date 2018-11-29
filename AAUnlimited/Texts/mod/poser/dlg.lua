@@ -95,6 +95,7 @@ local bonelist = lists.listbox {}
 
 local propbonefilter = lists.listfilter()
 local propbonelist = lists.listbox { sort = "yes" }
+signals.connect(propbonefilter, "setfilter", propbonelist, "setfilter")
 
 local function showframe(frame, show)
 	show = show and 0 or 2
@@ -439,13 +440,13 @@ end
 local function propchanged()
 	local prop = propmgr.props[tonumber(proplist.value)]
 	if prop then
+		local newlist = {}
 		local i = 1
-		log.spam("%s %s", prop, prop.poser)
 		for k,_ in prop:sliders() do
-			propbonelist[i] = k
+			newlist[i] = k
 			i = i + 1
 		end
-		propbonelist[i] = nil
+		propbonelist.setlist(newlist)
 		propsliderchanged()
 	end
 end
