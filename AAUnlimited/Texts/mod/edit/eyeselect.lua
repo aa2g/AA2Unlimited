@@ -24,6 +24,7 @@ function select_eye(dir,field)
 end
 
 return function(_M, opts, p)
+	if opts.eyeselect == 0 then return end
 	super = _M
 	-- eye control hook
 	p:g_hook_vptr(0x304CCC, 4, function(orig,this,a2,a3,a4,hwnd)

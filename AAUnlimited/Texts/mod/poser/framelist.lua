@@ -122,6 +122,8 @@ return {
 	{ "a_J_dan09",				 { "Other" },		"Strapon9" },
 	{ "a01_J_NikuL_00",		 { "Other" },		"Left Vagina Lip" },
 	{ "a01_J_NikuR_00",		 { "Other" },		"Right Vagina Lip" },
+	{ "a01_J_NikuL_01",		 { "Other" },		"Left Ass Meat" },
+	{ "a01_J_NikuR_01",		 { "Other" },		"Right Ass Meat" },
 
 	{ "A00_N_hitomiL",		 { "Face" },		"Left Iris" },
 	{ "A00_N_hitomiR",		 { "Face" },		"Right Iris" },

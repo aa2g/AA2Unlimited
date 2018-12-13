@@ -8,6 +8,7 @@ local snowflake = require 'edit.snowflake'
 local opts = {
 	{ "face", 1, "Generate face on save: %b" },
 	{ "roster", 1, "Generate roster on save: %b"},
+	{ "eyeselect", 1, "Preview eye textures: %b" },
 }
 
 
