@@ -307,6 +307,10 @@ void InitializeHooks() {
 		NpcActions::NpcMovingActionPlanInjection();
 		NpcActions::RoomChangeInjection();
 		NpcActions::hPositionChangeInjection();
+		NpcActions::LowPolyUpdateEndInjectForPC();
+		NpcActions::LowPolyUpdateEndInjectForNPC();
+		NpcActions::LowPolyUpdateStartInjectForPC();
+		NpcActions::LowPolyUpdateStartInjectForNPC();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();
