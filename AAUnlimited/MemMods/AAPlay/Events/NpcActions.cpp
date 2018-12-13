@@ -278,7 +278,7 @@ void RoomChangeInjection() {
 
 void __stdcall LowPolyUpdateStart(CharacterStruct* param) {
 	//Fill this in as you like, this is your function.
-	auto x = param; 
+	Shared::GameState::setIsOverriding(true);
 }
 
 void __stdcall LowPolyUpdateStartPC(CharacterStruct* param) {
@@ -365,7 +365,7 @@ void LowPolyUpdateStartInjectForNPC() {
 void __stdcall LowPolyUpdateEnd() {
 	//This is your function, fill it in how you want
 	//If you are wondering which character finished loading, just push the character from LowPolyUpdateStart into GameState. The character that started updating is the one that finished updating.
-
+	Shared::GameState::setIsOverriding(false);
 }
 
 void __stdcall LowPolyUpdateEndPC() {
