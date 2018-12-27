@@ -351,6 +351,7 @@
     <None Include="Texts\mod\reshade.lua" />
     <None Include="Texts\mod\stats.lua" />
     <None Include="Texts\mod\strutil.lua" />
+    <None Include="Texts\mod\subtitles.lua" />
     <None Include="Texts\mod\opt.lua" />
     <None Include="Texts\mod\timewarp.lua" />
     <None Include="Texts\mod\unlocks.lua" />

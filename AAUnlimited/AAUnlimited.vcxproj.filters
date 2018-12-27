@@ -561,5 +561,8 @@
     <None Include="Texts\mod\poser\dlgmeshes.lua">
       <Filter>Lua\poser</Filter>
     </None>
+    <None Include="Texts\mod\subtitles.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
