@@ -16,6 +16,7 @@
 #include "Files/Config.h"
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
+#include "Functions/AAPlay/Subs.h"
 
 
 #define FRAME_MASK 15
@@ -163,6 +164,12 @@ public:;
 		_swprintf(buf, L"%02.2lf", 1000.0 * (FRAME_MASK + 1) / (real_time + 1));
 		//, real_time / (FRAME_MASK+1)
 		DrawText(font, 0, buf, -1, &rekt, DT_LEFT, 0xFFFFFFFF);
+	}
+
+	void DrawSubs() {
+		Subtitles::PopSubtitles();
+		if (!Subtitles::text.empty())
+			DrawText(font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect, DT_NOCLIP, Subtitles::color);
 	}
 
 	void MakeFont() {
@@ -572,11 +579,15 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-		if (font && g_Config.bDrawFPS) {
+		if (font && g_Config.bDrawFPS || g_Config.bDisplaySubs) {
 			D3DVIEWPORT9 vp;
 			GetViewport(&vp);
-			if (vp.Width > 256)
-				DrawFPS();
+			if (vp.Width > 1024) {
+				if (g_Config.bDrawFPS)
+					DrawFPS();
+				if (g_Config.bDisplaySubs)
+					DrawSubs();
+			}
 		}
 		frameno++;
 		WRAPCALL(orig->EndScene());

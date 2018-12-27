@@ -129,6 +129,7 @@
     <ClCompile Include="Files\PNGData.cpp" />
     <ClCompile Include="External\ExternalClasses\Camera.cpp" />
     <ClCompile Include="External\ExternalClasses\Light.cpp" />
+    <ClCompile Include="Functions\AAPlay\Subs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -249,6 +250,7 @@
     <ClInclude Include="External\ExternalClasses\CharacterStatus.h" />
     <ClInclude Include="External\ExternalClasses\NpcData.h" />
     <ClInclude Include="External\ExternalClasses\ActionParamStruct.h" />
+    <ClInclude Include="Functions\AAPlay\Subs.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

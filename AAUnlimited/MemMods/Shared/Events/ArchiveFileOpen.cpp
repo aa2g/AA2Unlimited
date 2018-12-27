@@ -293,6 +293,9 @@ public:;
 	   virtual int init_sound_buffer(int a2, BYTE *buf, DWORD, wchar_t **bn, int a6, int a7, int a8, int a9, int a10);
 
 	   int load_audio(int a2, wchar_t **archive, void *ppcls, wchar_t **fname, int a6, int a7, int a8, int a9, int a10) {
+		   std::string mbfname = General::CastToStringN(*fname, wcslen(*fname) + 1);
+		   size_t fpos = mbfname.find_last_of("\\");
+		   LUA_EVENT_NORET("load_audio", mbfname.c_str() + fpos + 1);
 		   int ret = 0x80004005;
 		   DWORD outSize;
 		   wchar_t *p = *fname;

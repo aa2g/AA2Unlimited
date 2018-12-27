@@ -278,6 +278,10 @@ void Lua::bindLua() {
 		*PlayerCharacterPtr() = s.get(1);
 	});
 
+	_BINDING["AddSubtitles"] = LUA_LAMBDA0({
+		Subtitles::AddSubtitles(s.get(1));
+	});
+
 //	_BINDING["GetPlayerConversation"] = &PlayerConversationPtr;
 
 	// Higher level triggers

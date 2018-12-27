@@ -44,6 +44,7 @@
     <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
     <ClCompile Include="Functions\AAPlay\Poser.cpp" />
     <ClCompile Include="Functions\AAPlay\PoserController.cpp" />
+    <ClCompile Include="Functions\AAPlay\Subs.cpp" />
     <ClCompile Include="Functions\CharInstData.cpp" />
     <ClCompile Include="External\ExternalClasses\Frame.cpp" />
     <ClCompile Include="External\ExternalVariables\AAEdit\CardData.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />
     <ClInclude Include="Functions\AAPlay\Poser.h" />
+    <ClInclude Include="Functions\AAPlay\Subs.h" />
     <ClInclude Include="Functions\CharInstData.h" />
     <ClInclude Include="External\ExternalClasses\Frame.h" />
     <ClInclude Include="External\ExternalClasses\XXFile.h" />
