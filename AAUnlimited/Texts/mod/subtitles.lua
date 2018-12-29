@@ -1,10 +1,10 @@
---@INFO Shows subtitles
+--@INFO Subtitles loader
 
 local _M = {}
-local opts = {
+--local opts = {
 --	{ "maxlines", 4, "Maximum number of lines to show %i[1,10]"},
 --	{ "duration", 3, "Subtitles duration %i[1,10]:" },
-}
+--}
 
 local subtitles = {}
 
@@ -30,11 +30,12 @@ function on.load_audio(fname)
 end
 
 function _M:load()
-	mod_load_config(self, opts)
+	-- mod_load_config(self, opts)
 	reload_subtitles()
 end
 
 function _M:unload()
+	subtitles = {}
 end
 
 --function _M:config()
@@ -42,3 +43,4 @@ end
 --end
 
 return _M
+
