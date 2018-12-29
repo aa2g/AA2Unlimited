@@ -175,29 +175,38 @@ public:;
 	void MakeFont() {
 		// fuck you microsoft for the d3dx9 SDK stupidity, no way im installing that shit
 		font = 0;
-		HMODULE hm = GetModuleHandleA("d3dx9_42");
-		void *(WINAPI *D3DXCreateFont)(
-			IDirect3DDevice9 *pDevice,
-			INT               Height,
-			UINT              Width,
-			UINT              Weight,
-			UINT              MipLevels,
-			BOOL              Italic,
-			DWORD             CharSet,
-			DWORD             OutputPrecision,
-			DWORD             Quality,
-			DWORD             PitchAndFamily,
-			LPCTSTR           pFacename,
-			IUnknown        **ppFont
-			);
-		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
 
-		D3DXCreateFont(orig, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial", &font);
+		const char *text = g_Config.gets("sSubtitlesFont");
+		int fontSize = g_Config.geti("iSubtitlesFontSize");
+		Subtitles::duration = g_Config.geti("iSubtitlesTimer");
 
-		if (!font) return;
+		if (text && fontSize) {
+			std::wstring fontName = General::utf8.from_bytes(text);
 
-		DrawText = decltype(DrawText)(((void***)font)[0][15]);
+			HMODULE hm = GetModuleHandleA("d3dx9_42");
+			void *(WINAPI *D3DXCreateFont)(
+				IDirect3DDevice9 *pDevice,
+				INT               Height,
+				UINT              Width,
+				UINT              Weight,
+				UINT              MipLevels,
+				BOOL              Italic,
+				DWORD             CharSet,
+				DWORD             OutputPrecision,
+				DWORD             Quality,
+				DWORD             PitchAndFamily,
+				LPCTSTR           pFacename,
+				IUnknown        **ppFont
+				);
+			D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
+
+			D3DXCreateFont(orig, fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
+				OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, fontName.c_str(), &font);
+
+			if (!font) return;
+
+			DrawText = decltype(DrawText)(((void***)font)[0][15]);
+		}
 	}
 
 	AAUIDirect3DDevice9(IDirect3DDevice9* old) {

@@ -9,13 +9,14 @@ namespace Subtitles {
 	RECT rect = { 0, 40, 1024, 256 };
 	D3DCOLOR color = D3DCOLOR_RGBA(255, 255, 255, 255);
 	DWORD lastPopTime = 0;
+	int duration = 4000;
 
 	void AddSubtitles(const char *subtitle) {
 		if (lastPopTime == 0)
 			lastPopTime = GetTickCount();
 		if (lines.size() > 4)
 			lines.pop_front();
-		lines.push_back(General::CastToWStringN(subtitle, strlen(subtitle) + 1) + L"\n");
+		lines.push_back(General::utf8.from_bytes(subtitle) + L"\n");
 		SetSubtitles();
 	}
 
@@ -33,7 +34,7 @@ namespace Subtitles {
 		if (lines.empty())
 			return;
 		DWORD now = GetTickCount();
-		if (now - lastPopTime > 4000) {
+		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			SetSubtitles();
 			lastPopTime = lines.empty() ? 0 : now;

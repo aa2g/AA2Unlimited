@@ -8,6 +8,7 @@ namespace Subtitles {
 	extern RECT rect;
 	extern D3DCOLOR color;
 	extern DWORD lastPopTime;
+	extern int duration;
 
 	void AddSubtitles(const char *subtitles);
 	void SetSubtitles();
