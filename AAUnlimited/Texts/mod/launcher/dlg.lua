@@ -40,11 +40,33 @@ local function update_res(text)
 		return n
 	end
 
-	local factor = gcd(x,y)
-	local ax = x/factor
-	local ay = y/factor
+	local factor
+	local ax
+	local ay
 
-	if ax > 128 or ay > 128 then return end
+	factor = x / y
+	if math.abs(factor - 16/9) < 0.1 then
+		ax = 16
+		ay = 9
+	elseif math.abs(factor - 16/10) < 0.1 then
+		ax = 16
+		ay = 10
+	elseif math.abs(factor - 4/3) < 0.1 then
+		ax = 4
+		ay = 3
+	elseif math.abs(factor - 9/16) < 0.01 then
+		ax = 9
+		ay = 16
+	elseif math.abs(factor - 10/16) < 0.01 then
+		ax = 10
+		ay = 16
+	else
+		factor = gcd(x,y)
+		ax = x/factor
+		ay = y/factor
+
+		if ax > 128 or ay > 128 then return end
+	end
 
 	gsdconfig.aspectx = ax
 	gsdconfig.aspecty = ay
@@ -391,6 +413,7 @@ local function buildtabs() return
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
+				aaut("bDisplaySubs", iup.toggle {title = "Show subtitles", tip = "Shows game subtitles (needs subtitles script"}),
 			}
 		},
 	}, iup.fill{}, launch() },

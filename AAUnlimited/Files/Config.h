@@ -48,6 +48,7 @@ public:;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
+	bool bDisplaySubs;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -72,6 +73,7 @@ public:;
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
+			LUA_BIND(bDisplaySubs)
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

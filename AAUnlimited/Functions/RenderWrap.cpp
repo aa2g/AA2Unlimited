@@ -16,6 +16,7 @@
 #include "Files/Config.h"
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
+#include "Functions/AAPlay/Subs.h"
 
 
 #define FRAME_MASK 15
@@ -165,32 +166,47 @@ public:;
 		DrawText(font, 0, buf, -1, &rekt, DT_LEFT, 0xFFFFFFFF);
 	}
 
+	void DrawSubs() {
+		Subtitles::PopSubtitles();
+		if (!Subtitles::text.empty())
+			DrawText(font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect, DT_NOCLIP, Subtitles::color);
+	}
+
 	void MakeFont() {
 		// fuck you microsoft for the d3dx9 SDK stupidity, no way im installing that shit
 		font = 0;
-		HMODULE hm = GetModuleHandleA("d3dx9_42");
-		void *(WINAPI *D3DXCreateFont)(
-			IDirect3DDevice9 *pDevice,
-			INT               Height,
-			UINT              Width,
-			UINT              Weight,
-			UINT              MipLevels,
-			BOOL              Italic,
-			DWORD             CharSet,
-			DWORD             OutputPrecision,
-			DWORD             Quality,
-			DWORD             PitchAndFamily,
-			LPCTSTR           pFacename,
-			IUnknown        **ppFont
-			);
-		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
 
-		D3DXCreateFont(orig, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial", &font);
+		const char *text = g_Config.gets("sSubtitlesFont");
+		int fontSize = g_Config.geti("iSubtitlesFontSize");
+		Subtitles::duration = g_Config.geti("iSubtitlesTimer");
 
-		if (!font) return;
+		if (text && fontSize) {
+			std::wstring fontName = General::utf8.from_bytes(text);
 
-		DrawText = decltype(DrawText)(((void***)font)[0][15]);
+			HMODULE hm = GetModuleHandleA("d3dx9_42");
+			void *(WINAPI *D3DXCreateFont)(
+				IDirect3DDevice9 *pDevice,
+				INT               Height,
+				UINT              Width,
+				UINT              Weight,
+				UINT              MipLevels,
+				BOOL              Italic,
+				DWORD             CharSet,
+				DWORD             OutputPrecision,
+				DWORD             Quality,
+				DWORD             PitchAndFamily,
+				LPCTSTR           pFacename,
+				IUnknown        **ppFont
+				);
+			D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
+
+			D3DXCreateFont(orig, fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
+				OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, fontName.c_str(), &font);
+
+			if (!font) return;
+
+			DrawText = decltype(DrawText)(((void***)font)[0][15]);
+		}
 	}
 
 	AAUIDirect3DDevice9(IDirect3DDevice9* old) {
@@ -572,11 +588,15 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-		if (font && g_Config.bDrawFPS) {
+		if (font && g_Config.bDrawFPS || g_Config.bDisplaySubs) {
 			D3DVIEWPORT9 vp;
 			GetViewport(&vp);
-			if (vp.Width > 256)
-				DrawFPS();
+			if (vp.Width > 1024) {
+				if (g_Config.bDrawFPS)
+					DrawFPS();
+				if (g_Config.bDisplaySubs)
+					DrawSubs();
+			}
 		}
 		frameno++;
 		WRAPCALL(orig->EndScene());
