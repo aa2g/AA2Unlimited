@@ -395,9 +395,10 @@ namespace Poser {
 	void PoserController::PoserCharacter::FrameModFace(ExtClass::XXFile* xxFile) {
 		//move all face sliders to the transient list because some faces have more bones than others and
 		//when switching faces some sliders may be stale
+		ExtClass::CharacterStruct::Models model = General::GetModelFromName(xxFile->m_name);
 		auto it = m_sliders.begin();
 		while (it != m_sliders.end()) {
-			if (it->second->source == ExtClass::CharacterStruct::FACE || it->second->source == ExtClass::CharacterStruct::TONGUE) {
+			if (it->second->source == model) {
 				m_transientSliders[it->first] = it->second;
 				it = m_sliders.erase(it);
 			}
