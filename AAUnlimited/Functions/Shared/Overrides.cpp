@@ -64,6 +64,7 @@ namespace Shared {
 	/*********************************/
 
 	bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
+		if (!GameState::getIsOverriding()) return false;
 		TCHAR* strArchive = General::FindFileInPath(archive);
 
 		const OverrideFile* match = g_currentChar->m_cardData.GetArchiveOverrideFile(strArchive, file);
