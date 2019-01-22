@@ -676,6 +676,16 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_character.strength);
 		}
 
+		//int(int)
+		Value Thread::GetCardFightingStyle(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_charData->m_character.fightingStyle);
+		}
+
 		Value Thread::GetCardLocked(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -2977,6 +2987,12 @@ namespace Shared {
 					TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom"), TEXT("Returns the ID of the room that the character is talking about."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetActionAboutRoom
+				},
+				{
+					116, EXPRCAT_CHARPROP,
+					TEXT("Fighting Stance"), TEXT("%p ::FightStance"), TEXT("The fighting stance of this character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardFightingStyle
 				},
 			},
 

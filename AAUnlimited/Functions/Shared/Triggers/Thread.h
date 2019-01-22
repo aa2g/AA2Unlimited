@@ -88,6 +88,7 @@ namespace Shared {
 			void SetCardIntelligenceValue(std::vector<Value>& params);
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
+			void SetCardFightingStyle(std::vector<Value>& params);
 			void SetCharacterLocked(std::vector<Value>& params);
 			void SetActionAboutRoom(std::vector<Value>& params);
 			void SetMasturbating(std::vector<Value>& params);
@@ -210,6 +211,8 @@ namespace Shared {
 			Value GetCardIntelligenceValue(std::vector<Value>& params); //int(int)
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
+			Value GetCardFightingStyle(std::vector<Value>& params); //int(int)
+			//int(int)
 			Value GetCardLocked(std::vector<Value>& params);
 			Value GetActionAboutRoom(std::vector<Value>& params);
 			Value GetMasturbating(std::vector<Value>& params);
