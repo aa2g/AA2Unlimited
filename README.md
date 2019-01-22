@@ -55,7 +55,7 @@ These Features above are all simply special, wild-carded rules of one of the typ
 - **Body Modification**: can put an SRT(*S*cale *R*otation *T*ranslation) matrix in front of frames or modify the SRT matrix of bones. Essentially generic body(or hair, or outfit, or anything) sliders. Only use if you are aware of how AA2 handles bodies.
   - *Note*: due to how AA2 handles frames, this is not the same as changing a frame in SB3U. rotations and scales will affect the original matrix of this frame. Adjust your matrix accordingly to make up for the incorrect translations.
 
-### Tech-Support
+### Tech-Support (in order from most preferable to least preferable)
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
 - Try asking questions in [this discord channel](https://discord.gg/5MfdAPT)
 - Make an issue on github

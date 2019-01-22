@@ -137,6 +137,11 @@ patches.play = {
 	["\xDB\x46\x10\x90"] = {
 		-0x12A7B8,
 	},]]
+
+	-- browser bug / long window title bug
+	["\x01"] = {
+		-0x6510
+	}
 }
 
 
@@ -292,6 +297,11 @@ patches.edit = {
 	-- Don't remove rainbow, if present
 	["\xeb\x05"] = {
 		0x00123422,
+	},
+
+	-- browser bug / long window title bug
+	["\x01"] = {
+		-0x6020,
 	},
 }
 

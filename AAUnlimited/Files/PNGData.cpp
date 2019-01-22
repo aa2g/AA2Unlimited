@@ -262,6 +262,7 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	int blob_off = SetFilePointer(hf, 0, NULL, FILE_CURRENT);
 	int illusion_off = blob_off - *delta;
 	int blob_sz = 0; // compressed blob size
+	bool report_compression_error = false;
 
 	AAUCardData &cd = AAEdit::g_currChar.m_cardData;
 	if (cd.BlobAt) {
@@ -271,10 +272,15 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 		got = 0;
 
 		blob_sz = ZSTD_compress(buf, worst, cd.Blob, cd.BlobAt, 22);
-		LOGPRIO(Logger::Priority::SPAM) << std::dec << "PNG blob compressed to " << blob_sz << " bytes\r\n";
-
-		WriteFile(hf, buf, blob_sz, &got, NULL);
-
+		if (ZSTD_isError(blob_sz)) {
+			LOGPRIO(Logger::Priority::ERR) << "Error compressing modfiles. Resulting card isn't a modcard!: " << ZSTD_getErrorName(blob_sz) << "\r\n";
+			blob_sz = 0;
+			report_compression_error = true;
+		}
+		else {
+			LOGPRIO(Logger::Priority::SPAM) << std::dec << "PNG blob compressed to " << blob_sz << " bytes\r\n";
+			WriteFile(hf, buf, blob_sz, &got, NULL);
+		}
 		delete buf;
 	}
 	cd.BlobReset();
@@ -295,6 +301,8 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 		WriteFile(hf, saved_clothes, BACKUP_END - BACKUP_START, &got, NULL);
 		SetFilePointer(hf, 0, NULL, FILE_END);
 	}
+	if (report_compression_error)
+		MessageBox(NULL, L"Warning: this card's modfiles weren't saved, please try again.", L"Warning", 0);
 	return true;
 }
 
