@@ -278,158 +278,107 @@ void RoomChangeInjection() {
 
 void __stdcall LowPolyUpdateStart(CharacterStruct* param) {
 	//Fill this in as you like, this is your function.
-	Shared::GameState::setIsOverriding(true);
-}
-
-void __stdcall LowPolyUpdateStartPC(CharacterStruct* param) {
-	//Calling the common function
-	LowPolyUpdateStart(param);
-
-	//Setting the address to return to after the hook
-	//Two different functions update low polys, one for PC and another for NPC. We set the return address accordingly depending on whether the character whose low poly is being updated is PC or not.
-	const DWORD offset[]{ 0x10DE6F };
-	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
-
-	//This is a vanilla address that the function we are hooking to uses, it's part of original code that we override
-	const DWORD offset2[]{ 0x363AA0, 0x00 };
-	SomeVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
-
-
-}
-
-void __stdcall LowPolyUpdateStartNPC(CharacterStruct* param) {
-	//Calling the common function
-	LowPolyUpdateStart(param);
+	if (ExtVars::AAPlay::GameTimeData()) {
+		if (ExtVars::AAPlay::GameTimeData()->currentPeriod >= 0) {
+			Shared::g_currentChar = &AAPlay::g_characters[param->m_seat];
+			Shared::GameState::setIsOverriding(true);
+		}
+	}
 
 	//Setting the address to return to after the hook
-	//Two different functions update low polys, one for PC and another for NPC. We set the return address accordingly depending on whether the character whose low poly is being updated is PC or not.
-	const DWORD offset[]{ 0x11677F };
+	const DWORD offset[]{ 0x14A18A };
 	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
 
-	//This is a vanilla address that the function we are hooking to uses, it's part of original code that we override
 	const DWORD offset2[]{ 0x363AA0, 0x00 };
 	SomeVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
-
 }
 
-void __declspec(naked) LowPolyUpdateStartRedirectPC() {
+void __declspec(naked) LowPolyUpdateStartRedirect() {
 	__asm {
 		pushad
-		push ecx
-		call LowPolyUpdateStartPC
+		push ebx
+		call LowPolyUpdateStart
 		popad
 		//original code
-		mov eax, [SomeVanillaAddress]
+		mov eax, SomeVanillaAddress
 		jmp LowPolyInjectionReturnAddress
 	}
 }
 
-void __declspec(naked) LowPolyUpdateStartRedirectNPC() {
-	__asm {
-		pushad
-		push ecx
-		call LowPolyUpdateStartNPC
-		popad
-		//original code
-		mov eax, [SomeVanillaAddress]
-		jmp LowPolyInjectionReturnAddress
-	}
-}
 
-void LowPolyUpdateStartInjectForPC() {
-	//ecx is charstruct
-	//AA2Play.exe + 10DE6A - A1 A03ABF00 - mov eax, [AA2Play.exe + 363AA0]{ [368E3FF7] } 
+void LowPolyUpdateStartInject() {
+	//ebx is charstruct
+	//AA2Play.exe+14A185 - A1 A03AF000           - mov eax,[AA2Play.exe+363AA0] { [286BED3C] }
+	//AA2Play.exe+14A18A - 33 C4                 - xor eax,esp //ret point
 
 
-	DWORD address = General::GameBase + 0x10DE6A;
-	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectPC);
+
+
+	DWORD address = General::GameBase + 0x14A185;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirect);
 	Hook((BYTE*)address,
-	{ 0xA1, 0xA0, 0x3A, 0xBF, 0x00 },						//expected values
+	{ 0xA1, 0xA0, 0x3A, 0xF0, 0x00 },						//expected values
 		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
 		NULL);
 }
 
-void LowPolyUpdateStartInjectForNPC() {
-	//ecx is charstruct
-	//AA2Play.exe+11677A - A1 A03ABF00           - mov eax,[AA2Play.exe+363AA0] { [368E3FF7] }
 
-
-	DWORD address = General::GameBase + 0x11677A;
-	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectNPC);
-	Hook((BYTE*)address,
-	{ 0xA1, 0xA0, 0x3A, 0xBF, 0x00 },						//expected values
-		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
-		NULL);
-}
 
 void __stdcall LowPolyUpdateEnd() {
 	//This is your function, fill it in how you want
 	//If you are wondering which character finished loading, just push the character from LowPolyUpdateStart into GameState. The character that started updating is the one that finished updating.
-	Shared::GameState::setIsOverriding(false);
-}
-
-void __stdcall LowPolyUpdateEndPC() {
-	LowPolyUpdateEnd();
+	if (ExtVars::AAPlay::GameTimeData()) {
+		if (ExtVars::AAPlay::GameTimeData()->currentPeriod >= 0) {
+			Shared::GameState::setIsOverriding(false);
+		}
+	}
 	
+
+
 	//Setting the address to return to after the hook
-	const DWORD offset[]{ 0x10EA58 };
+	const DWORD offset[]{ 0x14A3C3 };
 	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
 }
 
-void __stdcall LowPolyUpdateEndNPC() {
-	LowPolyUpdateEnd();
-
-	//Setting the address to return to after the hook
-	const DWORD offset[]{ 0x11739C };
-	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
-}
-
-void __declspec(naked) LowPolyUpdateEndRedirectPC() {
+void __declspec(naked) LowPolyUpdateEndRedirect() {
 	__asm {
 		pushad
-		call LowPolyUpdateEndPC
+		call LowPolyUpdateEnd
 		popad
 		//original code
-		mov ecx, [esp + 0x000004E8]
+		pop ecx
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
 		jmp LowPolyInjectionReturnAddress
 	}
 }
 
-void __declspec(naked) LowPolyUpdateEndRedirectNPC() {
-	__asm {
-		pushad
-		call LowPolyUpdateEndNPC
-		popad
-		//original code
-		mov ecx, [esp + 0x000004F0]
-		jmp LowPolyInjectionReturnAddress
-	}
-}
 
-void LowPolyUpdateEndInjectForPC() {
-	//AA2Play.exe + 10EA51 - 8B 8C 24 E8040000 - mov ecx, [esp + 000004E8]
+void LowPolyUpdateEndInject() {
+	
+	//AA2Play.exe + 14A3BE - 59 - pop ecx
+	//AA2Play.exe + 14A3BF - 5F - pop edi
+	//AA2Play.exe + 14A3C0 - 5E - pop esi
+	//AA2Play.exe + 14A3C1 - 5D - pop ebp
+	//AA2Play.exe + 14A3C2 - 5B - pop ebx
+	//AA2Play.exe + 14A3C3 - 83 C4 18 - add esp, 18 { 24 } //return point
+	//AA2Play.exe + 14A3C6 - C2 0800 - ret 0008 { 00000008 }
 
 
-	DWORD address = General::GameBase + 0x10EA51;
-	DWORD redirectAddress = (DWORD)(&LowPolyUpdateEndRedirectPC);
+	DWORD address = General::GameBase + 0x14A3BE;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateEndRedirect);
 	Hook((BYTE*)address,
-	{ 0x8B, 0x8C, 0x24, 0xE8, 0x04, 0x00, 0x00 },						//expected values
-		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+	{ 0x59, 
+		0x5F, 
+		0x5E, 
+		0x5D, 
+		0x5B },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
 
-
-void LowPolyUpdateEndInjectForNPC() {
-	//AA2Play.exe+117395 - 8B 8C 24 F0040000     - mov ecx,[esp+000004F0]
-
-
-	DWORD address = General::GameBase + 0x117395;
-	DWORD redirectAddress = (DWORD)(&LowPolyUpdateEndRedirectNPC);
-	Hook((BYTE*)address,
-	{ 0x8B, 0x8C, 0x24, 0xF0, 0x04, 0x00, 0x00 },						//expected values
-		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
-		NULL);
-}
 
 void __stdcall hPositionChange(BYTE param) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
