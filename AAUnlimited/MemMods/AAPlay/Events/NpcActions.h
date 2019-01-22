@@ -13,6 +13,8 @@ namespace NpcActions {
 	void NpcMovingActionInjection();
 	void NpcMovingActionPlanInjection();
 	void RoomChangeInjection();
+	void LowPolyUpdateStartInject();
+	void LowPolyUpdateEndInject();
 	void hPositionChangeInjection();
 
 #pragma pack(push, 1)
