@@ -13,7 +13,8 @@ namespace NpcActions {
 	void NpcMovingActionInjection();
 	void NpcMovingActionPlanInjection();
 	void RoomChangeInjection();
-	void LowPolyUpdateStartInject();
+	void LowPolyUpdateStartInjectForBoys();
+	void LowPolyUpdateStartInjectForGirls();
 	void LowPolyUpdateEndInject();
 	void hPositionChangeInjection();
 

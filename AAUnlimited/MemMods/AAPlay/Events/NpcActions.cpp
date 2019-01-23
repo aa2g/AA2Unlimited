@@ -277,47 +277,94 @@ void RoomChangeInjection() {
 }
 
 void __stdcall LowPolyUpdateStart(CharacterStruct* param) {
-	//Fill this in as you like, this is your function.
+	//This is the common function for boys and girls
 	if (ExtVars::AAPlay::GameTimeData()) {
 		if (ExtVars::AAPlay::GameTimeData()->currentPeriod >= 0) {
 			Shared::g_currentChar = &AAPlay::g_characters[param->m_seat];
 			Shared::GameState::setIsOverriding(true);
 		}
 	}
-
-	//Setting the address to return to after the hook
-	const DWORD offset[]{ 0x14A18A };
-	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
-
-	const DWORD offset2[]{ 0x363AA0, 0x00 };
-	SomeVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
 }
 
-void __declspec(naked) LowPolyUpdateStartRedirect() {
+void __stdcall LowPolyUpdateStartForGirls(CharacterStruct* param) {
+	//calling the common function
+	LowPolyUpdateStart(param);
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0x116812 };
+	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+}
+
+void __declspec(naked) LowPolyUpdateStartRedirectForGirls() {
 	__asm {
 		pushad
 		push ebx
-		call LowPolyUpdateStart
+		call LowPolyUpdateStartForGirls
 		popad
 		//original code
-		mov eax, SomeVanillaAddress
+		mov eax, [ebp + 0x0C]
+		mov edx, [edx + 0x4C]
 		jmp LowPolyInjectionReturnAddress
 	}
 }
 
 
-void LowPolyUpdateStartInject() {
-	//ebx is charstruct
-	//AA2Play.exe+14A185 - A1 A03AF000           - mov eax,[AA2Play.exe+363AA0] { [286BED3C] }
-	//AA2Play.exe+14A18A - 33 C4                 - xor eax,esp //ret point
+void LowPolyUpdateStartInjectForGirls() {
+	//AA2Play.exe + 11680C - 8B 45 0C - mov eax, [ebp + 0C]
+	//AA2Play.exe + 11680F - 8B 52 4C - mov edx, [edx + 4C]
+	//AA2Play.exe + 116812 - 50 - push eax
+	//AA2Play.exe + 116813 - 8B CB - mov ecx, ebx
+	//AA2Play.exe + 116815 - FF D2 - call edx
+	//AA2Play.exe + 116817 - 8A 43 44 - mov al, [ebx + 44]
 
 
-
-
-	DWORD address = General::GameBase + 0x14A185;
-	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirect);
+	DWORD address = General::GameBase + 0x11680C;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectForGirls);
 	Hook((BYTE*)address,
-	{ 0xA1, 0xA0, 0x3A, 0xF0, 0x00 },						//expected values
+	{ 0x8B, 0x45, 0x0C,
+		0x8B, 0x52, 0x4C },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
+		NULL);
+}
+
+
+void __stdcall LowPolyUpdateStartForBoys(CharacterStruct* param) {
+	//calling the common function
+	LowPolyUpdateStart(param);
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0x10DF3C };
+	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+}
+
+void __declspec(naked) LowPolyUpdateStartRedirectForBoys() {
+	__asm {
+		pushad
+		push ebx
+		call LowPolyUpdateStartForBoys
+		popad
+		//original code
+		mov eax, [ebx]
+		mov edx, [eax + 0x4C]
+		jmp LowPolyInjectionReturnAddress
+	}
+}
+
+
+void LowPolyUpdateStartInjectForBoys() {
+	//AA2Play.exe + 10DF37 - 8B 03 - mov eax, [ebx]
+	//AA2Play.exe + 10DF39 - 8B 50 4C - mov edx, [eax + 4C]
+	//AA2Play.exe + 10DF3C - 51 - push ecx
+	//AA2Play.exe + 10DF3D - 8B CB - mov ecx, ebx
+	//AA2Play.exe + 10DF3F - FF D2 - call edx
+	//AA2Play.exe + 10DF41 - 83 3E 02 - cmp dword ptr[esi], 02 { 2 }
+
+
+	DWORD address = General::GameBase + 0x10DF37;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectForBoys);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x03,
+		0x8B, 0x50, 0x4C },						//expected values
 		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
 		NULL);
 }
@@ -325,18 +372,11 @@ void LowPolyUpdateStartInject() {
 
 
 void __stdcall LowPolyUpdateEnd() {
-	//This is your function, fill it in how you want
 	//If you are wondering which character finished loading, just push the character from LowPolyUpdateStart into GameState. The character that started updating is the one that finished updating.
-	if (ExtVars::AAPlay::GameTimeData()) {
-		if (ExtVars::AAPlay::GameTimeData()->currentPeriod >= 0) {
-			Shared::GameState::setIsOverriding(false);
-		}
-	}
-	
-
+	Shared::GameState::setIsOverriding(false);
 
 	//Setting the address to return to after the hook
-	const DWORD offset[]{ 0x14A3C3 };
+	const DWORD offset[]{ 0x14A3C3 }; //There are vanilla common functions, but it's hard to find any that are called before files are opened
 	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
 }
 
