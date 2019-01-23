@@ -18,7 +18,14 @@ class Frame
 {
 public:
 	struct Submesh {
-		BYTE m_flags[64]; //SB3U submesh flags
+		BYTE m_blendMode;
+		BYTE m_unknown00;	//usually 0x64
+		BYTE m_unknown01;	//possibly padding
+		BYTE m_outlinesEnabled;	//00 - diable, 01 - enable	//When an object lacks outlines it has the side-effect of being transparent from the inside out (behind the backfaces)
+		BYTE m_flags0[6];
+		BYTE m_enableGloss;	//00 - diable, 01 - enable	//Activates the gloss (reflection) texture. This is the 4th texture material slot and usually named with the "Asp" prefix.
+		BYTE m_unknown02;
+		BYTE m_flags[52]; //SB3U submesh flags
 		DWORD m_unknown0; //unknown
 		uint32_t m_faceCount; //Face Count (actually count*3, counts WORDS(vertex indizes))
 		void* m_pointer1;
@@ -62,7 +69,16 @@ public:
 	D3DMATRIX m_matrix5; //constant translation matrix, copy of matrixx1 when read in;
 						 //used by neck3 to build matrix1, maybe attachment matrix for other body parts?
 	DWORD m_unknown1;
-	BYTE m_frameFlags[0x20]; //SB3U Frame Flags
+	union {
+		BYTE m_frameFlags[0x20]; //SB3U Frame Flags
+		struct {
+			BYTE m_frameFlagsPadding0;
+			BYTE m_enablePriority;	//00 - disabled, 01 - enabled	//Priority is only considered when it is enabled. Otherwise its value is ignored.
+			BYTE m_frameFlagsPadding1[0x2];
+			DWORD m_framePriority;
+			BYTE m_frameFlagsPadding2[0x18];
+		};
+	};
 	DWORD m_nSubmeshes; //number of submeshes
 	DWORD m_readStuff[6]; //usually 0, something else on meshes
 	Submesh* m_subMeshes; //SB3U Submesh Flags array
@@ -79,6 +95,8 @@ public:
 		struct {
 			BYTE m_meshFlagHide; // 0 show, 2 - dont show, this particular mesh only.
 			BYTE m_meshFlagLightData;
+			BYTE m_meshFlagsPadding0[0x2];
+			BYTE m_meshFlagSubmeshBlendingEnabled;	//00 - disabled, 01 - enabled	//Enables submesh texture blend modes for this mesh
 		};
 	};
 
