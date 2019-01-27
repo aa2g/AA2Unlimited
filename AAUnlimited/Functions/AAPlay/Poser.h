@@ -8,16 +8,6 @@ namespace ExtClass {
 
 namespace Poser {
 
-	enum SceneType {
-		NoScene = 0,
-		ClothingScene = 1,
-		DialogueScene = 2,
-		InterruptionScene = 4,
-		HScene = 8
-	};
-
-	void StartEvent(SceneType type);
-	void EndEvent();
 	void LoadCharacter(ExtClass::CharacterStruct* c);
 	void UpdateCharacter(ExtClass::CharacterStruct* c);
 	void RemoveCharacter(ExtClass::CharacterStruct* c);

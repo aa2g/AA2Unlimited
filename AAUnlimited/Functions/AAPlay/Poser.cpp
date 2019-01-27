@@ -9,15 +9,6 @@
 namespace Poser {
 
 	PoserController g_PoserController;
-	SceneType currentScene = NoScene;
-
-	void StartEvent(SceneType type) {
-		currentScene = type;
-	}
-
-	void EndEvent() {
-		currentScene = SceneType::NoScene;
-	}
 
 	void LoadCharacter(ExtClass::CharacterStruct* charStruct) {
 		g_PoserController.LoadCharacter(charStruct);

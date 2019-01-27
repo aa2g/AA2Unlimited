@@ -5,12 +5,10 @@ namespace ClothingDialog {
 
 void InitEvent() {
 	Shared::GameState::setIsClothesScreen(true);
-	Poser::StartEvent(Poser::ClothingScene);
 }
 
 void ExitEvent() {
 	Shared::GameState::setIsClothesScreen(false);
-	Poser::EndEvent();
 }
 
 DWORD loc_InitOriginalFunction;

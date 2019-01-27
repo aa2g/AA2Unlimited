@@ -9,7 +9,6 @@ ExtClass::CharacterStruct* loc_passiveChar = NULL;
 ExtClass::XXFile* loc_passiveFaceXX = NULL;
 ExtClass::XXFile* loc_activeFaceXX = NULL;
 DWORD loc_currPos = -1;
-static bool loc_HStartEventFired = false;
 
 bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
@@ -65,14 +64,6 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 	}
 
 	ExtClass::Camera::PostTick(hInfo,contScene);
-	if (contScene && !loc_HStartEventFired) {
-		Poser::StartEvent(Poser::HScene);
-		loc_HStartEventFired = true;
-	}
-	else {
-		Poser::EndEvent();
-		loc_HStartEventFired = false;
-	}
 	return contScene;
 }
 

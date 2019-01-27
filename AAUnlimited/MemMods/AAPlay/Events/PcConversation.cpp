@@ -15,7 +15,6 @@ namespace PcConversation {
 // TODO - both these events get passed some interesting arguments we currently ignore
 void __stdcall StartEvent() {
 	Shared::GameState::setIsPcConversation(true);
-	Poser::StartEvent(Poser::DialogueScene);
 }
 
 void __stdcall EndEvent() {
@@ -31,7 +30,6 @@ void __stdcall EndEvent() {
 					Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 
 					Shared::GameState::clearConversationCharacter(-1);
-					Poser::EndEvent();
 				}
 			}
 		}
