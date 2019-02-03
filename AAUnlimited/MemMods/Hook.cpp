@@ -307,6 +307,9 @@ void InitializeHooks() {
 		NpcActions::NpcMovingActionPlanInjection();
 		NpcActions::RoomChangeInjection();
 		NpcActions::hPositionChangeInjection();
+		NpcActions::LowPolyUpdateEndInject();
+		NpcActions::LowPolyUpdateStartInjectForGirls();
+		NpcActions::LowPolyUpdateStartInjectForBoys();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();

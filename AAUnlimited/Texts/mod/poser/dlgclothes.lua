@@ -226,18 +226,39 @@ local loadclothbutton = iup.button { title = "Load Cloth", action = function(sel
 	end
 end}
 
+local decalstrength = 3
+local decals = exe_type == "play" and (iup.frame {
+	title = "Skin",
+	iup.vbox {
+		toggles.slotbuttons("Strength", { "0", "1", "2", "3" }, function(strength)
+			decalstrength = strength
+		end),
+		toggles.slotbuttons("Decals", { "0", "1", "2", "3", "4" }, function(bodypart)
+			local character = charamgr.current
+			if character then
+				local characterdata = GetCharInstData(character.struct.m_seat)
+				characterdata:ApplyDecal(bodypart, decalstrength)
+log.spam("applydecal %d %d", bodypart, decalstrength)
+			end
+		end),
+	}
+})
+
 
 local _M = iup.hbox {
-	iup.frame {
-		title = "Clothing",
-		iup.vbox {
-			clothslot,
-			clothstate,
-			loadstyle,
-			iup.hbox {
-				loadclothbutton,
+	iup.vbox {
+		iup.frame {
+			title = "Clothing",
+			iup.vbox {
+				clothslot,
+				clothstate,
+				loadstyle,
+				iup.hbox {
+					loadclothbutton,
+				},
 			},
 		},
+		decals,
 	},
 	iup.frame {
 		title = "Leg Wear",

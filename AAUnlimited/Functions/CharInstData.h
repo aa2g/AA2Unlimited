@@ -170,6 +170,12 @@ public:
 			BYTE b = _gl.get(4);
 			_self->SetAmbientColor(r, g, b);
 		});
+		LUA_METHOD(ApplyDecal, {
+			int bodyPart = _gl.get(2);
+			int strength = _gl.get(3);
+			if (bodyPart >= 0 && bodyPart < 5 && strength >= 0 && strength < 4)
+				_self->ApplyDecals(bodyPart, strength);
+		});
 #undef LUA_CLASS
 	}
 

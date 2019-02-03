@@ -10,7 +10,8 @@ using namespace ExtClass;
 
 #if NEW_HOOK
 DWORD AnswerAddress, AnswerLowAddress;
-
+DWORD* LowPolyInjectionReturnAddress = 0;
+DWORD* SomeVanillaAddress = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
 
@@ -274,6 +275,150 @@ void RoomChangeInjection() {
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
+
+void __stdcall LowPolyUpdateStart(CharacterStruct* param) {
+	//This is the common function for boys and girls
+	if (ExtVars::AAPlay::GameTimeData()) {
+		if (ExtVars::AAPlay::GameTimeData()->currentPeriod >= 0) {
+			Shared::g_currentChar = &AAPlay::g_characters[param->m_seat];
+			Shared::GameState::setIsOverriding(true);
+		}
+	}
+}
+
+void __stdcall LowPolyUpdateStartForGirls(CharacterStruct* param) {
+	//calling the common function
+	LowPolyUpdateStart(param);
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0x116812 };
+	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+}
+
+void __declspec(naked) LowPolyUpdateStartRedirectForGirls() {
+	__asm {
+		pushad
+		push ebx
+		call LowPolyUpdateStartForGirls
+		popad
+		//original code
+		mov eax, [ebp + 0x0C]
+		mov edx, [edx + 0x4C]
+		jmp LowPolyInjectionReturnAddress
+	}
+}
+
+
+void LowPolyUpdateStartInjectForGirls() {
+	//AA2Play.exe + 11680C - 8B 45 0C - mov eax, [ebp + 0C]
+	//AA2Play.exe + 11680F - 8B 52 4C - mov edx, [edx + 4C]
+	//AA2Play.exe + 116812 - 50 - push eax
+	//AA2Play.exe + 116813 - 8B CB - mov ecx, ebx
+	//AA2Play.exe + 116815 - FF D2 - call edx
+	//AA2Play.exe + 116817 - 8A 43 44 - mov al, [ebx + 44]
+
+
+	DWORD address = General::GameBase + 0x11680C;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectForGirls);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x45, 0x0C,
+		0x8B, 0x52, 0x4C },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
+		NULL);
+}
+
+
+void __stdcall LowPolyUpdateStartForBoys(CharacterStruct* param) {
+	//calling the common function
+	LowPolyUpdateStart(param);
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0x10DF3C };
+	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+}
+
+void __declspec(naked) LowPolyUpdateStartRedirectForBoys() {
+	__asm {
+		pushad
+		push ebx
+		call LowPolyUpdateStartForBoys
+		popad
+		//original code
+		mov eax, [ebx]
+		mov edx, [eax + 0x4C]
+		jmp LowPolyInjectionReturnAddress
+	}
+}
+
+
+void LowPolyUpdateStartInjectForBoys() {
+	//AA2Play.exe + 10DF37 - 8B 03 - mov eax, [ebx]
+	//AA2Play.exe + 10DF39 - 8B 50 4C - mov edx, [eax + 4C]
+	//AA2Play.exe + 10DF3C - 51 - push ecx
+	//AA2Play.exe + 10DF3D - 8B CB - mov ecx, ebx
+	//AA2Play.exe + 10DF3F - FF D2 - call edx
+	//AA2Play.exe + 10DF41 - 83 3E 02 - cmp dword ptr[esi], 02 { 2 }
+
+
+	DWORD address = General::GameBase + 0x10DF37;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateStartRedirectForBoys);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x03,
+		0x8B, 0x50, 0x4C },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function, unlike hackanon's code it's jumping, not calling so it doesn't mess up the stack
+		NULL);
+}
+
+
+
+void __stdcall LowPolyUpdateEnd() {
+	//If you are wondering which character finished loading, just push the character from LowPolyUpdateStart into GameState. The character that started updating is the one that finished updating.
+	Shared::GameState::setIsOverriding(false);
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0x14A3C3 }; //There are vanilla common functions, but it's hard to find any that are called before files are opened
+	LowPolyInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+}
+
+void __declspec(naked) LowPolyUpdateEndRedirect() {
+	__asm {
+		pushad
+		call LowPolyUpdateEnd
+		popad
+		//original code
+		pop ecx
+		pop edi
+		pop esi
+		pop ebp
+		pop ebx
+		jmp LowPolyInjectionReturnAddress
+	}
+}
+
+
+void LowPolyUpdateEndInject() {
+	
+	//AA2Play.exe + 14A3BE - 59 - pop ecx
+	//AA2Play.exe + 14A3BF - 5F - pop edi
+	//AA2Play.exe + 14A3C0 - 5E - pop esi
+	//AA2Play.exe + 14A3C1 - 5D - pop ebp
+	//AA2Play.exe + 14A3C2 - 5B - pop ebx
+	//AA2Play.exe + 14A3C3 - 83 C4 18 - add esp, 18 { 24 } //return point
+	//AA2Play.exe + 14A3C6 - C2 0800 - ret 0008 { 00000008 }
+
+
+	DWORD address = General::GameBase + 0x14A3BE;
+	DWORD redirectAddress = (DWORD)(&LowPolyUpdateEndRedirect);
+	Hook((BYTE*)address,
+	{ 0x59, 
+		0x5F, 
+		0x5E, 
+		0x5D, 
+		0x5B },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
 
 void __stdcall hPositionChange(BYTE param) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
