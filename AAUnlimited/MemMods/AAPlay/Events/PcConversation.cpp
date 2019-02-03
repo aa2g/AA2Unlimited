@@ -15,6 +15,7 @@ namespace PcConversation {
 // TODO - both these events get passed some interesting arguments we currently ignore
 void __stdcall StartEvent() {
 	Shared::GameState::setIsPcConversation(true);
+	Shared::GameState::setIsOverridingDialogue(true);
 	Poser::StartEvent(Poser::DialogueScene);
 }
 
@@ -44,6 +45,7 @@ void __stdcall EndEvent() {
  ********************/
 
 void __stdcall GeneralPreTick(ExtClass::MainConversationStruct* param) {
+	Shared::GameState::setIsOverridingDialogue(false);
 	const int arbitraryMaxResponse = 10;
 
 	auto substruct = param->GetSubStruct();

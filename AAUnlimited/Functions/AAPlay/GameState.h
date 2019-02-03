@@ -14,11 +14,15 @@ namespace Shared {
 		void setIsPcConversation(bool value);
 		bool getIsPcConversation();
 
+		void setIsOverridingDialogue(bool value);
+		bool getIsOverridingDialogue();
+
 		void setIsOverriding(bool value);
 		bool getIsOverriding();
-		bool getIsInMainMenu();
-		void setIsInMainMenu(bool value);
 		void updateIsOverriding();
+
+		void setIsInMainMenu(bool value);
+		bool getIsInMainMenu();
 
 		void setIsHighPolyLoaded(bool value);
 		bool getIsHighPolyLoaded();

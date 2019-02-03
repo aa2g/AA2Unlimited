@@ -46,7 +46,7 @@ namespace Shared {
 	}
 
 	bool ArchiveReplaceRules(wchar_t** archive, wchar_t** file, DWORD* readBytes, BYTE** outBuffer) {
-		if (!GameState::getIsOverriding()) return false;
+		if (!(GameState::getIsOverriding() || GameState::getIsOverridingDialogue())) return false;
 		TCHAR* strArchive = General::FindFileInPath(*archive);
 		auto match = g_currentChar->m_cardData.GetArchiveRedirectFile(strArchive, *file);
 		if (match != NULL) {
@@ -65,7 +65,7 @@ namespace Shared {
 	/*********************************/
 
 	bool ArchiveOverrideRules(wchar_t* archive, wchar_t* file, DWORD* readBytes, BYTE** outBuffer) {
-		if (!GameState::getIsOverriding()) return false;
+		if (!(GameState::getIsOverriding() || GameState::getIsOverridingDialogue())) return false;
 		TCHAR* strArchive = General::FindFileInPath(archive);
 
 		const OverrideFile* match = g_currentChar->m_cardData.GetArchiveOverrideFile(strArchive, file);
