@@ -256,8 +256,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,78, TEXT("a01_J_MuneL_02"),{ 0.1f,0.1f,0.1f, 0,0,0, 0,0,0 },	        Slider::ADD, AAUCardData::MODIFY_FRAME }, //BalloonTits
 			{ ExtClass::CharacterStruct::SKELETON,79, TEXT("a01_J_ChikuR_01"),{ 0,0,0.25f, 0,0,0, 0,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Perkiness
 			{ ExtClass::CharacterStruct::SKELETON,80, TEXT("a01_J_ChikuL_01"),{ 0,0,0.25f, 0,0,0, 0,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Perkiness
-			{ ExtClass::CharacterStruct::SKELETON,81, TEXT("a01_J_MuneR_01"),{ 0,0,0, 0,0,0, -0.2f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
-			{ ExtClass::CharacterStruct::SKELETON,82, TEXT("a01_J_MuneL_01"),{ 0,0,0, 0,0,0, 0.2f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
+			{ ExtClass::CharacterStruct::SKELETON,81, TEXT("a01_J_MuneR_01"),{ 0,0,0, 0,0,0, -0.1f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
+			{ ExtClass::CharacterStruct::SKELETON,82, TEXT("a01_J_MuneL_01"),{ 0,0,0, 0,0,0, 0.1f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
 
 
 
