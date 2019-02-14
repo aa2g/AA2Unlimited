@@ -2315,9 +2315,37 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Eyebrow Spacing"),
+			{ { CharacterStruct::FACE, 50 },{ CharacterStruct::FACE, 51 } },
+					-1, 1
+			},
 			{ TEXT("Eye Depth"),
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
+			},
+			{ TEXT("L Iris Rotation"),
+			{ { CharacterStruct::FACE, 52 },{ CharacterStruct::FACE, 53 } },
+				-5, 5
+			},
+			{ TEXT("R Iris Rotation"),
+			{ { CharacterStruct::FACE, 54 },{ CharacterStruct::FACE, 55 } },
+					-5, 5
+			},
+			{ TEXT("L Iris X Translation"),
+			{ { CharacterStruct::FACE, 56 },{ CharacterStruct::FACE, 57 } },
+					-1, 1
+			},
+			{ TEXT("R Iris X Translation"),
+			{ { CharacterStruct::FACE, 58 },{ CharacterStruct::FACE, 59 } },
+					-1, 1
+			},
+			{ TEXT("L Iris Y Translation"),
+			{ { CharacterStruct::FACE, 60 },{ CharacterStruct::FACE, 61 } },
+					-1, 1
+			},
+			{ TEXT("R Iris Y Translation"),
+			{ { CharacterStruct::FACE, 62 },{ CharacterStruct::FACE, 63 } },
+					-1, 1
 			},
 			{ TEXT("Ear Height"),
 				{ { CharacterStruct::FACE, 1 } },

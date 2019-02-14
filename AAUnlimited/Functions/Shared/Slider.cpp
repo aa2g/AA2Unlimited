@@ -155,6 +155,22 @@ namespace Shared {
 			//onemoreslider.
 			{ ExtClass::CharacterStruct::FACE, 49,	TEXT("A00_J_chin"),{ 1,1,0.4f, 0,0,0, 0,0.4f,-0.16f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 
+			//Eyesliders
+			{ ExtClass::CharacterStruct::FACE, 50,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0.1f,0, 0.1f,0,-0.005f },		     Slider::ADD, AAUCardData::MODIFY_FRAME }, //Eyebrow Width
+			{ ExtClass::CharacterStruct::FACE, 51,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,-0.1f,0, -0.1f,0,-0.005f },		 Slider::ADD, AAUCardData::MODIFY_FRAME }, //Eyebrow Width
+			{ ExtClass::CharacterStruct::FACE, 52,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,1,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 53,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,1,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 54,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,1,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 55,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,1,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 56,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,0,0, 0.05f,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 57,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 0.05f,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 58,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, 0.05f,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 59,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, 0.05f,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 60,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,0,0.05f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 61,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,0,0.05f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 62,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,0,0.05f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+			{ ExtClass::CharacterStruct::FACE, 63,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,0,0.05f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },    //Iris manipulation
+
 
 		},
 		{
