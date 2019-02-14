@@ -2147,9 +2147,22 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ CharacterStruct::SKIRT, 36 },{ CharacterStruct::SKIRT, 37 }, },
 				0, 1
 			},
+			{ TEXT("BalloonTits"),
+			{ { CharacterStruct::SKELETON, 75 },{ CharacterStruct::SKELETON, 76 },
+			{ CharacterStruct::SKELETON, 77 },{ CharacterStruct::SKELETON, 78 }, },
+			0, 2
+			},
 			{ TEXT("Breasts Pushup"),
 				{ { CharacterStruct::SKELETON, 64 },{ CharacterStruct::SKELETON, 65 }, },
 				-1, 1
+			},
+			{ TEXT("Breasts Distance"),
+			{ { CharacterStruct::SKELETON, 81 },{ CharacterStruct::SKELETON, 82 }, },
+			-1, 1
+			},
+			{ TEXT("Breast Perkiness"),
+			{ { CharacterStruct::SKELETON, 79 },{ CharacterStruct::SKELETON, 80 }, },
+			-1, 1
 			},
 			{ TEXT("Nipple Size"),
 				{ { CharacterStruct::BODY, 37 },{ CharacterStruct::BODY, 38 },{ CharacterStruct::SKIRT, 64 },{ CharacterStruct::SKIRT, 65 }, },
