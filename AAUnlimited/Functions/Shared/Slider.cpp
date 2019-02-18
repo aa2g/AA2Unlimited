@@ -250,6 +250,16 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::SKELETON,73, TEXT("a01_J_SiriL_010"),{ 0,0.15f,0.15f, 0,0,0, 0.15f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //Butt Size
 			{ ExtClass::CharacterStruct::SKELETON,74, TEXT("a01_J_SiriR_010"),{ 0,0.15f,0.15f, 0,0,0, -0.15f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //Butt Size
 
+			{ ExtClass::CharacterStruct::SKELETON,75, TEXT("a01_J_MuneR_01"),{ 0.1f,0.1f,0.1f, 0,0,0, 0.1f,-0.1f,0 },	    Slider::ADD, AAUCardData::MODIFY_FRAME }, //BalloonTits
+			{ ExtClass::CharacterStruct::SKELETON,76, TEXT("a01_J_MuneL_01"),{ 0.1f,0.1f,0.1f, 0,0,0, -0.1f,-0.1f,0 },    Slider::ADD, AAUCardData::MODIFY_FRAME }, //BalloonTits
+			{ ExtClass::CharacterStruct::SKELETON,77, TEXT("a01_J_MuneR_02"),{ 0.1f,0.1f,0.1f, 0,0,0, 0,0,0 },	        Slider::ADD, AAUCardData::MODIFY_FRAME }, //BalloonTits
+			{ ExtClass::CharacterStruct::SKELETON,78, TEXT("a01_J_MuneL_02"),{ 0.1f,0.1f,0.1f, 0,0,0, 0,0,0 },	        Slider::ADD, AAUCardData::MODIFY_FRAME }, //BalloonTits
+			{ ExtClass::CharacterStruct::SKELETON,79, TEXT("a01_J_ChikuR_01"),{ 0,0,0.25f, 0,0,0, 0,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Perkiness
+			{ ExtClass::CharacterStruct::SKELETON,80, TEXT("a01_J_ChikuL_01"),{ 0,0,0.25f, 0,0,0, 0,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Perkiness
+			{ ExtClass::CharacterStruct::SKELETON,81, TEXT("a01_J_MuneR_01"),{ 0,0,0, 0,0,0, -0.1f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
+			{ ExtClass::CharacterStruct::SKELETON,82, TEXT("a01_J_MuneL_01"),{ 0,0,0, 0,0,0, 0.1f,0,0 },	            Slider::ADD, AAUCardData::MODIFY_FRAME }, //Breast Distance
+
+
 
 		},
 		{
