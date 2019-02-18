@@ -59,3 +59,7 @@ These Features above are all simply special, wild-carded rules of one of the typ
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
 - Try asking questions in [this discord channel](https://discord.gg/5MfdAPT)
 - Make an issue on github
+
+### I have NVIDIA crashes or glitches. Help!
+
+Try all combinations of enabling and disabling **Type 2 Renderer**, **wined3d** (must disable win10fix) and **Software Vertex Processing**.
