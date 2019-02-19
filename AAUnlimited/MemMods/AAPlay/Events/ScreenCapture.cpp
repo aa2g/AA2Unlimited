@@ -68,7 +68,7 @@ namespace PlayInjections {
 				jpegParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
 				jpegParameters.Parameter[0].NumberOfValues = 1;
 				jpegParameters.Parameter[0].Value = &jpegQuality;
-				jpegQuality = 85; // make it look shit, so that people use png instead
+				jpegQuality = 100; // make it look shit, so that people use png instead // F U
 			}
 			Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO((BITMAPINFO*)gdiBitmapInfo, (void*)gdiBitmapData);
 			size_t pathLength = wcslen(path);
