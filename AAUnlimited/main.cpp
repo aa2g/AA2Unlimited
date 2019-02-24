@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 
 #include <Dbghelp.h>
 #include "General\ModuleInfo.h"
@@ -114,7 +114,54 @@ static const char *NormalInit()
 	return g_Config.gets("pathD3D9");
 }
 
+
 static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
+	
+	DWORD machine = IMAGE_FILE_MACHINE_I386;
+
+	HANDLE process = GetCurrentProcess();
+	HANDLE thread = GetCurrentThread();
+
+	SymInitialize(process, NULL, TRUE);
+	SymSetOptions(SYMOPT_LOAD_LINES);
+
+	CONTEXT context = {};
+	context.ContextFlags = exceptionInfo->ContextRecord->ContextFlags;
+	context.Eip = exceptionInfo->ContextRecord->Eip;
+	context.Ebp = exceptionInfo->ContextRecord->Ebp;
+	context.Esp = exceptionInfo->ContextRecord->Esp;
+
+	STACKFRAME frame = {};
+	frame.AddrPC.Offset = context.Eip;
+	frame.AddrPC.Mode = AddrModeFlat;
+	frame.AddrFrame.Offset = context.Ebp;
+	frame.AddrFrame.Mode = AddrModeFlat;
+	frame.AddrStack.Offset = context.Esp;
+	frame.AddrStack.Mode = AddrModeFlat;
+	int maxFrameNumber = 0;
+
+	while (StackWalk(machine, process, thread, &frame, &context, NULL, SymFunctionTableAccess, SymGetModuleBase, NULL))
+	{
+		if (maxFrameNumber < 5) {
+			maxFrameNumber++;
+			char * functionName;
+			char symbolBuffer[sizeof(IMAGEHLP_SYMBOL) + 255];
+			PIMAGEHLP_SYMBOL symbol = (PIMAGEHLP_SYMBOL)symbolBuffer;
+			symbol->SizeOfStruct = (sizeof IMAGEHLP_SYMBOL) + 255;
+			symbol->MaxNameLength = 254;
+
+			if (SymGetSymFromAddr(process, frame.AddrPC.Offset, NULL, symbol))
+			{
+				functionName = symbol->Name;
+				std::string str(functionName);
+
+				if (str.find("nvd3dum") != std::string::npos || str.find("d3d9") != std::string::npos || str.find("D3D9") != std::string::npos) {
+					MessageBox(NULL, L"Looks like you are having trouble with nVidia. Try this: go to the scripts tab in AAU Launcher and disable win10fix, and enable wined3d and software vertex processing. If you still get this error message after doing that, try enabling only wined3d.", L"Error", MB_ICONERROR | MB_OK);
+				}
+			}
+		}
+	}
+
 	char message[255];
 	sprintf_s<255>(message,
 		"Code: 0x%08X\nAddress: 0x%08X\n\nDo you want to write aaucrash.dmp?",
@@ -124,6 +171,7 @@ static LONG WINAPI panic(EXCEPTION_POINTERS *exceptionInfo) {
 	if (MessageBoxA(0, message, "Unhandled exception", MB_YESNO) == IDNO)
 		return EXCEPTION_CONTINUE_SEARCH;
 
+	
 	HANDLE hFile = CreateFile(L"aaucrash.dmp",
 		GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
@@ -182,7 +230,6 @@ void* WINAPI AA2Unlimited(UINT SDKVersion)
 		if (orig)
 			return Render::Wrap(orig(SDKVersion));
 	}
-
 	SetErrorMode(0);
 	SetUnhandledExceptionFilter(panic);
 
@@ -228,3 +275,4 @@ void WINAPI CALLBACK AA2UPatcher(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, 
 		LOGPRIONC(Logger::Priority::CRIT_ERR) msg;
 	}
 }
+
