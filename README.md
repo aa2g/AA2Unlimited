@@ -13,16 +13,15 @@ AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by I
 - **H-Ai**: When a player is being raped, the player will not be in control of the sex scene. The NPC's Ai will be picking the positions, and the scene will last until they are satisfied. The player cannot say no to rape if they have the exploitable trait. When you spectate two NPCs who are publicly fucking, an H scene will start with H-Ai turned on.
 
 ### Character editor enhancement:
-- **Body Sliders** - This adds a lot of new sliders that let you edit everything about the body of your character. Even facial features can be edited: jaw, nose, chin, cheeks, etc. 
-- **Extra hair** - You can add additional hair, which means that you aren't limited to picking only 1 hair for front/side/back/extension hair slot. 
-- **Unlocks** - We've made the character editor more powerful. We've unlocked all the slider values that Illusion originally limited. We've added the option to set custom shadows, and custom outlines to various body parts. We've made it possible to add custom highlight and custom hair texture. Add to this the new sliders, and you can make some really cute girls!
-- **Overrides and redirects** - Every time a file is read from some archive, a different file that the user specifies could be loaded instead of it. So this basically removes all limits like there only being a certain amount of available hair slots, clothes etc. This lets modders run wild by editting anything in the game. A lot of new mods and assets have been made for AA2, and this makes it possible to use all of them together without conflict.
-- **Custom tans and tattoos** - Unlimited amount of colored tans.
+- **Unlocks** - We've made the character editor significantly more powerful. We've added the option to set custom shadows, custom outlines, highlights and textures. Unlocked previously locked sliders and added new sliders to the body and face.
+- **Overrides and redirects** - Allows loading arbitrary assets from disk. This makes it possible to use any number of character mods without conflicts.
+- **Custom tans** - Unlimited amount of colored tans.
 
 ### Fixes & General
-- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer sytstems (Windows 10, Linux). We've also fixed all Japanese locale issues.
+- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer sytstems (Windows 10, Linux). We've also fixed all Japanese locale issues. Allows to play in borderless fullscreen.
 - **Asset embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
 - **Mod compression** - We've gathered the most essential mods and compressed them into the pp2 format. You install mods by drag and dropping them, there is no need for Illusion Wizzard.
+- **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
 
 ### Tech-Support (in order from most preferable to least preferable)
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
