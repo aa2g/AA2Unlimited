@@ -17,11 +17,12 @@ AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by I
 - **Extra hair** - You can add additional hair, which means that you aren't limited to picking only 1 hair for front/side/back/extension hair slot. 
 - **Unlocks** - We've made the character editor more powerful. We've unlocked all the slider values that Illusion originally limited. We've added the option to set custom shadows, and custom outlines to various body parts. We've made it possible to add custom highlight and custom hair texture. Add to this the new sliders, and you can make some really cute girls!
 - **Overrides and redirects** - Every time a file is read from some archive, a different file that the user specifies could be loaded instead of it. So this basically removes all limits like there only being a certain amount of available hair slots, clothes etc. This lets modders run wild by editting anything in the game. A lot of new mods and assets have been made for AA2, and this makes it possible to use all of them together without conflict.
+- **Custom tans and tattoos** - Why yes, you can make your girl look like yakuza.
+
 
 ### Fixes & General
-- **Custom tans and tattoos** - Why yes, you can make your girl look like yakuza.
 - **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer sytstems (Windows 10, Linux). We've also fixed all Japanese locale issues.
-- **Mod embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
+- **Asset embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
 - **Mod compression** - We've gathered the most essential mods and compressed them into the pp2 format. You install mods by drag and dropping them, there is no need for Illusion Wizzard.
 
 ### Tech-Support (in order from most preferable to least preferable)
