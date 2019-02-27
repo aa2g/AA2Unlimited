@@ -3,7 +3,7 @@
 
 # AA2Unlimited
 
-AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by Illusion. It adds many new features. In short, it makes your game run smoother, it makes your characters look pretty, and it makes the gameplay interesting.
+AAUnlimited is a mod, and a mod framework for the game Artificial Academy 2 by Illusion. It adds many new features. In short, it makes your game run smoother, it makes your characters look pretty, and it makes the gameplay interesting.
 
 ## Features:
 
@@ -18,7 +18,7 @@ AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by I
 - **Custom tans** - Unlimited amount of colored tans.
 
 ### Fixes & General
-- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer sytstems (Windows 10, Linux). We've also fixed all Japanese locale issues. Allows to play in borderless fullscreen.
+- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer systems (Windows 10, Linux). We've also fixed all Japanese locale issues. Allows to play in borderless fullscreen.
 - **Asset embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
 - **Mod compression** - We've gathered the most essential mods and compressed them into the pp2 format. You install mods by drag and dropping them, there is no need for Illusion Wizzard.
 - **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
