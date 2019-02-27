@@ -8,7 +8,7 @@ AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by I
 ## Features:
 
 ### Gameplay enhancement:
-- **Poser**: You can pose characters. You have complete control of the scene which includes every part of the body, objects, rooms, and lighting. Here are some examples of the poser in action.
+- **Poser**: You can pose characters. You have complete control of the scene which includes every part of the body, objects, rooms, and lighting. [Here](https://imgur.com/a/FHePJmp) are some examples of the poser in action.
 - **Modules**: You can create custom traits and make changes to the AI of your characters. List of pre-made traits can be found [here.](https://pastebin.com/R4DW0dxw)
 - **H-Ai**: When a player is being raped, the player will not be in control of the sex scene. The NPC's Ai will be picking the positions, and the scene will last until they are satisfied. The player cannot say no to rape if they have the exploitable trait. When you spectate two NPCs who are publicly fucking, an H scene will start with H-Ai turned on.
 
