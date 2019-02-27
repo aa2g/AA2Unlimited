@@ -2,22 +2,27 @@
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
 
 # AA2Unlimited
-AAFace was supposed to make the Maker do things that it already could, but wouldn't want to. 
-It basically gave a UI to these features.
 
-AAUnlimited, on the other hand, tries to make the game (and maker) do new things.
-
-As a part of this, it puts additional Information into the card images in form of a PNG chunk right before the first IEND chunk. The Game treats these as part of the image, which means cards produced with these additional data will still work normally if used without AAUnlimited. However, it also means that saving the card with a normal Maker will remove this data. Latest AA2Snowflake is aware of this data so you can use it to change card face without losing it. Because AAU data is attached to the card face it can be moved around with ReiEdit's import feature.
+AAUnlimited is a mod, and a mod framework for the game Aritifical Academy 2 by Illusion. It adds many new features. In short, it makes your game run smoother, it makes your characters look pretty, and it makes the gameplay interesting.
 
 ## Features:
 
 ### Gameplay changes:
-- **H-Ai**: AI that does H for you. Activates when the player is forced or at evil no prompt h.
-	- NO means YES when forced by an npc
-- **Position Buttons during H** are aligned in rows if there are too many buttons per category, allowing to add more buttons before they go out of the screen
+- **Poser**: You can pose characters, just like in Koikatu. You have complete control of the scene which includes every part of the body, objects, rooms, and lighting. Here are some examples of the poser in action.
+- **Modules**: You can create custom traits and make changes to the AI of your characters. List of pre-made traits can be found [here.](https://pastebin.com/R4DW0dxw)
+- **H-Ai**: When a player is being raped, the player will not be in control of the sex scene. The NPC's Ai will be picking the positions, and the scene will last until they are satisfied. The player cannot say no to rape if they have the exploitable trait exploitable. H-Ai turns on when you spectate two NPCs who are publicly fucking.
+- **Body Sliders** - This adds a lot of new sliders that let you edit everything about the body of your character. Even facial features can be edited: jaw, nose, chin, cheeks, etc. 
+- **Extra hair** - You can add additional hair, which means that you aren't limited to picking only 1 hair for front/side/back/extension hair slot. 
+- **Unlocks** - We've made the character editor more powerful. We've unlocked all the slider values that Illusion originally limited. We've added the option to set custom shadows, and custom outlines to various body parts. We've made it possible to add custom highlight and custom hair texture. Add to this the new sliders, and you can make some really cute girls!
+- **Overrides and redirects** - Every time a file is read from some archive, a different file that the user specifies could be loaded instead of it. So this basically removes all limits like there only being a certain amount of available hair slots, clothes etc. This lets modders run wild by editting anything in the game. A lot of new mods and assets have been made for AA2, and this makes it possible to use all of them together without conflict.
+- **Custom tans and tattoos** - Why yes, you can make your girl look like yakuza.
+- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer sytstems (Windows 10, Linux). We've also fixed all Japanese locale issues.
+- **Mod embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
+
+
+
 - **POV**: in H-Mode press `A` to switch between POVs of participants. Press `Q` `W` `E` to restore to normal view.
-- **Poser**: in clothing menu, frames can be rotated. Sliders are defined in poserframes.txt. Poses can be saved and loaded.
-- **Modules**: Modules, or AAU traits allow for custom AI behaviour for your characters. List of pre-made traits can be found [here.](https://pastebin.com/R4DW0dxw)
+
 
 ### General:
 - **Shadow Files**: Instead of only loading files from a .pp file, the game checks for a folder of the same name (without the pp ending) first. If this folder exists and contains a file of the required name, this file is loaded instead.
