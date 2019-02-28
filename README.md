@@ -5,6 +5,12 @@
 
 AAUnlimited is a mod, and a mod framework for the game Artificial Academy 2 by Illusion. It adds many new features. In short, it makes your game run smoother, it makes your characters look pretty, and it makes the gameplay interesting.
 
+If you like our mod, please consider supporting us on patreon: 
+
+<a href="https://www.patreon.com/bePatron?u=17827358"><img src="https://i.imgur.com/4OlHf21.png" title="Become a patron" alt="Patreon"></a>
+
+
+
 ## Features:
 
 ### Gameplay enhancement:
