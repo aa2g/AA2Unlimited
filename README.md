@@ -1,5 +1,6 @@
 
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
+Please read this [detailed guide](https://github.com/aa2g/AA2Unlimited/wiki) on how to install, update and use AAUnlimited!
 
 # AA2Unlimited
 
@@ -8,8 +9,6 @@ AAUnlimited is a mod, and a mod framework for the game Artificial Academy 2 by I
 If you like our mod, please consider supporting us on patreon: 
 
 <a href="https://www.patreon.com/bePatron?u=17827358"><img src="https://i.imgur.com/4OlHf21.png" title="Become a patron" alt="Patreon"></a>
-
-
 
 ## Features:
 
@@ -34,5 +33,5 @@ If you like our mod, please consider supporting us on patreon:
 - Try asking questions in [this discord channel](https://discord.gg/5MfdAPT)
 - Make an issue on github
 
-### I have NVIDIA crashes or glitches. Help!
-- Try all combinations of enabling and disabling **Type 2 Renderer**, **wined3d** (must disable win10fix) and **Software Vertex Processing**.
+### Having issues?
+Please read the [FAQ](https://github.com/aa2g/AA2Unlimited/wiki/Launcher-Options#settings--toggles)! If this does not solve your issue, please [report it](https://github.com/aa2g/AA2Unlimited/wiki/How-To-Report-a-Crash)!
