@@ -1,6 +1,6 @@
 
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
-Please read this [detailed guide](https://github.com/aa2g/AA2Unlimited/wiki/Index) on how to install, update and use AAUnlimited!
+Please read this [guide](https://github.com/aa2g/AA2Unlimited/wiki/) on how to install, update and use AAUnlimited! It includes a [FAQ](https://github.com/aa2g/AA2Unlimited/wiki#faq)!
 
 # AA2Unlimited
 
@@ -34,4 +34,4 @@ If you like our mod, please consider supporting us on patreon:
 - Make an issue on github
 
 ### Having issues?
-Please read the [FAQ](https://github.com/aa2g/AA2Unlimited/wiki/Launcher-Options#settings--toggles)! If this does not solve your issue, please [report it](https://github.com/aa2g/AA2Unlimited/wiki/How-To-Report-a-Crash)!
+Please read the [FAQ](https://github.com/aa2g/AA2Unlimited/wiki#faq)! If this does not solve your issue, please [report it](https://github.com/aa2g/AA2Unlimited/wiki/How-To-Report-a-Crash)!
