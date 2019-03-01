@@ -1,6 +1,6 @@
 
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
-Please read this [detailed guide](https://github.com/aa2g/AA2Unlimited/wiki) on how to install, update and use AAUnlimited!
+Please read this [detailed guide](https://github.com/aa2g/AA2Unlimited/wiki/Index) on how to install, update and use AAUnlimited!
 
 # AA2Unlimited
 
