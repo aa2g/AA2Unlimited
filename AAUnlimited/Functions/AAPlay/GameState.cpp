@@ -32,6 +32,7 @@ struct GameStateStruct {
 	//Game state indicators
 	bool m_isClothesScreen;				//true if in clothes edit screen
 	bool m_isPcConversation;			//true if PC is in conversation mode
+	bool m_isIsOverridingDialogue;		//true from conversationstart till the first conversation tick
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
 	
@@ -78,6 +79,16 @@ void Shared::GameState::setIsPcConversation(bool value)
 bool Shared::GameState::getIsPcConversation()
 {
 	return loc_gameState.m_isPcConversation;
+}
+
+void Shared::GameState::setIsOverridingDialogue(bool value)
+{
+	loc_gameState.m_isIsOverridingDialogue = value;
+}
+
+bool Shared::GameState::getIsOverridingDialogue()
+{
+	return loc_gameState.m_isIsOverridingDialogue;
 }
 
 void Shared::GameState::setIsOverriding(bool value)
