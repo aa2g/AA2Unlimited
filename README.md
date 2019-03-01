@@ -11,6 +11,7 @@ If you like our mod, please consider supporting us on patreon:
 <a href="https://www.patreon.com/AAUnlimited"><img src="https://i.imgur.com/4OlHf21.png" title="Become a patron" alt="Patreon"></a>
 
 ## Features:
+For a full list of features, please read [this page](https://github.com/aa2g/AA2Unlimited/wiki/).
 
 ### Gameplay enhancement:
 - **Poser**: You can pose characters. You have complete control of the scene which includes every part of the body, objects, rooms, and lighting. [Here](https://imgur.com/a/FHePJmp) are some examples of the poser in action.
