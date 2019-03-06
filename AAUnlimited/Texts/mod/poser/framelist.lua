@@ -125,6 +125,10 @@ return {
 	{ "a01_J_NikuL_01",		 { "Other" },		"Left Ass Meat" },
 	{ "a01_J_NikuR_01",		 { "Other" },		"Right Ass Meat" },
 
+	{ "A00_J_meL1",		 { "Face" },		"Left Eye (Face)" },
+	{ "A00_J_meR1",		 { "Face" },		"Right Eye (Face)" },
+	{ "A00_J_meLTrsX",		 { "Face" },		"Left Eye (Whole)" },
+	{ "A00_J_meRTrsX",		 { "Face" },		"Right Eye (Whole)" },
 	{ "A00_N_hitomiL",		 { "Face" },		"Left Iris" },
 	{ "A00_N_hitomiR",		 { "Face" },		"Right Iris" },
 	{ "S00_N_hitomiL",		 { "Face" },		"Left Iris (M)" },
