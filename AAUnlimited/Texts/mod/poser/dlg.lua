@@ -688,6 +688,13 @@ local dlgclothes = require "poser.dlgclothes"
 local dlglight = require "poser.dlglight"
 
 -- -----------
+-- UI Emoji
+-- -----------
+
+local dlgemoji = require "poser.dlgemoji"
+
+
+-- -----------
 -- UI Layout
 -- -----------
 
@@ -833,6 +840,10 @@ local dialogsliders = iup.dialog {
 			iup.hbox {
 				tabtitle = "Light",
 				dlglight,
+			},
+			iup.hbox {
+				tabtitle = "Emoji",
+				dlgemoji,
 			},
 		},
 		--gap = 3,

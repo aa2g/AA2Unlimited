@@ -25,12 +25,12 @@
 31: wwc ddh13
 32: wwc ddh14
 33: wwc ddh15
-34: --NOT SPECIFIED--
-35: --NOT SPECIFIED--
-36: --NOT SPECIFIED--
-37: --NOT SPECIFIED--
-38: --NOT SPECIFIED--
-39: --NOT SPECIFIED--
+34: Faceparts Face 8
+35: Faceparts Face 9
+36: Faceparts Face 10
+37: Faceparts Face 11
+38: Faceparts Face 12
+39: Faceparts Face 13
 40: --NOT SPECIFIED--
 41: --NOT SPECIFIED--
 42: --NOT SPECIFIED--
@@ -246,4 +246,4 @@
 252: Possessed - Face 10 DDH
 253: Stitched Face [White]
 254: Clock Eye
-255: --NOT SPECIFIED-- 
+255: --NOT SPECIFIED--

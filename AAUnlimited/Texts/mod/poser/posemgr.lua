@@ -24,17 +24,19 @@ local posesdir = aau_path("poser\\poses")
 local scenesdir = aau_path("poser\\scenes")
 
 local lock_camera = false
+local lock_light = true
 local lock_face = false
 local lock_props = false
 local lock_world = false
 local lock_world_bone = "a01_N_Zentai_010"
 
 local lockfacetoggle2
-lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
-lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
-lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
-lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
-lockcameratoggle = iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
+local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
+local lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
+local lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
+local lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
+local lockcameratoggle= iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
+local locklighttoggle = iup.toggle { title = "Lock Light", action = function(self, state) lock_light = state == 1 end, value = "ON" }
 
 local function setclip(clip)
 	if charamgr.current then
@@ -349,6 +351,18 @@ local function loadscene(filename)
 					camera[k] = v
 				end
 			end
+
+			if not lock_light and scene.light then
+				local direction = scene.light.direction
+				for _,character in pairs(charamgr.characters) do
+					local skeleton = character.struct.m_xxSkeleton
+					local lightcount = skeleton.m_lightsCount
+					for i = 1, lightcount, 1 do
+						local light = skeleton:m_lightsArray(i - 1)
+						light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+					end
+				end
+			end
 		end
 	end
 	sceneloaded()
@@ -369,6 +383,7 @@ local function savescene(filename)
 
 	local characters = {}
 	local props = {}
+	local light
 
 	local scene = {
 		VERSION = 1,
@@ -381,6 +396,13 @@ local function savescene(filename)
 			pose = pose2table(chara)
 		}
 		table.insert(characters, character)
+		if not light then
+			light = {}
+			local struct = chara.struct.m_xxSkeleton:m_lightsArray(0)
+			local x,y,z,w = struct:GetLightDirection()
+			light.direction = { x, y, z, w }
+			scene.light = light
+		end
 	end
 	
 	for _,prop in ipairs(propmgr.props) do
@@ -522,6 +544,7 @@ _M.dialogposes = iup.dialog {
 					lockfacetoggle2,
 					lockpropstoggle,
 					lockcameratoggle,
+					locklighttoggle,
 					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
