@@ -484,7 +484,6 @@ end
 
 charamgr.on_character_updated.connect(function(chr)
 	if chr ~= charamgr.current then
-		log.spam("updating non-current character")
 		return
 	end
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
