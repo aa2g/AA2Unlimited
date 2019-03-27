@@ -143,6 +143,8 @@ namespace Shared {
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
+			void SetSubmissiveInH(std::vector<Value>& params);
+			void SetDominantInH(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
@@ -171,6 +173,8 @@ namespace Shared {
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
 			Value GetDominantInH(std::vector<Value>&);
 			Value GetSubmissiveInH(std::vector<Value>&);
+			Value GetActiveInH(std::vector<Value>&);
+			Value GetPassiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()

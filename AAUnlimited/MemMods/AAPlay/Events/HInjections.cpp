@@ -15,14 +15,18 @@ bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
 //take note that these ticks might be called multiple times even after returning contScene = false
 bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
+	Shared::GameState::setHInfo(hInfo);
 	HAi::PreTick(hInfo);
 	bool contScene = loc_OriginalTickFunction(hInfo);
-	HAi::PostTick(hInfo,contScene);
-	HButtonMove::PostTick(hInfo,contScene);
 	if (contScene) {
 		if (!loc_currentHInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H started\n";
 			LUA_EVENT_NORET("start_h", hInfo);
+			Shared::Triggers::HStartData data;
+			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
+			data.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
+			data.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
+			Shared::Triggers::ThrowEvent(&data);
 		}
 		loc_currentHInfo = hInfo;
 	}
@@ -43,6 +47,8 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		loc_activeFaceXX = NULL;
 		loc_passiveFaceXX = NULL;
 	}
+	HAi::PostTick(hInfo, contScene);
+	HButtonMove::PostTick(hInfo, contScene);
 	if (loc_currentHInfo) {
 		auto active = hInfo->m_activeParticipant->m_charPtr;
 		auto passive = hInfo->m_passiveParticipant->m_charPtr;

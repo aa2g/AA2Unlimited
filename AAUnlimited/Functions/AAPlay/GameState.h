@@ -42,6 +42,9 @@ namespace Shared {
 		void setVoyeur(ExtClass::CharacterStruct * voyeur);
 		ExtClass::CharacterStruct * getVoyeur();
 
+		void setHInfo(ExtClass::HInfo * h_info);
+		ExtClass::HInfo * getHInfo();
+
 		void setVoyeurTarget(ExtClass::NpcData * target);
 		ExtClass::NpcData * getVoyeurTarget();
 

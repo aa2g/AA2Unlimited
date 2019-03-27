@@ -55,6 +55,7 @@ namespace Triggers {
 		NPC_AFTER_RESPONSE,
 		HI_POLY_DESPAWN,
 		H_END,
+		H_START,
 		
 		
 		N_EVENTS
@@ -127,6 +128,12 @@ namespace Triggers {
 
 	EDC_DECLARE(HEndData, H_END)
 
+
+	EDC_END
+
+	EDC_DECLARE(HStartData, H_START)
+		int dominantParticipant;
+		int submissiveParticipant;
 
 	EDC_END
 
@@ -261,6 +268,8 @@ namespace Triggers {
 	int position;
 	int actor0;
 	int actor1;
+	int dominantParticipant;
+	int submissiveParticipant;
 
 	EDC_END
 

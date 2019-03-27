@@ -1362,6 +1362,31 @@ namespace Shared {
 			*HSceneTrigger = 1;
 		}
 
+
+		void Thread::SetSubmissiveInH(std::vector<Value>& params) {
+			if ((this->eventData->GetId() != H_START) && (this->eventData->GetId() != HPOSITION_CHANGE)) return;
+			auto hInfo = Shared::GameState::getHInfo();
+
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) return;
+
+			hInfo->m_passiveParticipant->m_charPtr = AAPlay::g_characters[seat].m_char;
+		}
+
+		void Thread::SetDominantInH(std::vector<Value>& params) {
+			if ((this->eventData->GetId() != H_START) && (this->eventData->GetId() != HPOSITION_CHANGE)) return;
+
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) return;
+
+			auto hInfo = Shared::GameState::getHInfo();
+			hInfo->m_activeParticipant->m_charPtr = AAPlay::g_characters[seat].m_char;
+		}
+
 		//int seat, int status
 		void Thread::SetNpcStatus(std::vector<Value>& params)
 		{
@@ -2130,6 +2155,18 @@ namespace Shared {
 				TEXT("Set character's fighting stance."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardFightingStyle
+			},
+			{
+				105, ACTIONCAT_EVENT, TEXT("Set Dominant Actor"), TEXT("Dominant = %p"),
+				TEXT("Set dominant character in H."),
+				{ TYPE_INT },
+				&Thread::SetDominantInH
+			},
+			{
+				106, ACTIONCAT_EVENT, TEXT("Set Submissive Actor"), TEXT("Submissive = %p"),
+				TEXT("Set submissive character in H."),
+				{ TYPE_INT },
+				&Thread::SetSubmissiveInH
 			},
 		};
 
