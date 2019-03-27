@@ -432,6 +432,9 @@ void __stdcall hPositionChange(BYTE param) {
 		hPositionData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 		hPositionData.actor0 = *actor0;
 		hPositionData.actor1 = *actor1;
+		auto hInfo = Shared::GameState::getHInfo();
+		hPositionData.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
+		hPositionData.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
 		hPositionData.position = param;
 		Shared::Triggers::ThrowEvent(&hPositionData);
 	}

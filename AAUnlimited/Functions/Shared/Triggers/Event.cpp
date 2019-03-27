@@ -101,6 +101,10 @@ namespace Shared {
 			{ H_END, EVENTCAT_LOADS, TEXT("H End"), TEXT("H Ends"),
 			TEXT("The event is fired as the H scene ends."),
 				{}
+			},
+			{ H_START, EVENTCAT_LOADS, TEXT("H Start"), TEXT("H Starts"),
+			TEXT("The event is fired as the H scene starts."),
+			{}
 			}
 		};
 
