@@ -18,7 +18,6 @@ local opts = {
 	{"autofocus", 1, "Window auto-focus: %b"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
-	{"hairfix", 0, "Spawned hair physics (BREAKS HEADS SIZES!): %b"}
 }
 
 
@@ -93,9 +92,6 @@ function _M:load()
 		dlg.fullscreen = detect_fs(GetGameHwnd())
 	end
 	propmgr:init()
-	if exe_type == "play" and opts.hairfix == 1 then
-		g_poke(0x115BE3, "\xeb\x06")
-	end
 end
 
 function on.open_card2()

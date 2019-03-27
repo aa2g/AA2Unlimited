@@ -50,6 +50,7 @@ local showemoji = function(index, show)
 		return
 	end
 	local emojibaseframe = char.struct.m_xxFace:FindBone("A00_U_emojis")
+	if not emojibaseframe then return end
 	if index <= emojibaseframe.m_nChildren then
 		local frame = emojibaseframe:m_children(index - 1)
 		frame.m_meshFlagHide = show and 0 or 2
@@ -69,30 +70,19 @@ end}
 -- Helpers
 -- #######
 
-local baseeyebones = { "A00_J_meR1", "A00_J_meL1" }
-local features = { "A00_N_mabuga", "A00_N_matugeU", "A00_N_matugeS" }
-local featuresiris = { "A00_N_hitomiRScaX", "A00_N_hitomiLScaX", "A00_N_mabuga", "A00_N_matugeU", "A00_N_matugeS" }
+local baseeyebones = { "A00_J_meR1", "A00_J_meL1", "A00_N_hitomiRScaX", "A00_N_hitomiLScaX", "S00_N_hitomiRScaX", "S00_N_hitomiLScaX" }
+local features = { "A00_N_mabuga", "A00_N_matugeU", "A00_N_matugeS", "S00_N_mabuga", "S00_N_matugeU", "S00_N_matugeS" }
+--local featuresiris = { "A00_N_hitomiRScaX", "A00_N_hitomiLScaX", "S00_N_hitomiRScaX", "S00_N_hitomiLScaX" }
 local collapsebutton = iup.button { title = "Collapse eyes", expand = "horizontalfree", action = function(self)
 	local character = charamgr.current
 	if character and character.ischaracter then
 		local face = character.struct.m_xxFace
 		for _,bone in pairs(baseeyebones) do
 			local slider = charamgr.current:getslider(bone)
-			slider:SetCurrentOperation(2)
-			slider:SetValues(0, 0, 0)
-			slider:Apply()
-		end 
-		for _,framename in pairs(featuresiris) do
-			local baseframe = face:FindBone(framename)
-			local count = baseframe.m_nChildren
-			for i = 1, count, 1 do
-				local frame = baseframe:m_children(i - 1)
-				--log.info("Frame %s render flag was %d", frame.m_name, frame.m_renderFlag)
-				if frame.m_renderFlag == 0 then
-					-- remember which facial feature is used
-					character[framename] = frame.m_name
-					frame.m_renderFlag = 2
-				end
+			if slider then
+				slider:SetCurrentOperation(2)
+				slider:SetValues(0, 0, 0)
+				slider:Apply()
 			end
 		end
 	end
@@ -106,14 +96,16 @@ local hideeyebutton = iup.button { title = "Hide Eyes", expand = "horizontalfree
 		local face = character.struct.m_xxFace
 		for _,framename in pairs(features) do
 			local baseframe = face:FindBone(framename)
-			local count = baseframe.m_nChildren
-			for i = 1, count, 1 do
-				local frame = baseframe:m_children(i - 1)
-				--log.info("Frame %s render flag was %d", frame.m_name, frame.m_renderFlag)
-				if frame.m_renderFlag == 0 then
-					-- remember which facial feature is used
-					character[framename] = frame.m_name
-					frame.m_renderFlag = 2
+			if baseframe then
+				local count = baseframe.m_nChildren
+				for i = 1, count, 1 do
+					local frame = baseframe:m_children(i - 1)
+					--log.info("Frame %s render flag was %d", frame.m_name, frame.m_renderFlag)
+					if frame.m_renderFlag == 0 then
+						-- remember which facial feature is used
+						character[framename] = frame.m_name
+						frame.m_renderFlag = 2
+					end
 				end
 			end
 		end
@@ -125,20 +117,24 @@ local showeyebutton = iup.button { title = "Show Eyes", expand = "horizontalfree
 	if character and character.ischaracter then
 		for _,bone in pairs(baseeyebones) do
 			local slider = character:getslider(bone)
-			slider:SetCurrentOperation(2)
-			slider:SetValues(1, 1, 1)
-			slider:Apply()
+			if slider then
+				slider:SetCurrentOperation(2)
+				slider:SetValues(1, 1, 1)
+				slider:Apply()
+			end
 		end 
 		local face = character.struct.m_xxFace
-		for _,framename in pairs(featuresiris) do
+		for _,framename in pairs(features) do
 			local restore = character[framename]
 			if restore then
 				local baseframe = face:FindBone(framename)
-				local count = baseframe.m_nChildren
-				for i = 1, count, 1 do
-					local frame = baseframe:m_children(i - 1)
-					if frame.m_name == restore then
-						frame.m_renderFlag = 0
+				if baseframe then
+					local count = baseframe.m_nChildren
+					for i = 1, count, 1 do
+						local frame = baseframe:m_children(i - 1)
+						if frame.m_name == restore then
+							frame.m_renderFlag = 0
+						end
 					end
 				end
 			end
@@ -150,7 +146,7 @@ end}
 local _M = iup.hbox {
 	iup.vbox {
 		iup.frame {
-			title = "Emoji",
+			title = "Show",
 			expand = "horizontalfree",
 			iup.vbox {
 				showemojibutton,
@@ -168,7 +164,7 @@ local _M = iup.hbox {
 		},
 	},
 	iup.frame {
-		title = "Leg Wear",
+		title = "Emotes",
 		emojilist,
 	},
 }

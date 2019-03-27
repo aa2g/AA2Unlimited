@@ -130,6 +130,7 @@
     <ClCompile Include="External\ExternalClasses\Camera.cpp" />
     <ClCompile Include="External\ExternalClasses\Light.cpp" />
     <ClCompile Include="Functions\AAPlay\Subs.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\CharacterRender.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -251,6 +252,7 @@
     <ClInclude Include="External\ExternalClasses\NpcData.h" />
     <ClInclude Include="External\ExternalClasses\ActionParamStruct.h" />
     <ClInclude Include="Functions\AAPlay\Subs.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\CharacterRender.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

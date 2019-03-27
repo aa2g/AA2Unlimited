@@ -15,7 +15,7 @@ local function reload_subtitles()
 	local file = io.open(subtitles_path, "r")
 	if not file then return end
 	for line in file:lines() do
-		file, dialogue = line:match("([%w_.]+).+\"(.*)\"$")
+		file, dialogue = line:match("%s*([%w_.]+).+\"(.*)\"%s*$")
 		if file and dialogue then
 			subtitles[file] = dialogue
 			count = count + 1

@@ -192,14 +192,12 @@ signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 posemgr.poseloaded.connect(function(character) if character == charamgr.current then _M.restorecharui() end end)
 
 local function updatecharacterlist()
-	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur
 	local list = {}
 	for i,v in ipairs(charamgr.characters) do
 		if v == charamgr.current then
 			cur = i
 		end
-		log.spam("Insert character %s %s", v, v.name)
 		table.insert(list, '#%d: %s' % {v.struct.m_seat, v.name})
 	end
 	characterlist.setlist(list)

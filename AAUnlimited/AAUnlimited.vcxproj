@@ -78,6 +78,7 @@
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="Hooks\WinAPI.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\CharacterRender.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ClothingDialog.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\NpcActions.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\PcActions.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\CharacterRender.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ClothingDialog.h" />
     <ClInclude Include="MemMods\AAPlay\Events\NpcActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\PcActions.h" />
