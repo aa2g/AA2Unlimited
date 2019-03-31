@@ -34,6 +34,7 @@ end
 
 local emojilist = iup.list {
 	expand = "yes",
+	multiple = "yes",
 	visiblelines = 8,
 	action = function(self, text, index, state)
 		showemoji(index, state == 1)
