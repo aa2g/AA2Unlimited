@@ -16,9 +16,28 @@ end
 -- Emoji
 -- #####
 
+local showemoji = function(index, show)
+	local char = charamgr.currentcharacter()
+	if not char then
+		return
+	end
+	if not char.struct.m_xxFace then
+		return
+	end
+	local emojibaseframe = char.struct.m_xxFace:FindBone("A00_U_emojis")
+	if not emojibaseframe then return end
+	if index <= emojibaseframe.m_nChildren then
+		local frame = emojibaseframe:m_children(index - 1)
+		frame.m_meshFlagHide = show and 0 or 2
+	end
+end
+
 local emojilist = iup.list {
 	expand = "yes",
 	visiblelines = 8,
+	action = function(self, text, index, state)
+		showemoji(index, state == 1)
+	end,
 }
 
 local populateemoji = function()
@@ -40,22 +59,6 @@ local populateemoji = function()
 	end
 end
 charamgr.currentcharacterchanged.connect(populateemoji)
-
-local showemoji = function(index, show)
-	local char = charamgr.currentcharacter()
-	if not char then
-		return
-	end
-	if not char.struct.m_xxFace then
-		return
-	end
-	local emojibaseframe = char.struct.m_xxFace:FindBone("A00_U_emojis")
-	if not emojibaseframe then return end
-	if index <= emojibaseframe.m_nChildren then
-		local frame = emojibaseframe:m_children(index - 1)
-		frame.m_meshFlagHide = show and 0 or 2
-	end
-end
 
 local showemojibutton = iup.button { title = "Show", expand = "horizontalfree", action = function(self)
 	showemoji(tonumber(emojilist.value), true)
