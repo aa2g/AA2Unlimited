@@ -238,6 +238,12 @@ void Lua::bindLua() {
 		if (!s.isnil(3)) g_eyeTracking = s.get(3);
 		return 3;
 	});
+	_BINDING["SetNoBraOverride"] = LUA_LAMBDA({
+		BYTE index = s.get(1);
+		BYTE state = s.get(2);
+		state = min(state, 2);
+		g_invisibraOverride[index] = state;
+	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
 		int idx = s.get(1);
 		if ((idx < 0) || (idx > 24) || !g_characters[idx].IsValid())

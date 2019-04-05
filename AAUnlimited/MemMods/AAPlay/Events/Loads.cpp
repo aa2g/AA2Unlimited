@@ -219,9 +219,17 @@ DWORD  __declspec(noinline) __stdcall CallOrigLoadXA(DWORD who, void *_this, wch
 }
 
 
+BYTE g_invisibraOverride[256] = { 0 };
+CharacterStruct *loc_character;
 void __declspec(naked) QueryBoobGravity() {
 	__asm {
 		mov     ebx, [esi+0F84h]
+		mov loc_character, esi
+		pushad
+	}
+	g_boobGravityOverride = g_boobGravityOverride != 2 ? g_boobGravityOverride : loc_character->m_clothState && g_invisibraOverride[loc_character->m_currClothSlot] ? 0 : 2;
+	__asm {
+		popad
 		mov cl, g_boobGravityOverride
 		test cl, 2
 		jnz no_override
