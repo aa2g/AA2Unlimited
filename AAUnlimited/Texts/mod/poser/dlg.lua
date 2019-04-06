@@ -100,6 +100,7 @@ signals.connect(propbonefilter, "setfilter", propbonelist, "setfilter")
 local function showframe(frame, show)
 	show = show and 0 or 2
 	frame.m_renderFlag = show
+	frame.m_meshFlagHide = show
 end
 
 local bonelistzbox = iup.zbox {
@@ -840,7 +841,7 @@ local dialogsliders = iup.dialog {
 				dlglight,
 			},
 			iup.hbox {
-				tabtitle = "Emoji",
+				tabtitle = "Emotes",
 				dlgemoji,
 			},
 		},
