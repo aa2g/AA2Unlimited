@@ -86,6 +86,7 @@ iSubtitlesTimer = 4000
 mods = {
 	{ "aaface" },
 	{ "poser" },
+	{ "nobra" },
 	{ "edit" },
 	{ "hirestex" },
 	{ "unlocks" },
