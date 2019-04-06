@@ -841,7 +841,7 @@ local dialogsliders = iup.dialog {
 				dlglight,
 			},
 			iup.hbox {
-				tabtitle = "Emoji",
+				tabtitle = "Emotes",
 				dlgemoji,
 			},
 		},

@@ -33,7 +33,7 @@ local lock_world_bone = "a01_N_Zentai_010"
 local lockfacetoggle2
 local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
 local lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
-local lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
+lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
 local lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
 local lockcameratoggle= iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
 local locklighttoggle = iup.toggle { title = "Lock Light", action = function(self, state) lock_light = state == 1 end, value = "ON" }
