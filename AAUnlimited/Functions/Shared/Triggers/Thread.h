@@ -143,8 +143,7 @@ namespace Shared {
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
-			void SetSubmissiveInH(std::vector<Value>& params);
-			void SetDominantInH(std::vector<Value>& params);
+			void SwitchActiveInH(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
