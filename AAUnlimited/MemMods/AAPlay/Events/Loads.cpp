@@ -224,13 +224,13 @@ BYTE loc_invisibraOverride;
 CharacterStruct *loc_character;
 void __declspec(naked) QueryBoobGravity() {
 	__asm {
-		mov     ebx, [esi+0F84h]
-		mov loc_character, esi
 		pushad
+		mov loc_character, esi
 	}
 	loc_invisibraOverride = g_boobGravityOverride != 2 ? g_boobGravityOverride : loc_character->m_clothState && g_invisibraOverride[loc_character->m_currClothSlot] ? 0 : 2;
 	__asm {
 		popad
+		mov ebx, [esi+0F84h]
 		mov cl, loc_invisibraOverride
 		test cl, 2
 		jnz no_override
