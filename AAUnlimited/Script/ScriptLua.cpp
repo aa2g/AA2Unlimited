@@ -241,7 +241,6 @@ void Lua::bindLua() {
 	_BINDING["SetNoBraOverride"] = LUA_LAMBDA({
 		BYTE index = s.get(1);
 		BYTE state = s.get(2);
-		state = min(state, 2);
 		g_invisibraOverride[index] = state;
 	});
 	_BINDING["GetCharacter"] = LUA_LAMBDA({
