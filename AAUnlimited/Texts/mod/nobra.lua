@@ -8,9 +8,11 @@ local _M = {}
 
 
 local function reload_overrides()
-	for slot in string.gmatch("26 180 181 222 223 224 225 172", "%d+") do
-		log.info("override nobra slot %s", slot)
-		SetNoBraOverride(tonumber(slot), 1)
+	for slot in string.gmatch("22 26 28 36 42 43 57 58 93 151 152 159 172 180 181 222 223 224 225 235", "%d+") do
+		SetNoBraOverride(tonumber(slot), 0xF)
+	end
+	for slot in string.gmatch("155 156 188 230", "%d+") do
+		SetNoBraOverride(tonumber(slot), 0x4)
 	end
 end
 
