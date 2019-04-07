@@ -30,7 +30,7 @@ function _M:unload()
 end
 
 function _M:config()
-	mod_edit_config(self, opts, "Subtitles options")
+	mod_edit_config(self, opts, "No-bra options")
 	reload_overrides()
 end
 
