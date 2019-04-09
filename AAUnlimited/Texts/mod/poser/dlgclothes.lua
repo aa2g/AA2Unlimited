@@ -9,7 +9,7 @@ local function unhidemeshes(frame)
 	for i = 0, count - 1, 1 do
 		unhidemeshes(frame:m_children(i))
 	end
-	frame.m_renderFlag = 0
+	--frame.m_renderFlag = 0
 	frame.m_meshFlagHide = 0
 end
 
@@ -56,6 +56,7 @@ local selectlegs = function(index)
 		local frame = legsbaseframe:m_children(i - 1)
 		if i == index then
 			unhidemeshes(frame)
+			frame.m_renderFlag = 0
 		else
 			frame.m_renderFlag = 2
 		end
@@ -113,6 +114,7 @@ local selectskirt = function(index)
 		if i == index then
 			local frame = skirtbaseframe:m_children(i - 1)
 			unhidemeshes(frame)
+			frame.m_renderFlag = 0
 		else
 			skirtbaseframe:m_children(i - 1).m_renderFlag = 2
 		end
