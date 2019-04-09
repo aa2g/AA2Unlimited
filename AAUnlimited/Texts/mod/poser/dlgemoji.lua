@@ -30,7 +30,7 @@ local showemoji = function(index, show)
 	if index < 0 then
 		local emojicount = emojibaseframe.m_nChildren
 		for i = 0, emojicount - 1, 1 do
-			frame = emojibaseframe:m_children(index - 1)
+			frame = emojibaseframe:m_children(i)
 			frame.m_meshFlagHide = show and 0 or 2
 		end
 	elseif index <= emojibaseframe.m_nChildren then
