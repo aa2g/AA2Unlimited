@@ -127,6 +127,22 @@ namespace PlayInjections {
 			{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress,	//redirect to our function
 			  0xE9, 0x0B, 0x01, 0x00, 0x00 },						//jump to cleanup
 			  NULL);
+
+			if (General::IsAAPlay) {
+				GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
+					if (m->message == WM_KEYDOWN) {
+						DWORD addr = 0;
+						if (m->wParam == VK_F9)
+							addr = General::GameBase + 0x38F6CA;
+						else if (m->wParam == VK_F11 || m->wParam == VK_SNAPSHOT)
+							addr = General::GameBase + 0x38F6C9;
+						if (addr)
+							*reinterpret_cast<BYTE*>(addr) = 1;
+						return true;
+					}
+					return false;
+				}));
+			}
 		}
 
 	}
