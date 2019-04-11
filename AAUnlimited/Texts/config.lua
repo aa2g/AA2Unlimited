@@ -78,10 +78,6 @@ bListFilenames = false
 -- Enable card triggers
 bTriggers = true
 
--- Subtitles settings
-sSubtitlesFont = "Arial"
-iSubtitlesFontSize = 24
-iSubtitlesTimer = 4000
 
 mods = {
 	{ "aaface" },
