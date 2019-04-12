@@ -2,22 +2,24 @@
 
 local _M = {}
 local opts = {
-	{ "fontfam", 0, "Font family: %l|Arial|Tahoma|" },
-	{ "fontsize", 24, "Font size, px: %i[1,100]" },
-	{ "lineheight", 120, "Line height, percents: %i[100,300]{Percent of Font size param}" },
-	{ "duration", 5, "Show duration, sec: %i[1,60]" },
-	{ "maxlines", 4, "Maximum number of lines: %i[1,20]"},
+	{ "fontFam", 0, "Font family: %l|Arial|Tahoma|" },
+	{ "fontSize", 24, "Font size, px: %i[1,]" },
+	{ "lineHeight", 120, "Line height, percents: %i[100,300]{Percent of Font size param (Not work if params `Separate color for male` and `Outline quality` are disabled)}" },
+	{ "duration", 5, "Show duration, sec: %i[1,]" },
+	{ "maxLines", 4, "Maximum number of lines: %i[1,]"},
 	
-	{ "textcolfemale", "255, 155, 255", "Text color (female) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
-	{ "textcolmale", "155, 244, 244", "Text color (male) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "textColFemale", "255, 155, 255", "Text color (main) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "diffColForM", 1, "Separate color for male: %b"},
+	{ "textColMale", "155, 244, 244", "Text color (for male) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
 	
-	{ "outlineW", 2, "Text outline width, px: %i[1,8]"},
-	{ "outlinecolor", "0, 0, 0", "Outline color RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
-	{ "outlinecolorA", 255, "Outline Alpha: %i[0,255]"},
+	{ "outlineQuality", 2, "Outline quality: %l|Only text (Off)|With Shadow (Med)|With Outline (High)|{Higher values can slightly affect performance}" },
+	{ "outlineSpread", 2, "Text outline spread, px: %i[1,10]"},
+	{ "outlineColor", "0, 0, 0", "Outline color RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "outlineColorA", 255, "Outline Alpha: %i[0,255]"},
 	
-	{ "textalign", 0, "Text Alignment: %l|Left|Center|{(if `Center`, param `Position X` not working)}"},
-	{ "areaposX", 15, "Subs Position X, px: %i[0,3000]{not works, if param `Alignment` set to `Center`}"},
-	{ "areaposY", 45, "Subs Position Y, px: %i[0,3000]"},
+	{ "textAlign", 0, "Text Alignment: %l|Left|Center|{(if `Center`, param `Position X` not working)}"},
+	{ "areaPosX", 15, "Subs Position X, px: %i[0,3000]{not works, if param `Alignment` set to `Center`}"},
+	{ "areaPosY", 45, "Subs Position Y, px: %i[0,3000]"},
 }
 
 local subtitles = {}
@@ -44,9 +46,10 @@ function on.load_audio(fname)
 end
 
 function on.launch()
-	InitSubtitlesParams(opts.fontfam, opts.fontsize, opts.lineheight, opts.duration, opts.maxlines,
-		opts.textcolfemale, opts.textcolmale, opts.outlineW, opts.outlinecolor, opts.outlinecolorA,
-		opts.textalign, opts.areaposX, opts.areaposY)
+	InitSubtitlesParams(opts.fontFam, opts.fontSize, opts.lineHeight, opts.duration, opts.maxLines,
+		opts.textColFemale, opts.diffColForM, opts.textColMale, 
+		opts.outlineQuality, opts.outlineSpread, opts.outlineColor, opts.outlineColorA,
+		opts.textAlign, opts.areaPosX, opts.areaPosY)
 end
 
 function _M:load()

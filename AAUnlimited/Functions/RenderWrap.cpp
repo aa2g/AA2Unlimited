@@ -169,29 +169,39 @@ public:;
 	void DrawSubs() {
 		Subtitles::PopSubtitles();
 		if (!Subtitles::lines.empty()) {
-			int line_num = 0;
-			for each (const auto line in Subtitles::lines) // for each subs line
+
+			if (Subtitles::outlineLayersCount != 0 || Subtitles::separateColorMale)
 			{
-				int top_offset = Subtitles::lineHeight * line_num; 
-				RECT *tempRect;
-				for (int i = 0; i < Subtitles::fontLayersNum - 1; i++) // outline layers
+				int line_num = 0;
+				for each (const auto line in Subtitles::lines) // for each subs line
 				{
-					tempRect = &Subtitles::rect[i];
+					int top_offset = Subtitles::lineHeight * line_num;
+					RECT *tempRect;
+					for (int i = 0; i < Subtitles::outlineLayersCount; i++) // outline layers
+					{
+						tempRect = &Subtitles::rect[i];
+						tempRect->top = tempRect->top + top_offset;
+						tempRect->bottom = tempRect->bottom + top_offset;
+						DrawText(font, 0, std::get<0>(line).c_str(), -1, tempRect, DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[0]);
+						tempRect->top = tempRect->top - top_offset;
+						tempRect->bottom = tempRect->bottom - top_offset;
+					}
+					// Colorized text
+					tempRect = &Subtitles::rect[Subtitles::fontLayersCount - 1];
 					tempRect->top = tempRect->top + top_offset;
 					tempRect->bottom = tempRect->bottom + top_offset;
-					DrawText(font, 0, std::get<0>(line).c_str(), -1, tempRect, DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[0]);
+					DrawText(font, 0, std::get<0>(line).c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[std::get<1>(line)]);
 					tempRect->top = tempRect->top - top_offset;
 					tempRect->bottom = tempRect->bottom - top_offset;
-				}
-				// Colorized text
-				tempRect = &Subtitles::rect[Subtitles::fontLayersNum - 1];
-				tempRect->top = tempRect->top + top_offset;
-				tempRect->bottom = tempRect->bottom + top_offset;
-				DrawText(font, 0, std::get<0>(line).c_str(), -1, &Subtitles::rect[Subtitles::fontLayersNum - 1], DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[std::get<1>(line)]);
-				tempRect->top = tempRect->top - top_offset;
-				tempRect->bottom = tempRect->bottom - top_offset;
 
-				line_num++;
+					line_num++;
+				}
+			}
+			else { // Only Colorized text
+				Subtitles::text.clear();
+				for each (const auto line in Subtitles::lines)
+					Subtitles::text += std::get<0>(line);
+				DrawText(font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[1]);
 			}
 		}
 	}
@@ -1084,7 +1094,7 @@ public:;
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
 		if (hres == D3D_OK) {
-			Subtitles::gameWndW = pPresentationParameters->BackBufferWidth; // Game window Width for Subtitles
+			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth; // Game window Width for Subtitles
 			Subtitles::CorrectSubsAreaSize();
 			*ppReturnedDeviceInterface = d3dev;
 			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
