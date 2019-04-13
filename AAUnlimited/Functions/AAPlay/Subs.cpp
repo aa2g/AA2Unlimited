@@ -27,7 +27,6 @@ namespace Subtitles {
 	int gameWindowWidth = 0;
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
-	//int outlineQuality = 2; // 0 - Only Text | 1 - With Shadow (Med) | 2 - With Outline (High)
 
 	void AddSubtitles(const char *subtitle, const char *file_name) {
 		int sexes_id = 1;
@@ -102,22 +101,17 @@ namespace Subtitles {
 		return result;
 	}
 
-	void InitSubtitlesParams(int font_family, int font_size, int line_height, int show_duration, int max_lines,
+	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
 		const char *text_color_female, int diff_color_for_male, const char *text_color_male,
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
-		// diff_color_for_male
-		// outline_quality
-
-		if (font_family == 1) { fontFamily = "Tahoma"; }
-		else { fontFamily = "Arial"; }
+		fontFamily = font_family;
 		if (text_align == 1) { subsCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
 		lineHeight = round(fontSize * line_height / 100);
 		duration = show_duration * 1000;
 		maxLines = max_lines - 1;
-		//outlineQuality = outline_quality;
 
 		if (outline_quality == 1)
 			outlineLayersCount = 1;

@@ -2,19 +2,19 @@
 
 local _M = {}
 local opts = {
-	{ "fontFam", 0, "Font family: %l|Arial|Tahoma|" },
+	{ "fontFam", "Arial", "Font family: %n" },
 	{ "fontSize", 24, "Font size, px: %i[1,]" },
 	{ "lineHeight", 120, "Line height, percents: %i[100,300]{Percent of Font size param (Not work if params `Separate color for male` and `Outline quality` are disabled)}" },
 	{ "duration", 5, "Show duration, sec: %i[1,]" },
 	{ "maxLines", 4, "Maximum number of lines: %i[1,]"},
 	
-	{ "textColFemale", "255, 155, 255", "Text color (main) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "textColFemale", "255 155 255", "Text color (main) RGB: %c"},
 	{ "diffColForM", 1, "Separate color for male: %b"},
-	{ "textColMale", "155, 244, 244", "Text color (for male) RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "textColMale", "155 244 244", "Text color (for male) RGB: %c"},
 	
 	{ "outlineQuality", 2, "Outline quality: %l|Only text (Off)|With Shadow (Med)|With Outline (High)|{Higher values can slightly affect performance}" },
 	{ "outlineSpread", 2, "Text outline spread, px: %i[1,10]"},
-	{ "outlineColor", "0, 0, 0", "Outline color RGB/HEX: %s{Example `255,45,23` / `F9D0e1` / `c7F` etc. }"},
+	{ "outlineColor", "0 0 0", "Outline color RGB: %c"},
 	{ "outlineColorA", 255, "Outline Alpha: %i[0,255]"},
 	
 	{ "textAlign", 0, "Text Alignment: %l|Left|Center|{(if `Center`, param `Position X` not working)}"},
