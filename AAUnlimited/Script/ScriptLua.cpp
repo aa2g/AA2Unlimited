@@ -284,7 +284,12 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["AddSubtitles"] = LUA_LAMBDA0({
-		Subtitles::AddSubtitles(s.get(1));
+		Subtitles::AddSubtitles(s.get(1), s.get(2));
+	});
+
+	_BINDING["InitSubtitlesParams"] = LUA_LAMBDA0({
+		Subtitles::InitSubtitlesParams(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6),
+			s.get(7), s.get(8), s.get(9), s.get(10), s.get(11), s.get(12), s.get(13), s.get(14), s.get(15));
 	});
 
 //	_BINDING["GetPlayerConversation"] = &PlayerConversationPtr;

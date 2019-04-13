@@ -168,17 +168,50 @@ public:;
 
 	void DrawSubs() {
 		Subtitles::PopSubtitles();
-		if (!Subtitles::text.empty())
-			DrawText(font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect, DT_NOCLIP, Subtitles::color);
+		if (!Subtitles::lines.empty()) {
+
+			if (Subtitles::outlineLayersCount != 0 || Subtitles::separateColorMale)
+			{
+				int line_num = 0;
+				for each (const auto line in Subtitles::lines) // for each subs line
+				{
+					int top_offset = Subtitles::lineHeight * line_num;
+					RECT *tempRect;
+					for (int i = 0; i < Subtitles::outlineLayersCount; i++) // outline layers
+					{
+						tempRect = &Subtitles::rect[i];
+						tempRect->top = tempRect->top + top_offset;
+						tempRect->bottom = tempRect->bottom + top_offset;
+						DrawText(font, 0, std::get<0>(line).c_str(), -1, tempRect, DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[0]);
+						tempRect->top = tempRect->top - top_offset;
+						tempRect->bottom = tempRect->bottom - top_offset;
+					}
+					// Colorized text
+					tempRect = &Subtitles::rect[Subtitles::fontLayersCount - 1];
+					tempRect->top = tempRect->top + top_offset;
+					tempRect->bottom = tempRect->bottom + top_offset;
+					DrawText(font, 0, std::get<0>(line).c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[std::get<1>(line)]);
+					tempRect->top = tempRect->top - top_offset;
+					tempRect->bottom = tempRect->bottom - top_offset;
+
+					line_num++;
+				}
+			}
+			else { // Only Colorized text
+				Subtitles::text.clear();
+				for each (const auto line in Subtitles::lines)
+					Subtitles::text += std::get<0>(line);
+				DrawText(font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[1]);
+			}
+		}
 	}
 
 	void MakeFont() {
 		// fuck you microsoft for the d3dx9 SDK stupidity, no way im installing that shit
 		font = 0;
 
-		const char *text = g_Config.gets("sSubtitlesFont");
-		int fontSize = g_Config.geti("iSubtitlesFontSize");
-		Subtitles::duration = g_Config.geti("iSubtitlesTimer");
+		const char *text = Subtitles::fontFamily;
+		int fontSize = Subtitles::fontSize;
 
 		if (text && fontSize) {
 			std::wstring fontName = General::utf8.from_bytes(text);
@@ -1061,6 +1094,8 @@ public:;
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
 		if (hres == D3D_OK) {
+			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth; // Game window Width for Subtitles
+			Subtitles::CorrectSubsAreaSize();
 			*ppReturnedDeviceInterface = d3dev;
 			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
 				DEVMODE dmScreenSettings = { 0 };
