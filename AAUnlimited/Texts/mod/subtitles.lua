@@ -2,7 +2,7 @@
 
 local _M = {}
 local opts = {
-	{ "fontFam", "Arial", "Font family: %n" },
+	{ "fontFam", "Arial", "Font family: %s" },
 	{ "fontSize", 24, "Font size, px: %i[1,]" },
 	{ "lineHeight", 120, "Line height, percents: %i[100,300]{Percent of Font size param (Not work if params `Separate color for male` and `Outline quality` are disabled)}" },
 	{ "duration", 5, "Show duration, sec: %i[1,]" },
