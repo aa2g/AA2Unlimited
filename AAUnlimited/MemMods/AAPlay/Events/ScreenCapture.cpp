@@ -136,9 +136,10 @@ namespace PlayInjections {
 							addr = General::GameBase + 0x38F6CA;
 						else if (m->wParam == VK_F11 || m->wParam == VK_SNAPSHOT)
 							addr = General::GameBase + 0x38F6C9;
-						if (addr)
+						if (addr) {
 							*reinterpret_cast<BYTE*>(addr) = 1;
-						return true;
+							return true;
+						}
 					}
 					return false;
 				}));
