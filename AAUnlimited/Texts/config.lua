@@ -58,11 +58,11 @@ bUsePPeX = false
 bUsePP2 = false
 
 -- MB cache memory for general data, includes data allocated by game itself
-PP2Cache = 800
+PP2Cache = 500
 
 -- MB cache memory for decompressed audio
-PP2AudioCache = 200
-PP2Buffers = 200
+PP2AudioCache = 150
+PP2Buffers = 300
 PP2Profiling = true
 
 -- The modified launcher of MKIII decensor
