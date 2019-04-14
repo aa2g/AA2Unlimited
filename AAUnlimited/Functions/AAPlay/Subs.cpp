@@ -142,7 +142,7 @@ namespace Subtitles {
 	}
 
 	void CorrectSubsAreaSize() {
-		for (int i = 0; i < outlineLayersCount; i++)
+		for (int i = 0; i < fontLayersCount; i++)
 			rect[i].right = rect[i].left + gameWindowWidth;
 	}
 
