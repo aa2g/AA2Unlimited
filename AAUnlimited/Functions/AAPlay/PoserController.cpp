@@ -386,7 +386,7 @@ namespace Poser {
 			});
 		}
 
-		ExtClass::Frame* dankon = root->FindFrame("a00_N_Dankon_01");
+		ExtClass::Frame* dankon = root->FindFrame("a_J_dan00");
 		if (dankon) {
 			FrameModTree(dankon, ExtClass::CharacterStruct::SKELETON);
 		}
