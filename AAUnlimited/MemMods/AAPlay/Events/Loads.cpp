@@ -361,6 +361,10 @@ void HiPolyLoadsInjection() {
 	{ 0x90, 0xe8, HookControl::RELATIVE_DWORD, (DWORD)&QueryEye },	//redirect to our function
 		NULL);
 
+	if (General::IsAAEdit) {
+		// Spawn clothed on preview window by default
+		Hook((BYTE*)(General::GameBase + 0x1A483), { 0x6A, 0x00 }, { 0x6A, 0x01 }, NULL);
+	}
 }
 
 void __stdcall SaveLoadEvent() {
