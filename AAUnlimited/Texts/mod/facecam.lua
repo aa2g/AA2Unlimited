@@ -33,13 +33,15 @@ local current = nil
 local eye = nil
 local center = {x=0,y=0,z=0}
 local xyz
+local backupcamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=1}
+local changehfov = 1
 
 --local
 function fetch_rot()
 	if not hinfo then return end
-	--log("fetch_rot")
 	-- must be in facecam mode to fetch something meaningful!
 	if current == nil then return end
+	--log.info("-LUA-fetch_rot")
 	local cam = hinfo:GetCamera()
 	xyz.xrot = cam.m_xRotRad
 	xyz.yrot = cam.m_yRotRad
@@ -50,7 +52,7 @@ end
 function load_hpos_settings()
 	if not hinfo then return end
 	if current == nil then return end
-	--log("load_hpos")
+	--log.info("-LUA-load_hpos_cfg")
 	local pos = tostring(hinfo.m_currPosition) .. ((current and "_active") or "_passive")
 	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi,zrot=0}
 	cfg[pos] = xyz
@@ -58,7 +60,7 @@ end
 
 --local
 function update_eye()
-	--log("update eye", current, eye)
+	--log.info("-LUA-update_eye")
 	SetFocusBone(eye, xyz.x + center.x, xyz.y + center.y, xyz.z + center.z, mcfg.zunlock)
 	local cam = hinfo:GetCamera()
 	cam.m_xRotRad = xyz.xrot
@@ -68,12 +70,17 @@ end
 
 --local
 function restore_camera()
-	--log("restoring camera")
+	--log.info("-LUA-restore_camera")
 	SetFocusBone(nil)	
 	local cam = hinfo:GetCamera()
 	for i,v in ipairs {1.0,0,0,0,0,1.0,0,0,0,0,1.0,0,0,0,0,1.0} do
 		cam:m_matrix(i-1, v)
 	end
+	cam.m_xRotRad = backupcamera.rotx -- restore also Camera FOV, Rotatings and Distance
+	cam.m_yRotRad = backupcamera.roty
+	cam.m_zRotRad = backupcamera.rotz
+	cam.m_distToMid = backupcamera.rotdist
+	cam.m_fov = backupcamera.fov
 end
 
 
@@ -148,12 +155,22 @@ function on.char(k)
 	local chr = string.char(k)
 	if chr == mcfg.activate then
 		fetch_rot()
-		if current == nil then
+		if current == nil then -- On activate facecam
 			current = true
+			-- backup the Camera FOV, Rotatings and Distance and set the starting FOV
+			local cam = hinfo:GetCamera()
+			backupcamera = {
+				rotx=cam.m_xRotRad,
+				roty=cam.m_yRotRad,
+				rotz=cam.m_zRotRad,
+				rotdist=cam.m_distToMid,
+				fov=cam.m_fov
+			}
+			cam.m_fov = mcfg.startfov
 		else
 			current = not current
 		end
-	elseif mcfg.reset:find(chr,1,true) then
+	elseif mcfg.reset:find(chr,1,true) and current ~= nil then
 		fetch_rot()
 		current = nil
 	else
@@ -205,12 +222,13 @@ end
 function on.change_h(hi, currpos, active, passive, aface, pface)
 	Config.save()
 	if current ~= nil then
-		--log("change h!")
+		--log.info("-LUA-change h!")
 		--[[
 			fetch_rot() ??
 			load_hpos_settings() ??
 			]]
 		set_status(current)
+		hinfo:GetCamera().m_fov = changehfov -- restore the FOV
 	end
 end
 
@@ -243,6 +261,7 @@ function on.convo()
 end
 
 local function on_hposchange(arg)
+	changehfov = hinfo:GetCamera().m_fov   -- backup FOV val for 'after changed H pose'
 	fetch_rot()
 	Config.save()
 --	log("injected hpos change! %d", arg)
@@ -266,6 +285,7 @@ function _M:load()
 	self.reset = self.reset or 'qwer'
 	self.zunlock = self.zunlock or false
 	self.step = self.step or 0.05
+	self.startfov = self.startfov or 1.2
 	-- tu, hackanon
 	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
 		arg = on_hposchange(arg)
@@ -284,16 +304,18 @@ end
 function _M:config()
 	require "iuplua"
 	require "iupluacontrols"
-	local okay, akey, rkeys, z, step = iup.GetParam("Configure Facecam", nil, [[
+	local okay, akey, rkeys, z, stfov, step = iup.GetParam("Configure Facecam", nil, [[
 Activate key: %s{alphanum key to enter facecam}
 Reset keys: %s{any of these keys reset facecam}
-Allow z axis: %b{Descent mode}
+Allow Roll (Z) axis: %b{Descent mode}
+Starting FOV: %r[0.1,1.5,0.1]{Field of view on Activating Facecam}
 Offset step: %r[0.01,0.5,0.01]{Eye offset. Use numpad Ins,Del,+,-,*,/}
-]], self.activate, self.reset, self.zunlock and 1 or 0, self.step)
+]], self.activate, self.reset, self.zunlock and 1 or 0, self.startfov, self.step)
 	if okay then
 		self.activate = akey
 		self.reset = rkeys
 		self.zunlock = z == 1
+		self.startfov = stfov
 		self.step = step
 		set_status(current)
 		Config.save()
