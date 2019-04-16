@@ -238,6 +238,15 @@ function on.start_h(hi)
 	parts[2] = hinfo.m_passiveParticipant.m_charPtr
 end
 
+function on.launch() -- Sending Motion amplitude to Camera
+	local amplitudeval
+	if mcfg.amplitudemov > 95 then 
+		amplitudeval = mcfg.amplitudemov
+	else
+		amplitudeval = math.ceil(100 - math.sqrt(9050 - mcfg.amplitudemov^2))
+	end
+	SetPovStabilization(amplitudeval)
+end
 
 --[[function on.hipoly()
 	if not hinfo then return end
@@ -286,6 +295,7 @@ function _M:load()
 	self.zunlock = self.zunlock or false
 	self.step = self.step or 0.05
 	self.startfov = self.startfov or 1.2
+	self.amplitudemov = self.amplitudemov or 30
 	-- tu, hackanon
 	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
 		arg = on_hposchange(arg)
@@ -304,18 +314,20 @@ end
 function _M:config()
 	require "iuplua"
 	require "iupluacontrols"
-	local okay, akey, rkeys, z, stfov, step = iup.GetParam("Configure Facecam", nil, [[
+	local okay, akey, rkeys, z, stfov, amplitude, step = iup.GetParam("Configure Facecam", nil, [[
 Activate key: %s{alphanum key to enter facecam}
 Reset keys: %s{any of these keys reset facecam}
 Allow Roll (Z) axis: %b{Descent mode}
 Starting FOV: %r[0.1,1.5,0.1]{Field of view on Activating Facecam}
+Motion amplitude: %r[5,100,5]{How much will the camera follow head movements. Low values are recommended for greater stabilization}
 Offset step: %r[0.01,0.5,0.01]{Eye offset. Use numpad Ins,Del,+,-,*,/}
-]], self.activate, self.reset, self.zunlock and 1 or 0, self.startfov, self.step)
+]], self.activate, self.reset, self.zunlock and 1 or 0, self.startfov, self.amplitudemov, self.step)
 	if okay then
 		self.activate = akey
 		self.reset = rkeys
 		self.zunlock = z == 1
 		self.startfov = stfov
+		self.amplitudemov = amplitude
 		self.step = step
 		set_status(current)
 		Config.save()

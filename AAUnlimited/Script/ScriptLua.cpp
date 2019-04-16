@@ -307,6 +307,10 @@ void Lua::bindLua() {
 		Camera::SetFocusBone(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5));
 	});
 
+	_BINDING["SetPovStabilization"] = LUA_LAMBDA0({
+		Camera::SetPovStabilization(s.get(1));
+	});
+
 	_BINDING["SetClassJSONData"] = LUA_LAMBDA({
 		std::string key((const char*)s.get(1));
 		std::string json((const char*)s.get(2));
