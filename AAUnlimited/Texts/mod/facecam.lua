@@ -1,5 +1,10 @@
 --@INFO POV facecam (camera tracks eye bones)
 
+-- Problems to fix: 
+-- 1) If user select again the same H CUMMING(!) pose, camera rotation and FOV are reset.
+-- 2) In `cumshot` part need restore_camera()  (non POV mode)
+-- (Currently, is no way to track these both events.)
+
 local c = require "const"
 local _M = {}
 local cfg -- config for positions
@@ -35,6 +40,7 @@ local center = {x=0,y=0,z=0}
 local xyz
 local backupcamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=1}
 local changehfov = 1
+local prevPosId = 0
 
 --local
 function fetch_rot()
@@ -133,6 +139,9 @@ function hide_heda(who, hide)
 	for _,v in ipairs(tohide) do
 		pcall(function() cptr:GetXXFile(v).m_root:m_children(0):m_children(0).m_renderFlag = flag end)
 	end
+	-- Also hide a tongue, where it's need
+	
+	
 end
 
 --local
@@ -219,23 +228,23 @@ function on.keydown(k)
 end
 
 -- this fires after the pos is actually changed
-function on.change_h(hi, currpos, active, passive, aface, pface)
-	Config.save()
+function after_change_h()
 	if current ~= nil then
-		--log.info("-LUA-change h!")
-		--[[
-			fetch_rot() ??
-			load_hpos_settings() ??
-			]]
+		--log.info("-LUA-after_change_h")
 		set_status(current)
 		hinfo:GetCamera().m_fov = changehfov -- restore the FOV
 	end
+end
+function on.change_h(hi, currpos, active, passive, aface, pface)
+	Config.save()
+	after_change_h()
 end
 
 function on.start_h(hi)
 	hinfo = hi
 	parts[1] = hinfo.m_activeParticipant.m_charPtr
 	parts[2] = hinfo.m_passiveParticipant.m_charPtr
+	g_poke(0x3A8578, string.pack("<f", 0.1)) -- decrease `Near clipping distance`(=1) (for `Far`(=1000) use 0x3A857C)
 end
 
 function on.launch() -- Sending Motion amplitude to Camera
@@ -245,7 +254,7 @@ function on.launch() -- Sending Motion amplitude to Camera
 	else
 		amplitudeval = math.ceil(100 - math.sqrt(9050 - mcfg.amplitudemov^2))
 	end
-	SetPovStabilization(amplitudeval)
+	InitPovParams(amplitudeval)
 end
 
 --[[function on.hipoly()
@@ -277,10 +286,18 @@ local function on_hposchange(arg)
 	return arg
 end
 
-local function on_hposchange2(arg)
+local function on_hposchange2(arg, ret)
 	load_hpos_settings()
 --	log("injected hpos change2! %d", arg)
-	return arg
+	if prevPosId == arg then -- If user select again current H-pose
+		--log.info("-LUA-hpos not changed")
+		after_change_h()
+	else
+		prevPosId = arg
+	end
+	--log.info("-LUA-H pos id")
+	--log.info(arg)
+	return ret
 end
 
 local orig_hook
@@ -301,7 +318,7 @@ function _M:load()
 		arg = on_hposchange(arg)
 		local ret = proc_invoke(orig, this, arg)
 		log("(tbd generalize this inject) hpos change %x %x %d", this, arg, ret)
-		ret = on_hposchange2(ret)
+		ret = on_hposchange2(arg, ret)
 		return ret
 	end)
 end

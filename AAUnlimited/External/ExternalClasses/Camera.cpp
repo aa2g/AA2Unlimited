@@ -60,8 +60,16 @@ int Camera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z, bo
 	return 1;
 }
 
-void Camera::SetPovStabilization(int stabilize_percents) {
+void Camera::InitPovParams(int stabilize_percents) {
 	stabilizeCoefficient = (float)stabilize_percents / 100;
+	// to unlock `Near clipping distance` NOP some instructions
+	Hook((BYTE*)(General::GameBase + 0x80EA7), { 0xD9 }, { 0x90 }, NULL);
+	Hook((BYTE*)(General::GameBase + 0x80EA8), { 0x1D }, { 0x90 }, NULL);
+	Hook((BYTE*)(General::GameBase + 0x80EA9), { 0x78 }, { 0x90 }, NULL);
+	Hook((BYTE*)(General::GameBase + 0x80EAA), { 0x85 }, { 0x90 }, NULL);
+	Hook((BYTE*)(General::GameBase + 0x80EAB), { 0x56 }, { 0x90 }, NULL);
+	Hook((BYTE*)(General::GameBase + 0x80EAC), { 0x00 }, { 0x90 }, NULL);
+	// to unlock `Far clipping` use 0x80EB3 (or 0x80EAD)
 }
 
 }
