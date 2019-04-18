@@ -1,9 +1,8 @@
 --@INFO POV facecam (camera tracks eye bones)
 
 -- Problems to fix: 
--- 1) If user select again the same H CUMMING(!) pose, camera rotation and FOV are reset.
--- 2) In `cumshot` part need restore_camera()  (non POV mode)
--- (Currently, is no way to track these both events.)
+-- 1) In `cumshot` part need restore_camera()  (non POV mode)
+-- (Currently, is no way to track this `start_cumshot` events.)
 
 local c = require "const"
 local _M = {}
@@ -14,7 +13,8 @@ local mcfg -- module config
 local def = {
 	x = 0,
 	y = 0,
-	z = 0
+	z = 0,
+	tongue = 2
 }
 
 local INS = 96
@@ -27,19 +27,24 @@ local DIV = 111
 local MUL = 106
 
 local SEVEN = 103
+local NINE = 105
+
+local DecrFOV = 186 -- ;
+local IncrFOV = 221 -- ]
 
 --local
 hinfo = hinfo or false
 local parts = {}
 
 local tohide = { c.FACE, c.HAIR_FRONT, c.HAIR_SIDE, c.HAIR_BACK, c.HAIR_EXT, c.FACE_SLIDERS, c.GLASSES}
+local tonguePart = c.TONGUE
 
 local current = nil
 local eye = nil
 local center = {x=0,y=0,z=0}
 local xyz
-local backupcamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=1}
-local changehfov = 1
+local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
+local facecamFOV = 1
 local prevPosId = 0
 
 --local
@@ -60,7 +65,10 @@ function load_hpos_settings()
 	if current == nil then return end
 	--log.info("-LUA-load_hpos_cfg")
 	local pos = tostring(hinfo.m_currPosition) .. ((current and "_active") or "_passive")
-	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi,zrot=0}
+	xyz = cfg[pos] or {x=def.x,y=def.y,z=def.z,xrot=0,yrot=math.pi,zrot=0,tong=def.tongue}
+	if not xyz.tong then -- fix for old-saved params of poses (without tong param)
+		xyz.tong = def.tongue
+	end 
 	cfg[pos] = xyz
 end
 
@@ -82,11 +90,11 @@ function restore_camera()
 	for i,v in ipairs {1.0,0,0,0,0,1.0,0,0,0,0,1.0,0,0,0,0,1.0} do
 		cam:m_matrix(i-1, v)
 	end
-	cam.m_xRotRad = backupcamera.rotx -- restore also Camera FOV, Rotatings and Distance
-	cam.m_yRotRad = backupcamera.roty
-	cam.m_zRotRad = backupcamera.rotz
-	cam.m_distToMid = backupcamera.rotdist
-	cam.m_fov = backupcamera.fov
+	cam.m_xRotRad = normalCamera.rotx -- restore also Camera FOV, Rotatings and Distance
+	cam.m_yRotRad = normalCamera.roty
+	cam.m_zRotRad = normalCamera.rotz
+	cam.m_distToMid = normalCamera.rotdist
+	set_FOV(normalCamera.fov)
 end
 
 
@@ -140,8 +148,11 @@ function hide_heda(who, hide)
 		pcall(function() cptr:GetXXFile(v).m_root:m_children(0):m_children(0).m_renderFlag = flag end)
 	end
 	-- Also hide a tongue, where it's need
-	
-	
+	if who == current then
+		pcall(function() cptr:GetXXFile(tonguePart).m_root:m_children(0):m_children(0).m_renderFlag = xyz.tong end)
+	else
+		pcall(function() cptr:GetXXFile(tonguePart).m_root:m_children(0):m_children(0).m_renderFlag = flag end)
+	end
 end
 
 --local
@@ -159,6 +170,10 @@ function set_status(current)
 	end
 end
 
+function set_FOV(value) -- from 0.1 to 1.5
+	g_poke(0x3A8574, string.pack("<f", value))
+end
+
 function on.char(k)
 	if not hinfo then return k end
 	local chr = string.char(k)
@@ -168,14 +183,11 @@ function on.char(k)
 			current = true
 			-- backup the Camera FOV, Rotatings and Distance and set the starting FOV
 			local cam = hinfo:GetCamera()
-			backupcamera = {
-				rotx=cam.m_xRotRad,
-				roty=cam.m_yRotRad,
-				rotz=cam.m_zRotRad,
-				rotdist=cam.m_distToMid,
-				fov=cam.m_fov
-			}
-			cam.m_fov = mcfg.startfov
+			normalCamera.rotx=cam.m_xRotRad
+			normalCamera.roty=cam.m_yRotRad
+			normalCamera.rotz=cam.m_zRotRad
+			normalCamera.rotdist=cam.m_distToMid
+			set_FOV(facecamFOV)
 		else
 			current = not current
 		end
@@ -193,7 +205,29 @@ function on.char(k)
 end
 
 function on.keydown(k)
-	if (not hinfo) or (current == nil) then return k end
+	if (not hinfo) then return k end
+	if k == IncrFOV then
+		if current ~= nil and facecamFOV <= 1.45 then
+			set_FOV(facecamFOV + 0.05)
+			facecamFOV = facecamFOV + 0.05
+		elseif current == nil and normalCamera.fov <= 1.45 then
+			set_FOV(normalCamera.fov + 0.05)
+			normalCamera.fov = normalCamera.fov + 0.05
+		end
+		return k
+	elseif k == DecrFOV then
+		if current ~= nil and facecamFOV >= 0.15 then 
+			set_FOV(facecamFOV - 0.05)
+			facecamFOV = facecamFOV - 0.05
+		elseif current == nil and normalCamera.fov >= 0.15 then 
+			set_FOV(normalCamera.fov - 0.05)
+			normalCamera.fov = normalCamera.fov - 0.05
+		end
+		return k
+	end
+	
+	if (current == nil) then return k end
+	
 	local step = mcfg.step
 	if k == PLUS then
 		xyz.y = xyz.y - step
@@ -220,6 +254,9 @@ function on.keydown(k)
 		-- note, no fetch_rot coz we force 0
 		update_eye()
 		return k
+	elseif k == NINE then
+		xyz.tong = xyz.tong == 2 and 0 or 2
+		hide_heda(current,true)
 	else return k end
 	--log("keydown! %f %f %f", xyz.x, xyz.y, xyz.z)
 	fetch_rot()
@@ -230,9 +267,9 @@ end
 -- this fires after the pos is actually changed
 function after_change_h()
 	if current ~= nil then
+		load_hpos_settings()
 		--log.info("-LUA-after_change_h")
 		set_status(current)
-		hinfo:GetCamera().m_fov = changehfov -- restore the FOV
 	end
 end
 function on.change_h(hi, currpos, active, passive, aface, pface)
@@ -268,6 +305,7 @@ local function kill_h()
 	Config.save()
 	set_status(nil)
 	hinfo = false
+	current = nil
 end
 
 function on.end_h()
@@ -279,7 +317,6 @@ function on.convo()
 end
 
 local function on_hposchange(arg)
-	changehfov = hinfo:GetCamera().m_fov   -- backup FOV val for 'after changed H pose'
 	fetch_rot()
 	Config.save()
 --	log("injected hpos change! %d", arg)
@@ -287,7 +324,7 @@ local function on_hposchange(arg)
 end
 
 local function on_hposchange2(arg, ret)
-	load_hpos_settings()
+	--load_hpos_settings()
 --	log("injected hpos change2! %d", arg)
 	if prevPosId == arg then -- If user select again current H-pose
 		--log.info("-LUA-hpos not changed")
@@ -310,9 +347,12 @@ function _M:load()
 	self.activate = self.activate or 'a'
 	self.reset = self.reset or 'qwer'
 	self.zunlock = self.zunlock or false
-	self.step = self.step or 0.05
 	self.startfov = self.startfov or 1.2
+	facecamFOV = self.startfov
 	self.amplitudemov = self.amplitudemov or 30
+	self.step = self.step or 0.05
+	self.tonguedef = self.tonguedef or false
+	def.tongue = self.tonguedef and 0 or 2
 	-- tu, hackanon
 	orig_hook = g_hook_vptr(0x326FC4, 1, function(orig, this, arg)
 		arg = on_hposchange(arg)
@@ -331,21 +371,25 @@ end
 function _M:config()
 	require "iuplua"
 	require "iupluacontrols"
-	local okay, akey, rkeys, z, stfov, amplitude, step = iup.GetParam("Configure Facecam", nil, [[
+	local okay, akey, rkeys, z, stfov, amplitude, step, tonguedefault = iup.GetParam("Configure Facecam", nil, [[
 Activate key: %s{alphanum key to enter facecam}
 Reset keys: %s{any of these keys reset facecam}
 Allow Roll (Z) axis: %b{Descent mode}
 Starting FOV: %r[0.1,1.5,0.1]{Field of view on Activating Facecam}
 Motion amplitude: %r[5,100,5]{How much will the camera follow head movements. Low values are recommended for greater stabilization}
-Offset step: %r[0.01,0.5,0.01]{Eye offset. Use numpad Ins,Del,+,-,*,/}
-]], self.activate, self.reset, self.zunlock and 1 or 0, self.startfov, self.amplitudemov, self.step)
+Offset step: %r[0.01,0.5,0.01]{Eye offset. Use Numpad Ins,Del,+,-,*,/}
+Show Tongue by default: %b{Show tongue for a managed character. Use Numpad 9 to toggle}
+]], self.activate, self.reset, self.zunlock and 1 or 0, self.startfov, self.amplitudemov, self.step, self.tonguedef and 1 or 0)
 	if okay then
 		self.activate = akey
 		self.reset = rkeys
 		self.zunlock = z == 1
 		self.startfov = stfov
+		facecamFOV = stfov
 		self.amplitudemov = amplitude
 		self.step = step
+		self.tonguedef = tonguedefault == 1
+		def.tongue = tonguedefault == 1 and 0 or 2
 		set_status(current)
 		Config.save()
 	end
