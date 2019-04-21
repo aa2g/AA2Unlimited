@@ -44,7 +44,7 @@ local eye = nil
 local center = {x=0,y=0,z=0}
 local xyz
 local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
-local facecamFOV = 1
+local facecamFOV = 0.5
 local prevPosId = 0
 
 --local
@@ -292,6 +292,8 @@ function on.launch() -- Sending Motion amplitude to Camera
 		amplitudeval = math.ceil(100 - math.sqrt(9050 - mcfg.amplitudemov^2))
 	end
 	InitPovParams(amplitudeval)
+	-- to unlock `Near clipping distance` and prevent random changes the FOV by game in H scenes
+	if exe_type == "play" then g_poke(0x80E9B, "\xEB\x10") end 
 end
 
 --[[function on.hipoly()
@@ -347,7 +349,7 @@ function _M:load()
 	self.activate = self.activate or 'a'
 	self.reset = self.reset or 'qwer'
 	self.zunlock = self.zunlock or false
-	self.startfov = self.startfov or 1.2
+	self.startfov = self.startfov or 0.5
 	facecamFOV = self.startfov
 	self.amplitudemov = self.amplitudemov or 30
 	self.step = self.step or 0.05

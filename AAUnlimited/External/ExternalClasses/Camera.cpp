@@ -62,21 +62,6 @@ int Camera::SetFocusBone(ExtClass::Frame* bone, double x, double y, double z, bo
 
 void Camera::InitPovParams(int stabilize_percents) {
 	stabilizeCoefficient = (float)stabilize_percents / 100;
-	// to unlock `Near clipping distance` - NOP some instructions
-	Hook((BYTE*)(General::GameBase + 0x80EA7), { 0xD9 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA8), { 0x1D }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA9), { 0x78 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EAA), { 0x85 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EAB), { 0x56 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EAC), { 0x00 }, { 0x90 }, NULL);
-	// to prevent random changes the FOV by game in H scenes - NOP some instructions
-	Hook((BYTE*)(General::GameBase + 0x80E9F), { 0xD9 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA0), { 0x1D }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA1), { 0x74 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA2), { 0x85 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA3), { 0x56 }, { 0x90 }, NULL);
-	Hook((BYTE*)(General::GameBase + 0x80EA4), { 0x00 }, { 0x90 }, NULL);
-	// to unlock `Far clipping` use 0x80EB3 (or 0x80EAD)
 }
 
 }
