@@ -44,7 +44,7 @@ local eye = nil
 local center = {x=0,y=0,z=0}
 local xyz
 local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
-local facecamFOV = 0.5
+local facecamFOV = 0.9
 local prevPosId = 0
 
 --local
@@ -349,9 +349,9 @@ function _M:load()
 	self.activate = self.activate or 'a'
 	self.reset = self.reset or 'qwer'
 	self.zunlock = self.zunlock or false
-	self.startfov = self.startfov or 0.5
+	self.startfov = self.startfov or 0.9
 	facecamFOV = self.startfov
-	self.amplitudemov = self.amplitudemov or 30
+	self.amplitudemov = self.amplitudemov or 50
 	self.step = self.step or 0.05
 	self.tonguedef = self.tonguedef or false
 	def.tongue = self.tonguedef and 0 or 2
