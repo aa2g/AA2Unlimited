@@ -349,8 +349,8 @@ function _M:load()
 	self.activate = self.activate or 'a'
 	self.reset = self.reset or 'qwer'
 	self.zunlock = self.zunlock or false
-	self.startfov = self.startfov or 0.9
-	facecamFOV = self.startfov
+	self.startfov = self.startfov or 90
+	facecamFOV = self.startfov / 100
 	self.amplitudemov = self.amplitudemov or 50
 	self.step = self.step or 0.05
 	self.tonguedef = self.tonguedef or false
@@ -377,7 +377,7 @@ function _M:config()
 Activate key: %s{alphanum key to enter facecam}
 Reset keys: %s{any of these keys reset facecam}
 Allow Roll (Z) axis: %b{Descent mode}
-Starting FOV: %r[0.1,1.5,0.1]{Field of view on Activating Facecam}
+Starting FOV, degrees: %r[10,150,5]{Field of view on Activating Facecam}
 Motion amplitude: %r[5,100,5]{How much will the camera follow head movements. Low values are recommended for greater stabilization}
 Offset step: %r[0.01,0.5,0.01]{Eye offset. Use Numpad Ins,Del,+,-,*,/}
 Show Tongue by default: %b{Show tongue for a managed character. Use Numpad 9 to toggle}
@@ -387,7 +387,7 @@ Show Tongue by default: %b{Show tongue for a managed character. Use Numpad 9 to 
 		self.reset = rkeys
 		self.zunlock = z == 1
 		self.startfov = stfov
-		facecamFOV = stfov
+		facecamFOV = stfov / 100
 		self.amplitudemov = amplitude
 		self.step = step
 		self.tonguedef = tonguedefault == 1
