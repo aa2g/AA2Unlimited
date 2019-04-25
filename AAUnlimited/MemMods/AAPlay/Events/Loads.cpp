@@ -364,6 +364,8 @@ void HiPolyLoadsInjection() {
 	if (General::IsAAEdit) {
 		// Spawn clothed on preview window by default
 		Hook((BYTE*)(General::GameBase + 0x1A483), { 0x6A, 0x00 }, { 0x6A, 0x01 }, NULL);
+		// Don't show male dick by default
+		Hook((BYTE*)(General::GameBase + 0x1A493), { 0x6A, 0x00 }, { 0x6A, 0x02 }, NULL);
 	}
 }
 
