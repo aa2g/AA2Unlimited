@@ -29,9 +29,9 @@ For a full list of features, please read [this page](https://github.com/aa2g/AA2
 - **Mod compression** - We've gathered the most essential mods and compressed them into the pp2 format. You install mods by drag and dropping them, there is no need for Illusion Wizzard.
 - **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
 
-### Tech-Support (in order from most preferable to least preferable)
+### Tech-Support (in order from most responsive to least responsive)
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
-- Try asking questions in [this discord channel](https://discord.gg/5MfdAPT)
+- Try asking questions in our [discord server](https://discord.gg/5MfdAPT)
 - Make an issue on github
 
 ### Having issues?
