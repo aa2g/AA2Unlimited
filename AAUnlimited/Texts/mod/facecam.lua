@@ -47,8 +47,7 @@ local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
 local facecamFOV = 0.9
 local prevPosId = 0
 
---local
-function fetch_rot()
+local function fetch_rot()
 	if not hinfo then return end
 	-- must be in facecam mode to fetch something meaningful!
 	if current == nil then return end
@@ -59,8 +58,7 @@ function fetch_rot()
 	xyz.zrot = cam.m_zRotRad
 end
 
---local
-function load_hpos_settings()
+local function load_hpos_settings()
 	if not hinfo then return end
 	if current == nil then return end
 	--log.info("-LUA-load_hpos_cfg")
@@ -72,8 +70,7 @@ function load_hpos_settings()
 	cfg[pos] = xyz
 end
 
---local
-function update_eye()
+local function update_eye()
 	--log.info("-LUA-update_eye")
 	SetFocusBone(eye, xyz.x + center.x, xyz.y + center.y, xyz.z + center.z, mcfg.zunlock)
 	local cam = hinfo:GetCamera()
@@ -82,8 +79,7 @@ function update_eye()
 	cam.m_zRotRad = xyz.zrot
 end
 
---local
-function restore_camera()
+local function restore_camera()
 	--log.info("-LUA-restore_camera")
 	SetFocusBone(nil)	
 	local cam = hinfo:GetCamera()
@@ -99,8 +95,7 @@ end
 
 
 -- find eyes center
---local
-function set_eye_focus(who)
+local function set_eye_focus(who)
 	--log("set eye", who)
 	if who == nil then
 		restore_camera()
@@ -139,8 +134,7 @@ function set_eye_focus(who)
 	update_eye()
 end
 
---local
-function hide_heda(who, hide)
+local function hide_heda(who, hide)
 	--log("hide heda %s %s", who, hide)
 	local flag = hide and 2 or 0
 	local cptr = parts[who and 1 or 2]
@@ -155,8 +149,7 @@ function hide_heda(who, hide)
 	end
 end
 
---local
-function set_status(current)
+local function set_status(current)
 	if not hinfo then return end
 	--log("set_status", current)
 	if current == nil then
@@ -265,7 +258,7 @@ function on.keydown(k)
 end
 
 -- this fires after the pos is actually changed
-function after_change_h()
+local function after_change_h()
 	if current ~= nil then
 		load_hpos_settings()
 		--log.info("-LUA-after_change_h")
