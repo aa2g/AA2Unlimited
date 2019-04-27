@@ -441,6 +441,20 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				return TRUE;
 			}
 			break; }
+		case LBN_DBLCLK: {
+			DWORD identifier = LOWORD(wparam);
+			if (identifier == IDC_MO_LIST) {
+				LRESULT res = SendMessage(thisPtr->m_lbOverrides, LB_GETCURSEL, 0, 0);
+				if (res != LB_ERR) {
+					auto list = AAEdit::g_currChar.m_cardData.GetMeshOverrideList();
+					auto override = list.at(res);
+					SetWindowText(thisPtr->m_cbOverride, override.first.c_str());
+					SetWindowText(thisPtr->m_edOverrideWith, override.second.c_str());
+				}
+			}
+
+			break; }
+
 		}
 		break; }
 	}
