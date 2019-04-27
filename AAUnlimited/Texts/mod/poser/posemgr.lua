@@ -320,23 +320,24 @@ local function loadscene(filename)
 					end
 					if not find then
 						table.insert(not_found, readprop.name)
-					end
-					find = table.remove(loadedprops, find)
-					if find then
-						for k,v in pairs(readprop.sliders) do
-							local slider = find:getslider(k)
-							if slider then
-								slider:rotation(0,v[1])
-								slider:rotation(1,v[2])
-								slider:rotation(2,v[3])
-								slider:rotation(3,v[4])
-								slider:translate(0,v[5])
-								slider:translate(1,v[6])
-								slider:translate(2,v[7])
-								slider:scale(0,v[8])
-								slider:scale(1,v[9])
-								slider:scale(2,v[10])
-								slider:Apply()
+					else
+						find = table.remove(loadedprops, find)
+						if find then
+							for k,v in pairs(readprop.sliders) do
+								local slider = find:getslider(k)
+								if slider then
+									slider:rotation(0,v[1])
+									slider:rotation(1,v[2])
+									slider:rotation(2,v[3])
+									slider:rotation(3,v[4])
+									slider:translate(0,v[5])
+									slider:translate(1,v[6])
+									slider:translate(2,v[7])
+									slider:scale(0,v[8])
+									slider:scale(1,v[9])
+									slider:scale(2,v[10])
+									slider:Apply()
+								end
 							end
 						end
 					end
