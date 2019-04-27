@@ -552,6 +552,9 @@ _M.dialogposes = iup.dialog {
 				tabtitle = "Scenes",
 				gap = 3,
 			},
+			tabchangepos_cb = function(self, newpos, oldpos)
+				lock_world = newpos == 0 and lockworldtoggle.value == "ON"
+			end,
 		},
 		iup.hbox {
 			iup.button { title = "Show UI", action = function() SetHideUI(false) end },
