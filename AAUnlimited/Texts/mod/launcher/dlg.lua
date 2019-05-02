@@ -413,7 +413,6 @@ local function buildtabs() return
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
-				aaut("bDisplaySubs", iup.toggle {title = "Show subtitles", tip = "Shows game subtitles (needs subtitles script"}),
 			}
 		},
 	}, iup.fill{}, launch() },

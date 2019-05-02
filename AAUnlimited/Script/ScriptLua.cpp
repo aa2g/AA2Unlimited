@@ -292,6 +292,15 @@ void Lua::bindLua() {
 			s.get(7), s.get(8), s.get(9), s.get(10), s.get(11), s.get(12), s.get(13), s.get(14), s.get(15));
 	});
 
+	_BINDING["AddNotification"] = LUA_LAMBDA0({
+		Notifications::AddNotification(s.get(1), s.get(2));
+	});
+
+	_BINDING["InitNotificationsParams"] = LUA_LAMBDA0({
+		Notifications::InitNotificationsParams(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6),
+		s.get(7), s.get(8), s.get(9), s.get(10), s.get(11), s.get(12), s.get(13), s.get(14), s.get(15));
+	});
+
 //	_BINDING["GetPlayerConversation"] = &PlayerConversationPtr;
 
 	// Higher level triggers

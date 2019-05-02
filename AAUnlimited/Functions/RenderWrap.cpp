@@ -17,6 +17,7 @@
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
 #include "Functions/Overlay.h"
+#include "Functions/Notifications.h"
 #include "Functions/AAPlay/Subs.h"
 
 
@@ -582,14 +583,16 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-		if (font && g_Config.bDrawFPS || g_Config.bDisplaySubs) {
+		if (font && g_Config.bDrawFPS || Subtitles::enabled || Notifications::enabled) {
 			D3DVIEWPORT9 vp;
 			GetViewport(&vp);
 			if (vp.Width > 1024) {
 				if (g_Config.bDrawFPS)
 					DrawFPS();
-				if (g_Config.bDisplaySubs)
+				if (Subtitles::enabled)
 					Subtitles::PopSubtitles();
+				if (Notifications::enabled)
+					Notifications::PopNotifications();
 			}
 		}
 		frameno++;
@@ -1059,6 +1062,9 @@ public:;
 			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width and Height for Subtitles
 			Subtitles::gameWindowHeight = pPresentationParameters->BackBufferHeight;
 			Subtitles::SetSubsAreaSize();
+			Notifications::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width and Height for Notifications
+			Notifications::gameWindowHeight = pPresentationParameters->BackBufferHeight;
+			Notifications::SetNotifyAreaSize();
 			Overlay::gameHwnd = hFocusWindow;										// Game window Handle, Width and Height for Overlay
 			Overlay::gameWindowWidth = pPresentationParameters->BackBufferWidth;
 			Overlay::gameWindowHeight = pPresentationParameters->BackBufferHeight;
