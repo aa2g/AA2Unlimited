@@ -15,6 +15,7 @@ namespace Subtitles {
 	extern int fontSize;
 	extern int lineHeight;
 	extern const char *fontFamily;
+	extern IUnknown *Font;
 	extern int gameWindowWidth;
 	extern DWORD subsCentered;
 	extern bool separateColorMale;
