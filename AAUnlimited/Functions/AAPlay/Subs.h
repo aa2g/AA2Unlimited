@@ -17,6 +17,7 @@ namespace Subtitles {
 	extern const char *fontFamily;
 	extern IUnknown *Font;
 	extern int gameWindowWidth;
+	extern int gameWindowHeight;
 	extern DWORD subsCentered;
 	extern bool separateColorMale;
 
@@ -25,7 +26,7 @@ namespace Subtitles {
 		const char *text_color_female, int diff_color_for_male, const char *text_color_male, 
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y);
-	void CorrectSubsAreaSize();
+	void SetSubsAreaSize();
 	void SetSubtitlesColor(int r, int g, int b);
 	void PopSubtitles();
 }

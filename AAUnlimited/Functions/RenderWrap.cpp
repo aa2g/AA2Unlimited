@@ -1056,8 +1056,9 @@ public:;
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
 		if (hres == D3D_OK) {
-			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width for Subtitles
-			Subtitles::CorrectSubsAreaSize();
+			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width and Height for Subtitles
+			Subtitles::gameWindowHeight = pPresentationParameters->BackBufferHeight;
+			Subtitles::SetSubsAreaSize();
 			Overlay::gameHwnd = hFocusWindow;										// Game window Handle, Width and Height for Overlay
 			Overlay::gameWindowWidth = pPresentationParameters->BackBufferWidth;
 			Overlay::gameWindowHeight = pPresentationParameters->BackBufferHeight;
