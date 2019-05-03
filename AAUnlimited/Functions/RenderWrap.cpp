@@ -583,20 +583,25 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-		if (font && g_Config.bDrawFPS || Subtitles::enabled || Notifications::enabled) {
+		if (font && g_Config.bDrawFPS) {
 			D3DVIEWPORT9 vp;
 			GetViewport(&vp);
 			if (vp.Width > 1024) {
 				if (g_Config.bDrawFPS)
 					DrawFPS();
-				if (Subtitles::enabled)
-					Subtitles::PopSubtitles();
-				if (Notifications::enabled)
-					Notifications::PopNotifications();
 			}
 		}
 		frameno++;
+
+		if (Subtitles::enabled)
+			Subtitles::PopSubtitles();
+		if (Notifications::enabled)
+			Notifications::PopNotifications();
+
+		if (Overlay::needRender) // Render Overlay, when only changes appear
+			Overlay::Render();
 		Overlay::CheckPosition();
+
 		WRAPCALL(orig->EndScene());
 	}
 
