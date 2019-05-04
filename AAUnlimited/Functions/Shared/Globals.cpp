@@ -40,8 +40,6 @@ D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut, const D3DX
 D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut, FLOAT Yaw, FLOAT Pitch, FLOAT Roll);
 D3DXQUATERNION* (__stdcall *D3DXQuaternionRotationAxis)(D3DXQUATERNION *pOut, const D3DXVECTOR3* pV, FLOAT Angle);
 void (__stdcall *D3DXQuaternionToAxisAngle)(CONST D3DXQUATERNION *pQ, D3DXVECTOR3 *pAxis, FLOAT *pAngle);
-///HRESULT(__stdcall *D3DXCreateTextureFromFile)(LPDIRECT3DDEVICE9 pDevice, LPCTSTR pSrcFile, LPDIRECT3DTEXTURE9 *ppTexture);
-///HRESULT(__stdcall *D3DXCreateSprite)(LPDIRECT3DDEVICE9 pDevice, LPD3DXSPRITE *ppSprite);
 
 void (__cdecl *IllusionDeleteXXFileProc)(void* someStruct, ExtClass::XXFile* file);
 void __stdcall IllusionDeleteXXFile(ExtClass::XXFile* file, ExtClass::CharacterStruct* owner) {
@@ -100,8 +98,6 @@ void Init() {
 	GETPROC(D3DXMatrixRotationYawPitchRoll);
 	GETPROC(D3DXQuaternionRotationAxis);
 	GETPROC(D3DXQuaternionToAxisAngle);
-	///GETPROC(D3DXCreateTextureFromFile);
-	///GETPROC(D3DXCreateSprite);
 
 #undef GETPROC
 
