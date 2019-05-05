@@ -1467,6 +1467,14 @@ namespace Shared {
 			}
 		}
 
+		// string text, bool important
+		void Thread::DisplayNotification(std::vector<Value>& params) {
+			auto text = params[0].strVal;
+			int important = params[1].bVal ? 2 : 1;
+			char text_char[400];
+			wcstombs_s( NULL, text_char, text->c_str(), text->size() );
+			Notifications::AddNotification(text_char, important);
+		}
 
 		/*
 		 * A list of all action categories
@@ -1888,7 +1896,7 @@ namespace Shared {
 			},
 			{
 				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
-				TEXT("Writes the string to the SPAM log."),
+				TEXT("Writes the string to the INFO log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
 			},
@@ -2145,6 +2153,12 @@ namespace Shared {
 				TEXT("Switch who is dominant and submissive in an H scene."),
 				{ },
 				&Thread::SwitchActiveInH
+			},
+			{
+				106, ACTIONCAT_GENERAL, TEXT("Display Notification"), TEXT("Notification (text: %p , importantBool: %p )"),
+				TEXT("Display the notification on the screen."),
+				{ TYPE_STRING, TYPE_BOOL },
+				&Thread::DisplayNotification
 			},
 		};
 

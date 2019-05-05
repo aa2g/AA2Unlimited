@@ -176,8 +176,8 @@ namespace Subtitles {
 			lastPopTime = lines.empty() ? 0 : now;
 			Overlay::needRender = true;
 
-			Notifications::AddNotification("Subtitle disappeared", 1); // debug only
-			Notifications::AddNotification("Subtitle disappeared", 2); // debug only
+			Notifications::AddNotification("Subtitle disappeared", 1); //_TEST
+			Notifications::AddNotification("Subtitle disappeared", 2); //_TEST
 		}
 	}
 }
