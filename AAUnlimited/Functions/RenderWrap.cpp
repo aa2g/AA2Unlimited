@@ -186,6 +186,12 @@ public:;
 		RECT rectFullscreen5 = { 300, 300, 1000, 1000 };
 		DrawText(fontTEST, 0, L"\u25D7\u2588",
 			-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen6 = { 300, 600, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u26AA\u2588",
+			-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen7 = { 600, 10, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u26AB\u2588",
+			-1, &rectFullscreen7, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
 
 	}
 
