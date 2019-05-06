@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include <Dwmapi.h>
+#include "General/DrawD3D.h"
 
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "Dwmapi.lib")
@@ -240,6 +241,9 @@ namespace Overlay {
 		// 3) Next texts render...
 		// ...
 
+		//DrawD3D::GetDevice(d3ddev);
+		//DrawD3D::CircleFilled(d3ddev, 100, 100, 100, 0, full, 32, D3DCOLOR_RGBA(255, 255, 255, 255));
+		//DrawD3D::BoxFilled(100, 200, 100, 100, D3DCOLOR_RGBA(255, 0, 0, 255));
 
 		d3ddev->EndScene();
 		d3ddev->Present(NULL, NULL, NULL, NULL);   // displays the created D3D frame on the screen
