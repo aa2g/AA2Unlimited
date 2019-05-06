@@ -25,12 +25,12 @@ struct sScreen
 
 namespace DrawD3D {
 
-	LPDIRECT3DDEVICE9 pDevice;
+	IDirect3DDevice9* pDevice;
 	LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL;
 	LPDIRECT3DINDEXBUFFER9 g_pIB = NULL;
 	int FontNr = 0;
 
-	void GetDevice(LPDIRECT3DDEVICE9 pDev) { pDevice = pDev; }
+	void GetDevice(IDirect3DDevice9* pDev) { pDevice = pDev; }
 
 	void Reset()
 	{
