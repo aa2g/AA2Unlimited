@@ -27,12 +27,11 @@ namespace DrawD3D {
 	bool initialized = false;
 	bool fontCreated = false;
 	IDirect3DDevice9* pDevice;
-	LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL;
-	LPDIRECT3DINDEXBUFFER9 g_pIB = NULL;
-	int FontNr = 0;
+	//LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL;
+	//LPDIRECT3DINDEXBUFFER9 g_pIB = NULL;
+	//int FontNr = 0;
 	double scaleCoefficient = 0;
 	int trueGameMarginY = 0;
-	//const wchar_t *hudFontFamily = ((std::wstring)(L"Times New Roman")).c_str();
 	std::wstring buff_text;
 	const std::wstring box_code = L"\u2586";
 	const std::wstring circle_code_Left = L"\u25D6";
@@ -46,8 +45,8 @@ namespace DrawD3D {
 	float circle1000MarginY = 305;
 	float circle1000Radius = 195.000;// (Width)
 	float circle1000Height = 390;
-	// 500 - Maximum shapes in HUD
-	const int max_shapes = 500;
+	
+	const int max_shapes = 500; // 500 - Maximum shapes in HUD
 	int key_next = 0;
 	RECT HUDarrayRect[max_shapes];
 	IUnknown *HUDarrayFont[max_shapes];
@@ -55,26 +54,17 @@ namespace DrawD3D {
 	D3DCOLOR HUDarrayColor[max_shapes];
 
 	IUnknown *fontFPS;
-	RECT rectFPS = { 0,0,256,64 };
+	RECT rectFPS = { 0, 0, 256, 64 };
 	IUnknown *fontTEST;
 
-	void *(WINAPI *DrawText)(IUnknown* Font, void*, LPCTSTR text, int, LPRECT rect, DWORD dt_params, D3DCOLOR color);
-	void *(WINAPI *D3DXCreateFont)(
-		IDirect3DDevice9 *pDevice,
-		INT               Height,
-		UINT              Width,
-		UINT              Weight,
-		UINT              MipLevels,
-		BOOL              Italic,
-		DWORD             CharSet,
-		DWORD             OutputPrecision,
-		DWORD             Quality,
-		DWORD             PitchAndFamily,
-		LPCTSTR           pFacename,
-		IUnknown        **ppFont
-		);
+	void *(WINAPI *DrawText)(IUnknown* Font, void*, LPCTSTR text, int, 
+		LPRECT rect, DWORD dt_params, D3DCOLOR color);
+	void *(WINAPI *D3DXCreateFont)( IDirect3DDevice9 *pDevice,
+		INT Height, UINT Width, UINT Weight, UINT MipLevels,
+		BOOL Italic, DWORD CharSet, DWORD OutputPrecision, DWORD Quality,
+		DWORD PitchAndFamily, LPCTSTR pFacename, IUnknown **ppFont);
 
-	void Reset()
+	/*void Reset()
 	{
 		D3DVIEWPORT9 screen;
 		pDevice->GetViewport(&screen);
@@ -83,7 +73,7 @@ namespace DrawD3D {
 		Screen.Height = screen.Height;
 		Screen.x_center = Screen.Width / 2;
 		Screen.y_center = Screen.Height / 2;
-	}
+	}*/
 
 	void InitDraw(IDirect3DDevice9 *pDev) {
 		pDevice = pDev;
@@ -98,9 +88,7 @@ namespace DrawD3D {
 			std::fill_n(HUDarrayText, max_shapes, empty_val);
 		}
 		initialized = true;
-		LOGPRIONC(Logger::Priority::INFO) "SVP test_3_\r\n";
 	}
-
 
 	/* If you need a font for hud, you can make his size (Height) scalable, 
 	thats depends on current game resolution. 
@@ -125,7 +113,7 @@ namespace DrawD3D {
 	}
 
 	int CreateBoxFilled(float x, float y, 
-		float height, int count_boxes_X, // boxes 705x535 (for font size == 1000)
+		float height, int count_boxes_X, // boxes 664x705 (for font size == 1000)
 		D3DCOLOR color, int key_node)
 	{
 		int key_In = key_node;
@@ -148,7 +136,8 @@ namespace DrawD3D {
 		
 		HUDarrayFont[key_node] = 0;
 		D3DXCreateFont(pDevice, fontHeight, 0, FW_REGULAR, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
 		if (HUDarrayFont[key_node])
 			DrawText = decltype(DrawText)(((void***)HUDarrayFont[key_node])[0][15]);
 		else
@@ -192,19 +181,15 @@ namespace DrawD3D {
 		y = y * scaleCoefficient + trueGameMarginY;
 		height = height * scaleCoefficient;
 
-
 		double fontRatio = height / circle1000Height;
-
 		float circle1000marginX = leftSide ? circle1000MarginLeftSideX : circle1000MarginRightSideX;
 		
-
 		int fontHeight = round(1000 * fontRatio); // Total Font Height
-		LOGPRIONC(Logger::Priority::INFO) "HUD_fontRatio_" << fontRatio << "_\r\n";
-		LOGPRIONC(Logger::Priority::INFO) "HUD_fontHeight_" << fontHeight << "_\r\n";
 		
 		HUDarrayFont[key_node] = 0;
 		D3DXCreateFont(pDevice, fontHeight, 0, FW_REGULAR, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
 		if (HUDarrayFont[key_node])
 			DrawText = decltype(DrawText)(((void***)HUDarrayFont[key_node])[0][15]);
 		else
@@ -219,10 +204,6 @@ namespace DrawD3D {
 		HUDarrayRect[key_node].top = y - round(circle1000MarginY * fontRatio);
 		HUDarrayRect[key_node].right = x + round(circle1000Radius * fontRatio * 2);//(+ 1 shape for reserve)
 		HUDarrayRect[key_node].bottom = y + fontHeight;
-		LOGPRIONC(Logger::Priority::INFO) "HUD left _" << HUDarrayRect[key_node].left << "_\r\n";
-		LOGPRIONC(Logger::Priority::INFO) "HUD top _" << HUDarrayRect[key_node].top << "_\r\n";
-		LOGPRIONC(Logger::Priority::INFO) "HUD right _" << HUDarrayRect[key_node].right << "_\r\n";
-		LOGPRIONC(Logger::Priority::INFO) "HUD bottom _" << HUDarrayRect[key_node].bottom << "_\r\n";
 
 		HUDarrayText[key_node] = leftSide ? 				// Total text
 			circle_code_Left.c_str() :
@@ -234,7 +215,7 @@ namespace DrawD3D {
 	}
 
 	void CreateCircleFilled() {
-
+		// Current not implemented yet
 	}
 
 	// ************************************ Font Creation **************************************
@@ -243,8 +224,6 @@ namespace DrawD3D {
 		scaleCoefficient = scale_coefficient;
 		trueGameMarginY = true_game_margin_Y;
 
-		LOGPRIONC(Logger::Priority::INFO) "SVP test_4_\r\n";
-		LOGPRIONC(Logger::Priority::INFO) "SVP test_5_\r\n";
 		if (fontCreated) // If Second time make a fonts - overvrite shapes also (using last D3d device).
 			key_next = 0;
 
@@ -255,12 +234,14 @@ namespace DrawD3D {
 
 		// Subs Font
 		CreateFontD3d(Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes(Subtitles::fontFamily).c_str(),
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			General::utf8.from_bytes(Subtitles::fontFamily).c_str(),
 			&Subtitles::Font, false, "Subs Font creation failed");
 
 		// Notifications Font
 		CreateFontD3d(Notifications::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes(Notifications::fontFamily).c_str(),
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			General::utf8.from_bytes(Notifications::fontFamily).c_str(),
 			&Notifications::Font, false, "Notifications Font creation failed");
 
 		// Other fonts
@@ -271,12 +252,12 @@ namespace DrawD3D {
 		/* For Shapes _TEST
 		// TEST font
 		CreateFontD3d(1000, 0, FW_REGULAR, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
-		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
-		&fontTEST, false, "TEST Font creation failed");//*/
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
+			&fontTEST, false, "TEST Font creation failed");//*/
 		
-		CreateBoxFilled(50, 250, 600, 1, D3DCOLOR_RGBA(33, 255, 255, 188), -1);
-		CreateHalfCircleFilled(true, 900, 100, 800, D3DCOLOR_RGBA(33, 255, 255, 188), -1);
-		CreateHalfCircleFilled(false, 1400, 200, 800, D3DCOLOR_RGBA(33, 255, 255, 188), -1);//*/
+		CreateBoxFilled(110, 50, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
+		CreateHalfCircleFilled(true, 900, 100, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
+		CreateHalfCircleFilled(false, 1400, 200, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);//*/
 
 		fontCreated = true;
 	}
@@ -299,13 +280,7 @@ namespace DrawD3D {
 		/*RECT rectFullscreen6 = { 10, 10, 500, 500 }; 
 		DrawText(fontTEST, 0, L"\u2586\u2588",
 		-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-		RECT rectFullscreen7 = { 10, 300, 500, 500 };
-		DrawText(fontTEST, 0, L"\u25D6\u2588",
-		-1, &rectFullscreen7, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-		RECT rectFullscreen8 = { 10, 600, 500, 500 };
-		DrawText(fontTEST, 0, L"\u25D7\u2588",
-		-1, &rectFullscreen8, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));//*/
-		
+		//*/
 		for (int i = 0;i < 3;i++)
 			DrawText(HUDarrayFont[i], 0, HUDarrayText[i],
 				-1, &HUDarrayRect[i], DT_NOCLIP, HUDarrayColor[i]);//*/

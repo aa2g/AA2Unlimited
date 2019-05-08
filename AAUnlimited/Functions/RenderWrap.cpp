@@ -550,10 +550,8 @@ public:;
 			if (g_Config.bDrawFPS) {
 				D3DVIEWPORT9 vp;
 				GetViewport(&vp);
-				if (vp.Width > 1024) {
-					if (g_Config.bDrawFPS)
-						DrawFPS();
-				}
+				if (vp.Width > 1024) 
+					DrawFPS();
 			}
 			Subtitles::Render();
 			Notifications::Render();
@@ -1013,8 +1011,6 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
-
-		LOGPRIONC(Logger::Priority::INFO) "SVP test_1_\r\n";
 		// Init GDI also
 		ULONG_PTR gdiToken;
 		Gdiplus::GdiplusStartupInput gdiStartupInput;
@@ -1034,14 +1030,11 @@ public:;
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
 		if (hres == D3D_OK) {
-			LOGPRIONC(Logger::Priority::INFO) "SVP test_2_\r\n";
 			int trueGameWindowWidth = pPresentationParameters->BackBufferWidth; // True game Width, Height for current resolution
 			int trueGameWindowHeight = trueGameWindowWidth / 16.00 * 9;
 			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
 			// Create D3D fonts
 			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY);
-
-
 			// Game window Width and Height for Subtitles and Notifications
 			Subtitles::SetSubsAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
 			Notifications::SetNotifyAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
