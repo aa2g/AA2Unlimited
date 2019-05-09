@@ -27,6 +27,8 @@ namespace DrawD3D {
 	bool initialized = false;
 	bool fontCreated = false;
 	IDirect3DDevice9* pDevice;
+	HWND gameHwnd = NULL;
+	POINT cursor;
 	//LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL;
 	//LPDIRECT3DINDEXBUFFER9 g_pIB = NULL;
 	//int FontNr = 0;
@@ -43,8 +45,14 @@ namespace DrawD3D {
 	float circle1000MarginLeftSideX = 55;
 	float circle1000MarginRightSideX = 250;
 	float circle1000MarginY = 305;
-	float circle1000Radius = 195.000;// (Width)
+	float circle1000Radius = 195.000; // (Width)
 	float circle1000Height = 390;
+	float cursorArrowScaledMarginX = 0;		// After scaling for current user resolution
+	float cursorShadowScaledMarginX = 0;
+	float cursorArrowScaledMarginY = 0;
+	float cursorShadowScaledMarginY = 0;
+	int cursorArrowKey = 0;
+	int cursorShadowKey = 0;
 	
 	const int max_shapes = 1000; // 1000 - Maximum total shapes in HUD
 	int key_next = 0;
@@ -198,6 +206,22 @@ namespace DrawD3D {
 			-1, &HUDarrayRect[key_node], DT_NOCLIP, HUDarrayColor[key_node]);
 	}
 
+	void renderCursorHUD() {
+		// correct Cursor Shapes position before render
+		HUDarrayRect[cursorArrowKey].left = cursor.x - cursorArrowScaledMarginX;
+		HUDarrayRect[cursorArrowKey].top = cursor.y - cursorArrowScaledMarginY;
+		HUDarrayRect[cursorArrowKey].right = cursor.x + 100;
+		HUDarrayRect[cursorArrowKey].bottom = cursor.y + 100;
+
+		HUDarrayRect[cursorShadowKey].left = cursor.x - cursorShadowScaledMarginX;
+		HUDarrayRect[cursorShadowKey].top = cursor.y - cursorShadowScaledMarginY;
+		HUDarrayRect[cursorShadowKey].right = cursor.x + 100;
+		HUDarrayRect[cursorShadowKey].bottom = cursor.y + 100;
+
+		renderShapeHUD(cursorShadowKey);
+		renderShapeHUD(cursorArrowKey);
+	}
+
 	int CreateBoxFilled(float x, float y, bool center_coords, // if need place Shape center in X:Y coords
 		float height, int count_boxes_X, // boxes 664x705 (for font size == 1000)
 		D3DCOLOR color, int key_node)
@@ -323,14 +347,62 @@ namespace DrawD3D {
 		CreateHalfCircleFilled(false, centerX, centerY, true, Height, your D3DCOLOR, -1); */
 	}
 
+	int CreateCursorHUD(bool main_shape) { // main shape or shadow
+		// Find new place for shape in HUD data memory
+		if (key_next >= max_shapes)
+		{
+			LOGPRIONC(Logger::Priority::WARN) "Out of memory for creating Cursor HUD (LOL)\r\n";
+			return -1;
+		}
+		int key_node = key_next;
+		key_next++;
+		// Scaling request params to current user's resolution + Margin, if resolution not 16:9
+		cursorArrowScaledMarginX = round(-1 * scaleCoefficient); // Margins for Shapes
+		cursorShadowScaledMarginX = round(3 * scaleCoefficient);
+		cursorArrowScaledMarginY = round(8 * scaleCoefficient);
+		cursorShadowScaledMarginY = round(20 * scaleCoefficient);
+
+		int fontHeight = main_shape				// Total Font Height
+			? round(50 * scaleCoefficient)		// Size for Main Shape
+			: round(80 * scaleCoefficient);		// Size for Shadow Shape
+
+		HUDarrayFont[key_node] = 0;
+		D3DXCreateFont(pDevice, fontHeight, 0, FW_BLACK, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+			General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
+		if (HUDarrayFont[key_node])
+			DrawText = decltype(DrawText)(((void***)HUDarrayFont[key_node])[0][15]);
+		else
+		{
+			LOGPRIONC(Logger::Priority::WARN) "Error Creating Cursor HUD shape\r\n";
+			key_next--;
+			return -1;
+		}
+
+		HUDarrayRect[key_node].left = 0;			// Total rect for result font
+		HUDarrayRect[key_node].top = 0;
+		HUDarrayRect[key_node].right = 100;
+		HUDarrayRect[key_node].bottom = 100;
+
+		HUDarrayText[key_node] = L"\u25B6";// u2196 - alt arrow
+
+		HUDarrayColor[key_node] = main_shape 
+			? D3DCOLOR_ARGB(255, 0, 205, 247) 
+			: D3DCOLOR_ARGB(255, 53, 26, 60);
+		
+		return key_node;
+	}
+
 	// ***************************** Font/Shapes Creation section ************************************
-	void MakeFonts(double scale_coefficient, int true_game_margin_Y)
+	void MakeFonts(double scale_coefficient, int true_game_margin_Y, HWND game_hwnd)
 	{
 		scaleCoefficient = scale_coefficient;
 		trueGameMarginY = true_game_margin_Y;
+		gameHwnd = game_hwnd;
 
 		if (fontCreated) // If Second time make a fonts - overvrite shapes also (using last D3d device).
 			key_next = 0;
+
 
 		// FPS font
 		CreateFontD3d(24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
@@ -353,8 +425,14 @@ namespace DrawD3D {
 		// ...
 
 
+		// Creating Shapes for HUD
 
-		/* For Shapes _TEST */
+		// Cursor shapes
+		cursorArrowKey = CreateCursorHUD(true);
+		cursorShadowKey = CreateCursorHUD(false);
+
+
+		/* For Shapes _TEST 
 		// TEST font
 		CreateBoxFilled(300, 500, true, 500, 1, D3DCOLOR_ARGB(166, 22, 255, 22), -1);
 		CreateFontHUD(300, 500, true, DT_CENTER, 440, 72, FW_REGULAR, false, General::utf8.from_bytes("Arial").c_str(),
@@ -364,12 +442,10 @@ namespace DrawD3D {
 			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
 			&fontTEST, false, "TEST Font creation failed");//*/
 		
-		CreateBoxFilled(1000, 500, false, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
+		/*CreateBoxFilled(1000, 500, false, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
 		CreateBoxFilled(1000, 500, true, 270, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
 		CreateHalfCircleFilled(true, 1000, 500, true, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
 		CreateHalfCircleFilled(false, 1000, 500, true, 600, D3DCOLOR_ARGB(166, 255, 22, 22), -1);//*/
-
-		CreateBoxFilled(-20, -20, false, 1200, 2, D3DCOLOR_ARGB(177, 0, 0, 0), -1);
 
 
 		fontCreated = true;
@@ -377,12 +453,18 @@ namespace DrawD3D {
 
 	// ************************************ Render section **************************************
 	void Render() {
-		
+		GetCursorPos(&cursor);
+		//RECT lbRect; GetWindowRect(gameHwnd, &lbRect); Alternative method, if not working this
+		ScreenToClient(gameHwnd, &cursor); // Cursor pos inside game window
 
 
 
 		// Other fonts
 		// ...
+
+
+		// Render HUD Shapes and text over them
+
 
 
 		/* For Shapes _TEST
@@ -396,35 +478,14 @@ namespace DrawD3D {
 		DrawText(fontTEST, 0, L"\u2586\u2588",
 		-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
 		//*/
-		renderShapeHUD(0);
-		for (int i = 2; i < key_next; i++)
+		/*renderShapeHUD(2);
+		for (int i = 4; i < key_next; i++)
 			renderShapeHUD(i);
-		renderFontHUD(1);//*/
+		renderFontHUD(3);//*/
 
 
-		RECT rectFullscreen5 = { 10, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u259B\u2586",
-			-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));//*/
-		RECT rectFullscreen6 = { 10, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u25E4\u2586",
-			-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen7 = { 400, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2572\u2586",
-			-1, &rectFullscreen7, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen8 = { 400, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2216\u2586",
-			-1, &rectFullscreen8, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen9 = { 800, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u21D6\u2586",
-			-1, &rectFullscreen9, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen10 = { 800, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2196\u2586",
-			-1, &rectFullscreen10, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen11 = { 1200, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u21D6\u2586",
-			-1, &rectFullscreen11, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		DrawText(fontTEST, 0, L"\u2196\u2586",
-			-1, &rectFullscreen11, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
+		// Render Cursor (Allways must be in the end of render!)
+		renderCursorHUD();
 	}
 
 	/*void CDraw::Line(float x1, float y1, float x2, float y2, float width, bool antialias, DWORD color)
