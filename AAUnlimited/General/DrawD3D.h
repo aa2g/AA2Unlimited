@@ -7,7 +7,8 @@ namespace DrawD3D {
 	extern bool fontCreated;
 	extern RECT HUDarrayRect[];
 	extern IUnknown *HUDarrayFont[];
-	extern const wchar_t *HUDarrayText[];
+	//extern const wchar_t *HUDarrayText[];
+	extern std::wstring HUDarrayText[];
 	extern D3DCOLOR HUDarrayColor[];
 	extern IUnknown *fontFPS;
 	extern RECT rectFPS;
@@ -27,11 +28,11 @@ namespace DrawD3D {
 		DWORD Quality, DWORD PitchAndFamily, LPCTSTR pFacename,
 		IUnknown **ppFont, bool autoScale, const char *error_msg);
 
-	extern int CreateBoxFilled(float x, float y, float height,
-		int count_boxes_X, D3DCOLOR color, int key_node);
+	extern int CreateBoxFilled(float x, float y, bool center_coords, 
+		float height, int count_boxes_X, D3DCOLOR color, int key_node);
 
-	extern int CreateHalfCircleFilled(bool leftSide, double x, double y,
-		double height, DWORD color, int key_node);
+	extern int CreateHalfCircleFilled(bool leftSide, double x, double y, 
+		bool center_coords, double height, DWORD color, int key_node);
 
 	extern void MakeFonts(double scale_coefficient, int true_game_margin_Y);
 	extern void Render();
