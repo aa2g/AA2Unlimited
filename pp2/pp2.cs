@@ -574,45 +574,101 @@ class pp2
             uint size = (uint)fi.Length;
             if (r.Match(fn).Success)
             {
-//                Console.WriteLine();
-
                 chb.AddChunkFile(new ChunkFile(new DirEntry(fn, f), "texture", size));
             }
         }
     }
 
-    static void Main(string[] args)
+	static void process_generic_tree(ChunkBuilder chb, String basedir)
+	{
+		foreach (string subdir in Directory.GetDirectories(basedir))
+		{
+			var subdirname = Path.GetFileName(subdir);
+			Console.WriteLine(subdirname);
+			if (subdirname.StartsWith("jg2") || subdirname == "base")
+			{
+				subdirname += ".pp";
+
+				foreach (var f in Directory.GetFiles(subdir))
+				{
+					uint size = (uint)new System.IO.FileInfo(f).Length;
+					var plain = Path.GetFileName(f);
+					chb.AddChunkFile(new ChunkFile(new DirEntry(Path.GetFileName(f), f), subdirname, size));
+				}
+			}
+			else
+			{
+				foreach (var file in Directory.GetFiles(subdir, "*.*", SearchOption.AllDirectories))
+				{
+					var fn = file.Substring(subdir.Length + 1).Replace("\\", "/");
+					var fi = new System.IO.FileInfo(file);
+					if ((fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+						continue;
+					uint size = (uint)fi.Length;
+					chb.AddChunkFile(new ChunkFile(new DirEntry(fn, file), subdirname, size));
+				}
+			}
+		}
+	}
+
+
+	static void Main(string[] args)
     {
-        if (args.Length < 3)
-        {
-            Console.WriteLine("usage: pp2 output.pp2 regex path... path...");
+		bool showUsage = true;
+		if (args.Length == 1)
+		{
+			var directory = args[0];
+			while (directory.EndsWith("\\") || directory.EndsWith("/"))
+				directory = directory.Remove(directory.Length - 1);
+			var outpp2 = directory + ".pp2";
+			var chb = new ChunkBuilder();
+			var fi = new System.IO.FileInfo(directory);
+			if ((fi.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+			{
+				Console.WriteLine("Processing " + directory);
+				process_generic_tree(chb, directory);
+				var outf = new FileStream(outpp2, FileMode.Create, FileAccess.Write);
+				chb.EncodeChunks(outf);
+				chb.WriteMetadata(outf);
+				// store length of metadata as last integer, so reader can locate
+				// the metadata header
+				outf.Close();
+				showUsage = false;
+			}
+		}
+		else if (args.Length >= 3)
+		{
+			var chb = new ChunkBuilder();
+			Regex r = null;
+			r = new Regex(args[1], RegexOptions.IgnoreCase);
+			//int nfm = 16;
+			var trail = Path.GetFileName(args[2]);
+			Console.WriteLine(trail);
+			if (trail == "AA2_MAKE" || trail == "AA2_PLAY")
+			{
+				process_unpacked_tree(chb, args.Skip(2), r);
+			}
+			else if (trail == "texture")
+			{
+				process_textures(chb, args[2], r);
+			}
+			else
+			{
+				process_pp_files(chb, args.Skip(2), r);
+			}
+
+			var outf = new FileStream(args[0], FileMode.Create, FileAccess.Write);
+			chb.EncodeChunks(outf);
+			chb.WriteMetadata(outf);
+			// store length of metadata as last integer, so reader can locate
+			// the metadata header
+			outf.Close();
+			showUsage = false;
+		}
+		if (showUsage)
+		{
+			Console.WriteLine("usage: pp2 output.pp2 regex path... path...\r\n       pp2 shadowset");
             return;
         }
-        var chb = new ChunkBuilder();
-        Regex r = null;
-        r = new Regex(args[1], RegexOptions.IgnoreCase);
-        //int nfm = 16;
-        var trail = Path.GetFileName(args[2]);
-        Console.WriteLine(trail);
-        if (trail == "AA2_MAKE" || trail == "AA2_PLAY")
-        {
-            process_unpacked_tree(chb, args.Skip(2), r);
-        }
-        else if (trail == "texture")
-        {
-            process_textures(chb, args[2], r);
-        }
-        else
-        {
-
-            process_pp_files(chb, args.Skip(2), r);
-        }
-
-        var outf = new FileStream(args[0], FileMode.Create, FileAccess.Write);
-        chb.EncodeChunks(outf);
-        chb.WriteMetadata(outf);
-        // store length of metadata as last integer, so reader can locate
-        // the metadata header
-        outf.Close();
     }
 }
