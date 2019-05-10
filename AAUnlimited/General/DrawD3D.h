@@ -36,7 +36,7 @@ namespace DrawD3D {
 
 	extern void MakeFonts(double scale_coefficient, int true_game_margin_Y, HWND game_hwnd);
 	extern void Render();
-	
+
 
 
 }

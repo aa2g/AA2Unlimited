@@ -29,6 +29,7 @@ namespace DrawD3D {
 	IDirect3DDevice9* pDevice;
 	HWND gameHwnd = NULL;
 	POINT cursor;
+	bool cursorHUD = false;
 	//LPDIRECT3DVERTEXBUFFER9 g_pVB = NULL;
 	//LPDIRECT3DINDEXBUFFER9 g_pIB = NULL;
 	//int FontNr = 0;
@@ -207,6 +208,8 @@ namespace DrawD3D {
 	}
 
 	void renderCursorHUD() {
+		if (!cursorHUD) return; // Show only when it's need
+		cursorHUD = false;
 		// correct Cursor Shapes position before render
 		HUDarrayRect[cursorArrowKey].left = cursor.x - cursorArrowScaledMarginX;
 		HUDarrayRect[cursorArrowKey].top = cursor.y - cursorArrowScaledMarginY;
@@ -393,6 +396,7 @@ namespace DrawD3D {
 		return key_node;
 	}
 
+
 	// ***************************** Font/Shapes Creation section ************************************
 	void MakeFonts(double scale_coefficient, int true_game_margin_Y, HWND game_hwnd)
 	{
@@ -411,13 +415,13 @@ namespace DrawD3D {
 
 		// Subs Font
 		CreateFontD3d(Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 			General::utf8.from_bytes(Subtitles::fontFamily).c_str(),
 			&Subtitles::Font, false, "Subs Font creation failed");
 
 		// Notifications Font
 		CreateFontD3d(Notifications::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 			General::utf8.from_bytes(Notifications::fontFamily).c_str(),
 			&Notifications::Font, false, "Notifications Font creation failed");
 
@@ -431,17 +435,19 @@ namespace DrawD3D {
 		cursorArrowKey = CreateCursorHUD(true);
 		cursorShadowKey = CreateCursorHUD(false);
 
+		// Other HUD shapes
+		// ...
 
-		/* For Shapes _TEST 
+		/* For Shapes _TEST
 		// TEST font
 		CreateBoxFilled(300, 500, true, 500, 1, D3DCOLOR_ARGB(166, 22, 255, 22), -1);
 		CreateFontHUD(300, 500, true, DT_CENTER, 440, 72, FW_REGULAR, false, General::utf8.from_bytes("Arial").c_str(),
-			L"Simple text for the mighty gods. Simple text for the mighty gods. Simple text for the ...", 
-			D3DCOLOR_ARGB(255, 244, 180, 20), -1);
+		L"Simple text for the mighty gods. Simple text for the mighty gods. Simple text for the ...",
+		D3DCOLOR_ARGB(255, 244, 180, 20), -1);
 		CreateFontD3d(300, 0, FW_BLACK, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
-			&fontTEST, false, "TEST Font creation failed");//*/
-		
+		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
+		&fontTEST, false, "TEST Font creation failed");//*/
+
 		/*CreateBoxFilled(1000, 500, false, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
 		CreateBoxFilled(1000, 500, true, 270, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
 		CreateHalfCircleFilled(true, 1000, 500, true, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
@@ -458,6 +464,13 @@ namespace DrawD3D {
 		ScreenToClient(gameHwnd, &cursor); // Cursor pos inside game window
 
 
+		/////////////////////////
+		
+		//Renderer::Guard guard(renderer->ptr(), D3DPT_LINESTRIP);
+		//renderer->drawCircle(500.f, 200.f, 100.f);
+		//Renderer::Guard guard(renderer->ptr(), D3DPT_TRIANGLELIST);
+		//renderer->drawOutlinedRect(Rect{ 450.f, 450.f, 150.f, 150.f }, 1.f, D3DCOLOR_ARGB(255, 0, 150, 150), D3DCOLOR_ARGB(100, 20, 20, 20));
+		
 
 		// Other fonts
 		// ...
@@ -465,22 +478,20 @@ namespace DrawD3D {
 
 		// Render HUD Shapes and text over them
 
-
-
 		/* For Shapes _TEST
 		RECT rectFullscreen5 = { 10, 200, 310, 700 };
 		DrawText(fontTEST, 0, L"\u2586\u259B\u2586",
-			-1, &rectFullscreen5, DT_NOCLIP | DT_WORDBREAK, D3DCOLOR_ARGB(166, 255, 22, 22));//*/
+		-1, &rectFullscreen5, DT_NOCLIP | DT_WORDBREAK, D3DCOLOR_ARGB(166, 255, 22, 22));//*/
 
 		// (all sign: u25D6 u25D7 u2586 | u2588 | u268B u2585  u26AB)
 		/*
-		RECT rectFullscreen6 = { 10, 10, 500, 500 }; 
+		RECT rectFullscreen6 = { 10, 10, 500, 500 };
 		DrawText(fontTEST, 0, L"\u2586\u2588",
 		-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
 		//*/
 		/*renderShapeHUD(2);
 		for (int i = 4; i < key_next; i++)
-			renderShapeHUD(i);
+		renderShapeHUD(i);
 		renderFontHUD(3);//*/
 
 
@@ -488,7 +499,12 @@ namespace DrawD3D {
 		renderCursorHUD();
 	}
 
-	/*void CDraw::Line(float x1, float y1, float x2, float y2, float width, bool antialias, DWORD color)
+
+	// Currently not working (need to find a way for correct displaying 
+	// D3DPT_TRIANGLELIST and D3DPT_TRIANGLEFAN to game Device)
+
+	/*
+	void CDraw::Line(float x1, float y1, float x2, float y2, float width, bool antialias, DWORD color)
 	{
 	ID3DXLine *m_Line;
 
@@ -502,186 +518,186 @@ namespace DrawD3D {
 	m_Line->Release();
 	}*/
 
-	// Currently not working (need to find a way for correct attaching to game Device)
-	/*
-	void Circle(float x, float y, float radius, int rotate, int type, bool smoothing, int resolution, DWORD color)
+	/*void Circle(float x, float y, float radius, int rotate, int type, bool smoothing, int resolution, DWORD color)
 	{
-		std::vector<vertex> circle(resolution + 2);
-		float angle = rotate * D3DX_PI / 180;
-		float pi;
+	std::vector<vertex> circle(resolution + 2);
+	float angle = rotate * D3DX_PI / 180;
+	float pi;
 
-		if (type == full) pi = D3DX_PI;        // Full circle
-		if (type == half) pi = D3DX_PI / 2;      // 1/2 circle
-		if (type == quarter) pi = D3DX_PI / 4;   // 1/4 circle
+	if (type == full) pi = D3DX_PI;        // Full circle
+	if (type == half) pi = D3DX_PI / 2;      // 1/2 circle
+	if (type == quarter) pi = D3DX_PI / 4;   // 1/4 circle
 
-		for (int i = 0; i < resolution + 2; i++)
-		{
-			circle[i].x = (float)(x - radius * cos(i*(2 * pi / resolution)));
-			circle[i].y = (float)(y - radius * sin(i*(2 * pi / resolution)));
-			circle[i].z = 0;
-			circle[i].rhw = 1;
-			circle[i].color = color;
-		}
+	float theta = 2.f * pi / resolution;
 
-		// Rotate matrix
-		int _res = resolution + 2;
-		for (int i = 0; i < _res; i++)
-		{
-			circle[i].x = x + cos(angle)*(circle[i].x - x) - sin(angle)*(circle[i].y - y);
-			circle[i].y = y + sin(angle)*(circle[i].x - x) + cos(angle)*(circle[i].y - y);
-		}
-
-		pDevice->CreateVertexBuffer((resolution + 2) * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
-
-		VOID* pVertices;
-		g_pVB->Lock(0, (resolution + 2) * sizeof(vertex), (void**)&pVertices, 0);
-		memcpy(pVertices, &circle[0], (resolution + 2) * sizeof(vertex));
-		g_pVB->Unlock();
-
-
-		pDevice->SetTexture(0, NULL);
-		pDevice->SetPixelShader(NULL);
-		if (smoothing)
-		{
-			pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-			pDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
-		}
-		pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-		pDevice->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
-		pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-
-		pDevice->DrawPrimitive(D3DPT_LINESTRIP, 0, resolution);
-		if (g_pVB != NULL) g_pVB->Release();
+	for (int i = 0; i < resolution + 2; i++)
+	{
+	circle[i].x = (float)(x - radius * cos(i * theta));
+	circle[i].y = (float)(y - radius * sin(i * theta));
+	circle[i].z = 0;
+	circle[i].rhw = 1;
+	circle[i].color = color;
 	}
 
-	void CircleFilled(LPDIRECT3DDEVICE9 pDev, float x, float y, float rad, float rotate, int type, int resolution, DWORD color)
+	// Rotate matrix
+	int _res = resolution + 2;
+	for (int i = 0; i < _res; i++)
 	{
-		std::vector<vertex> circle(resolution + 2);
-		float angle = rotate * D3DX_PI / 180;
-		float pi;
-
-		if (type == full) pi = D3DX_PI;        // Full circle
-		if (type == half) pi = D3DX_PI / 2;      // 1/2 circle
-		if (type == quarter) pi = D3DX_PI / 4;   // 1/4 circle
-
-		circle[0].x = x;
-		circle[0].y = y;
-		circle[0].z = 0;
-		circle[0].rhw = 1;
-		circle[0].color = color;
-
-		for (int i = 1; i < resolution + 2; i++)
-		{
-			circle[i].x = (float)(x - rad * cos(pi*((i - 1) / (resolution / 2.0f))));
-			circle[i].y = (float)(y - rad * sin(pi*((i - 1) / (resolution / 2.0f))));
-			circle[i].z = 0;
-			circle[i].rhw = 1;
-			circle[i].color = color;
-		}
-
-		// Rotate matrix
-		int _res = resolution + 2;
-		for (int i = 0; i < _res; i++)
-		{
-			circle[i].x = x + cos(angle)*(circle[i].x - x) - sin(angle)*(circle[i].y - y);
-			circle[i].y = y + sin(angle)*(circle[i].x - x) + cos(angle)*(circle[i].y - y);
-		}
-
-		pDev->CreateVertexBuffer((resolution + 2) * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
-
-		VOID* pVertices;
-		g_pVB->Lock(0, (resolution + 2) * sizeof(vertex), (void**)&pVertices, 0);
-		memcpy(pVertices, &circle[0], (resolution + 2) * sizeof(vertex));
-		g_pVB->Unlock();
-
-		pDev->SetTexture(0, NULL);
-		pDev->SetPixelShader(NULL);
-		pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-		pDev->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
-		pDev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		pDev->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, resolution);
-		if (g_pVB != NULL) g_pVB->Release();
+	circle[i].x = x + cos(angle)*(circle[i].x - x) - sin(angle)*(circle[i].y - y);
+	circle[i].y = y + sin(angle)*(circle[i].x - x) + cos(angle)*(circle[i].y - y);
 	}
 
-	void Box(float x, float y, float w, float h, float linewidth, DWORD color)
+	pDevice->CreateVertexBuffer((resolution + 2) * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
+
+	VOID* pVertices;
+	g_pVB->Lock(0, (resolution + 2) * sizeof(vertex), (void**)&pVertices, 0);
+	memcpy(pVertices, &circle[0], (resolution + 2) * sizeof(vertex));
+	g_pVB->Unlock();
+
+
+	pDevice->SetTexture(0, NULL);
+	pDevice->SetPixelShader(NULL);
+	if (smoothing)
 	{
-		if (linewidth == 0 || linewidth == 1)
-		{
-			BoxFilled(x, y, w, 1, color);             // Top
-			BoxFilled(x, y + h - 1, w, 1, color);         // Bottom
-			BoxFilled(x, y + 1, 1, h - 2 * 1, color);       // Left
-			BoxFilled(x + w - 1, y + 1, 1, h - 2 * 1, color);   // Right
-		}
-		else
-		{
-			BoxFilled(x, y, w, linewidth, color);                                     // Top
-			BoxFilled(x, y + h - linewidth, w, linewidth, color);                         // Bottom
-			BoxFilled(x, y + linewidth, linewidth, h - 2 * linewidth, color);               // Left
-			BoxFilled(x + w - linewidth, y + linewidth, linewidth, h - 2 * linewidth, color);   // Right
-		}
+	pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+	pDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
+	}
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	pDevice->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
+	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
+	pDevice->DrawPrimitive(D3DPT_LINESTRIP, 0, resolution);
+	if (g_pVB != NULL) g_pVB->Release();
 	}
 
-	void BoxBordered(float x, float y, float w, float h, float border_width, DWORD color, DWORD color_border)
+	void CircleFilled(float x, float y, float rad, float rotate, int type, int resolution, DWORD color)
 	{
-		BoxFilled(x, y, w, h, color);
-		Box(x - border_width, y - border_width, w + 2 * border_width, h + border_width, border_width, color_border);
+	std::vector<vertex> circle(resolution + 2);
+	float angle = rotate * D3DX_PI / 180;
+	float pi;
+
+	if (type == full) pi = D3DX_PI;        // Full circle
+	if (type == half) pi = D3DX_PI / 2;      // 1/2 circle
+	if (type == quarter) pi = D3DX_PI / 4;   // 1/4 circle
+
+	circle[0].x = x;
+	circle[0].y = y;
+	circle[0].z = 0;
+	circle[0].rhw = 1;
+	circle[0].color = color;
+
+	for (int i = 1; i < resolution + 2; i++)
+	{
+	circle[i].x = (float)(x - rad * cos(pi*((i - 1) / (resolution / 2.0f))));
+	circle[i].y = (float)(y - rad * sin(pi*((i - 1) / (resolution / 2.0f))));
+	circle[i].z = 0;
+	circle[i].rhw = 1;
+	circle[i].color = color;
+	}
+
+	// Rotate matrix
+	int _res = resolution + 2;
+	for (int i = 0; i < _res; i++)
+	{
+	circle[i].x = x + cos(angle)*(circle[i].x - x) - sin(angle)*(circle[i].y - y);
+	circle[i].y = y + sin(angle)*(circle[i].x - x) + cos(angle)*(circle[i].y - y);
+	}
+
+	pDevice->CreateVertexBuffer((resolution + 2) * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
+
+	VOID* pVertices;
+	g_pVB->Lock(0, (resolution + 2) * sizeof(vertex), (void**)&pVertices, 0);
+	memcpy(pVertices, &circle[0], (resolution + 2) * sizeof(vertex));
+	g_pVB->Unlock();
+
+	pDevice->SetTexture(0, NULL);
+	pDevice->SetPixelShader(NULL);
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	pDevice->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
+	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	pDevice->DrawPrimitive(D3DPT_TRIANGLEFAN, 0, resolution);
+	if (g_pVB != NULL) g_pVB->Release();
 	}
 
 	void BoxFilled(float x, float y, float w, float h, DWORD color)
 	{
-		vertex V[4];
+	vertex V[4];
 
-		V[0].color = V[1].color = V[2].color = V[3].color = color;
+	V[0].color = V[1].color = V[2].color = V[3].color = color;
 
-		V[0].z = V[1].z = V[2].z = V[3].z = 0;
-		V[0].rhw = V[1].rhw = V[2].rhw = V[3].rhw = 0;
+	V[0].z = V[1].z = V[2].z = V[3].z = 0;
+	V[0].rhw = V[1].rhw = V[2].rhw = V[3].rhw = 0;
 
-		V[0].x = x;
-		V[0].y = y;
-		V[1].x = x + w;
-		V[1].y = y;
-		V[2].x = x + w;
-		V[2].y = y + h;
-		V[3].x = x;
-		V[3].y = y + h;
+	V[0].x = x;
+	V[0].y = y;
+	V[1].x = x + w;
+	V[1].y = y;
+	V[2].x = x + w;
+	V[2].y = y + h;
+	V[3].x = x;
+	V[3].y = y + h;
 
-		unsigned short indexes[] = { 0, 1, 3, 1, 2, 3 };
+	unsigned short indexes[] = { 0, 1, 3, 1, 2, 3 };
 
-		pDevice->CreateVertexBuffer(4 * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
-		pDevice->CreateIndexBuffer(2 * sizeof(short), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &g_pIB, NULL);
+	pDevice->CreateVertexBuffer(4 * sizeof(vertex), D3DUSAGE_WRITEONLY, D3DFVF_XYZRHW | D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &g_pVB, NULL);
+	pDevice->CreateIndexBuffer(2 * sizeof(short), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_DEFAULT, &g_pIB, NULL);
 
-		VOID* pVertices;
-		g_pVB->Lock(0, sizeof(V), (void**)&pVertices, 0);
-		memcpy(pVertices, V, sizeof(V));
-		g_pVB->Unlock();
+	VOID* pVertices;
+	g_pVB->Lock(0, sizeof(V), (void**)&pVertices, 0);
+	memcpy(pVertices, V, sizeof(V));
+	g_pVB->Unlock();
 
-		VOID* pIndex;
-		g_pIB->Lock(0, sizeof(indexes), (void**)&pIndex, 0);
-		memcpy(pIndex, indexes, sizeof(indexes));
-		g_pIB->Unlock();
+	VOID* pIndex;
+	g_pIB->Lock(0, sizeof(indexes), (void**)&pIndex, 0);
+	memcpy(pIndex, indexes, sizeof(indexes));
+	g_pIB->Unlock();
 
-		pDevice->SetTexture(0, NULL);
-		pDevice->SetPixelShader(NULL);
-		pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	pDevice->SetTexture(0, NULL);
+	pDevice->SetPixelShader(NULL);
+	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-		pDevice->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
-		pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		pDevice->SetIndices(g_pIB);
+	pDevice->SetStreamSource(0, g_pVB, 0, sizeof(vertex));
+	pDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	pDevice->SetIndices(g_pIB);
 
-		pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2);
+	pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 4, 0, 2);
 
-		g_pVB->Release();
-		g_pIB->Release();
-	}*/
-	
+	g_pVB->Release();
+	g_pIB->Release();
+	}
+
+	void Box(float x, float y, float w, float h, float linewidth, DWORD color)
+	{
+	if (linewidth == 0 || linewidth == 1)
+	{
+	BoxFilled(x, y, w, 1, color);             // Top
+	BoxFilled(x, y + h - 1, w, 1, color);         // Bottom
+	BoxFilled(x, y + 1, 1, h - 2 * 1, color);       // Left
+	BoxFilled(x + w - 1, y + 1, 1, h - 2 * 1, color);   // Right
+	}
+	else
+	{
+	BoxFilled(x, y, w, linewidth, color);                                     // Top
+	BoxFilled(x, y + h - linewidth, w, linewidth, color);                         // Bottom
+	BoxFilled(x, y + linewidth, linewidth, h - 2 * linewidth, color);               // Left
+	BoxFilled(x + w - linewidth, y + linewidth, linewidth, h - 2 * linewidth, color);   // Right
+	}
+	}
+
+	void BoxBordered(float x, float y, float w, float h, float border_width, DWORD color, DWORD color_border)
+	{
+	BoxFilled(x, y, w, h, color);
+	Box(x - border_width, y - border_width, w + 2 * border_width, h + border_width, border_width, color_border);
+	}//*/
+
 	/*void CDraw::BoxRounded(float x, float y, float w, float h, float radius, bool smoothing, DWORD color, DWORD bcolor)
 	{
 	BoxFilled(x + radius, y + radius, w - 2 * radius - 1, h - 2 * radius - 1, color);   // Center rect.
