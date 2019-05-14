@@ -546,9 +546,12 @@ public:;
 
 	HRESULT WINAPI EndScene(void)
 	{
-		Controls::keysRelease(); // KeyUp for all pressed keys
 		//onEndScene();
-		if (DrawD3D::fontCreated) {
+		Controls::keysRelease(); // KeyUp for all pressed keys
+
+		if (!DrawD3D::canRender) // If drawing is temporarily not allowed
+			DrawD3D::canRenderDelay();
+		else if (DrawD3D::fontCreated) {
 			if (g_Config.bDrawFPS) {
 				D3DVIEWPORT9 vp;
 				GetViewport(&vp);

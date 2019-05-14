@@ -30,7 +30,7 @@ namespace RadialMenu {
 		cppFuncMap[std::string("Controls_Space")] = Controls::PressKeySpace;
 		cppFuncMap[std::string("Controls_F9")] = Controls::screenshotF9;
 		cppFuncMap[std::string("Controls_F11")] = Controls::screenshotF11;
-		cppFuncMap[std::string("FaceCam_Reset")] = ExtClass::Camera::ResetPovToNormal;
+		cppFuncMap[std::string("FaceCam_Deactivate")] = ExtClass::Camera::ResetPovToNormal;
 	}
 
 	void CallFunc(const char * func_map_key) {

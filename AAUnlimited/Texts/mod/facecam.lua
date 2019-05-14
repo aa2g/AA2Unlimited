@@ -240,6 +240,17 @@ function on.char(k)
 	return k
 end
 
+local function centerView()
+	xyz.x = 0
+	xyz.y = 0
+	xyz.z = 0
+	xyz.xrot = 0
+	xyz.yrot = math.pi
+	xyz.zrot = 0
+	-- note, no fetch_rot coz we force 0
+	update_eye()
+end
+
 function on.keydown(k)
 	if (not hinfo) then return k end
 	if k == IncrFOV then
@@ -269,14 +280,7 @@ function on.keydown(k)
 		xyz.z = xyz.z + step
 
 	elseif k == SEVEN then
-		xyz.x = 0
-		xyz.y = 0
-		xyz.z = 0
-		xyz.xrot = 0
-		xyz.yrot = math.pi
-		xyz.zrot = 0
-		-- note, no fetch_rot coz we force 0
-		update_eye()
+		centerView()
 		return k
 	elseif k == NINE then
 		xyz.tong = xyz.tong == 2 and 0 or 2
@@ -376,7 +380,9 @@ end
 function on.facecam_deactivate()
 	deactivateFacecam(true)
 end
-
+function on.facecam_center_view()
+	centerView()
+end
 
 local orig_hook
 -- support reloading
