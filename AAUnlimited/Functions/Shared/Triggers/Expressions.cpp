@@ -1390,6 +1390,29 @@ namespace Shared {
 			}
 		}
 
+
+		//int(int)
+		Value Thread::GetStamina(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(0);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_stamina);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetPeriodTimer(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x2c, 0x2C};
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
+			return (*(int*)timer / 1000);
+		}
+
+
+
 		//int(int)
 		Value Thread::GetCardWinCount(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -3028,6 +3051,19 @@ namespace Shared {
 					TEXT("Submissive actor"), TEXT("Submissive"), TEXT("Get the submissive actor in h."),
 					{}, (TYPE_INT),
 					&Thread::GetSubmissiveInH
+				},
+				{
+					119, EXPRCAT_EVENT,
+					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetStamina
+				},
+				{
+					120, EXPRCAT_EVENT,
+					TEXT("Get Period Timer"), TEXT("PeriodTimer"),
+					TEXT("Returns the number of seconds that have passed in the current period."),
+					{}, (TYPE_INT),
+					&Thread::GetPeriodTimer
 				},
 			},
 
