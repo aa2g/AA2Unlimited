@@ -53,7 +53,7 @@ namespace RadialMenu {
 		startCursorX = DrawD3D::cursor.x;
 		startCursorY = DrawD3D::cursor.y;
 
-		LOGPRIO(Logger::Priority::INFO) << "RadMenu ShowMenu()\r\n";
+		//LOGPRIO(Logger::Priority::INFO) << "RadMenu ShowMenu()\r\n";
 
 		menu.showed = true;
 	}
@@ -64,7 +64,7 @@ namespace RadialMenu {
 		menu.showed = false;
 		if (cancel == true || menu.selectedBtnNode == -1) // Cancel choise
 		{
-			LOGPRIO(Logger::Priority::INFO) << "RadMenu ApplyChoise(cancel)\r\n";
+			//LOGPRIO(Logger::Priority::INFO) << "RadMenu ApplyChoise(cancel)\r\n";
 			if (!cancel_immediately) // Indicating of cancel
 			{
 				menu.showCancelMsg = true;
@@ -74,7 +74,7 @@ namespace RadialMenu {
 		else if (cancel == false) // Apply choise
 		{
 			CallFunc(menuButtonsArr[menu.showedType][menu.selectedBtnNode].funcName);
-			LOGPRIO(Logger::Priority::INFO) << "RadMenu ApplyChoise(apply)\r\n";
+			//LOGPRIO(Logger::Priority::INFO) << "RadMenu ApplyChoise(apply)\r\n";
 		}
 		menu.selectedBtnNode = -1;
 	}
@@ -190,11 +190,8 @@ namespace RadialMenu {
 			menu.posX = 1670;
 		}
 
-
 		// Create Map of c++ functions, which will be using on click RadMenu buttons
 		CreateMapFuncCPP();
-
-
 
 		// If D3D HUD already created - create HUD for Menu also.
 		if (DrawD3D::fontCreated)
