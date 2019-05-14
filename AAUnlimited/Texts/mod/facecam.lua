@@ -167,26 +167,69 @@ function set_FOV(value) -- from 0.1 to 1.5
 	g_poke(0x3A8574, string.pack("<f", value))
 end
 
+local function increaseFOV(value)
+	if (not hinfo) then return end
+	if current ~= nil and (facecamFOV + value) <= 1.5 then
+		set_FOV(facecamFOV + value)
+		facecamFOV = facecamFOV + value
+	elseif current == nil and (normalCamera.fov + value) <= 1.5 then
+		set_FOV(normalCamera.fov + value)
+		normalCamera.fov = normalCamera.fov + value
+	end
+end
+
+local function decreaseFOV(value)
+	if (not hinfo) then return end
+	if current ~= nil and (facecamFOV - value) >= 0.1 then
+		set_FOV(facecamFOV - value)
+		facecamFOV = facecamFOV - value
+	elseif current == nil and (normalCamera.fov - value) >= 0.1 then
+		set_FOV(normalCamera.fov - value)
+		normalCamera.fov = normalCamera.fov - value
+	end
+end
+
+local function activateFacecam(saveconfig)
+	if not hinfo then return end
+	fetch_rot()
+	if current == nil then -- On activate facecam
+		current = true
+		-- backup the Camera FOV, Rotatings and Distance and set the starting FOV
+		local cam = hinfo:GetCamera()
+		normalCamera.rotx=cam.m_xRotRad
+		normalCamera.roty=cam.m_yRotRad
+		normalCamera.rotz=cam.m_zRotRad
+		normalCamera.rotdist=cam.m_distToMid
+		set_FOV(facecamFOV)
+	else
+		current = not current
+	end
+	if saveconfig then
+		Config.save()
+		load_hpos_settings()
+		set_status(current)
+	end
+end
+
+local function deactivateFacecam(saveconfig)
+	if not hinfo then return end
+	if current == nil then return end
+	fetch_rot()
+	current = nil
+	if saveconfig then
+		Config.save()
+		load_hpos_settings()
+		set_status(current)
+	end
+end
+
 function on.char(k)
 	if not hinfo then return k end
 	local chr = string.char(k)
 	if chr == mcfg.activate then
-		fetch_rot()
-		if current == nil then -- On activate facecam
-			current = true
-			-- backup the Camera FOV, Rotatings and Distance and set the starting FOV
-			local cam = hinfo:GetCamera()
-			normalCamera.rotx=cam.m_xRotRad
-			normalCamera.roty=cam.m_yRotRad
-			normalCamera.rotz=cam.m_zRotRad
-			normalCamera.rotdist=cam.m_distToMid
-			set_FOV(facecamFOV)
-		else
-			current = not current
-		end
+		activateFacecam(false)
 	elseif mcfg.reset:find(chr,1,true) and current ~= nil then
-		fetch_rot()
-		current = nil
+		deactivateFacecam(false)
 	else
 		return k
 	end
@@ -200,22 +243,10 @@ end
 function on.keydown(k)
 	if (not hinfo) then return k end
 	if k == IncrFOV then
-		if current ~= nil and facecamFOV <= 1.45 then
-			set_FOV(facecamFOV + 0.05)
-			facecamFOV = facecamFOV + 0.05
-		elseif current == nil and normalCamera.fov <= 1.45 then
-			set_FOV(normalCamera.fov + 0.05)
-			normalCamera.fov = normalCamera.fov + 0.05
-		end
+		increaseFOV(0.05)
 		return k
 	elseif k == DecrFOV then
-		if current ~= nil and facecamFOV >= 0.15 then 
-			set_FOV(facecamFOV - 0.05)
-			facecamFOV = facecamFOV - 0.05
-		elseif current == nil and normalCamera.fov >= 0.15 then 
-			set_FOV(normalCamera.fov - 0.05)
-			normalCamera.fov = normalCamera.fov - 0.05
-		end
+		decreaseFOV(0.05)
 		return k
 	end
 	
@@ -331,6 +362,21 @@ local function on_hposchange2(arg, ret)
 	--log.info(arg)
 	return ret
 end
+
+-- Radial Menu events
+function on.facecam_fov_plus()
+	increaseFOV(0.1)
+end
+function on.facecam_fov_minus()
+	decreaseFOV(0.1)
+end
+function on.facecam_activate()
+	activateFacecam(true)
+end
+function on.facecam_deactivate()
+	deactivateFacecam(true)
+end
+
 
 local orig_hook
 -- support reloading

@@ -43,6 +43,7 @@ public:
 	static void PostTick(ExtClass::HInfo* hInfo, bool tickRetVal);
 	static int SetFocusBone(ExtClass::Frame* bone, double x, double y, double z, bool);
 	static void InitPovParams(int stabilize_percents);
+	static void ResetPovToNormal();
 
 	D3DMATRIX m_matrix; //used, but typically identity matrix. can be used to distort view
 };

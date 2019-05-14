@@ -64,4 +64,9 @@ void Camera::InitPovParams(int stabilize_percents) {
 	stabilizeCoefficient = (float)stabilize_percents / 100;
 }
 
+void Camera::ResetPovToNormal() {
+	Controls::keyPress(0x11); // W key
+	LUA_EVENT_NORET("facecam_deactivate"); // Verify reset status (if key W not reset)
+}
+
 }

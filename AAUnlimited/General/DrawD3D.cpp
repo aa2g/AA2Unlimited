@@ -19,11 +19,12 @@ struct sScreen
 	float y_center;
 } Screen;
 
-#define MAX_FONTS 6
-#define D3DX_PI (3.14159265358979323846)
+//#define MAX_FONTS 6
 
 
 namespace DrawD3D {
+	double D3DX_PI = 3.14159265358979323846;
+
 	bool initialized = false;
 	bool fontCreated = false;
 	IDirect3DDevice9* pDevice;
@@ -39,6 +40,7 @@ namespace DrawD3D {
 	const std::wstring box_code = L"\u2586";
 	const std::wstring circle_code_Left = L"\u25D6";
 	const std::wstring circle_code_Right = L"\u25D7";
+	const std::wstring circle_code_Full = L"\u25CF";
 	float box1000MarginX = 0;	// Position and sizes of shapes for fontsize == 1000
 	float box1000MarginY = 246;
 	float box1000Width = 664;
@@ -48,6 +50,10 @@ namespace DrawD3D {
 	float circle1000MarginY = 305;
 	float circle1000Radius = 195.000; // (Width)
 	float circle1000Height = 390;
+	float circleFull1000MarginX = 94;
+	float circleFull1000MarginY = 98;
+	float circleFull1000Width = 812;
+	float circleFull1000Height = 812;
 	float cursorArrowScaledMarginX = 0;		// After scaling for current user resolution
 	float cursorShadowScaledMarginX = 0;
 	float cursorArrowScaledMarginY = 0;
@@ -344,10 +350,58 @@ namespace DrawD3D {
 		return key_node;
 	}
 
-	void CreateCircleFilled() {
-		/* Current not implemented yet. You can use for this
-		CreateHalfCircleFilled(true, centerX, centerY, true, Height, your D3DCOLOR, -1);
-		CreateHalfCircleFilled(false, centerX, centerY, true, Height, your D3DCOLOR, -1); */
+	int CreateCircleFilled(double x, double y, bool center_coords, 
+		double height, DWORD color, int key_node) 
+	{
+		int key_In = key_node;
+		if (key_In == -1) { // If need to find new place for shape in HUD data memory
+			if (key_next >= max_shapes)
+			{
+				LOGPRIONC(Logger::Priority::WARN) "Out of memory for creating CircleFilled HUD shape\r\n";
+				return -1;
+			}
+			key_node = key_next;
+			key_next++;
+		}
+		// Scaling request params to current user's resolution
+		x = x * scaleCoefficient;
+		y = y * scaleCoefficient + trueGameMarginY;
+		height = height * scaleCoefficient;
+
+		double fontRatio = height / circleFull1000Height;
+		int fontHeight = round(1000 * fontRatio); // Total Font Height
+
+		HUDarrayFont[key_node] = 0;
+		D3DXCreateFont(pDevice, fontHeight, 0, FW_REGULAR, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+			General::utf8.from_bytes("Arial").c_str(), &HUDarrayFont[key_node]);
+		if (HUDarrayFont[key_node])
+			DrawText = decltype(DrawText)(((void***)HUDarrayFont[key_node])[0][15]);
+		else
+		{
+			LOGPRIONC(Logger::Priority::WARN) "Error Creating CircleFilled HUD shape\r\n";
+			if (key_In == -1)
+				key_next--;
+			return -1;
+		}
+
+		float center_correct_X = 0;  float center_correct_Y = 0;
+		if (center_coords)		// if need place Shape center in X:Y coords (correction)
+		{
+			center_correct_X = round(circleFull1000Width * fontRatio * 0.5);
+			center_correct_Y = round(circleFull1000Height * fontRatio * 0.5);
+		}
+
+		HUDarrayRect[key_node].left = x - round(circleFull1000MarginX * fontRatio) - center_correct_X;	// Total rect for result font
+		HUDarrayRect[key_node].top = y - round(circleFull1000MarginY * fontRatio) - center_correct_Y;
+		HUDarrayRect[key_node].right = x + round(circleFull1000Width * fontRatio * 2) //(+ 1 shape for reserve)
+			- center_correct_X;
+		HUDarrayRect[key_node].bottom = y + fontHeight - center_correct_Y;
+
+		HUDarrayText[key_node] = circle_code_Full;		// Total text
+		HUDarrayColor[key_node] = color;
+
+		return key_node;
 	}
 
 	int CreateCursorHUD(bool main_shape) { // main shape or shadow
@@ -435,8 +489,13 @@ namespace DrawD3D {
 		cursorArrowKey = CreateCursorHUD(true);
 		cursorShadowKey = CreateCursorHUD(false);
 
+		RadialMenu::CreateHUD(); // RadialMenu HUD fonts and shapes
+
+
 		// Other HUD shapes
 		// ...
+
+
 
 		/* For Shapes _TEST
 		// TEST font
@@ -466,17 +525,16 @@ namespace DrawD3D {
 
 		/////////////////////////
 		
-		//Renderer::Guard guard(renderer->ptr(), D3DPT_LINESTRIP);
-		//renderer->drawCircle(500.f, 200.f, 100.f);
-		//Renderer::Guard guard(renderer->ptr(), D3DPT_TRIANGLELIST);
-		//renderer->drawOutlinedRect(Rect{ 450.f, 450.f, 150.f, 150.f }, 1.f, D3DCOLOR_ARGB(255, 0, 150, 150), D3DCOLOR_ARGB(100, 20, 20, 20));
-		
 
-		// Other fonts
+		// Fonts Render
 		// ...
 
 
 		// Render HUD Shapes and text over them
+
+		RadialMenu::Render();
+
+
 
 		/* For Shapes _TEST
 		RECT rectFullscreen5 = { 10, 200, 310, 700 };
@@ -488,11 +546,8 @@ namespace DrawD3D {
 		RECT rectFullscreen6 = { 10, 10, 500, 500 };
 		DrawText(fontTEST, 0, L"\u2586\u2588",
 		-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-		//*/
-		/*renderShapeHUD(2);
-		for (int i = 4; i < key_next; i++)
 		renderShapeHUD(i);
-		renderFontHUD(3);//*/
+		//*/
 
 
 		// Render Cursor (Allways must be in the end of render!)
