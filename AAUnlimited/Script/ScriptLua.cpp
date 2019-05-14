@@ -302,7 +302,7 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["InitRadialMenuParams"] = LUA_LAMBDA0({
-		RadialMenu::InitRadialMenuParams(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6), s.get(7));
+		RadialMenu::InitRadialMenuParams(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6), s.get(7), s.get(8));
 	});
 
 	_BINDING["RadMenuAddButton"] = LUA_LAMBDA0({

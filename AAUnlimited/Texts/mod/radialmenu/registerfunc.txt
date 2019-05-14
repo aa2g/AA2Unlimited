@@ -1,19 +1,19 @@
 Example
-{func_lang} {scene_type} {ExampleMod_some_cpp_func_or_lua_event_name} {Mod name} {Title for ingame button} {Short Description ingame}
+{func_lang} {scene_type} {ExampleMod_some_cpp_func_or_lua_event_name} {Mod name - Param Name (Config title)} {Title for ingame button} {Short Description ingame}
 Note: add your functions, so that the modification's names are in alphabetical order.
 
-{cpp} {general} {Controls_F1} {Game} {Game Settings} {Game Settings (F1)}
-{cpp} {h_scene} {Controls_F1} {Game} {Game Settings} {Game Settings (F1)}
-{cpp} {general} {Controls_ESC} {Game} {Exit (ESC)} {Trying exit the game (ESC)}
-{cpp} {h_scene} {Controls_ESC} {Game} {Exit (ESC)} {Trying exit the game (ESC)}
-{cpp} {general} {Controls_Space} {Game} {Toggle view (Space)} {Toggle camera control in conversation (Spacebar)}
-{cpp} {h_scene} {Controls_Space} {Game} {Change Lighting (Space)} {Change the lighting angle (Spacebar)}
-{cpp} {general} {Controls_F9} {Game} {Screenshot (F9)} {Make a screenshot (F9)}
-{cpp} {h_scene} {Controls_F9} {Game} {Screenshot (F9)} {Make a screenshot (F9)}
-{cpp} {general} {Controls_F11} {Game} {Screenshot (F11)} {Make an alternate screenshot (F11)}
-{cpp} {h_scene} {Controls_F11} {Game} {Screenshot (F11)} {Make an alternate screenshot (F11)}
-{lua} {h_scene} {facecam_activate} {POV Facecam} {Facecam ON} {Activate/Change person for POV in H-scene}
-{cpp} {h_scene} {FaceCam_Deactivate} {POV Facecam} {Facecam OFF} {Deactivate first person view in H-scene}
-{cpp} {h_scene} {facecam_center_view} {POV Facecam} {Center gaze} {Resets current first person view in H-scene}
-{lua} {h_scene} {facecam_fov_plus} {POV Facecam} {Facecam FOV +10} {Increase FOV by 10 degrees in H-scene}
-{lua} {h_scene} {facecam_fov_minus} {POV Facecam} {Facecam FOV -10} {Decrease FOV by 10 degrees in H-scene}
+{cpp} {general} {Controls_F1} {Game - Game Settings} {Game Settings} {Game Settings (F1)}
+{cpp} {h_scene} {Controls_F1} {Game - Game Settings} {Game Settings} {Game Settings (F1)}
+{cpp} {general} {Controls_ESC} {Game - Exit (ESC)} {Exit} {Trying exit the game (ESC)}
+{cpp} {h_scene} {Controls_ESC} {Game - Exit (ESC)} {Exit} {Trying exit the game (ESC)}
+{cpp} {general} {Controls_Space} {Game - Toggle view (Space)} {Toggle view} {Toggle camera control in conversation (Spacebar)}
+{cpp} {h_scene} {Controls_Space} {Game - Change Lighting (Space)} {Change Lighting} {Change the lighting angle (Spacebar)}
+{cpp} {general} {Controls_F9} {Game - Screenshot (F9)} {Screenshot} {Make a screenshot (F9)}
+{cpp} {h_scene} {Controls_F9} {Game - Screenshot (F9)} {Screenshot} {Make a screenshot (F9)}
+{cpp} {general} {Controls_F11} {Game - Screenshot (F11)} {Screenshot Alternate} {Make an alternate screenshot (F11)}
+{cpp} {h_scene} {Controls_F11} {Game - Screenshot (F11)} {Screenshot Alternate} {Make an alternate screenshot (F11)}
+{lua} {h_scene} {facecam_activate} {POV Facecam - ON} {Facecam ON} {Activate/Change person for POV in H-scene}
+{cpp} {h_scene} {FaceCam_Deactivate} {POV Facecam - OFF} {Facecam OFF} {Deactivate first person view in H-scene}
+{lua} {h_scene} {facecam_center_view} {POV Facecam - Center gaze} {Center gaze} {Resets current first person view in H-scene}
+{lua} {h_scene} {facecam_fov_plus} {POV Facecam - FOV +10} {FOV +10} {Increase FOV by 10 degrees in H-scene}
+{lua} {h_scene} {facecam_fov_minus} {POV Facecam - FOV -10} {FOV -10} {Decrease FOV by 10 degrees in H-scene}

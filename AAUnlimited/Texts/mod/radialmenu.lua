@@ -16,7 +16,7 @@ local function reload_buttons()
 	local func_lang
 	local scene_type
 	local func_name
-	local mod_name
+	local cfg_title
 	local title
 	local short_desc
 	local count_gen = 1
@@ -25,17 +25,17 @@ local function reload_buttons()
 	local file = io.open(functions_path, "r")
 	if not file then return end
 	for line in file:lines() do
-		func_lang, scene_type, func_name, mod_name, title, short_desc = line:match("{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}")
-		if func_lang and scene_type and func_name and mod_name and title and short_desc then
+		func_lang, scene_type, func_name, cfg_title, title, short_desc = line:match("{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}[^%{]*{([^%}]+)}")
+		if func_lang and scene_type and func_name and cfg_title and title and short_desc then
 			if scene_type == "general" then
 				funcs_general[count_gen] = {func_lang = func_lang, func_name = func_name, 
-				mod_name = mod_name, mod_name = mod_name, title = title, short_desc = short_desc }
-				funcs_gen_str = funcs_gen_str .. mod_name .. " - " .. title .. "|"
+				cfg_title = cfg_title, title = title, short_desc = short_desc }
+				funcs_gen_str = funcs_gen_str .. cfg_title .. "|"
 				count_gen = count_gen + 1
 			elseif scene_type == "h_scene" then
 				funcs_h_scene[count_h] = {func_lang = func_lang, func_name = func_name, 
-				mod_name = mod_name, mod_name = mod_name, title = title, short_desc = short_desc }
-				funcs_h_str = funcs_h_str .. mod_name .. " - " .. title .. "|"
+				cfg_title = cfg_title, title = title, short_desc = short_desc }
+				funcs_h_str = funcs_h_str .. cfg_title .. "|"
 				count_h = count_h + 1
 			end
 		end
@@ -118,7 +118,7 @@ function on.launch()
 	add_func_to_menu("h_scene", mcfg.hBtn7)
 	add_func_to_menu("h_scene", mcfg.hBtn8)
 	
-	InitRadialMenuParams(mcfg.fontfamily, mcfg.fontsize, mcfg.deadzone, 
+	InitRadialMenuParams(mcfg.fontfamily, mcfg.miniversion, mcfg.fontsize, mcfg.deadzone, 
 		mcfg.canceltime, mcfg.toggletype, "Move cursor to select action", "Canceled")
 end
 
@@ -139,6 +139,7 @@ function _M:load()
 	assert(self)
 	mcfg = self
 	self.fontfamily = self.fontfamily or 'Arial'
+	self.miniversion = self.miniversion or 0
 	self.fontsize = self.fontsize or 100
 	self.canceltime = self.canceltime or 500
 	self.deadzone = self.deadzone or 40
@@ -173,6 +174,7 @@ function _M:config()
 	
 	local opts = {
 		"Font family: %s",
+		"Minified menu: %b{Smaller version on the right side (more suitable for advanced users)}",
 		"Font size, percents: %i[10,500,1]{Percent of basic font size}",
 		"Cancel message time, ms: %i[10,10000,100]{1000 ms = 1 sec}",
 		"Select Deadzone, px: %i[10,500,1]",
@@ -197,11 +199,12 @@ function _M:config()
 
 	require "iuplua"
 	require "iupluacontrols"
-	local okay, fontfam, fontsize, canceltime, deadzone, toggletype, 
+	local okay, fontfam, miniversion, fontsize, canceltime, deadzone, toggletype, 
 			genBtn1, genBtn2, genBtn3, genBtn4, genBtn5, genBtn6, genBtn7, genBtn8,
 			hBtn1, hBtn2, hBtn3, hBtn4, hBtn5, hBtn6, hBtn7, hBtn8 = iup.GetParam("Configure Radial Menu", nil, 
 			table.concat(opts, "\n").."\n",
-		self.fontfamily, self.fontsize, self.canceltime, self.deadzone, self.toggletype,
+		self.fontfamily, self.miniversion, self.fontsize, 
+		self.canceltime, self.deadzone, self.toggletype,
 		func_name_to_node("general", self.genBtn1),
 		func_name_to_node("general", self.genBtn2),
 		func_name_to_node("general", self.genBtn3),
@@ -220,6 +223,7 @@ function _M:config()
 		func_name_to_node("h_scene", self.hBtn8))
 	if okay then
 		self.fontfamily = fontfam
+		self.miniversion = miniversion
 		self.fontsize = fontsize
 		self.canceltime = canceltime
 		self.deadzone = deadzone

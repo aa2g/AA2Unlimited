@@ -15,6 +15,7 @@ namespace RadialMenu {
 	DWORD lastRightClickTime = 0;
 	int startCursorX = 0;
 	int startCursorY = 0;
+	float currentVerScale = 1;
 
 	RDM_MENU menu;						// Most info about menu
 	std::map<std::string, FnPtr> cppFuncMap;
@@ -82,21 +83,21 @@ namespace RadialMenu {
 	void CreateHUD() {
 		if (!enabled) return;
 
-		int outCircleHeight = 780;
-		int inCircleHeight = 320;
+		int outCircleHeight = round(780 * currentVerScale);
+		int inCircleHeight = round(320 * currentVerScale);
 
 		// Main parts of menu
 		menu.inCircleD3dKey = DrawD3D::CreateCircleFilled(
-			960, 540, true, inCircleHeight, D3DCOLOR_ARGB(255, 33, 33, 33), -1);
+			menu.posX, menu.posY, true, inCircleHeight, D3DCOLOR_ARGB(255, 33, 33, 33), -1);
 		menu.outCircleD3dKey = DrawD3D::CreateCircleFilled(
-			960, 540, true, outCircleHeight, D3DCOLOR_ARGB(188, 11, 11, 11), -1);
+			menu.posX, menu.posY, true, outCircleHeight, D3DCOLOR_ARGB(188, 11, 11, 11), -1);
 		menu.cancelMsgBackgrD3dKey = DrawD3D::CreateBoxFilled(
-			960, 540, true, 75, 3, D3DCOLOR_ARGB(244, 233, 22, 22), -1);
-		menu.cancelMsgTextD3dKey = DrawD3D::CreateFontHUD(960, 540, true, DT_CENTER, 240, 
-			round(44 * menu.fontSizeMultiplier), FW_REGULAR, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
+			menu.posX, menu.posY, true, round(75 * currentVerScale), 3, D3DCOLOR_ARGB(244, 233, 22, 22), -1);
+		menu.cancelMsgTextD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(240 * currentVerScale),
+			round(44 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
 			General::utf8.from_bytes(canceledBtnText).c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
-		menu.defaultDescD3dKey = DrawD3D::CreateFontHUD(960, 540, true, DT_CENTER, 250,
-			round(32 * menu.fontSizeMultiplier), FW_REGULAR, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
+		menu.defaultDescD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(250 * currentVerScale),
+			round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
 			General::utf8.from_bytes(defaultDesc).c_str(), D3DCOLOR_ARGB(255, 188, 188, 188), -1);
 		// Buttons (General and H-scene)
 		int place_radius = round((outCircleHeight + inCircleHeight) / 4.0);
@@ -109,18 +110,18 @@ namespace RadialMenu {
 			for (int button_i = 0; button_i < countButtons[type_i]; button_i++) {
 				// Find the right place for button
 				current_angle = (90 + (buttonDegreesRange[type_i] * button_i)) * DrawD3D::D3DX_PI / 180;
-				pos_x = round(960 - place_radius * cos(current_angle));
-				pos_y = round(540 - place_radius * sin(current_angle));
+				pos_x = round(menu.posX - place_radius * cos(current_angle));
+				pos_y = round(menu.posY - place_radius * sin(current_angle));
 				// Button Active Background
 				menuButtonsArr[type_i][button_i].backgrActiveD3dKey = DrawD3D::CreateBoxFilled(
-					pos_x, pos_y, true, 80, 3, D3DCOLOR_ARGB(255, 188, 22, 166), -1);
+					pos_x, pos_y, true, round(80 * currentVerScale), 3, D3DCOLOR_ARGB(255, 188, 22, 166), -1);
 				// Button Title
-				menuButtonsArr[type_i][button_i].titleD3dKey = DrawD3D::CreateFontHUD(pos_x, pos_y, true, DT_CENTER, 200,
-					round(32 * menu.fontSizeMultiplier), FW_REGULAR, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
+				menuButtonsArr[type_i][button_i].titleD3dKey = DrawD3D::CreateFontHUD(pos_x, pos_y, true, DT_CENTER, round(200 * currentVerScale),
+					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
 					General::utf8.from_bytes(menuButtonsArr[type_i][button_i].titleIngame).c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
 				// Button Description
-				menuButtonsArr[type_i][button_i].descD3dKey = DrawD3D::CreateFontHUD(960, 540, true, DT_CENTER, 270,
-					round(32 * menu.fontSizeMultiplier), FW_REGULAR, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
+				menuButtonsArr[type_i][button_i].descD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(270 * currentVerScale),
+					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
 					General::utf8.from_bytes(menuButtonsArr[type_i][button_i].shortDesc).c_str(), D3DCOLOR_ARGB(255, 233, 233, 233), -1);
 			}
 		}
@@ -167,20 +168,28 @@ namespace RadialMenu {
 	}
 
 	// ScriptLua functions
-	void InitRadialMenuParams(const char *font_family, int font_size, int deadzone, int cancel_time, 
+	void InitRadialMenuParams(const char *font_family, int mini_version, int font_size, int deadzone, int cancel_time, 
 		int toggle_type, const char * default_desc, const char* canceled_button_text) {
 		if (!General::IsAAPlay) return;
 		menu.showed = false;
 		menu.showedType = 0;
 		menu.nowHscene = false;
+		enabled = true;
 		menu.fontFamily = font_family;
 		menu.fontSizeMultiplier = font_size / 100.000;
 		menu.deadzone = deadzone;
-		enabled = true;
 		toggleType = toggle_type;
 		cancelTime = cancel_time;
 		defaultDesc = default_desc;
 		canceledBtnText = canceled_button_text;
+
+		menu.posX = 960; // Default menu position (for 1920x1080 resolution template)
+		menu.posY = 540;
+		if (mini_version == 1) { // Minified ver. make smaller and move to the right
+			currentVerScale = 0.5;
+			menu.posX = 1670;
+		}
+
 
 		// Create Map of c++ functions, which will be using on click RadMenu buttons
 		CreateMapFuncCPP();
