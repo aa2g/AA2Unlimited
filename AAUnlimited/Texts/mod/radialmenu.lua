@@ -21,7 +21,7 @@ local function reload_buttons()
 	local short_desc
 	local count_gen = 1
 	local count_h = 1
-	local functions_path = aau_path("mod", "radialmenu", "registerfunc.txt")
+	local functions_path = aau_path("configs", "radmenu_registerfunc.txt")
 	local file = io.open(functions_path, "r")
 	if not file then return end
 	for line in file:lines() do
