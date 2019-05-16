@@ -31,6 +31,7 @@ namespace RadialMenu {
 		cppFuncMap[std::string("Controls_Space")] = Controls::PressKeySpace;
 		cppFuncMap[std::string("Controls_F9")] = Controls::screenshotF9;
 		cppFuncMap[std::string("Controls_F11")] = Controls::screenshotF11;
+		cppFuncMap[std::string("ClimaxButton_Start")] = ClimaxButton::StartClimaxPose;
 		cppFuncMap[std::string("FaceCam_Deactivate")] = ExtClass::Camera::ResetPovToNormal;
 	}
 
@@ -171,9 +172,6 @@ namespace RadialMenu {
 	void InitRadialMenuParams(const char *font_family, int mini_version, int font_size, int deadzone, int cancel_time, 
 		int toggle_type, const char * default_desc, const char* canceled_button_text) {
 		if (!General::IsAAPlay) return;
-		menu.showed = false;
-		menu.showedType = 0;
-		menu.nowHscene = false;
 		enabled = true;
 		menu.fontFamily = font_family;
 		menu.fontSizeMultiplier = font_size / 100.000;

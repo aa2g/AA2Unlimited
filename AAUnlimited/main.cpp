@@ -204,6 +204,7 @@ void* WINAPI AA2Unlimited(UINT SDKVersion)
 		LOGPRIONC(Logger::Priority::CRIT_ERR) "Failed to get Direct3DCreate9 constructor, crash imminent\r\n";
 
 	LUA_EVENT_NORET("launch");
+	ClimaxButton::InitCfg();
 
 	char buf[1024];
 

@@ -1,0 +1,83 @@
+// 
+// ------------- READ before making changes ---------------------
+// Pose redirection by default is based on their categories (id_category):
+// 'touches' (0) 	=> 'climax touches' (5)
+// 'service' (1) 	=> 'climax service' (6)
+// 'masturbate' (2) => 'climax touches' (5) (continue after category 0)
+// 'vaginal sex (3)'=> 'climax vaginal sex' (7)
+// 'anal sex' (4) 	=> 'climax anal sex' (8)
+// But some of normal versions of Poses can have a 0, 2 or 3
+// 		climax versions. In this case, the default order will shift
+//		and must be corrected in this config (see below, how to do this).
+// Starting from 5 category (climax categories), 
+// 		the pose redirection goes to the same pose and category
+// 		and can't changed in this config (It makes no sense).
+// For example, by default pose 10 in 0 category 
+// 		redirects her climax version on 10 pose in 5 category.
+// In the same time pose 10 in 7 category redirects her 
+//		climax version on 10 pose in 7 category.
+//
+// How to configure current poses pack:
+// 1) Clear/Comment all lines, starting with
+// 		[FIX_HETERO] ...
+// 		[FIX_HOMO] ...
+// 		[HETERO_LINK] ...
+// 		[HETERO_SHIFT] ...
+// 		[HOMO_LINK] ...
+// 		[HOMO_SHIFT] ...
+// 2) Set `Debug` param from `false` to `true` value
+// Now, you can see all necesseary info for working.
+// 
+// 3) Fix poses, that are not registered.
+// For this at start Set `VerifyRegister` param from `false` to `true` value
+// This forces to play Registered current pose again when pressed 'Start Climax' (for better visual debugging).
+// After that, start the H-scene, select poses one by one and click 'Start Climax'
+// In this cases, every current position must restarting. If this does not happen,
+// then the pose must be registered manually in this config in 'Fix register poses id' section.
+// Use, for example `[FIX_HETERO] 15` - for the fix Hetero pose 
+// with id 15 (see your id in logs `Current pose id: ...` after pressing 'Start Climax').
+// 
+// 4) Make sure all positions are registered in the previous step.
+//
+// 5) Verify attaching status between normal and climax poses.
+// For this Set `VerifyRegister` param from `true` to `false` value.
+// This no more forces to play Registered current pose again.
+// After that, start the H-scene, select poses one by one and click 'Start Climax'
+// In this cases, every current position must redirecting to his climax version.
+// If you have noticed Shifts, these Shifts can be caused by 2 factors:
+// Some of Normal pose versions doesn't have a climax versions at all, or have more, than 1.
+// In this case use `_LINK` command for problem poses 
+// in `Hetero and homo link fixes` section of this config. Example:
+// 
+// [HETERO_LINK] 	{3, 0} => {7, 12} {7, 13} {7, 15}   // 3 climax ver. for 1st button in category id == 3
+// [HOMO_LINK] 		{4, 13} => {8, 12} {} {}			// 1 climax ver. for 14th button in category id == 4
+// 
+// Also if some pose has a number of climax poses that are different from one,
+// there is often need to move the pointer among the climax poses. Example:
+// [HETERO_LINK] 	{3, 0} => {7, 12} {7, 13} {}	// Set 2 climax poses for 1 normal hetero pose
+// [HETERO_SHIFT]	+1								// shift pointer by +1 as it was occupied by 2 poses.
+// But for shift you can also use munis symbol for negative shift.
+// [HOMO_SHIFT]	-2
+//
+// If all verifications complete... Have fun!)
+// (Do not forget to set `Debug` param from `true` to `false` value =) )
+// --------------------------------------------------------------
+
+Debug=false
+VerifyRegister=false
+
+// Fix register poses id
+[FIX_HETERO]	72
+//[FIX_HOMO] 	51
+
+// Hetero and homo link fixes START ----------------------
+// (order this lines is important!)
+
+[HETERO_LINK] 	{3, 16} => {7, 16} {7, 17} {}
+[HETERO_SHIFT]	+1
+
+//[HOMO_LINK]		{2, 34} => {5, 22} {5, 23} {}
+//[HOMO_SHIFT]	-2
+//[HOMO_LINK]		{3, 21} => {6, 24} {} {}
+
+// Hetero and homo link fixes END -----------------------

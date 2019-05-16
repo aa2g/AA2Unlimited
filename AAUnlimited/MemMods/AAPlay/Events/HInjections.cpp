@@ -27,6 +27,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			data.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
 			data.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
+			ClimaxButton::Init();
 		}
 		loc_currentHInfo = hInfo;
 	}
@@ -37,7 +38,6 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			Shared::Triggers::HEndData data;
 			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
-			
 		}
 		loc_currentHInfo = NULL;
 
