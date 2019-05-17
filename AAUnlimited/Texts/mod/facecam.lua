@@ -46,6 +46,7 @@ local xyz
 local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
 local facecamFOV = 0.9
 local prevPosId = 0
+local backupGameCenterParamVal = 0x99
 
 local function fetch_rot()
 	if not hinfo then return end
@@ -156,10 +157,19 @@ local function set_status(current)
 		hide_heda(true,false)
 		hide_heda(false,false)
 		set_eye_focus(nil)
+		if backupGameCenterParamVal ~= 0x99 then	-- restore also 'Center H-scene' game param
+			poke_walk(GameBase + 0x376164, backupGameCenterParamVal, 0x34, 0x14, 0x38, 0x2D8)
+			backupGameCenterParamVal = 0x99
+		end
 	else
 		hide_heda(not current, false)
 		hide_heda(current, true)
 		set_eye_focus(current)
+		-- Temporary Turn off 'Center H-scene' game param (Prevent random rotating camera by the game)
+		if backupGameCenterParamVal == 0x99 then
+			backupGameCenterParamVal = peek_walk(GameBase + 0x376164, 0x34, 0x14, 0x38, 0x2D8)
+		end
+		poke_walk(GameBase + 0x376164, 0x0, 0x34, 0x14, 0x38, 0x2D8)
 	end
 end
 
@@ -336,9 +346,9 @@ local function kill_h()
 	if not hinfo then return end
 	fetch_rot()
 	Config.save()
+	current = nil
 	set_status(nil)
 	hinfo = false
-	current = nil
 end
 
 function on.end_h()
