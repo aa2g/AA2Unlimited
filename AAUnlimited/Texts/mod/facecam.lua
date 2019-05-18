@@ -1,8 +1,5 @@
 --@INFO POV facecam (camera tracks eye bones)
 
--- Problems to fix: 
--- 1) In `cumshot` part need restore_camera()  (non POV mode)
--- (Currently, is no way to track this `start_cumshot` events.)
 
 local c = require "const"
 local _M = {}
