@@ -312,6 +312,10 @@ void Lua::bindLua() {
 	_BINDING["RadMenuHstatus"] = LUA_LAMBDA0({
 		RadialMenu::SetHstatus(s.get(1));
 	});
+
+	_BINDING["SimKeyPress"] = LUA_LAMBDA0({
+		Controls::keyPress(s.get(1), s.get(2), true);
+	});
 	
 //	_BINDING["GetPlayerConversation"] = &PlayerConversationPtr;
 

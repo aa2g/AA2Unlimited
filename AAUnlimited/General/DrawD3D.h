@@ -8,6 +8,7 @@ namespace DrawD3D {
 
 	extern bool fontCreated;
 	extern bool canRender;
+	extern bool waitRenderDelay;
 	extern POINT cursor;
 	extern RECT HUDarrayRect[];
 	extern IUnknown *HUDarrayFont[];
@@ -50,6 +51,6 @@ namespace DrawD3D {
 	extern void MakeFonts(double scale_coefficient, int true_game_margin_Y, HWND game_hwnd);
 	extern void Render();
 
-	extern void canRenderDelay(bool start_delay = false);
+	extern void canRenderDelay(UINT delay_frames = 0);
 
 }
