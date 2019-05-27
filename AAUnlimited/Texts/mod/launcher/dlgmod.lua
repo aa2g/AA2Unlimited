@@ -5,7 +5,7 @@ local unchecked = '☐ '
 local checked = '☑ '
 local chk = #checked + 1
 
-local list = iup.list { expand="yes", font="Courier, 9"  }
+local list = iup.list { expand="yes", font="Courier, 9", visiblelines = 20 }
 local desc = iup.label { name="mod_desc", title="Description", expand="HORIZONTAL" }
 local dlglist = require("launcher.dlglist")
 
