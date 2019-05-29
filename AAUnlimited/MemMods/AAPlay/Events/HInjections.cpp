@@ -37,7 +37,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			Shared::Triggers::HEndData data;
 			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
-			
+			Shared::GameState::setHInfo(NULL);
 		}
 		loc_currentHInfo = NULL;
 
