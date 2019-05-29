@@ -54,7 +54,7 @@ namespace RadialMenu {
 		startCursorX = DrawD3D::cursor.x;
 		startCursorY = DrawD3D::cursor.y;
 
-		//LOGPRIO(Logger::Priority::INFO) << "RadMenu ShowMenu()\r\n";
+		//LOGPRIO(Logger::Priority::INFO) << "RadMenu ShowMenu() OK\r\n";
 
 		menu.showed = true;
 	}
@@ -203,7 +203,7 @@ namespace RadialMenu {
 					if (menu.showed)
 						ApplyChoise(true); // Cancel choise
 					else {
-						if (GetTickCount() - lastRightClickTime < 250)
+						if (GetTickCount() - lastRightClickTime < 400)
 							ShowMenu();
 					}
 					lastRightClickTime = GetTickCount();
