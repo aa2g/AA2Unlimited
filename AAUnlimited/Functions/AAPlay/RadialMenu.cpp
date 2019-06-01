@@ -32,6 +32,7 @@ namespace RadialMenu {
 		cppFuncMap[std::string("Controls_F9")] = Controls::screenshotF9;
 		cppFuncMap[std::string("Controls_F11")] = Controls::screenshotF11;
 		cppFuncMap[std::string("ClimaxButton_Start")] = ClimaxButton::StartClimaxPose;
+		cppFuncMap[std::string("ClimaxNormButton_Start")] = ClimaxButton::StartNormalPose;
 		cppFuncMap[std::string("FaceCam_Deactivate")] = ExtClass::Camera::ResetPovToNormal;
 	}
 

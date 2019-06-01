@@ -12,7 +12,8 @@ Note: add your functions, so that the modification's names are in alphabetical o
 {cpp} {h_scene} {Controls_F9} {Game - Screenshot (F9)} {Screenshot} {Make a screenshot (F9)}
 {cpp} {general} {Controls_F11} {Game - Screenshot (F11)} {Screenshot Alternate} {Make an alternate screenshot (F11)}
 {cpp} {h_scene} {Controls_F11} {Game - Screenshot (F11)} {Screenshot Alternate} {Make an alternate screenshot (F11)}
-{cpp} {h_scene} {ClimaxButton_Start} {Other - Start Climax} {Start Climax} {Starting climax version of current pose}
+{cpp} {h_scene} {ClimaxButton_Start} {Other - Start Climax} {Start Climax} {Starting Climax version of current pose}
+{cpp} {h_scene} {ClimaxNormButton_Start} {Other - Start Normal pose} {Start Normal pose} {Starting Normal version of current pose}
 {lua} {h_scene} {facecam_activate} {POV Facecam - ON} {Facecam ON} {Activate/Change person for POV in H-scene}
 {cpp} {h_scene} {FaceCam_Deactivate} {POV Facecam - OFF} {Facecam OFF} {Deactivate first person view in H-scene}
 {lua} {h_scene} {facecam_center_view} {POV Facecam - Center gaze} {Center gaze} {Resets current first person view in H-scene}
