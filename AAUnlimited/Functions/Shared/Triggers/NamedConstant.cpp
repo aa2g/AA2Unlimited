@@ -981,6 +981,61 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("PC conversation state updated"), TEXT("PC_CONVERSATION_STATE_UPDATED"), TEXT("PC Conversation state updated"),
 			Value(Shared::Triggers::Events::PC_CONVERSATION_STATE_UPDATED)
 		},
+		{
+			298, NCONSTCAT_EVENT_TYPE,
+			TEXT("Pc Answers in a Conversation"), TEXT("PC_RESPONSE"), TEXT("Pc Answers in a Conversation"),
+			Value(Shared::Triggers::Events::PC_RESPONSE)
+		},
+		{
+			299, NCONSTCAT_EVENT_TYPE,
+			TEXT("PC conversation line updated"), TEXT("PC_CONVERSATION_LINE_UPDATED"), TEXT("PC conversation line updated"),
+			Value(Shared::Triggers::Events::PC_CONVERSATION_LINE_UPDATED)
+		},
+		{
+			300, NCONSTCAT_EVENT_TYPE,
+			TEXT("Card Changes Room"), TEXT("ROOM_CHANGE"), TEXT("Card Changes Room"),
+			Value(Shared::Triggers::Events::ROOM_CHANGE)
+		},
+		{
+			301, NCONSTCAT_EVENT_TYPE,
+			TEXT("Key Press"), TEXT("KEY_PRESS"), TEXT("Key Press"),
+			Value(Shared::Triggers::Events::KEY_PRESS)
+		},
+		{
+			302, NCONSTCAT_EVENT_TYPE,
+			TEXT("H Position Change"), TEXT("HPOSITION_CHANGE"), TEXT("H Position Change"),
+			Value(Shared::Triggers::Events::HPOSITION_CHANGE)
+		},
+		{
+			303, NCONSTCAT_EVENT_TYPE,
+			TEXT("After PC Response"), TEXT("PC_AFTER_RESPONSE"), TEXT("After PC Response"),
+			Value(Shared::Triggers::Events::PC_AFTER_RESPONSE)
+		},
+		{
+			304, NCONSTCAT_EVENT_TYPE,
+			TEXT("After NPC Response"), TEXT("NPC_AFTER_RESPONSE"), TEXT("After NPC Response"),
+			Value(Shared::Triggers::Events::NPC_AFTER_RESPONSE)
+		},
+		{
+			305, NCONSTCAT_EVENT_TYPE,
+			TEXT("HI Poly Despawn"), TEXT("HI_POLY_DESPAWN"), TEXT("HI Poly Despawn"),
+			Value(Shared::Triggers::Events::HI_POLY_DESPAWN)
+		},
+		{
+			306, NCONSTCAT_EVENT_TYPE,
+			TEXT("HI Poly Despawn"), TEXT("HI_POLY_DESPAWN"), TEXT("HI Poly Despawn"),
+			Value(Shared::Triggers::Events::HI_POLY_DESPAWN)
+		},
+		{
+			307, NCONSTCAT_EVENT_TYPE,
+			TEXT("H End"), TEXT("H_END"), TEXT("H End"),
+			Value(Shared::Triggers::Events::H_END)
+		},
+		{
+			308, NCONSTCAT_EVENT_TYPE,
+			TEXT("H Start"), TEXT("H_START"), TEXT("H Start"),
+			Value(Shared::Triggers::Events::H_START)
+		},
 		//Moods
 		{
 			191, NCONSTCAT_MOOD,

@@ -43,6 +43,11 @@ extern std::vector<NamedConstant> g_NamedConstants[N_TYPES];
 
 inline const NamedConstant* NamedConstant::FromId(Types type,int id) {
 	if (type < 0 || type >= N_TYPES) return NULL;
+	for (int i = 0; i < g_NamedConstants[type].size(); i++) {
+		if (g_NamedConstants[type][i].id == id) {
+			return &g_NamedConstants[type][i];
+		}
+	}
 	if (id < 1 || id > g_NamedConstants[type].size()) return NULL;
 	return &g_NamedConstants[type][id-1];
 }
