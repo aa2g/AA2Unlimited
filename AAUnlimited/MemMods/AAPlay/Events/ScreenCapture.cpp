@@ -1,8 +1,4 @@
 #include "StdAfx.h"
-#include <gdiplus.h>
-
-
-#pragma comment(lib, "Gdiplus.lib")
 
 namespace PlayInjections {
 	namespace ScreenCapture {
@@ -44,25 +40,12 @@ namespace PlayInjections {
 			return -1;  // Failure
 		}
 
-		void InitGDI() {
-			ULONG_PTR gdiToken;
-			Gdiplus::GdiplusStartupInput gdiStartupInput;
-			gdiStartupInput.GdiplusVersion = 1;
-			gdiStartupInput.DebugEventCallback = NULL;
-			gdiStartupInput.SuppressBackgroundThread = FALSE;
-			gdiStartupInput.SuppressExternalCodecs = FALSE;
-
-			Gdiplus::GdiplusStartup(&gdiToken, &gdiStartupInput, NULL);
-
-			GetEncoderClsid(L"image/jpeg", &JPGencoderClsid);
-			GetEncoderClsid(L"image/png", &PNGencoderClsid);
-
-			gdiInit = true;
-		}
-
 		void __stdcall SaveAs(DWORD gdiBitmapInfo, DWORD gdiBitmapData, WCHAR* path) {
 			if (!gdiInit) {
-				InitGDI();
+				gdiInit = true;
+				GetEncoderClsid(L"image/jpeg", &JPGencoderClsid);
+				GetEncoderClsid(L"image/png", &PNGencoderClsid);
+
 				jpegParameters.Count = 1;
 				jpegParameters.Parameter[0].Guid = Gdiplus::EncoderQuality;
 				jpegParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
