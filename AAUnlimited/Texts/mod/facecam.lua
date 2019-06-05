@@ -212,8 +212,8 @@ local function activateFacecam(saveconfig)
 end
 
 local function deactivateFacecam(saveconfig)
-	if (not hinfo) then return end
-	if (current == nil) then return end
+	if not hinfo then return end
+	if current == nil then return end
 	fetch_rot()
 	current = nil
 	if saveconfig then
@@ -225,7 +225,6 @@ end
 
 function on.char(k)
 	if not hinfo then return k end
-	if k > 255 then return k end
 	local chr = string.char(k)
 	if chr == mcfg.activate then
 		activateFacecam(false)
@@ -242,8 +241,6 @@ function on.char(k)
 end
 
 local function centerView()
-	if (not hinfo) then return end
-	if (current == nil) then return end
 	xyz.x = 0
 	xyz.y = 0
 	xyz.z = 0
