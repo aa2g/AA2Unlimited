@@ -84,6 +84,8 @@ namespace Overlay {
 			&d3dpp,
 			&d3ddev);
 
+		pFont = 0;
+		std::wstring fontName = General::utf8.from_bytes("Arial");
 
 		HMODULE hm = GetModuleHandleA("d3dx9_42");
 		void *(WINAPI *D3DXCreateFont)(
@@ -102,83 +104,24 @@ namespace Overlay {
 			);
 		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
 
+		D3DXCreateFont(d3ddev, 32, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, fontName.c_str(), &pFont);
 
-		pFont = 0;			// Overlay default font
-		D3DXCreateFont(d3ddev, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &pFont);
-		if (pFont)
-			DrawText = decltype(DrawText)(((void***)pFont)[0][15]);
-		else
-			LOGPRIONC(Logger::Priority::WARN) "Overlay Font creation failed:\r\n";
+		if (!pFont) return;
 
-		Subtitles::Font = 0; // Subs Font
-		D3DXCreateFont(d3ddev, Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes(Subtitles::fontFamily).c_str(), &Subtitles::Font);
-		if (Subtitles::Font)
-			DrawText = decltype(DrawText)(((void***)Subtitles::Font)[0][15]);
-		else
-			LOGPRIONC(Logger::Priority::WARN) "Subs Font creation failed:\r\n";
-		
-
+		DrawText = decltype(DrawText)(((void***)pFont)[0][15]);
 	}
 
 	void Render()
 	{
 		if (Overlay::overlayHwnd == NULL) return;
 		// clear the window alpha
-		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(1, 75, 0, 0), 1.0f, 0);
+		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(10, 255, 0, 0), 1.0f, 0);
 		d3ddev->BeginScene();
 
-		RECT rect = { 10, 40, 500, 500 }; // debug
-		DrawText(pFont, 0, L"Overlay test v0.0.1", -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(100, 0, 255, 0));
+		RECT rect = { 10,10, 500, 500 };
+		DrawText(pFont, 0, L"Overlay test version 0.0.1", -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 255, 0));
 
-		// 1) Subtitles
-		if (g_Config.bDisplaySubs) {
-			if (!Subtitles::lines.empty()) {
-				if (Subtitles::outlineLayersCount != 0 || Subtitles::separateColorMale)
-				{
-					int line_num = 0;
-					for each (const auto line in Subtitles::lines) // for each subs line
-					{
-						int top_offset = Subtitles::lineHeight * line_num;
-						RECT *tempRect;
-						for (int i = 0; i < Subtitles::outlineLayersCount; i++) // outline layers
-						{
-							tempRect = &Subtitles::rect[i];
-							tempRect->top = tempRect->top + top_offset;
-							tempRect->bottom = tempRect->bottom + top_offset;
-							DrawText(Subtitles::Font, 0, std::get<0>(line).c_str(), -1, tempRect, 
-								DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[0]);
-							tempRect->top = tempRect->top - top_offset;
-							tempRect->bottom = tempRect->bottom - top_offset;
-						}
-						// Colorized text
-						tempRect = &Subtitles::rect[Subtitles::fontLayersCount - 1];
-						tempRect->top = tempRect->top + top_offset;
-						tempRect->bottom = tempRect->bottom + top_offset;
-						DrawText(Subtitles::Font, 0, std::get<0>(line).c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], 
-							DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[std::get<1>(line)]);
-						tempRect->top = tempRect->top - top_offset;
-						tempRect->bottom = tempRect->bottom - top_offset;
-
-						line_num++;
-					}
-				}
-				else { // Only Colorized text
-					Subtitles::text.clear();
-					for each (const auto line in Subtitles::lines)
-						Subtitles::text += std::get<0>(line);
-					DrawText(Subtitles::Font, 0, Subtitles::text.c_str(), -1, &Subtitles::rect[Subtitles::fontLayersCount - 1], 
-						DT_NOCLIP | Subtitles::subsCentered, Subtitles::colors[1]);
-				}
-			}
-		}
-
-
-		// 2) Test image
-		// ...
-
-		LOGPRIONC(Logger::Priority::INFO) "Render()\r\n"; // debug
 		d3ddev->EndScene();
 		d3ddev->Present(NULL, NULL, NULL, NULL);   // displays the created frame on the screen
 	}
@@ -229,6 +172,11 @@ namespace Overlay {
 
 		CheckPosition();
 		Render();
+
+		// If Game resolution == Screen resolution - all Overlay margins must be zero
+		// ...
+		
+
 	}
 	
 }

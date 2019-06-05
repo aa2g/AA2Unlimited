@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include "Functions/Overlay.h"
 
 
 namespace Subtitles {
@@ -25,7 +24,6 @@ namespace Subtitles {
 	const char *fontFamily = "Arial";
 	int fontSize = 24;
 	int lineHeight = 36;
-	IUnknown *Font;
 	int gameWindowWidth = 0;
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
@@ -39,7 +37,6 @@ namespace Subtitles {
 		if (lines.size() > maxLines)
 			lines.pop_front();
 		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
-		Overlay::Render();
 	}
 
 	static int HexadecimalToDecimal(std::string hex) {
@@ -160,7 +157,6 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
-			Overlay::Render();
 		}
 	}
 }
