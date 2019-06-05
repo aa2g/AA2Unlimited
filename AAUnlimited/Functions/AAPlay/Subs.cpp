@@ -26,11 +26,7 @@ namespace Subtitles {
 	int fontSize = 24;
 	int lineHeight = 36;
 	IUnknown *Font;
-	int areaPosPercentsX = 0; // in `% * 100`
-	int areaPosPercentsY = 0;
-	int outlineSpread = 0;
 	int gameWindowWidth = 0;
-	int gameWindowHeight = 0;
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
 
@@ -113,11 +109,10 @@ namespace Subtitles {
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
-		LOGPRIONC(Logger::Priority::INFO) "11111: " << area_pos_X << "_" << area_pos_Y << "!\r\n";
 		fontFamily = font_family;
 		if (text_align == 1) { subsCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
-		lineHeight = round(fontSize * line_height / (float)100);
+		lineHeight = round(fontSize * line_height / 100);
 		duration = show_duration * 1000;
 		maxLines = max_lines - 1;
 
@@ -126,10 +121,18 @@ namespace Subtitles {
 		else if (outline_quality == 0)
 			outlineLayersCount = 0;
 
-		areaPosPercentsX = area_pos_X;
-		areaPosPercentsY = area_pos_Y;
-		outlineSpread = outline_spread;
-		if (gameWindowWidth > 0) { SetSubsAreaSize(); } // If game window Width is available - Set the rectangles
+		int area_coords_Right = area_pos_X + 100; // Temporary params
+		int area_coords_Bottom = area_pos_Y + 100;
+		rect[0] = { area_pos_X + outline_spread, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[1] = { area_pos_X - outline_spread, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[2] = { area_pos_X - outline_spread, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[3] = { area_pos_X + outline_spread, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[4] = { area_pos_X - outline_spread, area_pos_Y, area_coords_Right, area_coords_Bottom };
+		rect[5] = { area_pos_X + outline_spread, area_pos_Y, area_coords_Right, area_coords_Bottom };
+		rect[6] = { area_pos_X, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[7] = { area_pos_X, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
+		rect[8] = { area_pos_X, area_pos_Y, area_coords_Right, area_coords_Bottom };
+		if (gameWindowWidth > 0) { CorrectSubsAreaSize(); } // If game window Width is available - correct the rectangles
 
 		colors[0] = sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
 		colors[1] = sHEX_sRGB_toRGBA(text_color_female, colors[1]);
@@ -141,28 +144,9 @@ namespace Subtitles {
 		}
 	}
 
-	void SetSubsAreaSize() {
-		int area_pos_X = round(gameWindowWidth * areaPosPercentsX / (float)10000);
-		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000);
-		LOGPRIONC(Logger::Priority::INFO) "2222222: " << area_pos_X << "_" << area_pos_Y << "!\r\n";
-
-		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread, 
-			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
-		rect[1] = { area_pos_X - outlineSpread, area_pos_Y + outlineSpread, 
-			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
-		rect[2] = { area_pos_X - outlineSpread, area_pos_Y - outlineSpread, 
-			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[3] = { area_pos_X + outlineSpread, area_pos_Y - outlineSpread, 
-			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[4] = { area_pos_X - outlineSpread, area_pos_Y, 
-			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
-		rect[5] = { area_pos_X + outlineSpread, area_pos_Y, 
-			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
-		rect[6] = { area_pos_X, area_pos_Y - outlineSpread, 
-			area_pos_X + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[7] = { area_pos_X, area_pos_Y + outlineSpread, 
-			area_pos_X + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
-		rect[8] = { area_pos_X, area_pos_Y, area_pos_X + gameWindowWidth, area_pos_Y + gameWindowHeight };
+	void CorrectSubsAreaSize() {
+		for (int i = 0; i < fontLayersCount; i++)
+			rect[i].right = rect[i].left + gameWindowWidth;
 	}
 
 	void SetSubtitlesColor(int r, int g, int b) {
