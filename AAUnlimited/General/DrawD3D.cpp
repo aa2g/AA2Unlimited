@@ -28,8 +28,6 @@ namespace DrawD3D {
 	bool initialized = false;
 	bool fontCreated = false;
 	bool canRender = true;
-	bool waitRenderDelay = false; // If can't render by waiting delay
-	UINT waitRenderFrames = 0;
 	int frame_after_start_H_now = 0;
 	IDirect3DDevice9* pDevice;
 	HWND gameHwnd = NULL;
@@ -559,12 +557,9 @@ namespace DrawD3D {
 	}
 
 	// Fix against drawing on naked skin
-	void canRenderDelay(UINT delay_frames) {
-		if (delay_frames > 0) {
+	void canRenderDelay(bool start_delay) {
+		if (start_delay == true) {
 			canRender = false;
-			waitRenderDelay = true;
-			waitRenderFrames = (delay_frames > waitRenderFrames - frame_after_start_H_now) ?
-				delay_frames : (waitRenderFrames - frame_after_start_H_now);
 			frame_after_start_H_now = 0;
 			return;
 		}
@@ -572,14 +567,12 @@ namespace DrawD3D {
 		if (canRender)
 			return;
 
-		if (frame_after_start_H_now < waitRenderFrames) { // Wait some frames
+		if (frame_after_start_H_now < 200) { // Wait 200 frames
 			frame_after_start_H_now++;
 			return;
 		}
 		frame_after_start_H_now = 0;
-		waitRenderFrames = 0;
 		canRender = true;
-		waitRenderDelay = false;
 	}
 
 	// Currently not working (need to find a way for correct displaying 

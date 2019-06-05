@@ -7,8 +7,7 @@ namespace Controls {
 	static const WORD ESCAPE_SCANCODE = 0x01;
 	// ...
 
-	bool keyPressed = false;
-	bool needShortDelay = false;
+	bool key_pressed = false;
 	std::list<WORD> pressedKeys;
 
 	void sendKey(WORD scan_code, bool key_down, bool extended = false) {
@@ -31,23 +30,18 @@ namespace Controls {
 	}
 
 	// Correct Full Press process: KeyDown and KeyUp on the next Rendered frame
-	void keyPress(WORD scan_code, bool extended, bool needDelay) {
+	void keyPress(WORD scan_code, bool extended) {
 		keyDown(scan_code, extended);
 		pressedKeys.push_back(scan_code);
-		keyPressed = true;
-		needShortDelay = needDelay; // if need 1 more frame to release the key
+		key_pressed = true;
 	}
 
 	void keysRelease() { // (execute in RenderWrap.cpp)
-		if (needShortDelay) { // If need 1 more frame to release the key
-			needShortDelay = false;
-			return;
-		}
-		if (keyPressed) { // Send keyup for each pressed key
+		if (key_pressed) { // Send keyup for each pressed key
 			for each (const auto key_scancode in pressedKeys)
 				keyUp(key_scancode);
 			pressedKeys.clear();
-			keyPressed = false;
+			key_pressed = false;
 		}
 	}
 

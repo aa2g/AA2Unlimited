@@ -47,7 +47,6 @@ local normalCamera = {rotx=0,roty=0,rotz=0,rotdist=0,fov=0.5}
 local facecamFOV = 0.9
 local prevPosId = 0
 local backupGameCenterParamVal = 0x99
-local deactivatedByCumshot = false
 
 local function fetch_rot()
 	if not hinfo then return end
@@ -317,25 +316,6 @@ end
 function on.change_h(hi, currpos, active, passive, aface, pface)
 	Config.save()
 	after_change_h()
-end
-
-function on.start_h_cumshot(hi)
-	if current ~= nil then
-		deactivatedByCumshot = true
-		SimKeyPress(0x11) -- Press W key
-		deactivateFacecam(true) -- Verify reset status (if key W not reset)
-		local cam = hinfo:GetCamera() -- Fix camera Pitch bad values
-		if cam.m_xRotRad > 0 and cam.m_xRotRad < 5 then
-			cam.m_xRotRad = 6
-		end
-	end
-end
-
-function on.end_h_cumshot(hi)
-	if deactivatedByCumshot and current == nil then
-		deactivatedByCumshot = false
-		activateFacecam(true)
-	end
 end
 
 function on.start_h(hi)
