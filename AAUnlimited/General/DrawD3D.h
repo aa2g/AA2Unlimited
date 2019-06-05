@@ -34,7 +34,7 @@ namespace DrawD3D {
 	extern int CreateHalfCircleFilled(bool leftSide, double x, double y, 
 		bool center_coords, double height, DWORD color, int key_node);
 
-	extern void MakeFonts(double scale_coefficient, int true_game_margin_Y, HWND game_hwnd);
+	extern void MakeFonts(double scale_coefficient, int true_game_margin_Y);
 	extern void Render();
 	
 

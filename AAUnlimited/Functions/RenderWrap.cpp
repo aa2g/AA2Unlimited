@@ -1034,7 +1034,7 @@ public:;
 			int trueGameWindowHeight = trueGameWindowWidth / 16.00 * 9;
 			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
 			// Create D3D fonts
-			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY, hFocusWindow);
+			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY);
 			// Game window Width and Height for Subtitles and Notifications
 			Subtitles::SetSubsAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
 			Notifications::SetNotifyAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
