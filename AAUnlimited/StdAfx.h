@@ -106,8 +106,6 @@
 #include "Functions/Shared/Triggers/Thread.h"
 #include "Functions/Shared/Triggers/Triggers.h"
 #include "Functions/Shared/Triggers/Value.h"
-#include "Functions/Notifications.h"
-#include "Functions/Overlay.h"
 #include "Functions/TextureImage.h"
 #include "Functions/XXObjectFile.h"
 #include "General/Buffer.h"

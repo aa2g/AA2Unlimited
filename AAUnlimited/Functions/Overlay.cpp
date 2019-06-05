@@ -25,6 +25,7 @@ namespace Overlay {
 
 	void CheckPosition() {
 		GetWindowRect(gameHwnd, &gameWindowRECT);
+		//ClientToScreen(gameHwnd, reinterpret_cast<POINT*>(&gameWindowRECT.left)); // convert top-left corner to screen coords
 		if (overlayPositionX == gameWindowRECT.left + gameWindowMarginX 
 			&& overlayPositionY == gameWindowRECT.top + gameWindowMarginY)
 			return;
@@ -32,8 +33,11 @@ namespace Overlay {
 		if (gameWindowRECT.bottom - gameWindowRECT.top - gameWindowHeight - gameWindowMarginX != gameWindowMarginY) {
 			gameWindowMarginX = round((gameWindowRECT.right - gameWindowRECT.left - gameWindowWidth) / 2);
 			gameWindowMarginY = gameWindowRECT.bottom - gameWindowRECT.top - gameWindowHeight - gameWindowMarginX;
+			LOGPRIONC(Logger::Priority::INFO) "Calculated offsets: " << gameWindowMarginX << "_" << gameWindowMarginY << "!\r\n";
 		}
 
+		LOGPRIONC(Logger::Priority::INFO) "Wind moving (func)" << gameWindowRECT.left << "_" << gameWindowMarginX 
+			<< "_" << gameWindowRECT.top << "_" << gameWindowMarginY << "!\r\n";
 		// Set Overlay position, if game window moved
 		overlayPositionX = gameWindowRECT.left + gameWindowMarginX;
 		overlayPositionY = gameWindowRECT.top + gameWindowMarginY;
@@ -115,14 +119,6 @@ namespace Overlay {
 		else
 			LOGPRIONC(Logger::Priority::WARN) "Subs Font creation failed:\r\n";
 		
-		Notifications::Font = 0; // Notifications Font
-		D3DXCreateFont(d3ddev, Notifications::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
-			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes(Notifications::fontFamily).c_str(), &Notifications::Font);
-		if (Notifications::Font)
-			DrawText = decltype(DrawText)(((void***)Notifications::Font)[0][15]);
-		else
-			LOGPRIONC(Logger::Priority::WARN) "Notifications Font creation failed:\r\n";
-
 
 	}
 
@@ -130,14 +126,14 @@ namespace Overlay {
 	{
 		if (Overlay::overlayHwnd == NULL) return;
 		// clear the window alpha
-		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
+		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(1, 75, 0, 0), 1.0f, 0);
 		d3ddev->BeginScene();
 
 		RECT rect = { 10, 40, 500, 500 }; // debug
 		DrawText(pFont, 0, L"Overlay test v0.0.1", -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(100, 0, 255, 0));
 
 		// 1) Subtitles
-		if (Subtitles::enabled) {
+		if (g_Config.bDisplaySubs) {
 			if (!Subtitles::lines.empty()) {
 				if (Subtitles::outlineLayersCount != 0 || Subtitles::separateColorMale)
 				{
@@ -178,50 +174,8 @@ namespace Overlay {
 			}
 		}
 
-		// 2) Notifications
-		if (Notifications::enabled) {
-			if (!Notifications::lines.empty()) {
-				if (Notifications::outlineLayersCount != 0 || Notifications::separateColorType)
-				{
-					int line_num = 0;
-					for each (const auto line in Notifications::lines) // for each subs line
-					{
-						int top_offset = -Notifications::lineHeight * line_num;
-						RECT *tempRect;
-						for (int i = 0; i < Notifications::outlineLayersCount; i++) // outline layers
-						{
-							tempRect = &Notifications::rect[i];
-							tempRect->top = tempRect->top + top_offset;
-							tempRect->bottom = tempRect->bottom + top_offset;
-							DrawText(Notifications::Font, 0, std::get<0>(line).c_str(), -1, tempRect,
-								DT_NOCLIP | Notifications::notifyCentered, Notifications::colors[0]);
-							tempRect->top = tempRect->top - top_offset;
-							tempRect->bottom = tempRect->bottom - top_offset;
-						}
-						// Colorized text
-						tempRect = &Notifications::rect[Notifications::fontLayersCount - 1];
-						tempRect->top = tempRect->top + top_offset;
-						tempRect->bottom = tempRect->bottom + top_offset;
-						DrawText(Notifications::Font, 0, std::get<0>(line).c_str(), -1, &Notifications::rect[Notifications::fontLayersCount - 1],
-							DT_NOCLIP | Notifications::notifyCentered, Notifications::colors[std::get<1>(line)]);
-						tempRect->top = tempRect->top - top_offset;
-						tempRect->bottom = tempRect->bottom - top_offset;
 
-						line_num++;
-					}
-				}
-				else { // Only Colorized text
-					Notifications::text.clear();
-					for each (const auto line in Notifications::lines)
-						Notifications::text += std::get<0>(line);
-					DrawText(Notifications::Font, 0, Notifications::text.c_str(), -1, &Notifications::rect[Notifications::fontLayersCount - 1],
-						DT_NOCLIP | Notifications::notifyCentered, Notifications::colors[1]);
-				}
-			}
-		}
-
-
-		// 3) Test image
+		// 2) Test image
 		// ...
 
 		LOGPRIONC(Logger::Priority::INFO) "Render()\r\n"; // debug

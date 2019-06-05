@@ -6,7 +6,6 @@
 #include <regex>
 
 namespace Subtitles {
-	extern bool enabled;
 	extern std::wstring text;
 	extern std::list<std::tuple< std::wstring, int >> lines;
 	extern const int fontLayersCount;

@@ -1,4 +1,4 @@
---@INFO Shows game subtitles
+--@INFO Subtitles loader
 
 local _M = {}
 local opts = {

@@ -1,8 +1,9 @@
 #include "StdAfx.h"
+#include "Functions/Overlay.h"
+
 
 namespace Subtitles {
 
-	bool enabled = false;
 	std::wstring text;
 	std::list<std::tuple< std::wstring, int >> lines;
 	const int fontLayersCount = 9;
@@ -112,7 +113,7 @@ namespace Subtitles {
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
-		enabled = true;
+		LOGPRIONC(Logger::Priority::INFO) "11111: " << area_pos_X << "_" << area_pos_Y << "!\r\n";
 		fontFamily = font_family;
 		if (text_align == 1) { subsCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
@@ -143,7 +144,8 @@ namespace Subtitles {
 	void SetSubsAreaSize() {
 		int area_pos_X = round(gameWindowWidth * areaPosPercentsX / (float)10000);
 		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000);
-		
+		LOGPRIONC(Logger::Priority::INFO) "2222222: " << area_pos_X << "_" << area_pos_Y << "!\r\n";
+
 		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread, 
 			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
 		rect[1] = { area_pos_X - outlineSpread, area_pos_Y + outlineSpread, 
@@ -174,9 +176,7 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
-
-			Notifications::AddNotification("Subtitle disappeared", 1); // debug only
-			// Overlay::Render(); UNCOMMENT AFTER DELETING PREV LINE OF CODE
+			Overlay::Render();
 		}
 	}
 }
