@@ -10,9 +10,9 @@ struct RDM_BUTTON{
 };
 
 struct RDM_MENU {
-	bool showed = false;
-	int showedType = 0; // 0 - General menu, 1 - H-scene menu
-	bool nowHscene = false;
+	bool showed;
+	int showedType; // 0 - General menu, 1 - H-scene menu
+	bool nowHscene;
 	int posX;
 	int posY;
 	int selectedBtnNode;
