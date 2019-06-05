@@ -42,7 +42,7 @@ namespace Subtitles {
 		if (lines.size() > maxLines)
 			lines.pop_front();
 		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
-		Overlay::needRender = true;
+		Overlay::Render();
 	}
 
 	static int HexadecimalToDecimal(std::string hex) {
@@ -174,10 +174,9 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
-			Overlay::needRender = true;
 
 			Notifications::AddNotification("Subtitle disappeared", 1); // debug only
-			Notifications::AddNotification("Subtitle disappeared", 2); // debug only
+			// Overlay::Render(); UNCOMMENT AFTER DELETING PREV LINE OF CODE
 		}
 	}
 }

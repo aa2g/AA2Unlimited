@@ -6,7 +6,6 @@ namespace Overlay {
 	extern int gameWindowWidth;
 	extern int gameWindowHeight;
 	extern HWND overlayHwnd;
-	extern bool needRender;
 
 	extern void CreateOverlay();
 	extern void Render();

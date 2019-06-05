@@ -41,8 +41,6 @@ extern D3DMATRIX* (__stdcall *D3DXMatrixTranslation)(D3DMATRIX *pOut, float x, f
 extern D3DMATRIX* (__stdcall *D3DXMatrixScaling)(D3DMATRIX *pOut, float sx, float sy, float sz);
 extern D3DMATRIX* (__stdcall *D3DXMatrixRotationQuaternion)(D3DMATRIX *pOut,const D3DXQUATERNION *pQ);
 extern D3DMATRIX* (__stdcall *D3DXMatrixRotationYawPitchRoll)(D3DMATRIX *pOut,FLOAT Yaw,FLOAT Pitch,FLOAT Roll);
-///extern HRESULT(__stdcall *D3DXCreateTextureFromFile)(LPDIRECT3DDEVICE9 pDevice, LPCTSTR pSrcFile, LPDIRECT3DTEXTURE9 *ppTexture);
-///extern HRESULT(__stdcall *D3DXCreateSprite)(LPDIRECT3DDEVICE9 pDevice, LPD3DXSPRITE *ppSprite);
 void Init();
 
 }

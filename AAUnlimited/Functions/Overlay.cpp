@@ -4,8 +4,6 @@
 #pragma comment (lib, "d3d9.lib")
 #pragma comment (lib, "Dwmapi.lib")
 
-// Current BUG: Overlay not updating in Fullscreen (checkbox in launcher)
-
 namespace Overlay {
 
 	HWND gameHwnd = NULL;
@@ -22,46 +20,7 @@ namespace Overlay {
 	LPDIRECT3D9 d3d;    // the pointer to our Direct3D interface
 	LPDIRECT3DDEVICE9 d3ddev;
 	IUnknown *pFont;
-	///LPDIRECT3DTEXTURE9 imagetex; //textute our image will be loaded into	/////////////////////
-	///LPD3DXSPRITE sprite; //sprite to display our image						////////////////////
-	///D3DXVECTOR3 imagepos; //vector for the position of the sprite			/////////////////////
-	bool needRender = false;
-	bool gameInFullscreen = false;
 	void *(WINAPI *DrawText)(IUnknown *, void*, LPCTSTR, int, LPRECT, DWORD, D3DCOLOR);
-
-	////////////////////////////
-	/*
-	void CleanUp() //function to delete/release things to prevent memory leak
-	{
-		if (d3d) //check if pD3D ism't released
-			d3d->Release(); //release it
-		if (d3ddev) //check if pDevice ism't released
-			d3ddev->Release(); //release it
-		if (sprite) //check if sprite ism't released
-			sprite->Release(); //release it
-		if (imagetex) //check if imagetex ism't released
-			imagetex->Release(); //release it
-	}
-
-	HRESULT initialize()
-	{
-		if (FAILED(Shared::D3DXCreateTextureFromFile(d3ddev, L"Close.png", &imagetex)))//first parameter is our device,second is the path to our image, third is a texture variable to load the image into
-		{
-			LOGPRIONC(Logger::Priority::WARN) "Failed to laod the image\r\n"; // debug
-			return E_FAIL; //return it failed
-		}
-		if (FAILED(D3DXCreateSprite(d3ddev, &sprite)))//first parameter is our device, second is a empty sprite variable
-		{
-			LOGPRIONC(Logger::Priority::WARN) "Failed to create the sprite\r\n"; // debug
-			return E_FAIL; //return it failed
-		}
-		imagepos.x = 8.0f; //coord x of our sprite
-		imagepos.y = 18.0f; //coord y of out sprite
-		imagepos.z = 0.0f; //coord z of out sprite
-		return S_OK;
-	}
-	*/
-		////////////////////////////
 
 
 	void CheckPosition() {
@@ -165,33 +124,18 @@ namespace Overlay {
 			LOGPRIONC(Logger::Priority::WARN) "Notifications Font creation failed:\r\n";
 
 
-		////////////////////////
-		/*
-		if (FAILED(initialize())) //call the initialize() function and check if it failed
-		{
-			LOGPRIONC(Logger::Priority::WARN) "Failed to initialize\r\n";
-			CleanUp(); //call your CleanUp() function to prevent memory leak
-		}
-		*/
-			/////////////////////////
-
 	}
 
 	void Render()
 	{
 		if (Overlay::overlayHwnd == NULL) return;
-		needRender = false; // For every frame checker
-
 		// clear the window alpha
 		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 		d3ddev->BeginScene();
 
-		if (gameInFullscreen) {// If Game in Fullscreen mode - Overlay doesn't updating (Notify user about this)
-			RECT rect = { 10, 40, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"Overlay doesn't work in fullscreen mode. Please turn off 'Fullscreen' parameter in the launcher (Graphics tab). ", 
-				-1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 22));
-		}
-		
+		RECT rect = { 10, 40, 500, 500 }; // debug
+		DrawText(pFont, 0, L"Overlay test v0.0.1", -1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(100, 0, 255, 0));
+
 		// 1) Subtitles
 		if (Subtitles::enabled) {
 			if (!Subtitles::lines.empty()) {
@@ -278,14 +222,7 @@ namespace Overlay {
 
 
 		// 3) Test image
-		/////////////////////////////////////
-		/*
-		sprite->Begin(D3DXSPRITE_ALPHABLEND); //begin our sprite with alphablend so it support alpha, like png use alpha
-		sprite->Draw(imagetex, NULL, NULL, &imagepos, 0xFFFFFFFF); //Draw the sprite, first parameter is the image texture, 4th parameter is the position, last parameter is the color change leave to 0xFFFFFFFF for no change
-		sprite->End(); //end the sprite
-		*/
-			/////////////////////////////////////
-
+		// ...
 
 		LOGPRIONC(Logger::Priority::INFO) "Render()\r\n"; // debug
 		d3ddev->EndScene();
@@ -331,16 +268,13 @@ namespace Overlay {
 		SetLayeredWindowAttributes(overlayHwnd, 0, 255, LWA_ALPHA);
 
 		ShowWindow(overlayHwnd, SW_SHOWDEFAULT);
+		
 		initD3D(overlayHwnd);
-		::SetWindowPos(gameHwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
-		// If Game in Fullscreen mode - Overlay doesn't updating (Notify user about this in Render())
-		if (General::IsAAPlay && g_Config.getb("bFullscreen")) { gameInFullscreen = true; }
+		::SetWindowPos(gameHwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 		CheckPosition();
 		Render();
-
-		///CleanUp(); //call your CleanUp() function to prevent memory leak /////////////////////
 	}
 	
 }

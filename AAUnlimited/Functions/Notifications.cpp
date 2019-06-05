@@ -42,7 +42,7 @@ namespace Notifications {
 		if (lines.size() > maxLines)
 			lines.pop_front();
 		lines.push_back(std::make_tuple(General::utf8.from_bytes(text) + L"\n", type_id));
-		Overlay::needRender = true;
+		Overlay::Render();
 	}
 
 	static int HexadecimalToDecimal(std::string hex) {
@@ -174,7 +174,7 @@ namespace Notifications {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
-			Overlay::needRender = true;
+			Overlay::Render();
 		}
 	}
 }
