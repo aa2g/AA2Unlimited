@@ -105,7 +105,7 @@ namespace Overlay {
 		// ******************************************* Font Creation *******************************************
 		// D3D Fonts
 		pFont = 0;				// Overlay default font
-		D3DXCreateFont(d3ddev, 200, 0, FW_REGULAR, 1, false, DEFAULT_CHARSET,
+		D3DXCreateFont(d3ddev, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &pFont);
 		if (pFont)
 			DrawText = decltype(DrawText)(((void***)pFont)[0][15]);
@@ -148,23 +148,11 @@ namespace Overlay {
 		Use to render Text, that will be under the Images and Text, rendered by GDI+
 		*/
 
-		//if (gameInFullscreen) {// If Game in Fullscreen mode - Overlay doesn't updating (Notify user about this)
-			RECT rectFullscreen = { 10, 10, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"\u258B\u258B", 
-				-1, &rectFullscreen, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-			RECT rectFullscreen2 = { 10, 300, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"\u2585\u2585",
-				-1, &rectFullscreen2, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-			RECT rectFullscreen3 = { 10, 600, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"\u2588\u2588",
-				-1, &rectFullscreen3, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-			RECT rectFullscreen4 = { 300, 10, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"\u25D6\u2588",
-				-1, &rectFullscreen4, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-			RECT rectFullscreen5 = { 300, 300, gameWindowWidth, gameWindowHeight };
-			DrawText(pFont, 0, L"\u25D7\u2588",
-				-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
-		//}
+		if (gameInFullscreen) {// If Game in Fullscreen mode - Overlay doesn't updating (Notify user about this)
+			RECT rectFullscreen = { 10, 40, gameWindowWidth, gameWindowHeight };
+			DrawText(pFont, 0, L"Overlay doesn't work in fullscreen mode. Please turn off 'Fullscreen' parameter in the launcher (Graphics tab). ", 
+				-1, &rectFullscreen, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 22));
+		}
 		
 		// 1) Subtitles
 		if (Subtitles::enabled) {
