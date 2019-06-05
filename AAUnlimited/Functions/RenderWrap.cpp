@@ -8,7 +8,6 @@
 
 #include <windows.h>
 #include <d3d9.h>
-#include <gdiplus.h>
 #include <thread>
 #include <mutex>
 #include "RenderWrap.h"
@@ -21,7 +20,6 @@
 #include "Functions/Notifications.h"
 #include "Functions/AAPlay/Subs.h"
 
-#pragma comment (lib, "Gdiplus.lib")
 
 #define FRAME_MASK 15
 #define TEST_DISABLE
@@ -1056,15 +1054,6 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
-		// Init GDI also
-		ULONG_PTR gdiToken;
-		Gdiplus::GdiplusStartupInput gdiStartupInput;
-		gdiStartupInput.GdiplusVersion = 1;
-		gdiStartupInput.DebugEventCallback = NULL;
-		gdiStartupInput.SuppressBackgroundThread = FALSE;
-		gdiStartupInput.SuppressExternalCodecs = FALSE;
-		Gdiplus::GdiplusStartup(&gdiToken, &gdiStartupInput, NULL);
-
 		static bool created;
 //		LOGSPAM << "D3d behavior :" << std::hex << BehaviorFlags << "\n";
 /*		BehaviorFlags &= ~D3DCREATE_DISABLE_PSGP_THREADING;

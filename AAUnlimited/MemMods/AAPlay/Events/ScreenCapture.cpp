@@ -1,4 +1,8 @@
 #include "StdAfx.h"
+#include <gdiplus.h>
+
+
+#pragma comment(lib, "Gdiplus.lib")
 
 namespace PlayInjections {
 	namespace ScreenCapture {
@@ -40,12 +44,25 @@ namespace PlayInjections {
 			return -1;  // Failure
 		}
 
+		void InitGDI() {
+			ULONG_PTR gdiToken;
+			Gdiplus::GdiplusStartupInput gdiStartupInput;
+			gdiStartupInput.GdiplusVersion = 1;
+			gdiStartupInput.DebugEventCallback = NULL;
+			gdiStartupInput.SuppressBackgroundThread = FALSE;
+			gdiStartupInput.SuppressExternalCodecs = FALSE;
+
+			Gdiplus::GdiplusStartup(&gdiToken, &gdiStartupInput, NULL);
+
+			GetEncoderClsid(L"image/jpeg", &JPGencoderClsid);
+			GetEncoderClsid(L"image/png", &PNGencoderClsid);
+
+			gdiInit = true;
+		}
+
 		void __stdcall SaveAs(DWORD gdiBitmapInfo, DWORD gdiBitmapData, WCHAR* path) {
 			if (!gdiInit) {
-				gdiInit = true;
-				GetEncoderClsid(L"image/jpeg", &JPGencoderClsid);
-				GetEncoderClsid(L"image/png", &PNGencoderClsid);
-
+				InitGDI();
 				jpegParameters.Count = 1;
 				jpegParameters.Parameter[0].Guid = Gdiplus::EncoderQuality;
 				jpegParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
@@ -68,10 +85,6 @@ namespace PlayInjections {
 			wcsncpy_s(path + pathLength - 3, 4, ext, 3);
 			bitmap->Save(path, cls, params);
 			delete bitmap;
-
-			char notify_text[256];
-			sprintf(notify_text, "Screenshot saved (%ws)", path);
-			Notifications::AddNotification(notify_text, 1);
 		}
 
 		void __declspec(naked) SaveRedirect() {

@@ -5,7 +5,6 @@
 #include <windows.h>
 #include <Windowsx.h>
 #include <d3d9.h>
-#include <gdiplus.h>
 
 #include <limits>
 #include <stdint.h>
@@ -143,5 +142,3 @@
 
 #include "resource.h"
 
-
-#pragma comment (lib, "Gdiplus.lib")

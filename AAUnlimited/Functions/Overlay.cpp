@@ -84,6 +84,7 @@ namespace Overlay {
 			&d3dpp,
 			&d3ddev);
 
+
 		HMODULE hm = GetModuleHandleA("d3dx9_42");
 		void *(WINAPI *D3DXCreateFont)(
 			IDirect3DDevice9 *pDevice,
@@ -101,9 +102,8 @@ namespace Overlay {
 			);
 		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
 
-		// ******************************************* Font Creation *******************************************
-		// D3D Fonts
-		pFont = 0;				// Overlay default font
+
+		pFont = 0;			// Overlay default font
 		D3DXCreateFont(d3ddev, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &pFont);
 		if (pFont)
@@ -111,7 +111,7 @@ namespace Overlay {
 		else
 			LOGPRIONC(Logger::Priority::WARN) "Overlay Font creation failed:\r\n";
 
-		Subtitles::Font = 0;	// Subs Font
+		Subtitles::Font = 0; // Subs Font
 		D3DXCreateFont(d3ddev, Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes(Subtitles::fontFamily).c_str(), &Subtitles::Font);
 		if (Subtitles::Font)
@@ -127,30 +127,23 @@ namespace Overlay {
 		else
 			LOGPRIONC(Logger::Priority::WARN) "Notifications Font creation failed:\r\n";
 
-		// GDI+ Fonts
-		//	Gdiplus::Font font(&Gdiplus::FontFamily(L"Tahoma"), 24, Gdiplus::FontStyleBold, Gdiplus::UnitWorld);
-		//	Gdiplus::StringFormat format;
-		//	format.SetAlignment(Gdiplus::StringAlignmentCenter);
-		//	Gdiplus::SolidBrush brush(Gdiplus::Color(255, 0, 0, 0));
+
 
 	}
 
 	void Render()
 	{
-		if (overlayHwnd == NULL) return;
+		if (Overlay::overlayHwnd == NULL) return;
 		needRender = false; // For every frame checker
 
+		// clear the window alpha
 		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 		d3ddev->BeginScene();
 
-		/******************************************** D3D rendering *******************************************
-		Use to render Text, that will be under the Images and Text, rendered by GDI+
-		*/
-
 		if (gameInFullscreen) {// If Game in Fullscreen mode - Overlay doesn't updating (Notify user about this)
-			RECT rectFullscreen = { 10, 40, gameWindowWidth, gameWindowHeight };
+			RECT rect = { 10, 40, gameWindowWidth, gameWindowHeight };
 			DrawText(pFont, 0, L"Overlay doesn't work in fullscreen mode. Please turn off 'Fullscreen' parameter in the launcher (Graphics tab). ", 
-				-1, &rectFullscreen, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 22));
+				-1, &rect, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 22));
 		}
 		
 		// 1) Subtitles
@@ -203,7 +196,7 @@ namespace Overlay {
 					int line_num = 0;
 					for each (const auto line in Notifications::lines) // for each subs line
 					{
-						int top_offset = -Notifications::lineHeight * (Notifications::lines.size() - 1 - line_num);
+						int top_offset = -Notifications::lineHeight * line_num;
 						RECT *tempRect;
 						for (int i = 0; i < Notifications::outlineLayersCount; i++) // outline layers
 						{
@@ -230,52 +223,21 @@ namespace Overlay {
 				else { // Only Colorized text
 					Notifications::text.clear();
 					for each (const auto line in Notifications::lines)
-						Notifications::text = std::get<0>(line) + Notifications::text;
+						Notifications::text += std::get<0>(line);
 					DrawText(Notifications::Font, 0, Notifications::text.c_str(), -1, &Notifications::rect[Notifications::fontLayersCount - 1],
 						DT_NOCLIP | Notifications::notifyCentered, Notifications::colors[1]);
 				}
 			}
 		}
 
-		// 3) Next texts render...
-		// ...
+
+		// 3) Test image
+		//...
 
 
+		LOGPRIONC(Logger::Priority::INFO) "Render()\r\n"; // debug
 		d3ddev->EndScene();
-		d3ddev->Present(NULL, NULL, NULL, NULL);   // displays the created D3D frame on the screen
-
-		HDC hDC = GetDC(overlayHwnd);
-		Gdiplus::Graphics graphics(hDC, overlayHwnd);
-
-		/******************************************** GDI+ rendering *******************************************
-		Use to render Images as well as Text, that should be on top of these images.
-		Highly NOT recommended to use the GDI+ Text rendering for other purposes. 
-		(GDI+ text rendering is 3~5 times slower, than the D3D render text, used above)
-		*/
-		// Create an Image object.
-		Gdiplus::Image image(L"AAUnlimited\\mod\\radialmenu\\zOverlayTest.png");//_TEST
-		// Draw the original source image. (without scaling)
-		//graphics.DrawImage(&image, 100, 150);
-		// Create a Rect object that specifies the destination of the image.
-		Gdiplus::Rect destRect(100, 100, 150, 75);//_TEST
-		// Draw the image.
-		graphics.DrawImage(&image, destRect);//_TEST
-
-
-		// Create a Pen object.
-		Gdiplus::Pen pen(Gdiplus::Color(255, 255, 0, 0), 2);//_TEST
-		// Create a Rect object that specifies the destination of the Overlay.
-		Gdiplus::Rect destRect2(0, 0, gameWindowWidth, gameWindowHeight);//_TEST
-		// Draw the rectangle that bounds the Overlay.
-		graphics.DrawRectangle(&pen, destRect2);//_TEST
-		
-
-		// Text render
-		// graphics.DrawString(L"Look at this text normal!", -1, &font, Gdiplus::RectF(0, 90, 1000, 200), &format, &brush);
-
-		ReleaseDC(overlayHwnd, hDC);
-
-		LOGPRIONC(Logger::Priority::INFO) "Overlay: Render()\r\n"; // debug
+		d3ddev->Present(NULL, NULL, NULL, NULL);   // displays the created frame on the screen
 	}
 
 	void CreateOverlay() {
@@ -292,7 +254,7 @@ namespace Overlay {
 		wc.hbrBackground = (HBRUSH)RGB(0, 0, 0);
 		wc.lpszClassName = L"UnlimitedOverlay";
 
-		if (RegisterClassEx(&wc) == 0) { LOGPRIONC(Logger::Priority::INFO) "Overlay: Register Class failed.\r\n"; }
+		if (RegisterClassEx(&wc) == 0) { LOGPRIONC(Logger::Priority::INFO) "------------------Register Class failed----------\r\n"; }
 		
 		overlayHwnd = CreateWindowEx(0,
 			L"UnlimitedOverlay",
@@ -308,7 +270,7 @@ namespace Overlay {
 		{
 			wchar_t *error = new wchar_t;
 			wsprintf(error, L"error %X", GetLastError());
-			LOGPRIONC(Logger::Priority::WARN) "Overlay: error (" << error << ")\r\n";
+			LOGPRIONC(Logger::Priority::WARN) "Overlay error:" << error << "\r\n";
 			return;
 		}
 
@@ -326,6 +288,7 @@ namespace Overlay {
 
 		CheckPosition();
 		Render();
+
 	}
 	
 }
