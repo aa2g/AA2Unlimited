@@ -30,7 +30,6 @@ namespace Subtitles {
 	int outlineSpread = 0;
 	int gameWindowWidth = 0;
 	int gameWindowHeight = 0;
-	int gameWindowMarginY = 0;
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
 
@@ -43,6 +42,7 @@ namespace Subtitles {
 		if (lines.size() > maxLines)
 			lines.pop_front();
 		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
+		Overlay::needRender = true;
 	}
 
 	static int HexadecimalToDecimal(std::string hex) {
@@ -128,8 +128,7 @@ namespace Subtitles {
 		areaPosPercentsX = area_pos_X;
 		areaPosPercentsY = area_pos_Y;
 		outlineSpread = outline_spread;
-		if (gameWindowWidth > 0) 
-			SetSubsAreaSize(gameWindowWidth, gameWindowHeight, gameWindowMarginY);  // If game window Width is available - Set the rectangles
+		if (gameWindowWidth > 0) { SetSubsAreaSize(); } // If game window Width is available - Set the rectangles
 
 		colors[0] = sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
 		colors[1] = sHEX_sRGB_toRGBA(text_color_female, colors[1]);
@@ -141,13 +140,9 @@ namespace Subtitles {
 		}
 	}
 
-	void SetSubsAreaSize(int window_width, int window_height, int margin_Y) {
-		gameWindowWidth = window_width;
-		gameWindowHeight = window_height;
-		gameWindowMarginY = margin_Y;
-
+	void SetSubsAreaSize() {
 		int area_pos_X = round(gameWindowWidth * areaPosPercentsX / (float)10000);
-		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000) + gameWindowMarginY;
+		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000);
 		
 		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread, 
 			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
@@ -179,56 +174,10 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
+			Overlay::needRender = true;
 
 			Notifications::AddNotification("Subtitle disappeared", 1); //_TEST
 			Notifications::AddNotification("Subtitle disappeared", 2); //_TEST
 		}
-	}
-
-	void Render() {
-		if (!enabled || lines.empty())
-			return;
-
-		PopSubtitles();
-
-		if (outlineLayersCount != 0 || separateColorMale)
-		{
-			int line_num = 0;
-			for each (const auto line in lines) // for each subs line
-			{
-				int top_offset = lineHeight * line_num;
-				RECT *tempRect;
-				for (int i = 0; i < outlineLayersCount; i++) // outline layers
-				{
-					tempRect = &rect[i];
-					tempRect->top = tempRect->top + top_offset;
-					tempRect->bottom = tempRect->bottom + top_offset;
-					DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, tempRect,
-						DT_NOCLIP | subsCentered, colors[0]);
-					tempRect->top = tempRect->top - top_offset;
-					tempRect->bottom = tempRect->bottom - top_offset;
-				}
-				// Colorized text
-				tempRect = &rect[fontLayersCount - 1];
-				tempRect->top = tempRect->top + top_offset;
-				tempRect->bottom = tempRect->bottom + top_offset;
-				DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, &rect[fontLayersCount - 1],
-					DT_NOCLIP | subsCentered, colors[std::get<1>(line)]);
-				tempRect->top = tempRect->top - top_offset;
-				tempRect->bottom = tempRect->bottom - top_offset;
-
-				line_num++;
-			}
-		}
-		else { // Only Colorized text
-			text.clear();
-			for each (const auto line in lines)
-				text += std::get<0>(line);
-			DrawD3D::DrawText(Font, 0, text.c_str(), -1, &rect[fontLayersCount - 1],
-				DT_NOCLIP | subsCentered, colors[1]);
-		}
-		
-		
-
 	}
 }

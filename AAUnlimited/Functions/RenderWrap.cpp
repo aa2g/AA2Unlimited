@@ -17,6 +17,7 @@
 #include "Files/Config.h"
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
+#include "Functions/Overlay.h"
 #include "General/DrawD3D.h"
 #include "Functions/Notifications.h"
 #include "Functions/AAPlay/Subs.h"
@@ -150,10 +151,15 @@ public:;
 	volatile size_t record;
 	bool exiting;
 	char buf[QSIZE];
+	IUnknown *fontFPS;
+	IUnknown *fontTEST;
+	void *(WINAPI *DrawText)(IUnknown *, void*, LPCTSTR, int, LPRECT, DWORD, D3DCOLOR);
 	double real_time;
 
 	void DrawFPS() {
+		RECT rekt = { 0,0,256,64 };
 		wchar_t buf[64];
+
 		// every FRAME_MASK
 		if ((frameno & FRAME_MASK) == 0) {
 			DWORD now = GetTickCount();
@@ -163,9 +169,75 @@ public:;
 
 		_swprintf(buf, L"%02.2lf", 1000.0 * (FRAME_MASK + 1) / (real_time + 1));
 		//, real_time / (FRAME_MASK+1)
-		DrawD3D::DrawText(DrawD3D::fontFPS, 0, buf, -1, &DrawD3D::rectFPS, DT_LEFT, 0xFFFFFFFF);
+		DrawText(fontFPS, 0, buf, -1, &rekt, DT_LEFT, 0xFFFFFFFF);
+
+		RECT rectFullscreen = { 10, 10, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u258B\u258B",
+			-1, &rectFullscreen, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen2 = { 10, 300, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u2585\u2585",
+			-1, &rectFullscreen2, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen3 = { 10, 600, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u2588\u2588",
+			-1, &rectFullscreen3, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen4 = { 300, 10, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u25D6\u2588",
+			-1, &rectFullscreen4, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen5 = { 300, 300, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u25D7\u2588",
+			-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen6 = { 300, 600, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u26AA\u2588",
+			-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+		RECT rectFullscreen7 = { 600, 10, 1000, 1000 };
+		DrawText(fontTEST, 0, L"\u26AB\u2588",
+			-1, &rectFullscreen7, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
+
 	}
 
+	void MakeFont() {
+		// fuck you microsoft for the d3dx9 SDK stupidity, no way im installing that shit
+
+		HMODULE hm = GetModuleHandleA("d3dx9_42");
+		void *(WINAPI *D3DXCreateFont)(
+			IDirect3DDevice9 *pDevice,
+			INT               Height,
+			UINT              Width,
+			UINT              Weight,
+			UINT              MipLevels,
+			BOOL              Italic,
+			DWORD             CharSet,
+			DWORD             OutputPrecision,
+			DWORD             Quality,
+			DWORD             PitchAndFamily,
+			LPCTSTR           pFacename,
+			IUnknown        **ppFont
+			);
+		D3DXCreateFont = decltype(D3DXCreateFont)(GetProcAddress(hm, "D3DXCreateFontW"));
+			
+		// ******************************************* Font Creation *******************************************
+		// D3D Fonts
+		fontFPS = 0;				// FPS font
+		D3DXCreateFont(orig, 24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &fontFPS);
+		if (fontFPS)
+			DrawText = decltype(DrawText)(((void***)fontFPS)[0][15]);
+		else
+			LOGPRIONC(Logger::Priority::WARN) "FPS Font creation failed:\r\n";
+
+		fontTEST = 0;				// TEST font
+		D3DXCreateFont(orig, 200, 0, FW_REGULAR, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(), &fontTEST);
+		if (fontTEST)
+			DrawText = decltype(DrawText)(((void***)fontTEST)[0][15]);
+		else
+			LOGPRIONC(Logger::Priority::WARN) "TEST Font creation failed:\r\n";
+
+
+
+
+		
+	}
 
 	AAUIDirect3DDevice9(IDirect3DDevice9* old) {
 		play = record = 0;
@@ -173,7 +245,7 @@ public:;
 		ref = 1;
 		exiting = false;
 
-		DrawD3D::InitDraw(orig);
+		MakeFont();
 
 		if (!g_Config.bMTRenderer)
 			return;
@@ -338,8 +410,8 @@ public:;
 		ULONG count = orig->Release();
 		if (!count) {
 //			LOGSPAM << "Releasing! ref=" << ref << "\n";
-			if (DrawD3D::fontFPS)
-				DrawD3D::fontFPS->Release();
+			if (fontFPS)
+				fontFPS->Release();
 			delete this;
 		}
 		return count;
@@ -545,21 +617,41 @@ public:;
 
 	HRESULT WINAPI EndScene(void)
 	{
+		//IDirect3DStateBlock9* stateBlock = nullptr;
+		//IDirect3DPixelShader9* pixelShader = nullptr;
+		//IDirect3DBaseTexture9* texture = nullptr;
+
+		//orig->GetTexture(0, &texture);
+		//orig->GetPixelShader(&pixelShader);
+		//orig->CreateStateBlock(D3DSBT_ALL, &stateBlock);
+
+		//DrawD3D::GetDevice(orig);
+		//DrawD3D::CircleFilled(orig, 100, 100, 100, 0, full, 32, D3DCOLOR_RGBA(255, 255, 255, 255));
+		//DrawD3D::BoxFilled(100, 200, 100, 100, D3DCOLOR_RGBA(255, 255, 255, 255));
+		
+		//orig->SetTexture(0, texture);
+		//orig->SetPixelShader(pixelShader);
+		//stateBlock->Apply();
+
 		//onEndScene();
-		if (DrawD3D::fontCreated) {
-			if (g_Config.bDrawFPS) {
-				D3DVIEWPORT9 vp;
-				GetViewport(&vp);
-				if (vp.Width > 1024) {
-					if (g_Config.bDrawFPS)
-						DrawFPS();
-				}
+		if (fontFPS && g_Config.bDrawFPS) {
+			D3DVIEWPORT9 vp;
+			GetViewport(&vp);
+			if (vp.Width > 1024) {
+				if (g_Config.bDrawFPS)
+					DrawFPS();
 			}
-			Subtitles::Render();
-			Notifications::Render();
-			DrawD3D::Render(); // HUD and others
 		}
 		frameno++;
+
+		if (Subtitles::enabled)
+			Subtitles::PopSubtitles();
+		if (Notifications::enabled)
+			Notifications::PopNotifications();
+
+		//if (Overlay::needRender) // Render Overlay, when only changes appear
+			//Overlay::Render();
+		//Overlay::CheckPosition();
 
 		WRAPCALL(orig->EndScene());
 	}
@@ -1013,8 +1105,6 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
-
-		LOGPRIONC(Logger::Priority::INFO) "SVP test_1_\r\n";
 		// Init GDI also
 		ULONG_PTR gdiToken;
 		Gdiplus::GdiplusStartupInput gdiStartupInput;
@@ -1033,18 +1123,18 @@ public:;
 		HRESULT hres = orig->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, pPresentationParameters, ppReturnedDeviceInterface);
 		auto pret = *ppReturnedDeviceInterface;
 		d3dev = new AAUIDirect3DDevice9(pret);
+		//DrawD3D::GetDevice(new AAUIDirect3DDevice9(pret));
 		if (hres == D3D_OK) {
-			LOGPRIONC(Logger::Priority::INFO) "SVP test_2_\r\n";
-			int trueGameWindowWidth = pPresentationParameters->BackBufferWidth; // True game Width, Height for current resolution
-			int trueGameWindowHeight = trueGameWindowWidth / 16.00 * 9;
-			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
-			// Create D3D fonts
-			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY);
-
-
-			// Game window Width and Height for Subtitles and Notifications
-			Subtitles::SetSubsAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
-			Notifications::SetNotifyAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
+			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width and Height for Subtitles
+			Subtitles::gameWindowHeight = pPresentationParameters->BackBufferHeight;
+			Subtitles::SetSubsAreaSize();
+			Notifications::gameWindowWidth = pPresentationParameters->BackBufferWidth;	// Game window Width and Height for Notifications
+			Notifications::gameWindowHeight = pPresentationParameters->BackBufferHeight;
+			Notifications::SetNotifyAreaSize();
+			//Overlay::gameHwnd = hFocusWindow;										// Game window Handle, Width and Height for Overlay
+			//Overlay::gameWindowWidth = pPresentationParameters->BackBufferWidth;
+			//Overlay::gameWindowHeight = pPresentationParameters->BackBufferHeight;
+			//Overlay::CreateOverlay();
 			*ppReturnedDeviceInterface = d3dev;
 			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
 				DEVMODE dmScreenSettings = { 0 };
