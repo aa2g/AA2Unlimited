@@ -46,13 +46,12 @@ namespace DrawD3D {
 	float circle1000Radius = 195.000;// (Width)
 	float circle1000Height = 390;
 	
-	const int max_shapes = 1000; // 1000 - Maximum total shapes in HUD
+	const int max_shapes = 500; // 500 - Maximum shapes in HUD
 	int key_next = 0;
 	RECT HUDarrayRect[max_shapes];
 	IUnknown *HUDarrayFont[max_shapes];
-	std::wstring HUDarrayText[max_shapes];
+	const wchar_t *HUDarrayText[max_shapes];
 	D3DCOLOR HUDarrayColor[max_shapes];
-	DWORD HUDarrayFontHorizAlign[max_shapes];
 
 	IUnknown *fontFPS;
 	RECT rectFPS = { 0, 0, 256, 64 };
@@ -85,17 +84,16 @@ namespace DrawD3D {
 		// Fill HUD RECT arrays with default values
 		if (!initialized) {
 			std::fill_n(HUDarrayRect, max_shapes, RECT{ 0, 0, 0, 0 });
-			std::wstring empty_val = (std::wstring)(L"");
+			const wchar_t *empty_val = ((std::wstring)(L"")).c_str();
 			std::fill_n(HUDarrayText, max_shapes, empty_val);
-			std::fill_n(HUDarrayFontHorizAlign, max_shapes, DT_LEFT);
 		}
 		initialized = true;
 	}
 
-	/* This is simple font creation
-	You can make his size (Height) scalable, thats depends on current game resolution. 
-	(Keep in mind, all font sizes recommend to create and set 
-	in CreateFontD3d() for 1920x1080 resolution)
+	/* If you need a font for hud, you can make his size (Height) scalable, 
+	thats depends on current game resolution. 
+	(Keep in mind, all hud sizes need to create and set in CreateFontD3d() 
+	for 1920x1080 resolution)
 	When you set 'autoScale' argument to 'true' in CreateFontD3d(),
 	this function automaticaly scaled the size from 1920x1080 template to
 	current user's resolution */
@@ -114,91 +112,7 @@ namespace DrawD3D {
 			LOGPRIONC(Logger::Priority::WARN) error_msg << "\r\n";
 	}
 
-	/* This Font Creation for HUD
-	- Keep in mind, Font (with his RECT) storing in HUD memory,
-	so don't create this time of fonts non-stop or every fps with key_node == -1
-	- This Font support autoScale by default, as well, as all HUD Shapes.
-	- If you need Vertical alignment, set the 'center_coords' to 'true' and 'x', 'y' 
-	coords of center point of your font.
-	- 'DT_horiz_align' == DT_LEFT / DT_CENTER / DT_RIGHT
-	- 'weight' == FW_REGULAR / FW_ULTRABOLD / FW_BLACK / ...     */
-	int CreateFontHUD(float x, float y, bool center_coords, // if need place Text RECT center in X:Y coords
-		DWORD DT_horiz_align, float rect_maxwidth, UINT font_size, UINT weight, BOOL italic, 
-		LPCTSTR pFacename, const LPCTSTR text, D3DCOLOR color, int key_node)
-	{
-		int key_In = key_node;
-		if (key_In == -1) { // If need to find new place for Font in HUD data memory
-			if (key_next >= max_shapes)
-			{
-				LOGPRIONC(Logger::Priority::WARN) "Out of memory for creating Font HUD\r\n";
-				return -1;
-			}
-			key_node = key_next;
-			key_next++;
-		}
-		// Scaling request params to current user's resolution + Margin, if resolution not 16:9
-		x = x * scaleCoefficient;
-		y = y * scaleCoefficient + trueGameMarginY;
-		font_size = round(font_size * scaleCoefficient);
-		rect_maxwidth = round(rect_maxwidth * scaleCoefficient);
-
-		HUDarrayFont[key_node] = 0;
-		D3DXCreateFont(pDevice, font_size, 0, weight, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, pFacename, &HUDarrayFont[key_node]);
-		if (HUDarrayFont[key_node])
-			DrawText = decltype(DrawText)(((void***)HUDarrayFont[key_node])[0][15]);
-		else
-		{
-			LOGPRIONC(Logger::Priority::WARN) "Error Creating Font HUD\r\n";
-			if (key_In == -1)
-				key_next--;
-			return -1;
-		}
-
-		if (DT_horiz_align != DT_LEFT && DT_horiz_align != DT_CENTER && DT_horiz_align != DT_RIGHT)
-			DT_horiz_align = DT_LEFT;
-
-		HUDarrayFontHorizAlign[key_node] = DT_horiz_align;
-		HUDarrayText[key_node] = text;
-		HUDarrayColor[key_node] = color;
-		HUDarrayRect[key_node].left = 0;
-		HUDarrayRect[key_node].right = rect_maxwidth;
-		HUDarrayRect[key_node].top = 0;
-		HUDarrayRect[key_node].bottom = 0;
-
-		// Get the total Font RECT Width and Height in HUDarrayRect[key_node]
-		DrawText(HUDarrayFont[key_node], 0, HUDarrayText[key_node].c_str(), -1, &HUDarrayRect[key_node], 
-			DT_NOCLIP | DT_WORDBREAK | HUDarrayFontHorizAlign[key_node] | DT_CALCRECT, HUDarrayColor[key_node]);
-
-		int rect_height = HUDarrayRect[key_node].bottom; // total RECT Height for this font
-
-		if (center_coords)		// if need place Shape center in X:Y coords (correction)
-		{
-			x -= round(rect_maxwidth * 0.5);
-			y -= round(rect_height * 0.5);
-		}
-
-		HUDarrayRect[key_node].left = x;			// Total rect for result font
-		HUDarrayRect[key_node].top = y;
-		HUDarrayRect[key_node].right = x + rect_maxwidth;
-		HUDarrayRect[key_node].bottom = y + rect_height;
-
-		return key_node;
-	}
-
-	// Render Font for HUD with this
-	void renderFontHUD(int key_node) {
-		DrawText(HUDarrayFont[key_node], 0, HUDarrayText[key_node].c_str(), -1, &HUDarrayRect[key_node],
-			DT_NOCLIP | DT_WORDBREAK | HUDarrayFontHorizAlign[key_node], HUDarrayColor[key_node]);
-	}
-
-	// Render Shapes for HUD with this
-	void renderShapeHUD(int key_node) {
-		DrawText(HUDarrayFont[key_node], 0, HUDarrayText[key_node].c_str(),
-			-1, &HUDarrayRect[key_node], DT_NOCLIP, HUDarrayColor[key_node]);
-	}
-
-	int CreateBoxFilled(float x, float y, bool center_coords, // if need place Shape center in X:Y coords
+	int CreateBoxFilled(float x, float y, 
 		float height, int count_boxes_X, // boxes 664x705 (for font size == 1000)
 		D3DCOLOR color, int key_node)
 	{
@@ -234,32 +148,23 @@ namespace DrawD3D {
 			return -1;
 		}
 
-		float center_correct_X = 0;  float center_correct_Y = 0;
-		if (center_coords)		// if need place Shape center in X:Y coords (correction)
-		{
-			center_correct_X = round(box1000Width * fontRatio * count_boxes_X * 0.5);
-			center_correct_Y = round(box1000Height * fontRatio * 0.5);
-		}
+		HUDarrayRect[key_node].left = x;							// Total rect for result font
+		HUDarrayRect[key_node].top = y - round(box1000MarginY * fontRatio);
+		HUDarrayRect[key_node].right = x + round(box1000Width * fontRatio * (count_boxes_X + 1));//(+ 1 * box for reserve)
+		HUDarrayRect[key_node].bottom = y + fontHeight;
 
-		HUDarrayRect[key_node].left = x - center_correct_X;			// Total rect for result font
-		HUDarrayRect[key_node].top = y - round(box1000MarginY * fontRatio) - center_correct_Y;
-		HUDarrayRect[key_node].right = x + round(box1000Width * fontRatio * (count_boxes_X + 1)) //(+ 1 * box for reserve)
-			- center_correct_X;
-		HUDarrayRect[key_node].bottom = y + fontHeight - center_correct_Y;
-
-		std::wstring buff_text;
 		buff_text.clear();
 		for (int i = 0; i < count_boxes_X; i++)
 			buff_text += box_code;
-		HUDarrayText[key_node] = buff_text;					// Total text
+		HUDarrayText[key_node] = buff_text.c_str();					// Total text
 
 		HUDarrayColor[key_node] = color;
 
 		return key_node;
 	}
 
-	int CreateHalfCircleFilled(bool leftSide, double x, double y, 
-		bool center_coords, double height, DWORD color, int key_node)
+	int CreateHalfCircleFilled(bool leftSide, double x, double y,
+		double height, DWORD color, int key_node)
 	{
 		int key_In = key_node;
 		if (key_In == -1) { // If need to find new place for shape in HUD data memory
@@ -295,22 +200,14 @@ namespace DrawD3D {
 			return -1;
 		}
 
-		float center_correct_X = 0;  float center_correct_Y = 0;
-		if (center_coords)		// if need place Shape center in X:Y coords (correction)
-		{
-			center_correct_X = leftSide ? (circle1000Radius * fontRatio) : 0;
-			center_correct_Y = round(circle1000Height * fontRatio * 0.5);
-		}
-
-		HUDarrayRect[key_node].left = x - round(circle1000marginX * fontRatio + center_correct_X);	// Total rect for result font
-		HUDarrayRect[key_node].top = y - round(circle1000MarginY * fontRatio) - center_correct_Y;
-		HUDarrayRect[key_node].right = x + round(circle1000Radius * fontRatio * 2) //(+ 1 shape for reserve)
-			- center_correct_X;
-		HUDarrayRect[key_node].bottom = y + fontHeight - center_correct_Y;
+		HUDarrayRect[key_node].left = x - round(circle1000marginX * fontRatio);	// Total rect for result font
+		HUDarrayRect[key_node].top = y - round(circle1000MarginY * fontRatio);
+		HUDarrayRect[key_node].right = x + round(circle1000Radius * fontRatio * 2);//(+ 1 shape for reserve)
+		HUDarrayRect[key_node].bottom = y + fontHeight;
 
 		HUDarrayText[key_node] = leftSide ? 				// Total text
-			circle_code_Left :
-			circle_code_Right;
+			circle_code_Left.c_str() :
+			circle_code_Right.c_str();
 
 		HUDarrayColor[key_node] = color;
 
@@ -318,12 +215,10 @@ namespace DrawD3D {
 	}
 
 	void CreateCircleFilled() {
-		/* Current not implemented yet. You can use for this
-		CreateHalfCircleFilled(true, centerX, centerY, true, Height, your D3DCOLOR, -1);
-		CreateHalfCircleFilled(false, centerX, centerY, true, Height, your D3DCOLOR, -1); */
+		// Current not implemented yet
 	}
 
-	// ***************************** Font/Shapes Creation section ************************************
+	// ************************************ Font Creation **************************************
 	void MakeFonts(double scale_coefficient, int true_game_margin_Y)
 	{
 		scaleCoefficient = scale_coefficient;
@@ -354,28 +249,20 @@ namespace DrawD3D {
 
 
 
-		/* For Shapes _TEST */
+		/* For Shapes _TEST
 		// TEST font
-		CreateBoxFilled(300, 500, true, 500, 1, D3DCOLOR_ARGB(166, 22, 255, 22), -1);
-		CreateFontHUD(300, 500, true, DT_CENTER, 440, 72, FW_REGULAR, false, General::utf8.from_bytes("Arial").c_str(),
-			L"Simple text for the mighty gods. Simple text for the mighty gods. Simple text for the ...", 
-			D3DCOLOR_ARGB(255, 244, 180, 20), -1);
-		CreateFontD3d(300, 0, FW_BLACK, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
+		CreateFontD3d(1000, 0, FW_REGULAR, 1, false, SHIFTJIS_CHARSET, OUT_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
 			&fontTEST, false, "TEST Font creation failed");//*/
 		
-		CreateBoxFilled(1000, 500, false, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
-		CreateBoxFilled(1000, 500, true, 270, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
-		CreateHalfCircleFilled(true, 1000, 500, true, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
-		CreateHalfCircleFilled(false, 1000, 500, true, 600, D3DCOLOR_ARGB(166, 255, 22, 22), -1);//*/
-
-		CreateBoxFilled(-20, -20, false, 1200, 2, D3DCOLOR_ARGB(177, 0, 0, 0), -1);
-
+		CreateBoxFilled(110, 50, 500, 2, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
+		CreateHalfCircleFilled(true, 900, 100, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);
+		CreateHalfCircleFilled(false, 1400, 200, 800, D3DCOLOR_ARGB(166, 255, 22, 22), -1);//*/
 
 		fontCreated = true;
 	}
 
-	// ************************************ Render section **************************************
+	// ************************************ Render **************************************
 	void Render() {
 		
 
@@ -386,45 +273,18 @@ namespace DrawD3D {
 
 
 		/* For Shapes _TEST
-		RECT rectFullscreen5 = { 10, 200, 310, 700 };
-		DrawText(fontTEST, 0, L"\u2586\u259B\u2586",
-			-1, &rectFullscreen5, DT_NOCLIP | DT_WORDBREAK, D3DCOLOR_ARGB(166, 255, 22, 22));//*/
-
+		RECT rectFullscreen5 = { 10, 10, 1200, 1200 };
+		DrawText(fontTEST, 0, L"\u2586\u2586",
+			-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
 		// (all sign: u25D6 u25D7 u2586 | u2588 | u268B u2585  u26AB)
-		/*
-		RECT rectFullscreen6 = { 10, 10, 500, 500 }; 
+		/*RECT rectFullscreen6 = { 10, 10, 500, 500 }; 
 		DrawText(fontTEST, 0, L"\u2586\u2588",
 		-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(166, 255, 22, 22));
 		//*/
-		renderShapeHUD(0);
-		for (int i = 2; i < key_next; i++)
-			renderShapeHUD(i);
-		renderFontHUD(1);//*/
+		for (int i = 0;i < 3;i++)
+			DrawText(HUDarrayFont[i], 0, HUDarrayText[i],
+				-1, &HUDarrayRect[i], DT_NOCLIP, HUDarrayColor[i]);//*/
 
-
-		RECT rectFullscreen5 = { 10, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u259B\u2586",
-			-1, &rectFullscreen5, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));//*/
-		RECT rectFullscreen6 = { 10, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u25E4\u2586",
-			-1, &rectFullscreen6, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen7 = { 400, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2572\u2586",
-			-1, &rectFullscreen7, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen8 = { 400, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2216\u2586",
-			-1, &rectFullscreen8, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen9 = { 800, 10, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u21D6\u2586",
-			-1, &rectFullscreen9, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen10 = { 800, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u2196\u2586",
-			-1, &rectFullscreen10, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		RECT rectFullscreen11 = { 1200, 300, 1000, 500 };
-		DrawText(fontTEST, 0, L"\u21D6\u2586",
-			-1, &rectFullscreen11, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
-		DrawText(fontTEST, 0, L"\u2196\u2586",
-			-1, &rectFullscreen11, DT_NOCLIP, D3DCOLOR_ARGB(255, 255, 22, 255));
 	}
 
 	/*void CDraw::Line(float x1, float y1, float x2, float y2, float width, bool antialias, DWORD color)
