@@ -9,13 +9,6 @@ struct CLIMAX_BUTTON {
 	int climaxCount = 0;
 };
 
-struct CLIMAX_NORMAL_BUTTON {
-	int categoryNode = 0;
-	int buttonNode = -1;
-	int normalPoses[3] = { -1, -1 , -1 };
-	int normalCount = 0;
-};
-
 struct CLIMAX_CAT_SCENARIO {
 	bool isShift = false;
 	int shiftVal = 0;
@@ -29,7 +22,6 @@ namespace ClimaxButton {
 	extern bool initialized[2];
 
 	extern void StartClimaxPose();
-	extern void StartNormalPose();
 	extern void InitCfg();
 	extern void Init();
 }

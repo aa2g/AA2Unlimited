@@ -17,7 +17,6 @@ namespace ClimaxButton {
 		// .categoryNode in hInfo->m_hPosButtons[<0..8>]
 		// .buttonNode in hInfo->m_hPosButtons[0..8].m_arrButtonList[<0..n>]
 		// .anywayAdd == true, if need to add anyway for current gender
-	CLIMAX_NORMAL_BUTTON hButtonToNormal[2][maxPoses];
 	int hBtnPosToIndex[2][9][maxPosesInCat]; // Can get pose id
 		// hBtnPosToIndex[0 - hetero|1 - homo][category_id][0..n button_pos_in_category] == pose_id;
 
@@ -54,21 +53,12 @@ namespace ClimaxButton {
 				// Register button
 				hButtonToClimax[gender_id][pose_id].categoryNode = cat_i;
 				hButtonToClimax[gender_id][pose_id].buttonNode = button_i;
-				hButtonToNormal[gender_id][pose_id].categoryNode = cat_i;
-				hButtonToNormal[gender_id][pose_id].buttonNode = button_i;
 
 				hBtnPosToIndex[gender_id][cat_i][button_pos_in_cat] = pose_id;
 
-				// Normal pose version for normal pose will be same
-				if (cat_i < 5) {
-					hButtonToNormal[gender_id][pose_id].normalPoses[0] = pose_id;
-					hButtonToNormal[gender_id][pose_id].normalCount = 1;
-				}
 				// For Climax categories Climax pose will be same
-				else {
+				if (cat_i > 4)
 					hButtonToClimax[gender_id][pose_id].climaxPoses[0] = pose_id;
-					hButtonToClimax[gender_id][pose_id].climaxCount = 1;
-				}
 
 				button_pos_in_cat++;
 			}
@@ -109,15 +99,9 @@ namespace ClimaxButton {
 					for (int climax_i = 0; climax_i < 3; climax_i++) {
 						int climax_pose_cat = hCategoriesScenario[gender_id].front().climaxPoses[climax_i][0];
 						int climax_pose_btn_pos = hCategoriesScenario[gender_id].front().climaxPoses[climax_i][1];
-						if (climax_pose_btn_pos != -1) {
-							int climax_pos_id = hBtnPosToIndex[gender_id][climax_pose_cat][climax_pose_btn_pos];
-							hButtonToClimax[gender_id][pose_id].climaxPoses[climax_i] = climax_pos_id;
-							// Normal version for this climax pose
-							if (hButtonToNormal[gender_id][climax_pos_id].normalCount < 3) {
-								hButtonToNormal[gender_id][climax_pos_id].normalPoses[hButtonToNormal[gender_id][climax_pos_id].normalCount] = pose_id;
-								hButtonToNormal[gender_id][climax_pos_id].normalCount++;
-							}
-						}
+						if (climax_pose_btn_pos != -1)
+							hButtonToClimax[gender_id][pose_id].climaxPoses[climax_i] =
+								hBtnPosToIndex[gender_id][climax_pose_cat][climax_pose_btn_pos];
 					}
 
 					hCategoriesScenario[gender_id].pop_front(); // remove this scenario command
@@ -134,14 +118,9 @@ namespace ClimaxButton {
 				}
 				else {
 					// Climax 1st version for normal pose (by default)
-					int climax_pos_id = hBtnPosToIndex[gender_id][btnClimaxVerCategory][btnClimaxVerButton];
-					hButtonToClimax[gender_id][pose_id].climaxPoses[0] = climax_pos_id;
+					hButtonToClimax[gender_id][pose_id].climaxPoses[0] =
+						hBtnPosToIndex[gender_id][btnClimaxVerCategory][btnClimaxVerButton];
 					hButtonToClimax[gender_id][pose_id].climaxCount = 1;
-					// Normal version for this climax pose
-					if (hButtonToNormal[gender_id][climax_pos_id].normalCount < 3) {
-						hButtonToNormal[gender_id][climax_pos_id].normalPoses[hButtonToNormal[gender_id][climax_pos_id].normalCount] = pose_id;
-						hButtonToNormal[gender_id][climax_pos_id].normalCount++;
-					}
 				}
 
 				btnClimaxVerButton++;
@@ -162,9 +141,10 @@ namespace ClimaxButton {
 				btnClimaxVerButton = 0;
 			}
 		}
+
 	}
 
-	void StartClimaxPose() { // Starting Climax version of current pose
+	void StartClimaxPose() {
 		hInfo = Shared::GameState::getHInfo(); // Not H scene
 		if (!hInfo)
 			return;
@@ -214,59 +194,6 @@ namespace ClimaxButton {
 			// If button Showed for current H scene
 			if (!hInfo->m_hPosButtons[climaxBtnCategory].m_arrButtonList[climaxBtnNode]->m_bInvalid || debugMode)
 				hInfo->m_hPosButtons[climaxBtnCategory].m_arrButtonList[climaxBtnNode]->Press();
-		}
-	}
-
-	void StartNormalPose() { // Starting Normal version of current pose
-		hInfo = Shared::GameState::getHInfo(); // Not H scene
-		if (!hInfo)
-			return;
-
-		int gender_i = 0; // hetero
-		if (hInfo->m_activeParticipant->m_charPtr->m_charData->m_gender
-			== hInfo->m_passiveParticipant->m_charPtr->m_charData->m_gender)
-			gender_i = 1; // homo
-
-		if (!initialized[gender_i])
-			Init();
-		if (!initialized[gender_i]) { // If Init not success
-			LOGPRIO(Logger::Priority::WARN) << "[ClimaxBtn] Can't initialize ClimaxButton params\r\n";
-			return;
-		}
-
-		if (debugMode)
-			LOGPRIO(Logger::Priority::WARN) << "[ClimaxBtn] Current pose id: " << hInfo->m_currPosition << "\r\n";
-
-		if (hInfo->m_currPosition < 0 || hInfo->m_currPosition >= maxPoses)
-			return;
-
-		if (hButtonToNormal[gender_i][hInfo->m_currPosition].buttonNode == -1) {
-			LOGPRIO(Logger::Priority::WARN) << "[ClimaxBtn] Current pose is unregistered\r\n";
-			return;
-		}
-
-		// Get Normal version
-		int normal_pose_node = 0;
-		if (hButtonToNormal[gender_i][hInfo->m_currPosition].normalCount > 1) { // If need random pick normal pose
-			std::uniform_int_distribution<int> distribution(0, (hButtonToNormal[gender_i][hInfo->m_currPosition].normalCount - 1));
-			normal_pose_node = distribution(rand_gen);
-		}
-
-		int normal_id = hButtonToNormal[gender_i][hInfo->m_currPosition].normalPoses[normal_pose_node];
-		if (verifyRegister) // If need verify only registered status of current pose
-			normal_id = hInfo->m_currPosition;
-		if (normal_id == -1) {
-			LOGPRIO(Logger::Priority::WARN) << "[ClimaxBtn] Current pose haven't Normal version\r\n";
-			return;
-		}
-
-		int normalBtnCategory = hButtonToNormal[gender_i][normal_id].categoryNode;
-		int normalBtnNode = hButtonToNormal[gender_i][normal_id].buttonNode;
-
-		if (hInfo->m_hPosButtons[normalBtnCategory].m_arrButtonList[normalBtnNode] != NULL) {
-			// If button Showed for current H scene
-			if (!hInfo->m_hPosButtons[normalBtnCategory].m_arrButtonList[normalBtnNode]->m_bInvalid || debugMode)
-				hInfo->m_hPosButtons[normalBtnCategory].m_arrButtonList[normalBtnNode]->Press();
 		}
 	}
 
