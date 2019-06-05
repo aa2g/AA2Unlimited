@@ -27,8 +27,6 @@ namespace DrawD3D {
 
 	bool initialized = false;
 	bool fontCreated = false;
-	bool canRender = true;
-	int frame_after_start_H_now = 0;
 	IDirect3DDevice9* pDevice;
 	HWND gameHwnd = NULL;
 	POINT cursor;
@@ -556,24 +554,6 @@ namespace DrawD3D {
 		renderCursorHUD();
 	}
 
-	// Fix against drawing on naked skin
-	void canRenderDelay(bool start_delay) {
-		if (start_delay == true) {
-			canRender = false;
-			frame_after_start_H_now = 0;
-			return;
-		}
-
-		if (canRender)
-			return;
-
-		if (frame_after_start_H_now < 200) { // Wait 200 frames
-			frame_after_start_H_now++;
-			return;
-		}
-		frame_after_start_H_now = 0;
-		canRender = true;
-	}
 
 	// Currently not working (need to find a way for correct displaying 
 	// D3DPT_TRIANGLELIST and D3DPT_TRIANGLEFAN to game Device)
