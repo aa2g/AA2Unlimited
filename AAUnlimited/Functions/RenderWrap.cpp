@@ -18,7 +18,6 @@
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
 #include "Functions/Overlay.h"
-#include "General/DrawD3D.h"
 #include "Functions/Notifications.h"
 #include "Functions/AAPlay/Subs.h"
 
@@ -585,22 +584,6 @@ public:;
 
 	HRESULT WINAPI EndScene(void)
 	{
-		//IDirect3DStateBlock9* stateBlock = nullptr;
-		//IDirect3DPixelShader9* pixelShader = nullptr;
-		//IDirect3DBaseTexture9* texture = nullptr;
-
-		//orig->GetTexture(0, &texture);
-		//orig->GetPixelShader(&pixelShader);
-		//orig->CreateStateBlock(D3DSBT_ALL, &stateBlock);
-
-		DrawD3D::GetDevice(orig);
-		//DrawD3D::CircleFilled(orig, 100, 100, 100, 0, full, 32, D3DCOLOR_RGBA(255, 255, 255, 255));
-		DrawD3D::BoxFilled(100, 200, 100, 100, D3DCOLOR_RGBA(255, 255, 255, 255));
-
-		//orig->SetTexture(0, texture);
-		//orig->SetPixelShader(pixelShader);
-		//stateBlock->Apply();
-
 		//onEndScene();
 		if (font && g_Config.bDrawFPS) {
 			D3DVIEWPORT9 vp;

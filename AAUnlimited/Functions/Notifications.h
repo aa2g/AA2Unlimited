@@ -1,8 +1,5 @@
 #pragma once
 
-
-#include <list>
-
 namespace Notifications {
 	extern bool enabled;
 	extern std::wstring text;

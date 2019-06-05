@@ -1,5 +1,7 @@
 #pragma once
 
+#include <d3d9.h>
+#include <string>
 #include <list>
 #include <regex>
 
