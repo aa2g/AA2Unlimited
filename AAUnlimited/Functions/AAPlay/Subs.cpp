@@ -227,5 +227,8 @@ namespace Subtitles {
 			DrawD3D::DrawText(Font, 0, text.c_str(), -1, &rect[fontLayersCount - 1],
 				DT_NOCLIP | subsCentered, colors[1]);
 		}
+		
+		
+
 	}
 }
