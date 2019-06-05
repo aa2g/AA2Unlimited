@@ -552,7 +552,6 @@ public:;
 		if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
 			if (DrawD3D::waitRenderDelay)
 				DrawD3D::canRenderDelay();
-			//DrawD3D::DrawText(DrawD3D::fontFPS, 0, L"OFF", -1, &DrawD3D::rectFPS, DT_LEFT, D3DCOLOR_ARGB(200, 244, 244, 244));
 		}
 		else if (DrawD3D::fontCreated) {
 			if (g_Config.bDrawFPS) {
