@@ -213,7 +213,7 @@ namespace Subtitles {
 					DT_NOCLIP | subsCentered, colors[std::get<1>(line)]);
 				tempRect->top = tempRect->top - top_offset;
 				tempRect->bottom = tempRect->bottom - top_offset;
-				
+
 				line_num++;
 			}
 		}

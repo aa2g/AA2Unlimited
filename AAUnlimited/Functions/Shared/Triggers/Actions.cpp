@@ -1472,12 +1472,12 @@ namespace Shared {
 			auto text = params[0].strVal;
 			int important = params[1].bVal ? 2 : 1;
 
-			int neededSize = WideCharToMultiByte(CP_UTF8, 0,	// Wstr to str
+			int neededSize = WideCharToMultiByte(CP_UTF8, 0,				// From 
 				&text->c_str()[0], (int)text->size(), NULL, 0, NULL, NULL);
 			std::string strUTF8(neededSize, '\0');
 			WideCharToMultiByte(CP_UTF8, 0, &text->c_str()[0], (int)text->size(), 
 				&strUTF8[0], neededSize, NULL, NULL);
-			char *text_char = new char[strUTF8.size() + 1];		// From string to char
+			char *text_char = new char[strUTF8.size() + 1]; // From string to char
 			strUTF8.copy(text_char, strUTF8.size() + 1);
 			text_char[strUTF8.size()] = '\0';
 			Notifications::AddNotification(text_char, important);
