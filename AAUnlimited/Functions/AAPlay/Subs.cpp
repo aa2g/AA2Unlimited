@@ -179,6 +179,9 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
+
+			Notifications::AddNotification("Subtitle disappeared", 1); //_TEST
+			Notifications::AddNotification("Subtitle disappeared", 2); //_TEST
 		}
 	}
 
