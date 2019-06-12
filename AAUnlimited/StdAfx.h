@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <Windowsx.h>
 #include <d3d9.h>
+#include <gdiplus.h>
 
 #include <limits>
 #include <stdint.h>
@@ -109,6 +110,7 @@
 #include "Functions/TextureImage.h"
 #include "Functions/XXObjectFile.h"
 #include "General/Buffer.h"
+#include "General/DrawD3D.h"
 #include "General/DirectXStructs.h"
 #include "General/IllusionUtil.h"
 #include "General/ModuleInfo.h"
@@ -140,3 +142,5 @@
 
 #include "resource.h"
 
+
+#pragma comment (lib, "Gdiplus.lib")
