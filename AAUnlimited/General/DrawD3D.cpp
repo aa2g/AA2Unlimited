@@ -466,6 +466,17 @@ namespace DrawD3D {
 			key_next = 0;
 
 
+		// FPS font
+		CreateFontD3d(24, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, General::utf8.from_bytes("Arial").c_str(),
+			&fontFPS, false, "FPS Font creation failed");
+
+		// Subs Font
+		CreateFontD3d(Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
+			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+			General::utf8.from_bytes(Subtitles::fontFamily).c_str(),
+			&Subtitles::Font, false, "Subs Font creation failed");
+
 		// Other fonts
 		// ...
 

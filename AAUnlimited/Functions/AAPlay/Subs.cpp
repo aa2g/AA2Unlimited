@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 
-
 namespace Subtitles {
 
+	bool enabled = false;
 	std::wstring text;
 	std::list<std::tuple< std::wstring, int >> lines;
 	const int fontLayersCount = 9;
@@ -24,7 +24,13 @@ namespace Subtitles {
 	const char *fontFamily = "Arial";
 	int fontSize = 24;
 	int lineHeight = 36;
+	IUnknown *Font;
+	int areaPosPercentsX = 0; // in `% * 100`
+	int areaPosPercentsY = 0;
+	int outlineSpread = 0;
 	int gameWindowWidth = 0;
+	int gameWindowHeight = 0;
+	int gameWindowMarginY = 0;
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
 
@@ -106,10 +112,11 @@ namespace Subtitles {
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
+		enabled = true;
 		fontFamily = font_family;
 		if (text_align == 1) { subsCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
-		lineHeight = round(fontSize * line_height / 100);
+		lineHeight = round(fontSize * line_height / (float)100);
 		duration = show_duration * 1000;
 		maxLines = max_lines - 1;
 
@@ -118,18 +125,11 @@ namespace Subtitles {
 		else if (outline_quality == 0)
 			outlineLayersCount = 0;
 
-		int area_coords_Right = area_pos_X + 100; // Temporary params
-		int area_coords_Bottom = area_pos_Y + 100;
-		rect[0] = { area_pos_X + outline_spread, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[1] = { area_pos_X - outline_spread, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[2] = { area_pos_X - outline_spread, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[3] = { area_pos_X + outline_spread, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[4] = { area_pos_X - outline_spread, area_pos_Y, area_coords_Right, area_coords_Bottom };
-		rect[5] = { area_pos_X + outline_spread, area_pos_Y, area_coords_Right, area_coords_Bottom };
-		rect[6] = { area_pos_X, area_pos_Y - outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[7] = { area_pos_X, area_pos_Y + outline_spread, area_coords_Right, area_coords_Bottom };
-		rect[8] = { area_pos_X, area_pos_Y, area_coords_Right, area_coords_Bottom };
-		if (gameWindowWidth > 0) { CorrectSubsAreaSize(); } // If game window Width is available - correct the rectangles
+		areaPosPercentsX = area_pos_X;
+		areaPosPercentsY = area_pos_Y;
+		outlineSpread = outline_spread;
+		if (gameWindowWidth > 0) 
+			SetSubsAreaSize(gameWindowWidth, gameWindowHeight, gameWindowMarginY);  // If game window Width is available - Set the rectangles
 
 		colors[0] = sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
 		colors[1] = sHEX_sRGB_toRGBA(text_color_female, colors[1]);
@@ -141,9 +141,31 @@ namespace Subtitles {
 		}
 	}
 
-	void CorrectSubsAreaSize() {
-		for (int i = 0; i < fontLayersCount; i++)
-			rect[i].right = rect[i].left + gameWindowWidth;
+	void SetSubsAreaSize(int window_width, int window_height, int margin_Y) {
+		gameWindowWidth = window_width;
+		gameWindowHeight = window_height;
+		gameWindowMarginY = margin_Y;
+
+		int area_pos_X = round(gameWindowWidth * areaPosPercentsX / (float)10000);
+		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000) + gameWindowMarginY;
+		
+		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread, 
+			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
+		rect[1] = { area_pos_X - outlineSpread, area_pos_Y + outlineSpread, 
+			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
+		rect[2] = { area_pos_X - outlineSpread, area_pos_Y - outlineSpread, 
+			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
+		rect[3] = { area_pos_X + outlineSpread, area_pos_Y - outlineSpread, 
+			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
+		rect[4] = { area_pos_X - outlineSpread, area_pos_Y, 
+			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
+		rect[5] = { area_pos_X + outlineSpread, area_pos_Y, 
+			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
+		rect[6] = { area_pos_X, area_pos_Y - outlineSpread, 
+			area_pos_X + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
+		rect[7] = { area_pos_X, area_pos_Y + outlineSpread, 
+			area_pos_X + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
+		rect[8] = { area_pos_X, area_pos_Y, area_pos_X + gameWindowWidth, area_pos_Y + gameWindowHeight };
 	}
 
 	void SetSubtitlesColor(int r, int g, int b) {
@@ -157,6 +179,50 @@ namespace Subtitles {
 		if (now - lastPopTime > duration) {
 			lines.pop_front();
 			lastPopTime = lines.empty() ? 0 : now;
+		}
+	}
+
+	void Render() {
+		if (!enabled || lines.empty())
+			return;
+
+		PopSubtitles();
+
+		if (outlineLayersCount != 0 || separateColorMale)
+		{
+			int line_num = 0;
+			for each (const auto line in lines) // for each subs line
+			{
+				int top_offset = lineHeight * line_num;
+				RECT *tempRect;
+				for (int i = 0; i < outlineLayersCount; i++) // outline layers
+				{
+					tempRect = &rect[i];
+					tempRect->top = tempRect->top + top_offset;
+					tempRect->bottom = tempRect->bottom + top_offset;
+					DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, tempRect,
+						DT_NOCLIP | subsCentered, colors[0]);
+					tempRect->top = tempRect->top - top_offset;
+					tempRect->bottom = tempRect->bottom - top_offset;
+				}
+				// Colorized text
+				tempRect = &rect[fontLayersCount - 1];
+				tempRect->top = tempRect->top + top_offset;
+				tempRect->bottom = tempRect->bottom + top_offset;
+				DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, &rect[fontLayersCount - 1],
+					DT_NOCLIP | subsCentered, colors[std::get<1>(line)]);
+				tempRect->top = tempRect->top - top_offset;
+				tempRect->bottom = tempRect->bottom - top_offset;
+				
+				line_num++;
+			}
+		}
+		else { // Only Colorized text
+			text.clear();
+			for each (const auto line in lines)
+				text += std::get<0>(line);
+			DrawD3D::DrawText(Font, 0, text.c_str(), -1, &rect[fontLayersCount - 1],
+				DT_NOCLIP | subsCentered, colors[1]);
 		}
 	}
 }
