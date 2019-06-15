@@ -360,13 +360,6 @@ void HiPolyLoadsInjection() {
 	{ 0x75, 0x06, 0x80, 0x7D, 0x10, 0x00 },							//expected values
 	{ 0x90, 0xe8, HookControl::RELATIVE_DWORD, (DWORD)&QueryEye },	//redirect to our function
 		NULL);
-
-	if (General::IsAAEdit) {
-		// Spawn clothed on preview window by default
-		Hook((BYTE*)(General::GameBase + 0x1A483), { 0x6A, 0x00 }, { 0x6A, 0x01 }, NULL);
-		// Don't show male dick by default
-		Hook((BYTE*)(General::GameBase + 0x1A493), { 0x6A, 0x00 }, { 0x6A, 0x02 }, NULL);
-	}
 }
 
 void __stdcall SaveLoadEvent() {
