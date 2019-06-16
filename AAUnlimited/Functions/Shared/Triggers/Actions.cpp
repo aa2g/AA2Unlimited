@@ -764,6 +764,29 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.strengthClassRank = rank;
 		}
 
+
+		void Thread::SetStamina(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int value = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_stamina = value;
+		}
+
+
+		void Thread::SetPeriodTimer(std::vector<Value>& params)
+		{
+			int value = params[0].iVal * 1000;
+			const DWORD offset[]{ 0x376164, 0x2C, 0x2C };
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
+			*timer = value;
+		}
+
+
 		//int seat, int sociability
 		void Thread::SetCardSociability(std::vector<Value>& params)
 		{
@@ -1333,6 +1356,12 @@ namespace Shared {
 			CharInstData* instPartner = &AAPlay::g_characters[seatPartner];
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
 
+
+			//Add stamina
+			const DWORD offset11[]{ 0x376164, 0x2C, 0x2C };
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset11);
+			*timer = 1000; //resets the counter to be safe
+			AAPlay::g_characters[seatPC].m_char->m_stamina = AAPlay::g_characters[seatPC].m_char->m_stamina + 100;
 
 			//save interrupts
 			const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
@@ -2145,6 +2174,18 @@ namespace Shared {
 				TEXT("Switch who is dominant and submissive in an H scene."),
 				{ },
 				&Thread::SwitchActiveInH
+			},
+			{
+				106, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Stamina"), TEXT("%p ::SetStamina = %p"),
+				TEXT("Set the current stamina of a character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetStamina
+			},
+			{
+				107, ACTIONCAT_EVENT, TEXT("Set period timer"), TEXT("PeriodTimer = %p"),
+				TEXT("Set the amount of seconds that have passed in the current period."),
+				{ TYPE_INT },
+				&Thread::SetPeriodTimer
 			},
 		};
 

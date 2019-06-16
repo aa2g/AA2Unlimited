@@ -94,6 +94,8 @@ namespace Shared {
 			void SetMasturbating(std::vector<Value>& params);
 			void SetCardStrengthValue(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
+			void SetStamina(std::vector<Value>& params);
+			void SetPeriodTimer(std::vector<Value>& params);
 			void SetCardSociability(std::vector<Value>& params);
 			void SetCardLoversItem(std::vector<Value>& params);
 			void SetCardFriendItem(std::vector<Value>& params);
@@ -256,6 +258,8 @@ namespace Shared {
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
 			Value GetCardRejectCount(std::vector<Value>& params); //int(int)
+			Value GetStamina(std::vector<Value>& params);
+			Value GetPeriodTimer(std::vector<Value>& params);
 			Value GetCardWinCount(std::vector<Value>& params); //int(int)
 			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
 			Value GetCardSkipCount(std::vector<Value>& params); //int(int)

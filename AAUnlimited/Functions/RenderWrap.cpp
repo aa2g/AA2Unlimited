@@ -8,6 +8,7 @@
 
 #include <windows.h>
 #include <d3d9.h>
+#include <gdiplus.h>
 #include <thread>
 #include <mutex>
 #include "RenderWrap.h"
@@ -16,8 +17,10 @@
 #include "Files/Config.h"
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
+#include "General/DrawD3D.h"
 #include "Functions/AAPlay/Subs.h"
 
+#pragma comment (lib, "Gdiplus.lib")
 
 #define FRAME_MASK 15
 #define TEST_DISABLE
@@ -249,6 +252,7 @@ public:;
 		exiting = false;
 
 		MakeFont();
+		DrawD3D::InitDraw(orig);
 
 		if (!g_Config.bMTRenderer)
 			return;
@@ -621,6 +625,15 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
+
+		if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
+			if (DrawD3D::waitRenderDelay)
+				DrawD3D::canRenderDelay();
+		}
+		else if (DrawD3D::fontCreated) {
+			DrawD3D::Render(); // HUD and others
+		}
+
 		if (font && g_Config.bDrawFPS || g_Config.bDisplaySubs) {
 			D3DVIEWPORT9 vp;
 			GetViewport(&vp);
@@ -632,6 +645,7 @@ public:;
 			}
 		}
 		frameno++;
+
 		WRAPCALL(orig->EndScene());
 	}
 
@@ -1084,6 +1098,15 @@ public:;
 	}
 
 	HRESULT WINAPI CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS* pPresentationParameters, IDirect3DDevice9** ppReturnedDeviceInterface) {
+		// Init GDI also
+		ULONG_PTR gdiToken;
+		Gdiplus::GdiplusStartupInput gdiStartupInput;
+		gdiStartupInput.GdiplusVersion = 1;
+		gdiStartupInput.DebugEventCallback = NULL;
+		gdiStartupInput.SuppressBackgroundThread = FALSE;
+		gdiStartupInput.SuppressExternalCodecs = FALSE;
+		Gdiplus::GdiplusStartup(&gdiToken, &gdiStartupInput, NULL);
+
 		static bool created;
 //		LOGSPAM << "D3d behavior :" << std::hex << BehaviorFlags << "\n";
 /*		BehaviorFlags &= ~D3DCREATE_DISABLE_PSGP_THREADING;
@@ -1096,6 +1119,11 @@ public:;
 		if (hres == D3D_OK) {
 			Subtitles::gameWindowWidth = pPresentationParameters->BackBufferWidth; // Game window Width for Subtitles
 			Subtitles::CorrectSubsAreaSize();
+			int trueGameWindowWidth = pPresentationParameters->BackBufferWidth; // True game Width, Height for current resolution
+			int trueGameWindowHeight = trueGameWindowWidth / 16.00 * 9;
+			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
+			// Create D3D fonts
+			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY, hFocusWindow);
 			*ppReturnedDeviceInterface = d3dev;
 			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
 				DEVMODE dmScreenSettings = { 0 };
