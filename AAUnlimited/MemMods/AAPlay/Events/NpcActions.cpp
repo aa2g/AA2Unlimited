@@ -430,15 +430,19 @@ void __stdcall hPositionChange(BYTE param) {
 	if (actor0 && actor1) {
 		auto hInfo = Shared::GameState::getHInfo();
 		if (hInfo) {
+			if (hInfo->m_activeParticipant) {
+				if (hInfo->m_activeParticipant->m_charPtr) {
 
-			Shared::Triggers::HPositionData hPositionData;
-			hPositionData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
-			hPositionData.actor0 = *actor0;
-			hPositionData.actor1 = *actor1;
-			hPositionData.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
-			hPositionData.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
-			hPositionData.position = param;
-			Shared::Triggers::ThrowEvent(&hPositionData);
+					Shared::Triggers::HPositionData hPositionData;
+					hPositionData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
+					hPositionData.actor0 = *actor0;
+					hPositionData.actor1 = *actor1;
+					hPositionData.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
+					hPositionData.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
+					hPositionData.position = param;
+					Shared::Triggers::ThrowEvent(&hPositionData);
+				}
+			}
 
 		}
 	}
