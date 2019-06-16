@@ -131,6 +131,7 @@
     <ClCompile Include="External\ExternalClasses\Light.cpp" />
     <ClCompile Include="Functions\AAPlay\Subs.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterRender.cpp" />
+    <ClCompile Include="General\DrawD3D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />

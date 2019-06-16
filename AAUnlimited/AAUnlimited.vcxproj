@@ -75,6 +75,7 @@
     <ClCompile Include="Functions\Shared\Triggers\Triggers.cpp" />
     <ClCompile Include="Functions\Shared\Triggers\Value.cpp" />
     <ClCompile Include="Functions\XXObjectFile.cpp" />
+    <ClCompile Include="General\DrawD3D.cpp" />
     <ClCompile Include="General\IllusionUtil.cpp" />
     <ClCompile Include="Hooks\WinAPI.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\CharacterActions.cpp" />
