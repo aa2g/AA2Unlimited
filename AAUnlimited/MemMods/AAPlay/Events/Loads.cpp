@@ -75,6 +75,7 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 	Poser::LoadCharacter(loadCharacter);
 
+	DrawD3D::canRenderDelay(200); // Waiting 200 frames to prevent drawing HUD elements on naked skin
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
 	// Extra Hairs low poly infection fix
 	// Maker loads hair twice. Once after character is loaded. Fix can be safely ignored in Maker
