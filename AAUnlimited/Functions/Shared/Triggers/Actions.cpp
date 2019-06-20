@@ -1496,6 +1496,21 @@ namespace Shared {
 			}
 		}
 
+		// string text, bool important
+		void Thread::Notification(std::vector<Value>& params) {
+			auto text = params[0].strVal;
+			int important = params[1].bVal ? 2 : 1;
+
+			int neededSize = WideCharToMultiByte(CP_UTF8, 0,	// Wstr to str
+				&text->c_str()[0], (int)text->size(), NULL, 0, NULL, NULL);
+			std::string strUTF8(neededSize, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, &text->c_str()[0], (int)text->size(), 
+				&strUTF8[0], neededSize, NULL, NULL);
+			char *text_char = new char[strUTF8.size() + 1];		// From string to char
+			strUTF8.copy(text_char, strUTF8.size() + 1);
+			text_char[strUTF8.size()] = '\0';
+			Notifications::AddNotification(text_char, important);
+		}
 
 		/*
 		 * A list of all action categories
@@ -1917,7 +1932,7 @@ namespace Shared {
 			},
 			{
 				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
-				TEXT("Writes the string to the SPAM log."),
+				TEXT("Writes the string to the INFO log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
 			},
@@ -2187,6 +2202,12 @@ namespace Shared {
 				{ TYPE_INT },
 				&Thread::SetPeriodTimer
 			},
+			{
+				108, ACTIONCAT_GENERAL, TEXT("Notification"), TEXT("Notification (text: %p , importantBool: %p )"),
+				TEXT("Display the notification on the screen."),
+				{ TYPE_STRING, TYPE_BOOL },
+				&Thread::Notification
+			}
 		};
 
 
