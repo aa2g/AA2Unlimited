@@ -39,7 +39,7 @@ namespace Notifications {
 			LOGPRIO(Logger::Priority::INFO) << "Notification : " << text << "\r\n";
 			return;
 		}
-		if (type != REGULAR) { type = IMPORTANT; }
+		if (type != RegularNotification) { type = ImportantNotification; }
 
 		if (lastPopTime == 0)
 			lastPopTime = GetTickCount();

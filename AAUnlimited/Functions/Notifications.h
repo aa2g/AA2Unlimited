@@ -3,7 +3,7 @@
 
 #include <list>
 
-enum NotifyType { REGULAR = 1, IMPORTANT = 2 };
+enum NotifyType { RegularNotification = 1, ImportantNotification = 2 };
 
 namespace Notifications {
 	extern bool enabled;

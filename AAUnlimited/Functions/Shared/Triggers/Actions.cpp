@@ -1499,7 +1499,7 @@ namespace Shared {
 		// string text, bool important
 		void Thread::Notification(std::vector<Value>& params) {
 			auto text = params[0].strVal;
-			NotifyType important = params[1].bVal ? IMPORTANT : REGULAR;
+			NotifyType important = params[1].bVal ? ImportantNotification : RegularNotification;
 			Notifications::AddNotification(*text, important);
 		}
 
