@@ -68,6 +68,8 @@ namespace PlayInjections {
 			wcsncpy_s(path + pathLength - 3, 4, ext, 3);
 			bitmap->Save(path, cls, params);
 			delete bitmap;
+
+			Notifications::AddNotification(L"Screenshot saved (" + std::wstring(path) + L")", RegularNotification);
 		}
 
 		void __declspec(naked) SaveRedirect() {

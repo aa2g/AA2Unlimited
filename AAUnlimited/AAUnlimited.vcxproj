@@ -54,6 +54,7 @@
     <ClCompile Include="Functions\AAPlay\HAis\BaseAi.cpp" />
     <ClCompile Include="External\ExternalClasses\HClasses\HPosData.cpp" />
     <ClCompile Include="Functions\AAPlay\HButtonMove.cpp" />
+    <ClCompile Include="Functions\Notifications.cpp" />
     <ClCompile Include="Functions\Render.cpp" />
     <ClCompile Include="Functions\RenderWrap.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -174,6 +175,7 @@
     <ClInclude Include="Functions\AAPlay\HAis\BaseAi.h" />
     <ClInclude Include="External\ExternalClasses\HClasses\HPosData.h" />
     <ClInclude Include="Functions\AAPlay\HButtonMove.h" />
+    <ClInclude Include="Functions\Notifications.h" />
     <ClInclude Include="Functions\Render.h" />
     <ClInclude Include="Functions\RenderWrap.h" />
     <ClInclude Include="Functions\Serialize.h" />
@@ -192,6 +194,7 @@
     <ClInclude Include="Functions\Shared\Triggers\Value.h" />
     <ClInclude Include="Functions\XXObjectFile.h" />
     <ClInclude Include="General\DirectXStructs.h" />
+    <ClInclude Include="General\DrawD3D.h" />
     <ClInclude Include="General\IllusionUtil.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />

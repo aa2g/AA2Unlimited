@@ -1,29 +1,29 @@
 #include "StdAfx.h"
 
-namespace Subtitles {
+namespace Notifications {
 
 	bool enabled = false;
 	std::wstring text;
-	std::list<std::tuple< std::wstring, int >> lines;
+	std::list<std::tuple< std::wstring, int >> lines; // < text_val, type_id (1 - regular, 2 - important) >
 	const int fontLayersCount = 9;
-	int outlineLayersCount = 8;		// Count Outline (black) layers to show for each Subs lines (Depends outline quality)
+	int outlineLayersCount = 8;		// Count Outline (black) layers to show for each Notifs lines (Depends outline quality)
 	RECT rect[fontLayersCount] = {	// 0 - shadow position | 0-7 - outline font pos | 8 - main font pos
-		{ 1, 41, 1024, 256 }, { -1, 41, 1024, 256 }, 
-		{ -1, 39, 1024, 256 }, { 1, 39, 1024, 256 },
-		{ -1, 40, 1024, 256 },{ 1, 40, 1024, 256 },
-		{ 0, 39, 1024, 256 },{ 0, 41, 1024, 256 },
-		{ 0, 40, 1024, 256 } 
+		{ 1, 41, 1024, 256 },{ -1, 41, 1024, 256 },
+	{ -1, 39, 1024, 256 },{ 1, 39, 1024, 256 },
+	{ -1, 40, 1024, 256 },{ 1, 40, 1024, 256 },
+	{ 0, 39, 1024, 256 },{ 0, 41, 1024, 256 },
+	{ 0, 40, 1024, 256 }
 	};
-	// 0 - outline/shadow | 1 - female | 2 - male
-	D3DCOLOR colors[3] = { D3DCOLOR_RGBA(0, 0, 0, 255), 
-		D3DCOLOR_RGBA(255, 155, 255, 255), D3DCOLOR_RGBA(155, 244, 244, 255) };
+	// 0 - outline/shadow | 1 - normal notify | 2 - important
+	D3DCOLOR colors[3] = { D3DCOLOR_RGBA(0, 0, 0, 255),
+		D3DCOLOR_RGBA(255, 190, 100, 255), D3DCOLOR_RGBA(255, 70, 25, 255) };
 
 	DWORD lastPopTime = 0;
-	int duration = 4000;
-	int maxLines = 3; // 3 for this var == 4 in game
+	int duration = 10000;
+	int maxLines = 4; // 4 for this var == 5 in game
 	const char *fontFamily = "Arial";
-	int fontSize = 24;
-	int lineHeight = 36;
+	int fontSize = 18;
+	int lineHeight = 24;
 	IUnknown *Font;
 	int areaPosPercentsX = 0; // in `% * 100`
 	int areaPosPercentsY = 0;
@@ -31,28 +31,32 @@ namespace Subtitles {
 	int gameWindowWidth = 0;
 	int gameWindowHeight = 0;
 	int gameWindowMarginY = 0;
-	DWORD subsCentered = 0;
-	bool separateColorMale = true;
+	DWORD notifyCentered = 0;
+	bool separateColorType = true;
 
-	void AddSubtitles(const char *subtitle, const char *file_name) {
-		int sexes_id = 1;
-		if (file_name[0] == *"s") { sexes_id = 2; }
+	void AddNotification(std::wstring text, NotifyType type) {
+		if (!enabled) {
+			LOGPRIO(Logger::Priority::INFO) << "Notification : " << text << "\r\n";
+			return;
+		}
+		if (type != RegularNotification) { type = ImportantNotification; }
 
 		if (lastPopTime == 0)
 			lastPopTime = GetTickCount();
 		if (lines.size() > maxLines)
 			lines.pop_front();
-		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
+
+		lines.push_back(std::make_tuple(text + L"\n", type));
 	}
 
-	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
-		const char *text_color_female, int diff_color_for_male, const char *text_color_male,
+	void InitNotificationsParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
+		const char *text_color_normal, int diff_color_for_important, const char *text_color_important,
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
 		enabled = true;
 		fontFamily = font_family;
-		if (text_align == 1) { subsCentered = DT_CENTER; area_pos_X = 0; }
+		if (text_align == 1) { notifyCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
 		lineHeight = round(fontSize * line_height / (float)100);
 		duration = show_duration * 1000;
@@ -67,50 +71,50 @@ namespace Subtitles {
 		areaPosPercentsY = area_pos_Y;
 		outlineSpread = outline_spread;
 		if (gameWindowWidth > 0) 
-			SetSubsAreaSize(gameWindowWidth, gameWindowHeight, gameWindowMarginY);  // If game window Width is available - Set the rectangles
+			SetNotifyAreaSize(gameWindowWidth, gameWindowHeight, gameWindowMarginY); // If game window Width is available - Set the rectangles
 
 		colors[0] = General::sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
-		colors[1] = General::sHEX_sRGB_toRGBA(text_color_female, colors[1]);
-		if (diff_color_for_male == 1) 
-			colors[2] = General::sHEX_sRGB_toRGBA(text_color_male, colors[2]);
-		else { 
-			colors[2] = General::sHEX_sRGB_toRGBA(text_color_female, colors[1]);
-			separateColorMale = false;
+		colors[1] = General::sHEX_sRGB_toRGBA(text_color_normal, colors[1]);
+		if (diff_color_for_important == 1)
+			colors[2] = General::sHEX_sRGB_toRGBA(text_color_important, colors[2]);
+		else {
+			colors[2] = General::sHEX_sRGB_toRGBA(text_color_normal, colors[1]);
+			separateColorType = false;
 		}
 	}
 
-	void SetSubsAreaSize(int window_width, int window_height, int margin_Y) {
+	void SetNotifyAreaSize(int window_width, int window_height, int margin_Y) {
 		gameWindowWidth = window_width;
 		gameWindowHeight = window_height;
 		gameWindowMarginY = margin_Y;
 
 		int area_pos_X = round(gameWindowWidth * areaPosPercentsX / (float)10000);
 		int area_pos_Y = round(gameWindowHeight * areaPosPercentsY / (float)10000) + gameWindowMarginY;
-		
-		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread, 
+
+		rect[0] = { area_pos_X + outlineSpread, area_pos_Y + outlineSpread,
 			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
-		rect[1] = { area_pos_X - outlineSpread, area_pos_Y + outlineSpread, 
+		rect[1] = { area_pos_X - outlineSpread, area_pos_Y + outlineSpread,
 			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
-		rect[2] = { area_pos_X - outlineSpread, area_pos_Y - outlineSpread, 
+		rect[2] = { area_pos_X - outlineSpread, area_pos_Y - outlineSpread,
 			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[3] = { area_pos_X + outlineSpread, area_pos_Y - outlineSpread, 
+		rect[3] = { area_pos_X + outlineSpread, area_pos_Y - outlineSpread,
 			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[4] = { area_pos_X - outlineSpread, area_pos_Y, 
+		rect[4] = { area_pos_X - outlineSpread, area_pos_Y,
 			area_pos_X - outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
-		rect[5] = { area_pos_X + outlineSpread, area_pos_Y, 
+		rect[5] = { area_pos_X + outlineSpread, area_pos_Y,
 			area_pos_X + outlineSpread + gameWindowWidth, area_pos_Y + gameWindowHeight };
-		rect[6] = { area_pos_X, area_pos_Y - outlineSpread, 
+		rect[6] = { area_pos_X, area_pos_Y - outlineSpread,
 			area_pos_X + gameWindowWidth, area_pos_Y - outlineSpread + gameWindowHeight };
-		rect[7] = { area_pos_X, area_pos_Y + outlineSpread, 
+		rect[7] = { area_pos_X, area_pos_Y + outlineSpread,
 			area_pos_X + gameWindowWidth, area_pos_Y + outlineSpread + gameWindowHeight };
 		rect[8] = { area_pos_X, area_pos_Y, area_pos_X + gameWindowWidth, area_pos_Y + gameWindowHeight };
 	}
 
-	void SetSubtitlesColor(int r, int g, int b) {
+	void SetNotificationsColor(int r, int g, int b) {
 		colors[8] = D3DCOLOR_RGBA(r, g, b, 255);
 	}
 
-	VOID PopSubtitles() {
+	void PopNotifications() {
 		if (lines.empty())
 			return;
 		DWORD now = GetTickCount();
@@ -124,14 +128,14 @@ namespace Subtitles {
 		if (!enabled || lines.empty())
 			return;
 
-		PopSubtitles();
+		PopNotifications();
 
-		if (outlineLayersCount != 0 || separateColorMale)
+		if (outlineLayersCount != 0 || separateColorType)
 		{
 			int line_num = 0;
 			for each (const auto line in lines) // for each subs line
 			{
-				int top_offset = lineHeight * line_num;
+				int top_offset = -lineHeight * (lines.size() - 1 - line_num);
 				RECT *tempRect;
 				for (int i = 0; i < outlineLayersCount; i++) // outline layers
 				{
@@ -139,7 +143,7 @@ namespace Subtitles {
 					tempRect->top = tempRect->top + top_offset;
 					tempRect->bottom = tempRect->bottom + top_offset;
 					DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, tempRect,
-						DT_NOCLIP | subsCentered, colors[0]);
+						DT_NOCLIP | notifyCentered, colors[0]);
 					tempRect->top = tempRect->top - top_offset;
 					tempRect->bottom = tempRect->bottom - top_offset;
 				}
@@ -148,19 +152,19 @@ namespace Subtitles {
 				tempRect->top = tempRect->top + top_offset;
 				tempRect->bottom = tempRect->bottom + top_offset;
 				DrawD3D::DrawText(Font, 0, std::get<0>(line).c_str(), -1, &rect[fontLayersCount - 1],
-					DT_NOCLIP | subsCentered, colors[std::get<1>(line)]);
+					DT_NOCLIP | notifyCentered, colors[std::get<1>(line)]);
 				tempRect->top = tempRect->top - top_offset;
 				tempRect->bottom = tempRect->bottom - top_offset;
-				
+
 				line_num++;
 			}
 		}
 		else { // Only Colorized text
 			text.clear();
 			for each (const auto line in lines)
-				text += std::get<0>(line);
+				text = std::get<0>(line) + text;
 			DrawD3D::DrawText(Font, 0, text.c_str(), -1, &rect[fontLayersCount - 1],
-				DT_NOCLIP | subsCentered, colors[1]);
+				DT_NOCLIP | notifyCentered, colors[1]);
 		}
 	}
 }

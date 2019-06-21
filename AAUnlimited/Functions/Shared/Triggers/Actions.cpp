@@ -1496,6 +1496,12 @@ namespace Shared {
 			}
 		}
 
+		// string text, bool important
+		void Thread::Notification(std::vector<Value>& params) {
+			auto text = params[0].strVal;
+			NotifyType important = params[1].bVal ? ImportantNotification : RegularNotification;
+			Notifications::AddNotification(*text, important);
+		}
 
 		/*
 		 * A list of all action categories
@@ -1917,7 +1923,7 @@ namespace Shared {
 			},
 			{
 				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
-				TEXT("Writes the string to the SPAM log."),
+				TEXT("Writes the string to the INFO log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
 			},
@@ -2187,6 +2193,12 @@ namespace Shared {
 				{ TYPE_INT },
 				&Thread::SetPeriodTimer
 			},
+			{
+				108, ACTIONCAT_GENERAL, TEXT("Notification"), TEXT("Notification (text: %p , importantBool: %p )"),
+				TEXT("Display the notification on the screen."),
+				{ TYPE_STRING, TYPE_BOOL },
+				&Thread::Notification
+			}
 		};
 
 

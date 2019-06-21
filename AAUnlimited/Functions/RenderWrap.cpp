@@ -18,6 +18,7 @@
 #include "Render.h"
 #include "External/ExternalClasses/CharacterStruct.h"
 #include "General/DrawD3D.h"
+#include "Functions/Notifications.h"
 #include "Functions/AAPlay/Subs.h"
 
 #pragma comment (lib, "Gdiplus.lib")
@@ -558,8 +559,7 @@ public:;
 				if (vp.Width > 1024) 
 					DrawFPS();
 			}
-			Subtitles::Render();
-			DrawD3D::Render(); // HUD and others
+			DrawD3D::Render();
 		}
 		frameno++;
 
@@ -1039,8 +1039,9 @@ public:;
 			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
 			// Create D3D fonts
 			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY, hFocusWindow);
-			// Game window Width and Height for Subtitles
+			// Game window Width and Height for Subtitles and Notifications
 			Subtitles::SetSubsAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
+			Notifications::SetNotifyAreaSize(trueGameWindowWidth, trueGameWindowHeight, trueGameMarginY);
 			*ppReturnedDeviceInterface = d3dev;
 			if (!created && General::IsAAPlay && g_Config.getb("bFullscreen")) {
 				DEVMODE dmScreenSettings = { 0 };
