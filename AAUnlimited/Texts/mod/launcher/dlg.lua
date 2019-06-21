@@ -322,7 +322,7 @@ local function buildtabs() return
 				iup.label {
 					tip = "Invalid aliasing modes default to 8x",
 					title = "Antialiasing*:",}, gsdl("aa", iup.list { 
-					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
+					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8x MSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
 					"None", "256", "512", "1024", dropdown="YES" }),
 				iup.label {title = "Mipmap level:", }, gsdl("mipmap", iup.list { "None", "Normal", "Best", dropdown="YES" }),
