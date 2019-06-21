@@ -45,68 +45,6 @@ namespace Subtitles {
 		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
 	}
 
-	static int HexadecimalToDecimal(std::string hex) {
-		int hexLength = hex.length();
-		double dec = 0;
-
-		for (int i = 0; i < hexLength; ++i)
-		{
-			char b = hex[i];
-
-			if (b >= 48 && b <= 57)
-				b -= 48;
-			else if (b >= 65 && b <= 70)
-				b -= 55;
-			dec += b * pow(16, ((hexLength - i) - 1));
-		}
-		return (int)dec;
-	}
-
-	D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255) {
-		D3DCOLOR result = colorDefault;
-		int R = 0;
-		int G = 0;
-		int B = 0;
-		std::locale loc; std::string afterStrToUpper = "";
-		for (std::string::size_type i = 0; i<stringHEX_RGB.length(); ++i)
-			afterStrToUpper += std::toupper(stringHEX_RGB[i], loc);
-		stringHEX_RGB = afterStrToUpper;
-
-		std::smatch matches; 
-		std::regex regExpHEX("([A-F0-9]{6})");
-		std::regex regExpRGB("(\\d{1,3})[^\\d]+(\\d{1,3})[^\\d]+(\\d{1,3})");
-		std::regex regExpShortHEX("([A-F0-9]{3})");
-		bool finded_color = false;
-		if (std::regex_match(stringHEX_RGB, matches, regExpHEX))		// Try to find HEX
-		{
-			R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 2));
-			G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 2));
-			B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(4, 2));
-			finded_color = true;
-		}
-		else if (std::regex_match(stringHEX_RGB, matches, regExpRGB)) { // Try to find RGB
-			R = std::stoi(matches[1].str());
-			G = std::stoi(matches[2].str());
-			B = std::stoi(matches[3].str());
-			finded_color = true;
-		}
-		else if (std::regex_match(stringHEX_RGB, matches, regExpShortHEX)) { // Try to find short HEX
-			R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 1) + matches[0].str().substr(0, 1));
-			G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(1, 1) + matches[0].str().substr(1, 1));
-			B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 1) + matches[0].str().substr(2, 1));
-			finded_color = true;
-		}
-
-		if (finded_color) {
-			if (R > 255) { R = 255; }
-			if (G > 255) { G = 255; }
-			if (B > 255) { B = 255; }
-			result = D3DCOLOR_RGBA(R, G, B, alphaChannel);
-		}
-
-		return result;
-	}
-
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
 		const char *text_color_female, int diff_color_for_male, const char *text_color_male,
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
@@ -131,12 +69,12 @@ namespace Subtitles {
 		if (gameWindowWidth > 0) 
 			SetSubsAreaSize(gameWindowWidth, gameWindowHeight, gameWindowMarginY);  // If game window Width is available - Set the rectangles
 
-		colors[0] = sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
-		colors[1] = sHEX_sRGB_toRGBA(text_color_female, colors[1]);
+		colors[0] = General::sHEX_sRGB_toRGBA(outline_color, colors[0], outline_col_A);
+		colors[1] = General::sHEX_sRGB_toRGBA(text_color_female, colors[1]);
 		if (diff_color_for_male == 1) 
-			colors[2] = sHEX_sRGB_toRGBA(text_color_male, colors[2]);
+			colors[2] = General::sHEX_sRGB_toRGBA(text_color_male, colors[2]);
 		else { 
-			colors[2] = sHEX_sRGB_toRGBA(text_color_female, colors[1]);
+			colors[2] = General::sHEX_sRGB_toRGBA(text_color_female, colors[1]);
 			separateColorMale = false;
 		}
 	}

@@ -3,6 +3,8 @@
 
 #include <list>
 
+enum NotifyType { REGULAR = 1, IMPORTANT = 2 };
+
 namespace Notifications {
 	extern bool enabled;
 	extern int fontSize;
@@ -11,7 +13,7 @@ namespace Notifications {
 	extern int gameWindowWidth;
 	extern int gameWindowHeight;
 
-	void AddNotification(const char *text, int type_id);
+	void AddNotification(std::wstring text, NotifyType type);
 	void InitNotificationsParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
 		const char *text_color_normal, int diff_color_for_important, const char *text_color_important,
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
