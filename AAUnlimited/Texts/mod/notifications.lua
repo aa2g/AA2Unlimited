@@ -18,7 +18,7 @@ local opts = {
 	{ "outlineColorA", 255, "Outline Alpha: %i[0,255]"},
 	
 	{ "textAlign", 0, "Text Alignment: %l|Left|Center|{(if `Center`, param `Position X` not working)}"},
-	{ "areaPosX", 2.0, "Notifications Position X, percents: %r[0,100,0.1]{Percent of Game window Width (not works, if param `Alignment` set to `Center`)}"},
+	{ "areaPosX", 2.0, "Notifications Position X, percents: %r[0,95,0.1]{Percent of Game window Width (not works, if param `Alignment` set to `Center`)}"},
 	{ "areaPosY", 75.0, "Notifications Position Y, percents: %r[0,100,0.1]{(Bottom edge coordinate!) Percent of Game window Height}"},
 }
 
@@ -31,6 +31,10 @@ end
 
 function _M:load()
 	mod_load_config(self, opts)
+	if opts.areaPosX > 95 or opts.areaPosY > 100 then
+		opts.areaPosX = 2.0;
+		opts.areaPosY = 75.0;
+	end
 end
 
 function _M:unload()

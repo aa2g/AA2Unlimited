@@ -198,6 +198,4 @@ static int HexadecimalToDecimal(std::string hex);
 
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255);
 
-std::wstring str_to_wstr(const std::string& str);
-
 }

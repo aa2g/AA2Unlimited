@@ -293,9 +293,8 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["AddNotification"] = LUA_LAMBDA0({
-		std::string text_str((const char*)s.get(1));
 		NotifyType type = (int)s.get(2) == 2 ? ImportantNotification : RegularNotification;
-		Notifications::AddNotification(General::utf8.from_bytes(text_str.c_str()), type);
+		Notifications::AddNotification(General::utf8.from_bytes((const char*)s.get(1)), type);
 	});
 
 	_BINDING["InitNotificationsParams"] = LUA_LAMBDA0({
