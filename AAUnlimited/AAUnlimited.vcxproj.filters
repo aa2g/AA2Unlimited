@@ -134,6 +134,7 @@
     <ClCompile Include="General\DrawD3D.cpp" />
     <ClCompile Include="Functions\Notifications.cpp" />
     <ClCompile Include="Functions\AAPlay\Controls.cpp" />
+    <ClCompile Include="Functions\AAPlay\ClimaxButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -259,6 +260,7 @@
     <ClInclude Include="General\DrawD3D.h" />
     <ClInclude Include="Functions\Notifications.h" />
     <ClInclude Include="Functions\AAPlay\Controls.h" />
+    <ClInclude Include="Functions\AAPlay\ClimaxButton.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

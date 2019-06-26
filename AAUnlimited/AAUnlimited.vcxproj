@@ -40,6 +40,7 @@
     <ClCompile Include="Files\PP2.cpp" />
     <ClCompile Include="Files\PPeX.cpp" />
     <ClCompile Include="Files\XXFile.cpp" />
+    <ClCompile Include="Functions\AAPlay\ClimaxButton.cpp" />
     <ClCompile Include="Functions\AAPlay\Controls.cpp" />
     <ClCompile Include="Functions\AAPlay\GameState.cpp" />
     <ClCompile Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="Files\PP2.h" />
     <ClInclude Include="Files\PPeX.h" />
     <ClInclude Include="Files\XXFile.h" />
+    <ClInclude Include="Functions\AAPlay\ClimaxButton.h" />
     <ClInclude Include="Functions\AAPlay\Controls.h" />
     <ClInclude Include="Functions\AAPlay\GameState.h" />
     <ClInclude Include="Functions\AAEdit\UnlimitedDialogParts\Triggers.h" />

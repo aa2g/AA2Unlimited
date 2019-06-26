@@ -27,7 +27,7 @@ local subtitles = {}
 local function reload_subtitles()
 	local dialogue
 	local count = 0
-	local subtitles_path = aau_path("subtitles.txt")
+	local subtitles_path = aau_path("resources", "subtitles.txt")
 	local file = io.open(subtitles_path, "r")
 	if not file then return end
 	for line in file:lines() do
