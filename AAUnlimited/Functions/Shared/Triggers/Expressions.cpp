@@ -573,7 +573,7 @@ namespace Shared {
 				int decValue = 92 * towards + feeling;
 				return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
 
-			}
+		}
 
 		Value Thread::GetCardFigure(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -602,12 +602,55 @@ namespace Shared {
 			{
 				int size = (int)(inst->m_char->m_charData->m_chest.size);
 				if (size <= 33) return Value(0);
-				if ((size > 33) && (size <=66)) return Value(1);
+				if ((size > 33) && (size <= 66)) return Value(1);
 				if (size > 66) return Value(2);
 			}
 		}
+		
+		Value Thread::GetCardRawBreastSize(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				int size = (int)(inst->m_char->m_charData->m_chest.size);
+				return Value(size);
+			}
+		}
 
+		Value Thread::GetCardBreastShape(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				int shape = (int)(inst->m_char->m_charData->m_chest.shape);
+				return Value(shape);
+			}
+		}
 
+		Value Thread::GetCardBreastSoftness(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				int soft = (int)(inst->m_char->m_charData->m_chest.softness);
+				return Value(soft);
+			}
+		}
 
 		//int(int)
 		Value Thread::GetCardPersonality(std::vector<Value>& params) {
@@ -3064,6 +3107,24 @@ namespace Shared {
 					TEXT("Returns the number of seconds that have passed in the current period."),
 					{}, (TYPE_INT),
 					&Thread::GetPeriodTimer
+				},
+				{
+					121, EXPRCAT_CHARPROP,
+					TEXT("Get Raw Breast Size"), TEXT("%p ::RawBreastSize"), TEXT("Get breast size of the character. Vanilla max = 100, absolute max = 255"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardRawBreastSize
+				},
+				{
+					122, EXPRCAT_CHARPROP,
+					TEXT("Get Breast Shape"), TEXT("%p ::BreastShape"), TEXT("Get breast shape of the character. Ranges from 0 (roundest) to 3 (pointiest)."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardBreastShape
+				}, 
+				{
+					123, EXPRCAT_CHARPROP,
+					TEXT("Get Breast Softness"), TEXT("%p ::BreastSoftness"), TEXT("Get breast softness of the character. 0 = soft, 1 = medium, 2 = hard."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardBreastSoftness
 				},
 			},
 

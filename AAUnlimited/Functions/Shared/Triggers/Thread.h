@@ -89,6 +89,12 @@ namespace Shared {
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
 			void SetCardFightingStyle(std::vector<Value>& params);
+			void SetCardFigure(std::vector<Value>& params);
+			void SetCardBreastSize(std::vector<Value>& params);
+			void SetCardRawBreastSize(std::vector<Value>& params);
+			void SetCardBreastShape(std::vector<Value>& params);
+			void SetCardBreastSoftness(std::vector<Value>& params);
+			void SetHeight(std::vector<Value>& params);
 			void SetCharacterLocked(std::vector<Value>& params);
 			void SetActionAboutRoom(std::vector<Value>& params);
 			void SetMasturbating(std::vector<Value>& params);
@@ -204,8 +210,10 @@ namespace Shared {
 			Value GetCardPreference(std::vector<Value>& params);
 			Value GetCardOpinion(std::vector<Value>& params);
 			Value GetCardFigure(std::vector<Value>& params);
-
 			Value GetCardBreastSize(std::vector<Value>& params);
+			Value GetCardRawBreastSize(std::vector<Value>& params);
+			Value GetCardBreastShape(std::vector<Value>& params);
+			Value GetCardBreastSoftness(std::vector<Value>& params);
 
 			//bool(int, int)
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)

@@ -701,6 +701,84 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.fightingStyle = fightingStyle % 3;
 		}
 
+		//int seat, int figure
+		void Thread::SetCardFigure(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int figure = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_figure.figure = figure % 3;
+		}
+
+		//int seat, int breastSize
+		void Thread::SetCardBreastSize(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int breastSize = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_chest.size= (breastSize % 4) * 25;
+		}
+
+		//int seat, int breastSize
+		void Thread::SetCardRawBreastSize(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int breastSize = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_chest.size = breastSize % 256;
+		}
+
+		//int seat, int shape
+		void Thread::SetCardBreastShape(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int shape = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_chest.shape = shape % 4;
+		}
+
+		//int seat, int softness
+		void Thread::SetCardBreastSoftness(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int softness = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_chest.softness = softness % 3;
+		}
+
+		//int seat, int height
+		void Thread::SetHeight(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int height = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_figure.height = height % 3;
+		}
+
 		//int seat, int value
 		void Thread::SetCharacterLocked(std::vector<Value>& params)
 		{
@@ -2121,11 +2199,11 @@ namespace Shared {
 				&Thread::SetNpcResponseStrongPercent
 			},
 			{
-				96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p"),
-				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
-				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
-				{ TYPE_INT },
-				&Thread::SetNpcResponseAbsolutePercent
+96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p"),
+TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
+	"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
+{ TYPE_INT },
+&Thread::SetNpcResponseAbsolutePercent
 			},
 			{
 				97, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Success"), TEXT("NPCAbsoluteResponseSuccess = %p"),
@@ -2198,6 +2276,42 @@ namespace Shared {
 				TEXT("Display the notification on the screen."),
 				{ TYPE_STRING, TYPE_BOOL },
 				&Thread::Notification
+			},
+			{
+				109, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Figure"), TEXT("%p ::Figure = %p"),
+				TEXT("Set the figure of the character. 0=thin, 1=normal, 2=chubby."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardFigure
+			},
+			{
+				110, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Breast Size"), TEXT("%p ::BreastSize = %p"),
+				TEXT("Set the breast size of a character. 0 = flat, 1 = small, 2 = medium, 3 = large, 4 = XL."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardBreastSize
+			},
+			{
+				111, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Raw Breast Size"), TEXT("%p ::RawBreastSize = %p"),
+				TEXT("Set the breast size of a character (raw value). 0 = flat, 100 = vanilla max, 255 = absolute max."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardRawBreastSize
+			}, 
+			{
+				112, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Breast Shape"), TEXT("%p ::BreastShape = %p"),
+				TEXT("Set breast shape of the character. Ranges from 0 (roundest) to 3 (pointiest)."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardBreastShape
+			}, 
+			{
+				113, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Breast Softness"), TEXT("%p ::BreastSoftness = %p"),
+				TEXT("Set breast softness of the character. 0 = soft, 1 = medium, 2 = hard."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardBreastSoftness
+			},
+			{
+				114, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Height"), TEXT("%p ::Height = %p"),
+				TEXT("Set the height of the character. 0=short, 1=normal, 2=tall."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetHeight
 			}
 		};
 
