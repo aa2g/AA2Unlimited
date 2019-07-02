@@ -19,7 +19,6 @@
 #include "External/ExternalClasses/CharacterStruct.h"
 #include "General/DrawD3D.h"
 #include "Functions/Notifications.h"
-#include "Functions/AAPlay/Controls.h"
 #include "Functions/AAPlay/Subs.h"
 
 #pragma comment (lib, "Gdiplus.lib")
@@ -547,7 +546,6 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-		Controls::keysRelease(); // KeyUp for all pressed keys
 
 		if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
 			if (DrawD3D::waitRenderDelay)
