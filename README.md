@@ -24,7 +24,7 @@ For a full list of features, please read [this page](https://github.com/aa2g/AA2
 - **Custom tans** - Unlimited amount of colored tans.
 
 ### Fixes & General
-- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer systems (Windows 10, Linux). We've also fixed all Japanese locale issues. Allows to play in borderless fullscreen.
+- **Vanilla game fixes** - We fix various drivers issues, as well as make it possible to run AA2 on newer systems (Windows 10, Linux). We've also fixed all Japanese locale issues. Allows to play in borderless fullscreen. We include dgVoodoo 2 ([website](http://dege.fw.hu)) as an alternative d3d9 fix for Windows systems.
 - **Asset embedding** - A system of embedding mods into cards themselves and auto extraction for the ease of sharing.
 - **Mod compression** - We've gathered the most essential mods and compressed them into the pp2 format. You install mods by drag and dropping them, there is no need for Illusion Wizzard.
 - **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
