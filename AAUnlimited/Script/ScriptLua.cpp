@@ -112,6 +112,7 @@ void Lua::bindLua() {
 	HInfo::bindLua();
 	HParticipant::bindLua();
 	HPosButtonList::bindLua();
+	HPosData::bindLua();
 
 	Poser::bindLua();
 	Poser::PoserController::PoserCharacter::bindLua();
