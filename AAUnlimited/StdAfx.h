@@ -79,7 +79,6 @@
 #include "Functions/AAEdit/Globals.h"
 #include "Functions/AAEdit/UnlimitedDialog.h"
 #include "Functions/AAEdit/UnlimitedDialogParts/Triggers.h"
-#include "Functions/AAPlay/ClimaxButton.h"
 #include "Functions/AAPlay/Controls.h"
 #include "Functions/AAPlay/Facecam.h"
 #include "Functions/AAPlay/GameState.h"
