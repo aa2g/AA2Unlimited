@@ -5,7 +5,7 @@ local _M = {}
 local variants  = { "win10fix.dll", "dgd3d9.dll" }
 
 local opts = {
-	{"variant", 0, "Select d3d9 variant (needs restart): %l|Older d3d9|dgVoodoo 2|"},
+	{"variant", 0, "Select d3d9 variant (needs restart): %l|Original d3d9|dgVoodoo 2|"},
 }
 
 function on.d3d9_preload(prev)
