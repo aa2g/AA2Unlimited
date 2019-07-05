@@ -2,14 +2,15 @@
 
 #include <list>
 #include <regex>
+#include <string>
 
 namespace Subtitles {
-	extern bool enabled;
+	//extern bool enabled;
 	extern int fontSize;
-	extern const char *fontFamily;
+	extern std::wstring fontFamily;
 	extern IUnknown *Font;
-	extern int gameWindowWidth;
-	extern int gameWindowHeight;
+	//extern int gameWindowWidth;
+	//extern int gameWindowHeight;
 
 	void AddSubtitles(const char *subtitles, const char *file_name);
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,

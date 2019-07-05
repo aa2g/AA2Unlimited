@@ -474,13 +474,13 @@ namespace DrawD3D {
 		// Subs Font
 		CreateFontD3d(Subtitles::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-			General::utf8.from_bytes(Subtitles::fontFamily).c_str(),
+			Subtitles::fontFamily.c_str(),
 			&Subtitles::Font, false, "Subs Font creation failed");
 
 		// Notifications Font
 		CreateFontD3d(Notifications::fontSize, 0, FW_ULTRABOLD, 1, false, DEFAULT_CHARSET,
 			OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-			General::utf8.from_bytes(Notifications::fontFamily).c_str(),
+			Notifications::fontFamily.c_str(),
 			&Notifications::Font, false, "Notifications Font creation failed");
 
 		// Other fonts

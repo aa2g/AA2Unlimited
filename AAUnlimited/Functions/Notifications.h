@@ -8,7 +8,7 @@ enum NotifyType { RegularNotification = 1, ImportantNotification = 2 };
 namespace Notifications {
 	extern bool enabled;
 	extern int fontSize;
-	extern const char *fontFamily;
+	extern std::wstring fontFamily;
 	extern IUnknown *Font;
 	extern int gameWindowWidth;
 	extern int gameWindowHeight;

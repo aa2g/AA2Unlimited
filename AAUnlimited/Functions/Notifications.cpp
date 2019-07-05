@@ -21,7 +21,7 @@ namespace Notifications {
 	DWORD lastPopTime = 0;
 	int duration = 10000;
 	int maxLines = 4; // 4 for this var == 5 in game
-	const char *fontFamily = "Arial";
+	std::wstring fontFamily{ L"Arial" };
 	int fontSize = 18;
 	int lineHeight = 24;
 	IUnknown *Font;
@@ -55,7 +55,7 @@ namespace Notifications {
 		int text_align, int area_pos_X, int area_pos_Y)
 	{
 		enabled = true;
-		fontFamily = font_family;
+		fontFamily = General::utf8.from_bytes(font_family);
 		if (text_align == 1) { notifyCentered = DT_CENTER; area_pos_X = 0; }
 		fontSize = font_size;
 		lineHeight = round(fontSize * line_height / (float)100);
