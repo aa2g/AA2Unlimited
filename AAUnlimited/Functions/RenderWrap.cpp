@@ -546,23 +546,23 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
-
-		if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
-			if (DrawD3D::waitRenderDelay)
-				DrawD3D::canRenderDelay();
-			//DrawD3D::DrawText(DrawD3D::fontFPS, 0, L"OFF", -1, &DrawD3D::rectFPS, DT_LEFT, D3DCOLOR_ARGB(200, 244, 244, 244));
-		}
-		else if (DrawD3D::fontCreated) {
-			if (g_Config.bDrawFPS) {
-				D3DVIEWPORT9 vp;
-				GetViewport(&vp);
-				if (vp.Width > 1024) 
-					DrawFPS();
+		if (g_Config.bEnableOverlays) {
+			if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
+				if (DrawD3D::waitRenderDelay)
+					DrawD3D::canRenderDelay();
+				//DrawD3D::DrawText(DrawD3D::fontFPS, 0, L"OFF", -1, &DrawD3D::rectFPS, DT_LEFT, D3DCOLOR_ARGB(200, 244, 244, 244));
 			}
-			DrawD3D::Render();
+			else if (DrawD3D::fontCreated) {
+				if (g_Config.bDrawFPS) {
+					D3DVIEWPORT9 vp;
+					GetViewport(&vp);
+					if (vp.Width > 1024)
+						DrawFPS();
+				}
+				DrawD3D::Render();
+			}
+			frameno++;
 		}
-		frameno++;
-
 		WRAPCALL(orig->EndScene());
 	}
 

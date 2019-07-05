@@ -41,6 +41,9 @@ screenshotFormat = 2
 --HAi should be activated at no prompt h done by evil npcs
 bHAiOnNoPromptH = true				
 
+--Enables the display of FPS counter, subtitles and notification overlays
+bEnableOverlays = true
+
 sFont = "MS Gothic"
 
 -- Set log level

@@ -42,6 +42,7 @@ public:;
 	unsigned PP2Cache;
 	unsigned PP2AudioCache;
 	unsigned PP2Buffers;
+	bool bEnableOverlays;
 	bool bDrawFPS;
 	bool bUseVisualStyles;
 	bool PP2Profiling;
@@ -66,6 +67,7 @@ public:;
 			LUA_BIND(PP2Cache)
 			LUA_BIND(PP2AudioCache)
 			LUA_BIND(PP2Buffers)
+			LUA_BIND(bEnableOverlays)
 			LUA_BIND(bDrawFPS)
 			LUA_BIND(bUseVisualStyles)
 			LUA_BIND(PP2Profiling)

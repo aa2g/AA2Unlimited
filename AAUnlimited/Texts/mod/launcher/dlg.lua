@@ -337,6 +337,7 @@ local function buildtabs() return
 				gsdt("outline", iup.toggle {title = "Outline shader", tip = "Same as ingame outline switch, but works in edit too" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer", tip = "Renderers have slightly different physics and z-order" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background", tip = "Sets edit screen background 16:9, just like the game" }),
+				aaut("bEnableOverlays", iup.toggle {title = "Enable overlays", tip = "Enables the display of FPS counter, subtitles and notification overlays" }),
 				aaut("bDrawFPS", iup.toggle {title = "Show FPS", tip = "FPS counter in top left corner" }),
 				aaut("bFullscreen", iup.toggle {title = "Fullscreen", tip = "Will switch desktop resolution to the one you configure" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting (slow)", tip ="Show shadows around rim edges" }),
