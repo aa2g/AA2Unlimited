@@ -17,6 +17,7 @@ local hCategoriesScenario = { {}, {} } -- [1 - hetero|2 - homo] == <list of Scen
 local NUMPAD_1 = 97
 local NUMPAD_3 = 99
 
+local InitH
 
 local function InitGenderPoses(gender_id)
 	local pose_id = 0
@@ -418,7 +419,7 @@ local function InitCfg()
 	initializedCfg = true
 end
 
-local function InitH()
+InitH = function()
 	if not initializedCfg then InitCfg() end
 	if not initializedCfg then 
 		log.warn("[ClimaxBtn] Can't initialize CFG txt file for ClimaxButton")
