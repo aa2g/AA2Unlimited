@@ -109,6 +109,7 @@ public:
 		LUA_BIND(m_btnSkirt)
 		LUA_BIND(m_btnShoe)
 		LUA_BIND(m_btnUnderwear)
+		LUA_BINDARRP(m_hPosButtons)
 		LUA_MGETTER2(GetHPosition)
 		LUA_MGETTER1(GetHPosData)
 		LUA_MGETTER0(GetCamera)
