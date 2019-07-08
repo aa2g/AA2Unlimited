@@ -62,8 +62,8 @@ namespace DrawD3D {
 	float cursorShadowScaledMarginX = 0;
 	float cursorArrowScaledMarginY = 0;
 	float cursorShadowScaledMarginY = 0;
-	int cursorArrowKey = 0;
-	int cursorShadowKey = 0;
+	int cursorArrowKey = -1;
+	int cursorShadowKey = -1;
 	
 	const int max_shapes = 1000; // 1000 - Maximum total shapes in HUD
 	int key_next = 0;
@@ -408,15 +408,17 @@ namespace DrawD3D {
 		return key_node;
 	}
 
-	int CreateCursorHUD(bool main_shape) { // main shape or shadow
-		// Find new place for shape in HUD data memory
-		if (key_next >= max_shapes)
-		{
-			LOGPRIONC(Logger::Priority::WARN) "Out of memory for creating Cursor HUD (LOL)\r\n";
-			return -1;
+	int CreateCursorHUD(bool main_shape, int key_node) { // main shape or shadow
+		int key_In = key_node;
+		if (key_In == -1) { // If need to find new place for Font in HUD data memory
+			if (key_next >= max_shapes)
+			{
+				LOGPRIONC(Logger::Priority::WARN) "Out of memory for creating Cursor HUD (LOL)\r\n";
+				return -1;
+			}
+			key_node = key_next;
+			key_next++;
 		}
-		int key_node = key_next;
-		key_next++;
 		// Scaling request params to current user's resolution + Margin, if resolution not 16:9
 		cursorArrowScaledMarginX = round(-1 * scaleCoefficient); // Margins for Shapes
 		cursorShadowScaledMarginX = round(3 * scaleCoefficient);
@@ -436,7 +438,8 @@ namespace DrawD3D {
 		else
 		{
 			LOGPRIONC(Logger::Priority::WARN) "Error Creating Cursor HUD shape\r\n";
-			key_next--;
+			if (key_In == -1)
+				key_next--;
 			return -1;
 		}
 
@@ -461,9 +464,6 @@ namespace DrawD3D {
 		scaleCoefficient = scale_coefficient;
 		trueGameMarginY = true_game_margin_Y;
 		gameHwnd = game_hwnd;
-
-		if (fontCreated) // If Second time make a fonts - overvrite shapes also (using last D3d device).
-			key_next = 0;
 
 
 		// FPS font
@@ -490,11 +490,10 @@ namespace DrawD3D {
 		// Creating Shapes for HUD
 
 		// Cursor shapes
-		cursorArrowKey = CreateCursorHUD(true);
-		cursorShadowKey = CreateCursorHUD(false);
+		cursorArrowKey = CreateCursorHUD(true, cursorArrowKey);
+		cursorShadowKey = CreateCursorHUD(false, cursorArrowKey);
 
 		RadialMenu::CreateHUD(); // RadialMenu HUD fonts and shapes
-
 
 		// Other HUD shapes
 		// ...
