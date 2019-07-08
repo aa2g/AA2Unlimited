@@ -9,6 +9,7 @@ namespace DrawD3D {
 	extern bool fontCreated;
 	extern bool canRender;
 	extern bool waitRenderDelay;
+	extern HWND gameHwnd;
 	extern POINT cursor;
 	extern RECT HUDarrayRect[];
 	extern IUnknown *HUDarrayFont[];

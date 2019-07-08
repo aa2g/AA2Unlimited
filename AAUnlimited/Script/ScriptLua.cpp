@@ -303,6 +303,18 @@ void Lua::bindLua() {
 		s.get(7), s.get(8), s.get(9), s.get(10), s.get(11), s.get(12), s.get(13), s.get(14), s.get(15));
 	});
 
+	_BINDING["InitRadialMenuParams"] = LUA_LAMBDA0({
+		RadialMenu::InitRadialMenuParams(s.get(1), s.get(2), s.get(3), s.get(4), s.get(5), s.get(6), s.get(7), s.get(8));
+	});
+
+	_BINDING["RadMenuAddButton"] = LUA_LAMBDA0({
+		RadialMenu::AddButton(s.get(1), s.get(2), s.get(3), s.get(4));
+	});
+
+	_BINDING["RadMenuHstatus"] = LUA_LAMBDA0({
+		RadialMenu::SetHstatus(s.get(1));
+	});
+
 	_BINDING["SimKeyPress"] = LUA_LAMBDA0({
 		Controls::keyPress(s.get(1), s.get(2), true);
 	});
