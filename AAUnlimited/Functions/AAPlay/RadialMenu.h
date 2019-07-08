@@ -1,9 +1,9 @@
 #pragma once
 
 struct RDM_BUTTON{
-	const char* funcName;
-	const char* titleIngame;
-	const char* shortDesc;
+	std::string funcName;
+	std::wstring titleIngame;
+	std::wstring shortDesc;
 	int titleD3dKey;
 	int descD3dKey;
 	int backgrActiveD3dKey;
@@ -18,7 +18,7 @@ struct RDM_MENU {
 	int selectedBtnNode;
 	bool showCancelMsg;
 	int cancelMsgStartTime;
-	const char * fontFamily;
+	std::wstring fontFamily;
 	double fontSizeMultiplier;
 	int deadzone;
 	int inCircleD3dKey;
@@ -31,7 +31,6 @@ struct RDM_MENU {
 namespace RadialMenu {
 	extern bool enabled;
 
-	//void AddNotification(const char *text, int type_id);
 	extern void AddButton(int buttons_arr_node, const char * func_name,
 		const char * title_ingame, const char * short_desc);
 	extern void SetHstatus(bool current_status);

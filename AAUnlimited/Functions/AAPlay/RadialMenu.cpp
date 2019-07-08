@@ -10,8 +10,8 @@ namespace RadialMenu {
 	bool enabled = false;
 	int toggleType = 0;
 	int cancelTime = 500;
-	const char * defaultDesc = "Move cursor to select action";
-	const char * canceledBtnText = "Canceled";
+	std::wstring defaultDesc { L"Move cursor to select action" };
+	std::wstring canceledBtnText{ L"Canceled" };
 	DWORD lastRightClickTime = 0;
 	int startCursorX = 0;
 	int startCursorY = 0;
@@ -33,10 +33,9 @@ namespace RadialMenu {
 		cppFuncMap[std::string("Controls_F11")] = Controls::screenshotF11;
 	}
 
-	void CallFunc(const char * func_map_key) {
-		std::string map_key(func_map_key);
-		if (cppFuncMap.count(map_key) > 0) // If CPP func exist - call it
-			cppFuncMap[map_key]();
+	void CallFunc(std::string func_map_key) {
+		if (cppFuncMap.count(func_map_key) > 0) // If CPP func exist - call it
+			cppFuncMap[func_map_key]();
 		else
 			LUA_EVENT_NORET(func_map_key);
 		// In *.lua file need create event: function on.`your_lua_event_name`() ... end
@@ -93,11 +92,11 @@ namespace RadialMenu {
 		menu.cancelMsgBackgrD3dKey = DrawD3D::CreateBoxFilled(
 			menu.posX, menu.posY, true, round(75 * currentVerScale), 3, D3DCOLOR_ARGB(244, 233, 22, 22), -1);
 		menu.cancelMsgTextD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(240 * currentVerScale),
-			round(44 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
-			General::utf8.from_bytes(canceledBtnText).c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
+			round(44 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
+			canceledBtnText.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
 		menu.defaultDescD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(250 * currentVerScale),
-			round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
-			General::utf8.from_bytes(defaultDesc).c_str(), D3DCOLOR_ARGB(255, 188, 188, 188), -1);
+			round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
+			defaultDesc.c_str(), D3DCOLOR_ARGB(255, 188, 188, 188), -1);
 		// Buttons (General and H-scene)
 		int place_radius = round((outCircleHeight + inCircleHeight) / 4.0);
 		int pos_x = 0; 
@@ -116,12 +115,12 @@ namespace RadialMenu {
 					pos_x, pos_y, true, round(80 * currentVerScale), 3, D3DCOLOR_ARGB(255, 188, 22, 166), -1);
 				// Button Title
 				menuButtonsArr[type_i][button_i].titleD3dKey = DrawD3D::CreateFontHUD(pos_x, pos_y, true, DT_CENTER, round(200 * currentVerScale),
-					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
-					General::utf8.from_bytes(menuButtonsArr[type_i][button_i].titleIngame).c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
+					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
+					menuButtonsArr[type_i][button_i].titleIngame.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
 				// Button Description
 				menuButtonsArr[type_i][button_i].descD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(270 * currentVerScale),
-					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, General::utf8.from_bytes(menu.fontFamily).c_str(),
-					General::utf8.from_bytes(menuButtonsArr[type_i][button_i].shortDesc).c_str(), D3DCOLOR_ARGB(255, 233, 233, 233), -1);
+					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
+					menuButtonsArr[type_i][button_i].shortDesc.c_str(), D3DCOLOR_ARGB(255, 233, 233, 233), -1);
 			}
 		}
 	}
@@ -171,13 +170,13 @@ namespace RadialMenu {
 		int toggle_type, const char * default_desc, const char* canceled_button_text) {
 		if (!General::IsAAPlay) return;
 		enabled = true;
-		menu.fontFamily = font_family;
+		menu.fontFamily = General::utf8.from_bytes(font_family);
 		menu.fontSizeMultiplier = font_size / 100.000;
 		menu.deadzone = deadzone;
 		toggleType = toggle_type;
 		cancelTime = cancel_time;
-		defaultDesc = default_desc;
-		canceledBtnText = canceled_button_text;
+		defaultDesc = General::utf8.from_bytes(default_desc);
+		canceledBtnText = General::utf8.from_bytes(canceled_button_text);
 
 		menu.posX = 960; // Default menu position (for 1920x1080 resolution template)
 		menu.posY = 540;
@@ -234,8 +233,8 @@ namespace RadialMenu {
 		const char * title_ingame, const char * short_desc)
 	{
 		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].funcName = func_name;
-		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].titleIngame = title_ingame;
-		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].shortDesc = short_desc;
+		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].titleIngame = General::utf8.from_bytes(title_ingame);
+		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].shortDesc = General::utf8.from_bytes(short_desc);
 		countButtons[buttons_arr_node]++;
 	}
 
