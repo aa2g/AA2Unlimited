@@ -88,6 +88,7 @@
 #include "Functions/AAPlay/HAis/ForceAi.h"
 #include "Functions/AAPlay/HButtonMove.h"
 #include "Functions/AAPlay/Poser.h"
+#include "Functions/AAPlay/RadialMenu.h"
 #include "Functions/AAPlay/Subs.h"
 #include "Functions/AAUCardData.h"
 #include "Functions/CharInstData.h"

@@ -493,6 +493,8 @@ namespace DrawD3D {
 		cursorArrowKey = CreateCursorHUD(true);
 		cursorShadowKey = CreateCursorHUD(false);
 
+		RadialMenu::CreateHUD(); // RadialMenu HUD fonts and shapes
+
 
 		// Other HUD shapes
 		// ...
@@ -534,6 +536,8 @@ namespace DrawD3D {
 
 
 		// Render HUD Shapes and text over them
+
+		RadialMenu::Render();
 
 
 

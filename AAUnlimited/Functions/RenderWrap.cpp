@@ -547,8 +547,9 @@ public:;
 	HRESULT WINAPI EndScene(void)
 	{
 		//onEndScene();
+		Controls::keysRelease(); // KeyUp for all pressed keys
+
 		if (g_Config.bEnableOverlays) {
-			Controls::keysRelease(); // KeyUp for all pressed keys
 			if (!DrawD3D::canRender) {	// If drawing is temporarily not allowed
 				if (DrawD3D::waitRenderDelay)
 					DrawD3D::canRenderDelay();
