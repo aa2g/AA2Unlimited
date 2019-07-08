@@ -8,6 +8,7 @@ typedef void(*FnPtr)(); // Only void Functions and without arguments
 namespace RadialMenu {
 
 	bool enabled = false;
+	bool initializedBefore = false;
 	int toggleType = 0;
 	int cancelTime = 500;
 	std::wstring defaultDesc { L"Move cursor to select action" };
@@ -78,25 +79,26 @@ namespace RadialMenu {
 	}
 
 
-	void CreateHUD() {
-		if (!enabled) return;
+	void CreateHUD(bool force_create) {
+		if (!enabled && !force_create) return;
 
 		int outCircleHeight = round(780 * currentVerScale);
 		int inCircleHeight = round(320 * currentVerScale);
 
 		// Main parts of menu
 		menu.inCircleD3dKey = DrawD3D::CreateCircleFilled(
-			menu.posX, menu.posY, true, inCircleHeight, D3DCOLOR_ARGB(255, 33, 33, 33), -1);
+			menu.posX, menu.posY, true, inCircleHeight, D3DCOLOR_ARGB(255, 33, 33, 33), menu.inCircleD3dKey);
 		menu.outCircleD3dKey = DrawD3D::CreateCircleFilled(
-			menu.posX, menu.posY, true, outCircleHeight, D3DCOLOR_ARGB(188, 11, 11, 11), -1);
+			menu.posX, menu.posY, true, outCircleHeight, D3DCOLOR_ARGB(188, 11, 11, 11), menu.outCircleD3dKey);
 		menu.cancelMsgBackgrD3dKey = DrawD3D::CreateBoxFilled(
-			menu.posX, menu.posY, true, round(75 * currentVerScale), 3, D3DCOLOR_ARGB(244, 233, 22, 22), -1);
+			menu.posX, menu.posY, true, round(75 * currentVerScale), 3, D3DCOLOR_ARGB(244, 233, 22, 22), menu.cancelMsgBackgrD3dKey);
 		menu.cancelMsgTextD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(240 * currentVerScale),
 			round(44 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
-			canceledBtnText.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
+			canceledBtnText.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), menu.cancelMsgTextD3dKey);
 		menu.defaultDescD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(250 * currentVerScale),
 			round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
-			defaultDesc.c_str(), D3DCOLOR_ARGB(255, 188, 188, 188), -1);
+			defaultDesc.c_str(), D3DCOLOR_ARGB(255, 188, 188, 188), menu.defaultDescD3dKey);
+
 		// Buttons (General and H-scene)
 		int place_radius = round((outCircleHeight + inCircleHeight) / 4.0);
 		int pos_x = 0; 
@@ -111,16 +113,16 @@ namespace RadialMenu {
 				pos_x = round(menu.posX - place_radius * cos(current_angle));
 				pos_y = round(menu.posY - place_radius * sin(current_angle));
 				// Button Active Background
-				menuButtonsArr[type_i][button_i].backgrActiveD3dKey = DrawD3D::CreateBoxFilled(
-					pos_x, pos_y, true, round(80 * currentVerScale), 3, D3DCOLOR_ARGB(255, 188, 22, 166), -1);
+				menuButtonsArr[type_i][button_i].backgrActiveD3dKey = DrawD3D::CreateBoxFilled(pos_x, pos_y, true, 
+					round(80 * currentVerScale), 3, D3DCOLOR_ARGB(255, 188, 22, 166), menuButtonsArr[type_i][button_i].backgrActiveD3dKey);
 				// Button Title
 				menuButtonsArr[type_i][button_i].titleD3dKey = DrawD3D::CreateFontHUD(pos_x, pos_y, true, DT_CENTER, round(200 * currentVerScale),
 					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
-					menuButtonsArr[type_i][button_i].titleIngame.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), -1);
+					menuButtonsArr[type_i][button_i].titleIngame.c_str(), D3DCOLOR_ARGB(255, 244, 244, 244), menuButtonsArr[type_i][button_i].titleD3dKey);
 				// Button Description
 				menuButtonsArr[type_i][button_i].descD3dKey = DrawD3D::CreateFontHUD(menu.posX, menu.posY, true, DT_CENTER, round(270 * currentVerScale),
 					round(32 * currentVerScale * menu.fontSizeMultiplier), FW_BOLD, false, menu.fontFamily.c_str(),
-					menuButtonsArr[type_i][button_i].shortDesc.c_str(), D3DCOLOR_ARGB(255, 233, 233, 233), -1);
+					menuButtonsArr[type_i][button_i].shortDesc.c_str(), D3DCOLOR_ARGB(255, 233, 233, 233), menuButtonsArr[type_i][button_i].descD3dKey);
 			}
 		}
 	}
@@ -168,8 +170,10 @@ namespace RadialMenu {
 	// ScriptLua functions
 	void InitRadialMenuParams(const char *font_family, int mini_version, int font_size, int deadzone, int cancel_time, 
 		int toggle_type, const char * default_desc, const char* canceled_button_text) {
+
 		if (!General::IsAAPlay) return;
-		enabled = true;
+		enabled = false; // Hide menu, until Init/reInit success
+
 		menu.fontFamily = General::utf8.from_bytes(font_family);
 		menu.fontSizeMultiplier = font_size / 100.000;
 		menu.deadzone = deadzone;
@@ -180,58 +184,73 @@ namespace RadialMenu {
 
 		menu.posX = 960; // Default menu position (for 1920x1080 resolution template)
 		menu.posY = 540;
+		currentVerScale = 1;
 		if (mini_version == 1) { // Minified ver. make smaller and move to the right
 			currentVerScale = 0.5;
 			menu.posX = 1670;
 		}
 
-		// Create Map of c++ functions, which will be using on click RadMenu buttons
-		CreateMapFuncCPP();
-
 		// If D3D HUD already created - create HUD for Menu also.
 		if (DrawD3D::fontCreated)
-			CreateHUD();
+			CreateHUD(true);
 
-		// Handle user input clicks and keys
-		GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
-			if (toggleType == 0) {
-				if (m->message == WM_RBUTTONUP)
-				{
-					if (menu.showed)
-						ApplyChoise(true); // Cancel choise
-					else {
-						if (GetTickCount() - lastRightClickTime < 400)
-							ShowMenu();
+		if (!initializedBefore) {
+			// Create Map of c++ functions, which will be using on click RadMenu buttons
+			CreateMapFuncCPP();
+
+			// Handle user input clicks and keys
+			GameTick::RegisterMsgFilter(GameTick::MsgFilterFunc([](MSG *m) {
+				if (toggleType == 0) {
+					if (m->message == WM_RBUTTONUP)
+					{
+						if (menu.showed)
+							ApplyChoise(true); // Cancel choise
+						else {
+							if (GetTickCount() - lastRightClickTime < 400)
+								ShowMenu();
+						}
+						lastRightClickTime = GetTickCount();
 					}
-					lastRightClickTime = GetTickCount();
+					else if (m->message == WM_LBUTTONUP)
+						ApplyChoise(false);
 				}
-				else if (m->message == WM_LBUTTONUP)
-					ApplyChoise(false);
-			}
-			else if (toggleType == 1) {
-				if (m->message == WM_XBUTTONDOWN && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON1)
-					ShowMenu();
-				else if (m->message == WM_XBUTTONUP && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON1)
-					ApplyChoise(false);
-				else if (m->message == WM_RBUTTONUP || m->message == WM_LBUTTONUP)
-					ApplyChoise(true); // Cancel choise
-			}
-			else if (toggleType == 2)
-			{
-				if (m->message == WM_XBUTTONDOWN && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON2)
-					ShowMenu();
-				else if (m->message == WM_XBUTTONUP && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON2)
-					ApplyChoise(false);
-				else if (m->message == WM_RBUTTONUP || m->message == WM_LBUTTONUP)
-					ApplyChoise(true); // Cancel choise
-			}
-			return false;
-		}));
+				else if (toggleType == 1) {
+					if (m->message == WM_XBUTTONDOWN && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON1)
+						ShowMenu();
+					else if (m->message == WM_XBUTTONUP && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON1)
+						ApplyChoise(false);
+					else if (m->message == WM_RBUTTONUP || m->message == WM_LBUTTONUP)
+						ApplyChoise(true); // Cancel choise
+				}
+				else if (toggleType == 2)
+				{
+					if (m->message == WM_XBUTTONDOWN && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON2)
+						ShowMenu();
+					else if (m->message == WM_XBUTTONUP && GET_XBUTTON_WPARAM(m->wParam) == XBUTTON2)
+						ApplyChoise(false);
+					else if (m->message == WM_RBUTTONUP || m->message == WM_LBUTTONUP)
+						ApplyChoise(true); // Cancel choise
+				}
+				return false;
+			}));
+		}
+
+		initializedBefore = true;
+		enabled = true;
 	}
 
 	void AddButton(int buttons_arr_node, const char * func_name,
 		const char * title_ingame, const char * short_desc)
 	{
+		if (!General::IsAAPlay) return;
+
+		if (buttons_arr_node == -1) { // Clear previous buttons data before Init/reInit
+			enabled = false; // Hide menu, until Init/reInit success
+			countButtons[0] = 0;
+			countButtons[1] = 0;
+			return;
+		}
+
 		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].funcName = func_name;
 		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].titleIngame = General::utf8.from_bytes(title_ingame);
 		menuButtonsArr[buttons_arr_node][countButtons[buttons_arr_node]].shortDesc = General::utf8.from_bytes(short_desc);

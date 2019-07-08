@@ -80,6 +80,10 @@ end
 
 local function add_func_to_menu(scene_type, func_name)
 	if func_name == 0 then return end
+	if func_name == "CLEAR_PREV_DATA" then 		-- Clear previous buttons data before Init/reInit
+		RadMenuAddButton(-1, "", "", "")
+		return
+	end
 	local funcs_current = {}
 	local button_arr_node = 0
 	if scene_type == "general" then 
@@ -99,8 +103,9 @@ local function add_func_to_menu(scene_type, func_name)
 	end
 end
 
-function on.launch()
+local function init_radmenu()
 	-- add selected functions in right order to RadMenu
+	add_func_to_menu("general", "CLEAR_PREV_DATA")
 	add_func_to_menu("general", mcfg.genBtn1)
 	add_func_to_menu("general", mcfg.genBtn2)
 	add_func_to_menu("general", mcfg.genBtn3)
@@ -120,6 +125,10 @@ function on.launch()
 	
 	InitRadialMenuParams(mcfg.fontfamily, mcfg.miniversion, mcfg.fontsize, mcfg.deadzone, 
 		mcfg.canceltime, mcfg.toggletype, "Move cursor to select action", "Canceled")
+end
+
+function on.launch()
+	init_radmenu()
 end
 
 function on.start_h(hi)
@@ -247,6 +256,8 @@ function _M:config()
 		self.hBtn8 = func_node_to_name("h_scene", hBtn8)
 		
 		Config.save()
+		
+		init_radmenu() -- apply changes to the game
 	end
 end
 

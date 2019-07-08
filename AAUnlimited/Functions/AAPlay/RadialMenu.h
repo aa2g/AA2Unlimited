@@ -4,9 +4,9 @@ struct RDM_BUTTON{
 	std::string funcName;
 	std::wstring titleIngame;
 	std::wstring shortDesc;
-	int titleD3dKey;
-	int descD3dKey;
-	int backgrActiveD3dKey;
+	int titleD3dKey = -1;
+	int descD3dKey = -1;
+	int backgrActiveD3dKey = -1;
 };
 
 struct RDM_MENU {
@@ -21,11 +21,11 @@ struct RDM_MENU {
 	std::wstring fontFamily;
 	double fontSizeMultiplier;
 	int deadzone;
-	int inCircleD3dKey;
-	int outCircleD3dKey;
-	int defaultDescD3dKey;
-	int cancelMsgTextD3dKey;
-	int cancelMsgBackgrD3dKey;
+	int inCircleD3dKey = -1;
+	int outCircleD3dKey = -1;
+	int defaultDescD3dKey = -1;
+	int cancelMsgTextD3dKey = -1;
+	int cancelMsgBackgrD3dKey = -1;
 };
 
 namespace RadialMenu {
@@ -37,6 +37,6 @@ namespace RadialMenu {
 	extern void InitRadialMenuParams(const char *font_family, int mini_version, 
 		int font_size, int deadzone, int cancel_time, int toggle_type, 
 		const char * default_desc, const char* canceled_button_text);
-	extern void CreateHUD();
+	extern void CreateHUD(bool force_create = false);
 	extern void Render();
 }
