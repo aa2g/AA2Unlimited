@@ -522,14 +522,6 @@ namespace DrawD3D {
 
 	// ************************************ Render section **************************************
 	void Render() {
-		GetCursorPos(&cursor);
-		//RECT lbRect; GetWindowRect(gameHwnd, &lbRect); Alternative method, if not working this
-		ScreenToClient(gameHwnd, &cursor); // Cursor pos inside game window
-
-
-		/////////////////////////
-		
-
 		// Fonts Render
 		Subtitles::Render();
 		Notifications::Render();
