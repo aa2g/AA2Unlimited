@@ -253,7 +253,6 @@ namespace Triggers {
 
 		int roomTarget;
 		int action;
-		int convotarget;
 
 	EDC_END
 

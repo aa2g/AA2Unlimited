@@ -235,10 +235,6 @@ void __stdcall RoomChange(NpcData* param) {
 				Shared::Triggers::RoomChangeData roomChangeData;
 				roomChangeData.action = instance->m_forceAction.conversationId;
 				roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
-				if (instance->m_forceAction.target1 != nullptr) {
-					roomChangeData.convotarget = int(instance->m_forceAction.target1->m_thisChar);
-				}
-
 				roomChangeData.card = instance->m_char->m_seat;
 				Shared::Triggers::ThrowEvent(&roomChangeData);
 				return;
