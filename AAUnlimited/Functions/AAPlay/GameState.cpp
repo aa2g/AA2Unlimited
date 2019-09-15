@@ -27,6 +27,7 @@ struct GameStateStruct {
 		is_in_h = false;
 		h_ai_locked = true;
 		m_isInMainMenu = false;
+		h_info = NULL;
 	}
 
 	//Game state indicators

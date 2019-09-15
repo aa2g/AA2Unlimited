@@ -416,7 +416,7 @@ void LowPolyUpdateEndInject() {
 }
 
 
-void __stdcall hPositionChange(BYTE param) {
+void __stdcall hPositionChange(DWORD param) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
 
