@@ -1503,6 +1503,37 @@ namespace Shared {
 			Notifications::AddNotification(*text, important);
 		}
 
+
+		// string functionDef ("functionName\nparam1\nparam2...")
+		void Thread::CallLuaProcedure(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+
+			LUA_EVENT_NORET(funcName, args);
+		}
 		/*
 		 * A list of all action categories
 		 */
@@ -2198,6 +2229,12 @@ namespace Shared {
 				TEXT("Display the notification on the screen."),
 				{ TYPE_STRING, TYPE_BOOL },
 				&Thread::Notification
+			},
+			{
+				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("Call( %p )"),
+				TEXT("Call supplemental lua procedure."),
+				{ TYPE_STRING },
+				&Thread::CallLuaProcedure
 			}
 		};
 

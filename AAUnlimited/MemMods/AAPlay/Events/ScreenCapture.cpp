@@ -69,7 +69,7 @@ namespace PlayInjections {
 			bitmap->Save(path, cls, params);
 			delete bitmap;
 
-			Notifications::AddNotification(L"Screenshot saved (" + std::wstring(path) + L")", RegularNotification);
+			//Notifications::AddNotification(L"Screenshot saved (" + std::wstring(path) + L")", RegularNotification);
 		}
 
 		void __declspec(naked) SaveRedirect() {

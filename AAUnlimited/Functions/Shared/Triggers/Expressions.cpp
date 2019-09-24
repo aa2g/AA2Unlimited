@@ -2281,6 +2281,12 @@ namespace Shared {
 			return Value(this->eventData->GetId());
 		}
 
+		//str(procName)
+		Value Thread::AddLuaProcParam(std::vector<Value>& params) {
+			auto delimiter = L"\n";
+			return Value(delimiter + *params[0].strVal);
+		}
+
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 			TEXT("General"),
 			TEXT("Event Response"),
@@ -3550,6 +3556,12 @@ namespace Shared {
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFullName
 				},
+				{
+					21, EXPRCAT_GENERAL,
+					TEXT("LUA Add Parameter"), TEXT("%p << %p "), TEXT("Add parameter to the LUA Procedure string."),
+					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+					&Thread::AddLuaProcParam
+				}
 			}
 
 		};

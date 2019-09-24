@@ -155,6 +155,7 @@ namespace Shared {
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 			void Notification(std::vector<Value>& params);
+			void CallLuaProcedure(std::vector<Value>& params);
 
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
@@ -396,6 +397,7 @@ namespace Shared {
 			Value GetConversationAnswerId(std::vector<Value>& params);
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
+			Value AddLuaProcParam(std::vector<Value>& params);
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);
