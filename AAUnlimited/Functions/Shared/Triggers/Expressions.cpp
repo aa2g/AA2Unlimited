@@ -218,6 +218,7 @@ namespace Shared {
 
 		 //int (int min, int max)
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
+			srand((unsigned int)time(NULL));
 			int range = params[1].iVal - params[0].iVal + 1;
 			if (range > 0){
 				int r = rand() % range + params[0].iVal;
@@ -424,6 +425,7 @@ namespace Shared {
 		Value Thread::RollInt(std::vector<Value>& params) {
 			if (params[0].iVal <= 0) return Value(false);
 			int range = 100;
+			srand((unsigned int)time(NULL));
 			int roll = rand() % range + 1;
 			return Value(roll <= params[0].iVal);
 		}
