@@ -470,6 +470,37 @@ void hPositionChangeInjection() {
 		NULL);
 }
 
+void __stdcall MurderEvent(CharacterStruct* param) {
+	Shared::Triggers::MurderEventData murderEventData;
+	murderEventData.card = param->m_seat; // Protect this adequately so we don't get another infirmary crash bullshit
+	murderEventData.murderer = 0; // Put your loop here that detects who did it. Check the target AND actionid for it. 
+}
+
+
+void __declspec(naked) murderEventRedirect() {
+	__asm {
+		pushad
+		push ebx
+		call MurderEvent
+		popad
+		//original code
+		mov ecx,[edi + 0x00000394]
+		ret
+	}
+}
+
+void murderEventInjection() {
+	//Ebx has the victim
+	//AA2Play.exe+F4A34 - 8B 8F 94030000        - mov ecx,[edi+00000394]
+
+
+	DWORD address = General::GameBase + 0xF4A34;
+	DWORD redirectAddress = (DWORD)(&murderEventRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x8F, 0x94, 0x03, 0x00, 0x00 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 

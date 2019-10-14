@@ -17,6 +17,7 @@ namespace NpcActions {
 	void LowPolyUpdateStartInjectForGirls();
 	void LowPolyUpdateEndInject();
 	void hPositionChangeInjection();
+	void murderEventInjection();
 
 #pragma pack(push, 1)
 	struct AnswerStruct {

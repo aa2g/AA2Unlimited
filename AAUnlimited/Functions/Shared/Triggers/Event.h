@@ -56,6 +56,7 @@ namespace Triggers {
 		HI_POLY_DESPAWN,
 		H_END,
 		H_START,
+		MURDER_EVENT,
 		
 		
 		N_EVENTS
@@ -258,17 +259,23 @@ namespace Triggers {
 
 	EDC_DECLARE(KeyPressData, KEY_PRESS)
 
-	int keyVal;
+		int keyVal;
 
 	EDC_END
 
 	EDC_DECLARE(HPositionData, HPOSITION_CHANGE)
 
-	int position;
-	int actor0;
-	int actor1;
-	int dominantParticipant;
-	int submissiveParticipant;
+		int position;
+		int actor0;
+		int actor1;
+		int dominantParticipant;
+		int submissiveParticipant;
+
+	EDC_END
+
+	EDC_DECLARE(MurderEventData, MURDER_EVENT)
+
+		int murderer;
 
 	EDC_END
 
