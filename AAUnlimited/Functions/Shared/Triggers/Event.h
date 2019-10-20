@@ -276,6 +276,7 @@ namespace Triggers {
 	EDC_DECLARE(MurderEventData, MURDER_EVENT)
 
 		int murderer;
+		int murderAction;
 
 	EDC_END
 

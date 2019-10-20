@@ -471,9 +471,30 @@ void hPositionChangeInjection() {
 }
 
 void __stdcall MurderEvent(CharacterStruct* param) {
+	if (param == nullptr) return;
 	Shared::Triggers::MurderEventData murderEventData;
 	murderEventData.card = param->m_seat; // Protect this adequately so we don't get another infirmary crash bullshit
-	murderEventData.murderer = 0; // Put your loop here that detects who did it. Check the target AND actionid for it. 
+	//finding the murderer
+	int murderer = -1;
+	CharInstData* inst = &AAPlay::g_characters[murderEventData.card];
+	if (!inst->IsValid())
+	{
+		return;
+	}
+	else
+	{
+		for (int character = 0; character < 25; character = character + 1) {
+			CharInstData* inst2 = &AAPlay::g_characters[character];
+			if (inst2->IsValid()) {
+				if (inst2->m_char->m_npcData == inst->m_char->m_npcData->m_target) {
+					murderer = inst2->m_char->m_seat;
+				}
+			}
+		}
+	}
+	murderEventData.murderer = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 
+	murderEventData.murderAction = param->m_moreData1->m_activity->m_currConversationId;
+	LUA_EVENT_NORET("murder", murderEventData.card, murderEventData.murderer, murderEventData.murderAction);
 }
 
 
