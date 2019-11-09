@@ -495,8 +495,8 @@ void __stdcall MurderEvent(CharacterStruct* param) {
 	murderEventData.murderer = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 
 	murderEventData.murderAction = param->m_moreData1->m_activity->m_currConversationId;
 	LUA_EVENT_NORET("murder", murderEventData.card, murderEventData.murderer, murderEventData.murderAction);
+	ThrowEvent(&murderEventData);
 }
-
 
 void __declspec(naked) murderEventRedirect() {
 	__asm {
@@ -683,7 +683,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 	}
 	if (user == NULL) return;
 
-	LUA_EVENT_NORET("move", params);
+	LUA_EVENT_NORET("move", params, user);
 
 	using namespace Shared::Triggers;
 

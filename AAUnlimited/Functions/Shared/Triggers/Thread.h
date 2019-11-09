@@ -135,6 +135,11 @@ namespace Shared {
 			void SetCardStorageString(std::vector<Value>& params);
 			void SetCardStorageBool(std::vector<Value>& params);
 
+			void SetClassStorageInt(std::vector<Value>& params);
+			void SetClassStorageFloat(std::vector<Value>& params);
+			void SetClassStorageString(std::vector<Value>& params);
+			void SetClassStorageBool(std::vector<Value>& params);
+
 			void RemoveCardStorageInt(std::vector<Value>& params);
 			void RemoveCardStorageFloat(std::vector<Value>& params);
 			void RemoveCardStorageString(std::vector<Value>& params);
@@ -354,6 +359,11 @@ namespace Shared {
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
 			Value GetCardStorageString(std::vector<Value>& params); //string(int, string, string)
 			Value GetCardStorageBool(std::vector<Value>& params); //bool(int, string, bool)
+
+			Value GetClassStorageInt(std::vector<Value>& params);
+			Value GetClassStorageFloat(std::vector<Value>& params);
+			Value GetClassStorageString(std::vector<Value>& params);
+			Value GetClassStorageBool(std::vector<Value>& params);
 
 			//Event Response
 			//PERIOD_ENDS

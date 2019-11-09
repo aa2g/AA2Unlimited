@@ -1166,6 +1166,34 @@ namespace Shared {
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].bVal);
 		}
+		//int(string, int)
+		Value Thread::GetClassStorageInt(std::vector<Value>& params) {
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getClassInt(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].iVal);
+		}
+		//float(string, float)
+		Value Thread::GetClassStorageFloat(std::vector<Value>& params) {
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getClassFloat(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].fVal);
+		}
+		//string(string, string)
+		Value Thread::GetClassStorageString(std::vector<Value>& params) {
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getClassString(*params[0].strVal);
+			if (result.isValid) return Value(General::CastToWString(result.value));
+			else return Value(*params[1].strVal);
+		}
+		//bool(string, bool)
+		Value Thread::GetClassStorageBool(std::vector<Value>& params) {
+			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = store.getClassBool(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].bVal);
+		}
 		//int(int, int)
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -3073,6 +3101,14 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetPeriodTimer
 				},
+				{
+					121, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Int"), TEXT("GetInt(key: %p , default: %p )"),
+					TEXT("Gets the integer from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_INT }, (TYPE_INT),
+					&Thread::GetClassStorageInt
+				},
 			},
 
 			{ //BOOL
@@ -3223,7 +3259,7 @@ namespace Shared {
 				{
 					24, EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage Bool"), TEXT("%p ::GetBool(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the bool from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
 					&Thread::GetCardStorageBool
@@ -3356,6 +3392,14 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardPreference
 				},
+				{
+					46, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Bool"), TEXT("GetBool(key: %p , default: %p )"),
+					TEXT("Gets the bool from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
+					&Thread::GetClassStorageBool
+				},
 			},
 			{ //FLOAT
 				{
@@ -3415,7 +3459,7 @@ namespace Shared {
 				{
 					10,EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage Float"),TEXT("%p ::GetFloat(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the float from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
 						&Thread::GetCardStorageFloat
@@ -3432,6 +3476,14 @@ namespace Shared {
 					TEXT("The multiplier used when calculating interaction chances depending on actors' sex orientations and genders. Returns either 1.0, 0.5 or 0.0"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
 					&Thread::GetCardOrientationMultiplier
+				},
+				{
+					13,EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Float"),TEXT("GetFloat(key: %p , default: %p )"),
+					TEXT("Gets the float from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
+					&Thread::GetClassStorageFloat
 				},
 			},
 			{ //STRING
@@ -3475,7 +3527,7 @@ namespace Shared {
 				{
 					7, EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage String"), TEXT("%p ::GetStr(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the string from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::GetCardStorageString
@@ -3563,7 +3615,15 @@ namespace Shared {
 					TEXT("LUA Add Parameter"), TEXT("%p << %p "), TEXT("Add parameter to the LUA Procedure string."),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::AddLuaProcParam
-				}
+				},
+				{
+					22, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage String"), TEXT("GetStr(key: %p , default: %p )"),
+					TEXT("Gets the string from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+					&Thread::GetClassStorageString
+				},
 			}
 
 		};
