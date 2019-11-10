@@ -57,7 +57,7 @@ const char* CharInstData::GetStyleName(int index)
 	return styleName.c_str();
 }
 
-ExtClass::Light * CharInstData::GetLightArray()
+ExtClass::Light* CharInstData::GetLightArray()
 {
 	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		auto result = this->m_char->m_xxSkeleton->m_lightsArray;
@@ -66,7 +66,7 @@ ExtClass::Light * CharInstData::GetLightArray()
 	return nullptr;
 }
 
-int CharInstData::GetLightIndex(const char * name)
+int CharInstData::GetLightIndex(const char* name)
 {
 	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		for (int i = 0; i < this->m_char->m_xxSkeleton->m_lightsCount; i++) {
@@ -81,7 +81,7 @@ int CharInstData::GetLightIndex(const char * name)
 
 void CharInstData::SetLightMaterialColor(int light, int materialSlot, float red, float green, float blue, float alpha)
 {
-	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL){
+	if (this->IsValid() && this->m_char->m_xxSkeleton != NULL) {
 		if (light < this->m_char->m_xxSkeleton->m_lightsCount) {
 			if (materialSlot < this->m_char->m_xxSkeleton->m_lightsArray[light].m_materialCount) {
 				this->m_char->m_xxSkeleton->m_lightsArray[light].m_material[materialSlot].m_materialRed = red;
@@ -162,9 +162,70 @@ std::vector<BYTE> CharInstData::GetAmbientColor()
 		auto r = this->m_char->m_xxSkeleton->m_ambientLightRed;
 		auto g = this->m_char->m_xxSkeleton->m_ambientLightGreen;
 		auto b = this->m_char->m_xxSkeleton->m_ambientLightBlue;
-		return std::vector<BYTE>({ r, g, b});
+		return std::vector<BYTE>({ r, g, b });
 	}
 	return std::vector<BYTE>();
+}
+
+int CharInstData::GetLoveTowards(CharInstData* towards)
+{
+	auto* relations = this->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == towards->m_char->m_seat) break;
+	}
+	if (it == relations->m_end) return 0;
+
+	return it->m_lovePoints + it->m_loveCount * 30;
+}
+
+int CharInstData::GetLikeTowards(CharInstData* towards)
+{
+	auto* relations = this->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == towards->m_char->m_seat) break;
+	}
+	if (it == relations->m_end) return 0;
+
+	return it->m_likePoints + it->m_likeCount * 30;
+}
+
+int CharInstData::GetDislikeTowards(CharInstData* towards)
+{
+	auto* relations = this->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == towards->m_char->m_seat) break;
+	}
+	if (it == relations->m_end) return 0;
+
+	return it->m_dislikePoints + it->m_dislikeCount * 30;
+}
+
+int CharInstData::GetHateTowards(CharInstData* towards)
+{
+	auto* relations = this->m_char->GetRelations();
+	auto* it = relations->m_start;
+	for (it; it != relations->m_end; it++) {
+		if (it->m_targetSeat == towards->m_char->m_seat) break;
+	}
+	if (it == relations->m_end) return 0;
+
+	return it->m_hatePoints + it->m_hateCount * 30;
+}
+
+bool CharInstData::IsValid() {
+	if (General::IsAAEdit) return Editable();
+	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
+	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
+	for (start; start != end; start++) {
+		ExtClass::CharacterStruct* it = *start;
+		if (it == m_char) {
+			return m_char->m_seat + 1;
+		}
+	}
+	return false;
 }
 
 void CharInstData::Reset() {

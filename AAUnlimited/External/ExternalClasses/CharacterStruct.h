@@ -193,6 +193,8 @@ extern BYTE g_anim_data[25][6];
 	LUA_BIND(m_xxLegs)
 	LUA_BIND(m_xxSkirt)
 	LUA_BINDARRE(m_bonePtrArray,,_self->m_bonePtrArrayEnd-_self->m_bonePtrArray)
+	LUA_BINDARR(m_lovers)
+	LUA_BINDARR(m_daysLovers)
 	LUA_BIND(m_characterStatus)
 	LUA_BIND(m_npcData)
 
