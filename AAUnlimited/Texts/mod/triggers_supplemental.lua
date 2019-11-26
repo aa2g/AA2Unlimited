@@ -57,13 +57,22 @@ function detectiveTakeClassSnapshot(snapshotKey)
 	local snapshotStorage = {};
 	for i=0,24 do
 		local character = GetCharInstData(i);
-		snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s current action"] = character.m_char.m_characterStatus.m_npcStatus.m_currConversationId;
-		snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s movement state"] = character.m_char.m_characterStatus.m_npcStatus.m_status;
-		if (character ~= 0) then
+		if (character ~= nil) then
+			local currentAction = character.m_char:GetActivity().m_currConversationId;
+			if (currentAction == 4294967295) then
+				currentAction = -1;
+			end
+			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s current action"] = currentAction;			
+			local currentState = character.m_char.m_characterStatus.m_npcStatus.m_status;
+			if (currentState == 4294967295) then
+				currentState = -1;
+			end
+			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s movement state"] = character.m_char.m_characterStatus.m_npcStatus.m_status;
+			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s current room"] = character:GetCurrentRoom();
 			for j=0,24 do
 				if j == i then goto jloopcontinue end
 				local towards = GetCharInstData(j);
-				if (towards ~= 0) then	
+				if (towards ~= nil) then	
 					if (towards.m_char.m_npcData == character.m_char.m_npcData.m_target) then
 						snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s target"] = getCardStorageKey(j);
 					end
@@ -81,6 +90,11 @@ function detectiveTakeClassSnapshot(snapshotKey)
 	local json = require "json";
 	log.info(json.encode(snapshotStorage));
 	setClassStorage(snapshotKey, snapshotStorage);
+end
+
+function detectiveCompileAlibiReport(detective, testifier, case)
+	local storage = getClassStorage(case);
+
 end
 
 --------------------------------------------------------------------------------------------------------------------------

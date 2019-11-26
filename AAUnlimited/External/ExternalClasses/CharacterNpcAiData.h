@@ -34,6 +34,13 @@ public:
 
 	CharacterNpcAiData() = delete;
 	~CharacterNpcAiData() = delete;
+
+#define LUA_CLASS ExtClass::CharacterNpcAiData
+	static inline void bindLua() {
+		LUA_NAME;
+		LUA_BIND(m_activity)
+	}
+#undef LUA_CLASS
 };
 
 static_assert(sizeof(CharacterNpcAiData) == 0xEC0,"size missmatch");

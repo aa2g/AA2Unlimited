@@ -215,6 +215,21 @@ int CharInstData::GetHateTowards(CharInstData* towards)
 	return it->m_hatePoints + it->m_hateCount * 30;
 }
 
+int CharInstData::GetCurrentRoom()
+{
+	if (this->m_char->m_npcData != nullptr) {
+		if (this->m_char->m_npcData->roomPtr != nullptr) {
+			if ((((int*)this->m_char->m_npcData->roomPtr) + 5) != nullptr) {
+				auto roomno = *(((int*)this->m_char->m_npcData->roomPtr) + 5);
+				return roomno;
+			}
+			else return -1;
+		}
+		else return -1;
+	}
+	else return -1;
+}
+
 bool CharInstData::IsValid() {
 	if (General::IsAAEdit) return Editable();
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();

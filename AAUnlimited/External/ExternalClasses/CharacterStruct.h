@@ -196,6 +196,8 @@ extern BYTE g_anim_data[25][6];
 	LUA_BINDARR(m_lovers)
 	LUA_BINDARR(m_daysLovers)
 	LUA_BIND(m_characterStatus)
+	LUA_BIND(m_moreData1)
+	LUA_BIND(m_moreData2)
 	LUA_BIND(m_npcData)
 
 	LUA_MGETTER0(GetActivity)
