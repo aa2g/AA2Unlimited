@@ -102,9 +102,9 @@ function detectiveCompileAllReports(case)
 	for seat=0,24 do
 		local testifier = GetCharInstData(seat);
 		if (testifier ~= nil) then
-			storage[seat .. "'s alibi report"] = detectiveCompileAlibiReport(seat, case);
-			storage[seat .. "'s intrigue report"] = detectiveCompileIntrigueReport(seat, case);
-			storage[seat .. "'s trivia report"] = detectiveCompileTriviaReport(seat, case);
+			storage[getCardStorageKey(seat) .. "'s alibi report"] = detectiveCompileAlibiReport(seat, case);
+			storage[getCardStorageKey(seat) .. "'s intrigue report"] = detectiveCompileIntrigueReport(seat, case);
+			storage[getCardStorageKey(seat) .. "'s trivia report"] = detectiveCompileTriviaReport(seat, case);
 		end
 	end	
 	setClassStorage(case, storage);
@@ -152,7 +152,7 @@ function detectiveCompileAlibiReport(testifier, case)
 	-- avoid talking about the victim and the murderer
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
-		if (i~=testifier and i~=victimSeat and i~=murdererSeat and X~=nil) then
+		if (i ~= testifier and i ~= victimSeat and i ~= murdererSeat and X ~= nil) then
 			if (storage[X .. "\'s current room"] == storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"]) then
 				local targetX = storage[X .. "\'s target"];
 				local actionX = storage[X .. "\'s current action"];
@@ -173,16 +173,94 @@ function detectiveCompileAlibiReport(testifier, case)
 		end
 	end
 
-	-- local json = require "json";
-	-- log.info(testifier .. "'s alibi report: \n" .. json.encode(alibiReport));
+	local json = require "json";
+	log.info(getCardStorageKey(testifier) .. "'s alibi report: \n" .. json.encode(alibiReport));
 	return alibiReport;
 end
 
 function detectiveCompileIntrigueReport(testifier, case)
-	return {};
+	local math = require "math";
+	local storage = getClassStorage(case);
+	local victimSeat = getClassStorage("Latest murder case seat");
+	local murdererSeat = getClassStorage(getCardStorageKey(victimSeat) .. "'s murderer");
+
+	local line = 0;
+
+	local intrigueReport = {};	-- where all the alibi report data is gonna be stored
+
+	local myselfInst = GetCharInstData(testifier);
+	if (myselfInst.m_char.m_seat == victimSeat) then
+		-- dead tell no tales
+		return {};
+	end
+			
+	for i=0,24 do
+		local X = storage.classMembers["" .. i];
+		if (i ~= testifier and X ~= nil) then
+			local LoveLike = storage[X .. "\'s LOVE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s LIKE towards " .. getCardStorageKey(testifier)];
+			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s HATE towards " .. getCardStorageKey(testifier)];
+			if (LoveLike > DislikeHate) then
+				for j=0,24 do
+					local Y = storage.classMembers["" .. j];
+					if (Y ~= nil and i ~= j and j ~= testifier) then	--	don't talk about myself
+						-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
+						local LOVE_X_Y = storage[X .. "\'s LOVE towards " .. Y];
+						local LIKE_X_Y = storage[X .. "\'s LIKE towards " .. Y];
+						local DISLIKE_X_Y = storage[X .. "\'s DISLIKE towards " .. Y];
+						local HATE_X_Y = storage[X .. "\'s HATE towards " .. Y];
+						local MAX_X_Y = math.max(LOVE_X_Y, math.max(LIKE_X_Y, math.max(DISLIKE_X_Y, math.max(HATE_X_Y))));
+						if (MAX_X_Y == LIKE_X_Y and MAX_X_Y >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " liked " .. Y;
+						end
+						if (MAX_X_Y == DISLIKE_X_Y and MAX_X_Y >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " disliked " .. Y;
+						end
+						if (MAX_X_Y == LOVE_X_Y and MAX_X_Y >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " loved " .. Y;
+						end
+						if (MAX_X_Y == HATE_X_Y and MAX_X_Y >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " hated " .. Y;
+						end
+
+						-- Apparently, <student X> felt <LOVED/LIKED/DISLIKED/HATED> by <student Y>						
+						local LOVE_Y_X = storage[Y .. "\'s LOVE towards " .. X];
+						local LIKE_Y_X = storage[Y .. "\'s LIKE towards " .. X];
+						local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE towards " .. X];
+						local HATE_Y_X = storage[Y .. "\'s HATE towards " .. X];
+						local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
+						if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " felt liked by " .. Y;
+						end
+						if (MAX_Y_X == DISLIKE_Y_X and MAX_Y_X >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " felt disliked by " .. Y;
+						end
+						if (MAX_Y_X == LOVE_Y_X and MAX_Y_X >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " felt loved by " .. Y;
+						end
+						if (MAX_Y_X == HATE_Y_X and MAX_Y_X >= 30) then
+							line = line + 1;
+							intrigueReport[line] = "Apparently, " .. X .. " felt hated by " .. Y;
+						end						
+					end
+				end				
+			end
+		end
+	end
+
+	local json = require "json";
+	log.info(getCardStorageKey(testifier) .. "'s intrigue report: \n" .. json.encode(intrigueReport));
+	return intrigueReport;
 end
 
 function detectiveCompileTriviaReport(testifier, case)
+	-- <student X> and <student Y> were dating
 	return {};
 end
 
