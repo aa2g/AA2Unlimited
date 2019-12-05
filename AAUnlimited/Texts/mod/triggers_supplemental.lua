@@ -260,10 +260,87 @@ function detectiveCompileIntrigueReport(testifier, case)
 end
 
 function detectiveCompileTriviaReport(testifier, case)
-	-- <student X> and <student Y> were dating
-	return {};
+	local storage = getClassStorage(case);
+	local victimSeat = getClassStorage("Latest murder case seat");
+	local murdererSeat = getClassStorage(getCardStorageKey(victimSeat) .. "'s murderer");
+
+	local line = 0;
+
+	local triviaReport = {};	-- where all the alibi report data is gonna be stored
+
+	local myselfInst = GetCharInstData(testifier);
+	if (myselfInst.m_char.m_seat == victimSeat) then
+		-- dead tell no tales
+		return {};
+	end
+			
+	for i=0,24 do
+		local X = storage.classMembers["" .. i];
+		if (X ~= nil) then
+			local LoveLike = storage[X .. "\'s LOVE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s LIKE towards " .. getCardStorageKey(testifier)];
+			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s HATE towards " .. getCardStorageKey(testifier)];
+			if (LoveLike > DislikeHate) then
+				for j=0,24 do
+					local Y = storage.classMembers["" .. j];
+					if (Y ~= nil and i ~= j) then	--	don't talk about myself
+						-- <student X> and <student Y> were dating
+						local loversFlag = storage[X .. " is lovers with " .. Y];
+						if (loversFlag == true) then
+							line = line + 1;
+							triviaReport[line] = "Looks like " .. X .. " and " .. Y .. " were dating";
+						end
+					end
+				end				
+			end
+		end
+	end
+
+	local json = require "json";
+	log.info(getCardStorageKey(testifier) .. "'s trivia report: \n" .. json.encode(triviaReport));
+
+	return triviaReport;
 end
 
+function printReport(case, detective, testifier, reportKey)
+	local math = require "math";
+	local detectiveStorageKey = case .. " : " .. reportKey;
+	local detectiveReport = getCardStorage(detective, detectiveStorageKey);
+	local testifierReport = getClassStorage(case)[reportKey];
+	local detectiveInst = GetCharInstData(detective);
+	local testifierInst = GetCharInstData(testifier);
+	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 900.0;
+	local result = {};
+	for k,v in ipairs(detectiveReport) do
+		result[v] = k;
+	end
+	for line in pairs(testifierReport) do
+		local proc = math.random() < disposition;
+		if (proc) then
+			result[line] = 0;
+		end
+	end
+	detectiveReport = {};
+	local i = 0;
+	log.info(reportKey .. ": ");
+	for k,v in ipairs(result) do
+		i = i + 1;
+		detectiveReport[i] = k;
+		log.info(k);
+	end
+	setCardStorage(detective, detectiveStorageKey, detectiveReport);
+end
+
+function on.printAlibiReport(case, detective, testifier)
+	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s alibi report");
+end
+
+function on.printIntrigueReport(case, detective, testifier)
+	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s intrigue report");
+end
+
+function on.printTriviaReport(case, detective, testifier)
+	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
+end
 
 --------------------------------------------------------------------------------------------------------------------------
 
