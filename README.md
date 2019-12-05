@@ -31,7 +31,7 @@ For a full list of features, please read [this page](https://github.com/aa2g/AA2
 
 ### Tech-Support (in order from most responsive to least responsive)
 - Try asking questions in our [discord server](https://discord.gg/5MfdAPT) (devs are here most of the time)
-- Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g) (devs occasionally check this out but regulars can help you out too)
+- Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g) (devs occasionally visit but regulars can help you out too)
 - Make an issue on github (good luck with that)
 
 ### Having issues?
