@@ -30,14 +30,15 @@ end
 
 function detectiveStartTheCase(actor0, actor1)
 	detectiveDetermineTheMurderer(actor0, actor1);
-	local case = getCardStorageKey(getClassStorage("Latest murder case seat")) .. "\'s murder case data";
+	local case = getClassStorage("Latest murder case");
 	detectiveTakeClassSnapshot(case);
-	detectiveCompileAllReports(case);
+	-- detectivePrintAllReports(case);
 end
 
 function detectiveDetermineTheMurderer(actor0, actor1)
 	local victim = 25;
 	local murderer = 25;
+	local storage = {};
 
 	if (prevActions[actor0 + 1] == MURDER or prevActions[actor0 + 1] == TOGETHER_FOREVER) then
 		victim = GetCharInstData(actor1);
@@ -49,95 +50,93 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 	end
 	
 	if (victim ~= 25 and murderer ~= 25) then
-		setClassStorage("Latest murder case seat", victim.m_char.m_seat);
-		local murderKey = getCardStorageKey(victim.m_char.m_seat) .. "'s murderer";
-		setClassStorage(murderKey, murderer.m_char.m_seat);
+		local case = getCardStorageKey(victim.m_char.m_seat) .. "\'s murder case";
+		setClassStorage("Latest murder case", case);
+		storage.victim = getCardStorageKey(victim.m_char.m_seat);
+		storage.murderer = getCardStorageKey(murderer.m_char.m_seat);
+		setClassStorage(case, storage);
 	end	
 end
 
-function detectiveTakeClassSnapshot(snapshotKey)
+function detectiveTakeClassSnapshot(case)
 	local snapshotStorage = {};
 	snapshotStorage.classMembers = {};	--	list of class members at the time of murder
 	for i=0,24 do
 		local character = GetCharInstData(i);
 		if (character ~= nil) then
-			snapshotStorage.classMembers["" .. i] = getCardStorageKey(character.m_char.m_seat);
+			local charKey = getCardStorageKey(character.m_char.m_seat);
+			snapshotStorage.classMembers["" .. i] = charKey;
 
 			local currentAction = character.m_char:GetActivity().m_currConversationId;
 			if (currentAction == 4294967295) then
 				currentAction = -1;
 			end
-			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s current action"] = currentAction;			
+			snapshotStorage[charKey .. "\'s current action"] = currentAction;			
 			local currentState = character.m_char.m_characterStatus.m_npcStatus.m_status;
 			if (currentState == 4294967295) then
 				currentState = -1;
 			end
-			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s movement state"] = character.m_char.m_characterStatus.m_npcStatus.m_status;
-			snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s current room"] = character:GetCurrentRoom();
+			snapshotStorage[charKey .. "\'s movement state"] = character.m_char.m_characterStatus.m_npcStatus.m_status;
+			snapshotStorage[charKey .. "\'s current room"] = character:GetCurrentRoom();
 			for j=0,24 do
 				if j == i then goto jloopcontinue end
 				local towards = GetCharInstData(j);
-				if (towards ~= nil) then	
+				if (towards ~= nil) then
+					local towardsKey = getCardStorageKey(j);
 					if (towards.m_char.m_npcData == character.m_char.m_npcData.m_target) then
-						snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s target"] = getCardStorageKey(j);
+						snapshotStorage[charKey .. "\'s target"] = towardsKey;
 					end
-					snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. " is lovers with " .. getCardStorageKey(j)] = character.m_char:m_lovers(j);
+					snapshotStorage[charKey .. " is lovers with " .. towardsKey] = character.m_char:m_lovers(j);
 					-- LLDH
-					snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s LOVE towards " .. getCardStorageKey(j)] = character:GetLoveTowards(towards);
-					snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s LIKE towards " .. getCardStorageKey(j)] = character:GetLikeTowards(towards);
-					snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s DISLIKE towards " .. getCardStorageKey(j)] = character:GetDislikeTowards(towards);
-					snapshotStorage[getCardStorageKey(character.m_char.m_seat) .. "\'s HATE towards " .. getCardStorageKey(j)] = character:GetHateTowards(towards);
+					snapshotStorage[charKey .. "\'s LOVE towards " .. towardsKey] = character:GetLoveTowards(towards);
+					snapshotStorage[charKey .. "\'s LIKE towards " .. towardsKey] = character:GetLikeTowards(towards);
+					snapshotStorage[charKey .. "\'s DISLIKE towards " .. towardsKey] = character:GetDislikeTowards(towards);
+					snapshotStorage[charKey .. "\'s HATE towards " .. towardsKey] = character:GetHateTowards(towards);
 				end
 				::jloopcontinue::
 			end
 		end
 	end
-	-- local json = require "json";
-	-- log.info(json.encode(snapshotStorage));
-	setClassStorage(snapshotKey, snapshotStorage);
+
+	setClassStorage(case, snapshotStorage);
 end
 
-function detectiveCompileAllReports(case)
-	local storage = getClassStorage(case);
+function detectivePrintAllReports(case)
 	for seat=0,24 do
 		local testifier = GetCharInstData(seat);
 		if (testifier ~= nil) then
-			storage[getCardStorageKey(seat) .. "'s alibi report"] = detectiveCompileAlibiReport(seat, case);
-			storage[getCardStorageKey(seat) .. "'s intrigue report"] = detectiveCompileIntrigueReport(seat, case);
-			storage[getCardStorageKey(seat) .. "'s trivia report"] = detectiveCompileTriviaReport(seat, case);
+			local json = require "json";
+			log.info(getCardStorageKey(seat) .. "'s alibi report: \n" .. json.encode(detectiveCompileAlibiReport(seat, case)));
+			log.info(getCardStorageKey(seat) .. "'s intrigue report: \n" .. json.encode(detectiveCompileIntrigueReport(seat, case)));
+			log.info(getCardStorageKey(seat) .. "'s trivia report: \n" .. json.encode(detectiveCompileTriviaReport(seat, case)));
 		end
-	end	
-	setClassStorage(case, storage);
+	end
 end
 
 function detectiveCompileAlibiReport(testifier, case)
 	local storage = getClassStorage(case);
-	local victimSeat = getClassStorage("Latest murder case seat");
-	local murdererSeat = getClassStorage(getCardStorageKey(victimSeat) .. "'s murderer");
+	local victim= case.victim;
+	local murderer= case.murderer;
 
-	local line = 1;
-
+	local line = 0;
 	local alibiReport = {};	-- where all the alibi report data is gonna be stored
 
 	local myselfInst = GetCharInstData(testifier);
-	if (myselfInst.m_char.m_seat == victimSeat) then
-		-- dead tell no tales
-		return {};
-	end
+	local myKey = getCardStorageKey(testifier);
 	
 	-- I was in <room>
 	local alibiMyself = "I was in " .. getRoomName(storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"]) .. " at the time\n";
-	if (myselfInst.m_char.m_seat == murdererSeat) then
+	if (myKey == murderer) then
 		-- lie about my involvement
 		alibiMyself = "I was in " .. getRoomName(getRandomRoom(storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"])) .. " at the time\n";
 		alibiMyself = alibiMyself .. "I was trying to " .. getActionName(-1);
 	else
 		-- I was doing <action> / talking to <target> about <action>
-		local myTarget = storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s target"];
-		local myAction = storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current action"];
+		local myTarget = storage[myKey .. "\'s target"];
+		local myAction = storage[myKey .. "\'s current action"];
 		if (myTarget ~= nil) then
 			local targetsTarget = storage[myTarget .. "\'s target"];
-			if (targetsTarget == getCardStorageKey(myselfInst.m_char.m_seat)) then
+			if (targetsTarget == myKey) then
 				alibiMyself = alibiMyself .. "I was talking to " .. myTarget .. " about " .. getActionName(myAction); 		
 			else
 				alibiMyself = alibiMyself .. "I was going to talk to " .. myTarget .. " about " .. getActionName(myAction); 	
@@ -146,63 +145,59 @@ function detectiveCompileAlibiReport(testifier, case)
 			alibiMyself = alibiMyself .. "I was trying to " .. getActionName(myAction);
 		end
 	end
+	line = line + 1;
 	alibiReport[line] = alibiMyself;
 		
 	-- <student> was in the same room, doing <action> / talking to <target> about <action>
 	-- avoid talking about the victim and the murderer
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
-		if (i ~= testifier and i ~= victimSeat and i ~= murdererSeat and X ~= nil) then
-			if (storage[X .. "\'s current room"] == storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"]) then
+		if (X ~= nil and X ~= myKey and X ~= victim and X ~= murderer) then
+			if (storage[X .. "\'s current room"] == storage[myKey .. "\'s current room"]) then
 				local targetX = storage[X .. "\'s target"];
 				local actionX = storage[X .. "\'s current action"];
-				local alibiX = X .. " was in the same room, ";
+				local alibiX = X .. " was in the same room,";
 				if (targetX ~= nil) then
 					local targetXsTarget = storage[targetX .. "\'s target"];
 					if (targetXsTarget == X) then
-						alibiX = alibiX .. "talking to " .. targetX .. " about " .. getActionName(actionX);
+						alibiX = alibiX .. " talking to " .. targetX .. " about " .. getActionName(actionX);
 					else
-						alibiX = alibiX .. "trying to talk to " .. targetX .. " about " .. getActionName(actionX);
+						alibiX = alibiX .. " trying to talk to " .. targetX .. " about " .. getActionName(actionX);
 					end
 				else
-					alibiX = alibiX .. "trying to " .. getActionName(actionX);
+					alibiX = alibiX .. " trying to " .. getActionName(actionX);
 				end
 				line = line + 1;
 				alibiReport[line] = alibiX;
 			end
 		end
 	end
-
-	local json = require "json";
-	log.info(getCardStorageKey(testifier) .. "'s alibi report: \n" .. json.encode(alibiReport));
+	
 	return alibiReport;
 end
 
 function detectiveCompileIntrigueReport(testifier, case)
 	local math = require "math";
+
 	local storage = getClassStorage(case);
-	local victimSeat = getClassStorage("Latest murder case seat");
-	local murdererSeat = getClassStorage(getCardStorageKey(victimSeat) .. "'s murderer");
+	local victim = case.victim;
+	local murderer = case.murderer;
 
 	local line = 0;
-
-	local intrigueReport = {};	-- where all the alibi report data is gonna be stored
+	local intrigueReport = {};	-- where all the intrigue report data is gonna be stored
 
 	local myselfInst = GetCharInstData(testifier);
-	if (myselfInst.m_char.m_seat == victimSeat) then
-		-- dead tell no tales
-		return {};
-	end
+	local myKey = getCardStorageKey(testifier);
 			
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
-		if (i ~= testifier and X ~= nil) then
-			local LoveLike = storage[X .. "\'s LOVE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s LIKE towards " .. getCardStorageKey(testifier)];
-			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s HATE towards " .. getCardStorageKey(testifier)];
+		if (X ~= nil and X ~= myKey) then
+			local LoveLike = storage[X .. "\'s LOVE towards " .. myKey] + storage[X .. "\'s LIKE towards " .. myKey];
+			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. myKey] + storage[X .. "\'s HATE towards " .. myKey];
 			if (LoveLike > DislikeHate) then
 				for j=0,24 do
 					local Y = storage.classMembers["" .. j];
-					if (Y ~= nil and i ~= j and j ~= testifier) then	--	don't talk about myself
+					if (Y ~= nil and i ~= j and Y ~= myKey) then	--	don't talk about myself
 						-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
 						local LOVE_X_Y = storage[X .. "\'s LOVE towards " .. Y];
 						local LIKE_X_Y = storage[X .. "\'s LIKE towards " .. Y];
@@ -254,38 +249,32 @@ function detectiveCompileIntrigueReport(testifier, case)
 		end
 	end
 
-	local json = require "json";
-	log.info(getCardStorageKey(testifier) .. "'s intrigue report: \n" .. json.encode(intrigueReport));
 	return intrigueReport;
 end
 
 function detectiveCompileTriviaReport(testifier, case)
 	local storage = getClassStorage(case);
-	local victimSeat = getClassStorage("Latest murder case seat");
-	local murdererSeat = getClassStorage(getCardStorageKey(victimSeat) .. "'s murderer");
+	local victim = case.victim;
+	local murderer = case.murderer;
 
 	local line = 0;
-
 	local triviaReport = {};	-- where all the alibi report data is gonna be stored
 
 	local myselfInst = GetCharInstData(testifier);
-	if (myselfInst.m_char.m_seat == victimSeat) then
-		-- dead tell no tales
-		return {};
-	end
-			
+	local myKey = getCardStorageKey(testifier);
+
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
-		if (X ~= nil) then
-			local LoveLike = storage[X .. "\'s LOVE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s LIKE towards " .. getCardStorageKey(testifier)];
-			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. getCardStorageKey(testifier)] + storage[X .. "\'s HATE towards " .. getCardStorageKey(testifier)];
+		if (X ~= nil and X ~= myKey) then
+			local LoveLike = storage[X .. "\'s LOVE towards " .. myKey] + storage[X .. "\'s LIKE towards " .. myKey];
+			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. myKey] + storage[X .. "\'s HATE towards " .. myKey];
 			if (LoveLike > DislikeHate) then
 				for j=0,24 do
 					local Y = storage.classMembers["" .. j];
 					if (Y ~= nil and i ~= j) then	--	don't talk about myself
 						-- <student X> and <student Y> were dating
 						local loversFlag = storage[X .. " is lovers with " .. Y];
-						if (loversFlag == true) then
+						if (loversFlag == 1) then
 							line = line + 1;
 							triviaReport[line] = "Looks like " .. X .. " and " .. Y .. " were dating";
 						end
@@ -294,9 +283,6 @@ function detectiveCompileTriviaReport(testifier, case)
 			end
 		end
 	end
-
-	local json = require "json";
-	log.info(getCardStorageKey(testifier) .. "'s trivia report: \n" .. json.encode(triviaReport));
 
 	return triviaReport;
 end
