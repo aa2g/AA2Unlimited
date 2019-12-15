@@ -345,6 +345,14 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,58, TEXT("a01_J_UplegL_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 			{ ExtClass::CharacterStruct::BODY,59, TEXT("a01_J_UplegR_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
+			{ ExtClass::CharacterStruct::BODY,	60, TEXT("a01_J_LegL_01"),{ 0.15f,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	61, TEXT("a01_J_LegR_01"),{ 0.15f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	62, TEXT("a01_J_LegL_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	63, TEXT("a01_J_LegR_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	64, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	65, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
 
 		},
 		{

@@ -2300,17 +2300,20 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Calves Size"),
 				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 },
-				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 } },
+				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 },
+				{ CharacterStruct::BODY, 64 },{ CharacterStruct::BODY, 65 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Calves Width"),
 				{ { CharacterStruct::LEGS, 26 },{ CharacterStruct::LEGS, 27 },
-				{ CharacterStruct::SKIRT, 60 },{ CharacterStruct::SKIRT, 61 } },
+				{ CharacterStruct::SKIRT, 60 },{ CharacterStruct::SKIRT, 61 },
+				{ CharacterStruct::BODY, 60 },{ CharacterStruct::BODY, 61 }},
 				-0.5f, 0.5f
 			},
 			{ TEXT("Calves Thickness"),
 				{ { CharacterStruct::LEGS, 28 },{ CharacterStruct::LEGS, 29 },
-				{ CharacterStruct::SKIRT, 62 },{ CharacterStruct::SKIRT, 63 } },
+				{ CharacterStruct::SKIRT, 62 },{ CharacterStruct::SKIRT, 63 },
+				{ CharacterStruct::BODY, 62 },{ CharacterStruct::BODY, 63 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Head Size"),
