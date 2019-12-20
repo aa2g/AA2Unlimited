@@ -687,8 +687,21 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.strength = strength % 6;
 		}
-		//int seat, int value
 
+		//int seat, int fightingStyle
+		void Thread::SetCardFightingStyle(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int fightingStyle = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.fightingStyle = fightingStyle % 3;
+		}
+
+		//int seat, int value
 		void Thread::SetCharacterLocked(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -750,6 +763,29 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.strengthClassRank = rank;
 		}
+
+
+		void Thread::SetStamina(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int value = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_stamina = value;
+		}
+
+
+		void Thread::SetPeriodTimer(std::vector<Value>& params)
+		{
+			int value = params[0].iVal * 1000;
+			const DWORD offset[]{ 0x376164, 0x2C, 0x2C };
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
+			*timer = value;
+		}
+
 
 		//int seat, int sociability
 		void Thread::SetCardSociability(std::vector<Value>& params)
@@ -1321,6 +1357,12 @@ namespace Shared {
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
 
 
+			//Add stamina
+			const DWORD offset11[]{ 0x376164, 0x2C, 0x2C };
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset11);
+			*timer = 1000; //resets the counter to be safe
+			AAPlay::g_characters[seatPC].m_char->m_stamina = AAPlay::g_characters[seatPC].m_char->m_stamina + 100;
+
 			//save interrupts
 			const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
 			DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
@@ -1348,6 +1390,15 @@ namespace Shared {
 			DWORD* HSceneTrigger = (DWORD*)ExtVars::ApplyRule(offset4);
 			*HSceneTrigger = 1;
 		}
+
+
+		void Thread::SwitchActiveInH(std::vector<Value>& params) {
+			if ((this->eventData->GetId() != H_START) && (this->eventData->GetId() != HPOSITION_CHANGE)) return;
+			auto hInfo = Shared::GameState::getHInfo();
+			hInfo->m_btnSwap->Press();
+		
+		}
+
 
 		//int seat, int status
 		void Thread::SetNpcStatus(std::vector<Value>& params)
@@ -1445,6 +1496,12 @@ namespace Shared {
 			}
 		}
 
+		// string text, bool important
+		void Thread::Notification(std::vector<Value>& params) {
+			auto text = params[0].strVal;
+			NotifyType important = params[1].bVal ? ImportantNotification : RegularNotification;
+			Notifications::AddNotification(*text, important);
+		}
 
 		/*
 		 * A list of all action categories
@@ -1866,7 +1923,7 @@ namespace Shared {
 			},
 			{
 				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
-				TEXT("Writes the string to the SPAM log."),
+				TEXT("Writes the string to the INFO log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
 			},
@@ -2112,6 +2169,36 @@ namespace Shared {
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetRoomTarget
 			},
+			{
+				104, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Fighting Stance"), TEXT("%p ::FightStance = %p"),
+				TEXT("Set character's fighting stance."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardFightingStyle
+			},
+			{
+				105, ACTIONCAT_EVENT, TEXT("Switch Dominant"), TEXT("SwitchDominant"),
+				TEXT("Switch who is dominant and submissive in an H scene."),
+				{ },
+				&Thread::SwitchActiveInH
+			},
+			{
+				106, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Stamina"), TEXT("%p ::SetStamina = %p"),
+				TEXT("Set the current stamina of a character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetStamina
+			},
+			{
+				107, ACTIONCAT_EVENT, TEXT("Set period timer"), TEXT("PeriodTimer = %p"),
+				TEXT("Set the amount of seconds that have passed in the current period."),
+				{ TYPE_INT },
+				&Thread::SetPeriodTimer
+			},
+			{
+				108, ACTIONCAT_GENERAL, TEXT("Notification"), TEXT("Notification (text: %p , importantBool: %p )"),
+				TEXT("Display the notification on the screen."),
+				{ TYPE_STRING, TYPE_BOOL },
+				&Thread::Notification
+			}
 		};
 
 

@@ -42,13 +42,13 @@ public:;
 	unsigned PP2Cache;
 	unsigned PP2AudioCache;
 	unsigned PP2Buffers;
+	bool bEnableOverlays;
 	bool bDrawFPS;
 	bool bUseVisualStyles;
 	bool PP2Profiling;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
-	bool bDisplaySubs;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -67,13 +67,13 @@ public:;
 			LUA_BIND(PP2Cache)
 			LUA_BIND(PP2AudioCache)
 			LUA_BIND(PP2Buffers)
+			LUA_BIND(bEnableOverlays)
 			LUA_BIND(bDrawFPS)
 			LUA_BIND(bUseVisualStyles)
 			LUA_BIND(PP2Profiling)
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
-			LUA_BIND(bDisplaySubs)
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

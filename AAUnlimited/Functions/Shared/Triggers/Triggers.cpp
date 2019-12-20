@@ -27,6 +27,10 @@ void Trigger::AddActionsFromGuiActions(std::vector<GUIAction*>& guiActions, AddA
 		switch(elemId) {
 		case ACTION_ELSEIF:
 		case ACTION_IF: {
+			if (elem->action.action->id == ACTION_IF && state.elseIfLabels.size() > 0) {
+				//If you use an If after elseifs, disregard the elseif chain
+				state.ResetITEState();
+			}
 			//add a jump, make it jump on !if condition
 			ParameterisedExpression exprJumpN(TYPE_INT,Value(0));
 			ParameterisedExpression exprJumpCond(TYPE_BOOL,EXPR_BOOL_NOT,elem->action.actualParameters);

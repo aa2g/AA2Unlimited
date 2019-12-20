@@ -9,20 +9,31 @@ ExtClass::CharacterStruct* loc_passiveChar = NULL;
 ExtClass::XXFile* loc_passiveFaceXX = NULL;
 ExtClass::XXFile* loc_activeFaceXX = NULL;
 DWORD loc_currPos = -1;
+bool cumshotStarted = false;
+byte* cumshotStart = 0;
+const DWORD cumshotStartOffset[]{ 0x3761CC, 0x28, 0x38, 0x70, 0xAC, 0x2C };
+byte* cumshotSprays = 0;
+const DWORD cumshotEndOffset[]{ 0x3761CC, 0x28, 0x38, 0x70, 0xAC, 0x34 };
+byte loc_cumshotSprays = 0;
+bool renderDelayStarted = false;
 
 bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
 
 //take note that these ticks might be called multiple times even after returning contScene = false
 bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
+	Shared::GameState::setHInfo(hInfo);
 	HAi::PreTick(hInfo);
 	bool contScene = loc_OriginalTickFunction(hInfo);
-	HAi::PostTick(hInfo,contScene);
-	HButtonMove::PostTick(hInfo,contScene);
 	if (contScene) {
 		if (!loc_currentHInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H started\n";
 			LUA_EVENT_NORET("start_h", hInfo);
+			Shared::Triggers::HStartData data;
+			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
+			data.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
+			data.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
+			Shared::Triggers::ThrowEvent(&data);
 		}
 		loc_currentHInfo = hInfo;
 	}
@@ -33,7 +44,7 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			Shared::Triggers::HEndData data;
 			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
-			
+			Shared::GameState::setHInfo(NULL);
 		}
 		loc_currentHInfo = NULL;
 
@@ -43,6 +54,8 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		loc_activeFaceXX = NULL;
 		loc_passiveFaceXX = NULL;
 	}
+	HAi::PostTick(hInfo, contScene);
+	HButtonMove::PostTick(hInfo, contScene);
 	if (loc_currentHInfo) {
 		auto active = hInfo->m_activeParticipant->m_charPtr;
 		auto passive = hInfo->m_passiveParticipant->m_charPtr;
@@ -60,6 +73,34 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 			loc_passiveChar = passive;
 			loc_activeFaceXX = active->m_xxFace;
 			loc_passiveFaceXX = passive->m_xxFace;
+		}
+		// Detecting cumshot pose stage
+		cumshotStart = (byte*)ExtVars::ApplyRule(cumshotStartOffset);
+		if (!cumshotStarted && *cumshotStart == 1) {
+			LUA_EVENT_NORET("start_h_cumshot", hInfo);
+			cumshotStarted = true;
+			DrawD3D::canRender = false; // Fix against drawing on naked skin in cumshot stage
+			renderDelayStarted = false;
+		}
+		if (cumshotStarted) {
+			cumshotSprays = (byte*)ExtVars::ApplyRule(cumshotEndOffset); // Current count of released sprays
+			if (*cumshotSprays == 0)
+				loc_cumshotSprays = 0;
+			else if (*cumshotSprays != loc_cumshotSprays) {
+				loc_cumshotSprays = *cumshotSprays;
+				LUA_EVENT_NORET("cumshot_every_spray", loc_cumshotSprays);
+			}
+
+			if (*cumshotStart == 0) { // If cumshot end possible and sprays end
+				if (!renderDelayStarted) {
+					DrawD3D::canRenderDelay(30); // After little delay we can again draw a HUD
+					renderDelayStarted = true;
+				}
+				if (*cumshotSprays == 0) {
+					LUA_EVENT_NORET("end_h_cumshot", hInfo);
+					cumshotStarted = false;
+				}
+			}
 		}
 	}
 

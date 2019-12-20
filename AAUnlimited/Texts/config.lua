@@ -41,6 +41,9 @@ screenshotFormat = 2
 --HAi should be activated at no prompt h done by evil npcs
 bHAiOnNoPromptH = true				
 
+--Enables the display of FPS counter, subtitles and notification overlays
+bEnableOverlays = true
+
 sFont = "MS Gothic"
 
 -- Set log level
@@ -58,11 +61,11 @@ bUsePPeX = false
 bUsePP2 = false
 
 -- MB cache memory for general data, includes data allocated by game itself
-PP2Cache = 800
+PP2Cache = 500
 
 -- MB cache memory for decompressed audio
-PP2AudioCache = 200
-PP2Buffers = 200
+PP2AudioCache = 150
+PP2Buffers = 300
 PP2Profiling = true
 
 -- The modified launcher of MKIII decensor
@@ -78,21 +81,21 @@ bListFilenames = false
 -- Enable card triggers
 bTriggers = true
 
--- Subtitles settings
-sSubtitlesFont = "Arial"
-iSubtitlesFontSize = 24
-iSubtitlesTimer = 4000
 
 mods = {
 	{ "aaface" },
 	{ "poser" },
+	{ "nobra" },
 	{ "edit" },
 	{ "hirestex" },
 	{ "unlocks" },
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "playtrans" },
-	{ "facecam" }, 
+	{ "notifications" },
+	{ "subtitles" },
+	{ "facecam" },
+	{ "climaxbutton" },
 	{ "geass"},
 	{ "jizou"},
 	{ "timewarp" },

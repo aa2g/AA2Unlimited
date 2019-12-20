@@ -32,12 +32,14 @@ struct GameStateStruct {
 	//Game state indicators
 	bool m_isClothesScreen;				//true if in clothes edit screen
 	bool m_isPcConversation;			//true if PC is in conversation mode
+	bool m_isIsOverridingDialogue;		//true from conversationstart till the first conversation tick
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
 	
 	bool m_isPeeping;					//true if the current H scene does not involve the PC
-	ExtClass::CharacterStruct* m_voyeur;//the observer of the H scene. Virtually always the PC regardless of what the game thinks about it
-	ExtClass::NpcData* m_voyeurTarget;//the NPC voyeur is peeping at. Usually the first actor in the H scene
+	ExtClass::CharacterStruct* m_voyeur; //the observer of the H scene. Virtually always the PC regardless of what the game thinks about it
+	ExtClass::NpcData* m_voyeurTarget; //the NPC voyeur is peeping at. Usually the first actor in the H scene
+	ExtClass::HInfo* h_info; //hInfo
 
 	std::wstring m_classSaveName;
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
@@ -78,6 +80,16 @@ void Shared::GameState::setIsPcConversation(bool value)
 bool Shared::GameState::getIsPcConversation()
 {
 	return loc_gameState.m_isPcConversation;
+}
+
+void Shared::GameState::setIsOverridingDialogue(bool value)
+{
+	loc_gameState.m_isIsOverridingDialogue = value;
+}
+
+bool Shared::GameState::getIsOverridingDialogue()
+{
+	return loc_gameState.m_isIsOverridingDialogue;
 }
 
 void Shared::GameState::setIsOverriding(bool value)
@@ -166,6 +178,16 @@ void Shared::GameState::setVoyeur(ExtClass::CharacterStruct* voyeur)
 ExtClass::CharacterStruct* Shared::GameState::getVoyeur()
 {
 	return loc_gameState.m_voyeur;
+}
+
+void Shared::GameState::setHInfo(ExtClass::HInfo* h_info)
+{
+	loc_gameState.h_info = h_info;
+}
+
+ExtClass::HInfo* Shared::GameState::getHInfo()
+{
+	return loc_gameState.h_info;
 }
 
 void Shared::GameState::setVoyeurTarget(ExtClass::NpcData* target)

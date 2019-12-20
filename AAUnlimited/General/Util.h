@@ -194,5 +194,8 @@ D3DMATRIX MatrixFromSRT(D3DXVECTOR3& scales,D3DXVECTOR3& rots,D3DXVECTOR3& trans
 
 std::vector<BYTE> FileToBuffer(const TCHAR* path);
 
+static int HexadecimalToDecimal(std::string hex);
+
+D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255);
 
 }

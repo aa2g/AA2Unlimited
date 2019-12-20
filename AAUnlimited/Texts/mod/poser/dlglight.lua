@@ -54,7 +54,7 @@ local ambientlighteditor = iup.hbox {
 			numdiv = 4,
 			baser, baseg, baseb,
 		},
-		iup.vbox {
+		iup.hbox {
 			iup.button { title = "Get", action = function()
 				local character = charamgr.current
 				if character.ischaracter ~= true or not character.struct.m_xxSkeleton then return end
@@ -101,7 +101,7 @@ local function lightmaterialeditor(name)
 			mat1r, mat1g, mat1b, mat1a,
 			mat2r, mat2g, mat2b, mat2a,
 		},
-		iup.vbox {
+		iup.hbox {
 			iup.button { title = "Get", action = function()
 				local light = getlight(charamgr.current, name)
 				if not light then return end

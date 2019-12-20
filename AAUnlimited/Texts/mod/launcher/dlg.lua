@@ -322,7 +322,7 @@ local function buildtabs() return
 				iup.label {
 					tip = "Invalid aliasing modes default to 8x",
 					title = "Antialiasing*:",}, gsdl("aa", iup.list { 
-					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8xQ CSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
+					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8x MSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
 					"None", "256", "512", "1024", dropdown="YES" }),
 				iup.label {title = "Mipmap level:", }, gsdl("mipmap", iup.list { "None", "Normal", "Best", dropdown="YES" }),
@@ -337,6 +337,7 @@ local function buildtabs() return
 				gsdt("outline", iup.toggle {title = "Outline shader", tip = "Same as ingame outline switch, but works in edit too" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer", tip = "Renderers have slightly different physics and z-order" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background", tip = "Sets edit screen background 16:9, just like the game" }),
+				aaut("bEnableOverlays", iup.toggle {title = "Enable overlays", tip = "Enables the display of FPS counter, subtitles and notification overlays" }),
 				aaut("bDrawFPS", iup.toggle {title = "Show FPS", tip = "FPS counter in top left corner" }),
 				aaut("bFullscreen", iup.toggle {title = "Fullscreen", tip = "Will switch desktop resolution to the one you configure" }),
 				gsdt("rim", iup.toggle {title = "Rim lighting (slow)", tip ="Show shadows around rim edges" }),
@@ -413,7 +414,6 @@ local function buildtabs() return
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
-				aaut("bDisplaySubs", iup.toggle {title = "Show subtitles", tip = "Shows game subtitles (needs subtitles script"}),
 			}
 		},
 	}, iup.fill{}, launch() },

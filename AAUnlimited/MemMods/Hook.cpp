@@ -222,6 +222,7 @@ DWORD PatchIAT(void *piat, void *newp)
 #include "MemMods/AAPlay/Events/NpcActions.h"
 #include "MemMods/AAPlay/Events/ScreenCapture.h"
 #include "MemMods/AAPlay/Events/UiEvent.h"
+#include "MemMods/AAPlay/Events/CharacterRender.h"
 
 
 #include "MemMods/AAEdit/TanSlotUnlimited.h"
@@ -313,6 +314,7 @@ void InitializeHooks() {
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();
+		CharacterRender::InitInjection();
 	}
 	else if (General::IsAAEdit) {
 		if (g_Config.getb("bUseAdditionalTanSlots")) {

@@ -88,11 +88,14 @@ namespace Shared {
 			void SetCardIntelligenceValue(std::vector<Value>& params);
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
+			void SetCardFightingStyle(std::vector<Value>& params);
 			void SetCharacterLocked(std::vector<Value>& params);
 			void SetActionAboutRoom(std::vector<Value>& params);
 			void SetMasturbating(std::vector<Value>& params);
 			void SetCardStrengthValue(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
+			void SetStamina(std::vector<Value>& params);
+			void SetPeriodTimer(std::vector<Value>& params);
 			void SetCardSociability(std::vector<Value>& params);
 			void SetCardLoversItem(std::vector<Value>& params);
 			void SetCardFriendItem(std::vector<Value>& params);
@@ -142,6 +145,7 @@ namespace Shared {
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
+			void SwitchActiveInH(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
@@ -150,6 +154,7 @@ namespace Shared {
 			void Set_H_AI_LOCK(std::vector<Value>& params);
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
+			void Notification(std::vector<Value>& params);
 
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
@@ -170,6 +175,8 @@ namespace Shared {
 			Value GetTriggeringCard(std::vector<Value>& params);	//int ()
 			Value GetDominantInH(std::vector<Value>&);
 			Value GetSubmissiveInH(std::vector<Value>&);
+			Value GetActiveInH(std::vector<Value>&);
+			Value GetPassiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
 			Value GetPC(std::vector<Value>&); //int()
@@ -210,6 +217,8 @@ namespace Shared {
 			Value GetCardIntelligenceValue(std::vector<Value>& params); //int(int)
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
+			Value GetCardFightingStyle(std::vector<Value>& params); //int(int)
+			//int(int)
 			Value GetCardLocked(std::vector<Value>& params);
 			Value GetActionAboutRoom(std::vector<Value>& params);
 			Value GetMasturbating(std::vector<Value>& params);
@@ -250,6 +259,8 @@ namespace Shared {
 			Value GetCardFirstHPartner(std::vector<Value>& params); //string(int)
 			Value GetCardFirstAnalPartner(std::vector<Value>& params); //string(int)
 			Value GetCardRejectCount(std::vector<Value>& params); //int(int)
+			Value GetStamina(std::vector<Value>& params);
+			Value GetPeriodTimer(std::vector<Value>& params);
 			Value GetCardWinCount(std::vector<Value>& params); //int(int)
 			Value GetCardVictoryCount(std::vector<Value>& params); //int(int)
 			Value GetCardSkipCount(std::vector<Value>& params); //int(int)

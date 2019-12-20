@@ -75,6 +75,7 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	CharacterStruct *loadCharacter = (CharacterStruct*)_this;
 	Poser::LoadCharacter(loadCharacter);
 
+	DrawD3D::canRenderDelay(200); // Waiting 200 frames to prevent drawing HUD elements on naked skin
 	LUA_EVENT_NORET("char_spawn", loadCharacter, cloth, a3, a4, partial);
 	// Extra Hairs low poly infection fix
 	// Maker loads hair twice. Once after character is loaded. Fix can be safely ignored in Maker
@@ -219,10 +220,24 @@ DWORD  __declspec(noinline) __stdcall CallOrigLoadXA(DWORD who, void *_this, wch
 }
 
 
+BYTE g_invisibraOverride[256] = { 0 };
+BYTE loc_invisibraOverride;
+CharacterStruct *loc_character;
+
+void setInvisibra() {
+	loc_invisibraOverride =
+		g_boobGravityOverride != 2 ? g_boobGravityOverride :
+		loc_character->m_clothState && ((1 << (loc_character->m_clothState-1)) & g_invisibraOverride[loc_character->m_currClothSlot]) ? 0 : 2;
+}
+
 void __declspec(naked) QueryBoobGravity() {
 	__asm {
-		mov     ebx, [esi+0F84h]
-		mov cl, g_boobGravityOverride
+		pushad
+		mov loc_character, esi
+		call setInvisibra
+		popad
+		mov ebx, [esi+0F84h]
+		mov cl, loc_invisibraOverride
 		test cl, 2
 		jnz no_override
 		mov al, cl
@@ -346,7 +361,6 @@ void HiPolyLoadsInjection() {
 	{ 0x75, 0x06, 0x80, 0x7D, 0x10, 0x00 },							//expected values
 	{ 0x90, 0xe8, HookControl::RELATIVE_DWORD, (DWORD)&QueryEye },	//redirect to our function
 		NULL);
-
 }
 
 void __stdcall SaveLoadEvent() {

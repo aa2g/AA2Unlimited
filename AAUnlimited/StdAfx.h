@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <Windowsx.h>
 #include <d3d9.h>
+#include <gdiplus.h>
 
 #include <limits>
 #include <stdint.h>
@@ -78,6 +79,7 @@
 #include "Functions/AAEdit/Globals.h"
 #include "Functions/AAEdit/UnlimitedDialog.h"
 #include "Functions/AAEdit/UnlimitedDialogParts/Triggers.h"
+#include "Functions/AAPlay/Controls.h"
 #include "Functions/AAPlay/Facecam.h"
 #include "Functions/AAPlay/GameState.h"
 #include "Functions/AAPlay/Globals.h"
@@ -106,9 +108,11 @@
 #include "Functions/Shared/Triggers/Thread.h"
 #include "Functions/Shared/Triggers/Triggers.h"
 #include "Functions/Shared/Triggers/Value.h"
+#include "Functions/Notifications.h"
 #include "Functions/TextureImage.h"
 #include "Functions/XXObjectFile.h"
 #include "General/Buffer.h"
+#include "General/DrawD3D.h"
 #include "General/DirectXStructs.h"
 #include "General/IllusionUtil.h"
 #include "General/ModuleInfo.h"
@@ -140,3 +144,5 @@
 
 #include "resource.h"
 
+
+#pragma comment (lib, "Gdiplus.lib")

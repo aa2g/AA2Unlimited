@@ -36,7 +36,7 @@ static bool is_pp_path(const wchar_t *path) {
     return !wcscmp(path + pplen - 4, L"*.pp");
 }
 
-static set<wstring> list;
+static set<wstring> file_list;
 
 set<wstring> *PPeX::FList(const wchar_t *path) {
 	if (!is_connected)
@@ -44,7 +44,7 @@ set<wstring> *PPeX::FList(const wchar_t *path) {
 	if (!is_pp_path(path))
 		return NULL;
 
-	list.clear();
+	file_list.clear();
 
 	PutString(L"matchfiles");
 	PutString(path);
@@ -52,11 +52,11 @@ set<wstring> *PPeX::FList(const wchar_t *path) {
 		auto str = GetString();
 		if (str == L"")
 		    break;
-		list.insert(str);
+		file_list.insert(str);
 	}
-	if (list.empty())
+	if (file_list.empty())
 		return NULL;
-	return &list;
+	return &file_list;
 }
 
 size_t PPeX::Read(char *buf, DWORD len) {

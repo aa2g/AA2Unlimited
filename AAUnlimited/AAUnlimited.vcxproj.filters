@@ -130,6 +130,10 @@
     <ClCompile Include="External\ExternalClasses\Camera.cpp" />
     <ClCompile Include="External\ExternalClasses\Light.cpp" />
     <ClCompile Include="Functions\AAPlay\Subs.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\CharacterRender.cpp" />
+    <ClCompile Include="General\DrawD3D.cpp" />
+    <ClCompile Include="Functions\Notifications.cpp" />
+    <ClCompile Include="Functions\AAPlay\Controls.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -251,6 +255,10 @@
     <ClInclude Include="External\ExternalClasses\NpcData.h" />
     <ClInclude Include="External\ExternalClasses\ActionParamStruct.h" />
     <ClInclude Include="Functions\AAPlay\Subs.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\CharacterRender.h" />
+    <ClInclude Include="General\DrawD3D.h" />
+    <ClInclude Include="Functions\Notifications.h" />
+    <ClInclude Include="Functions\AAPlay\Controls.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

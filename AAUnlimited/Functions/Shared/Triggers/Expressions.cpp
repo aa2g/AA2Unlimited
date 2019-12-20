@@ -29,6 +29,28 @@ namespace Shared {
 		}
 
 		Value Thread::GetDominantInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case H_START:
+				return ((HStartData*)eventData)->dominantParticipant;
+			case HPOSITION_CHANGE:
+				return ((HPositionData*)eventData)->dominantParticipant;
+			default:
+				return -1;
+			}
+		}
+
+		Value Thread::GetSubmissiveInH(std::vector<Value>&) {
+			switch (this->eventData->GetId()) {
+			case H_START:
+				return ((HStartData*)eventData)->submissiveParticipant;
+			case HPOSITION_CHANGE:
+				return ((HPositionData*)eventData)->submissiveParticipant;
+			default:
+				return -1;
+			}
+		}
+
+		Value Thread::GetActiveInH(std::vector<Value>&) {
 			const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 			DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
 			if (actor0) {
@@ -37,7 +59,7 @@ namespace Shared {
 			else return -1;
 		}
 
-		Value Thread::GetSubmissiveInH(std::vector<Value>&) {
+		Value Thread::GetPassiveInH(std::vector<Value>&) {
 			const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
 			DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
 			if (actor1) {
@@ -55,6 +77,7 @@ namespace Shared {
 				return -1;
 			}
 		}
+
 
 		//int ()
 		Value Thread::GetThisCard(std::vector<Value>& params) {
@@ -674,6 +697,16 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value(cardInst->m_char->m_charData->m_character.strength);
+		}
+
+		//int(int)
+		Value Thread::GetCardFightingStyle(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_charData->m_character.fightingStyle);
 		}
 
 		Value Thread::GetCardLocked(std::vector<Value>& params) {
@@ -1356,6 +1389,29 @@ namespace Shared {
 				return Value((int)instance->m_char->m_characterStatus->m_rejectCount);
 			}
 		}
+
+
+		//int(int)
+		Value Thread::GetStamina(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(0);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(0);
+			}
+			else {
+				return Value((int)instance->m_char->m_stamina);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetPeriodTimer(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x2c, 0x2C};
+			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
+			return (*(int*)timer / 1000);
+		}
+
+
 
 		//int(int)
 		Value Thread::GetCardWinCount(std::vector<Value>& params) {
@@ -2924,15 +2980,15 @@ namespace Shared {
 				},
 				{
 					107, EXPRCAT_EVENT,
-					TEXT("Dominant actor"), TEXT("Dominant"), TEXT("Get the dominant actor in h."),
+					TEXT("Active actor"), TEXT("Active"), TEXT("Get the active actor in h."),
 					{}, (TYPE_INT),
-					&Thread::GetDominantInH
+					&Thread::GetActiveInH
 				},
 				{
 					108, EXPRCAT_EVENT,
-					TEXT("Submissive actor"), TEXT("Submissive"), TEXT("Get the submissive actor in h."),
+					TEXT("Passive actor"), TEXT("Passive"), TEXT("Get the passive actor in h."),
 					{}, (TYPE_INT),
-					&Thread::GetSubmissiveInH
+					&Thread::GetPassiveInH
 				},
 				{
 					109, EXPRCAT_CONVERSATION,
@@ -2977,6 +3033,37 @@ namespace Shared {
 					TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom"), TEXT("Returns the ID of the room that the character is talking about."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetActionAboutRoom
+				},
+				{
+					116, EXPRCAT_CHARPROP,
+					TEXT("Fighting Stance"), TEXT("%p ::FightStance"), TEXT("The fighting stance of this character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardFightingStyle
+				},
+				{
+					117, EXPRCAT_EVENT,
+					TEXT("Dominant actor"), TEXT("Dominant"), TEXT("Get the dominant actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetDominantInH
+				},
+				{
+					118, EXPRCAT_EVENT,
+					TEXT("Submissive actor"), TEXT("Submissive"), TEXT("Get the submissive actor in h."),
+					{}, (TYPE_INT),
+					&Thread::GetSubmissiveInH
+				},
+				{
+					119, EXPRCAT_EVENT,
+					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetStamina
+				},
+				{
+					120, EXPRCAT_EVENT,
+					TEXT("Get Period Timer"), TEXT("PeriodTimer"),
+					TEXT("Returns the number of seconds that have passed in the current period."),
+					{}, (TYPE_INT),
+					&Thread::GetPeriodTimer
 				},
 			},
 

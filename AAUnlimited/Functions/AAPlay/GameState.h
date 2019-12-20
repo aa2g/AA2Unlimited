@@ -14,11 +14,15 @@ namespace Shared {
 		void setIsPcConversation(bool value);
 		bool getIsPcConversation();
 
+		void setIsOverridingDialogue(bool value);
+		bool getIsOverridingDialogue();
+
 		void setIsOverriding(bool value);
 		bool getIsOverriding();
-		bool getIsInMainMenu();
-		void setIsInMainMenu(bool value);
 		void updateIsOverriding();
+
+		void setIsInMainMenu(bool value);
+		bool getIsInMainMenu();
 
 		void setIsHighPolyLoaded(bool value);
 		bool getIsHighPolyLoaded();
@@ -37,6 +41,9 @@ namespace Shared {
 
 		void setVoyeur(ExtClass::CharacterStruct * voyeur);
 		ExtClass::CharacterStruct * getVoyeur();
+
+		void setHInfo(ExtClass::HInfo * h_info);
+		ExtClass::HInfo * getHInfo();
 
 		void setVoyeurTarget(ExtClass::NpcData * target);
 		ExtClass::NpcData * getVoyeurTarget();

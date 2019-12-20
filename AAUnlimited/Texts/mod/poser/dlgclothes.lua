@@ -9,6 +9,7 @@ local function unhidemeshes(frame)
 	for i = 0, count - 1, 1 do
 		unhidemeshes(frame:m_children(i))
 	end
+	--frame.m_renderFlag = 0
 	frame.m_meshFlagHide = 0
 end
 

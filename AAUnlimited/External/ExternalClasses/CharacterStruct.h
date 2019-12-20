@@ -116,7 +116,8 @@ extern BYTE g_anim_data[25][6];
 		BYTE m_unknown7[0xD78];
 		BYTE m_lovers[0x19];	//array of lovers, by seat	//F20
 		BYTE m_daysLovers[0x19];
-		BYTE m_unknown7_1[0x6];
+		BYTE m_unknown7_1[0x2];
+		DWORD m_stamina;
 		NpcData* m_npcData;
 		void* m_somedata; //F5C
 		void* m_moreUnknownData;

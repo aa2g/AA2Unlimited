@@ -100,6 +100,7 @@ signals.connect(propbonefilter, "setfilter", propbonelist, "setfilter")
 local function showframe(frame, show)
 	show = show and 0 or 2
 	frame.m_renderFlag = show
+	frame.m_meshFlagHide = show
 end
 
 local bonelistzbox = iup.zbox {
@@ -192,14 +193,12 @@ signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
 posemgr.poseloaded.connect(function(character) if character == charamgr.current then _M.restorecharui() end end)
 
 local function updatecharacterlist()
-	log.spam("Updating character list: %d", #charamgr.characters)
 	local cur
 	local list = {}
 	for i,v in ipairs(charamgr.characters) do
 		if v == charamgr.current then
 			cur = i
 		end
-		log.spam("Insert character %s %s", v, v.name)
 		table.insert(list, '#%d: %s' % {v.struct.m_seat, v.name})
 	end
 	characterlist.setlist(list)
@@ -688,6 +687,13 @@ local dlgclothes = require "poser.dlgclothes"
 local dlglight = require "poser.dlglight"
 
 -- -----------
+-- UI Emoji
+-- -----------
+
+local dlgemoji = require "poser.dlgemoji"
+
+
+-- -----------
 -- UI Layout
 -- -----------
 
@@ -833,6 +839,10 @@ local dialogsliders = iup.dialog {
 			iup.hbox {
 				tabtitle = "Light",
 				dlglight,
+			},
+			iup.hbox {
+				tabtitle = "Emotes",
+				dlgemoji,
 			},
 		},
 		--gap = 3,

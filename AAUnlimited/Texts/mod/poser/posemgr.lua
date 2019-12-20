@@ -24,17 +24,19 @@ local posesdir = aau_path("poser\\poses")
 local scenesdir = aau_path("poser\\scenes")
 
 local lock_camera = false
+local lock_light = true
 local lock_face = false
 local lock_props = false
 local lock_world = false
 local lock_world_bone = "a01_N_Zentai_010"
 
 local lockfacetoggle2
-lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
-lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
+local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
+local lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle2.value = (state == 1 and "ON") or "OFF" end }
 lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state) lock_face = state == 1; lockfacetoggle1.value = (state == 1 and "ON") or "OFF" end }
-lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
-lockcameratoggle = iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
+local lockpropstoggle = iup.toggle { title = "Lock Props", action = function(self, state) lock_props = state == 1 end }
+local lockcameratoggle= iup.toggle { title = "Lock Camera", action = function(self, state) lock_camera = state == 1 end }
+local locklighttoggle = iup.toggle { title = "Lock Light", action = function(self, state) lock_light = state == 1 end, value = "ON" }
 
 local function setclip(clip)
 	if charamgr.current then
@@ -318,23 +320,24 @@ local function loadscene(filename)
 					end
 					if not find then
 						table.insert(not_found, readprop.name)
-					end
-					find = table.remove(loadedprops, find)
-					if find then
-						for k,v in pairs(readprop.sliders) do
-							local slider = find:getslider(k)
-							if slider then
-								slider:rotation(0,v[1])
-								slider:rotation(1,v[2])
-								slider:rotation(2,v[3])
-								slider:rotation(3,v[4])
-								slider:translate(0,v[5])
-								slider:translate(1,v[6])
-								slider:translate(2,v[7])
-								slider:scale(0,v[8])
-								slider:scale(1,v[9])
-								slider:scale(2,v[10])
-								slider:Apply()
+					else
+						find = table.remove(loadedprops, find)
+						if find then
+							for k,v in pairs(readprop.sliders) do
+								local slider = find:getslider(k)
+								if slider then
+									slider:rotation(0,v[1])
+									slider:rotation(1,v[2])
+									slider:rotation(2,v[3])
+									slider:rotation(3,v[4])
+									slider:translate(0,v[5])
+									slider:translate(1,v[6])
+									slider:translate(2,v[7])
+									slider:scale(0,v[8])
+									slider:scale(1,v[9])
+									slider:scale(2,v[10])
+									slider:Apply()
+								end
 							end
 						end
 					end
@@ -347,6 +350,18 @@ local function loadscene(filename)
 			if not lock_camera then
 				for k,v in pairs(scene.camera or {}) do
 					camera[k] = v
+				end
+			end
+
+			if not lock_light and scene.light then
+				local direction = scene.light.direction
+				for _,character in pairs(charamgr.characters) do
+					local skeleton = character.struct.m_xxSkeleton
+					local lightcount = skeleton.m_lightsCount
+					for i = 1, lightcount, 1 do
+						local light = skeleton:m_lightsArray(i - 1)
+						light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+					end
 				end
 			end
 		end
@@ -369,6 +384,7 @@ local function savescene(filename)
 
 	local characters = {}
 	local props = {}
+	local light
 
 	local scene = {
 		VERSION = 1,
@@ -381,6 +397,13 @@ local function savescene(filename)
 			pose = pose2table(chara)
 		}
 		table.insert(characters, character)
+		if not light then
+			light = {}
+			local struct = chara.struct.m_xxSkeleton:m_lightsArray(0)
+			local x,y,z,w = struct:GetLightDirection()
+			light.direction = { x, y, z, w }
+			scene.light = light
+		end
 	end
 	
 	for _,prop in ipairs(propmgr.props) do
@@ -462,7 +485,6 @@ end
 
 charamgr.on_character_updated.connect(function(chr)
 	if chr ~= charamgr.current then
-		log.spam("updating non-current character")
 		return
 	end
 	local p = chr.struct.m_xxSkeleton.m_poseNumber
@@ -522,6 +544,7 @@ _M.dialogposes = iup.dialog {
 					lockfacetoggle2,
 					lockpropstoggle,
 					lockcameratoggle,
+					locklighttoggle,
 					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
@@ -529,6 +552,9 @@ _M.dialogposes = iup.dialog {
 				tabtitle = "Scenes",
 				gap = 3,
 			},
+			tabchangepos_cb = function(self, newpos, oldpos)
+				lock_world = newpos == 0 and lockworldtoggle.value == "ON"
+			end,
 		},
 		iup.hbox {
 			iup.button { title = "Show UI", action = function() SetHideUI(false) end },

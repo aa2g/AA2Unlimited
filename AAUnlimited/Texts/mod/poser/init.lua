@@ -18,9 +18,52 @@ local opts = {
 	{"autofocus", 1, "Window auto-focus: %b"},
 	{"prunecharacters", 1, "Auto-prune extra characters on scene end: %b"},
 	{"pruneprops", 1, "Auto-prune props on scene end: %b"},
-	{"hairfix", 0, "Spawned hair physics (BREAKS HEADS SIZES!): %b"}
+	{"editpreviewclothed", 1, "Show characters clothed in editor preview: %b"},
+	{"clotheseditkeeppose", 0, "Keep current pose in clothes editor: %b"},
 }
 
+local edit_tweaks = {
+	editpreviewclothed = {
+		[0x1A483] = "\x6A\x01", -- spawn in clothes state 1
+		[0x1A493] = "\x6A\x02", -- don't show dick
+	},
+}
+local play_tweaks = {
+	clotheseditkeeppose = {
+		[0xA7717] = "\xFF", -- underwear icon - if clothed state equals FF(invalid) do pose change
+		[0xAB7D0] = "\xC3", -- most clicks - immediate return from pose change function
+		[0xAA45B] = "\xEB\x9D", -- texture scroll wheel - immediate return
+	},
+}
+
+local orig_bytes = {}
+local function set_tweaks(list)
+	for opt, tweaks in pairs(list) do
+		if opts[opt] == 1 then
+			for offset, val in pairs(tweaks) do
+				if not orig_bytes[offset] then
+					orig_bytes[offset] = g_peek(offset, string.len(val))
+					g_poke(offset, val)
+				end
+			end
+		else
+			for offset, _ in pairs(tweaks) do
+				if orig_bytes[offset] then
+					g_poke(offset, orig_bytes[offset])
+					orig_bytes[offset] = nil
+				end
+			end
+		end
+	end
+end
+
+local function update_tweaks()
+	if exe_type == "edit" then
+		set_tweaks(edit_tweaks)
+	elseif exe_type == "play" then
+		set_tweaks(play_tweaks)
+	end
+end
 
 local function detect_fs(hwnd)
 	dlg.parentHWND = hwnd
@@ -93,9 +136,7 @@ function _M:load()
 		dlg.fullscreen = detect_fs(GetGameHwnd())
 	end
 	propmgr:init()
-	if exe_type == "play" and opts.hairfix == 1 then
-		g_poke(0x115BE3, "\xeb\x06")
-	end
+	update_tweaks()
 end
 
 function on.open_card2()
@@ -112,6 +153,7 @@ end
 
 function _M:config()
 	mod_edit_config(self, opts, "Poser settings")
+	update_tweaks()
 end
 
 function on.pose_load(charidx, posename)
