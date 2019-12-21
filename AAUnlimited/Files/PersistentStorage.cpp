@@ -159,7 +159,7 @@ PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getClassBool(st
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
 	if (result.isValid)
-		result.value = i->second.get<double>();
+		result.value = i->second.evaluate_as_boolean();
 	return result;
 }
 PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getClassString(std::wstring key)
@@ -168,7 +168,7 @@ PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getClass
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
 	if (result.isValid)
-		result.value = i->second.get<double>();
+		result.value = i->second.get<std::string>();
 	return result;
 }
 

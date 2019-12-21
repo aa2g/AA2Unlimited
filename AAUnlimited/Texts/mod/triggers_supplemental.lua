@@ -51,11 +51,19 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 	
 	if (victim ~= 25 and murderer ~= 25) then
 		local case = getCardStorageKey(victim.m_char.m_seat) .. "\'s murder case";
-		setClassStorage("Latest murder case", case);
-		storage.victim = getCardStorageKey(victim.m_char.m_seat);
-		storage.murderer = getCardStorageKey(murderer.m_char.m_seat);
+		local latestMurderCase = getClassStorage("Latest murder case");
+		if (latestMurderCase ~= case) then
+			setClassStorage("Latest murder case", case);
+			setClassStorage("Latest murdered seat", victim.m_char.m_seat);
+		else
+			setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer wac caught or victim survived
+		end
+		storage["victim"] = getCardStorageKey(victim.m_char.m_seat);
+		storage["murderer"] = getCardStorageKey(murderer.m_char.m_seat);
 		setClassStorage(case, storage);
-	end	
+	else
+		setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer was caught or victim survived		
+	end
 end
 
 function detectiveTakeClassSnapshot(case)
@@ -287,11 +295,25 @@ function detectiveCompileTriviaReport(testifier, case)
 	return triviaReport;
 end
 
-function printReport(case, detective, testifier, reportKey)
+function detectiveCompileReport(case, testifier, reportKey)
+	local report = {};
+	if (reportKey == getCardStorageKey(testifier) .. "'s alibi report") then
+		report = detectiveCompileAlibiReport(testifier, case);
+	end
+	if (reportKey == getCardStorageKey(testifier) .. "'s intrigue report") then
+		report = detectiveCompileIntrigueReport(testifier, case);
+	end
+	if (reportKey == getCardStorageKey(testifier) .. "'s trivia report") then
+		report = detectiveCompileTriviaReport(testifier, case);
+	end
+	return report;
+end
+
+function detectiveGatherReport(case, detective, testifier, reportKey)
 	local math = require "math";
 	local detectiveStorageKey = case .. " : " .. reportKey;
 	local detectiveReport = getCardStorage(detective, detectiveStorageKey);
-	local testifierReport = getClassStorage(case)[reportKey];
+	local testifierReport = detectiveCompileReport(case, testifier, reportKey);
 	local detectiveInst = GetCharInstData(detective);
 	local testifierInst = GetCharInstData(testifier);
 	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 900.0;
@@ -307,13 +329,33 @@ function printReport(case, detective, testifier, reportKey)
 	end
 	detectiveReport = {};
 	local i = 0;
-	log.info(reportKey .. ": ");
 	for k,v in ipairs(result) do
 		i = i + 1;
 		detectiveReport[i] = k;
-		log.info(k);
 	end
 	setCardStorage(detective, detectiveStorageKey, detectiveReport);
+end
+
+function on.gatherAlibiReport(case, detective, testifier)
+	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s alibi report");
+end
+
+function on.gatherIntrigueReport(case, detective, testifier)
+	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s intrigue report");
+end
+
+function on.gatherTriviaReport(case, detective, testifier)
+	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
+end
+
+function printReport(case, detective, testifier, reportKey)
+	local detectiveStorageKey = case .. ":" .. reportKey;
+	local report = getCardStorage(detective, detectiveStorageKey);
+	local strReport = "";
+	for line in pairs(report) do
+		strReport = strReport .. "\n" .. line;
+	end
+	log.info(reportKey .. ":" .. strReport);
 end
 
 function on.printAlibiReport(case, detective, testifier)

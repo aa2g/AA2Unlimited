@@ -3621,7 +3621,7 @@ namespace Shared {
 					TEXT("Get Class Storage String"), TEXT("GetStr(key: %p , default: %p )"),
 					TEXT("Gets the string from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
-					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::GetClassStorageString
 				},
 			}
