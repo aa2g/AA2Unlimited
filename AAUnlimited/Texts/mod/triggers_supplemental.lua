@@ -72,6 +72,11 @@ function detectiveTakeClassSnapshot(case)
 	for i=0,24 do
 		local character = GetCharInstData(i);
 		if (character ~= nil) then
+			local storageLovers = {};
+			local storageLOVE = {};
+			local storageLIKE = {};
+			local storageDISLIKE = {};
+			local storateHATE = {};
 			local charKey = getCardStorageKey(character.m_char.m_seat);
 			snapshotStorage.classMembers["" .. i] = charKey;
 
@@ -90,19 +95,27 @@ function detectiveTakeClassSnapshot(case)
 				if j == i then goto jloopcontinue end
 				local towards = GetCharInstData(j);
 				if (towards ~= nil) then
+
 					local towardsKey = getCardStorageKey(j);
 					if (towards.m_char.m_npcData == character.m_char.m_npcData.m_target) then
 						snapshotStorage[charKey .. "\'s target"] = towardsKey;
 					end
-					snapshotStorage[charKey .. " is lovers with " .. towardsKey] = character.m_char:m_lovers(j);
+					if (character.m_char:m_lovers(j) == 1) then
+						storageLovers[towardsKey] = true;
+					end
 					-- LLDH
-					snapshotStorage[charKey .. "\'s LOVE towards " .. towardsKey] = character:GetLoveTowards(towards);
-					snapshotStorage[charKey .. "\'s LIKE towards " .. towardsKey] = character:GetLikeTowards(towards);
-					snapshotStorage[charKey .. "\'s DISLIKE towards " .. towardsKey] = character:GetDislikeTowards(towards);
-					snapshotStorage[charKey .. "\'s HATE towards " .. towardsKey] = character:GetHateTowards(towards);
+					storageLOVE[towardsKey] = ter:GetLoveTowards(towards);
+					storageLIKE[towardsKey] = ter:GetLikeTowards(towards);
+					storageDISLIKE[towardsKey] = ter:GetDislikeTowards(towards);
+					storateHATE[towardsKey] = ter:GetHateTowards(towards);
 				end
 				::jloopcontinue::
 			end
+			snapshotStorage[charKey .. "\'s lovers"] = storageLovers;
+			snapshotStorage[charKey .. "\'s LOVE"] = storageLOVE;
+			snapshotStorage[charKey .. "\'s LIKE"] = storageLIKE;
+			snapshotStorage[charKey .. "\'s DISLIKE"] = storageDISLIKE;
+			snapshotStorage[charKey .. "\'s HATE"] = storateHATE;
 		end
 	end
 
@@ -200,17 +213,24 @@ function detectiveCompileIntrigueReport(testifier, case)
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
 		if (X ~= nil and X ~= myKey) then
-			local LoveLike = storage[X .. "\'s LOVE towards " .. myKey] + storage[X .. "\'s LIKE towards " .. myKey];
-			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. myKey] + storage[X .. "\'s HATE towards " .. myKey];
+			local storageLOVE = storage[X .. "\'s LOVE"];
+			local storageLIKE = storage[X .. "\'s LIKE"];
+			local storageDISLIKE = storage[X .. "\'s DISLIKE"];
+			local storateHATE = storage[X .. "\'s HATE"];
+
+			local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
+			local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
+
 			if (LoveLike > DislikeHate) then
 				for j=0,24 do
 					local Y = storage.classMembers["" .. j];
 					if (Y ~= nil and i ~= j and Y ~= myKey) then	--	don't talk about myself
 						-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
-						local LOVE_X_Y = storage[X .. "\'s LOVE towards " .. Y];
-						local LIKE_X_Y = storage[X .. "\'s LIKE towards " .. Y];
-						local DISLIKE_X_Y = storage[X .. "\'s DISLIKE towards " .. Y];
-						local HATE_X_Y = storage[X .. "\'s HATE towards " .. Y];
+						local LOVE_X_Y = storageLOVE[Y];
+						local LIKE_X_Y = storageLIKE[Y];
+						local DISLIKE_X_Y = storageDISLIKE[Y];
+						local HATE_X_Y = storateHATE[Y];
+
 						local MAX_X_Y = math.max(LOVE_X_Y, math.max(LIKE_X_Y, math.max(DISLIKE_X_Y, math.max(HATE_X_Y))));
 						if (MAX_X_Y == LIKE_X_Y and MAX_X_Y >= 30) then
 							line = line + 1;
@@ -230,10 +250,11 @@ function detectiveCompileIntrigueReport(testifier, case)
 						end
 
 						-- Apparently, <student X> felt <LOVED/LIKED/DISLIKED/HATED> by <student Y>						
-						local LOVE_Y_X = storage[Y .. "\'s LOVE towards " .. X];
-						local LIKE_Y_X = storage[Y .. "\'s LIKE towards " .. X];
-						local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE towards " .. X];
-						local HATE_Y_X = storage[Y .. "\'s HATE towards " .. X];
+						local LOVE_Y_X = storage[Y .. "\'s LOVE"][X];
+						local LIKE_Y_X = storage[Y .. "\'s LIKE"][X];
+						local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE"][X];
+						local HATE_Y_X = storage[Y .. "\'s HATE towards"][X];
+
 						local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
 						if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
 							line = line + 1;
@@ -274,15 +295,22 @@ function detectiveCompileTriviaReport(testifier, case)
 	for i=0,24 do
 		local X = storage.classMembers["" .. i];
 		if (X ~= nil and X ~= myKey) then
-			local LoveLike = storage[X .. "\'s LOVE towards " .. myKey] + storage[X .. "\'s LIKE towards " .. myKey];
-			local DislikeHate = storage[X .. "\'s DISLIKE towards " .. myKey] + storage[X .. "\'s HATE towards " .. myKey];
+			local storageLovers = storage[X .. "\'s lovers"];
+			local storageLOVE = storage[X .. "\'s LOVE"];
+			local storageLIKE = storage[X .. "\'s LIKE"];
+			local storageDISLIKE = storage[X .. "\'s DISLIKE"];
+			local storateHATE = storage[X .. "\'s HATE"];
+			
+			local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
+			local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
+
 			if (LoveLike > DislikeHate) then
 				for j=0,24 do
 					local Y = storage.classMembers["" .. j];
 					if (Y ~= nil and i ~= j) then	--	don't talk about myself
 						-- <student X> and <student Y> were dating
-						local loversFlag = storage[X .. " is lovers with " .. Y];
-						if (loversFlag == 1) then
+						local loversFlag = storageLovers[Y];
+						if (loversFlag == true) then
 							line = line + 1;
 							triviaReport[line] = "Looks like " .. X .. " and " .. Y .. " were dating";
 						end
