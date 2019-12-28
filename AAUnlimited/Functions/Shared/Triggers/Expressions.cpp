@@ -383,6 +383,23 @@ namespace Shared {
 			return Value(false);
 		}
 		//bool(int)
+		Value Thread::IsSkipAction(std::vector<Value>& params) {
+			int sexActions[] = {
+				ExtClass::ConversationId::SKIP_CLASS,
+				ExtClass::ConversationId::SKIP_CLASS_H,
+				ExtClass::ConversationId::SKIP_CLASS_SURPRISE_H,
+				ExtClass::ConversationId::GO_HOME_TOGETHER,
+				ExtClass::ConversationId::GO_KARAOKE_TOGETHER,
+				ExtClass::ConversationId::GO_PLAY_TOGETHER,
+				ExtClass::ConversationId::GO_EAT_TOGETHER
+			};
+			for each (int action in sexActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
+		//bool(int)
 		Value Thread::IsNoPromptAction(std::vector<Value>& params) {
 			int noPromptActions[] = {
 				ExtClass::ConversationId::EXPLOITABLE_LINE, ExtClass::ConversationId::FORCE_BREAKUP, ExtClass::ConversationId::GOOD_BYE_KISS, ExtClass::ConversationId::GOOD_MORNING_KISS, ExtClass::ConversationId::I_SAW_SOMEONE_HAVE_H, ExtClass::ConversationId::I_WILL_CHEAT, ExtClass::ConversationId::MURDER, ExtClass::ConversationId::MURDER_NOTICE, ExtClass::ConversationId::NEVERMIND, ExtClass::ConversationId::NO_PROMPT_H, ExtClass::ConversationId::NO_PROMPT_KISS, ExtClass::ConversationId::REVEAL_PREGNANCY, ExtClass::ConversationId::SHAMELESS, ExtClass::ConversationId::SLAP, ExtClass::ConversationId::SOMEONE_GOT_CONFESSED_TO, ExtClass::ConversationId::SOMEONE_LIKES_YOU, ExtClass::ConversationId::STOP_FOLLOWING, ExtClass::ConversationId::TOGETHER_FOREVER
@@ -2314,7 +2331,7 @@ namespace Shared {
 		//str(procName)
 		Value Thread::AddLuaProcParam(std::vector<Value>& params) {
 			auto delimiter = L"\n";
-			return Value(delimiter + *params[0].strVal);
+			return Value(*params[0].strVal + delimiter + *params[1].strVal);
 		}
 
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
@@ -3399,6 +3416,12 @@ namespace Shared {
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
 					&Thread::GetClassStorageBool
+				},
+				{
+					47, EXPRCAT_GENERAL,
+					TEXT("Check Skip Action"), TEXT("%p ::isSkip"), TEXT("Returns true if SKIP_CLASS, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, GO_HOME_TOGETHER, GO_KARAOKE_TOGETHER, GO_PLAY_TOGETHER, GO_EAT_TOGETHER"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsSkipAction
 				},
 			},
 			{ //FLOAT

@@ -67,7 +67,7 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 end
 
 function detectiveTakeClassSnapshot(case)
-	local snapshotStorage = {};
+	local snapshotStorage = getClassStorage(case);
 	snapshotStorage.classMembers = {};	--	list of class members at the time of murder
 	for i=0,24 do
 		local character = GetCharInstData(i);
@@ -104,10 +104,10 @@ function detectiveTakeClassSnapshot(case)
 						storageLovers[towardsKey] = true;
 					end
 					-- LLDH
-					storageLOVE[towardsKey] = ter:GetLoveTowards(towards);
-					storageLIKE[towardsKey] = ter:GetLikeTowards(towards);
-					storageDISLIKE[towardsKey] = ter:GetDislikeTowards(towards);
-					storateHATE[towardsKey] = ter:GetHateTowards(towards);
+					storageLOVE[towardsKey] = character:GetLoveTowards(towards);
+					storageLIKE[towardsKey] = character:GetLikeTowards(towards);
+					storageDISLIKE[towardsKey] = character:GetDislikeTowards(towards);
+					storateHATE[towardsKey] = character:GetHateTowards(towards);
 				end
 				::jloopcontinue::
 			end
@@ -135,7 +135,7 @@ function detectivePrintAllReports(case)
 end
 
 function detectiveCompileAlibiReport(testifier, case)
-	local storage = getClassStorage(case);
+	local storage = getClassStorage(case) or {};
 	local victim= case.victim;
 	local murderer= case.murderer;
 
@@ -146,10 +146,10 @@ function detectiveCompileAlibiReport(testifier, case)
 	local myKey = getCardStorageKey(testifier);
 	
 	-- I was in <room>
-	local alibiMyself = "I was in " .. getRoomName(storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"]) .. " at the time\n";
+	local alibiMyself = "I was in " .. getRoomName(storage[myKey .. "\'s current room"]) .. " at the time\n";
 	if (myKey == murderer) then
 		-- lie about my involvement
-		alibiMyself = "I was in " .. getRoomName(getRandomRoom(storage[getCardStorageKey(myselfInst.m_char.m_seat) .. "\'s current room"])) .. " at the time\n";
+		alibiMyself = "I was in " .. getRoomName(getRandomRoom(storage[myKey .. "\'s current room"])) .. " at the time\n";
 		alibiMyself = alibiMyself .. "I was trying to " .. getActionName(-1);
 	else
 		-- I was doing <action> / talking to <target> about <action>
@@ -193,14 +193,13 @@ function detectiveCompileAlibiReport(testifier, case)
 			end
 		end
 	end
-	
 	return alibiReport;
 end
 
 function detectiveCompileIntrigueReport(testifier, case)
 	local math = require "math";
 
-	local storage = getClassStorage(case);
+	local storage = getClassStorage(case) or {};
 	local victim = case.victim;
 	local murderer = case.murderer;
 
@@ -253,7 +252,7 @@ function detectiveCompileIntrigueReport(testifier, case)
 						local LOVE_Y_X = storage[Y .. "\'s LOVE"][X];
 						local LIKE_Y_X = storage[Y .. "\'s LIKE"][X];
 						local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE"][X];
-						local HATE_Y_X = storage[Y .. "\'s HATE towards"][X];
+						local HATE_Y_X = storage[Y .. "\'s HATE"][X];
 
 						local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
 						if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
@@ -282,7 +281,7 @@ function detectiveCompileIntrigueReport(testifier, case)
 end
 
 function detectiveCompileTriviaReport(testifier, case)
-	local storage = getClassStorage(case);
+	local storage = getClassStorage(case) or {};
 	local victim = case.victim;
 	local murderer = case.murderer;
 
@@ -340,62 +339,94 @@ end
 function detectiveGatherReport(case, detective, testifier, reportKey)
 	local math = require "math";
 	local detectiveStorageKey = case .. " : " .. reportKey;
-	local detectiveReport = getCardStorage(detective, detectiveStorageKey);
-	local testifierReport = detectiveCompileReport(case, testifier, reportKey);
+	local detectiveReport = getCardStorage(detective, detectiveStorageKey) or {};
+	local testifierReport = detectiveCompileReport(case, testifier, reportKey) or {};
 	local detectiveInst = GetCharInstData(detective);
 	local testifierInst = GetCharInstData(testifier);
-	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 900.0;
+	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 1800.0;
 	local result = {};
 	for k,v in ipairs(detectiveReport) do
-		result[v] = k;
+		result[v] = "whatever it doesn't fucking matter";
 	end
-	for line in pairs(testifierReport) do
+	for k,v in ipairs(testifierReport) do
 		local proc = math.random() < disposition;
 		if (proc) then
-			result[line] = 0;
+			result[v] = "whatever it doesn't fucking matter";
 		end
 	end
 	detectiveReport = {};
 	local i = 0;
-	for k,v in ipairs(result) do
+	for k,v in pairs(result) do
 		i = i + 1;
 		detectiveReport[i] = k;
 	end
+	local caseStorage = getClassStorage(case);
+	setCardStorage(detective, case .. " murderer", caseStorage.murderer);
 	setCardStorage(detective, detectiveStorageKey, detectiveReport);
 end
 
-function on.gatherAlibiReport(case, detective, testifier)
+function on.gatherAlibiReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s alibi report");
 end
 
-function on.gatherIntrigueReport(case, detective, testifier)
+function on.gatherIntrigueReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s intrigue report");
 end
 
-function on.gatherTriviaReport(case, detective, testifier)
+function on.gatherTriviaReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
 end
 
 function printReport(case, detective, testifier, reportKey)
-	local detectiveStorageKey = case .. ":" .. reportKey;
-	local report = getCardStorage(detective, detectiveStorageKey);
+	local detectiveStorageKey = case .. " : " .. reportKey;
+	local report = getCardStorage(detective, detectiveStorageKey) or {};
 	local strReport = "";
-	for line in pairs(report) do
-		strReport = strReport .. "\n" .. line;
+	for key,line in ipairs(report) do
+		strReport = strReport .. "\n" .. key .. "=>" .. line;
 	end
-	log.info(reportKey .. ":" .. strReport);
+	log.info(strReport);
 end
 
-function on.printAlibiReport(case, detective, testifier)
-	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s alibi report");
+function on.printAlibiReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
+	local reportKey = getCardStorageKey(testifier) .. "'s alibi report";
+	log.info(reportKey);
+	printReport(case, detective, testifier, reportKey);
 end
 
-function on.printIntrigueReport(case, detective, testifier)
-	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s intrigue report");
+function on.printIntrigueReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
+	local reportKey = getCardStorageKey(testifier) .. "'s intrigue report";
+	log.info(reportKey);
+	printReport(case, detective, testifier, reportKey);
 end
 
-function on.printTriviaReport(case, detective, testifier)
-	printReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
+function on.printTriviaReport(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+	local testifier = args[3];
+	local reportKey = getCardStorageKey(testifier) .. "'s trivia report";
+	log.info(reportKey);
+	printReport(case, detective, testifier, reportKey);
 end
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -619,6 +650,11 @@ function setCardStorage(card, key, value)
 	local record = get_class_key(getCardStorageKey(card));
 	record[key] = value;
 	setClassStorage(getCardStorageKey(card), record);
+end
+
+function splitArgs(input)
+	local text = require("pl.text");
+	return text.split(input, "\n");
 end
 
 --------------------------------------------------------------------------------------------------------------------------

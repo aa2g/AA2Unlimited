@@ -340,6 +340,7 @@ namespace Shared {
 			Value IsMinnaAction(std::vector<Value>& params); //bool(int)
 			Value IsForceAction(std::vector<Value>& params); //bool(int)
 			Value IsSexAction(std::vector<Value>& params); //bool(int)
+			Value IsSkipAction(std::vector<Value>& params); //bool(int)
 			Value IsNoPromptAction(std::vector<Value>& params); //bool(int)
 			Value IsGameOverAction(std::vector<Value>& params); //bool(int)
 			Value IsNoTargetAction(std::vector<Value>& params); //bool(int)
