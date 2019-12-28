@@ -58,8 +58,8 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 		else
 			setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer wac caught or victim survived
 		end
-		storage["victim"] = getCardStorageKey(victim.m_char.m_seat);
-		storage["murderer"] = getCardStorageKey(murderer.m_char.m_seat);
+		storage.victim = getCardStorageKey(victim.m_char.m_seat);
+		storage.murderer = getCardStorageKey(murderer.m_char.m_seat);
 		setClassStorage(case, storage);
 	else
 		setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer was caught or victim survived		
@@ -136,8 +136,8 @@ end
 
 function detectiveCompileAlibiReport(testifier, case)
 	local storage = getClassStorage(case) or {};
-	local victim= case.victim;
-	local murderer= case.murderer;
+	local victim = storage.victim;
+	local murderer = storage.murderer;
 
 	local line = 0;
 	local alibiReport = {};	-- where all the alibi report data is gonna be stored
@@ -200,80 +200,83 @@ function detectiveCompileIntrigueReport(testifier, case)
 	local math = require "math";
 
 	local storage = getClassStorage(case) or {};
-	local victim = case.victim;
-	local murderer = case.murderer;
+	local victim = storage.victim;
+	local murderer = storage.murderer;
 
 	local line = 0;
 	local intrigueReport = {};	-- where all the intrigue report data is gonna be stored
 
 	local myselfInst = GetCharInstData(testifier);
 	local myKey = getCardStorageKey(testifier);
+
+	local X = victim;
+	if (X ~= nil and X ~= myKey) then
+		local storageLOVE = storage[X .. "\'s LOVE"];
+		local storageLIKE = storage[X .. "\'s LIKE"];
+		local storageDISLIKE = storage[X .. "\'s DISLIKE"];
+		local storateHATE = storage[X .. "\'s HATE"];
+
+		local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
+		local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
+
+		if (LoveLike > DislikeHate) then
+			for j=0,24 do
+				local Y = storage.classMembers["" .. j];			
+				if (Y ~= nil and Y ~= myKey and Y ~= victim) then
+					-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
+
+					log.error(Y);
+
+					local LOVE_X_Y = storageLOVE[Y];
+					local LIKE_X_Y = storageLIKE[Y];
+					local DISLIKE_X_Y = storageDISLIKE[Y];
+					local HATE_X_Y = storateHATE[Y];
+
+					local MAX_X_Y = math.max(LOVE_X_Y, math.max(LIKE_X_Y, math.max(DISLIKE_X_Y, math.max(HATE_X_Y))));
 			
-	for i=0,24 do
-		local X = storage.classMembers["" .. i];
-		if (X ~= nil and X ~= myKey) then
-			local storageLOVE = storage[X .. "\'s LOVE"];
-			local storageLIKE = storage[X .. "\'s LIKE"];
-			local storageDISLIKE = storage[X .. "\'s DISLIKE"];
-			local storateHATE = storage[X .. "\'s HATE"];
-
-			local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
-			local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
-
-			if (LoveLike > DislikeHate) then
-				for j=0,24 do
-					local Y = storage.classMembers["" .. j];
-					if (Y ~= nil and i ~= j and Y ~= myKey) then	--	don't talk about myself
-						-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
-						local LOVE_X_Y = storageLOVE[Y];
-						local LIKE_X_Y = storageLIKE[Y];
-						local DISLIKE_X_Y = storageDISLIKE[Y];
-						local HATE_X_Y = storateHATE[Y];
-
-						local MAX_X_Y = math.max(LOVE_X_Y, math.max(LIKE_X_Y, math.max(DISLIKE_X_Y, math.max(HATE_X_Y))));
-						if (MAX_X_Y == LIKE_X_Y and MAX_X_Y >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " liked " .. Y;
-						end
-						if (MAX_X_Y == DISLIKE_X_Y and MAX_X_Y >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " disliked " .. Y;
-						end
-						if (MAX_X_Y == LOVE_X_Y and MAX_X_Y >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " loved " .. Y;
-						end
-						if (MAX_X_Y == HATE_X_Y and MAX_X_Y >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " hated " .. Y;
-						end
-
-						-- Apparently, <student X> felt <LOVED/LIKED/DISLIKED/HATED> by <student Y>						
-						local LOVE_Y_X = storage[Y .. "\'s LOVE"][X];
-						local LIKE_Y_X = storage[Y .. "\'s LIKE"][X];
-						local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE"][X];
-						local HATE_Y_X = storage[Y .. "\'s HATE"][X];
-
-						local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
-						if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " felt liked by " .. Y;
-						end
-						if (MAX_Y_X == DISLIKE_Y_X and MAX_Y_X >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " felt disliked by " .. Y;
-						end
-						if (MAX_Y_X == LOVE_Y_X and MAX_Y_X >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " felt loved by " .. Y;
-						end
-						if (MAX_Y_X == HATE_Y_X and MAX_Y_X >= 30) then
-							line = line + 1;
-							intrigueReport[line] = "Apparently, " .. X .. " felt hated by " .. Y;
-						end						
+					if (MAX_X_Y == LIKE_X_Y and MAX_X_Y >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " liked " .. Y;
 					end
-				end				
-			end
+					if (MAX_X_Y == DISLIKE_X_Y and MAX_X_Y >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " disliked " .. Y;
+					end
+					if (MAX_X_Y == LOVE_X_Y and MAX_X_Y >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " loved " .. Y;
+					end
+					if (MAX_X_Y == HATE_X_Y and MAX_X_Y >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " hated " .. Y;
+					end
+
+					-- Apparently, <student X> felt <LOVED/LIKED/DISLIKED/HATED> by <student Y>						
+					local LOVE_Y_X = storage[Y .. "\'s LOVE"][X];
+					local LIKE_Y_X = storage[Y .. "\'s LIKE"][X];
+					local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE"][X];
+					local HATE_Y_X = storage[Y .. "\'s HATE"][X];
+
+					local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
+			
+					if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " felt liked by " .. Y;
+					end
+					if (MAX_Y_X == DISLIKE_Y_X and MAX_Y_X >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " felt disliked by " .. Y;
+					end
+					if (MAX_Y_X == LOVE_Y_X and MAX_Y_X >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " felt loved by " .. Y;
+					end
+					if (MAX_Y_X == HATE_Y_X and MAX_Y_X >= 30) then
+						line = line + 1;
+						intrigueReport[line] = "Apparently, " .. X .. " felt hated by " .. Y;
+					end						
+				end
+			end				
 		end
 	end
 
@@ -282,8 +285,8 @@ end
 
 function detectiveCompileTriviaReport(testifier, case)
 	local storage = getClassStorage(case) or {};
-	local victim = case.victim;
-	local murderer = case.murderer;
+	local victim = storage.victim;
+	local murderer = storage.murderer;
 
 	local line = 0;
 	local triviaReport = {};	-- where all the alibi report data is gonna be stored
@@ -343,7 +346,7 @@ function detectiveGatherReport(case, detective, testifier, reportKey)
 	local testifierReport = detectiveCompileReport(case, testifier, reportKey) or {};
 	local detectiveInst = GetCharInstData(detective);
 	local testifierInst = GetCharInstData(testifier);
-	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 1800.0;
+	local disposition = (2 * testifierInst:GetLoveTowards(detectiveInst) + testifierInst:GetLikeTowards(detectiveInst)) / 900.0;
 	local result = {};
 	for k,v in ipairs(detectiveReport) do
 		result[v] = "whatever it doesn't fucking matter";
@@ -394,7 +397,7 @@ function printReport(case, detective, testifier, reportKey)
 	local report = getCardStorage(detective, detectiveStorageKey) or {};
 	local strReport = "";
 	for key,line in ipairs(report) do
-		strReport = strReport .. "\n" .. key .. "=>" .. line;
+		strReport = strReport .. "\n" .. line;
 	end
 	log.info(strReport);
 end
