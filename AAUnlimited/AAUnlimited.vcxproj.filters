@@ -575,5 +575,8 @@
     <None Include="Texts\mod\triggers_supplemental.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\cram_school.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>

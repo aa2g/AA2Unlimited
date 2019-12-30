@@ -243,6 +243,11 @@ bool CharInstData::IsValid() {
 	return false;
 }
 
+bool CharInstData::IsPC() {
+	if (!this->IsValid()) return false;
+	return (Shared::GameState::getPlayerCharacter())->m_char->m_seat == this->m_char->m_seat;
+}
+
 void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
 	m_cardData.Reset();

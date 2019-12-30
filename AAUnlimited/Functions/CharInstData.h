@@ -72,6 +72,8 @@ public:
 	int GetDislikeTowards(CharInstData* towards);
 	int GetHateTowards(CharInstData* towards);
 
+	bool IsPC();
+
 	int GetCurrentRoom();
 
 	void Reset();
@@ -100,6 +102,9 @@ public:
 		LUA_BIND(m_char);
 		LUA_METHOD(IsValid, {
 			return _gl.push(_self->IsValid()).one;
+		});
+		LUA_METHOD(IsPC, {
+			return _gl.push(_self->IsPC()).one;
 		});
 		LUA_METHOD(GetCurrentRoom, {
 			return _gl.push(_self->GetCurrentRoom()).one;
