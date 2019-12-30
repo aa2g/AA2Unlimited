@@ -197,8 +197,6 @@ function detectiveCompileAlibiReport(testifier, case)
 end
 
 function detectiveCompileIntrigueReport(testifier, case)
-	local math = require "math";
-
 	local storage = getClassStorage(case) or {};
 	local victim = storage.victim;
 	local murderer = storage.murderer;
@@ -219,34 +217,30 @@ function detectiveCompileIntrigueReport(testifier, case)
 		local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
 		local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
 
-		if (LoveLike > DislikeHate) then
+		if (LoveLike >= 600) then
 			for j=0,24 do
 				local Y = storage.classMembers["" .. j];			
 				if (Y ~= nil and Y ~= myKey and Y ~= victim) then
 					-- Apparently, <student X> <LOVED/LIKED/DISLIKED/HATED> <student Y>
-
-					log.error(Y);
 
 					local LOVE_X_Y = storageLOVE[Y];
 					local LIKE_X_Y = storageLIKE[Y];
 					local DISLIKE_X_Y = storageDISLIKE[Y];
 					local HATE_X_Y = storateHATE[Y];
 
-					local MAX_X_Y = math.max(LOVE_X_Y, math.max(LIKE_X_Y, math.max(DISLIKE_X_Y, math.max(HATE_X_Y))));
-			
-					if (MAX_X_Y == LIKE_X_Y and MAX_X_Y >= 30) then
+					if (LIKE_X_Y >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " liked " .. Y;
 					end
-					if (MAX_X_Y == DISLIKE_X_Y and MAX_X_Y >= 30) then
+					if (DISLIKE_X_Y >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " disliked " .. Y;
 					end
-					if (MAX_X_Y == LOVE_X_Y and MAX_X_Y >= 30) then
+					if (LOVE_X_Y >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " loved " .. Y;
 					end
-					if (MAX_X_Y == HATE_X_Y and MAX_X_Y >= 30) then
+					if (HATE_X_Y >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " hated " .. Y;
 					end
@@ -257,21 +251,19 @@ function detectiveCompileIntrigueReport(testifier, case)
 					local DISLIKE_Y_X = storage[Y .. "\'s DISLIKE"][X];
 					local HATE_Y_X = storage[Y .. "\'s HATE"][X];
 
-					local MAX_Y_X = math.max(LOVE_Y_X, math.max(LIKE_Y_X, math.max(DISLIKE_Y_X, math.max(HATE_Y_X))));
-			
-					if (MAX_Y_X == LIKE_Y_X and MAX_Y_X >= 30) then
+					if (LIKE_Y_X >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " felt liked by " .. Y;
 					end
-					if (MAX_Y_X == DISLIKE_Y_X and MAX_Y_X >= 30) then
+					if (DISLIKE_Y_X >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " felt disliked by " .. Y;
 					end
-					if (MAX_Y_X == LOVE_Y_X and MAX_Y_X >= 30) then
+					if (LOVE_Y_X >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " felt loved by " .. Y;
 					end
-					if (MAX_Y_X == HATE_Y_X and MAX_Y_X >= 30) then
+					if (HATE_Y_X >= 600) then
 						line = line + 1;
 						intrigueReport[line] = "Apparently, " .. X .. " felt hated by " .. Y;
 					end						
@@ -289,7 +281,7 @@ function detectiveCompileTriviaReport(testifier, case)
 	local murderer = storage.murderer;
 
 	local line = 0;
-	local triviaReport = {};	-- where all the alibi report data is gonna be stored
+	local triviaReport = {};	-- where all the trivia report data is gonna be stored
 
 	local myselfInst = GetCharInstData(testifier);
 	local myKey = getCardStorageKey(testifier);
@@ -306,7 +298,7 @@ function detectiveCompileTriviaReport(testifier, case)
 			local LoveLike = storageLOVE[myKey] + storageLIKE[myKey];
 			local DislikeHate = storageDISLIKE[myKey] + storateHATE[myKey];
 
-			if (LoveLike > DislikeHate) then
+			if (LoveLike >= 300) then
 				for j=0,24 do
 					local Y = storage.classMembers["" .. j];
 					if (Y ~= nil and i ~= j) then	--	don't talk about myself
@@ -318,6 +310,215 @@ function detectiveCompileTriviaReport(testifier, case)
 						end
 					end
 				end				
+			end
+
+			local Xinst = GetCharInstData(getSeatFromStorageKey(X));
+			if (Xinst ~= nil and DislikeHate >= 300) then
+				local XMurderous = getClassStorage(X)["Murderous"] or false;
+				if (XMurderous) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Murderous vibe";
+				end
+				local XCheating = getClassStorage(X)["Cheating"] or false;
+				if (XCheating) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Cheating vibe";
+				end
+				local XSexCrazed= getClassStorage(X)["Sex Crazed"] or false;
+				if (XSexCrazed) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Sex Crazed vibe";
+				end
+				local XBrute= getClassStorage(X)["Brute"] or false;
+				if (XBrute) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Brute vibe";
+				end
+				local XBlackmailer= getClassStorage(X)["Blackmailer"] or false;
+				if (XBlackmailer) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Blackmailer vibe";
+				end
+				local XDelinquent= getClassStorage(X)["Delinquent"] or false;
+				if (XDelinquent) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Delinquent vibe";
+				end
+				local XDominant= getClassStorage(X)["Dominant"] or false;
+				if (XDominant) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Dominant vibe";
+				end
+				local XForceful= getClassStorage(X)["Forceful"] or false;
+				if (XForceful) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Forceful vibe";
+				end
+				local XHomewrecker= getClassStorage(X)["Homewrecker"] or false;
+				if (XHomewrecker) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Homewrecker vibe";
+				end
+				local XHotBody= getClassStorage(X)["Hot Body"] or false;
+				if (XHotBody) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Hot Body vibe";
+				end
+				local XInsecure= getClassStorage(X)["Insecure"] or false;
+				if (XInsecure) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Insecure vibe";
+				end
+				local XKidnapper= getClassStorage(X)["Kidnapper"] or false;
+				if (XKidnapper) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Kidnapper vibe";
+				end
+				local XKiller= getClassStorage(X)["Killer"] or false;
+				if (XKiller) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Killer vibe";
+				end
+				local XMartialArtist= getClassStorage(X)["Martial Artist"] or false;
+				if (XMartialArtist) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Martial Artist vibe";
+				end
+				local XMoody= getClassStorage(X)["Moody"] or false;
+				if (XMoody) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Moody vibe";
+				end
+				local XParanoid= getClassStorage(X)["Paranoid"] or false;
+				if (XParanoid) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Paranoid vibe";
+				end
+				local XPheromones= getClassStorage(X)["Pheromones"] or false;
+				if (XPheromones) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Pheromones vibe";
+				end
+				local XProfane= getClassStorage(X)["Profane"] or false;
+				if (XProfane) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Profane vibe";
+				end
+				local XResentful= getClassStorage(X)["Resentful"] or false;
+				if (XResentful) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Resentful vibe";
+				end
+				local XSadist= getClassStorage(X)["Sadist"] or false;
+				if (XSadist) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Sadist vibe";
+				end
+				local XSaint= getClassStorage(X)["Saint"] or false;
+				if (XSaint) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Saint vibe";
+				end
+				local XSeducer= getClassStorage(X)["Seducer"] or false;
+				if (XSeducer) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Seducer vibe";
+				end
+				local XSexAddict= getClassStorage(X)["Sex Addict"] or false;
+				if (XSexAddict) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Sex Addict vibe";
+				end
+				local XShaming= getClassStorage(X)["Shaming"] or false;
+				if (XShaming) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Shaming vibe";
+				end
+				local XStalker= getClassStorage(X)["Stalker"] or false;
+				if (XStalker) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Stalker vibe";
+				end
+				local XThief= getClassStorage(X)["Thief"] or false;
+				if (XThief) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Thief vibe";
+				end
+				local XWhiteKnight= getClassStorage(X)["White Knight"] or false;
+				if (XWhiteKnight) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this White Knight vibe";
+				end
+				local XEasygoing= Xinst.m_char.m_charData:m_traitBools(0);
+				if (XEasygoing == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Easygoing vibe";
+				end
+				local XCharming= Xinst.m_char.m_charData:m_traitBools(4);
+				if (XCharming == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Charming vibe";
+				end
+				local XJealous= Xinst.m_char.m_charData:m_traitBools(11);
+				if (XJealous == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Jealous vibe";
+				end
+				local XPerverted= Xinst.m_char.m_charData:m_traitBools(13);
+				if (XPerverted == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Perverted vibe";
+				end
+				local XImpulsive= Xinst.m_char.m_charData:m_traitBools(16);
+				if (XImpulsive == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Impulsive vibe";
+				end
+				local XViolent= Xinst.m_char.m_charData:m_traitBools(18);
+				if (XViolent == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Violent vibe";
+				end
+				local XMeddlesome= Xinst.m_char.m_charData:m_traitBools(20);
+				if (XMeddlesome == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Meddlesome vibe";
+				end
+				local XSingleminded= Xinst.m_char.m_charData:m_traitBools(25);
+				if (XSingleminded == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Singleminded vibe";
+				end
+				local XCompetitive= Xinst.m_char.m_charData:m_traitBools(27);
+				if (XCompetitive == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Competitive vibe";
+				end
+				local XScheming = Xinst.m_char.m_charData:m_traitBools(28);
+				if (XScheming == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Scheming vibe";
+				end
+				local XWild= Xinst.m_char.m_charData:m_traitBools(30);
+				if (XWild == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Wild vibe";
+				end
+				local XEvil = Xinst.m_char.m_charData:m_traitBools(33);
+				if (XEvil == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Evil vibe";
+				end
+				local XExploitable = Xinst.m_char.m_charData:m_traitBools(35);
+				if (XExploitable == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Exploitable vibe";
+				end
+				local XLucky= Xinst.m_char.m_charData:m_traitBools(37);
+				if (XLucky == 1) then
+					line = line + 1;
+					triviaReport[line] = X .. " gives off this Lucky vibe";
+				end
 			end
 		end
 	end
@@ -653,6 +854,12 @@ function setCardStorage(card, key, value)
 	local record = get_class_key(getCardStorageKey(card));
 	record[key] = value;
 	setClassStorage(getCardStorageKey(card), record);
+end
+
+function getSeatFromStorageKey(key)
+	local text = require("pl.text");
+	local result = text.split(key, " ")[1];
+	return result;
 end
 
 function splitArgs(input)
