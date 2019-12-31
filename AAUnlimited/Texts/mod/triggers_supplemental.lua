@@ -4,7 +4,7 @@ local _M = {}
 local opts = {}
 
 --------------------------------------------------------------------------------------------------------------------------
--- Event handlers --------------------------------------------------------------------------------------------------------
+-- Event handlers -- These should only call other functions and not contain any logic directly ---------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 local TOGETHER_FOREVER = 81
@@ -12,16 +12,16 @@ local MURDER = 82
 
 local prevActions = {}
 
--- keep note of the previous action
 function on.move(params, user)
-	if params.movementType == 3 then
-		prevActions[user.m_seat + 1] = params.conversationId;
-	end
+	trackPrevAction(params, user);
 end
 
--- identify the murderer
 function on.murder(actor0, actor1, murder_action)
 	detectiveStartTheCase(actor0, actor1);
+end
+
+function on.period()
+	detectiveCheckIfMurderFailed();
 end
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -29,10 +29,32 @@ end
 --------------------------------------------------------------------------------------------------------------------------
 
 function detectiveStartTheCase(actor0, actor1)
+	if (detectiveIsThereIsADetectiveInClass() == false) then	-- if there's no detective we just don't track the murder stuffs
+		log.info("No detectives in class, no snapshot taken");
+		return;
+	end
 	detectiveDetermineTheMurderer(actor0, actor1);
 	local case = getClassStorage("Latest murder case");
 	detectiveTakeClassSnapshot(case);
 	-- detectivePrintAllReports(case);
+end
+
+function detectiveIsThereIsADetectiveInClass()
+	for seat=0,24 do
+		if (getCardStorage(seat, "Detective") == true) then
+			return true;
+		end
+	end
+	return false;
+end
+
+function detectiveCloseCase(case, detective)
+	if (detective ~= nil) then
+		setCardStorage(detective, "Murder Case", "CLOSED");
+	end
+	
+	setClassStorage(case, {});
+	setClassStorage("Latest murder case", "CLOSED");
 end
 
 function detectiveDetermineTheMurderer(actor0, actor1)
@@ -40,10 +62,10 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 	local murderer = 25;
 	local storage = {};
 
-	if (prevActions[actor0 + 1] == MURDER or prevActions[actor0 + 1] == TOGETHER_FOREVER) then
-		victim = GetCharInstData(actor1);
-		murderer = GetCharInstData(actor0);
-	end
+	-- if (prevActions[actor0 + 1] == MURDER or prevActions[actor0 + 1] == TOGETHER_FOREVER) then
+	-- 	victim = GetCharInstData(actor1);
+	-- 	murderer = GetCharInstData(actor0);
+	-- end
 	if (prevActions[actor1 + 1] == MURDER or prevActions[actor1 + 1] == TOGETHER_FOREVER) then
 		victim = GetCharInstData(actor0);
 		murderer = GetCharInstData(actor1);
@@ -55,19 +77,41 @@ function detectiveDetermineTheMurderer(actor0, actor1)
 		if (latestMurderCase ~= case) then
 			setClassStorage("Latest murder case", case);
 			setClassStorage("Latest murdered seat", victim.m_char.m_seat);
+			storage.victim = getCardStorageKey(victim.m_char.m_seat);
+			storage.murderer = getCardStorageKey(murderer.m_char.m_seat);
+			setClassStorage(case, storage);
 		else
-			setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer wac caught or victim survived
+			setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer was caught or victim survived
+			detectiveCloseCase(case);
+			log.info("Victim survived, case closed");
 		end
-		storage.victim = getCardStorageKey(victim.m_char.m_seat);
-		storage.murderer = getCardStorageKey(murderer.m_char.m_seat);
-		setClassStorage(case, storage);
 	else
-		setClassStorage("Latest murder case", "CLOSED");	-- there's no case if the killer was caught or victim survived		
+		setClassStorage("Latest murder case", "CLOSED");
+	end
+end
+
+function detectiveCheckIfMurderFailed()
+	local case = getClassStorage("Latest murder case");
+	if (case ~= nil and case ~= "CLOSED") then
+		local murderCase = getClassStorage(case);
+		local victimSeat = getClassStorage("Latest murdered seat");
+		local victim = GetCharInstData(victimSeat);
+		if (victim ~= nil) then	-- victim's seat is occupied
+			if (murderCase.victim == getCardStorageKey(victimSeat)) then	-- victim is alive, close the case
+				detectiveCloseCase(case);
+			end
+		end
+		if (murderCase.murderer ~= getCardStorageKey(getSeatFromStorageKey(murderCase.murderer))) then
+			detectiveCloseCase(case);
+		end
 	end
 end
 
 function detectiveTakeClassSnapshot(case)
 	local snapshotStorage = getClassStorage(case);
+	if (snapshotStorage == nil) then
+		return;
+	end;
 	snapshotStorage.classMembers = {};	--	list of class members at the time of murder
 	for i=0,24 do
 		local character = GetCharInstData(i);
@@ -633,6 +677,14 @@ function on.printTriviaReport(params)
 	printReport(case, detective, testifier, reportKey);
 end
 
+function on.closeCase(params)
+	local args = splitArgs(params);
+	local case = args[1];
+	local detective = args[2];
+
+	detectiveCloseCase(case, detective);
+end
+
 --------------------------------------------------------------------------------------------------------------------------
 
 function getStudentCount()
@@ -843,11 +895,18 @@ end
 
 function getCardStorageKey(card)
 	local inst = GetCharInstData(card);
+	if (inst == nil) then
+		return nil;
+	end
 	return inst.m_char.m_seat .. " " .. inst.m_char.m_charData.m_forename .. " " .. inst.m_char.m_charData.m_surname;	
 end
 
 function getCardStorage(card, key)
-	return get_class_key(getCardStorageKey(card))[key];
+	local cardKey = getCardStorageKey(card);
+	if (cardKey == nil) then
+		return nil;
+	end
+	return get_class_key(cardKey)[key];
 end
 
 function setCardStorage(card, key, value)
@@ -867,6 +926,11 @@ function splitArgs(input)
 	return text.split(input, "\n");
 end
 
+function trackPrevAction(params, user)
+	if params.movementType == 3 then
+		prevActions[user.m_seat + 1] = params.conversationId;
+	end
+end
 --------------------------------------------------------------------------------------------------------------------------
 
 function _M:load()

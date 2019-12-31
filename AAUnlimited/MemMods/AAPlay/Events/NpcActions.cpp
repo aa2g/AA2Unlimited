@@ -483,13 +483,10 @@ void __stdcall MurderEvent(CharacterStruct* param) {
 	}
 	else
 	{
-		for (int character = 0; character < 25; character = character + 1) {
-			CharInstData* inst2 = &AAPlay::g_characters[character];
-			if (inst2->IsValid()) {
-				if (inst2->m_char->m_npcData == inst->m_char->m_npcData->m_target) {
-					murderer = inst2->m_char->m_seat;
-				}
-			}
+		auto target = inst->GetTargetInst();
+		if (target != nullptr && target->IsValid())
+		{
+			murderer = target->m_char->m_seat;
 		}
 	}
 	murderEventData.murderer = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 

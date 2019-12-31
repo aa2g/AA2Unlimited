@@ -73,6 +73,7 @@ public:
 	int GetHateTowards(CharInstData* towards);
 
 	int GetCurrentRoom();
+	CharInstData* GetTargetInst();
 
 	void Reset();
 	bool IsValid();
