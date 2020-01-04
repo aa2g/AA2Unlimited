@@ -135,6 +135,11 @@ namespace Shared {
 			void SetCardStorageString(std::vector<Value>& params);
 			void SetCardStorageBool(std::vector<Value>& params);
 
+			void SetClassStorageInt(std::vector<Value>& params);
+			void SetClassStorageFloat(std::vector<Value>& params);
+			void SetClassStorageString(std::vector<Value>& params);
+			void SetClassStorageBool(std::vector<Value>& params);
+
 			void RemoveCardStorageInt(std::vector<Value>& params);
 			void RemoveCardStorageFloat(std::vector<Value>& params);
 			void RemoveCardStorageString(std::vector<Value>& params);
@@ -155,6 +160,7 @@ namespace Shared {
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 			void Notification(std::vector<Value>& params);
+			void CallLuaProcedure(std::vector<Value>& params);
 
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
@@ -334,6 +340,7 @@ namespace Shared {
 			Value IsMinnaAction(std::vector<Value>& params); //bool(int)
 			Value IsForceAction(std::vector<Value>& params); //bool(int)
 			Value IsSexAction(std::vector<Value>& params); //bool(int)
+			Value IsSkipAction(std::vector<Value>& params); //bool(int)
 			Value IsNoPromptAction(std::vector<Value>& params); //bool(int)
 			Value IsGameOverAction(std::vector<Value>& params); //bool(int)
 			Value IsNoTargetAction(std::vector<Value>& params); //bool(int)
@@ -353,6 +360,11 @@ namespace Shared {
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
 			Value GetCardStorageString(std::vector<Value>& params); //string(int, string, string)
 			Value GetCardStorageBool(std::vector<Value>& params); //bool(int, string, bool)
+
+			Value GetClassStorageInt(std::vector<Value>& params);
+			Value GetClassStorageFloat(std::vector<Value>& params);
+			Value GetClassStorageString(std::vector<Value>& params);
+			Value GetClassStorageBool(std::vector<Value>& params);
 
 			//Event Response
 			//PERIOD_ENDS
@@ -396,6 +408,7 @@ namespace Shared {
 			Value GetConversationAnswerId(std::vector<Value>& params);
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
+			Value AddLuaProcParam(std::vector<Value>& params);
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);

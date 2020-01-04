@@ -362,6 +362,7 @@
     <None Include="Texts\mod\subtitles.lua" />
     <None Include="Texts\mod\opt.lua" />
     <None Include="Texts\mod\timewarp.lua" />
+    <None Include="Texts\mod\triggers_supplemental.lua" />
     <None Include="Texts\mod\unlocks.lua" />
     <None Include="Texts\mod\win10fix.lua" />
     <None Include="Texts\mod\wined3d.lua" />

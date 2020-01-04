@@ -19,6 +19,28 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::set(std::string
 	return *this;
 }
 
+//storeClassData
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeClassBool(std::wstring key, bool value)
+{
+	return this->set(General::CastToString(key), picojson::value(value));
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeClassInt(std::wstring key, int value)
+{
+	return this->set(General::CastToString(key), picojson::value(1.0 * value));
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeClassFloat(std::wstring key, float value)
+{
+	return this->set(General::CastToString(key), picojson::value(1.0 * value));
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeClassString(std::wstring key, std::string value)
+{
+	return this->set(General::CastToString(key), picojson::value(value));
+}
+
 //storeCardData
 
 PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardBool(CharInstData * character, std::wstring key, bool value)
@@ -110,6 +132,44 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardObject
 
 	this->set(name, picojson::value(record));
 	return *this;
+}
+
+//getClassData
+PersistentStorage::Option<int> PersistentStorage::ClassStorage::getClassInt(std::wstring key)
+{
+	Option<int> result;
+	auto i = this->data.find(General::CastToString(key));
+	result.isValid = i != this->data.end();
+	if (result.isValid)
+		result.value = i->second.get<double>();
+	return result;
+}
+PersistentStorage::Option<float> PersistentStorage::ClassStorage::getClassFloat(std::wstring key)
+{
+	Option<float> result;
+	auto i = this->data.find(General::CastToString(key));
+	result.isValid = i != this->data.end();
+	if (result.isValid)
+		result.value = i->second.get<double>();
+	return result;
+}
+PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getClassBool(std::wstring key)
+{
+	Option<bool> result;
+	auto i = this->data.find(General::CastToString(key));
+	result.isValid = i != this->data.end();
+	if (result.isValid)
+		result.value = i->second.evaluate_as_boolean();
+	return result;
+}
+PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getClassString(std::wstring key)
+{
+	Option<std::string> result;
+	auto i = this->data.find(General::CastToString(key));
+	result.isValid = i != this->data.end();
+	if (result.isValid)
+		result.value = i->second.get<std::string>();
+	return result;
 }
 
 //getCardData
@@ -211,6 +271,10 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::getStorage(std:
 		PersistentStorage::ClassStorage::allStorages[file] = PersistentStorage::ClassStorage(file);
 	}
 	return PersistentStorage::ClassStorage::allStorages[file];
+}
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::getCurrentClassStorage()
+{
+	return PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 }
 void PersistentStorage::ClassStorage::reset(std::wstring file)
 {

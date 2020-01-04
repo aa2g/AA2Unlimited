@@ -245,4 +245,8 @@ function text.format_operator()
     end
 end
 
+function text.split(str, delim)
+	return split(str, delim);
+end
+
 return text

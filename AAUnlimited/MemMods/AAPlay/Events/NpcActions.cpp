@@ -235,10 +235,6 @@ void __stdcall RoomChange(NpcData* param) {
 				Shared::Triggers::RoomChangeData roomChangeData;
 				roomChangeData.action = instance->m_forceAction.conversationId;
 				roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
-				if (instance->m_forceAction.target1 != nullptr) {
-					roomChangeData.convotarget = int(instance->m_forceAction.target1->m_thisChar);
-				}
-
 				roomChangeData.card = instance->m_char->m_seat;
 				Shared::Triggers::ThrowEvent(&roomChangeData);
 				return;
@@ -420,7 +416,7 @@ void LowPolyUpdateEndInject() {
 }
 
 
-void __stdcall hPositionChange(BYTE param) {
+void __stdcall hPositionChange(DWORD param) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
 
@@ -474,6 +470,55 @@ void hPositionChangeInjection() {
 		NULL);
 }
 
+void __stdcall MurderEvent(CharacterStruct* param) {
+	if (param == nullptr) return;
+	Shared::Triggers::MurderEventData murderEventData;
+	murderEventData.card = param->m_seat; // Protect this adequately so we don't get another infirmary crash bullshit
+	//finding the murderer
+	int murderer = -1;
+	CharInstData* inst = &AAPlay::g_characters[murderEventData.card];
+	if (!inst->IsValid())
+	{
+		return;
+	}
+	else
+	{
+		auto target = inst->GetTargetInst();
+		if (target != nullptr && target->IsValid())
+		{
+			murderer = target->m_char->m_seat;
+		}
+	}
+	murderEventData.murderer = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 
+	murderEventData.murderAction = param->m_moreData1->m_activity->m_currConversationId;
+	LUA_EVENT_NORET("murder", murderEventData.card, murderEventData.murderer, murderEventData.murderAction);
+	ThrowEvent(&murderEventData);
+}
+
+void __declspec(naked) murderEventRedirect() {
+	__asm {
+		pushad
+		push ebx
+		call MurderEvent
+		popad
+		//original code
+		mov ecx,[edi + 0x00000394]
+		ret
+	}
+}
+
+void murderEventInjection() {
+	//Ebx has the victim
+	//AA2Play.exe+F4A34 - 8B 8F 94030000        - mov ecx,[edi+00000394]
+
+
+	DWORD address = General::GameBase + 0xF4A34;
+	DWORD redirectAddress = (DWORD)(&murderEventRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x8F, 0x94, 0x03, 0x00, 0x00 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 
@@ -635,7 +680,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 	}
 	if (user == NULL) return;
 
-	LUA_EVENT_NORET("move", params);
+	LUA_EVENT_NORET("move", params, user);
 
 	using namespace Shared::Triggers;
 
