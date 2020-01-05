@@ -545,7 +545,7 @@ void PP2::AddArchive(const wchar_t *fn) {
 	GetFullPathName(fn, 1024, buf, NULL);
 	wstring wfn(buf);
 
-	LOGPRIONC(Logger::Priority::INFO) "Adding .pp2 archive " << wfn << "\r\n";
+	LOGPRIONC(Logger::Priority::SPAM) "Adding .pp2 archive " << wfn << "\r\n";
 	for (auto &it : pfiles) {
 		if (it.name == wfn) {
 			LOGPRIONC(Logger::Priority::WARN) wfn << "is already loaded\r\n";

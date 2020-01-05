@@ -536,9 +536,6 @@
     <None Include="Texts\mod\extsave.lua">
       <Filter>Lua</Filter>
     </None>
-    <None Include="Texts\mod\timewarp.lua">
-      <Filter>Lua</Filter>
-    </None>
     <None Include="Texts\mod\fader.lua">
       <Filter>Lua</Filter>
     </None>
@@ -570,6 +567,12 @@
       <Filter>Lua\poser</Filter>
     </None>
     <None Include="Texts\mod\subtitles.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\timewarp.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\triggers_supplemental.lua">
       <Filter>Lua</Filter>
     </None>
   </ItemGroup>

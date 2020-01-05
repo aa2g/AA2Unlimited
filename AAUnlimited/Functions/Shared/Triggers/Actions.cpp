@@ -304,7 +304,7 @@ namespace Shared {
 
 			AAPlay::ApplyRelationshipPoints(cardFrom->m_char, rel);
 		}
-		
+
 		//int cardFrom, int cardTowards, int ptsLove, int ptsLike, int ptsDislike, int ptsHate, int ptsSpare
 		void Thread::SetCardPoints(std::vector<Value>& params) {
 			int iCardFrom = params[0].iVal;
@@ -365,7 +365,7 @@ namespace Shared {
 			rel->m_hatePoints = 0;
 
 			rel->m_poin = 0;
-			
+
 			rel->m_actionBacklog.m_end = rel->m_actionBacklog.m_start;
 
 			//apply the points, discard the decimals
@@ -401,7 +401,7 @@ namespace Shared {
 
 		void Thread::SetStrongResponse(std::vector<Value>& params) {
 			if (eventData->GetId() != PC_RESPONSE) return;
-			((PcResponseData*)eventData)->strong_response= params[0].iVal;
+			((PcResponseData*)eventData)->strong_response = params[0].iVal;
 		}
 
 		void Thread::SetAbsoluteResponse(std::vector<Value>& params) {
@@ -416,9 +416,9 @@ namespace Shared {
 			if (!(instPartner->IsValid() && instPartner->m_char->m_seat == seatPartner)) return;
 
 			const DWORD offset3[]{ 0x376164, 0x34, 0x14, 0x8C };
-			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset3);
+			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus * *)ExtVars::ApplyRule(offset3);
 			*partnerNpcStatus = instPartner->m_char->m_characterStatus->m_npcStatus;
-		}	
+		}
 
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
@@ -437,7 +437,7 @@ namespace Shared {
 		{
 			int seat = params[0].iVal;
 			int trait = params[1].iVal;
-			if (ActionSeatInvalid(seat) || trait > ExtClass::Trait::TRAIT_RAINBOW	) return;
+			if (ActionSeatInvalid(seat) || trait > ExtClass::Trait::TRAIT_RAINBOW) return;
 			bool enable = params[2].bVal;
 			if (!AAPlay::g_characters[seat].m_char) {
 				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
@@ -601,7 +601,7 @@ namespace Shared {
 				frame++;
 			}
 		}
-		
+
 		//int seat, int club
 		void Thread::SetCardClub(std::vector<Value>& params)
 		{
@@ -970,7 +970,7 @@ namespace Shared {
 			towards = (AAPlay::g_characters[towards].idxSave);
 			if (AAPlay::g_characters[seat].idxSave == towards) return;
 			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
-			int decValue = 92*towards + feeling;
+			int decValue = 92 * towards + feeling;
 			AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue] = value;
 
 		}
@@ -1257,6 +1257,27 @@ namespace Shared {
 			storage.storeCardBool(inst, *params[1].strVal, params[2].bVal);
 		}
 
+		//string keyname, int value
+		void Thread::SetClassStorageInt(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			storage.storeClassInt(*params[0].strVal, params[1].iVal);
+		}
+		//string keyname, float value
+		void Thread::SetClassStorageFloat(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			storage.storeClassFloat(*params[0].strVal, params[1].fVal);
+		}
+		//string keyname, string value
+		void Thread::SetClassStorageString(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			storage.storeClassString(*params[0].strVal, General::CastToString(*params[1].strVal));
+		}
+		//string keyname, bool value
+		void Thread::SetClassStorageBool(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			storage.storeClassBool(*params[0].strVal, params[1].bVal);
+		}
+
 		//int card, string keyname
 		void Thread::RemoveCardStorageInt(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -1375,15 +1396,15 @@ namespace Shared {
 			GameState::setIsPeeping(true);
 
 			const DWORD offset1[]{ 0x376164, 0x88 };
-			ExtClass::CharacterStruct** pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offset1);
+			ExtClass::CharacterStruct** pc = (ExtClass::CharacterStruct * *)ExtVars::ApplyRule(offset1);
 			*pc = instPC->m_char;
 
 			const DWORD offset2[]{ 0x376164, 0x28, 0x28 };
-			ExtClass::NpcStatus** pcNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset2);
+			ExtClass::NpcStatus** pcNpcStatus = (ExtClass::NpcStatus * *)ExtVars::ApplyRule(offset2);
 			*pcNpcStatus = instPC->m_char->m_characterStatus->m_npcStatus;
 
 			const DWORD offset3[]{ 0x376164, 0x34, 0x14, 0x8C };
-			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus**)ExtVars::ApplyRule(offset3);
+			ExtClass::NpcStatus** partnerNpcStatus = (ExtClass::NpcStatus * *)ExtVars::ApplyRule(offset3);
 			*partnerNpcStatus = instPartner->m_char->m_characterStatus->m_npcStatus;
 
 			const DWORD offset4[]{ 0x3761CC, 0x28, 0x28 };
@@ -1396,7 +1417,7 @@ namespace Shared {
 			if ((this->eventData->GetId() != H_START) && (this->eventData->GetId() != HPOSITION_CHANGE)) return;
 			auto hInfo = Shared::GameState::getHInfo();
 			hInfo->m_btnSwap->Press();
-		
+
 		}
 
 
@@ -1419,8 +1440,8 @@ namespace Shared {
 				const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
 				const DWORD offstPC[] = { 0x376164, 0x88 };
 				const DWORD offstPCNPC[] = { 0x376164, 0x28, 0x28 };
-				auto pc = (ExtClass::CharacterStruct**)ExtVars::ApplyRule(offstPC);
-				auto pcnpc = (ExtClass::NpcData**)ExtVars::ApplyRule(offstPCNPC);
+				auto pc = (ExtClass::CharacterStruct * *)ExtVars::ApplyRule(offstPC);
+				auto pcnpc = (ExtClass::NpcData * *)ExtVars::ApplyRule(offstPCNPC);
 				DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
 				if (!Shared::GameState::getVoyeur()) return;
@@ -1503,6 +1524,37 @@ namespace Shared {
 			Notifications::AddNotification(*text, important);
 		}
 
+
+		// string functionDef ("functionName\nparam1\nparam2...")
+		void Thread::CallLuaProcedure(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+
+			LUA_EVENT_NORET(funcName, args);
+		}
 		/*
 		 * A list of all action categories
 		 */
@@ -1690,24 +1742,24 @@ namespace Shared {
 				25, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Float"), TEXT("%p ::SetFloat( %p ) = %p "),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
-					"When the key is allready in use, the function will silently fail."),
-					{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },
-					&Thread::SetCardStorageFloat
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },
+				&Thread::SetCardStorageFloat
 			},
 			{
 				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetString( %p ) = %p "),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
-					"When the key is allready in use, the function will silently fail."),
-					{ TYPE_INT, TYPE_STRING, TYPE_STRING },
-					&Thread::SetCardStorageString
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_INT, TYPE_STRING, TYPE_STRING },
+				&Thread::SetCardStorageString
 			},
 			{
 				27, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Bool"), TEXT("%p ::SetBool( %p ) = %p "),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
-					"When the key is allready in use, the function will silently fail."),
-					{ TYPE_INT, TYPE_STRING, TYPE_BOOL },
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_INT, TYPE_STRING, TYPE_BOOL },
 				&Thread::SetCardStorageBool
 			},
 			{
@@ -2198,7 +2250,45 @@ namespace Shared {
 				TEXT("Display the notification on the screen."),
 				{ TYPE_STRING, TYPE_BOOL },
 				&Thread::Notification
-			}
+			},
+			{
+				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("Call( %p )"),
+				TEXT("Call supplemental lua procedure."),
+				{ TYPE_STRING },
+				&Thread::CallLuaProcedure
+			},
+			{
+				110, ACTIONCAT_GENERAL, TEXT("Set Class Storage Integer"), TEXT("SetInt( %p ) = %p "),
+				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
+				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_STRING, TYPE_INT },
+				&Thread::SetClassStorageInt
+			},
+			{
+				111, ACTIONCAT_GENERAL, TEXT("Set Class Storage Float"), TEXT("SetFloat( %p ) = %p "),
+				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
+				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_STRING, TYPE_FLOAT },
+				&Thread::SetClassStorageFloat
+			},
+			{
+				112, ACTIONCAT_GENERAL, TEXT("Set Class Storage String"), TEXT("SetString( %p ) = %p "),
+				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
+				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_STRING, TYPE_STRING },
+				&Thread::SetClassStorageString
+			},
+			{
+				113, ACTIONCAT_GENERAL, TEXT("Set Class Storage Bool"), TEXT("SetBool( %p ) = %p "),
+				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
+				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
+				"When the key is allready in use, the function will silently fail."),
+				{ TYPE_STRING, TYPE_BOOL },
+				&Thread::SetClassStorageBool
+			},
 		};
 
 

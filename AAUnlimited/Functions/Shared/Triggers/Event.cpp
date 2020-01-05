@@ -104,6 +104,10 @@ namespace Shared {
 			},
 			{ H_START, EVENTCAT_LOADS, TEXT("H Start"), TEXT("H Starts"),
 			TEXT("The event is fired as the H scene starts."),
+				{}
+			},
+			{ MURDER_EVENT, EVENTCAT_LOADS, TEXT("Murder event"), TEXT("Murder happened"),
+			TEXT("The event is fired when a character is murdered."),
 			{}
 			}
 		};

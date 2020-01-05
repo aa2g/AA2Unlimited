@@ -67,19 +67,16 @@ public:
 	std::vector<float> GetLightDirection(int light);
 	std::vector<BYTE> GetAmbientColor();
 
+	int GetLoveTowards(CharInstData* towards);
+	int GetLikeTowards(CharInstData* towards);
+	int GetDislikeTowards(CharInstData* towards);
+	int GetHateTowards(CharInstData* towards);
+
+	int GetCurrentRoom();
+	CharInstData* GetTargetInst();
+
 	void Reset();
-	inline bool IsValid() {
-		if (General::IsAAEdit) return Editable();
-		ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
-		ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
-		for (start; start != end; start++) {
-			ExtClass::CharacterStruct* it = *start;
-			if (it == m_char) {
-				return m_char->m_seat + 1;
-			}
-		}
-		return false;	
-	}
+	bool IsValid();
 
 	inline bool Editable() {
 		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
@@ -102,6 +99,12 @@ public:
 #define LUA_CLASS CharInstData
 		LUA_NAME;
 		LUA_BIND(m_char);
+		LUA_METHOD(IsValid, {
+			return _gl.push(_self->IsValid()).one;
+		});
+		LUA_METHOD(GetCurrentRoom, {
+			return _gl.push(_self->GetCurrentRoom()).one;
+		});
 		LUA_METHOD(SetCurrentStyle, {
 			_self->SetCurrentStyle(_gl.get(2));
 		});
@@ -169,6 +172,18 @@ public:
 			BYTE g = _gl.get(3);
 			BYTE b = _gl.get(4);
 			_self->SetAmbientColor(r, g, b);
+		});
+		LUA_METHOD(GetLikeTowards, {
+			return _gl.push(_self->GetLikeTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetLoveTowards, {
+			return _gl.push(_self->GetLoveTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetDislikeTowards, {
+			return _gl.push(_self->GetDislikeTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetHateTowards, {
+			return _gl.push(_self->GetHateTowards(_gl.get(2))).one;
 		});
 		LUA_METHOD(ApplyDecal, {
 			int bodyPart = _gl.get(2);

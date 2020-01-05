@@ -30,9 +30,9 @@ For a full list of features, please read [this page](https://github.com/aa2g/AA2
 - **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
 
 ### Tech-Support (in order from most responsive to least responsive)
-- Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g)
-- Try asking questions in our [discord server](https://discord.gg/5MfdAPT)
-- Make an issue on github
+- Try asking questions in our [discord server](https://discord.gg/5MfdAPT) (devs are here most of the time)
+- Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g) (devs occasionally visit but regulars can help you out too)
+- Make an issue on github (good luck with that)
 
 ### Having issues?
 Please read the [FAQ](https://github.com/aa2g/AA2Unlimited/wiki#faq)! If this does not solve your issue, please [report it](https://github.com/aa2g/AA2Unlimited/wiki/How-To-Report-a-Crash)!
