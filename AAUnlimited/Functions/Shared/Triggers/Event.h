@@ -56,7 +56,7 @@ namespace Triggers {
 		HI_POLY_DESPAWN,
 		H_END,
 		H_START,
-		MURDER_EVENT,
+		CARD_EXPELLED,
 		
 		
 		N_EVENTS
@@ -273,10 +273,10 @@ namespace Triggers {
 
 	EDC_END
 
-	EDC_DECLARE(MurderEventData, MURDER_EVENT)
+	EDC_DECLARE(CardExpelledData, CARD_EXPELLED)
 
-		int murderer;
-		int murderAction;
+		int target;
+		int action;
 
 	EDC_END
 
