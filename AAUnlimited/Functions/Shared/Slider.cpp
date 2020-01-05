@@ -155,6 +155,18 @@ namespace Shared {
 			//onemoreslider.
 			{ ExtClass::CharacterStruct::FACE, 49,	TEXT("A00_J_chin"),{ 1,1,0.4f, 0,0,0, 0,0.4f,-0.16f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 
+			// male mimi sliders
+			{ ExtClass::CharacterStruct::FACE, 50,	TEXT("S00_O_mimiR"),{ 1,0,0, 0,0,0, 0.64346f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Left
+			{ ExtClass::CharacterStruct::FACE, 51,	TEXT("S00_O_mimiL"),{ 1,0,0, 0,0,0, -0.64346f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Right
+			{ ExtClass::CharacterStruct::FACE, 52,	TEXT("S00_O_mimiR"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Left
+			{ ExtClass::CharacterStruct::FACE, 53,	TEXT("S00_O_mimiL"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Right
+			{ ExtClass::CharacterStruct::FACE, 54,	TEXT("S00_O_mimiL"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Left
+			{ ExtClass::CharacterStruct::FACE, 55,	TEXT("S00_O_mimiR"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Right
+			{ ExtClass::CharacterStruct::FACE, 56,	TEXT("S00_O_mimiL"),{ 0,0,0, 0,0,0, 1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Left
+			{ ExtClass::CharacterStruct::FACE, 57,	TEXT("S00_O_mimiR"),{ 0,0,0, 0,0,0, -1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Right
+			{ ExtClass::CharacterStruct::FACE, 58,	TEXT("S00_O_mimiL"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Left
+			{ ExtClass::CharacterStruct::FACE, 59,	TEXT("S00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
+			{ ExtClass::CharacterStruct::FACE, 60,	TEXT("S00_O_mimi"),{ 0,0,0, 0,0,0, 0,1,0 },					Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear height
 
 		},
 		{
@@ -345,6 +357,14 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,58, TEXT("a01_J_UplegL_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 			{ ExtClass::CharacterStruct::BODY,59, TEXT("a01_J_UplegR_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
+			{ ExtClass::CharacterStruct::BODY,	60, TEXT("a01_J_LegL_01"),{ 0.15f,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	61, TEXT("a01_J_LegR_01"),{ 0.15f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	62, TEXT("a01_J_LegL_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	63, TEXT("a01_J_LegR_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	64, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	65, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
 
 		},
 		{
