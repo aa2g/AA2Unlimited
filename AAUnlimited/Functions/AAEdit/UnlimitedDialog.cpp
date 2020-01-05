@@ -2350,27 +2350,32 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				-0.1f, 0.1f
 			},
 			{ TEXT("Ear Height"),
-				{ { CharacterStruct::FACE, 1 } },
+				{ { CharacterStruct::FACE, 1 }, { CharacterStruct::FACE, 60 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Ear (Split) Spacing"),
-				{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 } },
+				{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 },
+				{ CharacterStruct::FACE, 56 },{ CharacterStruct::FACE, 57 } },
 				-0.1f, 0.1f
 			},
 			{ TEXT("Ear (Split) Depth"),
-				{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 } },
+				{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 },
+				{ CharacterStruct::FACE, 58 },{ CharacterStruct::FACE, 59 }},
 				-0.1f, 0.1f
 			},
 			{ TEXT("Ear (Split) Scale X"),
-				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 },
+				{ CharacterStruct::FACE, 50 },{ CharacterStruct::FACE, 51 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Y"),
-				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 },
+				{ CharacterStruct::FACE, 52 },{ CharacterStruct::FACE, 53 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Z"),
-			{ { CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 } },
+			{	{ CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 },
+				{ CharacterStruct::FACE, 54 },{ CharacterStruct::FACE, 55 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Mouth Width"),
