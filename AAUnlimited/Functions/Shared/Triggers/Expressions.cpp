@@ -1366,6 +1366,25 @@ namespace Shared {
 			}
 		}
 
+		//int()
+		Value Thread::GetPcTarget(std::vector<Value>& params) {
+			int default_return = -1;
+
+			const DWORD offset[]{ 0x376164, 0x8C };
+			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity **)ExtVars::ApplyRule(offset);
+
+			for (int character = 0; character < 25; character = character + 1) {
+				CharInstData* inst2 = &AAPlay::g_characters[character];
+				if (inst2->IsValid()) {
+					if ((inst2->m_char->m_moreData1->m_activity) == *pcTarget) {
+						default_return = inst2->m_char->m_seat;
+					}
+				}
+			}
+			return Value(default_return);
+		}
+
+
 		//int(int)
 		Value Thread::PCTalkAbout(std::vector<Value>& params) {
 			auto ptr = Shared::GameState::getPlayerCharacter();
@@ -3125,6 +3144,12 @@ namespace Shared {
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_INT }, (TYPE_INT),
 					&Thread::GetClassStorageInt
+				},
+				{
+					122, EXPRCAT_GENERAL,
+					TEXT("Get PC Target"), TEXT("PCTarget"), TEXT("Returns the seat of the card that is the current target of the player character."),
+					{}, (TYPE_INT),
+					&Thread::GetPcTarget
 				},
 			},
 
