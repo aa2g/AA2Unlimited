@@ -472,11 +472,11 @@ void hPositionChangeInjection() {
 
 void __stdcall MurderEvent(CharacterStruct* param) {
 	if (param == nullptr) return;
-	Shared::Triggers::MurderEventData murderEventData;
-	murderEventData.card = param->m_seat; // Protect this adequately so we don't get another infirmary crash bullshit
+	Shared::Triggers::CardExpelledData cardExpelledData;
+	cardExpelledData.card = param->m_seat; // Protect this adequately so we don't get another infirmary crash bullshit
 	//finding the murderer
 	int murderer = -1;
-	CharInstData* inst = &AAPlay::g_characters[murderEventData.card];
+	CharInstData* inst = &AAPlay::g_characters[cardExpelledData.card];
 	if (!inst->IsValid())
 	{
 		return;
@@ -489,10 +489,10 @@ void __stdcall MurderEvent(CharacterStruct* param) {
 			murderer = target->m_char->m_seat;
 		}
 	}
-	murderEventData.murderer = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 
-	murderEventData.murderAction = param->m_moreData1->m_activity->m_currConversationId;
-	LUA_EVENT_NORET("murder", murderEventData.card, murderEventData.murderer, murderEventData.murderAction);
-	ThrowEvent(&murderEventData);
+	cardExpelledData.target = murderer; // Put your loop here that detects who did it. Check the target AND actionid for it. 
+	cardExpelledData.action = param->m_moreData1->m_activity->m_currConversationId;
+	LUA_EVENT_NORET("card_expelled", cardExpelledData.card, cardExpelledData.target, cardExpelledData.action);
+	ThrowEvent(&cardExpelledData);
 }
 
 void __declspec(naked) murderEventRedirect() {

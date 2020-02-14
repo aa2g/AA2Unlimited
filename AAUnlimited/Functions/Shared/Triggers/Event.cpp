@@ -106,9 +106,9 @@ namespace Shared {
 			TEXT("The event is fired as the H scene starts."),
 				{}
 			},
-			{ MURDER_EVENT, EVENTCAT_LOADS, TEXT("Murder event"), TEXT("Murder happened"),
-			TEXT("The event is fired when a character is murdered."),
-			{}
+			{ CARD_EXPELLED, EVENTCAT_LOADS, TEXT("Card Expelled"), TEXT("Card Expelled"),
+			TEXT("The event is fired when a character expelled from class: either killed, arrested or fired."),
+				{}
 			}
 		};
 

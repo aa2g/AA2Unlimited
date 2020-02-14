@@ -16,7 +16,7 @@ function on.move(params, user)
 	trackPrevAction(params, user);
 end
 
-function on.murder(actor0, actor1, murder_action)
+function on.card_expelled(actor0, actor1, murder_action)
 	detectiveStartTheCase(actor0, actor1);
 end
 
