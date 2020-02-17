@@ -43,7 +43,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeClassStrin
 
 //storeCardData
 
-PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardBool(CharInstData * character, std::wstring key, bool value)
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardBool(CharInstData* character, std::wstring key, bool value)
 {
 	/*
 	{
@@ -70,7 +70,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardBool(C
 	return *this;
 }
 
-PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardInt(CharInstData * character, std::wstring key, int value)
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardInt(CharInstData* character, std::wstring key, int value)
 {
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 
@@ -86,7 +86,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardInt(Ch
 	return *this;
 }
 
-PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardFloat(CharInstData * character, std::wstring key, float value)
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardFloat(CharInstData* character, std::wstring key, float value)
 {
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 
@@ -102,7 +102,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardFloat(
 	return *this;
 }
 
-PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardString(CharInstData * character, std::wstring key, std::string value)
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardString(CharInstData* character, std::wstring key, std::string value)
 {
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 
@@ -118,7 +118,7 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardString
 	return *this;
 }
 
-PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardObject(CharInstData * character, std::wstring key, picojson::object value)
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardObject(CharInstData* character, std::wstring key, picojson::object value)
 {
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 
@@ -129,6 +129,113 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardObject
 		record = val.get<picojson::object>();
 	}
 	record[General::CastToString(key)] = picojson::value(value);
+
+	this->set(name, picojson::value(record));
+	return *this;
+}
+
+//storeCardAAUData
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDataBool(CharInstData* character, std::wstring key, bool value)
+{
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+
+	auto cardStorageValue = this->get(name);
+	picojson::object record;
+	if (!cardStorageValue.is<picojson::object>()) {
+		cardStorageValue = picojson::value(picojson::object());
+	}
+	auto aaudStorageValue = cardStorageValue.get<picojson::object>()["AAUData"];
+	if (!aaudStorageValue.is<picojson::object>()) {
+		aaudStorageValue = picojson::value(picojson::object());
+	}
+	picojson::object aaudStorage = aaudStorageValue.get<picojson::object>();
+	aaudStorage[General::CastToString(key)] = picojson::value(value);
+	record["AAUData"] = picojson::value(aaudStorage);
+
+	this->set(name, picojson::value(record));
+	return *this;
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDataInt(CharInstData* character, std::wstring key, int value)
+{
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+
+	auto cardStorageValue = this->get(name);
+	picojson::object record;
+	if (!cardStorageValue.is<picojson::object>()) {
+		cardStorageValue = picojson::value(picojson::object());
+	}
+	auto aaudStorageValue = cardStorageValue.get<picojson::object>()["AAUData"];
+	if (!aaudStorageValue.is<picojson::object>()) {
+		aaudStorageValue = picojson::value(picojson::object());
+	}
+	picojson::object aaudStorage = aaudStorageValue.get<picojson::object>();
+	aaudStorage[General::CastToString(key)] = picojson::value(value * 1.0);
+	record["AAUData"] = picojson::value(aaudStorage);
+
+	this->set(name, picojson::value(record));
+	return *this;
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDataFloat(CharInstData* character, std::wstring key, float value)
+{
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+
+	auto cardStorageValue = this->get(name);
+	picojson::object record;
+	if (!cardStorageValue.is<picojson::object>()) {
+		cardStorageValue = picojson::value(picojson::object());
+	}
+	auto aaudStorageValue = cardStorageValue.get<picojson::object>()["AAUData"];
+	if (!aaudStorageValue.is<picojson::object>()) {
+		aaudStorageValue = picojson::value(picojson::object());
+	}
+	picojson::object aaudStorage = aaudStorageValue.get<picojson::object>();
+	aaudStorage[General::CastToString(key)] = picojson::value(value);
+	record["AAUData"] = picojson::value(aaudStorage);
+
+	this->set(name, picojson::value(record));
+	return *this;
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDataString(CharInstData* character, std::wstring key, std::string value)
+{
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+
+	auto cardStorageValue = this->get(name);
+	picojson::object record;
+	if (!cardStorageValue.is<picojson::object>()) {
+		cardStorageValue = picojson::value(picojson::object());
+	}
+	auto aaudStorageValue = cardStorageValue.get<picojson::object>()["AAUData"];
+	if (!aaudStorageValue.is<picojson::object>()) {
+		aaudStorageValue = picojson::value(picojson::object());
+	}
+	picojson::object aaudStorage = aaudStorageValue.get<picojson::object>();
+	aaudStorage[General::CastToString(key)] = picojson::value(value);
+	record["AAUData"] = picojson::value(aaudStorage);
+
+	this->set(name, picojson::value(record));
+	return *this;
+}
+
+PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDataObject(CharInstData* character, std::wstring key, picojson::object value)
+{
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+
+	auto cardStorageValue = this->get(name);
+	picojson::object record;
+	if (!cardStorageValue.is<picojson::object>()) {
+		cardStorageValue = picojson::value(picojson::object());
+	}
+	auto aaudStorageValue = cardStorageValue.get<picojson::object>()["AAUData"];
+	if (!aaudStorageValue.is<picojson::object>()) {
+		aaudStorageValue = picojson::value(picojson::object());
+	}
+	picojson::object aaudStorage = aaudStorageValue.get<picojson::object>();
+	aaudStorage[General::CastToString(key)] = picojson::value(value);
+	record["AAUData"] = picojson::value(aaudStorage);
 
 	this->set(name, picojson::value(record));
 	return *this;
@@ -180,13 +287,13 @@ PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::get
 	Option<picojson::object> result;
 	auto i = this->data.find(name);
 	result.isValid = i != this->data.end();
-	if(result.isValid)
+	if (result.isValid)
 		result.value = i->second.get<picojson::object>();
 
 	return result;
 }
 
-PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getCardBool(CharInstData * character, std::wstring key)
+PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getCardBool(CharInstData* character, std::wstring key)
 {
 	auto val = getCardRecord(character, key);
 	Option<bool> result;
@@ -200,7 +307,7 @@ PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getCardBool(Cha
 	return result;
 }
 
-PersistentStorage::Option<int> PersistentStorage::ClassStorage::getCardInt(CharInstData * character, std::wstring key)
+PersistentStorage::Option<int> PersistentStorage::ClassStorage::getCardInt(CharInstData* character, std::wstring key)
 {
 	auto val = getCardRecord(character, key);
 	Option<int> result;
@@ -214,7 +321,7 @@ PersistentStorage::Option<int> PersistentStorage::ClassStorage::getCardInt(CharI
 	return result;
 }
 
-PersistentStorage::Option<float> PersistentStorage::ClassStorage::getCardFloat(CharInstData * character, std::wstring key)
+PersistentStorage::Option<float> PersistentStorage::ClassStorage::getCardFloat(CharInstData* character, std::wstring key)
 {
 	auto val = getCardRecord(character, key);
 	Option<float> result;
@@ -228,7 +335,7 @@ PersistentStorage::Option<float> PersistentStorage::ClassStorage::getCardFloat(C
 	return result;
 }
 
-PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getCardString(CharInstData * character, std::wstring key)
+PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getCardString(CharInstData* character, std::wstring key)
 {
 	auto val = getCardRecord(character, key);
 	Option<std::string> result;
@@ -241,7 +348,7 @@ PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getCardS
 	return result;
 }
 
-PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::getCardObject(CharInstData * character, std::wstring key)
+PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::getCardObject(CharInstData* character, std::wstring key)
 {
 	auto val = getCardRecord(character, key);
 	Option<picojson::object> result;
@@ -253,6 +360,22 @@ PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::get
 	}
 	return result;
 }
+
+//getCardAAUData
+picojson::value PersistentStorage::ClassStorage::getCardAAUDataValue(CharInstData* character, std::wstring key) {
+	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
+	auto cardStorage = this->get(name);
+	picojson::value result;
+	if (cardStorage.is<picojson::object>())
+	{
+		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
+		if (aaudStorageValue.is<picojson::object>()) {
+			result = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
+		}
+	}
+	return result;
+}
+
 
 
 

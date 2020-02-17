@@ -76,6 +76,7 @@ public:
 	CharInstData* GetTargetInst();
 
 	void Reset();
+	void StoreInitialStats();
 	bool IsValid();
 
 	inline bool Editable() {

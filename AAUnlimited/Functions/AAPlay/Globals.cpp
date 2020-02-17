@@ -91,6 +91,9 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 			trg.Initialize(&aauData.GetGlobalVariables(), seat);
 		}
 	}
+	//initialize stats
+	g_characters[seat].StoreInitialStats();
+
 	//throw init event
 	CardInitializeData data;
 	data.card = seat;

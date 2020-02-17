@@ -71,6 +71,7 @@ namespace Shared {
 			void SetAbsoluteResponse(std::vector<Value>& params);
 			void SetPCTarget(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
+			void AddVirtueMod(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
 			void SetCardPreference(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);
@@ -83,9 +84,11 @@ namespace Shared {
 			void SetGlasses(std::vector<Value>& params);
 			void SetCardClub(std::vector<Value>& params);
 			void SetCardClubValue(std::vector<Value>& params);
+			void AddClubMod(std::vector<Value>& params);
 			void SetCardClubRank(std::vector<Value>& params);
 			void SetCardIntelligence(std::vector<Value>& params);
 			void SetCardIntelligenceValue(std::vector<Value>& params);
+			void AddIntelligenceMod(std::vector<Value>& params);
 			void SetCardIntelligenceRank(std::vector<Value>& params);
 			void SetCardStrength(std::vector<Value>& params);
 			void SetCardFightingStyle(std::vector<Value>& params);
@@ -93,10 +96,12 @@ namespace Shared {
 			void SetActionAboutRoom(std::vector<Value>& params);
 			void SetMasturbating(std::vector<Value>& params);
 			void SetCardStrengthValue(std::vector<Value>& params);
+			void AddStrengthMod(std::vector<Value>& params);
 			void SetCardStrengthRank(std::vector<Value>& params);
 			void SetStamina(std::vector<Value>& params);
 			void SetPeriodTimer(std::vector<Value>& params);
 			void SetCardSociability(std::vector<Value>& params);
+			void AddSociabilityMod(std::vector<Value>& params);
 			void SetCardLoversItem(std::vector<Value>& params);
 			void SetCardFriendItem(std::vector<Value>& params);
 			void SetCardSexualItem(std::vector<Value>& params);
