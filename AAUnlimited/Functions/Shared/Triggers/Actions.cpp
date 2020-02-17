@@ -432,6 +432,41 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.virtue = min(max(virtue, 0), 4);
 		}
 
+		//int seat, string modName, int virtue
+		void Thread::AddVirtueMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto modName = params[1].strVal;
+			auto newModValue = params[2].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target virtue mod
+			auto allVirtueMods = storage.getCardAAUDataValue(inst, L"virtueMods");
+			if (!allVirtueMods.is<picojson::object>()) {
+				allVirtueMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allVirtueMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allVirtueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+			
+			//adjust the effective virtue
+			auto oldEffectiveVirtue = storage.getCardAAUDataValue(inst, L"virtue");
+			int oldEffectiveVirtueValue = oldEffectiveVirtue.is<double>() ?
+				oldEffectiveVirtue.get<double>() : inst->m_char->m_charData->m_character.virtue;
+			auto newVirtueValue = oldEffectiveVirtueValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"virtue", newVirtueValue);
+			storage.storeCardAAUDataObject(inst, L"virtueMods", allVirtueMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_character.virtue = min(max(newVirtueValue, 0), 4);
+		}
+
 		//int seat, int trait, bool enable
 		void Thread::SetCardTrait(std::vector<Value>& params)
 		{
@@ -614,6 +649,7 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_club = club % 8;
 		}
+
 		//int seat, int value
 		void Thread::SetCardClubValue(std::vector<Value>& params)
 		{
@@ -625,6 +661,52 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.clubValue = value;
 		}
+
+		//int seat, string modName, int strengthValue
+		void Thread::AddClubMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto modName = params[1].strVal;
+			auto newModValue = params[2].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target club value mod
+			auto allClubValueMods = storage.getCardAAUDataValue(inst, L"clubValueMods");
+			if (!allClubValueMods.is<picojson::object>()) {
+				allClubValueMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allClubValueMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allClubValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+
+			//adjust the effective club value
+			auto oldEffectiveClubValue = storage.getCardAAUDataValue(inst, L"clubValue");
+			int oldEffectiveClubValueValue = oldEffectiveClubValue.is<double>() ?
+				oldEffectiveClubValue.get<double>() : inst->m_char->m_charData->m_character.clubValue;
+			//	training correction
+			if (oldEffectiveClubValueValue > 999) {
+				oldEffectiveClubValueValue -= 999 - inst->m_char->m_charData->m_character.clubValue;
+			}
+			else if (oldEffectiveClubValueValue < 0) {
+				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue;
+			}
+			else {
+				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue - oldEffectiveClubValueValue;
+			}
+			auto newClubValueValue = oldEffectiveClubValueValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"clubValue", newClubValueValue);
+			storage.storeCardAAUDataObject(inst, L"clubValueMods", allClubValueMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_character.clubValue = min(max(newClubValueValue, 0), 999);
+		}
+		
 		//int seat, int rank
 		void Thread::SetCardClubRank(std::vector<Value>& params)
 		{
@@ -650,6 +732,7 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligence = intelligence % 6;
 		}
+
 		//int seat, int value
 		void Thread::SetCardIntelligenceValue(std::vector<Value>& params)
 		{
@@ -662,6 +745,52 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligenceValue = value;
 		}
+
+		//int seat, string modName, int intelligenceValue
+		void Thread::AddIntelligenceMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto modName = params[1].strVal;
+			auto newModValue = params[2].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target intelligence value mod
+			auto allIntelligenceValueMods = storage.getCardAAUDataValue(inst, L"intelligenceValueMods");
+			if (!allIntelligenceValueMods.is<picojson::object>()) {
+				allIntelligenceValueMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allIntelligenceValueMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allIntelligenceValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+
+			//adjust the effective intelligence value
+			auto oldEffectiveIntelligenceValue = storage.getCardAAUDataValue(inst, L"intelligenceValue");
+			int oldEffectiveIntelligenceValueValue = oldEffectiveIntelligenceValue.is<double>() ?
+				oldEffectiveIntelligenceValue.get<double>() : inst->m_char->m_charData->m_character.intelligenceValue;
+			//	training correction
+			if (oldEffectiveIntelligenceValueValue > 999) {
+				oldEffectiveIntelligenceValueValue -= 999 - inst->m_char->m_charData->m_character.intelligenceValue;
+			}
+			else if (oldEffectiveIntelligenceValueValue < 0) {
+				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue;
+			}
+			else {
+				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue - oldEffectiveIntelligenceValueValue;
+			}
+			auto newIntelligenceValueValue = oldEffectiveIntelligenceValueValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"intelligenceValue", newIntelligenceValueValue);
+			storage.storeCardAAUDataObject(inst, L"intelligenceValueMods", allIntelligenceValueMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_character.intelligenceValue = min(max(newIntelligenceValueValue, 0), 999);
+		}
+
 		//int seat, int rank
 		void Thread::SetCardIntelligenceRank(std::vector<Value>& params)
 		{
@@ -673,19 +802,6 @@ namespace Shared {
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.intelligenceClassRank = rank;
-		}
-
-		//int seat, int strength
-		void Thread::SetCardStrength(std::vector<Value>& params)
-		{
-			int seat = params[0].iVal;
-			if (ActionSeatInvalid(seat)) return;
-			int strength = params[1].iVal;
-			if (!AAPlay::g_characters[seat].IsValid()) {
-				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
-				return;
-			}
-			AAPlay::g_characters[seat].m_char->m_charData->m_character.strength = strength % 6;
 		}
 
 		//int seat, int fightingStyle
@@ -739,6 +855,19 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_moreData1->m_activity->m_isMasturbating = masturbatingValue;
 		}
+		
+		//int seat, int strength
+		void Thread::SetCardStrength(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int strength = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_charData->m_character.strength = strength % 6;
+		}
 
 		void Thread::SetCardStrengthValue(std::vector<Value>& params)
 		{
@@ -751,6 +880,52 @@ namespace Shared {
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.strengthValue = value;
 		}
+
+		//int seat, string modName, int strengthValue
+		void Thread::AddStrengthMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto modName = params[1].strVal;
+			auto newModValue = params[2].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target strength value mod
+			auto allStrengthValueMods = storage.getCardAAUDataValue(inst, L"strengthValueMods");
+			if (!allStrengthValueMods.is<picojson::object>()) {
+				allStrengthValueMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allStrengthValueMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allStrengthValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+
+			//adjust the effective strength value
+			auto oldEffectiveStrengthValue = storage.getCardAAUDataValue(inst, L"strengthValue");
+			int oldEffectiveStrengthValueValue = oldEffectiveStrengthValue.is<double>() ?
+				oldEffectiveStrengthValue.get<double>() : inst->m_char->m_charData->m_character.strengthValue;
+			//	training correction
+			if (oldEffectiveStrengthValueValue > 999) {
+				oldEffectiveStrengthValueValue -= 999 - inst->m_char->m_charData->m_character.strengthValue;
+			}
+			else if (oldEffectiveStrengthValueValue < 0) {
+				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue;
+			}
+			else {
+				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue - oldEffectiveStrengthValueValue;
+			}
+			auto newStrengthValueValue = oldEffectiveStrengthValueValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"strengthValue", newStrengthValueValue);
+			storage.storeCardAAUDataObject(inst, L"strengthValueMods", allStrengthValueMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_character.strengthValue = min(max(newStrengthValueValue, 0), 999);
+		}
+
 		//int seat, int rank
 		void Thread::SetCardStrengthRank(std::vector<Value>& params)
 		{
@@ -798,6 +973,41 @@ namespace Shared {
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.sociability = sociability;
+		}
+
+		//int seat, string modName, int sociability
+		void Thread::AddSociabilityMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto modName = params[1].strVal;
+			auto newModValue = params[2].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target sociability mod
+			auto allSociabilityMods = storage.getCardAAUDataValue(inst, L"sociabilityMods");
+			if (!allSociabilityMods.is<picojson::object>()) {
+				allSociabilityMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allSociabilityMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allSociabilityMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+
+			//adjust the effective sociability
+			auto oldEffectiveSociability = storage.getCardAAUDataValue(inst, L"sociability");
+			int oldEffectiveSociabilityValue = oldEffectiveSociability.is<double>() ?
+				oldEffectiveSociability.get<double>() : inst->m_char->m_charData->m_character.sociability;
+			auto newSociabilityValue = oldEffectiveSociabilityValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"sociability", newSociabilityValue);
+			storage.storeCardAAUDataObject(inst, L"sociabilityMods", allSociabilityMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_character.sociability = min(max(newSociabilityValue, 0), 4);
 		}
 
 		//int seat, string item
@@ -2288,6 +2498,36 @@ namespace Shared {
 				"When the key is allready in use, the function will silently fail."),
 				{ TYPE_STRING, TYPE_BOOL },
 				&Thread::SetClassStorageBool
+			},
+			{
+				114, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Virtue"), TEXT("%p ::AddVirtueMod( %p ) = %p "),
+				TEXT("Add or replace a virtue modifier"),
+				{ TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddVirtueMod
+			},
+			{
+				115, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Sociability"), TEXT("%p ::AddSociabilityMod( %p ) = %p "),
+				TEXT("Add or replace a sociability modifier"),
+				{ TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddSociabilityMod
+			},
+			{
+				116, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Strength"), TEXT("%p ::AddStrengthMod( %p ) = %p "),
+				TEXT("Add or replace a strength value modifier"),
+				{ TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddStrengthMod
+			},
+			{
+				117, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Intelligence"), TEXT("%p ::AddIntelligenceMod( %p ) = %p "),
+				TEXT("Add or replace an intelligence value modifier"),
+				{ TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddIntelligenceMod
+			},
+			{
+				118, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Club"), TEXT("%p ::AddClubMod( %p ) = %p "),
+				TEXT("Add or replace a club value modifier"),
+				{ TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddClubMod
 			},
 		};
 

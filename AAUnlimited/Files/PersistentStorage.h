@@ -58,11 +58,7 @@ namespace PersistentStorage {
 		Option<std::string> getCardString(CharInstData* character, std::wstring key);
 		Option<picojson::object> getCardObject(CharInstData* character, std::wstring key);
 
-		PersistentStorage::Option<bool> getCardAAUDataBool(CharInstData* character, std::wstring key);
-		PersistentStorage::Option<int> getCardAAUDataInt(CharInstData* character, std::wstring key);
-		PersistentStorage::Option<float> getCardAAUDataFloat(CharInstData* character, std::wstring key);
-		PersistentStorage::Option<std::string> getCardAAUDataString(CharInstData* character, std::wstring key);
-		PersistentStorage::Option<picojson::object> getCardAAUDataObject(CharInstData* character, std::wstring key);
+		picojson::value getCardAAUDataValue(CharInstData* character, std::wstring key);
 
 		static ClassStorage getStorage(std::wstring file);
 		static ClassStorage getCurrentClassStorage();

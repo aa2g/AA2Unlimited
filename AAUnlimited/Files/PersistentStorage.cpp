@@ -362,96 +362,15 @@ PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::get
 }
 
 //getCardAAUData
-PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getCardAAUDataBool(CharInstData* character, std::wstring key)
-{
+picojson::value PersistentStorage::ClassStorage::getCardAAUDataValue(CharInstData* character, std::wstring key) {
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 	auto cardStorage = this->get(name);
-	Option<bool> result;
-	result.isValid = false;
+	picojson::value result;
 	if (cardStorage.is<picojson::object>())
 	{
 		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
 		if (aaudStorageValue.is<picojson::object>()) {
-			auto i = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
-			result.isValid = i.is<bool>();
-			if (result.isValid)
-				result.value = i.get<bool>();
-		}
-	}
-	return result;
-}
-
-PersistentStorage::Option<int> PersistentStorage::ClassStorage::getCardAAUDataInt(CharInstData* character, std::wstring key)
-{
-	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
-	auto cardStorage = this->get(name);
-	Option<int> result;
-	result.isValid = false;
-	if (cardStorage.is<picojson::object>())
-	{
-		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
-		if (aaudStorageValue.is<picojson::object>()) {
-			auto i = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
-			result.isValid = i.is<double>();
-			if (result.isValid)
-				result.value = i.get<double>();
-		}
-	}
-	return result;
-}
-
-PersistentStorage::Option<float> PersistentStorage::ClassStorage::getCardAAUDataFloat(CharInstData* character, std::wstring key)
-{
-	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
-	auto cardStorage = this->get(name);
-	Option<float> result;
-	result.isValid = false;
-	if (cardStorage.is<picojson::object>())
-	{
-		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
-		if (aaudStorageValue.is<picojson::object>()) {
-			auto i = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
-			result.isValid = i.is<double>();
-			if (result.isValid)
-				result.value = i.get<double>();
-		}
-	}
-	return result;
-}
-
-PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getCardAAUDataString(CharInstData* character, std::wstring key)
-{
-	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
-	auto cardStorage = this->get(name);
-	Option<std::string> result;
-	result.isValid = false;
-	if (cardStorage.is<picojson::object>())
-	{
-		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
-		if (aaudStorageValue.is<picojson::object>()) {
-			auto i = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
-			result.isValid = i.is<std::string>();
-			if (result.isValid)
-				result.value = i.get<std::string>();
-		}
-	}
-	return result;
-}
-
-PersistentStorage::Option<picojson::object> PersistentStorage::ClassStorage::getCardAAUDataObject(CharInstData* character, std::wstring key)
-{
-	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
-	auto cardStorage = this->get(name);
-	Option<picojson::object> result;
-	result.isValid = false;
-	if (cardStorage.is<picojson::object>())
-	{
-		auto aaudStorageValue = cardStorage.get<picojson::object>()["AAUData"];
-		if (aaudStorageValue.is<picojson::object>()) {
-			auto i = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
-			result.isValid = i.is<picojson::object>();
-			if (result.isValid)
-				result.value = i.get<picojson::object>();
+			result = aaudStorageValue.get<picojson::object>()[General::CastToString(key)];
 		}
 	}
 	return result;

@@ -92,7 +92,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 		}
 	}
 	//initialize stats
-	//TODO: inst->InitStats()
+	g_characters[seat].StoreInitialStats();
 
 	//throw init event
 	CardInitializeData data;
