@@ -211,6 +211,8 @@ namespace Shared {
 
 			//card info
 			Value GetCardVirtue(std::vector<Value>& params); //int(int)
+			Value GetCardVirtueMod(std::vector<Value>& params); //int(int,string)
+			Value GetCardEffectiveVirtue(std::vector<Value>& params);
 			Value GetCardTrait(std::vector<Value>& params);
 			Value GetCardPreference(std::vector<Value>& params);
 			Value GetCardOpinion(std::vector<Value>& params);
@@ -223,9 +225,16 @@ namespace Shared {
 			Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
 			Value GetCardClub(std::vector<Value>& params); //int(int)
 			Value GetCardClubValue(std::vector<Value>& params); //int(int)
+			Value GetCardClubMod(std::vector<Value>& params);	//int(int, string)
+			Value GetCardEffectiveClubValue(std::vector<Value>& params);	//int(int)
 			Value GetCardClubRank(std::vector<Value>& params); //int(int)
 			Value GetCardIntelligence(std::vector<Value>& params); //int(int)
 			Value GetCardIntelligenceValue(std::vector<Value>& params); //int(int)
+			Value GetCardIntelligenceMod(std::vector<Value>& params);
+			Value GetCardStrengthMod(std::vector<Value>& params);
+			Value GetCardEffectiveStrengthValue(std::vector<Value>& params);
+			//int(int, string)
+			Value GetCardEffectiveIntelligenceValue(std::vector<Value>& params);	//int(int)
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
 			Value GetCardFightingStyle(std::vector<Value>& params); //int(int)
@@ -238,6 +247,8 @@ namespace Shared {
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
 			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
+			Value GetCardSociabilityMod(std::vector<Value>& params); //int(int, string)
+			Value GetCardEffectiveSociability(std::vector<Value>& params); //int(int)
 			Value GetCardLastName(std::vector<Value>& params); //string(int)
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
 			Value GetCardFullName(std::vector<Value>& params);	//string(int)

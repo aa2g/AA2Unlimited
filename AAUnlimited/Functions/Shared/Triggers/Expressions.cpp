@@ -105,7 +105,7 @@ namespace Shared {
 
 		//bool (int)
 		Value Thread::PoseExists(std::vector<Value>& params) {
-			
+
 			auto fileName = General::AAUPath + L"poser\\poses\\" + *(params[0].strVal);
 
 			std::ifstream infile(fileName);
@@ -220,7 +220,7 @@ namespace Shared {
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
 			srand((unsigned int)time(NULL));
 			int range = params[1].iVal - params[0].iVal + 1;
-			if (range > 0){
+			if (range > 0) {
 				int r = rand() % range + params[0].iVal;
 				return Value(r);
 			}
@@ -555,6 +555,35 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_character.virtue);
 		}
 
+		//int(int, string)
+		Value Thread::GetCardVirtueMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto virtueMods = storage.getCardAAUDataValue(cardInst, L"virtueMods");
+			if (!virtueMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto virtueMod = virtueMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto virtue = virtueMod.is<double>() ? (int)virtueMod.get<double>() : 0;
+
+
+			return Value(virtue);
+		}
+
+		Value Thread::GetCardEffectiveVirtue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto virtue = storage.getCardAAUDataValue(cardInst, L"virtue");
+			return Value(virtue.is<double>() ? (int)virtue.get<double>() : cardInst->m_char->m_charData->m_character.virtue);
+		}
+
 		//bool(int, int)
 		Value Thread::GetCardTrait(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -579,20 +608,20 @@ namespace Shared {
 		}
 
 		Value Thread::GetCardOpinion(std::vector<Value>& params) {
-				int seat = params[0].iVal;
-				int feeling = params[1].iVal;
-				int towards = params[2].iVal;
+			int seat = params[0].iVal;
+			int feeling = params[1].iVal;
+			int towards = params[2].iVal;
 
-				if (!AAPlay::g_characters[seat].IsValid()) return -1;
-				if (!AAPlay::g_characters[towards].IsValid()) return -1;
+			if (!AAPlay::g_characters[seat].IsValid()) return -1;
+			if (!AAPlay::g_characters[towards].IsValid()) return -1;
 
-				towards = (AAPlay::g_characters[towards].idxSave);
-				if (AAPlay::g_characters[seat].idxSave == towards) return -1;
-				if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
-				int decValue = 92 * towards + feeling;
-				return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
+			towards = (AAPlay::g_characters[towards].idxSave);
+			if (AAPlay::g_characters[seat].idxSave == towards) return -1;
+			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
+			int decValue = 92 * towards + feeling;
+			return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
 
-			}
+		}
 
 		Value Thread::GetCardFigure(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -621,7 +650,7 @@ namespace Shared {
 			{
 				int size = (int)(inst->m_char->m_charData->m_chest.size);
 				if (size <= 33) return Value(0);
-				if ((size > 33) && (size <=66)) return Value(1);
+				if ((size > 33) && (size <= 66)) return Value(1);
 				if (size > 66) return Value(2);
 			}
 		}
@@ -668,6 +697,35 @@ namespace Shared {
 			return Value((int)cardInst->m_char->m_charData->m_character.clubValue);
 		}
 
+		//int(int, string)
+		Value Thread::GetCardClubMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto clubMods = storage.getCardAAUDataValue(cardInst, L"clubMods");
+			if (!clubMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto clubMod = clubMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto club = clubMod.is<double>() ? (int)clubMod.get<double>() : 0;
+
+
+			return Value(club);
+		}
+
+		Value Thread::GetCardEffectiveClubValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto club = storage.getCardAAUDataValue(cardInst, L"club");
+			return Value(club.is<double>() ? (int)club.get<double>() : (int)cardInst->m_char->m_charData->m_character.clubValue);
+		}
+
 		//int(int)
 		Value Thread::GetCardClubRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -698,6 +756,35 @@ namespace Shared {
 			return Value((int)cardInst->m_char->m_charData->m_character.intelligenceValue);
 		}
 
+		//int(int, string)
+		Value Thread::GetCardIntelligenceMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto intelligenceMods = storage.getCardAAUDataValue(cardInst, L"intelligenceMods");
+			if (!intelligenceMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto intelligenceMod = intelligenceMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto intelligence = intelligenceMod.is<double>() ? (int)intelligenceMod.get<double>() : 0;
+
+
+			return Value(intelligence);
+		}
+
+		Value Thread::GetCardEffectiveIntelligenceValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto intelligence = storage.getCardAAUDataValue(cardInst, L"intelligence");
+			return Value(intelligence.is<double>() ? (int)intelligence.get<double>() : (int)cardInst->m_char->m_charData->m_character.intelligenceValue);
+		}
+
 		//int(int)
 		Value Thread::GetCardIntelligenceRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -706,16 +793,6 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value(cardInst->m_char->m_charData->m_character.intelligenceClassRank);
-		}
-
-		//int(int)
-		Value Thread::GetCardStrength(std::vector<Value>& params) {
-			int card = params[0].iVal;
-			if (ExpressionSeatInvalid(card)) return Value(-1);
-			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (!cardInst->IsValid()) return Value(-1);
-
-			return Value(cardInst->m_char->m_charData->m_character.strength);
 		}
 
 		//int(int)
@@ -780,6 +857,16 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetCardStrength(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_charData->m_character.strength);
+		}
+
+		//int(int)
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -787,6 +874,35 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value((int)cardInst->m_char->m_charData->m_character.strengthValue);
+		}
+
+		//int(int, string)
+		Value Thread::GetCardStrengthMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto strengthMods = storage.getCardAAUDataValue(cardInst, L"strengthMods");
+			if (!strengthMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto strengthMod = strengthMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto strength = strengthMod.is<double>() ? (int)strengthMod.get<double>() : 0;
+
+
+			return Value(strength);
+		}
+
+		Value Thread::GetCardEffectiveStrengthValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto strength = storage.getCardAAUDataValue(cardInst, L"strength");
+			return Value(strength.is<double>() ? (int)strength.get<double>() : (int)cardInst->m_char->m_charData->m_character.strengthValue);
 		}
 
 		//int(int)
@@ -806,6 +922,35 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value(cardInst->m_char->m_charData->m_character.sociability);
+		}
+
+		//int(int, string)
+		Value Thread::GetCardSociabilityMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto sociabilityMods = storage.getCardAAUDataValue(cardInst, L"sociabilityMods");
+			if (!sociabilityMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto sociabilityMod = sociabilityMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto sociability = sociabilityMod.is<double>() ? (int)sociabilityMod.get<double>() : 0;
+
+
+			return Value(sociability);
+		}
+
+		Value Thread::GetCardEffectiveSociability(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto sociability = storage.getCardAAUDataValue(cardInst, L"sociability");
+			return Value(sociability.is<double>() ? (int)sociability.get<double>() : cardInst->m_char->m_charData->m_character.sociability);
 		}
 
 		//string(int)
@@ -899,7 +1044,7 @@ namespace Shared {
 				DWORD* offset = (DWORD*)ExtVars::ApplyRule(adr);
 
 				if (offset) {
-					return Value((int)*offset);
+					return Value((int)* offset);
 				}
 				else return -1;
 			}
@@ -1232,7 +1377,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(target)) return Value(0);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			CharInstData* targetInst = &AAPlay::g_characters[target];
-			
+
 			if (!cardInst->IsValid() || !targetInst->IsValid()) {
 				return 0;
 			}
@@ -1264,7 +1409,7 @@ namespace Shared {
 			}
 			return Value(AAPlay::g_characters[seat].m_cardData.FindStyleIdxByName(styleName));
 		}
-		
+
 		//bool(int)
 		Value Thread::GetSexExperience(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -1371,7 +1516,7 @@ namespace Shared {
 			int default_return = -1;
 
 			const DWORD offset[]{ 0x376164, 0x8C };
-			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity **)ExtVars::ApplyRule(offset);
+			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity * *)ExtVars::ApplyRule(offset);
 
 			for (int character = 0; character < 25; character = character + 1) {
 				CharInstData* inst2 = &AAPlay::g_characters[character];
@@ -1472,7 +1617,7 @@ namespace Shared {
 
 		//int(int)
 		Value Thread::GetPeriodTimer(std::vector<Value>& params) {
-			const DWORD offset[]{ 0x376164, 0x2c, 0x2C};
+			const DWORD offset[]{ 0x376164, 0x2c, 0x2C };
 			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
 			return (*(int*)timer / 1000);
 		}
@@ -1612,7 +1757,7 @@ namespace Shared {
 				return Value(totalCums);
 			}
 		}
-		
+
 		//int(int)
 		Value Thread::GetCardCumStatInMouthTotal(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -2589,37 +2734,37 @@ namespace Shared {
 				},
 				{
 					31, EXPRCAT_CHARPROP,
-					TEXT("Intelligence"), TEXT("%p ::Intelligence"), TEXT("The intelligence of this character."),
+					TEXT("Intelligence"), TEXT("%p ::INT"), TEXT("The intelligence of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligence
 				},
 				{
 					32, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Value"), TEXT("%p ::IntelligenceValue"), TEXT("The intelligence value of this character."),
+					TEXT("Intelligence Value"), TEXT("%p ::INTValue"), TEXT("The intelligence value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceValue
 				},
 				{
 					33, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Rank"), TEXT("%p ::IntelligenceRank"), TEXT("The intelligence rank of this character."),
+					TEXT("Intelligence Rank"), TEXT("%p ::INTRank"), TEXT("The intelligence rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceRank
 				},
 				{
 					34, EXPRCAT_CHARPROP,
-					TEXT("Strength"), TEXT("%p ::Strength"), TEXT("The strength of this character."),
+					TEXT("Strength"), TEXT("%p ::STR"), TEXT("The strength of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrength
 				},
 				{
 					35, EXPRCAT_CHARPROP,
-					TEXT("Strength Value"), TEXT("%p ::StrengthValue"), TEXT("The strength value of this character."),
+					TEXT("Strength Value"), TEXT("%p ::STRValue"), TEXT("The strength value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthValue
 				},
 				{
 					36, EXPRCAT_CHARPROP,
-					TEXT("Strength Rank"), TEXT("%p ::StrengthRank"), TEXT("The strength rank of this character."),
+					TEXT("Strength Rank"), TEXT("%p ::STRRank"), TEXT("The strength rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthRank
 				},
@@ -3151,6 +3296,66 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetPcTarget
 				},
+				{
+					123, EXPRCAT_CHARPROP,
+					TEXT("Virtue Modifier"), TEXT("%p ::VirtueMod( %p )"), TEXT("The value of the specified virtue modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardVirtueMod
+				},
+				{
+					124, EXPRCAT_CHARPROP,
+					TEXT("Real Virtue"), TEXT("%p ::RealVirtue"), TEXT("The real unlocked virtue of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveVirtue
+				},
+				{
+					125, EXPRCAT_CHARPROP,
+					TEXT("Sociability Modifier"), TEXT("%p ::SociabilityMod( %p )"), TEXT("The value of the specified sociability modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardSociabilityMod
+				},
+				{
+					126, EXPRCAT_CHARPROP,
+					TEXT("Real Sociability"), TEXT("%p ::RealSociability"), TEXT("The real unlocked socibility of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveSociability
+				},
+				{
+					127, EXPRCAT_CHARPROP,
+					TEXT("Intelligence Modifier"), TEXT("%p ::INTMod( %p )"), TEXT("The value of the specified intelligence value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardIntelligenceMod
+				},
+				{
+					128, EXPRCAT_CHARPROP,
+					TEXT("Real Intelligence Value"), TEXT("%p ::RealINTValue"), TEXT("The real unlocked intelligenve value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveIntelligenceValue
+				},
+				{
+					129, EXPRCAT_CHARPROP,
+					TEXT("Strength Modifier"), TEXT("%p ::STRMod( %p )"), TEXT("The value of the specified strength value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardStrengthMod
+				},
+				{
+					130, EXPRCAT_CHARPROP,
+					TEXT("Real Strength Value"), TEXT("%p ::RealSTRValue"), TEXT("The real unlocked strength value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveStrengthValue
+				},
+				{
+					131, EXPRCAT_CHARPROP,
+					TEXT("Club Modifier"), TEXT("%p ::ClubMod( %p )"), TEXT("The value of the specified club value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardClubMod
+				},
+				{
+					132, EXPRCAT_CHARPROP,
+					TEXT("Real Club Value"), TEXT("%p ::RealClubValue"), TEXT("The real unlocked club value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveClubValue
+				}
 			},
 
 			{ //BOOL
