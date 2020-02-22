@@ -458,6 +458,16 @@ namespace Shared {
 			auto oldEffectiveVirtue = storage.getCardAAUDataValue(inst, L"virtue");
 			int oldEffectiveVirtueValue = oldEffectiveVirtue.is<double>() ?
 				oldEffectiveVirtue.get<double>() : inst->m_char->m_charData->m_character.virtue;
+			//	training correction
+			if (oldEffectiveVirtueValue > 4) {
+				oldEffectiveVirtueValue -= 4 - inst->m_char->m_charData->m_character.virtue;
+			}
+			else if (oldEffectiveVirtueValue < 0) {
+				oldEffectiveVirtueValue += inst->m_char->m_charData->m_character.virtue;
+			}
+			else {
+				oldEffectiveVirtueValue += inst->m_char->m_charData->m_character.virtue - oldEffectiveVirtueValue;
+			}
 			auto newVirtueValue = oldEffectiveVirtueValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
@@ -1001,6 +1011,16 @@ namespace Shared {
 			auto oldEffectiveSociability = storage.getCardAAUDataValue(inst, L"sociability");
 			int oldEffectiveSociabilityValue = oldEffectiveSociability.is<double>() ?
 				oldEffectiveSociability.get<double>() : inst->m_char->m_charData->m_character.sociability;
+			//	training correction
+			if (oldEffectiveSociabilityValue > 4) {
+				oldEffectiveSociabilityValue -= 4 - inst->m_char->m_charData->m_character.sociability;
+			}
+			else if (oldEffectiveSociabilityValue < 0) {
+				oldEffectiveSociabilityValue += inst->m_char->m_charData->m_character.sociability;
+			}
+			else {
+				oldEffectiveSociabilityValue += inst->m_char->m_charData->m_character.sociability - oldEffectiveSociabilityValue;
+			}
 			auto newSociabilityValue = oldEffectiveSociabilityValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
