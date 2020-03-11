@@ -251,6 +251,47 @@ void Shared::GameState::setHPosition(DWORD value)
 	loc_gameState.m_HPosition = value;
 }
 
+
+void Shared::GameState::kickCard(int s)
+{
+	DWORD seat = (DWORD)s;
+	const DWORD offset1[]{ 0xF46D0 };
+	DWORD* kickFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x376164, 0x28, 0x00 };
+	DWORD* ediValue = (DWORD*)ExtVars::ApplyRule(offset2);
+
+
+	__asm
+	{
+		mov eax, seat
+		push ediValue
+		call[kickFunction]
+	}
+}
+
+void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
+{
+	DWORD seat = (DWORD)s;
+	std::wstring genderPath = gender ? L"Female\\" : L"Male\\";
+	std::wstring cardPath = General::AAPlayPath + L"data\\save\\" + genderPath + cardName;
+	DWORD *p = (DWORD *)(&cardPath);
+	DWORD pushaddress = *p;
+	const DWORD offset1[]{ 0xEBBD0 };
+	DWORD* addFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x376164, 0x00 };
+	DWORD* ediValue = (DWORD*)ExtVars::ApplyRule(offset2);
+
+	__asm
+	{
+		mov edi, ediValue
+		push pushaddress
+		push gender
+		push seat
+		call[addFunction]
+	}
+}
+
+
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
 		if (!loc_gameState.m_char[i]) {

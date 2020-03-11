@@ -124,6 +124,8 @@ namespace Shared {
 			void SetCardCumStatCondomsUsed(std::vector<Value>& params);
 			void SetRoomTarget(std::vector<Value>& params);
 			void SetDecals(std::vector<Value>& params);
+			void KickOut(std::vector<Value>& params);
+			void AddToClass(std::vector<Value>& params);
 			void SetCardCumStatRiskyCums(std::vector<Value>& params);
 			void SetCardVaginalSex(std::vector<Value>& params);
 			void SetCardAnalSex(std::vector<Value>& params);

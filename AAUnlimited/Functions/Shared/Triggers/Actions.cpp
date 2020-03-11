@@ -1361,6 +1361,23 @@ namespace Shared {
 			instance->ApplyDecals(position, decalstrength);
 		}
 
+		void Thread::KickOut(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			Shared::GameState::kickCard(seat);
+		}
+
+
+		void Thread::AddToClass(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			std::wstring& fileName = *params[2].strVal;
+			bool gender = params[1].bVal;
+			if (ActionSeatInvalid(seat)) return;
+			Shared::GameState::addCard(fileName, gender, seat);
+		}
+		
 		void Thread::SetCardCumStatRiskyCums(std::vector<Value>& params)
 		{
 			int seat = params[0].iVal;
@@ -2548,6 +2565,18 @@ namespace Shared {
 				TEXT("Add or replace a club value modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddClubMod
+			},
+			{
+				119, ACTIONCAT_EVENT, TEXT("Kick out"), TEXT("KickOutCard = %p"),
+				TEXT("Kick the card with the specified seat out from the class."),
+				{ TYPE_INT },
+				&Thread::KickOut
+			},
+			{
+				120, ACTIONCAT_EVENT, TEXT("Add card to class"), TEXT("%p ::AddCardToClass( %p ) = %p "),
+				TEXT("Add a card to the specified seat, with the specified gender. Input is Seat, Gender (1 for female, 0 for male), Filename respectively."),
+				{ TYPE_INT, TYPE_INT, TYPE_STRING },
+				&Thread::AddToClass
 			},
 		};
 

@@ -40,6 +40,7 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	}
 }
 
+
 int CharInstData::GetStyleCount()
 {
 	return m_cardData.m_styles.size();

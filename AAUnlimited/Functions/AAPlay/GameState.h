@@ -63,6 +63,9 @@ namespace Shared {
 		void SetRoomNumber(int seat, int room);
 		int GetRoomNumber(int seat);
 
+		void kickCard(int s);
+		void addCard(std::wstring cardName, bool gender, int s);
+
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
