@@ -277,7 +277,7 @@ function createRelationshipPointsDump(seat, towards)
 	local dump = {};
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
-	if (thisInst ~= nil AND towardsInst ~= nil) then
+	if (thisInst ~= nil and towardsInst ~= nil) then
 		dump["LOVE"]	= thisInst:GetLoveTowards(towardsInst);
 		dump["LIKE"]	= thisInst:GetLikeTowards(towardsInst);
 		dump["DISLIKE"]	= thisInst:GetDislikeTowards(towardsInst);
@@ -290,7 +290,7 @@ end
 function restoreRelationshipPointsFromDump(seat, towards, dump)
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
-	if (thisInst == nil OR towardsInst == nil) then
+	if (thisInst == nil or towardsInst == nil) then
 		return;
 	end
 	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
@@ -299,7 +299,7 @@ end
 -- trigger procedure calls
 
 function on.storeRelationshipPoints(key, seat, towards)
-	setCardStorage(seat, key, createRelationshipPointsDump(seat, towards);
+	setCardStorage(seat, key, createRelationshipPointsDump(seat, towards));
 end	
 
 function on.loadRelationshipPoints(key, seat, towards)
@@ -312,7 +312,7 @@ end
 
 function on.storeAllRelationshipPoints(seat, key)
 	local storage = {};
-	for towards=0,24
+	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil) then
 			storage[storageKey] = createRelationshipPointsDump(seat, towards);
@@ -323,7 +323,7 @@ end
 
 function on.loadAllRelationshipPoints(seat, key)
 	local storage = getCardStorage(seat, key);
-	for towards=0,24
+	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil) then
 			local dump = storage[storageKey];

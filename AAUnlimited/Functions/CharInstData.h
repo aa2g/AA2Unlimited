@@ -73,6 +73,7 @@ public:
 	int GetHateTowards(CharInstData* towards);
 
 	void SetPointsTowards(CharInstData* towards, float love, float like, float dislike, float hate, float spare);
+	bool IsPC();
 
 	int GetCurrentRoom();
 	CharInstData* GetTargetInst();
@@ -104,6 +105,9 @@ public:
 		LUA_BIND(m_char);
 		LUA_METHOD(IsValid, {
 			return _gl.push(_self->IsValid()).one;
+		});
+		LUA_METHOD(IsPC, {
+			return _gl.push(_self->IsPC()).one;
 		});
 		LUA_METHOD(GetCurrentRoom, {
 			return _gl.push(_self->GetCurrentRoom()).one;

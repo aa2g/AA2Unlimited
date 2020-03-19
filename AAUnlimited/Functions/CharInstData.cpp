@@ -169,9 +169,9 @@ std::vector<BYTE> CharInstData::GetAmbientColor()
 
 int CharInstData::GetLoveTowards(CharInstData* towards)
 {
-	if (!this->IsValid()) return;
-	if (!towards->IsValid()) return;
-	if (this == towards) return;
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
 
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
@@ -185,9 +185,9 @@ int CharInstData::GetLoveTowards(CharInstData* towards)
 
 int CharInstData::GetLikeTowards(CharInstData* towards)
 {
-	if (!this->IsValid()) return;
-	if (!towards->IsValid()) return;
-	if (this == towards) return;
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
 
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
@@ -201,9 +201,9 @@ int CharInstData::GetLikeTowards(CharInstData* towards)
 
 int CharInstData::GetDislikeTowards(CharInstData* towards)
 {
-	if (!this->IsValid()) return;
-	if (!towards->IsValid()) return;
-	if (this == towards) return;
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
 
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
@@ -217,9 +217,9 @@ int CharInstData::GetDislikeTowards(CharInstData* towards)
 
 int CharInstData::GetHateTowards(CharInstData* towards)
 {
-	if (!this->IsValid()) return;
-	if (!towards->IsValid()) return;
-	if (this == towards) return;
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
 
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
@@ -334,8 +334,12 @@ bool CharInstData::IsValid()
 	return false;
 }
 
-void CharInstData::Reset()
-{
+bool CharInstData::IsPC() {
+	if (!this->IsValid()) return false;
+	return (Shared::GameState::getPlayerCharacter())->m_char->m_seat == this->m_char->m_seat;
+}
+
+void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
 	m_cardData.Reset();
 	for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup

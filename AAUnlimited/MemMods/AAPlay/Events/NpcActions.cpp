@@ -234,8 +234,9 @@ void __stdcall RoomChange(NpcData* param) {
 			if (instance->m_char->m_npcData == param) {
 				Shared::Triggers::RoomChangeData roomChangeData;
 				roomChangeData.action = instance->m_forceAction.conversationId;
-				roomChangeData.roomTarget = instance->m_forceAction.roomTarget;
+				roomChangeData.roomTarget = instance->IsPC() ? instance->GetCurrentRoom() : instance->m_forceAction.roomTarget;
 				roomChangeData.card = instance->m_char->m_seat;
+				LUA_EVENT("roomChange", roomChangeData.card, roomChangeData.roomTarget, roomChangeData.action);
 				Shared::Triggers::ThrowEvent(&roomChangeData);
 				return;
 			}
