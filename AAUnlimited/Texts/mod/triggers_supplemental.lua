@@ -25,7 +25,316 @@ function on.period()
 end
 
 --------------------------------------------------------------------------------------------------------------------------
--- Detective module supplemental functions -------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
+
+function getStudentCount()
+	local counter = 0;
+	for i=0,24 do
+		if (GetCharInstData(i) ~= nil) then
+			counter = counter + 1;
+		end
+	end
+	return counter;
+end
+
+function getRandomRoom(except)
+	local math = require "math";
+	local min = 0;
+	local max = 52;
+	local ret = math.random(min, max);
+	return ret;
+end
+
+function getRoomName(idxRoom)
+	local rooms = {
+		"School gates",
+		"Back street",
+		"Outside gymnasium",
+		"School route",
+		"Mens changing room",
+		"Girls changing room",
+		"Mens shower",
+		"Girls shower",
+		"Lockers",
+		"Outside lounge",
+		"Outside toilets",
+		"Outside classroom",
+		"Rooftop access",
+		"Old building 1st floor",
+		"Old building 2nd floor",
+		"Old building 3rd floor",
+		"Teachers lounge",
+		"Infirmary",
+		"Library",
+		"Classroom",
+		"Mens Toilets",
+		"Girls Toilets",
+		"Rooftop",
+		"Outside counsel",
+		"Outside cafeteria",
+		"Courtyard",
+		"2nd floor hallway",
+		"3rd floor passage",
+		"Swimming pool",
+		"Track",
+		"Sports facility",
+		"Dojo",
+		"Gymnasium",
+		"Arts room",
+		"Multipurpose room",
+		"Japanese room",
+		"Behind Dojo",
+		"Outside dojo",
+		"Cafeteria",
+		"Outside Station",
+		"Karaoke",
+		"Boys' night room",		--	probably nonexistant according to backgrounds
+		"Girls' night room",	--	probably nonexistant according to backgrounds
+		"Boys' room",
+		"Girls' room",
+		"Boys's Shower Stall",
+		"Girl's Shower Stall",
+		"Boys' Toilet Stall",
+		"Girls' Toilet Stall",
+		"Counseling Room",
+		"Gym Storeroom",
+		"Love Hotel",
+		"Machine Room",
+	};
+	return rooms[idxRoom + 1];
+end
+
+function getActionName(idxAction)
+	local actions = {};
+		actions[0] = "ENCOURAGE";
+		actions[1] = "CALM";
+		actions[2] = "PRAISE";
+		actions[3] = "GRUMBLE";
+		actions[4] = "APOLOGIZE";
+		actions[5] = "ENCOURAGE_STUDY";
+		actions[6] = "ENCOURAGE_EXERCISE";
+		actions[7] = "ENCOURAGE_CLUB";
+		actions[8] = "ENCOURAGE_GET_ALONG";
+		actions[9] = "REPRIMAND_LEWD";
+		actions[10] = "GOOD_RUMOR";
+		actions[11] = "GET_ALONG_WITH";
+		actions[12] = "I_WANNA_GET_ALONG_WITH";
+		actions[13] = "BAD_RUMOR";
+		actions[14] = "DO_YOU_LIKE";
+		actions[15] = "TALK_LIFE";
+		actions[16] = "TALK_HOBBIES";
+		actions[17] = "TALK_FOOD";
+		actions[18] = "TALK_LOVE";
+		actions[19] = "TALK_LEWD";
+		actions[20] = "STUDY_TOGETHER";
+		actions[21] = "EXERCISE_TOGETHER";
+		actions[22] = "CLUB_TOGETHER";
+		actions[23] = "MASSAGE";
+		actions[24] = "GOTO_CLASS";
+		actions[25] = "LUNCH_TOGETHER";
+		actions[26] = "TEA_TOGETHER";
+		actions[27] = "GO_HOME_TOGETHER";
+		actions[28] = "GO_PLAY_TOGETHER";
+		actions[29] = "GO_EAT_TOGETHER";
+		actions[30] = "GO_KARAOKE_TOGETHER";
+		actions[31] = "STUDY_HOME";
+		actions[32] = "STUDY_HOME_H";
+		actions[33] = "INSULT";
+		actions[34] = "FIGHT";
+		actions[35] = "FORCE_IGNORE";
+		actions[36] = "FORCE_SHOW_THAT";
+		actions[37] = "FORCE_PUT_THIS_ON";
+		actions[38] = "FORCE_H";
+		actions[39] = "MAKE_JOIN_CLUB";
+		actions[40] = "ASK_DATE";
+		actions[41] = "CONFESS";
+		actions[42] = "ASK_COUPLE";
+		actions[43] = "ASK_BREAKUP";
+		actions[44] = "HEADPAT";
+		actions[45] = "HUG";
+		actions[46] = "KISS";
+		actions[47] = "TOUCH";
+		actions[48] = "NORMAL_H";
+		actions[49] = "FOLLOW_ME"; 
+		actions[50] = "GO_AWAY";
+		actions[51] = "COME_TO"; 
+		actions[52] = "NEVERMIND";
+		actions[53] = "MINNA_STUDY";
+		actions[54] = "MINNA_SPORTS";
+		actions[55] = "MINNA_CLUB";
+		actions[56] = "MINNA_LUNCH";
+		actions[57] = "MINNA_REST";
+		actions[58] = "MINNA_EAT";
+		actions[60] = "MINNA_KARAOKE";
+		actions[61] = "MINNA_BE_FRIENDLY";
+		actions[62] = "MINNA_COME";
+		actions[63] = "INTERRUPT_COMPETE";
+		actions[64] = "INTERRUPT_WHAT_ARE_YOU_DOING";
+		actions[65] = "INTERRUPT_STOP_QUARREL";
+		actions[66] = "H_END";
+		actions[67] = "H_NOTE";
+		actions[68] = "TRY_3P";
+		actions[69] = "REQUEST_MASSAGE";
+		actions[70] = "REQUEST_KISS";
+		actions[71] = "REQUEST_HUG";
+		actions[72] = "SKIP_CLASS";
+		actions[73] = "SKIP_CLASS_H";
+		actions[74] = "SKIP_CLASS_SURPRISE_H";
+		actions[75] = "DID_YOU_HAVE_H_WITH";
+		actions[76] = "SHOW_UNDERWEAR";
+		actions[77] = "DID_YOU_HAVE_H";
+		actions[78] = "EXCHANGE_ITEMS";
+		actions[79] = "LEWD_PROMISE";
+		actions[80] = "LEWD_REWARD";
+		actions[81] = "TOGETHER_FOREVER";
+		actions[82] = "MURDER";
+		actions[83] = "SLAP";
+		actions[84] = "GOOD_MORNING_KISS";
+		actions[85] = "GOOD_BYE_KISS";
+		actions[86] = "NO_PROMPT_KISS";
+		actions[87] = "FORCE_BREAKUP";
+		actions[88] = "REVEAL_PREGNANCY";
+		actions[89] = "I_WILL_CHEAT";
+		actions[90] = "EXPLOITABLE_LINE";
+		actions[91] = "STOP_FOLLOWING";
+		actions[92] = "MURDER_NOTICE";
+		actions[93] = "SOMEONE_LIKES_YOU";
+		actions[94] = "SOMEONE_GOT_CONFESSED_TO";
+		actions[95] = "DID_YOU_DATE_SOMEONE";
+		actions[96] = "I_SAW_SOMEONE_HAVE_H";
+		actions[97] = "DO_NOT_GET_INVOLVED";
+		actions[98] = "SHAMELESS";
+		actions[99] = "NO_PROMPT_H";
+		actions[101] = "AFTER_DATE_H";
+		actions[102] = "FOLLOW_ME_H";
+		actions[103] = "DATE_GREETING";
+		actions[105] = "CHANGE_CLOTHES";
+		actions[106] = "STALK";
+		actions[107] = "STALK_FROM_AFAR";
+		actions[108] = "DO_STUDY";
+		actions[109] = "DO_EXERCISE";
+		actions[110] = "DO_CLUB";
+		actions[112] = "BREAK_CHAT";
+		actions[113] = "BREAK_H";
+		actions[114] = "GUST_OF_WIND";
+		actions[115] = "TEST_3P";
+		actions[117] = "MINNA_H";
+	if (idxAction < 0) then
+		return "DO_NOTHING";
+	end
+	return actions[idxAction];
+end
+
+function setClassStorage(key, value)
+	set_class_key(key, value);
+end
+
+function getClassStorage(key)
+	return get_class_key(key);
+end
+
+function getCardStorageKey(card)
+	local inst = GetCharInstData(card);
+	if (inst == nil) then
+		return nil;
+	end
+	return inst.m_char.m_seat .. " " .. inst.m_char.m_charData.m_forename .. " " .. inst.m_char.m_charData.m_surname;	
+end
+
+function getCardStorage(card, key)
+	local cardKey = getCardStorageKey(card);
+	if (cardKey == nil) then
+		return nil;
+	end
+	return get_class_key(cardKey)[key];
+end
+
+function setCardStorage(card, key, value)
+	local record = get_class_key(getCardStorageKey(card));
+	record[key] = value;
+	setClassStorage(getCardStorageKey(card), record);
+end
+
+function getSeatFromStorageKey(key)
+	local text = require("pl.text");
+	local result = text.split(key, " ")[1];
+	return result;
+end
+
+function splitArgs(input)
+	local text = require("pl.text");
+	return text.split(input, "\n");
+end
+
+function trackPrevAction(params, user)
+	if params.movementType == 3 then
+		prevActions[user.m_seat + 1] = params.conversationId;
+	end
+end
+
+function createRelationshipPointsDump(seat, towards)
+	local dump = {};
+	local thisInst = GetCharInstData(seat);
+	local towardsInst = GetCharInstData(towards);
+	if (thisInst ~= nil AND towardsInst ~= nil) then
+		dump["LOVE"]	= thisInst:GetLoveTowards(towardsInst);
+		dump["LIKE"]	= thisInst:GetLikeTowards(towardsInst);
+		dump["DISLIKE"]	= thisInst:GetDislikeTowards(towardsInst);
+		dump["HATE"]	= thisInst:GetHateTowards(towardsInst);
+		dump["SPARE"]	= 900 - dump["LOVE"] - dump["LIKE"] - dump["DISLIKE"] - dump["HATE"];
+	end
+	return dump;
+end
+
+function restoreRelationshipPointsFromDump(seat, towards, dump)
+	local thisInst = GetCharInstData(seat);
+	local towardsInst = GetCharInstData(towards);
+	if (thisInst == nil OR towardsInst == nil) then
+		return;
+	end
+	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
+end
+
+-- trigger procedure calls
+
+function on.storeRelationshipPoints(key, seat, towards)
+	setCardStorage(seat, key, createRelationshipPointsDump(seat, towards);
+end	
+
+function on.loadRelationshipPoints(key, seat, towards)
+	local storage = getCardStorage(seat, key) or {};
+	if (storage ~= {}) then
+		restoreRelationshipPointsFromDump(seat, towards, storage);
+	end
+	setCardStorage(seat, key, {});
+end
+
+function on.storeAllRelationshipPoints(seat, key)
+	local storage = {};
+	for towards=0,24
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil) then
+			storage[storageKey] = createRelationshipPointsDump(seat, towards);
+		end
+	end
+	setCardStorage(seat, key, storage);
+end
+
+function on.loadAllRelationshipPoints(seat, key)
+	local storage = getCardStorage(seat, key);
+	for towards=0,24
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil) then
+			local dump = storage[storageKey];
+			restoreRelationshipPointsFromDump(seat, towards, dump);
+		end
+	end
+	setCardStorage(seat, key, {});
+end
+
+--------------------------------------------------------------------------------------------------------------------------
+-- Detective -------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 function detectiveStartTheCase(actor0, actor1)
@@ -613,6 +922,18 @@ function detectiveGatherReport(case, detective, testifier, reportKey)
 	setCardStorage(detective, detectiveStorageKey, detectiveReport);
 end
 
+function printReport(case, detective, testifier, reportKey)
+	local detectiveStorageKey = case .. " : " .. reportKey;
+	local report = getCardStorage(detective, detectiveStorageKey) or {};
+	local strReport = "";
+	for key,line in ipairs(report) do
+		strReport = strReport .. "\n" .. line;
+	end
+	log.info(strReport);
+end
+
+-- trigger procedure calls
+
 function on.gatherAlibiReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
@@ -635,16 +956,6 @@ function on.gatherTriviaReport(params)
 	local detective = args[2];
 	local testifier = args[3];
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
-end
-
-function printReport(case, detective, testifier, reportKey)
-	local detectiveStorageKey = case .. " : " .. reportKey;
-	local report = getCardStorage(detective, detectiveStorageKey) or {};
-	local strReport = "";
-	for key,line in ipairs(report) do
-		strReport = strReport .. "\n" .. line;
-	end
-	log.info(strReport);
 end
 
 function on.printAlibiReport(params)
@@ -686,251 +997,7 @@ function on.closeCase(params)
 end
 
 --------------------------------------------------------------------------------------------------------------------------
-
-function getStudentCount()
-	local counter = 0;
-	for i=0,24 do
-		if (GetCharInstData(i) ~= nil) then
-			counter = counter + 1;
-		end
-	end
-	return counter;
-end
-
-function getRandomRoom(except)
-	local math = require "math";
-	local min = 0;
-	local max = 52;
-	local ret = math.random(min, max);
-	return ret;
-end
-
-function getRoomName(idxRoom)
-	local rooms = {
-		"School gates",
-		"Back street",
-		"Outside gymnasium",
-		"School route",
-		"Mens changing room",
-		"Girls changing room",
-		"Mens shower",
-		"Girls shower",
-		"Lockers",
-		"Outside lounge",
-		"Outside toilets",
-		"Outside classroom",
-		"Rooftop access",
-		"Old building 1st floor",
-		"Old building 2nd floor",
-		"Old building 3rd floor",
-		"Teachers lounge",
-		"Infirmary",
-		"Library",
-		"Classroom",
-		"Mens Toilets",
-		"Girls Toilets",
-		"Rooftop",
-		"Outside counsel",
-		"Outside cafeteria",
-		"Courtyard",
-		"2nd floor hallway",
-		"3rd floor passage",
-		"Swimming pool",
-		"Track",
-		"Sports facility",
-		"Dojo",
-		"Gymnasium",
-		"Arts room",
-		"Multipurpose room",
-		"Japanese room",
-		"Behind Dojo",
-		"Outside dojo",
-		"Cafeteria",
-		"Outside Station",
-		"Karaoke",
-		"Boys' night room",		--	probably nonexistant according to backgrounds
-		"Girls' night room",	--	probably nonexistant according to backgrounds
-		"Boys' room",
-		"Girls' room",
-		"Boys's Shower Stall",
-		"Girl's Shower Stall",
-		"Boys' Toilet Stall",
-		"Girls' Toilet Stall",
-		"Counseling Room",
-		"Gym Storeroom",
-		"Love Hotel",
-		"Machine Room",
-	};
-	return rooms[idxRoom + 1];
-end
-
-function getActionName(idxAction)
-	local actions = {};
-		actions[0] = "ENCOURAGE";
-		actions[1] = "CALM";
-		actions[2] = "PRAISE";
-		actions[3] = "GRUMBLE";
-		actions[4] = "APOLOGIZE";
-		actions[5] = "ENCOURAGE_STUDY";
-		actions[6] = "ENCOURAGE_EXERCISE";
-		actions[7] = "ENCOURAGE_CLUB";
-		actions[8] = "ENCOURAGE_GET_ALONG";
-		actions[9] = "REPRIMAND_LEWD";
-		actions[10] = "GOOD_RUMOR";
-		actions[11] = "GET_ALONG_WITH";
-		actions[12] = "I_WANNA_GET_ALONG_WITH";
-		actions[13] = "BAD_RUMOR";
-		actions[14] = "DO_YOU_LIKE";
-		actions[15] = "TALK_LIFE";
-		actions[16] = "TALK_HOBBIES";
-		actions[17] = "TALK_FOOD";
-		actions[18] = "TALK_LOVE";
-		actions[19] = "TALK_LEWD";
-		actions[20] = "STUDY_TOGETHER";
-		actions[21] = "EXERCISE_TOGETHER";
-		actions[22] = "CLUB_TOGETHER";
-		actions[23] = "MASSAGE";
-		actions[24] = "GOTO_CLASS";
-		actions[25] = "LUNCH_TOGETHER";
-		actions[26] = "TEA_TOGETHER";
-		actions[27] = "GO_HOME_TOGETHER";
-		actions[28] = "GO_PLAY_TOGETHER";
-		actions[29] = "GO_EAT_TOGETHER";
-		actions[30] = "GO_KARAOKE_TOGETHER";
-		actions[31] = "STUDY_HOME";
-		actions[32] = "STUDY_HOME_H";
-		actions[33] = "INSULT";
-		actions[34] = "FIGHT";
-		actions[35] = "FORCE_IGNORE";
-		actions[36] = "FORCE_SHOW_THAT";
-		actions[37] = "FORCE_PUT_THIS_ON";
-		actions[38] = "FORCE_H";
-		actions[39] = "MAKE_JOIN_CLUB";
-		actions[40] = "ASK_DATE";
-		actions[41] = "CONFESS";
-		actions[42] = "ASK_COUPLE";
-		actions[43] = "ASK_BREAKUP";
-		actions[44] = "HEADPAT";
-		actions[45] = "HUG";
-		actions[46] = "KISS";
-		actions[47] = "TOUCH";
-		actions[48] = "NORMAL_H";
-		actions[49] = "FOLLOW_ME"; 
-		actions[50] = "GO_AWAY";
-		actions[51] = "COME_TO"; 
-		actions[52] = "NEVERMIND";
-		actions[53] = "MINNA_STUDY";
-		actions[54] = "MINNA_SPORTS";
-		actions[55] = "MINNA_CLUB";
-		actions[56] = "MINNA_LUNCH";
-		actions[57] = "MINNA_REST";
-		actions[58] = "MINNA_EAT";
-		actions[60] = "MINNA_KARAOKE";
-		actions[61] = "MINNA_BE_FRIENDLY";
-		actions[62] = "MINNA_COME";
-		actions[63] = "INTERRUPT_COMPETE";
-		actions[64] = "INTERRUPT_WHAT_ARE_YOU_DOING";
-		actions[65] = "INTERRUPT_STOP_QUARREL";
-		actions[66] = "H_END";
-		actions[67] = "H_NOTE";
-		actions[68] = "TRY_3P";
-		actions[69] = "REQUEST_MASSAGE";
-		actions[70] = "REQUEST_KISS";
-		actions[71] = "REQUEST_HUG";
-		actions[72] = "SKIP_CLASS";
-		actions[73] = "SKIP_CLASS_H";
-		actions[74] = "SKIP_CLASS_SURPRISE_H";
-		actions[75] = "DID_YOU_HAVE_H_WITH";
-		actions[76] = "SHOW_UNDERWEAR";
-		actions[77] = "DID_YOU_HAVE_H";
-		actions[78] = "EXCHANGE_ITEMS";
-		actions[79] = "LEWD_PROMISE";
-		actions[80] = "LEWD_REWARD";
-		actions[81] = "TOGETHER_FOREVER";
-		actions[82] = "MURDER";
-		actions[83] = "SLAP";
-		actions[84] = "GOOD_MORNING_KISS";
-		actions[85] = "GOOD_BYE_KISS";
-		actions[86] = "NO_PROMPT_KISS";
-		actions[87] = "FORCE_BREAKUP";
-		actions[88] = "REVEAL_PREGNANCY";
-		actions[89] = "I_WILL_CHEAT";
-		actions[90] = "EXPLOITABLE_LINE";
-		actions[91] = "STOP_FOLLOWING";
-		actions[92] = "MURDER_NOTICE";
-		actions[93] = "SOMEONE_LIKES_YOU";
-		actions[94] = "SOMEONE_GOT_CONFESSED_TO";
-		actions[95] = "DID_YOU_DATE_SOMEONE";
-		actions[96] = "I_SAW_SOMEONE_HAVE_H";
-		actions[97] = "DO_NOT_GET_INVOLVED";
-		actions[98] = "SHAMELESS";
-		actions[99] = "NO_PROMPT_H";
-		actions[101] = "AFTER_DATE_H";
-		actions[102] = "FOLLOW_ME_H";
-		actions[103] = "DATE_GREETING";
-		actions[105] = "CHANGE_CLOTHES";
-		actions[106] = "STALK";
-		actions[107] = "STALK_FROM_AFAR";
-		actions[108] = "DO_STUDY";
-		actions[109] = "DO_EXERCISE";
-		actions[110] = "DO_CLUB";
-		actions[112] = "BREAK_CHAT";
-		actions[113] = "BREAK_H";
-		actions[114] = "GUST_OF_WIND";
-		actions[115] = "TEST_3P";
-		actions[117] = "MINNA_H";
-	if (idxAction < 0) then
-		return "DO_NOTHING";
-	end
-	return actions[idxAction];
-end
-
-function setClassStorage(key, value)
-	set_class_key(key, value);
-end
-
-function getClassStorage(key)
-	return get_class_key(key);
-end
-
-function getCardStorageKey(card)
-	local inst = GetCharInstData(card);
-	if (inst == nil) then
-		return nil;
-	end
-	return inst.m_char.m_seat .. " " .. inst.m_char.m_charData.m_forename .. " " .. inst.m_char.m_charData.m_surname;	
-end
-
-function getCardStorage(card, key)
-	local cardKey = getCardStorageKey(card);
-	if (cardKey == nil) then
-		return nil;
-	end
-	return get_class_key(cardKey)[key];
-end
-
-function setCardStorage(card, key, value)
-	local record = get_class_key(getCardStorageKey(card));
-	record[key] = value;
-	setClassStorage(getCardStorageKey(card), record);
-end
-
-function getSeatFromStorageKey(key)
-	local text = require("pl.text");
-	local result = text.split(key, " ")[1];
-	return result;
-end
-
-function splitArgs(input)
-	local text = require("pl.text");
-	return text.split(input, "\n");
-end
-
-function trackPrevAction(params, user)
-	if params.movementType == 3 then
-		prevActions[user.m_seat + 1] = params.conversationId;
-	end
-end
+--------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 function _M:load()

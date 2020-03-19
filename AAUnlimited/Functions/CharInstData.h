@@ -72,6 +72,8 @@ public:
 	int GetDislikeTowards(CharInstData* towards);
 	int GetHateTowards(CharInstData* towards);
 
+	void SetPointsTowards(CharInstData* towards, float love, float like, float dislike, float hate, float spare);
+
 	int GetCurrentRoom();
 	CharInstData* GetTargetInst();
 
@@ -185,6 +187,9 @@ public:
 		});
 		LUA_METHOD(GetHateTowards, {
 			return _gl.push(_self->GetHateTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(SetPointsTowards, {
+			_self->SetPointsTowards(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5), _gl.get(6), _gl.get(7));
 		});
 		LUA_METHOD(ApplyDecal, {
 			int bodyPart = _gl.get(2);
