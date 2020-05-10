@@ -457,8 +457,12 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 			HGUIButton* btn = arrIt[j];
 			HPosData* data = info->GetHPosData(info->GetHPosition(i, j));
 			if (btn->m_posTop == 0 && btn->m_posLeft == 0) continue;
-			if (data->m_yuriAllowance == GENDERALLOW_HETERO_ONLY && m_isYuri) continue; //not allowed
-			if (data->m_yuriAllowance == GENDERALLOW_HOMO_ONLY && !m_isYuri) continue;
+			if (m_isYuri)
+			{
+				if (data->m_yuriAllowance == GENDERALLOW_HETERO_ONLY && m_forceeGender == 1) continue; //no lesbians
+				if (data->m_yaoiAllowance == GENDERALLOW_HETERO_ONLY && m_forceeGender == 0) continue; //no fags
+			}
+			if (data->m_yuriAllowance == GENDERALLOW_HOMO_ONLY && !m_isYuri) continue;    // no christians
 			//check if it fullfills preferences
 			//check if its dominant
 			const wchar_t* name = &(data->m_fileName[0]);
