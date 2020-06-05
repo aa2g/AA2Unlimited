@@ -20,11 +20,11 @@ local function reload_overrides()
 		SetNoBraOverride(tonumber(slot), 0xF)
 	end
 	slots = opts.usedefaults == 1 and defstate1 or opts.states1
-	for slot in string.gmatch(defstate1, "%d+") do
+	for slot in string.gmatch(slots, "%d+") do
 		SetNoBraOverride(tonumber(slot), 0x1)
 	end
 	slots = opts.usedefaults == 1 and defstate3 or opts.states3
-	for slot in string.gmatch(defstate3, "%d+") do
+	for slot in string.gmatch(slots, "%d+") do
 		SetNoBraOverride(tonumber(slot), 0x4)
 	end
 end
