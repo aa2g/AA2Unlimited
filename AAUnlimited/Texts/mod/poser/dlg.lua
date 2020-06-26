@@ -509,9 +509,6 @@ dimeyes.expand = "horizontal"
 local tears = iup.flatbutton { title = "Tears", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tears = self.value == "OFF" end end, expand = "horizontal" }
 tears.size = "x12"
 tears.expand = "horizontal"
-local eyetracking = iup.flatbutton { title = "Eye Tracking", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.eyetracking = self.value == "ON" and 1 or 0 end end, expand = "horizontal" }
-eyetracking.size = "x12"
-eyetracking.expand = "horizontal"
 local yogurt = iup.flatbutton { title = "Yogurt", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self) if charamgr.current then charamgr.current.tonguejuice = self.value == "OFF"; charamgr.current.mouthjuice = self.value == "OFF" end end, expand = "horizontal" }
 yogurt.size = "x12"
 yogurt.expand = "horizontal"
@@ -549,7 +546,7 @@ local blushlinesslider = iup.val { orientation = "horizontal", expand = "horizon
 
 local function shapecontrols(shapelist, opts)
 	local shapename = opts.name
-	local shapeopen = shapename .. "open"
+	--local shapeopen = shapename .. "open"
 	
 	local shapeselected = function(shape)
 		local character = charamgr.current
@@ -578,6 +575,35 @@ local function shapecontrols(shapelist, opts)
 			gap = 3,
 		},
 		shapecontrols = controls,
+	}
+end
+
+local function trackcontrols(gazelist, opts)
+	local trackcontrol = opts.name .. "tracking"
+	
+	local controls = {}
+	local updatebutton = iup.flatbutton { title = "Track", toggle = "yes", expand = "yes", padding = 3, size = opts.buttonsize }
+	function updatebutton.valuechanged_cb(self)
+		if charamgr.current then charamgr.current.eyetracking = self.value == "ON" and 1 or 0 end
+	end
+	signals.connect(charamgr, "currentcharacterchanged", function() 
+		updatebutton.value = charamgr.current.eyetracking == 1 and "ON" or "OFF"
+	end)
+	table.insert(controls, updatebutton)
+
+	for i, s in ipairs(gazelist) do
+		local button = iup.flatbutton { title = s, padding = 3, size = opts.buttonsize }
+		function button.flat_action(self)
+			local character = charamgr.currentcharacter()
+			if character then
+				proc_invoke(0x5CB7D0, nil, fixptr(character.struct.m_xxFace)+116220, i - 1, 1)
+			end
+		end
+		table.insert(controls, button)
+	end
+
+	return iup.hbox {
+		unpack(controls),
 	}
 end
 
@@ -639,6 +665,8 @@ local eyebrowshapescontrols = shapecontrols({ "1", "2", "3", "4", "5", "6", "7"}
 local eyebrowshapes = iup.vbox {
 	eyebrowshapescontrols,
 }
+
+local trackeyescontrols = trackcontrols({ "Forward", "Follow" }, { name = "eye" })
 
 
 -- ------------
@@ -809,11 +837,15 @@ local dialogsliders = iup.dialog {
 								eyeshapes,
 								dimeyes,
 								tears,
-								eyetracking,
 							},
 								expand = "no"
 						},
 						iup.vbox {
+							iup.frame { title = "Eye Tracking",
+								iup.vbox {
+									trackeyescontrols,
+								},
+							},
 							iup.frame { title = "Eyebrow",
 								iup.vbox {
 									eyebrowshapes
