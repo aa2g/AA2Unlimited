@@ -578,6 +578,12 @@ local function shapecontrols(shapelist, opts)
 	}
 end
 
+local eyetrackfunction
+if exe_type == "edit" then
+	eyetrackfunction = 0x5ADF70
+else
+	eyetrackfunction = 0x5CB7D0
+end
 local function trackcontrols(gazelist, opts)
 	local trackcontrol = opts.name .. "tracking"
 	
@@ -596,7 +602,7 @@ local function trackcontrols(gazelist, opts)
 		function button.flat_action(self)
 			local character = charamgr.currentcharacter()
 			if character then
-				proc_invoke(0x5CB7D0, nil, fixptr(character.struct.m_xxFace)+116220, i - 1, 1)
+				proc_invoke(eyetrackfunction, nil, fixptr(character.struct.m_xxFace)+116220, i - 1, 1)
 			end
 		end
 		table.insert(controls, button)
