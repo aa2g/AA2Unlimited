@@ -546,29 +546,16 @@ void __stdcall RosterCrashFix() {
 	}
 }
 
-void __stdcall RosterCrashRescue() {
-	//sets the return address 
-	const DWORD offset1[]{ 0x1C298F};
-	RosterCrashReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
-	//address below the call which populates the roster
-	//https://www.youtube.com/watch?v=ZDiX9wwo670 theme song
-	const DWORD offset2[]{ 0xBAF67 };
-	AfterRosterPopulate = (DWORD*)ExtVars::ApplyRule(offset2);
-
-}
 
 
 void __declspec(naked) rosterCrashRedirect() {
 	__asm {
-		//calls function that calculates the offsets
-		pushad
-		call RosterCrashRescue
-		popad
-		//original code
+		//checks if eax is invalid
 		test eax, eax
 		je RosterCrashFix
 		cmp eax, 0x50
 		je RosterCrashFix
+		//original code
 		mov[eax+0x34],ecx
 		mov ecx,[esp+10]
 		jmp RosterCrashReturnAddress
@@ -579,6 +566,13 @@ void __declspec(naked) rosterCrashRedirect() {
 void RosterCrashInjection() {
 	//AA2Play.exe + 1C2988 - 89 48 34 - mov[eax + 34], ecx
 	//AA2Play.exe+1C298B - 8B 4C 24 10           - mov ecx,[esp+10]
+
+	//sets the return address 
+	const DWORD offset1[]{ 0x1C298F };
+	RosterCrashReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+	//address below the call which populates the roster
+	const DWORD offset2[]{ 0xBAF67 };
+	AfterRosterPopulate = (DWORD*)ExtVars::ApplyRule(offset2);
 
 	DWORD address = General::GameBase + 0x1C2988;
 	DWORD redirectAddress = (DWORD)(&rosterCrashRedirect);
