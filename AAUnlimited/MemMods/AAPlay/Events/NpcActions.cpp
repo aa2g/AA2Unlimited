@@ -14,6 +14,18 @@ DWORD* LowPolyInjectionReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
+DWORD* RosterPopulateInjectionReturnAddress = 0;
+DWORD* RosterCrashReturnAddress = 0;
+DWORD* AfterRosterPopulate = 0;
+DWORD* RosterEAX = 0;
+DWORD* RosterEBX = 0;
+DWORD* RosterECX = 0;
+DWORD* RosterEDX = 0;
+DWORD* RosterESI = 0;
+DWORD* RosterEDI = 0;
+DWORD* RosterEBP = 0;
+DWORD* RosterESP = 0;
+
 
 // Wraps a call to our custom handler, redirect jump is pointed into here
 void __declspec(naked) WrapAnswer() {
@@ -519,7 +531,116 @@ void murderEventInjection() {
 	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 		NULL);
 }
+void __stdcall RosterCrashFix() {
+	__asm {
+		//reseting the stack and registers to what they would've been like had the function not been called 
+		add esp, 2E4h
+		mov eax, RosterEAX
+		mov ebx, RosterEBX
+		mov ecx, RosterECX
+		mov edx, RosterEDX
+		mov esi, RosterESI
+		mov edi, RosterEDI
+		mov ebp, RosterEBP
+		jmp AfterRosterPopulate
+	}
+}
 
+void __stdcall RosterCrashRescue() {
+	//sets the return address 
+	const DWORD offset1[]{ 0x1C298F};
+	RosterCrashReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+	//address below the call which populates the roster
+	//https://www.youtube.com/watch?v=ZDiX9wwo670 theme song
+	const DWORD offset2[]{ 0xBAF67 };
+	AfterRosterPopulate = (DWORD*)ExtVars::ApplyRule(offset2);
+
+}
+
+
+void __declspec(naked) rosterCrashRedirect() {
+	__asm {
+		//calls function that calculates the offsets
+		pushad
+		call RosterCrashRescue
+		popad
+		//original code
+		test eax, eax
+		je RosterCrashFix
+		cmp eax, 0x50
+		je RosterCrashFix
+		mov[eax+0x34],ecx
+		mov ecx,[esp+10]
+		jmp RosterCrashReturnAddress
+	}
+}
+
+
+void RosterCrashInjection() {
+	//AA2Play.exe + 1C2988 - 89 48 34 - mov[eax + 34], ecx
+	//AA2Play.exe+1C298B - 8B 4C 24 10           - mov ecx,[esp+10]
+
+	DWORD address = General::GameBase + 0x1C2988;
+	DWORD redirectAddress = (DWORD)(&rosterCrashRedirect);
+	Hook((BYTE*)address,
+	{ 0x89, 0x48, 0x34, 0x8B, 0x4C, 0x24, 0x10 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+void __stdcall RosterPopulate(DWORD* param1, DWORD* param2, DWORD* param3, DWORD* param4, DWORD* param5, DWORD* param6, DWORD* param7) {
+	//saving the registers every time we open the roster
+	RosterEAX = param7;
+	RosterEBX = param6;
+	RosterECX = param5;
+	RosterEDX = param4;
+	RosterESI = param3;
+	RosterEDI = param2;
+	RosterEBP = param1;
+
+	//Setting the address to return to after the hook
+	const DWORD offset[]{ 0xBC5E6 };
+	RosterPopulateInjectionReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+
+}
+
+
+void __declspec(naked) rosterPopulateRedirect() {
+	__asm {
+		pushad
+		push eax
+		push ebx
+		push ecx
+		push edx
+		push esi
+		push edi
+		push ebp
+		call RosterPopulate
+		popad
+		//original code
+		push ebp
+		mov ebp, esp
+		and esp, -0x00000008
+		jmp RosterPopulateInjectionReturnAddress
+	}
+}
+
+
+void rosterPopulateInjection() {
+	//AA2Play.exe+BC5E0  - 55 - push ebp
+	//AA2Play.exe+BC5E1 - 8B EC                 - mov ebp,esp
+	//AA2Play.exe+BC5E3 - 83 E4 F8              - and esp,-08 { 248 }
+
+
+
+	DWORD address = General::GameBase + 0xBC5E0;
+	DWORD redirectAddress = (DWORD)(&rosterPopulateRedirect);
+	Hook((BYTE*)address,
+	{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 #if !NEW_HOOK

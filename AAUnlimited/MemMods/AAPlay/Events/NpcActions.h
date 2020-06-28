@@ -18,6 +18,8 @@ namespace NpcActions {
 	void LowPolyUpdateEndInject();
 	void hPositionChangeInjection();
 	void murderEventInjection();
+	void RosterCrashInjection();
+	void rosterPopulateInjection();
 
 #pragma pack(push, 1)
 	struct AnswerStruct {

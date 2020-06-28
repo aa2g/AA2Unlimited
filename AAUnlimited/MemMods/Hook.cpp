@@ -312,6 +312,8 @@ void InitializeHooks() {
 		NpcActions::LowPolyUpdateStartInjectForGirls();
 		NpcActions::LowPolyUpdateStartInjectForBoys();
 		NpcActions::murderEventInjection();
+		NpcActions::rosterPopulateInjection();
+		NpcActions::RosterCrashInjection();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();
