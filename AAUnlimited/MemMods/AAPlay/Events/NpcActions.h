@@ -20,6 +20,8 @@ namespace NpcActions {
 	void murderEventInjection();
 	void RosterCrashInjection();
 	void rosterPopulateInjection();
+	void rosterHandleInjectionFirst();
+	void rosterHandleInjectionSecond();
 
 #pragma pack(push, 1)
 	struct AnswerStruct {
