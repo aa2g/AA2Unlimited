@@ -11,7 +11,10 @@ using namespace ExtClass;
 #if NEW_HOOK
 DWORD AnswerAddress, AnswerLowAddress;
 DWORD* LowPolyInjectionReturnAddress = 0;
+DWORD* FirstRosterHandleReturnAddress = 0;
+DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
+DWORD* RosterHandleLoopNextSeat = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
 DWORD* RosterPopulateInjectionReturnAddress = 0;
@@ -633,6 +636,86 @@ void rosterPopulateInjection() {
 	Hook((BYTE*)address,
 	{ 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8 },						//expected values
 	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+void __stdcall RosterHandle() {
+	//We're just skipping everything if we find a null pointer
+	__asm {
+		pop ebp
+		pop eax
+		jmp RosterHandleLoopNextSeat
+		
+	}
+}
+
+void __declspec(naked) rosterHandleRedirectSecond() {
+	__asm {
+		//check if the pointer is invalid
+		push eax
+		mov eax, [ecx + 0x154]
+		test eax, eax
+		je RosterHandle
+		pop eax
+		//original code
+		mov edx, [ecx]
+		mov eax, [edx + 0xc]
+		jmp SecondRosterHandleReturnAddress
+	}
+}
+
+void rosterHandleInjectionSecond() {
+	//I have no clue what this function is, I'm just safeguarding it, hence the awkward name
+	//AA2Play.exe+BBAA0 - 8B 11                 - mov edx,[ecx]
+	//AA2Play.exe + BBAA2 - 8B 42 0C - mov eax, [edx + 0C]
+
+	//our return addresses
+	const DWORD offset[]{ 0xBBAA5 };
+	SecondRosterHandleReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+	const DWORD offset1[]{ 0xBBAA9 };
+	RosterHandleLoopNextSeat = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0xBBAA0;
+	DWORD redirectAddress = (DWORD)(&rosterHandleRedirectSecond);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x11, 0x8B, 0x42, 0x0C },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
+
+
+void __declspec(naked) rosterHandleRedirectFirst() {
+	__asm {
+		//check if the pointer is invalid
+		push eax
+		mov eax, [ecx + 0x154]
+		test eax, eax
+		je RosterHandle
+		pop eax
+		//original code
+		mov edx, [ecx]
+		mov eax, [edx+0xc]
+		jmp FirstRosterHandleReturnAddress
+	}
+}
+
+void rosterHandleInjectionFirst() {
+	//I have no clue what this function is, I'm just safeguarding it, hence the awkward name
+	//AA2Play.exe+BBA95 - 8B 11                 - mov edx,[ecx]
+	//AA2Play.exe + BBA97 - 8B 42 0C - mov eax, [edx + 0C]
+
+	//our return addresses
+	const DWORD offset[]{ 0xBBA9A };
+	FirstRosterHandleReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+	const DWORD offset1[]{ 0xBBAA9 };
+	RosterHandleLoopNextSeat = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0xBBA95;
+	DWORD redirectAddress = (DWORD)(&rosterHandleRedirectFirst);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x11, 0x8B, 0x42, 0x0C },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
 
