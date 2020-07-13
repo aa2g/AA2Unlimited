@@ -1,4 +1,4 @@
-
+![](https://cdn.discordapp.com/attachments/324857527751933953/732208784142762004/aau_circlejerk_banner_new_text.png)
 # DOWNLOAD THE LATEST RELEASE IN THE [Releases](https://github.com/aa2g/AA2Unlimited/releases) TAB
 Please read this [guide](https://github.com/aa2g/AA2Unlimited/wiki/) on how to install, update and use AAUnlimited! It includes a [FAQ](https://github.com/aa2g/AA2Unlimited/wiki#faq)!
 
