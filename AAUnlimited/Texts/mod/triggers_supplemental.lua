@@ -290,7 +290,7 @@ end
 function restoreRelationshipPointsFromDump(seat, towards, dump)
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
-	if (thisInst == nil or towardsInst == nil) then
+	if (thisInst == nil or towardsInst == nil or dump == {} or dump == nil) then
 		return;
 	end
 	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
@@ -298,39 +298,73 @@ end
 
 -- trigger procedure calls
 
-function on.storeRelationshipPoints(key, seat, towards)
-	setCardStorage(seat, key, createRelationshipPointsDump(seat, towards));
+function on.storeRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[3]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage[storageKey] = createRelationshipPointsDump(seat, towards);
+	end
+	setCardStorage(storageCard, key, storage);
 end	
 
-function on.loadRelationshipPoints(key, seat, towards)
-	local storage = getCardStorage(seat, key) or {};
-	if (storage ~= {}) then
-		restoreRelationshipPointsFromDump(seat, towards, storage);
-	end
-	setCardStorage(seat, key, {});
-end
+function on.loadRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[3]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
 
-function on.storeAllRelationshipPoints(seat, key)
-	local storage = {};
-	for towards=0,24 do
+	local storage = getCardStorage(storageCard, key);	
+	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
-		if (storageKey ~= nil) then
-			storage[storageKey] = createRelationshipPointsDump(seat, towards);
-		end
-	end
-	setCardStorage(seat, key, storage);
-end
-
-function on.loadAllRelationshipPoints(seat, key)
-	local storage = getCardStorage(seat, key);
-	for towards=0,24 do
-		local storageKey = getCardStorageKey(towards);
-		if (storageKey ~= nil) then
+		if (storageKey ~= nil and seat ~= towards) then
 			local dump = storage[storageKey];
 			restoreRelationshipPointsFromDump(seat, towards, dump);
 		end
 	end
-	setCardStorage(seat, key, {});
+	storage[storageKey] = {};
+	setCardStorage(storageCard, key, storage);
+end
+
+function on.storeAllRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = tonumber(args[1]);
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+
+	local storage = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage[storageKey] = createRelationshipPointsDump(seat, towards);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+function on.loadAllRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local dump = storage[storageKey];
+				restoreRelationshipPointsFromDump(seat, towards, dump);
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
 end
 
 --------------------------------------------------------------------------------------------------------------------------
