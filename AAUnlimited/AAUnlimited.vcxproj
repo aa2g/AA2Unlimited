@@ -273,6 +273,7 @@
     <None Include="Texts\mod\charex.lua" />
     <None Include="Texts\mod\com.lua" />
     <None Include="Texts\mod\const.lua" />
+    <None Include="Texts\mod\cram_school.lua" />
     <None Include="Texts\mod\dx.lua" />
     <None Include="Texts\mod\edit\eyeselect.lua" />
     <None Include="Texts\mod\edit\init.lua" />
