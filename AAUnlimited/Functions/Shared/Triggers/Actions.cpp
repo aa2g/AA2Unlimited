@@ -1676,6 +1676,7 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[seat];
 			if (!inst->IsValid()) return;
 			int status = params[1].iVal % 9;
+			inst->m_forceAction.movementType = status;
 			inst->m_char->m_characterStatus->m_npcStatus->m_status = status;
 		}
 

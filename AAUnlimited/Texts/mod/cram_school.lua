@@ -3,23 +3,34 @@
 local _M = {}
 local opts = {}
 
+local lightingPresets = {
+	"lighting_night_full",
+	"lighting_night_subtle",
+}
+
 --------------------------------------------------------------------------------------------------------------------------
 -- Event handlers --------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 function on.roomChange(seat, room, action)
-	local character = GetCharInstData(seat);
-	if (character ~= nil) then
-		if (character:IsPC()) then
-			local os = require("os");
-			local setsPath = ".\\data\\sets\\!lighting_night\\";
-			if (isRoomInterior(room)) then
-				os.rename(setsPath .. "jg2p01_00_00", setsPath .. "lighting_night_full");
+	local os = require("os");
+	local setsPath = ".\\data\\sets\\!lighting_night\\";
+	for i=0,24 do
+		local character = GetCharInstData(i);
+		if (character ~= nil and character:IsPC()) then
+			-- reset all lighting presets
+			for i,v in pairs(lightingPresets) do
+				if(os.rename(setsPath .. "jg2p01_00_00", setsPath .. v)) then
+					break;
+				end
+			end
+
+			if (isRoomInterior(character:GetCurrentRoom())) then
 				os.rename(setsPath .. "lighting_night_subtle", setsPath .. "jg2p01_00_00");
 			else
-				os.rename(setsPath .. "jg2p01_00_00", setsPath .. "lighting_night_subtle");
 				os.rename(setsPath .. "lighting_night_full", setsPath .. "jg2p01_00_00");
-			end
+			end	
+			return;
 		end
 	end
 end
@@ -30,11 +41,16 @@ function on.period()
 	for i=0,24 do
 		local character = GetCharInstData(i);
 		if (character ~= nil and character:IsPC()) then
+			-- reset all lighting presets
+			for i,v in pairs(lightingPresets) do
+				if(os.rename(setsPath .. "jg2p01_00_00", setsPath .. v)) then
+					break;
+				end
+			end
+
 			if (isRoomInterior(character:GetCurrentRoom())) then
-				os.rename(setsPath .. "jg2p01_00_00", setsPath .. "lighting_night_full");
 				os.rename(setsPath .. "lighting_night_subtle", setsPath .. "jg2p01_00_00");
 			else
-				os.rename(setsPath .. "jg2p01_00_00", setsPath .. "lighting_night_subtle");
 				os.rename(setsPath .. "lighting_night_full", setsPath .. "jg2p01_00_00");
 			end	
 			return;
@@ -131,7 +147,7 @@ function isRoomInterior(idxRoom)
 			rooms["Outside cafeteria"] = false;
 			rooms["Courtyard"] = false;
 			rooms["2nd floor hallway"] = true;
-			rooms["3rd floor passage"] = true;
+			rooms["3rd floor passage"] = false;
 			rooms["Swimming pool"] = false;
 			rooms["Track"] = false;
 			rooms["Sports facility"] = false;
@@ -143,7 +159,7 @@ function isRoomInterior(idxRoom)
 			rooms["Behind Dojo"] = false;
 			rooms["Outside dojo"] = false;
 			rooms["Cafeteria"] = true;
-			rooms["Outside Station"] = false;
+			rooms["Outside Station"] = true;
 			rooms["Karaoke"] = true;
 			rooms["Boys' night room"] = true;		--	probably nonexistant according to backgrounds
 			rooms["Girls' night room"] = true;		--	probably nonexistant according to backgrounds
@@ -168,6 +184,10 @@ function _M:load()
 end
 
 function _M:unload()
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Jizou options")
 end
 
 return _M
