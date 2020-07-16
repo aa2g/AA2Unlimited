@@ -31,7 +31,7 @@ local function reload_subtitles()
 	local file
 
 	--loads all files from the subtitles folder
-	for found in readdir(aau_path("subtitles","*")) do
+	for found in readdir(aau_path("subtitles","*.txt")) do
 		file = io.open(subtitles_path .. "\\" .. found, "r")
 		if not file then goto continue end
 		for line in file:lines() do
