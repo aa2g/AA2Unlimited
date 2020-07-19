@@ -3188,7 +3188,7 @@ namespace Shared {
 					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
 					"using the Set Npc Response Answer Action"),
-					{}, (TYPE_BOOL),
+					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentAnswer
 				},
 				{
