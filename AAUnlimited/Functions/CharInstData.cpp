@@ -170,6 +170,10 @@ std::vector<BYTE> CharInstData::GetAmbientColor()
 
 int CharInstData::GetLoveTowards(CharInstData* towards)
 {
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
+
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
 	for (it; it != relations->m_end; it++) {
@@ -182,6 +186,10 @@ int CharInstData::GetLoveTowards(CharInstData* towards)
 
 int CharInstData::GetLikeTowards(CharInstData* towards)
 {
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
+
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
 	for (it; it != relations->m_end; it++) {
@@ -194,6 +202,10 @@ int CharInstData::GetLikeTowards(CharInstData* towards)
 
 int CharInstData::GetDislikeTowards(CharInstData* towards)
 {
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
+
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
 	for (it; it != relations->m_end; it++) {
@@ -206,6 +218,10 @@ int CharInstData::GetDislikeTowards(CharInstData* towards)
 
 int CharInstData::GetHateTowards(CharInstData* towards)
 {
+	if (!this->IsValid()) return 0;
+	if (!towards->IsValid()) return 0;
+	if (this == towards) return 0;
+
 	auto* relations = this->m_char->GetRelations();
 	auto* it = relations->m_start;
 	for (it; it != relations->m_end; it++) {
@@ -214,6 +230,67 @@ int CharInstData::GetHateTowards(CharInstData* towards)
 	if (it == relations->m_end) return 0;
 
 	return it->m_hatePoints + it->m_hateCount * 30;
+}
+
+void CharInstData::SetPointsTowards(CharInstData* towards, float love, float like, float dislike, float hate, float spare)
+{
+	if (!this->IsValid()) return;
+	if (!towards->IsValid()) return;
+	if (this == towards) return;
+
+	auto* ptrRel = this->m_char->GetRelations();
+	auto* rel = ptrRel->m_start;
+	if (ptrRel == NULL) return;
+	for (rel; rel != ptrRel->m_end; rel++) {
+		if (rel->m_targetSeat == towards->m_char->m_seat) {
+			break;
+		}
+	}
+	if (rel == ptrRel->m_end) return;	//if we didn't find the relationship data for the target we do nothing
+
+	//normalize the points
+	float ptsSum = love + like + dislike + hate + spare;
+	float normalizer;
+	if (ptsSum > 0)
+	{
+		normalizer = 900.0f / ptsSum;
+	}
+	else
+	{
+		normalizer = 0.0f;
+	}
+	love *= normalizer;
+	like *= normalizer;
+	dislike *= normalizer;
+	hate *= normalizer;
+
+	//nuke old relationship data
+	rel->m_loveCount = 0;
+	rel->m_likeCount = 0;
+	rel->m_dislikeCount = 0;
+	rel->m_hateCount = 0;
+
+	rel->m_love = 2;
+	rel->m_like = 2;
+	rel->m_dislike = 2;
+	rel->m_hate = 2;
+
+	rel->m_lovePoints = 0;
+	rel->m_likePoints = 0;
+	rel->m_dislikePoints = 0;
+	rel->m_hatePoints = 0;
+
+	rel->m_poin = 0;
+
+	rel->m_actionBacklog.m_end = rel->m_actionBacklog.m_start;
+
+	//apply the points, discard the decimals
+	rel->m_lovePoints = love;
+	rel->m_likePoints = like;
+	rel->m_dislikePoints = dislike;
+	rel->m_hatePoints = hate;
+
+	AAPlay::ApplyRelationshipPoints(this->m_char, rel);
 }
 
 int CharInstData::GetCurrentRoom()
@@ -258,8 +335,12 @@ bool CharInstData::IsValid()
 	return false;
 }
 
-void CharInstData::Reset()
-{
+bool CharInstData::IsPC() {
+	if (!this->IsValid()) return false;
+	return (Shared::GameState::getPlayerCharacter())->m_char->m_seat == this->m_char->m_seat;
+}
+
+void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
 	m_cardData.Reset();
 	for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
