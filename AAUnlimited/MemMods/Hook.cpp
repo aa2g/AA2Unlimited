@@ -312,10 +312,11 @@ void InitializeHooks() {
 		NpcActions::LowPolyUpdateStartInjectForGirls();
 		NpcActions::LowPolyUpdateStartInjectForBoys();
 		NpcActions::murderEventInjection();
-		NpcActions::rosterPopulateInjection();
-		NpcActions::RosterCrashInjection();
-		NpcActions::rosterHandleInjectionFirst();
-		NpcActions::rosterHandleInjectionSecond();
+		//hello darkness my old friend
+		//NpcActions::rosterPopulateInjection();
+		//NpcActions::RosterCrashInjection();
+		//NpcActions::rosterHandleInjectionFirst();
+		//NpcActions::rosterHandleInjectionSecond();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();

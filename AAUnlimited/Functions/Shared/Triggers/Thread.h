@@ -278,6 +278,7 @@ namespace Shared {
 			Value GetNpcStatus(std::vector<Value>& params); //int(int)
 			Value GetHeight(std::vector<Value>& params); //int(int)
 			Value GetTarget(std::vector<Value>& params); //int(int)
+			Value GetMLocationTarget(std::vector<Value>& params);
 			Value GetPcTarget(std::vector<Value>& params); //int()
 			Value PCTalkAbout(std::vector<Value>& params);
 			Value GetCardLastHPartner(std::vector<Value>& params); //string(int)
@@ -359,6 +360,7 @@ namespace Shared {
 			Value IsMinnaAction(std::vector<Value>& params); //bool(int)
 			Value IsForceAction(std::vector<Value>& params); //bool(int)
 			Value IsSexAction(std::vector<Value>& params); //bool(int)
+			Value IsPrivateRoom(std::vector<Value>& params);
 			Value IsSkipAction(std::vector<Value>& params); //bool(int)
 			Value IsNoPromptAction(std::vector<Value>& params); //bool(int)
 			Value IsGameOverAction(std::vector<Value>& params); //bool(int)
