@@ -27,16 +27,23 @@ local subtitles = {}
 local function reload_subtitles()
 	local dialogue
 	local count = 0
-	local subtitles_path = aau_path("subtitles.txt")
-	local file = io.open(subtitles_path, "r")
-	if not file then return end
-	for line in file:lines() do
-		file, dialogue = line:match("%s*([%w_.]+).+\"(.*)\"%s*$")
-		if file and dialogue then
-			subtitles[file] = dialogue
-			count = count + 1
+	local subtitles_path = aau_path("subtitles")
+	local file
+
+	--loads all files from the subtitles folder
+	for found in readdir(aau_path("subtitles","*.txt")) do
+		file = io.open(subtitles_path .. "\\" .. found, "r")
+		if not file then goto continue end
+		for line in file:lines() do
+			file, dialogue = line:match("%s*([%w_.]+).+\"(.*)\"%s*$")
+			if file and dialogue then
+					subtitles[file] = dialogue
+					count = count + 1
+			end
 		end
+		::continue::
 	end
+
 	log.info("Loaded %d subtitles", count)
 end
 

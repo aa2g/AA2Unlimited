@@ -132,6 +132,47 @@ namespace Shared {
 			card->m_forceAction.target2 = nullptr;
 			card->m_forceAction.unknown = -1;
 			card->m_forceAction.unknown2 = 1;
+
+
+			if (this->eventData->GetId() == NPC_WANT_TALK_WITH) {
+				((NpcWantTalkWithData*)eventData)->substruct->conversationId = -1;
+				((NpcWantTalkWithData*)eventData)->substruct->movementType = 0;
+				((NpcWantTalkWithData*)eventData)->substruct->roomTarget = -1;
+				((NpcWantTalkWithData*)eventData)->substruct->target1 = nullptr;
+				((NpcWantTalkWithData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantTalkWithData*)eventData)->substruct->unknown = -1;
+				((NpcWantTalkWithData*)eventData)->substruct->unknown2 = -1;
+			}
+
+			else if (this->eventData->GetId() == NPC_WANT_TALK_WITH_ABOUT) {
+				((NpcWantTalkWithAboutData*)eventData)->substruct->conversationId = -1;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->movementType = 0;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->roomTarget = -1;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->target1 = nullptr;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->unknown = -1;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->unknown2 = -1;
+			}
+
+			else if (this->eventData->GetId() == NPC_WANT_ACTION_NOTARGET) {
+				((NpcWantActionNoTargetData*)eventData)->substruct->conversationId = -1;
+				((NpcWantActionNoTargetData*)eventData)->substruct->movementType = 0;
+				((NpcWantActionNoTargetData*)eventData)->substruct->roomTarget = -1;
+				((NpcWantActionNoTargetData*)eventData)->substruct->target1 = nullptr;
+				((NpcWantActionNoTargetData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantActionNoTargetData*)eventData)->substruct->unknown = -1;
+				((NpcWantActionNoTargetData*)eventData)->substruct->unknown2 = -1;
+			}
+
+			else if (this->eventData->GetId() == NPC_WALK_TO_ROOM) {
+				((NpcWalkToRoomData*)eventData)->substruct->conversationId = -1;
+				((NpcWalkToRoomData*)eventData)->substruct->movementType = 0;
+				((NpcWalkToRoomData*)eventData)->substruct->roomTarget = -1;
+				((NpcWalkToRoomData*)eventData)->substruct->target1 = nullptr;
+				((NpcWalkToRoomData*)eventData)->substruct->target2 = nullptr;
+				((NpcWalkToRoomData*)eventData)->substruct->unknown = -1;
+				((NpcWalkToRoomData*)eventData)->substruct->unknown2 = -1;
+			}
 		}
 
 		//event response

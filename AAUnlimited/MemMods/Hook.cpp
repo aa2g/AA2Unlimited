@@ -312,6 +312,7 @@ void InitializeHooks() {
 		NpcActions::LowPolyUpdateStartInjectForGirls();
 		NpcActions::LowPolyUpdateStartInjectForBoys();
 		NpcActions::murderEventInjection();
+		//readded hooks for the release
 		NpcActions::rosterPopulateInjection();
 		NpcActions::RosterCrashInjection();
 		NpcActions::rosterHandleInjectionFirst();

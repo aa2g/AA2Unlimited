@@ -382,6 +382,14 @@ namespace Shared {
 			}
 			return Value(false);
 		}
+
+		Value Thread::IsPrivateRoom(std::vector<Value>& params) {
+			int roomID = params[0].iVal;
+			if (roomID >= 43 && roomID <= 52) return Value(true);
+			return Value(false);
+		}
+
+
 		//bool(int)
 		Value Thread::IsSkipAction(std::vector<Value>& params) {
 			int sexActions[] = {
@@ -1511,12 +1519,30 @@ namespace Shared {
 			}
 		}
 
+		//int(int)
+		Value Thread::GetMLocationTarget(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			int default_return = -1;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				default_return = inst->m_char->m_characterStatus->m_npcStatus->m_locationTarget;
+				return Value(default_return);
+			}
+		}
+
+
 		//int()
 		Value Thread::GetPcTarget(std::vector<Value>& params) {
 			int default_return = -1;
 
 			const DWORD offset[]{ 0x376164, 0x8C };
-			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity * *)ExtVars::ApplyRule(offset);
+			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity **)ExtVars::ApplyRule(offset);
 
 			for (int character = 0; character < 25; character = character + 1) {
 				CharInstData* inst2 = &AAPlay::g_characters[character];
@@ -3162,7 +3188,7 @@ namespace Shared {
 					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
 					"using the Set Npc Response Answer Action"),
-					{}, (TYPE_BOOL),
+					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentAnswer
 				},
 				{
@@ -3355,6 +3381,12 @@ namespace Shared {
 					TEXT("Real Club Value"), TEXT("%p ::RealClubValue"), TEXT("The real unlocked club value of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveClubValue
+				},
+				{
+					133, EXPRCAT_CHARPROP,
+					TEXT("Get LocationTarget"), TEXT("%p ::LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetMLocationTarget
 				}
 			},
 
@@ -3652,6 +3684,12 @@ namespace Shared {
 					TEXT("Check Skip Action"), TEXT("%p ::isSkip"), TEXT("Returns true if SKIP_CLASS, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, GO_HOME_TOGETHER, GO_KARAOKE_TOGETHER, GO_PLAY_TOGETHER, GO_EAT_TOGETHER"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsSkipAction
+				},
+				{
+					48, EXPRCAT_GENERAL,
+					TEXT("Check Private Room"), TEXT("%p ::isPrivateRoom"), TEXT("Returns true if the location ID is one of the private rooms."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsPrivateRoom
 				},
 			},
 			{ //FLOAT

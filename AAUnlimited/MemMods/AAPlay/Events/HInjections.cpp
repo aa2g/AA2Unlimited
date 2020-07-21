@@ -22,13 +22,13 @@ bool (__stdcall *loc_OriginalTickFunction)(ExtClass::HInfo* info);
 
 //take note that these ticks might be called multiple times even after returning contScene = false
 bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
-	Shared::GameState::setHInfo(hInfo);
 	HAi::PreTick(hInfo);
 	bool contScene = loc_OriginalTickFunction(hInfo);
 	if (contScene) {
 		if (!loc_currentHInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H started\n";
 			LUA_EVENT_NORET("start_h", hInfo);
+			Shared::GameState::setHInfo(hInfo);
 			Shared::Triggers::HStartData data;
 			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			data.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
@@ -41,10 +41,10 @@ bool __stdcall TickRedirect(ExtClass::HInfo* hInfo) {
 		if (loc_currentHInfo) {
 			LOGPRIO(Logger::Priority::INFO) << "H ended\n";
 			LUA_EVENT_NORET("end_h", hInfo);
+			Shared::GameState::setHInfo(NULL);
 			Shared::Triggers::HEndData data;
 			data.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 			Shared::Triggers::ThrowEvent(&data);
-			Shared::GameState::setHInfo(NULL);
 		}
 		loc_currentHInfo = NULL;
 

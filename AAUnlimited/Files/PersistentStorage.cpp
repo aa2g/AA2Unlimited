@@ -247,8 +247,10 @@ PersistentStorage::Option<int> PersistentStorage::ClassStorage::getClassInt(std:
 	Option<int> result;
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
-	if (result.isValid)
-		result.value = i->second.get<double>();
+	if (result.isValid) {
+		if (i->second.is<double>()) result.value = i->second.get<double>();
+		else result.isValid = false;
+	}
 	return result;
 }
 PersistentStorage::Option<float> PersistentStorage::ClassStorage::getClassFloat(std::wstring key)
@@ -256,8 +258,10 @@ PersistentStorage::Option<float> PersistentStorage::ClassStorage::getClassFloat(
 	Option<float> result;
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
-	if (result.isValid)
-		result.value = i->second.get<double>();
+	if (result.isValid) {
+		if (i->second.is<double>()) result.value = i->second.get<double>();
+		else result.isValid = false;
+	}
 	return result;
 }
 PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getClassBool(std::wstring key)
@@ -265,8 +269,10 @@ PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getClassBool(st
 	Option<bool> result;
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
-	if (result.isValid)
-		result.value = i->second.evaluate_as_boolean();
+	if (result.isValid) {
+		if (i->second.is<bool>()) result.value = i->second.evaluate_as_boolean();
+		else result.isValid = false;
+	}
 	return result;
 }
 PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getClassString(std::wstring key)
@@ -274,8 +280,10 @@ PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getClass
 	Option<std::string> result;
 	auto i = this->data.find(General::CastToString(key));
 	result.isValid = i != this->data.end();
-	if (result.isValid)
-		result.value = i->second.get<std::string>();
+	if (result.isValid) {
+		if (i->second.is<std::string>()) result.value = i->second.get<std::string>();
+		else result.isValid = false;
+	}
 	return result;
 }
 
@@ -301,8 +309,10 @@ PersistentStorage::Option<bool> PersistentStorage::ClassStorage::getCardBool(Cha
 	{
 		auto i = val.value.find(General::CastToString(key));
 		result.isValid = i != val.value.end();
-		if (result.isValid)
-			result.value = i->second.evaluate_as_boolean();
+		if (result.isValid) {
+			if (i->second.is<bool>()) result.value = i->second.evaluate_as_boolean();
+			else result.isValid = false;
+		}
 	}
 	return result;
 }
@@ -315,8 +325,10 @@ PersistentStorage::Option<int> PersistentStorage::ClassStorage::getCardInt(CharI
 	{
 		auto i = val.value.find(General::CastToString(key));
 		result.isValid = i != val.value.end();
-		if (result.isValid)
-			result.value = i->second.get<double>();
+		if (result.isValid) {
+			if (i->second.is<double>()) result.value = i->second.get<double>();
+			else result.isValid = false;
+		}
 	}
 	return result;
 }
@@ -329,8 +341,10 @@ PersistentStorage::Option<float> PersistentStorage::ClassStorage::getCardFloat(C
 	{
 		auto i = val.value.find(General::CastToString(key));
 		result.isValid = i != val.value.end();
-		if (result.isValid)
-			result.value = i->second.get<double>();
+		if (result.isValid) {
+			if (i->second.is<double>()) result.value = i->second.get<double>();
+			else result.isValid = false;
+		}
 	}
 	return result;
 }
@@ -343,7 +357,10 @@ PersistentStorage::Option<std::string> PersistentStorage::ClassStorage::getCardS
 	{
 		auto i = val.value.find(General::CastToString(key));
 		result.isValid = i != val.value.end();
-		if (result.isValid) result.value = i->second.get<std::string>();
+		if (result.isValid) {
+			if (i->second.is<std::string>()) result.value = i->second.get<std::string>();
+			else result.isValid = false;
+		}
 	}
 	return result;
 }
