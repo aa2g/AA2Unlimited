@@ -47,8 +47,7 @@ namespace Subtitles {
 		if (pos != result.npos) {
 			result.replace(pos, result.length(), std::string(talkingAbout));
 		}
-		auto test = result.c_str();
-		lines.push_back(std::make_tuple(General::utf8.from_bytes(test) + L"\n", sexes_id));
+		lines.push_back(std::make_tuple(General::CastToWString(result) + L"\n", sexes_id));
 	}
 
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
