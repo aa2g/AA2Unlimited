@@ -43,7 +43,7 @@ namespace Subtitles {
 		if (lines.size() > maxLines)
 			lines.pop_front();
 
-	
+		//Adding the one who's talking and the person they're talking about to the subtitles
 		std::string subject = std::string(talkingCard).append(": " + std::string(subtitle));
 		std::string search = "@";
 
