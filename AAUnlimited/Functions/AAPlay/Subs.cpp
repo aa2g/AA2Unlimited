@@ -42,12 +42,17 @@ namespace Subtitles {
 			lastPopTime = GetTickCount();
 		if (lines.size() > maxLines)
 			lines.pop_front();
-		std::string result = std::string(talkingCard).append(": " + std::string(subtitle));
-		std::string::size_type pos = result.find("@");
-		if (pos != result.npos) {
-			result.replace(pos, result.length(), std::string(talkingAbout));
+
+	
+		std::string subject = std::string(talkingCard).append(": " + std::string(subtitle));
+		std::string search = "@";
+
+		size_t pos = 0;
+		while ((pos = subject.find(search, pos)) != std::string::npos) {
+			subject.replace(pos, search.length(), std::string(talkingAbout));
+			pos += std::string(talkingAbout).length();
 		}
-		lines.push_back(std::make_tuple(General::CastToWString(result) + L"\n", sexes_id));
+		lines.push_back(std::make_tuple(General::CastToWString(subject) + L"\n", sexes_id));
 	}
 
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
