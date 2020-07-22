@@ -723,7 +723,9 @@ void rosterHandleInjectionFirst() {
 
 void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat) {
 	CharInstData* card = &AAPlay::g_characters[seat];
-	auto seatnumtest = card->m_char->m_seat;
+	if (card->IsValid()) {
+		auto seatnumtest = card->m_char->m_seat;
+	}
 	std::string file = General::CastToString(fname);
 	LUA_EVENT_NORET("load_audio", file);
 
