@@ -99,6 +99,8 @@ public:
 
 	void ApplyDecals(int bodyPart, int decalStrength);
 
+	DWORD* lastDialogue = NULL;
+
 	static inline void bindLua() {
 #define LUA_CLASS CharInstData
 		LUA_NAME;
