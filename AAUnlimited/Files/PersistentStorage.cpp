@@ -162,7 +162,13 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDat
 	std::string name = std::to_string(character->m_char->m_seat) + " " + std::string(character->m_char->m_charData->m_forename) + " " + std::string(character->m_char->m_charData->m_surname);
 
 	auto cardStorageValue = this->get(name);
+
 	picojson::object record;
+
+	if (cardStorageValue.is<picojson::object>())
+	{
+		record = cardStorageValue.get<picojson::object>();
+	}
 	if (!cardStorageValue.is<picojson::object>()) {
 		cardStorageValue = picojson::value(picojson::object());
 	}
@@ -184,6 +190,10 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDat
 
 	auto cardStorageValue = this->get(name);
 	picojson::object record;
+	if (cardStorageValue.is<picojson::object>())
+	{
+		record = cardStorageValue.get<picojson::object>();
+	}
 	if (!cardStorageValue.is<picojson::object>()) {
 		cardStorageValue = picojson::value(picojson::object());
 	}
@@ -205,6 +215,10 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDat
 
 	auto cardStorageValue = this->get(name);
 	picojson::object record;
+	if (cardStorageValue.is<picojson::object>())
+	{
+		record = cardStorageValue.get<picojson::object>();
+	}
 	if (!cardStorageValue.is<picojson::object>()) {
 		cardStorageValue = picojson::value(picojson::object());
 	}
@@ -226,6 +240,10 @@ PersistentStorage::ClassStorage PersistentStorage::ClassStorage::storeCardAAUDat
 
 	auto cardStorageValue = this->get(name);
 	picojson::object record;
+	if (cardStorageValue.is<picojson::object>())
+	{
+		record = cardStorageValue.get<picojson::object>();
+	}
 	if (!cardStorageValue.is<picojson::object>()) {
 		cardStorageValue = picojson::value(picojson::object());
 	}
