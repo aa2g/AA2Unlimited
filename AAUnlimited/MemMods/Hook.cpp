@@ -317,6 +317,7 @@ void InitializeHooks() {
 		NpcActions::RosterCrashInjection();
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
+		NpcActions::dialoguePlayInjection();
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();

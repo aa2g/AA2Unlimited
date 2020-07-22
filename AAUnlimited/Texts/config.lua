@@ -92,6 +92,7 @@ mods = {
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "playtrans" },
+	{ "triggers_supplemental" },
 	{ "notifications" },
 	{ "subtitles" },
 	{ "facecam" },

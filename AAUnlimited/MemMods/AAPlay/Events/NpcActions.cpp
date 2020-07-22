@@ -12,6 +12,7 @@ using namespace ExtClass;
 DWORD AnswerAddress, AnswerLowAddress;
 DWORD* LowPolyInjectionReturnAddress = 0;
 DWORD* FirstRosterHandleReturnAddress = 0;
+DWORD* DialogueReturnAddress = 0;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
 DWORD* RosterHandleLoopNextSeat = 0;
@@ -719,6 +720,52 @@ void rosterHandleInjectionFirst() {
 	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
+
+void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat) {
+	CharInstData* card = &AAPlay::g_characters[seat];
+	auto seatnumtest = card->m_char->m_seat;
+	std::string file = General::CastToString(fname);
+	LUA_EVENT_NORET("load_audio", file);
+
+}
+
+
+void __declspec(naked) dialoguePlayRedirect() {
+	__asm {
+		pushad
+		mov eax, [edi]
+		add eax, 0x04
+		mov eax, [eax]
+		push ebx
+		push eax
+		call DialoguePlay
+		//original code
+		popad
+		mov edx, [ecx+0x3C]
+		call edx
+		jmp DialogueReturnAddress
+	}
+}
+
+
+
+void dialoguePlayInjection() {
+	//Below is the function that's called when a game plays a dialogue line
+	//AA2Play.exe+1FD30F - 8B 51 3C              - mov edx,[ecx+3C]
+	//AA2Play.exe+1FD312 - FF D2                 - call edx	
+
+
+	const DWORD offset[]{ 0x1FD314 };
+	DialogueReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+
+	DWORD address = General::GameBase + 0x1FD30F;
+	DWORD redirectAddress = (DWORD)(&dialoguePlayRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x51, 0x3C, 0xFF, 0xD2 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
 
 
 #if !NEW_HOOK

@@ -21,6 +21,7 @@ namespace NpcActions {
 	void RosterCrashInjection();
 	void rosterPopulateInjection();
 	void rosterHandleInjectionFirst();
+	void dialoguePlayInjection();
 	void rosterHandleInjectionSecond();
 
 #pragma pack(push, 1)
