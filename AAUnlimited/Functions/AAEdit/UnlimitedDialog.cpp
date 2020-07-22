@@ -2345,6 +2345,14 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Eyebrow Depth"),
+				{ { CharacterStruct::FACE, 62 },{ CharacterStruct::FACE, 63 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Eyebrow Rotation"),
+				{ { CharacterStruct::FACE, 64 },{ CharacterStruct::FACE, 65 } },
+				-1.0f, 1.0f
+			},
 			{ TEXT("Eye Depth"),
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
@@ -2431,6 +2439,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Nose Length"),
 			{ { CharacterStruct::FACE, 22 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Nose Bridge Height"),
+			{ { CharacterStruct::FACE, 61 } },
 					-0.05f, 0.05f
 			},
 			{ TEXT("Nose Bridge Depth"),

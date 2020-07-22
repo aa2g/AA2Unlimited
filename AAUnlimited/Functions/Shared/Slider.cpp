@@ -168,6 +168,13 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 59,	TEXT("S00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
 			{ ExtClass::CharacterStruct::FACE, 60,	TEXT("S00_O_mimi"),{ 0,0,0, 0,0,0, 0,1,0 },					Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear height
 
+			//Faceparts v5.5
+			{ ExtClass::CharacterStruct::FACE, 61,	TEXT("A00_J_nosebridge"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //nose bridge height
+			{ ExtClass::CharacterStruct::FACE, 62,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow depth
+			{ ExtClass::CharacterStruct::FACE, 63,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow depth
+			{ ExtClass::CharacterStruct::FACE, 64,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow rotation
+			{ ExtClass::CharacterStruct::FACE, 65,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow rotation
+
 		},
 		{
 			//SKELETON
