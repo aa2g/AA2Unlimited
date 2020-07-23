@@ -580,9 +580,9 @@ end
 
 local eyetrackfunction
 if exe_type == "edit" then
-	eyetrackfunction = 0x5ADF70
+	eyetrackfunction = GameBase + 0x1ADF70
 else
-	eyetrackfunction = 0x5CB7D0
+	eyetrackfunction = GameBase + 0x1CB7D0
 end
 local function trackcontrols(gazelist, opts)
 	local trackcontrol = opts.name .. "tracking"
