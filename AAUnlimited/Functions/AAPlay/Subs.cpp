@@ -34,7 +34,7 @@ namespace Subtitles {
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
 
-	void AddSubtitles(const char *subtitle, const char *file_name) {
+	void AddSubtitles(const char *subtitle, const char *file_name, const char *talkingCard, const char *talkingAbout) {
 		int sexes_id = 1;
 		if (file_name[0] == *"s") { sexes_id = 2; }
 
@@ -42,7 +42,17 @@ namespace Subtitles {
 			lastPopTime = GetTickCount();
 		if (lines.size() > maxLines)
 			lines.pop_front();
-		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
+
+		//Adding the one who's talking and the person they're talking about to the subtitles
+		std::string subject = std::string(talkingCard).append(": " + std::string(subtitle));
+		std::string search = "@";
+
+		size_t pos = 0;
+		while ((pos = subject.find(search, pos)) != std::string::npos) {
+			subject.replace(pos, search.length(), std::string(talkingAbout));
+			pos += std::string(talkingAbout).length();
+		}
+		lines.push_back(std::make_tuple(General::CastToWString(subject) + L"\n", sexes_id));
 	}
 
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,

@@ -47,9 +47,9 @@ local function reload_subtitles()
 	log.info("Loaded %d subtitles", count)
 end
 
-function on.load_audio(fname)
+function on.load_audio(fname, talkingCardsName, talkingAboutName)
 	local sub = subtitles[fname]
-	if sub then AddSubtitles(sub, fname) end
+	if sub then AddSubtitles(sub, fname, talkingCardsName, talkingAboutName) end
 end
 
 function on.launch()

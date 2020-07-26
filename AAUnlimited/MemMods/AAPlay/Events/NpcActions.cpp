@@ -12,6 +12,7 @@ using namespace ExtClass;
 DWORD AnswerAddress, AnswerLowAddress;
 DWORD* LowPolyInjectionReturnAddress = 0;
 DWORD* FirstRosterHandleReturnAddress = 0;
+DWORD* DialogueReturnAddress = 0;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
 DWORD* RosterHandleLoopNextSeat = 0;
@@ -719,6 +720,76 @@ void rosterHandleInjectionFirst() {
 	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
+
+void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR) {
+	CharInstData* card = &AAPlay::g_characters[seat];
+	if (card->IsValid()) {
+		if (card->lastDialogue != dialoguePTR) {
+			//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
+			card->lastDialogue = dialoguePTR;
+			std::wstring talkingAboutName = L"@";
+			auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
+			if (card->m_char->GetActivity() != nullptr) {
+				auto convoID = card->m_char->GetActivity()->m_currConversationId;
+				//I am a very safe man
+				if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
+					if (card->m_char->m_characterStatus != nullptr) {
+						if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
+							if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
+								if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
+									talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+								}
+							}
+						}
+					}
+				}
+			}
+
+			LUA_EVENT_NORET("load_audio", General::CastToString(fname), General::CastToString(talkingCardsName), General::CastToString(talkingAboutName));
+		}
+	}
+
+
+}
+
+
+void __declspec(naked) dialoguePlayRedirect() {
+	__asm {
+		pushad
+		mov eax, [edi]
+		add eax, 0x04
+		mov eax, [eax]
+		push edi
+		push ebx
+		push eax
+		call DialoguePlay
+		//original code
+		popad
+		mov edx, [ecx+0x3C]
+		call edx
+		jmp DialogueReturnAddress
+	}
+}
+
+
+
+void dialoguePlayInjection() {
+	//Below is the function that's called when a game plays a dialogue line
+	//AA2Play.exe+1FD30F - 8B 51 3C              - mov edx,[ecx+3C]
+	//AA2Play.exe+1FD312 - FF D2                 - call edx	
+
+
+	const DWORD offset[]{ 0x1FD314 };
+	DialogueReturnAddress = (DWORD*)ExtVars::ApplyRule(offset);
+
+	DWORD address = General::GameBase + 0x1FD30F;
+	DWORD redirectAddress = (DWORD)(&dialoguePlayRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x51, 0x3C, 0xFF, 0xD2 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
 
 
 #if !NEW_HOOK
