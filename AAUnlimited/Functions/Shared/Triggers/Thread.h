@@ -397,9 +397,12 @@ namespace Shared {
 			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params);	//bool()
 			Value GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params);
+			Value GetNpcResponseStrongAnswerSuccess(std::vector<Value>& params);
+			Value GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
+			Value GetPCRoomTarget(std::vector<Value>& params);
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
 			Value GetNpcResponseOriginalPercent(std::vector<Value>& params);	//int()
 			Value GetNpcResponseCurrentPercent(std::vector<Value>& params);	//int()

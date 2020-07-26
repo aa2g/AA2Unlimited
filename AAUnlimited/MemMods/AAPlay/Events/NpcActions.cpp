@@ -155,6 +155,10 @@ void __stdcall Answer(AnswerStruct *as) {
 	afterResponseData.substruct = as;
 	afterResponseData.effectiveChance = as->answerChar->m_lastConversationAnswerPercent;
 	afterResponseData.effectiveResponse = as->answer;
+	//these three only exist so we know whether any modules ran to set the response with this priority. They're useful, but use effectiveResponse to check the response the game will act on.
+	afterResponseData.changedResponse = data.changedResponse;
+	afterResponseData.strongResponse = data.strongResponse;
+	afterResponseData.absoluteResponse = data.absoluteResponse;
 	ThrowEvent(&afterResponseData);
 
 }
