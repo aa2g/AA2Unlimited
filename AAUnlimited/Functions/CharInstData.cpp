@@ -43,18 +43,19 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 
 void CharInstData::SetHeadTracking(int headtracking)
 {
-
 	//Set it to 1 to disable headtracking
 	//2 enables headtracking
 	//4 makes the girl avoid your gaze
-	DWORD* somepointer = (DWORD*)((char*)(this->m_char->m_xxSkeleton->m_unknown13) + 0x88);
-	const DWORD offset[]{ 0x1C9DD0 };
-	DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
-	__asm
-	{
-		mov eax, somepointer
-		mov ecx, headtracking
-		call[address]
+	if (this->m_char->m_xxSkeleton) {
+		DWORD* somepointer = (DWORD*)((char*)(this->m_char->m_xxSkeleton->m_unknown13) + 0x88);
+		const DWORD offset[]{ 0x1C9DD0 };
+		DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+		__asm
+		{
+			mov eax, somepointer
+			mov ecx, headtracking
+			call[address]
+		}
 	}
 }
 
