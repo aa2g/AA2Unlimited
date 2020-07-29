@@ -794,6 +794,56 @@ void dialoguePlayInjection() {
 		NULL);
 }
 
+void __stdcall headTracking(DWORD* charAddress, BYTE tracking) {
+	//We need someone who deals with personalities to confirm whether other possible states are ever relevant. As far as I know, 0 and 1 mean no head tracking, 2 means head tracking is on. There are also some values for which the girl turns her head away from the player, and we should cover those cases too if any dialogue lines use them. We'll see.
+	if (tracking == 0 || tracking == 1 || tracking == 2) {
+		//this is the case for when 
+		for (int i = 0; i < 25; i++) {
+			if (AAPlay::g_characters[i].IsValid()) {
+				if (AAPlay::g_characters[i].m_char->m_xxSkeleton) {
+					if (AAPlay::g_characters[i].m_char->m_xxSkeleton) {
+						DWORD* somepointer = (DWORD*)((char*)(AAPlay::g_characters[i].m_char->m_xxSkeleton->m_unknown13) + 0x88);
+						if (charAddress == somepointer) {
+							//Use these two somehow
+							int seat = i;
+							if (tracking == 0 || tracking == 1) bool headTrackingEnabled = false;
+							else bool headTrackingEnabled = true;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void __declspec(naked) headTrackingRedirect() {
+	__asm {
+		pushad
+		push cl
+		push eax
+		call headTracking
+		//original code
+		popad
+		mov esi, [eax + 0x1C]
+		xor edx, edx
+		ret
+	}
+}
+
+
+void headTrackingChangeInjection() {
+	//AA2Play.exe+1C9DD1 - 8B 70 1C              - mov esi,[eax+1C]
+	//AA2Play.exe+1C9DD4 - 33 D2                 - xor edx,edx
+
+	DWORD address = General::GameBase + 0x1C9DD1;
+	DWORD redirectAddress = (DWORD)(&headTrackingRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x70, 0x1C, 0x33, 0xD2 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
 
 
 #if !NEW_HOOK
