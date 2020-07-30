@@ -13,6 +13,8 @@ DWORD AnswerAddress, AnswerLowAddress;
 DWORD* LowPolyInjectionReturnAddress = 0;
 DWORD* FirstRosterHandleReturnAddress = 0;
 DWORD* DialogueReturnAddress = 0;
+DWORD* extraHairFixReturnAddress = 0;
+DWORD* extraHairFixVanillaAddress;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
 DWORD* RosterHandleLoopNextSeat = 0;
@@ -29,6 +31,7 @@ DWORD* RosterESI = 0;
 DWORD* RosterEDI = 0;
 DWORD* RosterEBP = 0;
 DWORD* RosterESP = 0;
+BYTE extraHairTest;
 
 
 // Wraps a call to our custom handler, redirect jump is pointed into here
@@ -844,6 +847,69 @@ void headTrackingChangeInjection() {
 		NULL);
 }
 
+void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
+	extraHairTest = value;
+	if (Shared::GameState::getConversationCharacter(0)) {
+		auto card1 = Shared::GameState::getConversationCharacter(0);
+		if (card1->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(card1->m_xxSkeleton->m_unknown13) + 0x88);
+			if (charAddress == somepointer) {
+				auto hairs = AAPlay::g_characters[card1->m_seat].m_cardData;
+				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) extraHairTest = 1;
+			}
+		}
+	}
+	if (Shared::GameState::getConversationCharacter(1)) {
+		auto card2 = Shared::GameState::getConversationCharacter(1);
+		if (card2->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(card2->m_xxSkeleton->m_unknown13) + 0x88);
+			if (charAddress == somepointer) {
+				auto hairs = AAPlay::g_characters[card2->m_seat].m_cardData;
+				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) extraHairTest = 1;
+			}
+		}
+	}
+}
+
+
+void __declspec(naked) extraHairFixRedirect() {
+	__asm {
+		pushad
+		push al
+		push esi
+		call extraHairFix
+		//original code
+		mov al, extraHairTest
+		test al, al
+		popad
+		je JumpHere
+		jmp extraHairFixReturnAddress
+
+	JumpHere:
+		jmp extraHairFixVanillaAddress
+
+	}
+}
+
+
+void extraHairFixInjection() {
+	//AA2Play.exe+1C9C0C - 84 C0                 - test al,al
+	//AA2Play.exe+1C9C0E - 0F84 AD010000         - je AA2Play.exe+1C9DC1
+	//AA2Play.exe+1C9C14 - 8D 44 24 1C           - lea eax,[esp+1C]
+
+
+	const DWORD offset1[]{ 0x1C9C14 };
+	extraHairFixReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x1C9DC1 };
+	extraHairFixVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
+
+	DWORD address = General::GameBase + 0x1C9C0E;
+	DWORD redirectAddress = (DWORD)(&extraHairFixRedirect);
+	Hook((BYTE*)address,
+	{ 0x0F, 0x84, 0xAD, 0x01, 0x00, 0x00 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 #if !NEW_HOOK
