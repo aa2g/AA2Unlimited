@@ -319,6 +319,7 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
 		NpcActions::extraHairFixInjection();
+		HairMeshes::XXCleanupInjectionForBoys();
 		//NpcActions::headTrackingChangeInjection();
 
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing

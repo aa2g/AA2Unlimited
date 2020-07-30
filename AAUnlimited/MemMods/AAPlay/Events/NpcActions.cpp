@@ -849,27 +849,23 @@ void headTrackingChangeInjection() {
 
 void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 	extraHairTest = value;
-	if (Shared::GameState::getConversationCharacter(0)) {
-		auto card1 = Shared::GameState::getConversationCharacter(0);
+	int i = 0;
+	while (Shared::GameState::getConversationCharacter(i)) {
+		auto card1 = Shared::GameState::getConversationCharacter(i);
 		if (card1->m_xxSkeleton) {
 			DWORD* somepointer = (DWORD*)((char*)(card1->m_xxSkeleton->m_unknown13) + 0x88);
 			if (charAddress == somepointer) {
 				auto hairs = AAPlay::g_characters[card1->m_seat].m_cardData;
-				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) extraHairTest = 1;
+				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+					extraHairTest = 1;
+					return;
+				}
 			}
 		}
-	}
-	if (Shared::GameState::getConversationCharacter(1)) {
-		auto card2 = Shared::GameState::getConversationCharacter(1);
-		if (card2->m_xxSkeleton) {
-			DWORD* somepointer = (DWORD*)((char*)(card2->m_xxSkeleton->m_unknown13) + 0x88);
-			if (charAddress == somepointer) {
-				auto hairs = AAPlay::g_characters[card2->m_seat].m_cardData;
-				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) extraHairTest = 1;
-			}
-		}
+		i++;
 	}
 }
+
 
 
 void __declspec(naked) extraHairFixRedirect() {

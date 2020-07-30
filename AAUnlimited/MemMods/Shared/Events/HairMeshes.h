@@ -6,6 +6,7 @@ namespace HairMeshes {
 
 void HairLoadInject();
 void XXCleanupInjection();
+void XXCleanupInjectionForBoys();
 
 
 }

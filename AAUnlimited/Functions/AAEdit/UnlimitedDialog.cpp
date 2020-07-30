@@ -1103,7 +1103,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				if (g_currChar.Editable()) {
 
 
-					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1) {
+					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1 || AAEdit::g_currChar.m_char->m_charData->m_gender == 0) {
 
 						BYTE kind;
 						for (kind = 0; kind < 4; kind++) {
@@ -1124,10 +1124,6 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						else if (kind == 1) RedrawBodyPart(HAIR, HAIR_SIDE);
 						else if (kind == 2) RedrawBodyPart(HAIR, HAIR_BACK);
 						else if (kind == 3) RedrawBodyPart(HAIR, HAIR_EXTENSION);
-						return TRUE;
-					}
-					else {
-						MessageBox(NULL, TEXT("Extra hair does not work on boys."), TEXT("Error"), 0);
 						return TRUE;
 					}
 				}
