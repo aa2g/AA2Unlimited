@@ -425,6 +425,33 @@ void XXCleanupInjectionForBoys() {
 			NULL);
 		XXCleanupFuncStartForBoys = General::GameBase + 0x10A2B0;
 	}
+	else if (General::IsAAEdit) {
+		//AA2Edit.exe + F9020 - 6A FF - push - 01 { 255 }
+		//AA2Edit.exe + F9022 - 68 337BE600 - push AA2Edit.exe + 2B7B33{ (139) }
+		//AA2Edit.exe + F9027 - 64 A1 00000000 - mov eax, fs:[00000000]{ 0 }
+		//AA2Edit.exe + F902D - 50 - push eax
+		//AA2Edit.exe + F902E - 83 EC 30 - sub esp, 30 { 48 }
+		//AA2Edit.exe + F9031 - 53 - push ebx
+		//AA2Edit.exe + F9032 - 55 - push ebp
+		//AA2Edit.exe + F9033 - 56 - push esi
+		//AA2Edit.exe + F9034 - 57 - push edi
+
+		//....
+		//
+		//AA2Edit.exe+F9480 - 5B - pop ebx
+		//AA2Edit.exe+F9481 - 83 C4 3C - add esp,3C { 60 }
+		//AA2Edit.exe + F9484 - C3 - ret
+
+
+
+		DWORD address = General::GameBase + 0xF9480;
+		DWORD redirectAddress = (DWORD)(&XXCleanupRedirectBoys);
+		Hook((BYTE*)address,
+		{ 0x5B, 0x83, 0xC4, 0x3C, 0xC3 },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		XXCleanupFuncStartForBoys = General::GameBase + 0xF9020;
+	}
 }
 
 

@@ -266,6 +266,7 @@ void InitializeHooks() {
 
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
+			HairMeshes::XXCleanupInjectionForBoys();
 
 			Shared::GameState::setIsOverriding(General::IsAAEdit); //always override in aaedit
 		}
@@ -319,7 +320,6 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
 		NpcActions::extraHairFixInjection();
-		HairMeshes::XXCleanupInjectionForBoys();
 		//NpcActions::headTrackingChangeInjection();
 
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
