@@ -443,9 +443,9 @@ void LowPolyUpdateEndInject() {
 void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
-
 	const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
 	DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
+	Shared::GameState::setHInfo(hInfo);
 
 	if (actor0 && actor1) {
 		if (hInfo) {
