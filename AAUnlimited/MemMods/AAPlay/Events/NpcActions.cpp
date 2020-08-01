@@ -440,7 +440,7 @@ void LowPolyUpdateEndInject() {
 }
 
 
-void __stdcall hPositionChange(DWORD param) {
+void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
 
@@ -448,11 +448,9 @@ void __stdcall hPositionChange(DWORD param) {
 	DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
 
 	if (actor0 && actor1) {
-		auto hInfo = Shared::GameState::getHInfo();
 		if (hInfo) {
 			if (hInfo->m_activeParticipant) {
 				if (hInfo->m_activeParticipant->m_charPtr) {
-
 					Shared::Triggers::HPositionData hPositionData;
 					hPositionData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 					hPositionData.actor0 = *actor0;
@@ -463,7 +461,6 @@ void __stdcall hPositionChange(DWORD param) {
 					Shared::Triggers::ThrowEvent(&hPositionData);
 				}
 			}
-
 		}
 	}
 }
@@ -472,6 +469,7 @@ void __stdcall hPositionChange(DWORD param) {
 void __declspec(naked) hPositionChangeRedirect() {
 	__asm {
 		pushad
+		push edi
 		push esi
 		call hPositionChange
 		popad
