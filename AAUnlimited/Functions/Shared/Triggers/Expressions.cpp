@@ -1087,6 +1087,33 @@ namespace Shared {
 			return Value(multiplier);
 		}
 
+		//float(int, int)
+		Value Thread::GetCardLikeOrientationMultiplier(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(0);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+
+			int towards = params[1].iVal;
+			if (ExpressionSeatInvalid(towards)) return Value(0);
+			CharInstData* towardsInst = &AAPlay::g_characters[towards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			float multiplier = 0.0;
+			if (cardInst->m_char->m_charData->m_gender == towardsInst->m_char->m_charData->m_gender)
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//hetero, lean het, bi
+				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+			else
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation >= 2) multiplier = 1.0;	//bi, lean homo, homo
+				else if (cardInst->m_char->m_charData->m_character.orientation != 0) multiplier = 0.5;	//lean het
+			}
+
+			return Value(multiplier);
+		}
+
 		//int(int)
 		Value Thread::GetCardGender(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -3827,6 +3854,13 @@ namespace Shared {
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
 					&Thread::GetClassStorageFloat
+				},
+				{
+					14, EXPRCAT_CHARPROP,
+					TEXT("Like Orientation Multiplier"), TEXT("%p ::LikeOrientationMultiplier(towards: %p )"),
+					TEXT("Returns 0 when characters can't get like points towards each other, 0.5 when their like gain is halved, and 1 when they get full amount of like points from interactions."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
+					&Thread::GetCardLikeOrientationMultiplier
 				},
 			},
 			{ //STRING

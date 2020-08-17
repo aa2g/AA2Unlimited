@@ -259,6 +259,7 @@ namespace Shared {
 			Value GetDecals(std::vector<Value>& params);
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)
+			Value GetCardLikeOrientationMultiplier(std::vector<Value>& params);
 			Value GetCardGender(std::vector<Value>& params); //int(int)
 			Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)

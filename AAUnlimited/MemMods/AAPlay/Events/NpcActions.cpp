@@ -728,33 +728,32 @@ void rosterHandleInjectionFirst() {
 
 void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR) {
 	CharInstData* card = &AAPlay::g_characters[seat];
+	auto filename = General::CastToString(fname);
 	if (card->IsValid()) {
-		if (card->lastDialogue != dialoguePTR) {
-			//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
-			card->lastDialogue = dialoguePTR;
-			std::wstring talkingAboutName = L"@";
-			auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
-			if (card->m_char->GetActivity() != nullptr) {
-				auto convoID = card->m_char->GetActivity()->m_currConversationId;
-				//I am a very safe man
-				if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
-					if (card->m_char->m_characterStatus != nullptr) {
-						if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
-							if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
-								if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
-									talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+		if (filename.find("Bgm") == std::string::npos && filename.find("dse") == std::string::npos) { //no background music and no special effect sounds
+			if (card->lastDialogue != dialoguePTR) {
+				//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
+				card->lastDialogue = dialoguePTR;
+				std::wstring talkingAboutName = L"@";
+				auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
+				if (card->m_char->GetActivity() != nullptr) {
+					auto convoID = card->m_char->GetActivity()->m_currConversationId;
+					if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
+						if (card->m_char->m_characterStatus != nullptr) {
+							if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
+								if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
+									if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
+										talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+									}
 								}
 							}
 						}
 					}
 				}
+				LUA_EVENT_NORET("load_audio", General::CastToString(fname), General::CastToString(talkingCardsName), General::CastToString(talkingAboutName));
 			}
-
-			LUA_EVENT_NORET("load_audio", General::CastToString(fname), General::CastToString(talkingCardsName), General::CastToString(talkingAboutName));
 		}
 	}
-
-
 }
 
 
