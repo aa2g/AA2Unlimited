@@ -64,6 +64,41 @@ void CharInstData::SetHeadTracking(int headtracking)
 }
 
 
+void CharInstData::AddShadows(DWORD* HairPTR)
+{
+	if (this->IsValid()) {
+		if (this->m_char->m_xxSkeleton) { 
+			auto charPTR = this->m_char;
+			const DWORD offset[]{ 0x1AFD90 };
+			DWORD* firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+			const DWORD offset1[]{ 0x21C9A0 };
+			DWORD* secondFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+			__asm
+			{
+				mov esi, charPTR
+				mov edi, HairPTR
+				call[firstFunction]
+				mov eax, HairPTR
+				mov ecx, [eax + 0x218]
+				mov esi, [ecx + 0x0C]
+				xor edx, edx
+				jmp JumpHere
+
+			JumpHere:
+				push 0x01
+				push esi
+				call[secondFunction]
+				inc edx
+				add esp, 0x08
+				add esi, 0x000042F4
+				cmp edx, [ecx + 0x08]
+				jl JumpHere
+			}
+		}
+	}
+}
+
+
 int CharInstData::GetStyleCount()
 {
 	return m_cardData.m_styles.size();

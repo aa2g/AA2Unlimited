@@ -99,6 +99,7 @@ public:
 
 	void ApplyDecals(int bodyPart, int decalStrength);
 	void SetHeadTracking(int headtracking);
+	void AddShadows(DWORD * HairPTR);
 
 	DWORD* lastDialogue = NULL;
 
@@ -206,6 +207,9 @@ public:
 		});
 		LUA_METHOD(SetHeadTracking, {
 			_self->SetHeadTracking(_gl.get(2));
+		});
+		LUA_METHOD(AddShadows, {
+			_self->AddShadows(_gl.get(2));
 		});
 #undef LUA_CLASS
 	}
