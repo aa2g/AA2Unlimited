@@ -106,7 +106,16 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
+	auto card = AAPlay::g_characters[loadCharacter->m_seat].m_cardData;
 
+	for (int idx = 0; idx < 4; idx++) {
+		if (card.GetHairs(idx).size()) {
+			for (int num = 0; num < card.GetHairs(idx).size(); num++) {
+				AAPlay::g_characters[loadCharacter->m_seat].AddShadows((DWORD*)AAPlay::g_characters[loadCharacter->m_seat].m_hairs[idx][num].second);
+			}
+		}
+	}
+	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
 	if (General::IsAAPlay)
 		Shared::GameState::setIsOverriding(false);
