@@ -174,6 +174,8 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 63,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow depth
 			{ ExtClass::CharacterStruct::FACE, 64,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow rotation
 			{ ExtClass::CharacterStruct::FACE, 65,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow rotation
+			
+			{ ExtClass::CharacterStruct::FACE, 66,	TEXT("A00_J_teeth"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow rotation
 
 		},
 		{

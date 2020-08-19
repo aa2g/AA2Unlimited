@@ -2487,6 +2487,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 
 			//Tot Teeth Sliders.
+			{ TEXT("Teeth Clipping"),
+			{ { CharacterStruct::FACE, 66 } },
+					-0.05f, 0.05f
+			},
 			{ TEXT("Upper Shark Teeth"),
 			{ { CharacterStruct::FACE, 33 },{ CharacterStruct::FACE, 34 } },
 					-0.03f, 0.03f
