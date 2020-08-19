@@ -266,6 +266,7 @@ void InitializeHooks() {
 
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
+			HairMeshes::XXCleanupInjectionForBoys();
 
 			Shared::GameState::setIsOverriding(General::IsAAEdit); //always override in aaedit
 		}
@@ -318,6 +319,9 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
+		NpcActions::extraHairFixInjection();
+		//NpcActions::headTrackingChangeInjection();
+
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();

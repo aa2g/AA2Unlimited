@@ -22,6 +22,8 @@ namespace NpcActions {
 	void rosterPopulateInjection();
 	void rosterHandleInjectionFirst();
 	void dialoguePlayInjection();
+	void headTrackingChangeInjection();
+	void extraHairFixInjection();
 	void rosterHandleInjectionSecond();
 
 #pragma pack(push, 1)

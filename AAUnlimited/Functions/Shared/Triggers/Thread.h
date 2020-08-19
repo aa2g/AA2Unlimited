@@ -259,6 +259,7 @@ namespace Shared {
 			Value GetDecals(std::vector<Value>& params);
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)
+			Value GetCardLikeOrientationMultiplier(std::vector<Value>& params);
 			Value GetCardGender(std::vector<Value>& params); //int(int)
 			Value GetCardLovePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardLikePoints(std::vector<Value>& params); //int(int,int)
@@ -397,9 +398,12 @@ namespace Shared {
 			Value GetNpcResponseOriginalAnswer(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params);	//bool()
 			Value GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params);
+			Value GetNpcResponseStrongAnswerSuccess(std::vector<Value>& params);
+			Value GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
+			Value GetPCRoomTarget(std::vector<Value>& params);
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
 			Value GetNpcResponseOriginalPercent(std::vector<Value>& params);	//int()
 			Value GetNpcResponseCurrentPercent(std::vector<Value>& params);	//int()

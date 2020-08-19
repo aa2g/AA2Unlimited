@@ -218,13 +218,7 @@ namespace Shared {
 
 		 //int (int min, int max)
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
-			srand((unsigned int)time(NULL));
-			int range = params[1].iVal - params[0].iVal + 1;
-			if (range > 0) {
-				int r = rand() % range + params[0].iVal;
-				return Value(r);
-			}
-			return (rand() % 2 == 1) ? params[1] : params[0];
+			return Value(static_cast<int>(General::GetRandomFloat((float)(params[0].iVal), (float)(params[1].iVal))));
 		}
 
 		Value Thread::AddIntegers(std::vector<Value>& params) {
@@ -449,9 +443,7 @@ namespace Shared {
 		//bool(int)
 		Value Thread::RollInt(std::vector<Value>& params) {
 			if (params[0].iVal <= 0) return Value(false);
-			int range = 100;
-			srand((unsigned int)time(NULL));
-			int roll = rand() % range + 1;
+			auto roll = static_cast<int>(General::GetRandomFloat((float)(1), (float)(100)));
 			return Value(roll <= params[0].iVal);
 		}
 
@@ -1090,6 +1082,33 @@ namespace Shared {
 			{
 				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//het, lean het, bi
 				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+
+			return Value(multiplier);
+		}
+
+		//float(int, int)
+		Value Thread::GetCardLikeOrientationMultiplier(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(0);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+
+			int towards = params[1].iVal;
+			if (ExpressionSeatInvalid(towards)) return Value(0);
+			CharInstData* towardsInst = &AAPlay::g_characters[towards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			float multiplier = 0.0;
+			if (cardInst->m_char->m_charData->m_gender == towardsInst->m_char->m_charData->m_gender)
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//hetero, lean het, bi
+				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+			else
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation >= 2) multiplier = 1.0;	//bi, lean homo, homo
+				else if (cardInst->m_char->m_charData->m_character.orientation != 0) multiplier = 0.5;	//lean het
 			}
 
 			return Value(multiplier);
@@ -2192,9 +2211,17 @@ namespace Shared {
 
 		//bool()
 		Value Thread::GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params) {
-			if (this->eventData->GetId() != NPC_RESPONSE) return false;
-			bool bResponse = ((NpcResponseData*)eventData)->changedResponse == 1;
-			return bResponse;
+			bool bResponse = false;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				bResponse = ((NpcResponseData*)eventData)->changedResponse == 1;
+				return bResponse;
+			case NPC_AFTER_RESPONSE:
+				bResponse = ((NPCAfterResponseData*)eventData)->changedResponse == 1;
+				return bResponse;
+			default:
+				return bResponse;
+			}
 		}
 
 		Value Thread::GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params) {
@@ -2202,6 +2229,17 @@ namespace Shared {
 			bool bResponse = ((NPCAfterResponseData*)eventData)->effectiveResponse == 1;
 			return bResponse;
 		}
+
+		Value Thread::GetNpcResponseStrongAnswerSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return -1;
+			return ((NPCAfterResponseData*)eventData)->strongResponse;
+		}
+
+		Value Thread::GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return -1;
+			return ((NPCAfterResponseData*)eventData)->absoluteResponse;
+		}
+
 
 		//int()
 		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
@@ -2223,6 +2261,25 @@ namespace Shared {
 				return ((NpcResponseData*)eventData)->answeredTowards;
 			case NPC_AFTER_RESPONSE:
 				return ((NPCAfterResponseData*)eventData)->answeredTowards;
+			default:
+				return -1;
+			}
+		}
+
+		//int()
+		Value Thread::GetPCRoomTarget(std::vector<Value>& params) {
+			//this value is temporary and I'd rather not let the user retrieve it whenever
+			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0x150 };
+			DWORD* room = nullptr;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				room = (DWORD*)ExtVars::ApplyRule(offset);
+				if (room) return (int)(*room);
+				else return -1;
+			case NPC_AFTER_RESPONSE:
+				room = (DWORD*)ExtVars::ApplyRule(offset);
+				if (room) return (int)(*room);
+				else return -1;
 			default:
 				return -1;
 			}
@@ -2639,7 +2696,7 @@ namespace Shared {
 				},
 				{
 					13, EXPRCAT_EVENT,
-					TEXT("Npc Room Target"), TEXT("RoomTarget"), TEXT("Room that the Npc Walks to in a Npc Walks to Room event."),
+					TEXT("Npc Room Target"), TEXT("NPCRoomTarget"), TEXT("Room that the Npc Walks to in a Npc Walks to Room event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcRoomTarget
 				},
@@ -3384,10 +3441,31 @@ namespace Shared {
 				},
 				{
 					133, EXPRCAT_CHARPROP,
-					TEXT("Get LocationTarget"), TEXT("%p ::LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around."),
+					TEXT("Get LocationTarget"), TEXT("%p ::LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around, but unavailable from NPC answers event."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetMLocationTarget
-				}
+				},
+				{
+					134, EXPRCAT_EVENT,
+					TEXT("Npc Strong Response Modifier"), TEXT("StrongResponseModifier"),
+					TEXT("Use only in After NPC Response event. This expression will ONLY return the strong response modifier that any triggers set. It will be -1 if no triggers had done so."),
+					{}, (TYPE_INT),
+					&Thread::GetNpcResponseStrongAnswerSuccess
+				},
+				{
+					135, EXPRCAT_EVENT,
+					TEXT("Npc Absolute Response Modifier"), TEXT("AbsoluteResponseModifier"),
+					TEXT("Use only in After NPC Response event. This expression will ONLY return the absolute response modifier that any triggers set. It will be -1 if no triggers had done so."),
+					{}, (TYPE_INT),
+					&Thread::GetNpcResponseAbsoluteAnswerSuccess
+				},
+				{
+					136, EXPRCAT_EVENT,
+					TEXT("Get PC Room Target"), TEXT("PCRoomTarget"),
+					TEXT("Use only in NPC/After NPC answer event. This expression will return the room that PC is walking to."),
+					{}, (TYPE_INT),
+					&Thread::GetPCRoomTarget
+				},
 			},
 
 			{ //BOOL
@@ -3480,7 +3558,8 @@ namespace Shared {
 					15, EXPRCAT_EVENT,
 					TEXT("Npc Normal Response Success"), TEXT("NormalResponseSuccess"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the normal answer, modified by this or previously executed Triggers"
-					"using the Set Npc Response Answer Success Action. Will not work for strong or absolute responses."),
+					"using the Set Npc Response Answer Success Action. Will not work for strong or absolute responses."
+					"Within After NPC Response event, this will return the original answer the NPC gave, or the answer modified by normal response modifier."),
 					{ }, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswerSuccess
 				},
@@ -3775,6 +3854,13 @@ namespace Shared {
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
 					&Thread::GetClassStorageFloat
+				},
+				{
+					14, EXPRCAT_CHARPROP,
+					TEXT("Like Orientation Multiplier"), TEXT("%p ::LikeOrientationMultiplier(towards: %p )"),
+					TEXT("Returns 0 when characters can't get like points towards each other, 0.5 when their like gain is halved, and 1 when they get full amount of like points from interactions."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
+					&Thread::GetCardLikeOrientationMultiplier
 				},
 			},
 			{ //STRING

@@ -27,16 +27,74 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	DWORD strength = (DWORD)decalStrength;
 	const DWORD offset[]{ 0x151900 };
 	DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
-	auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
-	__asm
-	{
-		mov eax, position
-		mov edi, somepointer
-		mov ecx, strength
-		push ebp
-		push ecx
-		call[address]
-		pop ebp
+	if (this->IsValid()) {
+		auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+		__asm
+		{
+			mov eax, position
+			mov edi, somepointer
+			mov ecx, strength
+			push ebp
+			push ecx
+			call[address]
+			pop ebp
+		}
+	}
+}
+
+
+void CharInstData::SetHeadTracking(int headtracking)
+{
+	//Set it to 1 to disable headtracking
+	//2 enables headtracking
+	//4 makes the girl avoid your gaze
+	if (this->IsValid()) {
+		if (this->m_char->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(this->m_char->m_xxSkeleton->m_unknown13) + 0x88);
+			const DWORD offset[]{ 0x1C9DD0 };
+			DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+			__asm
+			{
+				mov eax, somepointer
+				mov ecx, headtracking
+				call[address]
+			}
+		}
+	}
+}
+
+
+void CharInstData::AddShadows(DWORD* HairPTR)
+{
+	if (this->IsValid()) {
+		if (this->m_char->m_xxSkeleton) { 
+			auto charPTR = this->m_char;
+			const DWORD offset[]{ 0x1AFD90 };
+			DWORD* firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+			const DWORD offset1[]{ 0x21C9A0 };
+			DWORD* secondFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+			__asm
+			{
+				mov esi, charPTR
+				mov edi, HairPTR
+				call[firstFunction]
+				mov eax, HairPTR
+				mov ecx, [eax + 0x218]
+				mov esi, [ecx + 0x0C]
+				xor edx, edx
+				jmp JumpHere
+
+			JumpHere:
+				push 0x01
+				push esi
+				call[secondFunction]
+				inc edx
+				add esp, 0x08
+				add esi, 0x000042F4
+				cmp edx, [ecx + 0x08]
+				jl JumpHere
+			}
+		}
 	}
 }
 

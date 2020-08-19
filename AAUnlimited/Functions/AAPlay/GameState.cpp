@@ -301,7 +301,8 @@ void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* char
 	}
 }
 ExtClass::CharacterStruct* Shared::GameState::getConversationCharacter(int idx) {
-	return loc_gameState.m_char[idx % CONVERSATION_CHARACTERS_N];
+	if (idx >= CONVERSATION_CHARACTERS_N) return nullptr;
+	return loc_gameState.m_char[idx];
 }
 void Shared::GameState::setConversationCharacter(ExtClass::CharacterStruct* chara, int idx) {
 	loc_gameState.m_char[idx] = chara;
@@ -315,6 +316,17 @@ void Shared::GameState::clearConversationCharacter(int idx) {
 		loc_gameState.m_char[idx] = nullptr;
 	}
 }
+
+void Shared::GameState::clearConversationCharacterBySeat(int seat) {
+	if (AAPlay::g_characters[seat].IsValid()) {	
+		for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
+			if (loc_gameState.m_char[i] == AAPlay::g_characters[seat].m_char) {
+				loc_gameState.m_char[i] = nullptr;
+			}
+		}
+	}
+}
+
 
 void Shared::GameState::setPlayerCharacter(int seat) {
 	if (AAPlay::g_characters[seat].IsValid()) {

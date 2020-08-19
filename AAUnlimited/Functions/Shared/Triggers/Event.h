@@ -172,6 +172,9 @@ namespace Triggers {
 		int conversationId;
 		int effectiveResponse;
 		int effectiveChance;
+		int changedResponse;
+		int strongResponse;
+		int absoluteResponse;
 
 	EDC_END
 

@@ -48,12 +48,10 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	auto normalCategory = 0;
 	auto climaxCategory = 0;
 	if (allowForeplay) {
-		srand((unsigned int)time(NULL));
 		normalCategory = rand() % 3;
 		nNormalPoses += countPoses(normalCategory);
 	}
 	if (allowNormal) {
-		srand((unsigned int)time(NULL));
 		if ((rand() % 3) > 1) {
 			normalCategory = 4;
 			nNormalPoses += countPoses(normalCategory);
@@ -66,13 +64,11 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	if (allowForeplay && allowNormal) {
 		normalCategory = 0;
 		nNormalPoses = 0;
-		srand((unsigned int)time(NULL));
 		if ((rand() % 3) > 1)  {
 			normalCategory = rand() % 3;
 			nNormalPoses += countPoses(normalCategory);
 		}
 		else {
-			srand((unsigned int)time(NULL));
 			if ((rand() % 3) > 1) {
 				normalCategory = 4;
 				nNormalPoses += countPoses(normalCategory);
@@ -85,7 +81,6 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	}
 	if (climaxChance > 0) {
 		if (allowForeplay) {
-			srand((unsigned int)time(NULL));
 			if ((rand() % 3) > 1) {
 				climaxCategory = 6;
 				nClimaxPoses += countPoses(climaxCategory);
@@ -96,7 +91,6 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 			}
 		}
 		if (allowNormal) {
-			srand((unsigned int)time(NULL));
 			if ((rand() % 3) > 1) {
 				climaxCategory = 8;
 				nClimaxPoses += countPoses(climaxCategory);
@@ -109,9 +103,7 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 		if (allowForeplay && allowNormal) {
 			climaxCategory = 0;
 			nClimaxPoses = 0;
-			srand((unsigned int)time(NULL));
 			if ((rand() % 2) == 0) {
-				srand((unsigned int)time(NULL));
 				if ((rand() % 3) > 1) {
 					climaxCategory = 6;
 					nClimaxPoses += countPoses(climaxCategory);
@@ -122,7 +114,6 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 				}
 			}
 			else {
-				srand((unsigned int)time(NULL));
 				if ((rand() % 3) > 1) {
 					climaxCategory = 8;
 					nClimaxPoses += countPoses(climaxCategory);
@@ -140,7 +131,6 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 
 	float f = General::GetRandomFloat(0, 1);
 	if (nClimaxPoses > 0 && f <= climaxChance) {
-		srand((unsigned int)time(NULL));
 		size_t randChoice = rand() % nClimaxPoses;
 		LOGPRIO(Logger::Priority::SPAM) << "chose random climax position " << randChoice << "\r\n";
 		if (chosenPassiveActive = findPose(randChoice, climaxCategory, climaxCategory)) {
@@ -150,7 +140,6 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	}
 	else {
 		if (nNormalPoses > 0) {
-			srand((unsigned int)time(NULL));
 			size_t randChoice = rand() % nNormalPoses;
 			LOGPRIO(Logger::Priority::SPAM) << "choose random position " << randChoice << "\r\n";
 			if (chosenPassiveActive = findPose(randChoice, normalCategory, normalCategory)) {

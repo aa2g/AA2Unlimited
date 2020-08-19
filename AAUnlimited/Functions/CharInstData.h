@@ -98,6 +98,8 @@ public:
 	}
 
 	void ApplyDecals(int bodyPart, int decalStrength);
+	void SetHeadTracking(int headtracking);
+	void AddShadows(DWORD * HairPTR);
 
 	DWORD* lastDialogue = NULL;
 
@@ -202,6 +204,12 @@ public:
 			int strength = _gl.get(3);
 			if (bodyPart >= 0 && bodyPart < 5 && strength >= 0 && strength < 4)
 				_self->ApplyDecals(bodyPart, strength);
+		});
+		LUA_METHOD(SetHeadTracking, {
+			_self->SetHeadTracking(_gl.get(2));
+		});
+		LUA_METHOD(AddShadows, {
+			_self->AddShadows(_gl.get(2));
 		});
 #undef LUA_CLASS
 	}

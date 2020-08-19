@@ -13,6 +13,8 @@ DWORD AnswerAddress, AnswerLowAddress;
 DWORD* LowPolyInjectionReturnAddress = 0;
 DWORD* FirstRosterHandleReturnAddress = 0;
 DWORD* DialogueReturnAddress = 0;
+DWORD* extraHairFixReturnAddress = 0;
+DWORD* extraHairFixVanillaAddress;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
 DWORD* RosterHandleLoopNextSeat = 0;
@@ -29,6 +31,7 @@ DWORD* RosterESI = 0;
 DWORD* RosterEDI = 0;
 DWORD* RosterEBP = 0;
 DWORD* RosterESP = 0;
+BYTE extraHairTest;
 
 
 // Wraps a call to our custom handler, redirect jump is pointed into here
@@ -155,6 +158,10 @@ void __stdcall Answer(AnswerStruct *as) {
 	afterResponseData.substruct = as;
 	afterResponseData.effectiveChance = as->answerChar->m_lastConversationAnswerPercent;
 	afterResponseData.effectiveResponse = as->answer;
+	//these three only exist so we know whether any modules ran to set the response with this priority. They're useful, but use effectiveResponse to check the response the game will act on.
+	afterResponseData.changedResponse = data.changedResponse;
+	afterResponseData.strongResponse = data.strongResponse;
+	afterResponseData.absoluteResponse = data.absoluteResponse;
 	ThrowEvent(&afterResponseData);
 
 }
@@ -433,19 +440,17 @@ void LowPolyUpdateEndInject() {
 }
 
 
-void __stdcall hPositionChange(DWORD param) {
+void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
-
 	const DWORD offsetsub[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe4, 0x00, 0x3c };
 	DWORD* actor1 = (DWORD*)ExtVars::ApplyRule(offsetsub);
+	Shared::GameState::setHInfo(hInfo);
 
 	if (actor0 && actor1) {
-		auto hInfo = Shared::GameState::getHInfo();
 		if (hInfo) {
 			if (hInfo->m_activeParticipant) {
 				if (hInfo->m_activeParticipant->m_charPtr) {
-
 					Shared::Triggers::HPositionData hPositionData;
 					hPositionData.card = Shared::GameState::getPlayerCharacter()->m_char->m_seat;
 					hPositionData.actor0 = *actor0;
@@ -456,7 +461,6 @@ void __stdcall hPositionChange(DWORD param) {
 					Shared::Triggers::ThrowEvent(&hPositionData);
 				}
 			}
-
 		}
 	}
 }
@@ -465,6 +469,7 @@ void __stdcall hPositionChange(DWORD param) {
 void __declspec(naked) hPositionChangeRedirect() {
 	__asm {
 		pushad
+		push edi
 		push esi
 		call hPositionChange
 		popad
@@ -723,33 +728,33 @@ void rosterHandleInjectionFirst() {
 
 void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR) {
 	CharInstData* card = &AAPlay::g_characters[seat];
+	auto filename = General::CastToString(fname);
 	if (card->IsValid()) {
-		if (card->lastDialogue != dialoguePTR) {
-			//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
-			card->lastDialogue = dialoguePTR;
-			std::wstring talkingAboutName = L"@";
-			auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
-			if (card->m_char->GetActivity() != nullptr) {
-				auto convoID = card->m_char->GetActivity()->m_currConversationId;
-				//I am a very safe man
-				if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
-					if (card->m_char->m_characterStatus != nullptr) {
-						if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
-							if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
-								if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
-									talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+		if (filename.find("Bgm") == std::string::npos && filename.find("dse") == std::string::npos) { //no background music and no special effect sounds
+			if (card->m_char == Shared::GameState::getConversationCharacter(0) || card->m_char == Shared::GameState::getConversationCharacter(1)) return;
+			if (card->lastDialogue != dialoguePTR) {
+				//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
+				card->lastDialogue = dialoguePTR;
+				std::wstring talkingAboutName = L"@";
+				auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
+				if (card->m_char->GetActivity() != nullptr) {
+					auto convoID = card->m_char->GetActivity()->m_currConversationId;
+					if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
+						if (card->m_char->m_characterStatus != nullptr) {
+							if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
+								if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
+									if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
+										talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+									}
 								}
 							}
 						}
 					}
 				}
+				LUA_EVENT_NORET("load_audio", General::CastToString(fname), General::CastToString(talkingCardsName), General::CastToString(talkingAboutName));
 			}
-
-			LUA_EVENT_NORET("load_audio", General::CastToString(fname), General::CastToString(talkingCardsName), General::CastToString(talkingAboutName));
 		}
 	}
-
-
 }
 
 
@@ -790,6 +795,115 @@ void dialoguePlayInjection() {
 		NULL);
 }
 
+void __stdcall headTracking(DWORD* charAddress, BYTE tracking) {
+	//We need someone who deals with personalities to confirm whether other possible states are ever relevant. As far as I know, 0 and 1 mean no head tracking, 2 means head tracking is on. There are also some values for which the girl turns her head away from the player, and we should cover those cases too if any dialogue lines use them. We'll see.
+	if (tracking == 0 || tracking == 1 || tracking == 2) {
+		//this is the case for when 
+		for (int i = 0; i < 25; i++) {
+			if (AAPlay::g_characters[i].IsValid()) {
+				if (AAPlay::g_characters[i].m_char->m_xxSkeleton) {
+					if (AAPlay::g_characters[i].m_char->m_xxSkeleton) {
+						DWORD* somepointer = (DWORD*)((char*)(AAPlay::g_characters[i].m_char->m_xxSkeleton->m_unknown13) + 0x88);
+						if (charAddress == somepointer) {
+							//Use these two somehow
+							int seat = i;
+							if (tracking == 0 || tracking == 1) bool headTrackingEnabled = false;
+							else bool headTrackingEnabled = true;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+void __declspec(naked) headTrackingRedirect() {
+	__asm {
+		pushad
+		push cl
+		push eax
+		call headTracking
+		//original code
+		popad
+		mov esi, [eax + 0x1C]
+		xor edx, edx
+		ret
+	}
+}
+
+
+void headTrackingChangeInjection() {
+	//AA2Play.exe+1C9DD1 - 8B 70 1C              - mov esi,[eax+1C]
+	//AA2Play.exe+1C9DD4 - 33 D2                 - xor edx,edx
+
+	DWORD address = General::GameBase + 0x1C9DD1;
+	DWORD redirectAddress = (DWORD)(&headTrackingRedirect);
+	Hook((BYTE*)address,
+	{ 0x8B, 0x70, 0x1C, 0x33, 0xD2 },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
+void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
+	extraHairTest = value;
+	int i = 0;
+	while (Shared::GameState::getConversationCharacter(i)) {
+		auto card1 = Shared::GameState::getConversationCharacter(i);
+		if (card1->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(card1->m_xxSkeleton->m_unknown13) + 0x88);
+			if (charAddress == somepointer) {
+				auto hairs = AAPlay::g_characters[card1->m_seat].m_cardData;
+				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+					extraHairTest = 1;
+					return;
+				}
+			}
+		}
+		i++;
+	}
+}
+
+
+
+void __declspec(naked) extraHairFixRedirect() {
+	__asm {
+		pushad
+		push al
+		push esi
+		call extraHairFix
+		//original code
+		mov al, extraHairTest
+		test al, al
+		popad
+		je JumpHere
+		jmp extraHairFixReturnAddress
+
+	JumpHere:
+		jmp extraHairFixVanillaAddress
+
+	}
+}
+
+
+void extraHairFixInjection() {
+	//AA2Play.exe+1C9C0C - 84 C0                 - test al,al
+	//AA2Play.exe+1C9C0E - 0F84 AD010000         - je AA2Play.exe+1C9DC1
+	//AA2Play.exe+1C9C14 - 8D 44 24 1C           - lea eax,[esp+1C]
+
+
+	const DWORD offset1[]{ 0x1C9C14 };
+	extraHairFixReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x1C9DC1 };
+	extraHairFixVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
+
+	DWORD address = General::GameBase + 0x1C9C0E;
+	DWORD redirectAddress = (DWORD)(&extraHairFixRedirect);
+	Hook((BYTE*)address,
+	{ 0x0F, 0x84, 0xAD, 0x01, 0x00, 0x00 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 #if !NEW_HOOK

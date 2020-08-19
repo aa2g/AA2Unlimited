@@ -70,6 +70,7 @@ namespace Shared {
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
 		void clearConversationCharacter(int idx);
+		void clearConversationCharacterBySeat(int seat);
 
 		inline CharInstData* getPlayerCharacter()
 		{

@@ -31,7 +31,12 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
-
+	const DWORD offsetScreen[]{ 0x38F6B0 };
+	DWORD* screenType = (DWORD*)ExtVars::ApplyRule(offsetScreen);
+	if (screenType) {
+		//add the character to the conversation list in the clothing screen
+		if (*screenType == 5) Shared::GameState::addConversationCharacter(loadCharacter);
+	}
 
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	//Add the character to the conversation list
@@ -101,7 +106,16 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
+	auto card = AAPlay::g_characters[loadCharacter->m_seat].m_cardData;
 
+	for (int idx = 0; idx < 4; idx++) {
+		if (card.GetHairs(idx).size()) {
+			for (int num = 0; num < card.GetHairs(idx).size(); num++) {
+				AAPlay::g_characters[loadCharacter->m_seat].AddShadows((DWORD*)AAPlay::g_characters[loadCharacter->m_seat].m_hairs[idx][num].second);
+			}
+		}
+	}
+	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
 	if (General::IsAAPlay)
 		Shared::GameState::setIsOverriding(false);
@@ -184,6 +198,7 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	if (!loc_loadingCharacter) {
 		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
+		if (!Shared::GameState::getIsPcConversation()) Shared::GameState::clearConversationCharacterBySeat(loadCharacter->m_seat);
 	}
 
 	return retv;
