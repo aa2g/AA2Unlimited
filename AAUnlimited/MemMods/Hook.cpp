@@ -276,6 +276,7 @@ void InitializeHooks() {
 		Loads::HiPolyLoadsInjection();
 		Shared::PNG::InstallHooks();
 		ScreenCapture::InitInjection();
+		NpcActions::extraHairFixInjection();
 	}
 
 	if (General::IsAAPlay) {
@@ -319,7 +320,6 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
-		NpcActions::extraHairFixInjection();
 		//NpcActions::headTrackingChangeInjection();
 
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
@@ -334,8 +334,10 @@ void InitializeHooks() {
 			TanSlotUnlimited::LoadLoopEndInject();
 			TanSlotUnlimited::InsertLoopCall();
 			TanSlotUnlimited::InsertLoopEnd();
+
 		}
 		Loads::hairUpdateInject();
+		NpcActions::extraHairMakerFixInjection();
 
 #if 0
 		SaveCard::AddUnlimitDataInject();
