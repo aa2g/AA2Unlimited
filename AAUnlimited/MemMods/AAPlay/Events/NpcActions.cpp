@@ -459,13 +459,6 @@ void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 					hPositionData.dominantParticipant = hInfo->m_activeParticipant->m_charPtr->m_seat;
 					hPositionData.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
 					hPositionData.position = param;
-					HPosData* arr = *(HPosData**)((BYTE*)(hInfo->m_positionInfo)+4);
-					auto array = arr + param;
-					for (int category = 0; category < 9; category++) {
-						auto* list = &(hInfo->m_hPosButtonPositions[category]);
-						DWORD* ptrHPos = list->m_arrPositions + 1;
-					}
-
 					Shared::Triggers::ThrowEvent(&hPositionData);
 					position = hPositionData.position;
 				}
