@@ -184,6 +184,12 @@ namespace Shared {
 			((NpcResponseData*)eventData)->changedResponse = iResponse;
 		}
 
+		void Thread::ChangeHPosition(std::vector<Value>& params) {
+			if (this->eventData->GetId() != HPOSITION_CHANGE) return;
+			int pos = params[0].iVal;
+			((HPositionData*)eventData)->position = pos;
+		}
+
 		//
 		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
@@ -2619,6 +2625,12 @@ namespace Shared {
 				TEXT("Add a card to the specified seat, with the specified gender. Input is Seat, Gender (1 for female, 0 for male), Filename respectively."),
 				{ TYPE_INT, TYPE_INT, TYPE_STRING },
 				&Thread::AddToClass
+			},
+			{
+				121, ACTIONCAT_EVENT, TEXT("Change h position"), TEXT("SexPosition = %p"),
+				TEXT("Changes the h position to the one you specify. Only works in H position chang event."),
+				{ TYPE_INT },
+				&Thread::ChangeHPosition
 			},
 		};
 

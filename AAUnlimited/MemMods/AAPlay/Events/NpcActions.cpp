@@ -32,7 +32,7 @@ DWORD* RosterEDI = 0;
 DWORD* RosterEBP = 0;
 DWORD* RosterESP = 0;
 BYTE extraHairTest;
-
+DWORD* extraHairMakerReturn;
 
 // Wraps a call to our custom handler, redirect jump is pointed into here
 void __declspec(naked) WrapAnswer() {
@@ -440,6 +440,7 @@ void LowPolyUpdateEndInject() {
 }
 
 
+int position;
 void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 	const DWORD offsetdom[]{ 0x3761CC, 0x28, 0x38, 0xe0, 0x6c, 0xe0, 0x00, 0x3c };
 	DWORD* actor0 = (DWORD*)ExtVars::ApplyRule(offsetdom);
@@ -459,12 +460,12 @@ void __stdcall hPositionChange(DWORD param, ExtClass::HInfo * hInfo) {
 					hPositionData.submissiveParticipant = hInfo->m_passiveParticipant->m_charPtr->m_seat;
 					hPositionData.position = param;
 					Shared::Triggers::ThrowEvent(&hPositionData);
+					position = hPositionData.position;
 				}
 			}
 		}
 	}
 }
-
 
 void __declspec(naked) hPositionChangeRedirect() {
 	__asm {
@@ -473,6 +474,7 @@ void __declspec(naked) hPositionChangeRedirect() {
 		push esi
 		call hPositionChange
 		popad
+		mov esi, position
 		//original code
 		mov [edi + 0x000005F4], esi
 		ret
@@ -848,12 +850,28 @@ void headTrackingChangeInjection() {
 void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 	extraHairTest = value;
 	int i = 0;
-	while (Shared::GameState::getConversationCharacter(i)) {
-		auto card1 = Shared::GameState::getConversationCharacter(i);
-		if (card1->m_xxSkeleton) {
-			DWORD* somepointer = (DWORD*)((char*)(card1->m_xxSkeleton->m_unknown13) + 0x88);
+	ExtClass::CharacterStruct *character;
+	if (General::IsAAPlay) character = Shared::GameState::getConversationCharacter(i);
+	else if (General::IsAAEdit) character = AAEdit::g_currChar.m_char;
+	while (character) {
+		if (character->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
 			if (charAddress == somepointer) {
-				auto hairs = AAPlay::g_characters[card1->m_seat].m_cardData;
+				AAUCardData hairs;
+				if (General::IsAAEdit) {
+					hairs = AAEdit::g_currChar.m_cardData;
+					if (Shared::GameState::getIsDrawingShadow()) {
+						Shared::GameState::setIsDrawingShadow(false);
+						for (int idx = 0; idx < 4; idx++) {
+							if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
+								for (int num = 0; num < AAEdit::g_currChar.m_cardData.GetHairs(idx).size(); num++) {
+									AAEdit::g_currChar.AddShadows((DWORD*)AAEdit::g_currChar.m_hairs[idx][num].second);
+								}
+							}
+						}
+					}
+				}
+				if (General::IsAAPlay) hairs = AAPlay::g_characters[character->m_seat].m_cardData;
 				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
 					extraHairTest = 1;
 					return;
@@ -861,9 +879,10 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 			}
 		}
 		i++;
+		if (General::IsAAPlay) character = Shared::GameState::getConversationCharacter(i);
+		else character = nullptr;
 	}
 }
-
 
 
 void __declspec(naked) extraHairFixRedirect() {
@@ -887,22 +906,67 @@ void __declspec(naked) extraHairFixRedirect() {
 
 
 void extraHairFixInjection() {
-	//AA2Play.exe+1C9C0C - 84 C0                 - test al,al
-	//AA2Play.exe+1C9C0E - 0F84 AD010000         - je AA2Play.exe+1C9DC1
-	//AA2Play.exe+1C9C14 - 8D 44 24 1C           - lea eax,[esp+1C]
+	if (General::IsAAPlay) {
+		//AA2Play.exe+1C9C0C - 84 C0                 - test al,al
+		//AA2Play.exe+1C9C0E - 0F84 AD010000         - je AA2Play.exe+1C9DC1
+		//AA2Play.exe+1C9C14 - 8D 44 24 1C           - lea eax,[esp+1C]
 
 
-	const DWORD offset1[]{ 0x1C9C14 };
-	extraHairFixReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
-	const DWORD offset2[]{ 0x1C9DC1 };
-	extraHairFixVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
+		const DWORD offset1[]{ 0x1C9C14 };
+		extraHairFixReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+		const DWORD offset2[]{ 0x1C9DC1 };
+		extraHairFixVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
 
-	DWORD address = General::GameBase + 0x1C9C0E;
-	DWORD redirectAddress = (DWORD)(&extraHairFixRedirect);
-	Hook((BYTE*)address,
-	{ 0x0F, 0x84, 0xAD, 0x01, 0x00, 0x00 },						//expected values
-	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
-		NULL);
+		DWORD address = General::GameBase + 0x1C9C0E;
+		DWORD redirectAddress = (DWORD)(&extraHairFixRedirect);
+		Hook((BYTE*)address,
+		{ 0x0F, 0x84, 0xAD, 0x01, 0x00, 0x00 },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+			NULL);
+	}
+	else if (General::IsAAEdit) {
+		//AA2Edit.exe + 1AC3AC - 84 C0 - test al, al
+		//AA2Edit.exe + 1AC3AE - 0F84 AD010000 - je AA2Edit.exe + 1AC561
+		//AA2Edit.exe + 1AC3B4 - 8D 44 24 1C - lea eax, [esp + 1C]
+		const DWORD offset1[]{ 0x1AC3B4 };
+		extraHairFixReturnAddress = (DWORD*)ExtVars::ApplyRule(offset1);
+		const DWORD offset2[]{ 0x1AC561 };
+		extraHairFixVanillaAddress = (DWORD*)ExtVars::ApplyRule(offset2);
+
+		DWORD address = General::GameBase + 0x1AC3AE;
+		DWORD redirectAddress = (DWORD)(&extraHairFixRedirect);
+		Hook((BYTE*)address,
+		{ 0x0F, 0x84, 0xAD, 0x01, 0x00, 0x00 },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+			NULL);
+	}
+}
+
+
+
+void __declspec(naked) ExtraHairMakerRedirect() {
+	__asm {
+		jmp extraHairMakerReturn
+	}
+}
+
+
+void extraHairMakerFixInjection() {
+		//for some fucking reason the original fix is not enough by itself, the code never reaches to it. Doing this though manages to make that happen.
+		
+		//AA2Edit.exe + 1044E6 - 80 7D 1C 00 - cmp byte ptr[ebp + 1C], 00 { 0 }
+		//AA2Edit.exe + 1044EA - 74 2B - je AA2Edit.exe + 104517
+		//AA2Edit.exe + 1044EC - 8B 4B 64 - mov ecx, [ebx + 64]
+
+		const DWORD offset1[]{ 0x1044EC };
+		extraHairMakerReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+		DWORD address = General::GameBase + 0x1044E6;
+		DWORD redirectAddress = (DWORD)(&ExtraHairMakerRedirect);
+		Hook((BYTE*)address,
+		{ 0x80, 0x7D, 0x1C, 0x00, 0x74, 0x2B },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+			NULL);
 }
 
 

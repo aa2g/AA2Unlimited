@@ -96,7 +96,8 @@ bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 			list = &AAEdit::g_currChar.m_hairs[kind];
 		}
 		else {
-			list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+			if (!(character->m_seat == 0 && AAPlay::g_characters[0].m_char != character)) list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+			else list = &AAPlay::g_previewChar.m_hairs[kind];
 		}
 		
 		if(list->size() > 0) {

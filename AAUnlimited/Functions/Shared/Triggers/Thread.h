@@ -171,6 +171,7 @@ namespace Shared {
 
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
+			void ChangeHPosition(std::vector<Value>& params);
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 

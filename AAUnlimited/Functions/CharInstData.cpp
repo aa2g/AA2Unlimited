@@ -67,12 +67,23 @@ void CharInstData::SetHeadTracking(int headtracking)
 void CharInstData::AddShadows(DWORD* HairPTR)
 {
 	if (this->IsValid()) {
-		if (this->m_char->m_xxSkeleton) { 
+		if (this->m_char->m_xxSkeleton) {
+			//an IsValid() check would be nice to have, but that fucks with the display tab in maker 
 			auto charPTR = this->m_char;
-			const DWORD offset[]{ 0x1AFD90 };
-			DWORD* firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
-			const DWORD offset1[]{ 0x21C9A0 };
-			DWORD* secondFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+			DWORD* firstFunction;
+			DWORD* secondFunction;
+			if (General::IsAAPlay) {
+				const DWORD offset[]{ 0x1AFD90 };
+				firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+				const DWORD offset1[]{ 0x21C9A0 };
+				secondFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+			}
+			else if (General::IsAAEdit) {
+				const DWORD offset[]{ 0x192930 };
+				firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+				const DWORD offset1[]{ 0x1FEA70 };
+				secondFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+			}
 			__asm
 			{
 				mov esi, charPTR
@@ -97,7 +108,6 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 		}
 	}
 }
-
 
 int CharInstData::GetStyleCount()
 {
@@ -381,7 +391,7 @@ CharInstData* CharInstData::GetTargetInst()
 
 bool CharInstData::IsValid()
 {
-	if (General::IsAAEdit) return Editable();
+	if (General::IsAAEdit) return (AAEdit::g_currChar.m_char != NULL || Editable());
 	ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
 	ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
 	for (start; start != end; start++) {

@@ -28,6 +28,7 @@ struct GameStateStruct {
 		h_ai_locked = true;
 		m_isInMainMenu = false;
 		h_info = NULL;
+		m_drawShadow = true;
 	}
 
 	//Game state indicators
@@ -52,6 +53,7 @@ struct GameStateStruct {
 	DWORD m_HPosition;					//H position ID
 	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 	bool m_isInMainMenu;				//Is true if the game is in main menu
+	bool m_drawShadow;
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -112,6 +114,19 @@ void Shared::GameState::setIsInMainMenu(bool value)
 {
 	loc_gameState.m_isInMainMenu = value;
 }
+
+
+bool Shared::GameState::getIsDrawingShadow()
+{
+	return loc_gameState.m_drawShadow;
+}
+
+void Shared::GameState::setIsDrawingShadow(bool value)
+{
+	loc_gameState.m_drawShadow = value;
+}
+
+
 
 void Shared::GameState::updateIsOverriding()
 {
