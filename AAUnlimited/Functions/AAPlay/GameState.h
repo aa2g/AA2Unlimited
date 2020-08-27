@@ -22,6 +22,8 @@ namespace Shared {
 		void updateIsOverriding();
 
 		void setIsInMainMenu(bool value);
+		bool getIsDrawingShadow();
+		void setIsDrawingShadow(bool value);
 		bool getIsInMainMenu();
 
 		void setIsHighPolyLoaded(bool value);

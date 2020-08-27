@@ -849,40 +849,40 @@ void headTrackingChangeInjection() {
 
 void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 	extraHairTest = value;
-	if (General::IsAAPlay) {
-		int i = 0;
-		while (Shared::GameState::getConversationCharacter(i)) {
-			auto card1 = Shared::GameState::getConversationCharacter(i);
-			if (card1->m_xxSkeleton) {
-				DWORD* somepointer = (DWORD*)((char*)(card1->m_xxSkeleton->m_unknown13) + 0x88);
-				if (charAddress == somepointer) {
-					auto hairs = AAPlay::g_characters[card1->m_seat].m_cardData;
-					if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
-						extraHairTest = 1;
-						return;
+	int i = 0;
+	ExtClass::CharacterStruct *character;
+	if (General::IsAAPlay) character = Shared::GameState::getConversationCharacter(i);
+	else if (General::IsAAEdit) character = AAEdit::g_currChar.m_char;
+	while (character) {
+		if (character->m_xxSkeleton) {
+			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
+			if (charAddress == somepointer) {
+				AAUCardData hairs;
+				if (General::IsAAEdit) {
+					hairs = AAEdit::g_currChar.m_cardData;
+					if (Shared::GameState::getIsDrawingShadow()) {
+						Shared::GameState::setIsDrawingShadow(false);
+						for (int idx = 0; idx < 4; idx++) {
+							if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
+								for (int num = 0; num < AAEdit::g_currChar.m_cardData.GetHairs(idx).size(); num++) {
+									AAEdit::g_currChar.AddShadows((DWORD*)AAEdit::g_currChar.m_hairs[idx][num].second);
+								}
+							}
+						}
 					}
 				}
-			}
-			i++;
-		}
-	}
-	else if (General::IsAAEdit) {
-		CharInstData* card1 = &AAEdit::g_currChar;
-		if (card1->m_char) {
-			if (card1->m_char->m_xxSkeleton) {
-				DWORD* somepointer = (DWORD*)((char*)(card1->m_char->m_xxSkeleton->m_unknown13) + 0x88);
-				if (charAddress == somepointer) {
-					auto hairs = card1->m_cardData;
-					if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
-						extraHairTest = 1;
-						return;
-					}
+				if (General::IsAAPlay) hairs = AAPlay::g_characters[character->m_seat].m_cardData;
+				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+					extraHairTest = 1;
+					return;
 				}
 			}
 		}
+		i++;
+		if (General::IsAAPlay) character = Shared::GameState::getConversationCharacter(i);
+		else character = nullptr;
 	}
 }
-
 
 
 void __declspec(naked) extraHairFixRedirect() {

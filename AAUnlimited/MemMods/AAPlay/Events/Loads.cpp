@@ -109,24 +109,16 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
-	
-	if (General::IsAAPlay) {
-		auto card = AAPlay::g_characters[loadCharacter->m_seat].m_cardData;
-		for (int idx = 0; idx < 4; idx++) {
-			if (card.GetHairs(idx).size()) {
-				for (int num = 0; num < card.GetHairs(idx).size(); num++) {
-					AAPlay::g_characters[loadCharacter->m_seat].AddShadows((DWORD*)AAPlay::g_characters[loadCharacter->m_seat].m_hairs[idx][num].second);
-				}
-			}
-		}
-	}
-	if (General::IsAAEdit) {
+	CharInstData card;
+	if (General::IsAAPlay) card = AAPlay::g_characters[loadCharacter->m_seat];
+	else if (General::IsAAEdit) {
 		AAEdit::g_currChar.m_char = loadCharacter;
-		for (int idx = 0; idx < 4; idx++) {
-			if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
-				for (int num = 0; num < AAEdit::g_currChar.m_cardData.GetHairs(idx).size(); num++) {
-					AAEdit::g_currChar.AddShadows((DWORD*)AAEdit::g_currChar.m_hairs[idx][num].second);
-				}
+		card = AAEdit::g_currChar;
+	}
+	for (int idx = 0; idx < 4; idx++) {
+		if (card.m_cardData.GetHairs(idx).size()) {
+			for (int num = 0; num < card.m_cardData.GetHairs(idx).size(); num++) {
+				card.AddShadows((DWORD*)card.m_hairs[idx][num].second);
 			}
 		}
 	}
@@ -215,7 +207,7 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 		Poser::RemoveCharacter(loadCharacter);
 		if (!Shared::GameState::getIsPcConversation()) Shared::GameState::clearConversationCharacterBySeat(loadCharacter->m_seat);
 	}
-
+	if (General::IsAAEdit) Shared::GameState::setIsDrawingShadow(true);
 	return retv;
 }
 
