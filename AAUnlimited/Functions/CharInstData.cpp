@@ -95,7 +95,7 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 				xor edx, edx
 				jmp JumpHere
 
-			JumpHere :
+			JumpHere:
 				push 0x01
 				push esi
 				call[secondFunction]
