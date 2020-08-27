@@ -109,8 +109,9 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
-	auto card = AAPlay::g_characters[loadCharacter->m_seat].m_cardData;
+	
 	if (General::IsAAPlay) {
+		auto card = AAPlay::g_characters[loadCharacter->m_seat].m_cardData;
 		for (int idx = 0; idx < 4; idx++) {
 			if (card.GetHairs(idx).size()) {
 				for (int num = 0; num < card.GetHairs(idx).size(); num++) {
@@ -121,6 +122,17 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	}
 	if (General::IsAAEdit) {
 		AAEdit::g_currChar.m_char = loadCharacter;
+		for (int idx = 0; idx < 4; idx++) {
+			if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
+				for (int num = 0; num < AAEdit::g_currChar.m_cardData.GetHairs(idx).size(); num++) {
+					AAEdit::g_currChar.AddShadows((DWORD*)AAEdit::g_currChar.m_hairs[idx][num].second);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_BACK);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_FRONT);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_SIDE);
+					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_EXTENSION);
+				}
+			}
+		}
 	}
 	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
