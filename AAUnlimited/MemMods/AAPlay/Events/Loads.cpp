@@ -126,10 +126,6 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 			if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
 				for (int num = 0; num < AAEdit::g_currChar.m_cardData.GetHairs(idx).size(); num++) {
 					AAEdit::g_currChar.AddShadows((DWORD*)AAEdit::g_currChar.m_hairs[idx][num].second);
-					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_BACK);
-					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_FRONT);
-					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_SIDE);
-					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::Category::HAIR, ExtVars::AAEdit::RedrawId::HAIR_EXTENSION);
 				}
 			}
 		}
