@@ -5,16 +5,16 @@
 namespace ExtClass {
 
 	enum PeriodId {
-		MORNING_ROOM = 1,
-		MORNING_SCHOOL = 2,
-		FIRST_LESSON = 3,
-		FIRST_BREAK = 4,
-		SPORTS = 5,
-		SECOND_BREAK = 6,
-		CLUB = 7,
-		EVENING_SCHOOL = 8,
-		EVENING_ROOM = 9,
-		SLEEP = 10
+		MORNING_ROOM = 0,
+		MORNING_SCHOOL = 1,
+		FIRST_LESSON = 2,
+		FIRST_BREAK = 3,
+		SPORTS = 4,
+		SECOND_BREAK = 5,
+		CLUB = 6,
+		EVENING_SCHOOL = 7,
+		EVENING_ROOM = 8,
+		SLEEP = 9
 	};
 
 	enum DayName {
