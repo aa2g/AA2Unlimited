@@ -287,7 +287,7 @@ normalizeraddremove.normalize = "horizontal"
 normalizeraddremove:destroy()
 
 function addpropbutton.action()
-	local selected = fileutils.getfiledialog(aau_path("poser\\items\\*.xx"))
+	local selected = fileutils.getfiledialog(aau_path("poser\\items\\*.*"))
 	if selected then
 		propmgr.loadprop(selected)
 	end
@@ -302,7 +302,7 @@ function removepropbutton.action()
 end
 
 function attachpropsbutton.action()
-	local path = fileutils.getfiledialog(aau_path("poser\\charitems\\*.xx"))
+	local path = fileutils.getfiledialog(aau_path("poser\\charitems\\*.*"))
 	if not path then return end
 	log.spam("loading charitem %s", path)
 	local character = charamgr.current
