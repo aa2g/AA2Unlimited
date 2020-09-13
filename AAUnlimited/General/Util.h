@@ -67,7 +67,7 @@ inline float GetRandomFloat(float min, float max) {
 }
 
 inline int GetRandomInt(int min, int max) {
-	return min + rand() % (max - min);
+	return min + rand() % (max - min + 1);
 }
 
 
