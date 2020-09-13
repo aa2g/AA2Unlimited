@@ -66,6 +66,11 @@ inline float GetRandomFloat(float min, float max) {
 	return min + rand() / (RAND_MAX / (max - min));
 }
 
+inline int GetRandomInt(int min, int max) {
+	return min + rand() % (max - min);
+}
+
+
 //opens an open-file dialog and returns the path chosen, or NULL if cancle was pressed.
 const TCHAR* OpenFileDialog(const TCHAR* initialDir);
 const TCHAR* SaveFileDialog(const TCHAR* initialDir);
