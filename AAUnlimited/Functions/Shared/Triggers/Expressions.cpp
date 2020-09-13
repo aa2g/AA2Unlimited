@@ -218,7 +218,7 @@ namespace Shared {
 
 		 //int (int min, int max)
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
-			return Value(static_cast<int>(General::GetRandomFloat((float)(params[0].iVal), (float)(params[1].iVal))));
+			return Value(General::GetRandomInt(params[0].iVal, params[1].iVal));
 		}
 
 		Value Thread::AddIntegers(std::vector<Value>& params) {
@@ -443,7 +443,7 @@ namespace Shared {
 		//bool(int)
 		Value Thread::RollInt(std::vector<Value>& params) {
 			if (params[0].iVal <= 0) return Value(false);
-			auto roll = static_cast<int>(General::GetRandomFloat((float)(1), (float)(100)));
+			auto roll = General::GetRandomInt(1, 100);
 			return Value(roll <= params[0].iVal);
 		}
 
