@@ -1846,6 +1846,11 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			TEXT("Machine room"), TEXT("Machine room"), TEXT("Machine room"),
 			Value(52)
 		},
+		{
+			351, NCONSTCAT_CONVERSATIONS,
+			TEXT("MINNA_PLAY"), TEXT("MINNA_EAT"), TEXT("MINNA_EAT"),
+			Value(ExtClass::ConversationId::MINNA_PLAY)
+		},
 	},
 	{ //BOOL
 		
