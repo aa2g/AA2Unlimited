@@ -13,10 +13,10 @@ namespace Shared {
 
 		void setIsPcConversation(bool value);
 		bool getIsPcConversation();
-
+		void setIsSaving(bool value);
+		bool getIsSaving();
 		void setIsOverridingDialogue(bool value);
 		bool getIsOverridingDialogue();
-
 		void setIsOverriding(bool value);
 		bool getIsOverriding();
 		void updateIsOverriding();

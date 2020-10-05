@@ -29,6 +29,7 @@ struct GameStateStruct {
 		m_isInMainMenu = false;
 		h_info = NULL;
 		m_drawShadow = true;
+		m_savingCard = false;
 	}
 
 	//Game state indicators
@@ -37,7 +38,8 @@ struct GameStateStruct {
 	bool m_isIsOverridingDialogue;		//true from conversationstart till the first conversation tick
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
-	
+	bool m_savingCard;					//true if the user is currently saving the card in the edtior
+
 	bool m_isPeeping;					//true if the current H scene does not involve the PC
 	ExtClass::CharacterStruct* m_voyeur; //the observer of the H scene. Virtually always the PC regardless of what the game thinks about it
 	ExtClass::NpcData* m_voyeurTarget; //the NPC voyeur is peeping at. Usually the first actor in the H scene
@@ -83,6 +85,16 @@ void Shared::GameState::setIsPcConversation(bool value)
 bool Shared::GameState::getIsPcConversation()
 {
 	return loc_gameState.m_isPcConversation;
+}
+
+void Shared::GameState::setIsSaving(bool value)
+{
+	loc_gameState.m_savingCard = value;
+}
+
+bool Shared::GameState::getIsSaving()
+{
+	return loc_gameState.m_savingCard;
 }
 
 void Shared::GameState::setIsOverridingDialogue(bool value)

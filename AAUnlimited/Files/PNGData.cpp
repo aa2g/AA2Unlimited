@@ -185,6 +185,7 @@ out:
 static int aaud_off;
 
 void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
+	Shared::GameState::setIsSaving(true);
 	BYTE *aaudata = General::FindPngChunk(*outbuf, *outlen, AAUCardData::PngChunkIdBigEndian);
 	// if no aaud found, just nuke the IEND
 	if (!aaudata)
@@ -234,6 +235,7 @@ void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
 	}
 	if (aaudbuf)
 		delete aaudbuf;
+	Shared::GameState::setIsSaving(false);
 }
 
 // This function is called by edit to generate raw PNG preview, right before character metadata are appended to it -
