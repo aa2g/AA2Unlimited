@@ -84,6 +84,7 @@ void Shared::GameState::setIsPcConversation(bool value)
 
 bool Shared::GameState::getIsPcConversation()
 {
+	if (General::IsAAPlay) return false;
 	return loc_gameState.m_isPcConversation;
 }
 
