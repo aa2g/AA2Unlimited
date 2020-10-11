@@ -235,7 +235,6 @@ void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
 	}
 	if (aaudbuf)
 		delete aaudbuf;
-	Shared::GameState::setIsSaving(false);
 }
 
 // This function is called by edit to generate raw PNG preview, right before character metadata are appended to it -
@@ -306,6 +305,7 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	if (report_compression_error)
 		MessageBox(NULL, L"Warning: this card's modfiles weren't saved, please try again.", L"Warning", 0);
 	return true;
+	Shared::GameState::setIsSaving(false);
 }
 
 // Called by play to save a class
