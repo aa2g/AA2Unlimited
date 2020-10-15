@@ -793,7 +793,7 @@ namespace Shared {
 				oldEffectiveClubValueValue -= 999 - inst->m_char->m_charData->m_character.clubValue;
 			}
 			else if (oldEffectiveClubValueValue < 100) {
-				oldEffectiveClubValueValue += 100 - inst->m_char->m_charData->m_character.clubValue;
+				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue - 100 ;
 			}
 			else {
 				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue - oldEffectiveClubValueValue;
@@ -877,7 +877,7 @@ namespace Shared {
 				oldEffectiveIntelligenceValueValue -= 999 - inst->m_char->m_charData->m_character.intelligenceValue;
 			}
 			else if (oldEffectiveIntelligenceValueValue < 100) {
-				oldEffectiveIntelligenceValueValue += 100 - inst->m_char->m_charData->m_character.intelligenceValue;
+				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue - 100;
 			}
 			else {
 				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue - oldEffectiveIntelligenceValueValue;
@@ -1012,7 +1012,7 @@ namespace Shared {
 				oldEffectiveStrengthValueValue -= 999 - inst->m_char->m_charData->m_character.strengthValue;
 			}
 			else if (oldEffectiveStrengthValueValue < 100) {
-				oldEffectiveStrengthValueValue += 100 - inst->m_char->m_charData->m_character.strengthValue;
+				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue - 100;
 			}
 			else {
 				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue - oldEffectiveStrengthValueValue;
