@@ -805,6 +805,7 @@ namespace Shared {
 			storage.storeCardAAUDataObject(inst, L"clubValueMods", allClubValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.clubValue = min(max(newClubValueValue, 100), 999);
+			inst->m_char->m_charData->m_character.clubClassRanking = (inst->m_char->m_charData->m_character.clubValue - 100);
 		}
 		
 		//int seat, int rank
@@ -889,6 +890,7 @@ namespace Shared {
 			storage.storeCardAAUDataObject(inst, L"intelligenceValueMods", allIntelligenceValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.intelligenceValue = min(max(newIntelligenceValueValue, 100), 999);
+			inst->m_char->m_charData->m_character.intelligenceClassRank = (inst->m_char->m_charData->m_character.intelligenceValue - 100);
 		}
 
 		//int seat, int rank
@@ -1024,6 +1026,7 @@ namespace Shared {
 			storage.storeCardAAUDataObject(inst, L"strengthValueMods", allStrengthValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.strengthValue = min(max(newStrengthValueValue, 100), 999);
+			inst->m_char->m_charData->m_character.strengthClassRank = (inst->m_char->m_charData->m_character.strengthValue - 100);
 		}
 
 		//int seat, int rank
