@@ -856,7 +856,7 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 	while (character) {
 		if (character->m_xxSkeleton) {
 			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
-			if (charAddress == somepointer) {
+			if (charAddress == somepointer && !Shared::GameState::getIsSaving()) {
 				AAUCardData hairs;
 				if (General::IsAAEdit) {
 					hairs = AAEdit::g_currChar.m_cardData;

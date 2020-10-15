@@ -595,6 +595,38 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
 		}
 
+		Value Thread::GetCardTraitMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int trait = params[1].iVal;
+			std::wstring* modName = params[2].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto traitMods = storage.getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			if (!traitMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto traitMod = traitMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto traitNew = traitMod.is<double>() ? (int)traitMod.get<double>() : 0;
+
+
+			return Value(traitNew);
+		}
+
+		Value Thread::GetCardUnboundTrait(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int trait = params[1].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto storedTrait = storage.getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			return Value(storedTrait.is<double>() ? (int)storedTrait.get<double>() : cardInst->m_char->m_charData->m_traitBools[trait]);
+
+		}
+
+
 
 		//bool(int, int)
 		Value Thread::GetCardPreference(std::vector<Value>& params) {
@@ -705,7 +737,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto clubMods = storage.getCardAAUDataValue(cardInst, L"clubMods");
+			auto clubMods = storage.getCardAAUDataValue(cardInst, L"clubValueMods");
 			if (!clubMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -764,7 +796,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto intelligenceMods = storage.getCardAAUDataValue(cardInst, L"intelligenceMods");
+			auto intelligenceMods = storage.getCardAAUDataValue(cardInst, L"intelligenceValueMods");
 			if (!intelligenceMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -884,7 +916,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto strengthMods = storage.getCardAAUDataValue(cardInst, L"strengthMods");
+			auto strengthMods = storage.getCardAAUDataValue(cardInst, L"strengthValueMods");
 			if (!strengthMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -3465,6 +3497,18 @@ namespace Shared {
 					TEXT("Use only in NPC/After NPC answer event. This expression will return the room that PC is walking to."),
 					{}, (TYPE_INT),
 					&Thread::GetPCRoomTarget
+				},
+				{
+					137, EXPRCAT_CHARPROP,
+					TEXT("Trait Modifier"), TEXT("%p ::TraitMod((Trait( %p ), ModName ( %p )"), TEXT("The value of the specified trait value modifier."),
+					{ TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardTraitMod
+				},
+				{
+					138, EXPRCAT_CHARPROP,
+					TEXT("Unbount Trait Value"), TEXT("%p ::UnboundTraitValue(Trait( %p ))"), TEXT("The unbound trait value of the character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardUnboundTrait
 				},
 			},
 
