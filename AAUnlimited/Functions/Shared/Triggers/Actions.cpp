@@ -538,6 +538,49 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_traitBools[trait] = enable;
 		}
 
+
+		void Thread::AddTraitMod(std::vector<Value>& params) {
+			auto seat = params[0].iVal;
+			auto trait = params[1].iVal;
+			auto modName = params[2].strVal;
+			auto newModValue = params[3].iVal;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid()) {
+				auto triggerName = this->execTrigger ? this->execTrigger->name : L"";
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] " << triggerName << ": Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			// add/replace target trait mod
+			auto allTraitMods = storage.getCardAAUDataValue(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			if (!allTraitMods.is<picojson::object>()) {
+				allTraitMods = picojson::value(picojson::object());
+			}
+			auto oldTargetMod = allTraitMods.get<picojson::object>()[General::CastToString(*modName)];
+			int oldTargetModValue = oldTargetMod.is<double>() ?
+				oldTargetMod.get<double>() : 0;
+			allTraitMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
+			//adjust the effective trait value
+			auto oldEffectiveTrait = storage.getCardAAUDataValue(inst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			int oldEffectiveTraitValue = oldEffectiveTrait.is<double>() ?
+				oldEffectiveTrait.get<double>() : inst->m_char->m_charData->m_traitBools[trait];
+			//    training correction
+			if (oldEffectiveTraitValue <= 0 && inst->m_char->m_charData->m_traitBools[trait]) {
+				oldEffectiveTraitValue++;
+			}
+			else if (oldEffectiveTraitValue > 0 && !inst->m_char->m_charData->m_traitBools[trait]) {
+				oldEffectiveTraitValue--;
+			}
+
+			auto newTraitValue = oldEffectiveTraitValue - oldTargetModValue + newModValue;
+
+			//save the values back into the storage
+			storage.storeCardAAUDataInt(inst, L"trait_" + General::CastToWString(std::to_string(trait)), newTraitValue);
+			storage.storeCardAAUDataObject(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)), allTraitMods.get<picojson::object>());
+
+			inst->m_char->m_charData->m_traitBools[trait] = min(max(newTraitValue, 0), 1);
+		}
+
 		//int seat, int trait, bool enable
 		void Thread::SetCardPreference(std::vector<Value>& params)
 		{
@@ -749,8 +792,8 @@ namespace Shared {
 			if (oldEffectiveClubValueValue > 999) {
 				oldEffectiveClubValueValue -= 999 - inst->m_char->m_charData->m_character.clubValue;
 			}
-			else if (oldEffectiveClubValueValue < 0) {
-				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue;
+			else if (oldEffectiveClubValueValue < 100) {
+				oldEffectiveClubValueValue += 100 - inst->m_char->m_charData->m_character.clubValue;
 			}
 			else {
 				oldEffectiveClubValueValue += inst->m_char->m_charData->m_character.clubValue - oldEffectiveClubValueValue;
@@ -761,7 +804,7 @@ namespace Shared {
 			storage.storeCardAAUDataInt(inst, L"clubValue", newClubValueValue);
 			storage.storeCardAAUDataObject(inst, L"clubValueMods", allClubValueMods.get<picojson::object>());
 
-			inst->m_char->m_charData->m_character.clubValue = min(max(newClubValueValue, 0), 999);
+			inst->m_char->m_charData->m_character.clubValue = min(max(newClubValueValue, 100), 999);
 		}
 		
 		//int seat, int rank
@@ -833,8 +876,8 @@ namespace Shared {
 			if (oldEffectiveIntelligenceValueValue > 999) {
 				oldEffectiveIntelligenceValueValue -= 999 - inst->m_char->m_charData->m_character.intelligenceValue;
 			}
-			else if (oldEffectiveIntelligenceValueValue < 0) {
-				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue;
+			else if (oldEffectiveIntelligenceValueValue < 100) {
+				oldEffectiveIntelligenceValueValue += 100 - inst->m_char->m_charData->m_character.intelligenceValue;
 			}
 			else {
 				oldEffectiveIntelligenceValueValue += inst->m_char->m_charData->m_character.intelligenceValue - oldEffectiveIntelligenceValueValue;
@@ -845,7 +888,7 @@ namespace Shared {
 			storage.storeCardAAUDataInt(inst, L"intelligenceValue", newIntelligenceValueValue);
 			storage.storeCardAAUDataObject(inst, L"intelligenceValueMods", allIntelligenceValueMods.get<picojson::object>());
 
-			inst->m_char->m_charData->m_character.intelligenceValue = min(max(newIntelligenceValueValue, 0), 999);
+			inst->m_char->m_charData->m_character.intelligenceValue = min(max(newIntelligenceValueValue, 100), 999);
 		}
 
 		//int seat, int rank
@@ -968,8 +1011,8 @@ namespace Shared {
 			if (oldEffectiveStrengthValueValue > 999) {
 				oldEffectiveStrengthValueValue -= 999 - inst->m_char->m_charData->m_character.strengthValue;
 			}
-			else if (oldEffectiveStrengthValueValue < 0) {
-				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue;
+			else if (oldEffectiveStrengthValueValue < 100) {
+				oldEffectiveStrengthValueValue += 100 - inst->m_char->m_charData->m_character.strengthValue;
 			}
 			else {
 				oldEffectiveStrengthValueValue += inst->m_char->m_charData->m_character.strengthValue - oldEffectiveStrengthValueValue;
@@ -980,7 +1023,7 @@ namespace Shared {
 			storage.storeCardAAUDataInt(inst, L"strengthValue", newStrengthValueValue);
 			storage.storeCardAAUDataObject(inst, L"strengthValueMods", allStrengthValueMods.get<picojson::object>());
 
-			inst->m_char->m_charData->m_character.strengthValue = min(max(newStrengthValueValue, 0), 999);
+			inst->m_char->m_charData->m_character.strengthValue = min(max(newStrengthValueValue, 100), 999);
 		}
 
 		//int seat, int rank
@@ -2631,6 +2674,12 @@ namespace Shared {
 				TEXT("Changes the h position to the one you specify. Only works in H position chang event."),
 				{ TYPE_INT },
 				&Thread::ChangeHPosition
+			},
+			{
+				122, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Trait Modifier"), TEXT("%p ::AddTraitMod(Trait ( %p ), ModifierName( %p ) = %p "),
+				TEXT("Add or replace a trait modifier."),
+				{ TYPE_INT, TYPE_INT, TYPE_STRING, TYPE_INT },
+				&Thread::AddTraitMod
 			},
 		};
 

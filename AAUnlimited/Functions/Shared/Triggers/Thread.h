@@ -73,6 +73,7 @@ namespace Shared {
 			void SetCardVirtue(std::vector<Value>& params);
 			void AddVirtueMod(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
+			void AddTraitMod(std::vector<Value>& params);
 			void SetCardPreference(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);
 			void SetClothingState(std::vector<Value>& params);
@@ -217,6 +218,8 @@ namespace Shared {
 			Value GetCardVirtueMod(std::vector<Value>& params); //int(int,string)
 			Value GetCardEffectiveVirtue(std::vector<Value>& params);
 			Value GetCardTrait(std::vector<Value>& params);
+			Value GetCardTraitMod(std::vector<Value>& params);
+			Value GetCardUnboundTrait(std::vector<Value>& params);
 			Value GetCardPreference(std::vector<Value>& params);
 			Value GetCardOpinion(std::vector<Value>& params);
 			Value GetCardFigure(std::vector<Value>& params);
