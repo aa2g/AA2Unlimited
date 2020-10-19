@@ -467,6 +467,16 @@ namespace Shared {
 			*partnerNpcStatus = instPartner->m_char->m_characterStatus->m_npcStatus;
 		}
 
+
+		void Thread::SetGustOfWind(std::vector<Value>& params) {
+			bool enable = params[0].bVal;
+			if (eventData->GetId() == HI_POLY_INIT || eventData->GetId() == PC_CONVERSATION_LINE_UPDATED || eventData->GetId() == PC_CONVERSATION_STATE_UPDATED) {
+				const DWORD offset[]{ 0x3761CC, 0x28, 0x30, 0x2C, 0x1C };
+				DWORD* gust = (DWORD*)ExtVars::ApplyRule(offset);
+				*gust = enable;
+			}
+		}
+
 		//int seat, int virtue
 		void Thread::SetCardVirtue(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -2679,10 +2689,16 @@ namespace Shared {
 				&Thread::ChangeHPosition
 			},
 			{
-				122, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Trait Modifier"), TEXT("%p ::AddTraitMod(Trait ( %p ), ModifierName( %p ) = %p "),
+				122, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Trait Modifier"), TEXT("%p ::AddTraitMod(Trait ( %p ), ModName( %p ) = %p "),
 				TEXT("Add or replace a trait modifier."),
 				{ TYPE_INT, TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddTraitMod
+			},
+			{
+				123, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Gust of Wind"), TEXT("Gust = %p "),
+				TEXT("Causes the gust of wind event to happen. Use only in pc convo state updated or pc line updated events."),
+				{ TYPE_BOOL },
+				&Thread::SetGustOfWind
 			},
 		};
 
