@@ -70,6 +70,7 @@ namespace Shared {
 			void SetStrongResponse(std::vector<Value>& params);
 			void SetAbsoluteResponse(std::vector<Value>& params);
 			void SetPCTarget(std::vector<Value>& params);
+			void SetGustOfWind(std::vector<Value>& params);
 			void SetCardVirtue(std::vector<Value>& params);
 			void AddVirtueMod(std::vector<Value>& params);
 			void SetCardTrait(std::vector<Value>& params);
@@ -243,6 +244,7 @@ namespace Shared {
 			Value GetCardEffectiveIntelligenceValue(std::vector<Value>& params);	//int(int)
 			Value GetCardIntelligenceRank(std::vector<Value>& params); //int(int)
 			Value GetCardStrength(std::vector<Value>& params); //int(int)
+			Value GetCurrentClothes(std::vector<Value>& params);
 			Value GetCardFightingStyle(std::vector<Value>& params); //int(int)
 			//int(int)
 			Value GetCardLocked(std::vector<Value>& params);
@@ -270,6 +272,7 @@ namespace Shared {
 			Value GetCardDislikePoints(std::vector<Value>& params); //int(int,int)
 			Value GetCardHatePoints(std::vector<Value>& params); //int(int,int)
 			Value IsLover(std::vector<Value>& params); //bool(int,int)
+			Value GetLoverDays(std::vector<Value>& params);
 			Value GetHasLovers(std::vector<Value>& params);	//bool(int)
 			Value GetStrongestMood(std::vector<Value>& params); //int(int)
 			Value GetMoodStrength(std::vector<Value>& params); //int(int, int)

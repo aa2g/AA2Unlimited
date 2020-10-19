@@ -899,6 +899,17 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetCurrentClothes(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_currClothes);
+		}
+
+
+		//int(int)
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -1253,6 +1264,20 @@ namespace Shared {
 
 			return Value((bool)cardInst->m_char->m_lovers[cardTowards]);
 		}
+
+		Value Thread::GetLoverDays(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(0);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+			int cardTowards = params[1].iVal;
+			if (ExpressionSeatInvalid(cardTowards)) return Value(-0);
+			CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			return Value((int)cardInst->m_char->m_daysLovers[cardTowards]);
+		}
+
 
 		//bool(int)
 		Value Thread::GetHasLovers(std::vector<Value>& params) {
@@ -3509,6 +3534,18 @@ namespace Shared {
 					TEXT("Unbount Trait Value"), TEXT("%p ::UnboundTraitValue(Trait( %p ))"), TEXT("The unbound trait value of the character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardUnboundTrait
+				},
+				{
+					139, EXPRCAT_CHARPROP,
+					TEXT("Get Current Outfit"), TEXT("%p ::CurrOutfit"), TEXT("Returns the ID (0-3) of the current outfit of the character. Use to figure out whether they are in uniform, sports, swim or club outfit."),
+					{ TYPE_INT}, (TYPE_INT),
+					&Thread::GetCurrentClothes
+				},
+				{
+					140, EXPRCAT_CHARPROP,
+					TEXT("Get lover days"), TEXT("%p ::GetLoverDays( %p )"), TEXT("Returns the amount of days that this card has been a lover with the other for."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetLoverDays
 				},
 			},
 
