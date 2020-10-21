@@ -1563,7 +1563,7 @@ namespace Shared {
 			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
 
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", newset);
+			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
 		}
 
 		//int card, string keyname, int value
