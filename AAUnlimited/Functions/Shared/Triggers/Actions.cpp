@@ -124,16 +124,6 @@ namespace Shared {
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
 
-			card->m_forceAction.conversationId = 0;
-			card->m_forceAction.movementType = 0;
-			card->m_char->m_characterStatus->m_npcStatus->m_status = 0;
-			card->m_forceAction.roomTarget = -1;
-			card->m_forceAction.target1 = nullptr;
-			card->m_forceAction.target2 = nullptr;
-			card->m_forceAction.unknown = -1;
-			card->m_forceAction.unknown2 = 1;
-
-
 			if (this->eventData->GetId() == NPC_WANT_TALK_WITH) {
 				((NpcWantTalkWithData*)eventData)->substruct->conversationId = -1;
 				((NpcWantTalkWithData*)eventData)->substruct->movementType = 0;
@@ -172,6 +162,16 @@ namespace Shared {
 				((NpcWalkToRoomData*)eventData)->substruct->target2 = nullptr;
 				((NpcWalkToRoomData*)eventData)->substruct->unknown = -1;
 				((NpcWalkToRoomData*)eventData)->substruct->unknown2 = -1;
+			}
+			else {
+				card->m_forceAction.conversationId = 0;
+				card->m_forceAction.movementType = 0;
+				card->m_char->m_characterStatus->m_npcStatus->m_status = 0;
+				card->m_forceAction.roomTarget = -1;
+				card->m_forceAction.target1 = nullptr;
+				card->m_forceAction.target2 = nullptr;
+				card->m_forceAction.unknown = -1;
+				card->m_forceAction.unknown2 = 1;
 			}
 		}
 
