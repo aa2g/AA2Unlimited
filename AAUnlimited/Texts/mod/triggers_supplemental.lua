@@ -334,7 +334,7 @@ end
 
 function on.storeAllRelationshipPoints(params)
 	local args = splitArgs(params);
-	local key = tonumber(args[1]);
+	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 
