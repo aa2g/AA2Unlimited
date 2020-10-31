@@ -124,54 +124,50 @@ namespace Shared {
 			CharInstData* card = &AAPlay::g_characters[cardSeat];
 			if (!card->IsValid()) return;
 
-			card->m_forceAction.conversationId = 0;
-			card->m_forceAction.movementType = 0;
-			card->m_char->m_characterStatus->m_npcStatus->m_status = 0;
-			card->m_forceAction.roomTarget = -1;
-			card->m_forceAction.target1 = nullptr;
-			card->m_forceAction.target2 = nullptr;
-			card->m_forceAction.unknown = -1;
-			card->m_forceAction.unknown2 = 1;
-
-
 			if (this->eventData->GetId() == NPC_WANT_TALK_WITH) {
-				((NpcWantTalkWithData*)eventData)->substruct->conversationId = -1;
-				((NpcWantTalkWithData*)eventData)->substruct->movementType = 0;
+				((NpcWantTalkWithData*)eventData)->substruct->conversationId = 0;
 				((NpcWantTalkWithData*)eventData)->substruct->roomTarget = -1;
-				((NpcWantTalkWithData*)eventData)->substruct->target1 = nullptr;
-				((NpcWantTalkWithData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantTalkWithData*)eventData)->substruct->target1 = NULL;
+				((NpcWantTalkWithData*)eventData)->substruct->target2 = NULL;
 				((NpcWantTalkWithData*)eventData)->substruct->unknown = -1;
 				((NpcWantTalkWithData*)eventData)->substruct->unknown2 = -1;
 			}
 
 			else if (this->eventData->GetId() == NPC_WANT_TALK_WITH_ABOUT) {
-				((NpcWantTalkWithAboutData*)eventData)->substruct->conversationId = -1;
-				((NpcWantTalkWithAboutData*)eventData)->substruct->movementType = 0;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->conversationId = 0;
 				((NpcWantTalkWithAboutData*)eventData)->substruct->roomTarget = -1;
-				((NpcWantTalkWithAboutData*)eventData)->substruct->target1 = nullptr;
-				((NpcWantTalkWithAboutData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->target1 = NULL;
+				((NpcWantTalkWithAboutData*)eventData)->substruct->target2 = NULL;
 				((NpcWantTalkWithAboutData*)eventData)->substruct->unknown = -1;
 				((NpcWantTalkWithAboutData*)eventData)->substruct->unknown2 = -1;
 			}
 
 			else if (this->eventData->GetId() == NPC_WANT_ACTION_NOTARGET) {
-				((NpcWantActionNoTargetData*)eventData)->substruct->conversationId = -1;
-				((NpcWantActionNoTargetData*)eventData)->substruct->movementType = 0;
+				((NpcWantActionNoTargetData*)eventData)->substruct->conversationId = 0;
 				((NpcWantActionNoTargetData*)eventData)->substruct->roomTarget = -1;
-				((NpcWantActionNoTargetData*)eventData)->substruct->target1 = nullptr;
-				((NpcWantActionNoTargetData*)eventData)->substruct->target2 = nullptr;
+				((NpcWantActionNoTargetData*)eventData)->substruct->target1 = NULL;
+				((NpcWantActionNoTargetData*)eventData)->substruct->target2 = NULL;
 				((NpcWantActionNoTargetData*)eventData)->substruct->unknown = -1;
 				((NpcWantActionNoTargetData*)eventData)->substruct->unknown2 = -1;
 			}
 
 			else if (this->eventData->GetId() == NPC_WALK_TO_ROOM) {
-				((NpcWalkToRoomData*)eventData)->substruct->conversationId = -1;
-				((NpcWalkToRoomData*)eventData)->substruct->movementType = 0;
+				((NpcWalkToRoomData*)eventData)->substruct->conversationId = 0;
 				((NpcWalkToRoomData*)eventData)->substruct->roomTarget = -1;
-				((NpcWalkToRoomData*)eventData)->substruct->target1 = nullptr;
-				((NpcWalkToRoomData*)eventData)->substruct->target2 = nullptr;
+				((NpcWalkToRoomData*)eventData)->substruct->target1 = NULL;
+				((NpcWalkToRoomData*)eventData)->substruct->target2 = NULL;
 				((NpcWalkToRoomData*)eventData)->substruct->unknown = -1;
 				((NpcWalkToRoomData*)eventData)->substruct->unknown2 = -1;
+			}
+			else {
+				card->m_forceAction.conversationId = 0;
+				card->m_forceAction.movementType = 0;
+				card->m_char->m_characterStatus->m_npcStatus->m_status = 0;
+				card->m_forceAction.roomTarget = -1;
+				card->m_forceAction.target1 = NULL;
+				card->m_forceAction.target2 = NULL;
+				card->m_forceAction.unknown = -1;
+				card->m_forceAction.unknown2 = 1;
 			}
 		}
 

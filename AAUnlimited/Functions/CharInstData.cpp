@@ -42,6 +42,23 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	}
 }
 
+void CharInstData::ClearCache()
+{
+	const DWORD offset[]{ 0x150750 };
+	DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+	if (this->IsValid()) {
+		auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+		__asm
+		{
+			mov esi, somepointer
+			push esi
+			call[address]
+
+		}
+	}
+}
+
+
 
 void CharInstData::SetHeadTracking(int headtracking)
 {

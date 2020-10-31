@@ -259,6 +259,7 @@
     <ClInclude Include="General\DrawD3D.h" />
     <ClInclude Include="Functions\Notifications.h" />
     <ClInclude Include="Functions\AAPlay\Controls.h" />
+    <ClInclude Include="External\ExternalClasses\CharacterAssetContainer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

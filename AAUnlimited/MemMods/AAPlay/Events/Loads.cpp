@@ -75,6 +75,7 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 	HiPolyEndData data;
 	data.card = loc_hiPolyLoaded;
 	ThrowEvent(&data);
+
 }
 
 // wraps the calls to original load character events
@@ -124,8 +125,9 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 	}
 	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
-	if (General::IsAAPlay)
+	if (General::IsAAPlay) {
 		Shared::GameState::setIsOverriding(false);
+	}
 	HiPolyLoadEndEvent(loadCharacter);
 	loc_loadingCharacter = false;
 	return retv;
@@ -186,6 +188,7 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 			HiPolyDespawnData data;
 			data.card = AAPlay::GetSeatFromStruct(loadCharacter);
 			ThrowEvent(&data);
+
 		}
 		LUA_EVENT_NORET("char_despawn", loadCharacter);
 	}
@@ -206,6 +209,15 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
 		if (!Shared::GameState::getIsPcConversation()) Shared::GameState::clearConversationCharacterBySeat(loadCharacter->m_seat);
+		if (General::IsAAPlay) {
+			//This code resets the cache memory
+			if (loadCharacter->m_somedata && loadCharacter->m_charData) {
+				//this event seems to be called on unloading a save, so we're just protecting for that case
+				AAPlay::g_characters[AAPlay::GetSeatFromStruct(loadCharacter)].ClearCache();
+				ExtClass::CharacterAssetContainer* something = *(ExtClass::CharacterAssetContainer**)((char*)(loadCharacter->m_somePointer) + 0x13c);
+				*something = AAPlay::g_characters[AAPlay::GetSeatFromStruct(loadCharacter)].assetContainer;
+			}
+		}
 	}
 	if (General::IsAAEdit) Shared::GameState::setIsDrawingShadow(true);
 	return retv;

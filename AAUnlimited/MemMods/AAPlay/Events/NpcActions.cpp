@@ -1149,6 +1149,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 			data.card = AAPlay::GetSeatFromStruct(user);
 			data.action = params->conversationId;
 			ThrowEvent(&data);
+			break;
 		}
 		else if(params->target2 == NULL) {
 			NpcWantTalkWithData data;
@@ -1157,6 +1158,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 			data.action = params->conversationId;
 			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
 			ThrowEvent(&data);
+			break;
 		}
 		else {
 			NpcWantTalkWithAboutData data;
@@ -1166,6 +1168,7 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
 			data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
 			ThrowEvent(&data);
+			break;
 		}
 		break; }
 	default:
