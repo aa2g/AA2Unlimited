@@ -2,9 +2,18 @@
 
 local _M = {}
 local opts = {}
+local trigger = {}
+
+-- lookup function
+function on.dispatch_trigger(name, args)
+	if (trigger[name] ~= nil) then
+		trigger[name](args);
+	end
+end
 
 --------------------------------------------------------------------------------------------------------------------------
 -- Event handlers -- These should only call other functions and not contain any logic directly ---------------------------
+-- These react to actual ingame event and are not called from triggers ---------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 local TOGETHER_FOREVER = 81
@@ -25,7 +34,7 @@ function on.period()
 end
 
 --------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------
+-- Helper stuffs ---------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 function getStudentCount()
@@ -296,12 +305,15 @@ function restoreRelationshipPointsFromDump(seat, towards, dump)
 	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
 end
 
--- trigger procedure calls
+--------------------------------------------------------------------------------------------------------------------------
+-- Trigger procedure calls -----------------------------------------------------------------------------------------------
+-- Procedures that can be called from triggers require the <trigger.> prefix ---------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 
-function on.storeRelationshipPoints(params)
+function trigger.storeRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
-	local storageCard = tonumber(args[3]);
+	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
@@ -313,10 +325,10 @@ function on.storeRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end	
 
-function on.loadRelationshipPoints(params)
+function trigger.loadRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
-	local storageCard = tonumber(args[3]);
+	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
@@ -332,7 +344,7 @@ function on.loadRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end
 
-function on.storeAllRelationshipPoints(params)
+function trigger.storeAllRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
@@ -348,7 +360,7 @@ function on.storeAllRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end
 
-function on.loadAllRelationshipPoints(params)
+function trigger.loadAllRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
@@ -368,7 +380,7 @@ function on.loadAllRelationshipPoints(params)
 end
 
 --------------------------------------------------------------------------------------------------------------------------
--- Detective -------------------------------------------------------------------------------------------------------------
+-- Detective specific code -----------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
 function detectiveStartTheCase(actor0, actor1)
@@ -966,9 +978,9 @@ function printReport(case, detective, testifier, reportKey)
 	log.info(strReport);
 end
 
--- trigger procedure calls
+-- trigger procedure calls for detective
 
-function on.gatherAlibiReport(params)
+function trigger.gatherAlibiReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -976,7 +988,7 @@ function on.gatherAlibiReport(params)
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s alibi report");
 end
 
-function on.gatherIntrigueReport(params)
+function trigger.gatherIntrigueReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -984,7 +996,7 @@ function on.gatherIntrigueReport(params)
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s intrigue report");
 end
 
-function on.gatherTriviaReport(params)
+function trigger.gatherTriviaReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -992,7 +1004,7 @@ function on.gatherTriviaReport(params)
 	detectiveGatherReport(case, detective, testifier, getCardStorageKey(testifier) .. "'s trivia report");
 end
 
-function on.printAlibiReport(params)
+function trigger.printAlibiReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -1002,7 +1014,7 @@ function on.printAlibiReport(params)
 	printReport(case, detective, testifier, reportKey);
 end
 
-function on.printIntrigueReport(params)
+function trigger.printIntrigueReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -1012,7 +1024,7 @@ function on.printIntrigueReport(params)
 	printReport(case, detective, testifier, reportKey);
 end
 
-function on.printTriviaReport(params)
+function trigger.printTriviaReport(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];
@@ -1022,7 +1034,7 @@ function on.printTriviaReport(params)
 	printReport(case, detective, testifier, reportKey);
 end
 
-function on.closeCase(params)
+function trigger.closeCase(params)
 	local args = splitArgs(params);
 	local case = args[1];
 	local detective = args[2];

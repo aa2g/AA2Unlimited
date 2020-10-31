@@ -1900,7 +1900,7 @@ namespace Shared {
 				args += container[i] + "\n";
 			}
 
-			LUA_EVENT_NORET(funcName, args);
+			LUA_EVENT_NORET("dispatch_trigger", funcName, args);
 		}
 		/*
 		 * A list of all action categories
