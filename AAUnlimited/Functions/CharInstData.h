@@ -7,6 +7,8 @@
 #include "Files/PNGData.h"
 #include "External\ExternalClasses\ActionParamStruct.h"
 #include "External\ExternalClasses\Light.h"
+#include "External\ExternalClasses\CharacterAssetContainer.h"
+
 
 /*
  * Contains data about a character that currently exists in a game.
@@ -45,6 +47,8 @@ public:
 
 
 	ExtClass::CharacterStruct* m_char;
+	ExtClass::CharacterAssetContainer assetContainer;
+
 	AAUCardData m_cardData;
 
 	std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> m_hairs[4];
@@ -98,6 +102,7 @@ public:
 	}
 
 	void ApplyDecals(int bodyPart, int decalStrength);
+	void ClearCache();
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
 

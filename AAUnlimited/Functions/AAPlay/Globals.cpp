@@ -24,11 +24,12 @@ void InitOnLoad() {
 	PersistentStorage::ClassStorage::reset(Shared::GameState::getCurrentClassSaveName());
 	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
-
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].LoadAAUData();		
 		g_characters[seat].idxSave = idxCharacter;
+		g_characters[seat].assetContainer = **(ExtClass::CharacterAssetContainer**)((char*)(it->m_somePointer) + 0x13c);
+
 
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
@@ -65,6 +66,7 @@ void InitOnLoad() {
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
+	g_characters[seat].assetContainer = **(ExtClass::CharacterAssetContainer**)((char*)(character->m_somePointer) + 0x13c);
 	bool modded = g_characters[seat].LoadAAUData();
 	if (modded)
 		LOGPRIO(Logger::Priority::INFO) << std::dec << "Loaded modcard into seat " << seat << "\n";
