@@ -339,8 +339,8 @@ function trigger.loadRelationshipPoints(params)
 			local dump = storage[storageKey];
 			restoreRelationshipPointsFromDump(seat, towards, dump);
 		end
+		storage[storageKey] = {};
 	end
-	storage[storageKey] = {};
 	setCardStorage(storageCard, key, storage);
 end
 
