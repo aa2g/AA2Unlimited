@@ -94,7 +94,6 @@ mods = {
 	{ "playtrans" },
 	{ "triggers_supplemental" },
 	{ "notifications" },
-	{ "subtitles" },
 	{ "facecam" },
 	{ "climaxbutton" },
 	{ "geass"},
