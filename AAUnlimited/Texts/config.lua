@@ -21,6 +21,10 @@ bUseMeshTextureOverrides = true
 --enables H-AI
 bUseHAi = true						
 
+--enables cache fix
+bUseCacheFix = true						
+
+
 --when shadowing is enabled, every time a file is opened from a pp archive, the game
 --checks for a folder of the same name (excluding the pp at the end) containing
 --the same file first. If it exists, this file is taken instead.

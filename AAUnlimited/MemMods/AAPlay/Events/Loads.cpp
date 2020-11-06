@@ -209,7 +209,7 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
 		if (!Shared::GameState::getIsPcConversation()) Shared::GameState::clearConversationCharacterBySeat(loadCharacter->m_seat);
-		if (General::IsAAPlay) {
+		if (General::IsAAPlay && g_Config.bUseCacheFix) {
 			//This code resets the cache memory
 			if (loadCharacter->m_somedata && loadCharacter->m_charData) {
 				//this event seems to be called on unloading a save, so we're just protecting for that case
