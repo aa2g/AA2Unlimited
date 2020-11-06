@@ -36,6 +36,7 @@ public:;
 	bool bEnableHPosButtonReorder;
 	bool bUseShadowing;
 	bool bUseHAi;
+	bool bUseCacheFix;
 	bool bUsePPeX;
 	bool bUsePP2;
 	bool bTriggers;
@@ -61,6 +62,7 @@ public:;
 			LUA_BIND(bEnableHPosButtonReorder)
 			LUA_BIND(bUseShadowing)
 			LUA_BIND(bUseHAi)
+			LUA_BIND(bUseCacheFix)
 			LUA_BIND(bUsePPeX)
 			LUA_BIND(bUsePP2)
 			LUA_BIND(bTriggers)
