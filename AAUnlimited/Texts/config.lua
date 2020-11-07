@@ -70,7 +70,7 @@ PP2Cache = 500
 -- MB cache memory for decompressed audio
 PP2AudioCache = 150
 PP2Buffers = 300
-PP2Profiling = true
+PP2Profiling = false
 
 -- The modified launcher of MKIII decensor
 -- rewrites the string so that AS00_03_00_00_00.bmp - AS00_03_00_04_00.bmp

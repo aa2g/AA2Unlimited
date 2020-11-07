@@ -1063,6 +1063,7 @@ public:;
 };
 
 void *Wrap(void *orig) {
+	if (!g_Config.bEnableOverlays) return orig;
 	return new AAUIDirect3D9((IDirect3D9*)orig);
 }
 }
