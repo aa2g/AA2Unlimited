@@ -466,13 +466,13 @@ end
 function detectiveMurdererPulseCheck()
 	for seat=0,24 do
 		if (getCardStorage(seat, "Detective") == true) then
-			local murderCase = getCardStorage(seat, "Murder case");
+			local murderCase = getCardStorage(seat, "Murder Case");
 			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
 				local murderSeat = tonumber(string.sub(murderCase,1,2));
 				local murderInst = GetCharInstData(murderSeat);
 				if (murderInst == nil) then
 					-- close case
-					setCardStorage(seat, "MurderCase", "COLD");
+					setCardStorage(seat, "Murder Case", "COLD");
 				end
 			end
 		end
