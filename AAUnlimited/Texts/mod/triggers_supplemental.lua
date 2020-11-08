@@ -467,7 +467,7 @@ function detectiveMurdererPulseCheck()
 	for seat=0,24 do
 		if (getCardStorage(seat, "Detective") == true) then
 			local murderCase = getCardStorage(seat, "Murder case");
-			if (murderCase ~= "CLOSED" and murderCase ~= "COLD") then
+			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
 				local murderSeat = tonumber(string.sub(murderCase,1,2));
 				local murderInst = GetCharInstData(murderSeat);
 				if (murderInst == nil) then
