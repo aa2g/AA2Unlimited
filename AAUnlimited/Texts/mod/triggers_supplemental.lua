@@ -31,6 +31,7 @@ end
 
 function on.period()
 	detectiveCheckIfMurderFailed();
+	detectiveMurdererPulseCheck();
 end
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -447,7 +448,7 @@ end
 
 function detectiveCheckIfMurderFailed()
 	local case = getClassStorage("Latest murder case");
-	if (case ~= nil and case ~= "CLOSED") then
+	if (case ~= nil and case ~= "CLOSED" and murderCase ~= "COLD") then
 		local murderCase = getClassStorage(case);
 		local victimSeat = getClassStorage("Latest murdered seat");
 		local victim = GetCharInstData(victimSeat);
@@ -458,6 +459,22 @@ function detectiveCheckIfMurderFailed()
 		end
 		if (murderCase.murderer ~= getCardStorageKey(getSeatFromStorageKey(murderCase.murderer))) then
 			detectiveCloseCase(case);
+		end
+	end
+end
+
+function detectiveMurdererPulseCheck()
+	for seat=0,24 do
+		if (getCardStorage(seat, "Detective") == true) then
+			local murderCase = getCardStorage(seat, "Murder case");
+			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
+				local murderSeat = tonumber(string.sub(murderCase,1,2));
+				local murderInst = GetCharInstData(murderSeat);
+				if (murderInst == nil) then
+					-- close case
+					setCardStorage(seat, "MurderCase", "COLD");
+				end
+			end
 		end
 	end
 end
