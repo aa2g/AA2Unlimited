@@ -257,11 +257,12 @@ function getCardStorage(card, key)
 	if (cardKey == nil) then
 		return nil;
 	end
-	return get_class_key(cardKey)[key];
+	local storage = getClassStorage(cardKey) or {};
+	return storage[key];
 end
 
 function setCardStorage(card, key, value)
-	local record = get_class_key(getCardStorageKey(card));
+	local record = getClassStorage(getCardStorageKey(card)) or {};
 	record[key] = value;
 	setClassStorage(getCardStorageKey(card), record);
 end
@@ -339,8 +340,8 @@ function trigger.loadRelationshipPoints(params)
 		if (storageKey ~= nil and seat ~= towards) then
 			local dump = storage[storageKey];
 			restoreRelationshipPointsFromDump(seat, towards, dump);
+			storage[storageKey] = {};
 		end
-		storage[storageKey] = {};
 	end
 	setCardStorage(storageCard, key, storage);
 end
@@ -468,7 +469,7 @@ function detectiveMurdererPulseCheck()
 		if (getCardStorage(seat, "Detective") == true) then
 			local murderCase = getCardStorage(seat, "Murder Case");
 			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
-				local murderSeat = tonumber(string.sub(murderCase,1,2));
+				local murderSeat = tonumber(getSeatFromStorageKey(murderCase));
 				local murderInst = GetCharInstData(murderSeat);
 				if (murderInst == nil) then
 					-- close case
