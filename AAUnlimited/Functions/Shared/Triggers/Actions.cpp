@@ -167,7 +167,7 @@ namespace Shared {
 				card->m_forceAction.target1 = NULL;
 				card->m_forceAction.target2 = NULL;
 				card->m_forceAction.unknown = -1;
-				card->m_forceAction.unknown2 = 1;
+				card->m_forceAction.unknown2 = -1;
 			}
 		}
 
