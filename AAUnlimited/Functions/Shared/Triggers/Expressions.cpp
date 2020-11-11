@@ -3600,7 +3600,7 @@ namespace Shared {
 				},
 				{
 					143, EXPRCAT_CHARPROP,
-					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
+					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on club tournament, from 0 to 5, where 0 is Eliminated 1st round and 5 is Champion"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClubExamGrade
 				},
