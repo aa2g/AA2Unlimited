@@ -169,7 +169,7 @@ end
 local step = "x6"
 
 local function loadPPeX()
-	os.execute("START /B " .. aau_path("ppex", "PPeXM64.exe \"" .. play_path("data") .. "\" -nowindow"))
+	os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
 end
 
 local buts = {}
