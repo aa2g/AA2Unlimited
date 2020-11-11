@@ -253,7 +253,11 @@ namespace Shared {
 			Value GetCurrentConvo(std::vector<Value>& params);
 			Value GetCherryStatus(std::vector<Value>& params);
 			Value GetCardStrengthValue(std::vector<Value>& params); //int(int)
-			Value GetCardStrengthRank(std::vector<Value>& params); //int(int)
+			Value GetCardStrengthRank(std::vector<Value>& params);
+			Value GetCardSportsExamGrade(std::vector<Value>& params);
+			Value GetCardAcademicExamGrade(std::vector<Value>& params);
+			Value GetCardClubExamGrade(std::vector<Value>& params);
+			//int(int)
 			Value GetCardSociability(std::vector<Value>& params); //int(int)
 			Value GetCardSociabilityMod(std::vector<Value>& params); //int(int, string)
 			Value GetCardEffectiveSociability(std::vector<Value>& params); //int(int)

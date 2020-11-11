@@ -957,6 +957,45 @@ namespace Shared {
 
 			return Value(cardInst->m_char->m_charData->m_character.strengthClassRank);
 		}
+
+		//int(int)
+		Value Thread::GetCardSportsExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_sportGrade);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardAcademicExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_academicGrade);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardClubExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_clubGrade);
+			}
+		}
 		//int(int)
 		Value Thread::GetCardSociability(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -3546,6 +3585,24 @@ namespace Shared {
 					TEXT("Get lover days"), TEXT("%p ::GetLoverDays( %p )"), TEXT("Returns the amount of days that this card has been a lover with the other for."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetLoverDays
+				},
+				{
+					141, EXPRCAT_CHARPROP,
+					TEXT("Get Sports Exam Grade"), TEXT("%p ::SportsExamGrade"), TEXT("Returns the grade this card got on sports exam, from 0 to 5, where 0 is F and 5 is A"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardSportsExamGrade
+				},
+				{
+					142, EXPRCAT_CHARPROP,
+					TEXT("Get Academic Exam Grade"), TEXT("%p ::AcademExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAcademicExamGrade
+				},
+				{
+					143, EXPRCAT_CHARPROP,
+					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardClubExamGrade
 				},
 			},
 
