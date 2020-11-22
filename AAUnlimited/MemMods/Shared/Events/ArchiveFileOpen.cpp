@@ -227,6 +227,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 		}
 	}
 
+skip:;
 	if (g_Config.bUsePPeX) {
 		if (g_PPeX.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
 			provider = "ppex";
@@ -234,7 +235,6 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 		}
 	}
 
-skip:;
 	if (g_Config.bUsePP2) {
 		if (g_PP2.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
 			provider = "pp2";

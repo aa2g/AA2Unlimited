@@ -449,7 +449,7 @@ end
 
 function detectiveCheckIfMurderFailed()
 	local case = getClassStorage("Latest murder case");
-	if (case ~= nil and case ~= "CLOSED" and murderCase ~= "COLD") then
+	if (case ~= nil and case ~= "CLOSED" and case ~= "COLD") then
 		local murderCase = getClassStorage(case);
 		local victimSeat = getClassStorage("Latest murdered seat");
 		local victim = GetCharInstData(victimSeat);

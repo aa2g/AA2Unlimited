@@ -3214,7 +3214,7 @@ namespace Shared {
 				},
 				{
 					87, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Anal"), TEXT("%p ::VaginalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
+					TEXT("H Stat - Anal"), TEXT("%p ::AnalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAnalSex
 				},
