@@ -182,6 +182,10 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::FACE, 68,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris horisontal f
 			{ ExtClass::CharacterStruct::FACE, 69,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris horisontal m
 			{ ExtClass::CharacterStruct::FACE, 70,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris horisontal m
+			{ ExtClass::CharacterStruct::FACE, 71,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris depth f
+			{ ExtClass::CharacterStruct::FACE, 72,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris depth f
+			{ ExtClass::CharacterStruct::FACE, 73,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris depth m
+			{ ExtClass::CharacterStruct::FACE, 74,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris depth m
 
 		},
 		{
