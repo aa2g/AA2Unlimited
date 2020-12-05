@@ -2353,6 +2353,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Iris Horisontal"),
+			{ { CharacterStruct::FACE, 67 }, { CharacterStruct::FACE, 68 }, { CharacterStruct::FACE, 69 }, { CharacterStruct::FACE, 70 } },
+					-0.1f, 0.1f
+			},
 			{ TEXT("Ear Height"),
 				{ { CharacterStruct::FACE, 1 }, { CharacterStruct::FACE, 60 } },
 				-0.5f, 0.5f
