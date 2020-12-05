@@ -2316,6 +2316,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 54 } },
 				0, 3
 			},
+			{ TEXT("Head Size"),
+			{ { CharacterStruct::SKELETON, 54 } },
+					0, 3
+			},
 			{ TEXT("Hair Size"),
 				{ { CharacterStruct::HAIR_FRONT, 0 },{ CharacterStruct::HAIR_FRONT, 1 },{ CharacterStruct::HAIR_FRONT, 6 },
 				{ CharacterStruct::HAIR_SIDE, 0 },{ CharacterStruct::HAIR_SIDE, 1 },
@@ -2425,6 +2429,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Glans Size"),
 				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
 				0.5f, 1.5f
+			},
+			{ TEXT("Face Width"),
+			{ { CharacterStruct::FACE, 75 } },
+					-0.1f, 0.1f
 			},
 
 
