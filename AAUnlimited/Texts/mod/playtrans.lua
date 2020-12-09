@@ -1,4 +1,4 @@
-﻿--@INFO Club/Place translations for AA2Play.exe
+--@INFO Club/Place translations for AA2Play.exe
 
 -- some entries need a string length, too
 local fixup = {

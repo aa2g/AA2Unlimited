@@ -733,7 +733,12 @@ void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR
 	auto filename = General::CastToString(fname);
 	if (card->IsValid()) {
 		if (filename.find("Bgm") == std::string::npos && filename.find("dse") == std::string::npos) { //no background music and no special effect sounds
-			if (card->m_char == Shared::GameState::getConversationCharacter(0) || card->m_char == Shared::GameState::getConversationCharacter(1)) return;
+			//don't display subs if it's a PC conversation
+			const DWORD offset[]{ 0x3761CC, 0x28, 0x28 };
+			BYTE* HSceneTrigger = (BYTE*)ExtVars::ApplyRule(offset);
+			if (*HSceneTrigger == 0){
+				if (card->m_char == Shared::GameState::getConversationCharacter(0) || card->m_char == Shared::GameState::getConversationCharacter(1)) return;
+			}
 			if (card->lastDialogue != dialoguePTR) {
 				//dialoguePTR changes even if you do the same action twice. We're checking if the event is running multiple times when it shouldn't.
 				card->lastDialogue = dialoguePTR;
