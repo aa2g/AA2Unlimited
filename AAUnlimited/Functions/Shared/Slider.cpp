@@ -189,6 +189,9 @@ namespace Shared {
 
 			{ ExtClass::CharacterStruct::FACE, 75,	TEXT("A00_J_kao"),{ 1,0,0, 0,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //face width
 
+			{ ExtClass::CharacterStruct::FACE, 76,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow horizontal
+			{ ExtClass::CharacterStruct::FACE, 77,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0,0, 1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow horizontal
+
 		},
 		{
 			//SKELETON

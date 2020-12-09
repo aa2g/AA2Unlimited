@@ -2349,6 +2349,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 64 },{ CharacterStruct::FACE, 65 } },
 				-1.0f, 1.0f
 			},
+			{ TEXT("Eyebrow Spacing"),
+			{ { CharacterStruct::FACE, 76 },{ CharacterStruct::FACE, 77 } },
+					-0.1f, 0.2f
+			},
 			{ TEXT("Eye Depth"),
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
