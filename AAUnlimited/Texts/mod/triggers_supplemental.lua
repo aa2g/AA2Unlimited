@@ -312,6 +312,14 @@ end
 -- Procedures that can be called from triggers require the <trigger.> prefix ---------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
+-- Relationship points ---------------------------------------------------------------------------------------------------
+
+--[[ Store the relationship points from one card to another. Dump can be restored with loadRelationshipPoints
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are stored
+	int towards - target card ]]
 function trigger.storeRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -327,6 +335,13 @@ function trigger.storeRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end	
 
+--[[ Restore the relationship points from one card to another. dump created in storeRelationshipPoints.
+Can be used to transfer the relationship points between cards.
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are restored
+	int towards - target card ]]
 function trigger.loadRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -346,11 +361,73 @@ function trigger.loadRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end
 
+--[[ Store both incoming and outgoing relationship points of one card towards the rest of the class.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are stored. Defaults to storageCard ]]
 function trigger.storeAllRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
-	local seat = tonumber(args[3]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = {};
+	storage.toDump = {};
+	storage.fromDump = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage.fromDump[storageKey] = createRelationshipPointsDump(towards, seat);
+			storage.toDump[storageKey] = createRelationshipPointsDump(seat, towards);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore both incoming and outgoing relationship points of one card towards the rest of the class.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are restored. Defaults to storageCard ]]
+function trigger.loadAllRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+					local toDump = storage.toDump[storageKey];
+					restoreRelationshipPointsFromDump(seat, towards, toDump);
+				end
+				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+					local fromDump = storage.fromDump[storageKey];
+					restoreRelationshipPointsFromDump(towards, seat, fromDump);
+				end
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
+end
+
+--[[ Store outgoing relationship points of one card towards the rest of the class (i.e. what this card thinks of everyone else)
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are stored. Defaults to storageCard ]]
+function trigger.storeOutgoingRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
 
 	local storage = {};
 	for towards=0,24 do
@@ -362,23 +439,107 @@ function trigger.storeAllRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end
 
-function trigger.loadAllRelationshipPoints(params)
+--[[ Restore outgoing relationship points of one card towards the rest of the class (i.e. what this card thinks of everyone else)
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are restored. Defaults to storageCard ]]
+function trigger.loadOutgoingRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
-	local seat = tonumber(args[3]);
+	local seat = tonumber(args[3]) or storageCard;
 
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
-				local dump = storage[storageKey];
-				restoreRelationshipPointsFromDump(seat, towards, dump);
+				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+					local toDump = storage.toDump[storageKey];
+					restoreRelationshipPointsFromDump(seat, towards, toDump);
+				end
 			end
 		end
 	end
 	setCardStorage(storageCard, key, {});
+end
+
+--[[ Store incoming relationship points of one card towards the rest of the class (i.e. what everyone thinks of this card)
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are stored. Defaults to storageCard ]]
+function trigger.storeIncomingRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage[storageKey] = createRelationshipPointsDump(towards, seat);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore incoming relationship points of one card towards the rest of the class (i.e. what everyone thinks of this card)
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are restored. Defaults to storageCard ]]
+function trigger.loadIncomingRelationshipPoints(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+					local fromDump = storage.fromDump[storageKey];
+					restoreRelationshipPointsFromDump(towards, seat, fromDump);
+				end
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
+end
+
+-- H Stats ---------------------------------------------------------------------------------------------------------------
+--TODO: sweet release when?
+
+function trigger.storeHStats(params)
+end
+
+function trigger.loadHStats(params)
+end
+
+function trigger.storeAllHStats(params)
+end
+
+function trigger.loadAllHStats(params)
+end
+
+function trigger.storeOutgoingHStats(params)
+end
+
+function trigger.loadOutgoingHStats(params)
+end
+
+function trigger.storeIncomingHStats(params)
+end
+
+function trigger.loadIncomingHStats(params)
 end
 
 --------------------------------------------------------------------------------------------------------------------------
