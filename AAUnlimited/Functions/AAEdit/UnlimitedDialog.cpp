@@ -2349,13 +2349,21 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 64 },{ CharacterStruct::FACE, 65 } },
 				-1.0f, 1.0f
 			},
+			{ TEXT("Eyebrow Spacing"),
+			{ { CharacterStruct::FACE, 76 },{ CharacterStruct::FACE, 77 } },
+					-0.1f, 0.2f
+			},
 			{ TEXT("Eye Depth"),
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
-			{ TEXT("Iris Horisontal"),
+			{ TEXT("Iris Horizontal"),
 			{ { CharacterStruct::FACE, 67 }, { CharacterStruct::FACE, 68 }, { CharacterStruct::FACE, 69 }, { CharacterStruct::FACE, 70 } },
 					-0.1f, 0.1f
+			},
+			{ TEXT("Iris Depth"),
+			{ { CharacterStruct::FACE, 71 },{ CharacterStruct::FACE, 72 },{ CharacterStruct::FACE, 73 },{ CharacterStruct::FACE, 74 } },
+				-0.05f, 0.05f
 			},
 			{ TEXT("Ear Height"),
 				{ { CharacterStruct::FACE, 1 }, { CharacterStruct::FACE, 60 } },
@@ -2421,6 +2429,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Glans Size"),
 				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
 				0.5f, 1.5f
+			},
+			{ TEXT("Face Width"),
+			{ { CharacterStruct::FACE, 75 } },
+					-0.1f, 0.1f
 			},
 
 
