@@ -277,7 +277,9 @@ namespace Shared {
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
 			Value GetCardFullName(std::vector<Value>& params);	//string(int)
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
-			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
+			Value GetCardPartnerCount(std::vector<Value>& params);
+			Value GetCardHPartnerCount(std::vector<Value>& params);
+			//int(int)
 			Value GetDecals(std::vector<Value>& params);
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)
