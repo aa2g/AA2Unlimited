@@ -1251,6 +1251,123 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.orientation = orientation;
 		}
 
+		//int seat, int value
+		void Thread::SetClassesSkipped(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int count = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_classesSkipped = count;
+		}
+
+		//int seat, int value
+		void Thread::SetVictoryCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int count = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_victoryCount = count;
+		}
+
+		//int seat, int value
+		void Thread::SetWinningCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int count = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_winningOverSomeoneCount = count;
+		}
+
+		//int seat, int value
+		void Thread::SetRejectCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int count = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_rejectCount = count;
+		}
+
+		//int seat, int value
+		void Thread::SetAcademicGrade(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int grade = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_academicGrade = grade;
+		}
+
+		//int seat, int value
+		void Thread::SetSportGrade(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int grade = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_sportGrade = grade;
+		}
+
+		//int seat, int value
+		void Thread::SetClubGrade(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int grade = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_clubGrade = grade;
+		}
+
+		//int seat, int value
+		void Thread::SetCardPartnerCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int pcount = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_partnerCount = pcount;
+		}
+
+		//int seat, int value
+		void Thread::SetCardHPartnerCount(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			int pcount = params[1].iVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			AAPlay::g_characters[seat].m_char->m_characterStatus->m_HPartnerCount = pcount;
+		}
+
 		//int seat, bool experience
 		void Thread::SetCardSexExperience(std::vector<Value>& params)
 		{
@@ -1275,6 +1392,61 @@ namespace Shared {
 				return;
 			}
 			AAPlay::g_characters[seat].m_char->m_charData->m_character.a_h_experience = experience;
+		}
+
+		//int seat, string name
+		void Thread::SetCardFirstHPartner(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto name = params[1].strVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_characterStatus->m_firstHPartner,
+				name->c_str(),
+				name->size()
+			);
+		}
+
+
+		//int seat, string name
+		void Thread::SetCardFirstAnalPartner(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto name = params[1].strVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_characterStatus->m_firstAnalPartner,
+				name->c_str(),
+				name->size()
+			);
+		}
+
+		//int seat, string name
+		void Thread::SetCardLatestHPartner(std::vector<Value>& params)
+		{
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto name = params[1].strVal;
+			if (!AAPlay::g_characters[seat].IsValid()) {
+				LOGPRIO(Logger::Priority::WARN) << "[Trigger] Invalid card target; seat number " << seat << "\r\n";
+				return;
+			}
+			wcstombs_s(
+				NULL,
+				AAPlay::g_characters[seat].m_char->m_characterStatus->m_latestHPartner,
+				name->c_str(),
+				name->size()
+			);
 		}
 
 		void Thread::SetCardOpinion(std::vector<Value>& params)
@@ -2695,6 +2867,78 @@ namespace Shared {
 				TEXT("Causes the gust of wind event to happen. Use only in pc convo state updated or pc line updated events."),
 				{ TYPE_BOOL },
 				&Thread::SetGustOfWind
+			},
+			{
+				124, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First H Partner"), TEXT("%p ::HFirst = %p"),
+				TEXT("Set character's First H Partner."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardFirstHPartner
+			},
+			{
+				125, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First Anal Partner"), TEXT("%p ::AnalFirst = %p"),
+				TEXT("Set character's First Anal Partner."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardFirstAnalPartner
+			},
+			{
+				126, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Latest H Partner"), TEXT("%p ::HLast = %p"),
+				TEXT("Set character's Latest H Partner."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::SetCardLatestHPartner
+			},
+			{
+				127, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Partner Count"), TEXT("%p ::SetPartnerCount = %p"),
+				TEXT("Set Partner Count of a character"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardPartnerCount
+			},
+			{
+				128, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Partner Count"), TEXT("%p ::SetHPartnerCount = %p"),
+				TEXT("Set Sexual Partner Count of a character"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetCardHPartnerCount
+			},
+			{
+				129, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Victory Count"), TEXT("%p ::SetVictoryCount = %p"),
+				TEXT("Set Victory Count of a card (how many times it won a fight)"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetVictoryCount
+			},
+			{
+				130, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Classes Skipped"), TEXT("%p ::SetClassesSkipped = %p"),
+				TEXT("Set Classes Skipped Count of a card"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetClassesSkipped
+			},
+								{
+				131, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Winning Count"), TEXT("%p ::SetWinningCount = %p"),
+				TEXT("Set Winning Over Someone Count of a card (how many times it won in an argument"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetWinningCount
+			},
+			{
+				132, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Reject Count"), TEXT("%p ::SetRejectCount = %p"),
+				TEXT("Set Reject Count of a card"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetRejectCount
+			},
+			{
+				133, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Academic Exam Grade"), TEXT("%p ::SetAcademGrade = %p"),
+				TEXT("Set Academic Exam Grade of a card"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetAcademicGrade
+			},
+			{
+				134, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sport Exam Grade"), TEXT("%p ::SetSportGrade = %p"),
+				TEXT("Set Sport Exam Grade of a card"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetSportGrade
+			},
+			{
+				135, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Exam Grade"), TEXT("%p ::SetClubGrade = %p"),
+				TEXT("Set Club Competition Grade of a card"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetClubGrade
 			},
 		};
 

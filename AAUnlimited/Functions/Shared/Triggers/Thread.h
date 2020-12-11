@@ -108,10 +108,22 @@ namespace Shared {
 			void SetCardFriendItem(std::vector<Value>& params);
 			void SetCardSexualItem(std::vector<Value>& params);
 			void SetCardFirstName(std::vector<Value>& params);
+			void SetCardFirstHPartner(std::vector<Value>& params);
+			void SetCardFirstAnalPartner(std::vector<Value>& params);
+			void SetCardLatestHPartner(std::vector<Value>& params);
 			void SetCardSecondName(std::vector<Value>& params);
 			void SetCardDescription(std::vector<Value>& params);
 			void WriteLog(std::vector<Value>& params);
 			void SetCardOrientation(std::vector<Value>& params);
+			void SetCardPartnerCount(std::vector<Value>& params);
+			void SetClassesSkipped(std::vector<Value>& params);
+			void SetVictoryCount(std::vector<Value>& params);
+			void SetWinningCount(std::vector<Value>& params);
+			void SetRejectCount(std::vector<Value>& params);
+			void SetAcademicGrade(std::vector<Value>& params);
+			void SetSportGrade(std::vector<Value>& params);
+			void SetClubGrade(std::vector<Value>& params);
+			void SetCardHPartnerCount(std::vector<Value>& params);
 			void SetCardSexExperience(std::vector<Value>& params);
 			void SetCardAnalSexExperience(std::vector<Value>& params);
 			void SetCardOpinion(std::vector<Value>& params);
@@ -265,7 +277,9 @@ namespace Shared {
 			Value GetCardFirstName(std::vector<Value>& params); //string(int)
 			Value GetCardFullName(std::vector<Value>& params);	//string(int)
 			Value GetCardDescription(std::vector<Value>& params); //string(int)
-			Value GetCardPartnerCount(std::vector<Value>& params); //int(int)
+			Value GetCardPartnerCount(std::vector<Value>& params);
+			Value GetCardHPartnerCount(std::vector<Value>& params);
+			//int(int)
 			Value GetDecals(std::vector<Value>& params);
 			Value GetCardOrientation(std::vector<Value>& params); //int(int)
 			Value GetCardOrientationMultiplier(std::vector<Value>& params);	//float(int, int)

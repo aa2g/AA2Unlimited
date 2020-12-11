@@ -1086,6 +1086,17 @@ namespace Shared {
 
 		}
 
+		//int(int)
+		Value Thread::GetCardHPartnerCount(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value((int)cardInst->m_char->m_characterStatus->m_HPartnerCount);
+
+		}
+
 		Value Thread::GetDecals(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -2955,7 +2966,7 @@ namespace Shared {
 				},
 				{
 					38, EXPRCAT_CHARPROP,
-					TEXT("Partners count"), TEXT("%p ::PartnersCount"), TEXT("The sexual partners count of this character."),
+					TEXT("Partner Count"), TEXT("%p ::PartnerCount"), TEXT("Returns Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPartnerCount
 				},
@@ -3013,7 +3024,7 @@ namespace Shared {
 				},
 				{
 					47, EXPRCAT_GENERAL,
-					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Days passed from the beginning of the save."),
+					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("The current day in a game calendar (0 to 41)."),
 					{}, (TYPE_INT),
 					&Thread::GetDaysPassed
 				},
@@ -3603,6 +3614,12 @@ namespace Shared {
 					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on club tournament, from 0 to 5, where 0 is Eliminated 1st round and 5 is Champion"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClubExamGrade
+				},
+				{
+					144, EXPRCAT_CHARPROP,
+					TEXT("Sexual Partner Count"), TEXT("%p ::HPartnerCount"), TEXT("Returns Sexual Partner Count of this character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardHPartnerCount
 				},
 			},
 
