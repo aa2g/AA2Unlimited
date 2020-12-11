@@ -22,7 +22,10 @@ public:
 	DWORD m_academicGrade; //5 = A, 0 = F
 	DWORD m_sportGrade;
 	DWORD m_clubGrade;
-	BYTE m_unknown2[0x10];
+	BYTE m_unknown2[0x08];
+	DWORD m_penetrativeHCount;
+	WORD m_HPartnerCount;
+	WORD m_unknown2_1;
 	char m_firstHPartner[32];
 	char m_firstAnalPartner[32];
 	char m_latestHPartner[32];
@@ -61,7 +64,7 @@ public:
 		LUA_BIND(m_sportGrade)
 		LUA_BIND(m_clubGrade)
 		LUA_BIND(m_npcStatus)
-		// TODO check these are actually strings
+
 		LUA_BINDSTR(m_firstHPartner)
 		LUA_BINDSTR(m_firstAnalPartner)
 		LUA_BINDSTR(m_latestHPartner)
@@ -76,6 +79,7 @@ public:
 		LUA_BINDARR(m_cumInVagina)
 		LUA_BINDARR(m_cumInAnal)
 		LUA_BINDARR(m_cumSwallowed)
+		LUA_BINDARR(m_cherry)
 		LUA_BINDARR(m_riskyCum)
 		LUA_BINDARR(m_stats)
 	}

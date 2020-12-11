@@ -2955,7 +2955,7 @@ namespace Shared {
 				},
 				{
 					38, EXPRCAT_CHARPROP,
-					TEXT("Partners count"), TEXT("%p ::PartnersCount"), TEXT("The sexual partners count of this character."),
+					TEXT("Partner Count"), TEXT("%p ::PartnerCount"), TEXT("Returns Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPartnerCount
 				},
