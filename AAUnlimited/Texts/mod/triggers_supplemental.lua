@@ -307,6 +307,46 @@ function restoreRelationshipPointsFromDump(seat, towards, dump)
 	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
 end
 
+function createHStatsDump(seat, towards)
+	local dump = {};
+	local thisInst = GetCharInstData(seat);
+	local towardsInst = GetCharInstData(towards);
+	if (thisInst ~= nil and towardsInst ~= nil) then
+		dump["TotalH"]    = thisInst.m_char.m_characterStatus:m_totalH(towards);
+		dump["VaginalH"]	= thisInst.m_char.m_characterStatus:m_vaginalH(towards);
+		dump["AnalH"]	= thisInst.m_char.m_characterStatus:m_analH(towards);
+		dump["CondomsUsed"]	= thisInst.m_char.m_characterStatus:m_condomsUsed(towards);
+		dump["ClimaxCount"]	= thisInst.m_char.m_characterStatus:m_climaxCount(towards);
+		dump["SimultaneousClimax"]	= thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards);
+		dump["TotalCum"]	= thisInst.m_char.m_characterStatus:m_totalCum(towards);
+		dump["CumInVagina"]	= thisInst.m_char.m_characterStatus:m_cumInVagina(towards);
+		dump["CumInAnal"]	= thisInst.m_char.m_characterStatus:m_cumInAnal(towards);
+		dump["CumSwallowed"]	= thisInst.m_char.m_characterStatus:m_cumSwallowed(towards);
+		dump["RiskyCum"]	= thisInst.m_char.m_characterStatus:m_riskyCum(towards);
+		dump["CherryStatus"]	= thisInst.m_char.m_characterStatus:m_cherry(towards);
+	end
+	return dump;
+end
+
+function restoreHStatsFromDump(seat, towards, dump)
+	local thisInst = GetCharInstData(seat);
+	local towardsInst = GetCharInstData(towards);
+	if (thisInst == nil or towardsInst == nil or dump == {} or dump == nil) then
+		return;
+	end
+		thisInst.m_char.m_characterStatus:m_totalH(towards, dump["TotalH"]);
+		thisInst.m_char.m_characterStatus:m_vaginalH(towards, dump["VaginalH"]);
+		thisInst.m_char.m_characterStatus:m_analH(towards, dump["AnalH"]);
+		thisInst.m_char.m_characterStatus:m_condomsUsed(towards, dump["CondomsUsed"]);
+		thisInst.m_char.m_characterStatus:m_climaxCount(towards, dump["ClimaxCount"]);
+		thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards, dump["SimultaneousClimax"]);
+		thisInst.m_char.m_characterStatus:m_totalCum(towards, dump["TotalCum"]);
+		thisInst.m_char.m_characterStatus:m_cumInVagina(towards, dump["CumInVagina"]);
+		thisInst.m_char.m_characterStatus:m_cumInAnal(towards, dump["CumInAnal"]);
+		thisInst.m_char.m_characterStatus:m_cumSwallowed(towards, dump["CumSwallowed"]);
+		thisInst.m_char.m_characterStatus:m_riskyCum(towards, dump["RiskyCum"]);
+		thisInst.m_char.m_characterStatus:m_cherry(towards, dump["CherryStatus"]);
+end
 --------------------------------------------------------------------------------------------------------------------------
 -- Trigger procedure calls -----------------------------------------------------------------------------------------------
 -- Procedures that can be called from triggers require the <trigger.> prefix ---------------------------------------------
@@ -519,27 +559,157 @@ end
 --TODO: sweet release when?
 
 function trigger.storeHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage[storageKey] = createHStatsDump(seat, towards);
+	end
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.loadHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key);	
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local dump = storage[storageKey];
+			restoreHStatsFromDump(seat, towards, dump);
+			storage[storageKey] = {};
+		end
+	end
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.storeAllHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = {};
+	storage.toDump = {};
+	storage.fromDump = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage.fromDump[storageKey] = createHStatsDump(towards, seat);
+			storage.toDump[storageKey] = createHStatsDump(seat, towards);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.loadAllHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+					local toDump = storage.toDump[storageKey];
+					restoreHStatsFromDump(seat, towards, toDump);
+				end
+				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+					local fromDump = storage.fromDump[storageKey];
+					restoreHStatsFromDump(towards, seat, fromDump);
+				end
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
 end
 
 function trigger.storeOutgoingHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage[storageKey] = createHStatsDump(seat, towards);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.loadOutgoingHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+					local toDump = storage.toDump[storageKey];
+					restoreHStatsFromDump(seat, towards, toDump);
+				end
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
+
 end
 
 function trigger.storeIncomingHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = {};
+	for towards=0,24 do
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			storage[storageKey] = createHStatsDump(towards, seat);
+		end
+	end
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.loadIncomingHStats(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]) or storageCard;
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+					local fromDump = storage.fromDump[storageKey];
+					restoreHStatsFromDump(towards, seat, fromDump);
+				end
+			end
+		end
+	end
+	setCardStorage(storageCard, key, {});
+
 end
 
 --------------------------------------------------------------------------------------------------------------------------

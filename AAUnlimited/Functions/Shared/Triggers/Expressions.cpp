@@ -3024,7 +3024,7 @@ namespace Shared {
 				},
 				{
 					47, EXPRCAT_GENERAL,
-					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Days passed from the beginning of the save."),
+					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("The current day in a game calendar (0 to 41)."),
 					{}, (TYPE_INT),
 					&Thread::GetDaysPassed
 				},
