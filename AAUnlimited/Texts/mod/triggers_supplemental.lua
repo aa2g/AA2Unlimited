@@ -469,11 +469,12 @@ function trigger.storeOutgoingRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	local storage = {};
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.toDump = {};
 	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
-			storage[storageKey] = createRelationshipPointsDump(seat, towards);
+			storage.toDump[storageKey] = createRelationshipPointsDump(seat, towards);
 		end
 	end
 	setCardStorage(storageCard, key, storage);
@@ -502,8 +503,9 @@ function trigger.loadOutgoingRelationshipPoints(params)
 				end
 			end
 		end
+		storage.toDump = {};
 	end
-	setCardStorage(storageCard, key, {});
+	setCardStorage(storageCard, key, storage);
 end
 
 --[[ Store incoming relationship points of one card towards the rest of the class (i.e. what everyone thinks of this card)
@@ -518,11 +520,12 @@ function trigger.storeIncomingRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	local storage = {};
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.fromDump = {};
 	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
-			storage[storageKey] = createRelationshipPointsDump(towards, seat);
+			storage.fromDump[storageKey] = createRelationshipPointsDump(towards, seat);
 		end
 	end
 	setCardStorage(storageCard, key, storage);
@@ -551,8 +554,9 @@ function trigger.loadIncomingRelationshipPoints(params)
 				end
 			end
 		end
+		storage.fromDump = {};
 	end
-	setCardStorage(storageCard, key, {});
+	setCardStorage(storageCard, key, storage);
 end
 
 -- H Stats ---------------------------------------------------------------------------------------------------------------
@@ -642,11 +646,12 @@ function trigger.storeOutgoingHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	local storage = {};
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.toDump = {};
 	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
-			storage[storageKey] = createHStatsDump(seat, towards);
+			storage.toDump[storageKey] = createHStatsDump(seat, towards);
 		end
 	end
 	setCardStorage(storageCard, key, storage);
@@ -669,9 +674,9 @@ function trigger.loadOutgoingHStats(params)
 				end
 			end
 		end
+		storage.toDump = {};
 	end
-	setCardStorage(storageCard, key, {});
-
+	setCardStorage(storageCard, key, storage);
 end
 
 function trigger.storeIncomingHStats(params)
@@ -680,11 +685,12 @@ function trigger.storeIncomingHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	local storage = {};
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.fromDump = {};
 	for towards=0,24 do
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
-			storage[storageKey] = createHStatsDump(towards, seat);
+			storage.fromDump[storageKey] = createHStatsDump(towards, seat);
 		end
 	end
 	setCardStorage(storageCard, key, storage);
@@ -707,9 +713,9 @@ function trigger.loadIncomingHStats(params)
 				end
 			end
 		end
+		storage.fromDump = {};
 	end
 	setCardStorage(storageCard, key, {});
-
 end
 
 --------------------------------------------------------------------------------------------------------------------------
