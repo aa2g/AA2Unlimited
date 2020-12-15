@@ -320,6 +320,21 @@ void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
 }
 
 
+
+
+DWORD Shared::GameState::getClubType(BYTE clubID)
+{
+	if (clubID >= 0 && clubID < 8) {
+		auto lastOffset = 0x18 + (0x1C * clubID);
+		const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x28, 0x29C + lastOffset };
+		DWORD* clubType = (DWORD*)ExtVars::ApplyRule(offset);
+		return *clubType;
+	}
+	return -1;
+
+}
+
+
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
 		if (!loc_gameState.m_char[i]) {
