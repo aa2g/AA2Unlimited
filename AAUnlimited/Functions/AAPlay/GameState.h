@@ -67,7 +67,7 @@ namespace Shared {
 
 		void kickCard(int s);
 		void addCard(std::wstring cardName, bool gender, int s);
-
+		DWORD getClubType(BYTE clubID);
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
