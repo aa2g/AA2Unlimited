@@ -266,6 +266,27 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					thisPtr->RefreshAAuSetList();
 				}
 				return TRUE;
+			case IDC_GN_BTNAAUSETSWAPTOP:
+				{
+					//get current selection
+					int selSwap = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (!g_currChar.Editable() || selSwap == 0 || selSwap == 1) return FALSE;
+					//swap with the previous stlye
+					g_currChar.m_cardData.SwapCardStyle(selSwap, selSwap - 1);
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETSWAPBOTTOM:
+				{
+					//get current selection
+					int selSwap = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (!g_currChar.Editable() || selSwap == 0 || selSwap == g_currChar.m_cardData.m_styles.size() - 1) return FALSE;
+					//swap with the next style
+					g_currChar.m_cardData.SwapCardStyle(selSwap, selSwap + 1);
+
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
 			case IDC_GN_BTNSETCLOTH0:
 			case IDC_GN_BTNSETCLOTH1:
 			case IDC_GN_BTNSETCLOTH2:
