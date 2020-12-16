@@ -437,9 +437,17 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			if (identifier == IDC_MO_BTNBROWSE) {
 				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
 				if (!General::DirExists(initialDir.c_str())) {
-					CreateDirectory(initialDir.c_str(), NULL);
+					CreateDirectory(initialDir.c_str(), NULL);				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideWith, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
 				}
-				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialDir.c_str())) {
 						const TCHAR* rest = choice + initialDir.size();
@@ -562,7 +570,18 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_AO_BTNBROWSE) {
-				std::wstring initialEditDir = General::BuildOverridePath(NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialEditDir.c_str())) {
@@ -760,8 +779,19 @@ INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_OO_BTNBROWSE) {
-				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_PATH,NULL);
-				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_PATH,NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					/*if (General::StartsWith(choice,initialPlayDir.c_str())) {
