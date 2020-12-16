@@ -589,6 +589,14 @@ bool AAUCardData::RemoveCardStyle(int index) {
 	m_styles.erase(m_styles.begin() + index);
 	return true;
 }
+bool AAUCardData::SwapCardStyle(int index1, int index2) {
+	if (index1 >= m_styles.size() || index1 >= m_styles.size() || index1 == index2) return false;
+	if (index1 == 0 || index2 == 0) return false;
+	if (index1 == m_currCardStyle) { m_currCardStyle = index2; }
+	else if (index2 == m_currCardStyle) { m_currCardStyle = index1; }
+	std::swap(m_styles[index1], m_styles[index2]);
+	return true;
+}
 void AAUCardData::SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData) {
 	if (newSet >= m_styles.size()) return;
 	m_currCardStyle = newSet;
