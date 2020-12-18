@@ -67,9 +67,21 @@ namespace AAEdit {
 		HWND m_cbSaveEyeTexture;
 		HWND m_cbSaveEyeHighlight;
 		HWND m_lbAAuSets;
+		HWND m_lbAAuSets2;
 		HWND m_edAAuSetName;
 		HWND m_btnAAuSetAdd;
+		HWND m_btnAAuSetTransfer;
 		HWND m_btnLoadCloth;
+
+		HWND m_cbTransAA2;
+		HWND m_cbTransAO;
+		HWND m_cbTransAR;
+		HWND m_cbTransMO;
+		HWND m_cbTransOO;
+		HWND m_cbTransBD;
+		HWND m_cbTransBS;
+		HWND m_cbTransHR;
+		HWND m_cbTransTN;
 
 		void Refresh();
 		void RefreshAAuSetList();

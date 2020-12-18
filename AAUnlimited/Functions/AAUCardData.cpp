@@ -582,6 +582,71 @@ bool AAUCardData::CopyCardStyle(const TCHAR * name, ExtClass::CharacterData* cha
 	m_styles[m_styles.size() - 1].m_cardStyleData.CopyCharacterData(charData);
 	return true;
 }
+
+bool AAUCardData::TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData,
+	bool aa2,
+	bool ao, bool ar, bool mo, bool oo,
+	bool hr, bool tn, bool bd, bool bs)
+{
+	if (index1 == index2 || index1 >= m_styles.size() || index2 >= m_styles.size()) return false;
+
+	if (aa2) {
+		m_styles[index2].m_cardStyleData.CopyCharacterData(charData);
+	}
+	if (ao) {
+		m_styles[index2].m_archiveOverrides = m_styles[index1].m_archiveOverrides;
+		m_styles[index2].m_archiveOverrideMap = m_styles[index1].m_archiveOverrideMap;
+	}
+	if (ar) {
+		m_styles[index2].m_archiveRedirects = m_styles[index1].m_archiveRedirects;
+		m_styles[index2].m_archiveRedirectMap = m_styles[index1].m_archiveRedirectMap;
+	}
+	if (mo) {
+		m_styles[index2].m_meshOverrides = m_styles[index1].m_meshOverrides;
+		m_styles[index2].m_meshOverrideMap = m_styles[index1].m_meshOverrideMap;
+	}
+	if (oo) {
+		m_styles[index2].m_objectOverrides = m_styles[index1].m_objectOverrides;
+		m_styles[index2].m_objectOverrideMap = m_styles[index1].m_objectOverrideMap;
+	}
+	if (hr) {
+		m_styles[index2].m_hairs[0] = m_styles[index1].m_hairs[0];
+		m_styles[index2].m_hairs[1] = m_styles[index1].m_hairs[1];
+		m_styles[index2].m_hairs[2] = m_styles[index1].m_hairs[2];
+		m_styles[index2].m_hairs[3] = m_styles[index1].m_hairs[3];
+		m_styles[index2].m_hairHighlightName = m_styles[index1].m_hairHighlightName;
+		m_styles[index2].m_hairHighlightImage = m_styles[index1].m_hairHighlightImage;
+	}
+	if (tn) {
+		m_styles[index2].m_tanImages[0] = m_styles[index1].m_tanImages[0];
+		m_styles[index2].m_tanImages[1] = m_styles[index1].m_tanImages[1];
+		m_styles[index2].m_tanImages[2] = m_styles[index1].m_tanImages[2];
+		m_styles[index2].m_tanImages[3] = m_styles[index1].m_tanImages[3];
+		m_styles[index2].m_tanImages[4] = m_styles[index1].m_tanImages[4];
+		m_styles[index2].m_bTanColor = m_styles[index1].m_bTanColor;
+		m_styles[index2].m_tanColor = m_styles[index1].m_tanColor;
+		m_styles[index2].m_tanName = m_styles[index1].m_tanName;
+	}
+	if (bs) {
+		m_styles[index2].m_sliders = m_styles[index1].m_sliders;
+		for (int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
+			m_styles[index2].m_boneSliderMap[i] = m_styles[index1].m_boneSliderMap[i];
+			m_styles[index2].m_frameSliderMap[i] = m_styles[index1].m_frameSliderMap[i];
+		}
+	}
+	if (bd) {
+		m_styles[index2].m_boneRules = m_styles[index1].m_boneRules;
+		m_styles[index2].m_boneRuleMap = m_styles[index1].m_boneRuleMap;
+		m_styles[index2].m_frameRuleMap = m_styles[index1].m_frameRuleMap;
+		m_styles[index2].m_boneTransforms = m_styles[index1].m_boneTransforms;
+		m_styles[index2].m_boneTransformMap = m_styles[index1].m_boneTransformMap;
+		m_styles[index2].m_submeshOutlines = m_styles[index1].m_submeshOutlines;
+		m_styles[index2].m_submeshShadows = m_styles[index1].m_submeshShadows;
+	}
+
+	return true;
+}
+
 bool AAUCardData::RemoveCardStyle(int index) {
 	if (index >= m_styles.size()) return false;
 	if (index == 0) return false;
