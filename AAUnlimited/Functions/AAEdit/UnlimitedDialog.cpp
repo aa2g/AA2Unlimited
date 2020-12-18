@@ -204,7 +204,10 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
-		thisPtr->m_cbTransAA2 = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2);
+		thisPtr->m_cbTransAA2BODY = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2BODY);
+		thisPtr->m_cbTransAA2FACE = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2FACE);
+		thisPtr->m_cbTransAA2EYES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2EYES);
+		thisPtr->m_cbTransAA2HAIR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2HAIR);
 		thisPtr->m_cbTransAO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAO);
 		thisPtr->m_cbTransAR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAR);
 		thisPtr->m_cbTransMO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSMO);
@@ -306,7 +309,10 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 					if (g_currChar.Editable()) {
 						// collect the transfer data checkboxes
-						bool aa2 = SendMessage(thisPtr->m_cbTransAA2, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2hair = SendMessage(thisPtr->m_cbTransAA2HAIR, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool ao = SendMessage(thisPtr->m_cbTransAO, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool ar = SendMessage(thisPtr->m_cbTransAR, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool mo = SendMessage(thisPtr->m_cbTransMO, BM_GETCHECK, 0, 0) == BST_CHECKED;
@@ -317,7 +323,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
 
 						g_currChar.m_cardData.TransferCardStyleData(selTransFrom, selTransTo, g_currChar.m_char->m_charData,
-							aa2,
+							aa2body, aa2face, aa2eyes, aa2hair,
 							ao, ar, mo, oo,
 							hr, tn, bd, bs);
 					}
@@ -418,7 +424,6 @@ void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
 		SendMessage(this->m_lbAAuSets2,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
 	}
 	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
-	SendMessage(this->m_lbAAuSets2,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
 }
 
 void UnlimitedDialog::GNDialog::Refresh() {

@@ -584,14 +584,23 @@ bool AAUCardData::CopyCardStyle(const TCHAR * name, ExtClass::CharacterData* cha
 }
 
 bool AAUCardData::TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData,
-	bool aa2,
+	bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair,
 	bool ao, bool ar, bool mo, bool oo,
 	bool hr, bool tn, bool bd, bool bs)
 {
 	if (index1 == index2 || index1 >= m_styles.size() || index2 >= m_styles.size()) return false;
 
-	if (aa2) {
-		m_styles[index2].m_cardStyleData.CopyCharacterData(charData);
+	if (aa2body) {
+		m_styles[index2].m_cardStyleData.CopyCharacterFigureData(charData);
+	}
+	if (aa2face) {
+		m_styles[index2].m_cardStyleData.CopyCharacterFaceData(charData);
+	}
+	if (aa2eyes) {
+		m_styles[index2].m_cardStyleData.CopyCharacterEyesData(charData);
+	}
+	if (aa2hair) {
+		m_styles[index2].m_cardStyleData.CopyCharacterHairData(charData);
 	}
 	if (ao) {
 		m_styles[index2].m_archiveOverrides = m_styles[index1].m_archiveOverrides;
