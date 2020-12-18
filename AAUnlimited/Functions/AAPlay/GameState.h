@@ -34,6 +34,11 @@ namespace Shared {
 
 		void setH_AI(bool value);
 		bool getH_AI();
+		void setTalkingName(std::wstring value);
+		std::wstring getTalkingName();
+		void setTalkAboutName(std::wstring value);
+		std::wstring getTalkAboutName();
+
 
 		void setLockedInH(bool value);
 		bool getLockedInH();
@@ -67,7 +72,7 @@ namespace Shared {
 
 		void kickCard(int s);
 		void addCard(std::wstring cardName, bool gender, int s);
-
+		DWORD getClubType(BYTE clubID);
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
