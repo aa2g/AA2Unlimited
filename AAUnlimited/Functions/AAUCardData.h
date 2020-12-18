@@ -98,6 +98,7 @@ public:
 	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
 	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
 	bool RemoveCardStyle(int index);
+	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
 	bool SwapCardStyle(int index1, int index2);
 	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
 	int FindStyleIdxByName(std::wstring * name);
