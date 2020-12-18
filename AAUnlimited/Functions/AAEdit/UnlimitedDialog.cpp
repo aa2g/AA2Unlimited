@@ -199,9 +199,20 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_cbSaveEyeTexture = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYETEX);
 		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
 		thisPtr->m_lbAAuSets = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS);
+		thisPtr->m_lbAAuSets2 = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS2);
 		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
 		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
+		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
+		thisPtr->m_cbTransAA2 = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2);
+		thisPtr->m_cbTransAO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAO);
+		thisPtr->m_cbTransAR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAR);
+		thisPtr->m_cbTransMO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSMO);
+		thisPtr->m_cbTransOO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSOO);
+		thisPtr->m_cbTransBD = GetDlgItem(hwndDlg, IDC_GN_CBTRANSBD);
+		thisPtr->m_cbTransBS = GetDlgItem(hwndDlg, IDC_GN_CBTRANSBS);
+		thisPtr->m_cbTransHR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSHR);
+		thisPtr->m_cbTransTN = GetDlgItem(hwndDlg, IDC_GN_CBTRANSTN);
 
 		return TRUE;
 		break; }
@@ -284,6 +295,32 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					//swap with the next style
 					g_currChar.m_cardData.SwapCardStyle(selSwap, selSwap + 1);
 
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETTRANS:
+				{
+					//get current selection
+					int selTransFrom = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					int selTransTo= SendMessage(thisPtr->m_lbAAuSets2, LB_GETCURSEL, 0, 0);
+
+					if (g_currChar.Editable()) {
+						// collect the transfer data checkboxes
+						bool aa2 = SendMessage(thisPtr->m_cbTransAA2, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ao = SendMessage(thisPtr->m_cbTransAO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ar = SendMessage(thisPtr->m_cbTransAR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool mo = SendMessage(thisPtr->m_cbTransMO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool oo = SendMessage(thisPtr->m_cbTransOO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bd = SendMessage(thisPtr->m_cbTransBD, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bs = SendMessage(thisPtr->m_cbTransBS, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool hr = SendMessage(thisPtr->m_cbTransHR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+						g_currChar.m_cardData.TransferCardStyleData(selTransFrom, selTransTo, g_currChar.m_char->m_charData,
+							aa2,
+							ao, ar, mo, oo,
+							hr, tn, bd, bs);
+					}
 					thisPtr->RefreshAAuSetList();
 				}
 				return TRUE;
@@ -374,11 +411,14 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
 	SendMessage(this->m_lbAAuSets,LB_RESETCONTENT,0,0);
+	SendMessage(this->m_lbAAuSets2,LB_RESETCONTENT,0,0);
 	auto list = AAEdit::g_currChar.m_cardData.GetAAUSetDataList();
 	for (size_t i = 0; i < list.size(); i++) {
 		SendMessage(this->m_lbAAuSets,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
+		SendMessage(this->m_lbAAuSets2,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
 	}
 	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
+	SendMessage(this->m_lbAAuSets2,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
 }
 
 void UnlimitedDialog::GNDialog::Refresh() {
@@ -437,9 +477,17 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			if (identifier == IDC_MO_BTNBROWSE) {
 				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
 				if (!General::DirExists(initialDir.c_str())) {
-					CreateDirectory(initialDir.c_str(), NULL);
+					CreateDirectory(initialDir.c_str(), NULL);				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideWith, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
 				}
-				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialDir.c_str())) {
 						const TCHAR* rest = choice + initialDir.size();
@@ -562,7 +610,18 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_AO_BTNBROWSE) {
-				std::wstring initialEditDir = General::BuildOverridePath(NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialEditDir.c_str())) {
@@ -760,8 +819,19 @@ INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_OO_BTNBROWSE) {
-				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_PATH,NULL);
-				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_PATH,NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					/*if (General::StartsWith(choice,initialPlayDir.c_str())) {
