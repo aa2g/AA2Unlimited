@@ -34,7 +34,7 @@ namespace Subtitles {
 	DWORD subsCentered = 0;
 	bool separateColorMale = true;
 
-	void AddSubtitles(const char *subtitle, const char *file_name, const char *talkingCard, const char *talkingAbout) {
+	void AddSubtitles(const char *subtitle, const char *file_name) {
 		int sexes_id = 1;
 		if (file_name[0] == *"s") { sexes_id = 2; }
 
@@ -44,15 +44,17 @@ namespace Subtitles {
 			lines.pop_front();
 
 		//Adding the one who's talking and the person they're talking about to the subtitles
-		std::string subject = std::string(talkingCard).append(": " + std::string(subtitle));
-		std::string search = "@";
+		std::wstring talkingCard = Shared::GameState::getTalkingName();
+		std::wstring talkingAbout = Shared::GameState::getTalkAboutName();
+		std::wstring subject = talkingCard.append(L": " + General::utf8.from_bytes(subtitle));
+		std::wstring search = L"@";
 
 		size_t pos = 0;
-		while ((pos = subject.find(search, pos)) != std::string::npos) {
-			subject.replace(pos, search.length(), std::string(talkingAbout));
-			pos += std::string(talkingAbout).length();
+		while ((pos = subject.find(search, pos)) != std::wstring::npos) {
+			subject.replace(pos, search.length(), talkingAbout);
+			pos += talkingAbout.length();
 		}
-		lines.push_back(std::make_tuple(General::CastToWString(subject) + L"\n", sexes_id));
+		lines.push_back(std::make_tuple((subject) + L"\n", sexes_id));
 	}
 
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,

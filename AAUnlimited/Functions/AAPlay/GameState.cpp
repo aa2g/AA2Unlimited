@@ -30,6 +30,8 @@ struct GameStateStruct {
 		h_info = NULL;
 		m_drawShadow = true;
 		m_savingCard = false;
+		m_talkCardName = L"";
+		m_talkAboutName = L"";
 	}
 
 	//Game state indicators
@@ -56,6 +58,10 @@ struct GameStateStruct {
 	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 	bool m_isInMainMenu;				//Is true if the game is in main menu
 	bool m_drawShadow;
+	std::wstring m_talkCardName;		//The name of the card that is currently talking; used in subtitles.
+	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
+
+
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -177,6 +183,28 @@ void Shared::GameState::setH_AI(bool value)
 bool Shared::GameState::getH_AI()
 {
 	return loc_gameState.h_ai;
+}
+
+
+void Shared::GameState::setTalkingName(std::wstring value)
+{
+	loc_gameState.m_talkCardName = value;
+}
+
+std::wstring Shared::GameState::getTalkingName()
+{
+	return loc_gameState.m_talkCardName;
+}
+
+
+void Shared::GameState::setTalkAboutName(std::wstring value)
+{
+	loc_gameState.m_talkAboutName = value;
+}
+
+std::wstring Shared::GameState::getTalkAboutName()
+{
+	return loc_gameState.m_talkAboutName;
 }
 
 void Shared::GameState::setLockedInH(bool value)

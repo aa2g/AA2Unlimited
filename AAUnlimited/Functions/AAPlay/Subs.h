@@ -12,7 +12,7 @@ namespace Subtitles {
 	//extern int gameWindowWidth;
 	//extern int gameWindowHeight;
 
-	void AddSubtitles(const char *subtitles, const char *file_name, const char *talkingCard, const char *talkingAbout);
+	void AddSubtitles(const char *subtitles, const char *file_name);
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,
 		const char *text_color_female, int diff_color_for_male, const char *text_color_male, 
 		int outline_quality, int outline_spread, const char *outline_color, int outline_col_A,
