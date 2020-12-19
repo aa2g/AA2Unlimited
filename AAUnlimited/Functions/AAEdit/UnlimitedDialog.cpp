@@ -629,8 +629,8 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
-					if (General::StartsWith(choice, initialEditDir.c_str())) {
-						const TCHAR* rest = choice + initialEditDir.size();
+					if (General::StartsWith(choice, initialDir.c_str())) {
+						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
 					}
 				}
@@ -843,8 +843,8 @@ INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						const TCHAR* rest = choice + initialPlayDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
 					}*/
-					if (General::StartsWith(choice,initialEditDir.c_str())) {
-						const TCHAR* rest = choice + initialEditDir.size();
+					if (General::StartsWith(choice, initialDir.c_str())) {
+						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
 					}
 				}
