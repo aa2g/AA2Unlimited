@@ -34,6 +34,11 @@ namespace Shared {
 
 		void setH_AI(bool value);
 		bool getH_AI();
+		void setTalkingName(std::wstring value);
+		std::wstring getTalkingName();
+		void setTalkAboutName(std::wstring value);
+		std::wstring getTalkAboutName();
+
 
 		void setLockedInH(bool value);
 		bool getLockedInH();

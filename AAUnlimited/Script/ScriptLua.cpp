@@ -285,7 +285,7 @@ void Lua::bindLua() {
 	});
 
 	_BINDING["AddSubtitles"] = LUA_LAMBDA0({
-		Subtitles::AddSubtitles(s.get(1), s.get(2), s.get(3), s.get(4));
+		Subtitles::AddSubtitles(s.get(1), s.get(2));
 	});
 
 	_BINDING["InitSubtitlesParams"] = LUA_LAMBDA0({
