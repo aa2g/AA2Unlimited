@@ -243,6 +243,7 @@ namespace Shared {
 			Value GetCardPersonality(std::vector<Value>& params); //int(int)
 			Value GetCardVoicePitch(std::vector<Value>& params); //int(int)
 			Value GetCardClub(std::vector<Value>& params); //int(int)
+			Value GetClubType(std::vector<Value>& params);
 			Value GetCardClubValue(std::vector<Value>& params); //int(int)
 			Value GetCardClubMod(std::vector<Value>& params);	//int(int, string)
 			Value GetCardEffectiveClubValue(std::vector<Value>& params);	//int(int)

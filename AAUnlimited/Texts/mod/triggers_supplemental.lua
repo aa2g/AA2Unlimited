@@ -324,6 +324,7 @@ function createHStatsDump(seat, towards)
 		dump["CumSwallowed"]	= thisInst.m_char.m_characterStatus:m_cumSwallowed(towards);
 		dump["RiskyCum"]	= thisInst.m_char.m_characterStatus:m_riskyCum(towards);
 		dump["CherryStatus"]	= thisInst.m_char.m_characterStatus:m_cherry(towards);
+		dump["Compatibility"] = thisInst.m_char.m_charData:m_hCompatibility(towards);
 	end
 	return dump;
 end
@@ -346,6 +347,7 @@ function restoreHStatsFromDump(seat, towards, dump)
 		thisInst.m_char.m_characterStatus:m_cumSwallowed(towards, dump["CumSwallowed"]);
 		thisInst.m_char.m_characterStatus:m_riskyCum(towards, dump["RiskyCum"]);
 		thisInst.m_char.m_characterStatus:m_cherry(towards, dump["CherryStatus"]);
+		thisInst.m_char.m_charData:m_hCompatibility(towards, dump["Compatibility"]);
 end
 --------------------------------------------------------------------------------------------------------------------------
 -- Trigger procedure calls -----------------------------------------------------------------------------------------------
@@ -360,6 +362,7 @@ params:
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are stored
 	int towards - target card ]]
+
 function trigger.storeRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -382,6 +385,7 @@ params:
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are restored
 	int towards - target card ]]
+
 function trigger.loadRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -407,6 +411,7 @@ params:
 	string key - storage key to store the points under. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are stored. Defaults to storageCard ]]
+
 function trigger.storeAllRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -432,6 +437,7 @@ params:
 	string key - storage key to restore the points from. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are restored. Defaults to storageCard ]]
+
 function trigger.loadAllRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -463,6 +469,7 @@ params:
 	string key - storage key to store the points under. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are stored. Defaults to storageCard ]]
+
 function trigger.storeOutgoingRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -486,6 +493,7 @@ params:
 	string key - storage key to restore the points from. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
 	int seat - card whose points are restored. Defaults to storageCard ]]
+
 function trigger.loadOutgoingRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -513,7 +521,8 @@ Uses the standard card keys: <seat LastName FirstName>
 params:
 	string key - storage key to store the points under. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
-	int seat - card whose points are stored. Defaults to storageCard ]]
+	int seat - card towards whom points are stored. Defaults to storageCard ]]
+
 function trigger.storeIncomingRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -536,7 +545,8 @@ Uses the standard card keys: <seat LastName FirstName>
 params:
 	string key - storage key to restore the points from. Arbitrary string
 	int storageCard - card under whose storage is utilized to keep the points dump
-	int seat - card whose points are restored. Defaults to storageCard ]]
+	int seat - card towards whom points are restored. Defaults to storageCard ]]
+
 function trigger.loadIncomingRelationshipPoints(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -559,8 +569,121 @@ function trigger.loadIncomingRelationshipPoints(params)
 	setCardStorage(storageCard, key, storage);
 end
 
+--[[ Store the outgoing relationship points from one card to another.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are stored
+	int towards - target card ]]
+
+function trigger.storeOutgoingRelationshipPointsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.toDump = {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage.toDump[storageKey] = createRelationshipPointsDump(seat, towards);
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore outgoing relationship points of one card towards the other.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card whose points are restored. 
+	int towards - target card ]]
+
+function trigger.loadOutgoingRelationshipPointsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+				local toDump = storage.toDump[storageKey];
+				restoreRelationshipPointsFromDump(seat, towards, toDump);
+				storage.toDump[storageKey] = {};
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Store the incoming relationship points from one card to another.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the points under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card towards whom points are stored
+	int towards - target card ]]
+
+function trigger.storeIncomingRelationshipPointsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.fromDump = {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage.fromDump[storageKey] = createRelationshipPointsDump(towards, seat);
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore incoming relationship points of one card towards the other.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the points from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the points dump
+	int seat - card towards whom points are restored. 
+	int towards - target card ]]
+
+function trigger.loadIncomingRelationshipPointsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+				local fromDump = storage.fromDump[storageKey];
+				restoreRelationshipPointsFromDump(towards, seat, fromDump);
+				storage.fromDump[storageKey] = {}
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+
 -- H Stats ---------------------------------------------------------------------------------------------------------------
---TODO: sweet release when?
+
+--[[ Store the H Stats from one card to another. Dump can be restored with loadHStats
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are stored
+	int towards - target card ]]
 
 function trigger.storeHStats(params)
 	local args = splitArgs(params);
@@ -576,6 +699,14 @@ function trigger.storeHStats(params)
 	end
 	setCardStorage(storageCard, key, storage);
 end
+
+--[[ Restore the H Stats from one card to another. dump created in storeHStats.
+Can be used to transfer the H Stats between cards.
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are restored
+	int towards - target card ]]
 
 function trigger.loadHStats(params)
 	local args = splitArgs(params);
@@ -596,6 +727,13 @@ function trigger.loadHStats(params)
 	setCardStorage(storageCard, key, storage);
 end
 
+--[[ Store both incoming and outgoing H Stats of one card towards the rest of the class.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are stored. Defaults to storageCard ]]
+
 function trigger.storeAllHStats(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -614,6 +752,12 @@ function trigger.storeAllHStats(params)
 	end
 	setCardStorage(storageCard, key, storage);
 end
+--[[ Restore both incoming and outgoing H Stats of one card towards the rest of the class.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are restored. Defaults to storageCard ]]
 
 function trigger.loadAllHStats(params)
 	local args = splitArgs(params);
@@ -639,6 +783,12 @@ function trigger.loadAllHStats(params)
 	end
 	setCardStorage(storageCard, key, {});
 end
+--[[ Store outgoing H Stats of one card towards the rest of the class
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are stored. Defaults to storageCard ]]
 
 function trigger.storeOutgoingHStats(params)
 	local args = splitArgs(params);
@@ -656,6 +806,13 @@ function trigger.storeOutgoingHStats(params)
 	end
 	setCardStorage(storageCard, key, storage);
 end
+
+--[[ Restore outgoing H Stats of one card towards the rest of the class
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are restored. Defaults to storageCard ]]
 
 function trigger.loadOutgoingHStats(params)
 	local args = splitArgs(params);
@@ -679,6 +836,13 @@ function trigger.loadOutgoingHStats(params)
 	setCardStorage(storageCard, key, storage);
 end
 
+--[[ Store incoming H Stats of one card towards the rest of the class
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card towards whom stats are stored. Defaults to storageCard ]]
+
 function trigger.storeIncomingHStats(params)
 	local args = splitArgs(params);
 	local key = args[1];
@@ -695,6 +859,13 @@ function trigger.storeIncomingHStats(params)
 	end
 	setCardStorage(storageCard, key, storage);
 end
+
+--[[ Restore incoming H Stats of one card towards the rest of the class
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card towards whom stats are restored. Defaults to storageCard ]]
 
 function trigger.loadIncomingHStats(params)
 	local args = splitArgs(params);
@@ -715,9 +886,233 @@ function trigger.loadIncomingHStats(params)
 		end
 		storage.fromDump = {};
 	end
-	setCardStorage(storageCard, key, {});
+	setCardStorage(storageCard, key, storage);
 end
 
+--[[ Store the outgoing H Stats from one card to another.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are stored
+	int towards - target card ]]
+
+function trigger.storeOutgoingHStatsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.toDump = {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage.toDump[storageKey] = createHStatsDump(towards, seat);
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore outgoing H Stats of one card towards the other.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card whose stats are restored. 
+	int towards - target card ]]
+
+function trigger.loadOutgoingHStatsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+				local toDump = storage.toDump[storageKey];
+				restoreHStatsFromDump(seat, towards, toDump);
+				storage.toDump[storageKey] = {};
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Store the incoming H Stats from one card to another.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to store the stats under. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card towards whom stats are stored
+	int towards - target card ]]
+
+function trigger.storeIncomingHStatsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key) or {};
+	storage.fromDump = {};
+	local storageKey = getCardStorageKey(towards);
+	if (storageKey ~= nil and seat ~= towards) then
+		storage.fromDump[storageKey] = createHStatsDump(towards, seat);
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Restore incoming H Stats of one card towards the other.
+Uses the standard card keys: <seat LastName FirstName>
+params:
+	string key - storage key to restore the stats from. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the stats dump
+	int seat - card towards whom stats are restored. 
+	int towards - target card ]]
+
+function trigger.loadIncomingHStatsIndividual(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local seat = tonumber(args[3]);
+	local towards = tonumber(args[4]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+				local fromDump = storage.fromDump[storageKey];
+				restoreHStatsFromDump(seat, towards, toDump);
+				storage.fromDump[storageKey] = {};
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+---Dump cleanup functions
+
+--[[ Cleans the dump under this key in the specified card storage towards specific card
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump
+	int towards - target card ]]
+
+function trigger.flushDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local towards = tonumber(args[3]);
+
+	local storage = getCardStorage(storageCard, key);	
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil) then
+			storage[storageKey] = {};
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Cleans the incoming dump under this key in the specified card storage towards specific card
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump
+	int towards - target card ]]
+
+function trigger.flushIncomingIndividualDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local towards = tonumber(args[3]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil) then
+			if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+				storage.fromDump[storageKey] = {};
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Cleans the outgoing dump under this key in the specified card storage towards specific card
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump
+	int towards - target card ]]
+
+function trigger.flushOutgoingIndividualDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+	local towards = tonumber(args[3]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil) then
+			if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+				storage.toDump[storageKey] = {};
+			end
+		end
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Cleans the outgoing dump under this key in the specified card storage towards whole class
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump ]]
+
+function trigger.flushOutgoingDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		storage.toDump = {};
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Cleans the incoming dump under this key in the specified card storage towards whole class
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump ]]
+
+function trigger.flushIncomingDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+
+	local storage = getCardStorage(storageCard, key);
+	if (storage ~= nil) then
+		storage.fromDump = {};
+	end
+	setCardStorage(storageCard, key, storage);
+end
+
+--[[ Cleans the incoming, outcoming and not specified (in other words, whole) dump under this key in the specified card storage towards whole class
+params:
+	string key - storage key of the dump. Arbitrary string
+	int storageCard - card under whose storage is utilized to keep the dump ]]
+
+function trigger.flushWholeDump(params)
+	local args = splitArgs(params);
+	local key = args[1];
+	local storageCard = tonumber(args[2]);
+
+	setCardStorage(storageCard, key, {});
+end
 --------------------------------------------------------------------------------------------------------------------------
 -- Detective specific code -----------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------

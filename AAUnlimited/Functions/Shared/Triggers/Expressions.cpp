@@ -719,6 +719,11 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_club);
 		}
 
+		Value Thread::GetClubType(std::vector<Value>& params) {
+			byte clubid = params[0].iVal;
+			return Value((int)Shared::GameState::getClubType(clubid));
+		}
+
 		//int(int)
 		Value Thread::GetCardClubValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -3620,6 +3625,12 @@ namespace Shared {
 					TEXT("Sexual Partner Count"), TEXT("%p ::HPartnerCount"), TEXT("Returns Sexual Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardHPartnerCount
+				},
+				{
+					145, EXPRCAT_GENERAL,
+					TEXT("Club Type"), TEXT("ClubType( %p )"), TEXT("Returns the type of a provided club id"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetClubType
 				},
 			},
 
