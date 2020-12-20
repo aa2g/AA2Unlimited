@@ -8,6 +8,7 @@
 
 namespace General {
 	
+	std::string ConvertSJIStoUTF8(const std::string& input);
 
 inline bool StartsWith(const char* str, const char* prefix) {
 	while (*str && *prefix && *str == *prefix) str++, prefix++;

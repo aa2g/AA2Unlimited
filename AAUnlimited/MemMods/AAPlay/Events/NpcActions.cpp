@@ -744,8 +744,11 @@ void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR
 				card->lastDialogue = dialoguePTR;
 				std::wstring talkingAboutName = L"@";
 
-				auto talkingCardsName = General::CastToWString(card->m_char->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_charData->m_surname);
+				auto lastName = General::utf8.from_bytes(General::ConvertSJIStoUTF8(std::string(card->m_char->m_charData->m_forename)).c_str());
+				auto firstName = General::utf8.from_bytes(General::ConvertSJIStoUTF8(std::string(card->m_char->m_charData->m_surname)).c_str());
+				auto talkingCardsName = lastName + L" " + firstName;
 				Shared::GameState::setTalkingName(talkingCardsName);
+
 				if (card->m_char->GetActivity() != nullptr) {
 					auto convoID = card->m_char->GetActivity()->m_currConversationId;
 					if (convoID == GOOD_RUMOR || convoID == GET_ALONG_WITH || convoID == I_WANNA_GET_ALONG_WITH || convoID == DO_YOU_LIKE || convoID == FORCE_IGNORE || convoID == MINNA_BE_FRIENDLY || convoID == DID_YOU_HAVE_H_WITH || convoID == SOMEONE_LIKES_YOU || convoID == SOMEONE_GOT_CONFESSED_TO || convoID == DID_YOU_DATE_SOMEONE || convoID == I_SAW_SOMEONE_HAVE_H || convoID == DO_NOT_GET_INVOLVED || convoID == BAD_RUMOR) {
@@ -753,7 +756,9 @@ void __stdcall DialoguePlay(const wchar_t* fname, DWORD seat, DWORD* dialoguePTR
 							if (card->m_char->m_characterStatus->m_npcStatus != nullptr) {
 								if (card->m_char->m_characterStatus->m_npcStatus->m_refto != nullptr) {
 									if (card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar != nullptr) {
-										talkingAboutName = General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename) + L" " + General::CastToWString(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname);
+										lastName = General::utf8.from_bytes(General::ConvertSJIStoUTF8(std::string(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_forename)).c_str());
+										firstName = General::utf8.from_bytes(General::ConvertSJIStoUTF8(std::string(card->m_char->m_characterStatus->m_npcStatus->m_refto->m_thisChar->m_charData->m_surname)).c_str());
+										talkingAboutName = lastName + L" " + firstName;
 										Shared::GameState::setTalkAboutName(talkingAboutName);
 									}
 								}
