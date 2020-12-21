@@ -77,7 +77,7 @@ PP2Profiling = false
 -- becomes AS00_03_00_04_00.tga. This forces the game to recognize that the file
 -- actually is tga format. Sometimes it needs to be disabled for stuff which
 -- expects the BMP behavior of vanilla (SVII perhaps)
-bUseMKIII = true
+bUseMKIII = false
 
 -- List file names instead of name in card select (AA2Play)
 bListFilenames = false

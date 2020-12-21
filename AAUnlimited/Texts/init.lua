@@ -1,6 +1,6 @@
 require "debug"
 
-AAU_VERSION = "1.6 "
+AAU_VERSION = "1.6.1 "
 ---------------------------
 -- C++ interfacing globals
 ---------------------------
