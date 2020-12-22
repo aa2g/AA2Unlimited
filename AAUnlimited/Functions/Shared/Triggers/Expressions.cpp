@@ -4125,7 +4125,7 @@ namespace Shared {
 				},
 				{
 					16, EXPRCAT_CHARPROP,
-					TEXT("First Anal Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					TEXT("First Anal Partner"), TEXT("%p ::FirstAnal"), TEXT("Returns the full name of the first anal partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstAnalPartner
 				},
