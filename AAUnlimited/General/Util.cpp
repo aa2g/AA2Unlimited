@@ -13,8 +13,9 @@ namespace General {
 	void LoadSJISTable() {
 		if (!convTableSJISLoaded) {
 			//open file
-			std::ifstream infile("AAUnlimited\\lib\\shiftjis_table.dat", std::ios_base::in | std::ios_base::binary);
+			std::ifstream infile(General::AAUPath + L"lib\\shiftjis_table.dat", std::ios_base::in | std::ios_base::binary);
 
+			if (!infile.good()) return;
 			//get length of file
 			infile.seekg(0, std::ios::end);
 			size_t length = infile.tellg();
