@@ -402,7 +402,8 @@ void __stdcall SaveLoadEvent() {
 //	Facecam::Cleanup();
 }
 
-void __stdcall TransferInEvent(ExtClass::CharacterStruct* character) {
+void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fileName) {
+
 	AAPlay::InitTransferedCharacter(character);
 }
 
@@ -443,6 +444,7 @@ void __declspec(naked) TransferInRedirect() {
 		push [esp+8]
 		call [TransferInOriginalFunc]
 		pushad
+		push [esp + 0x50]
 		push esi
 		call TransferInEvent
 		popad
