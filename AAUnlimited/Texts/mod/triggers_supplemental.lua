@@ -30,8 +30,17 @@ function on.card_expelled(actor0, actor1, murder_action)
 end
 
 function on.period()
+
 	detectiveCheckIfMurderFailed();
 	detectiveMurdererPulseCheck();
+	undyingCheck();
+
+end
+
+function on.ui_event(evt)
+	if (evt == 13) then
+		undyingCheck();
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------------------
@@ -293,7 +302,7 @@ function createRelationshipPointsDump(seat, towards)
 		dump["LIKE"]	= thisInst:GetLikeTowards(towardsInst);
 		dump["DISLIKE"]	= thisInst:GetDislikeTowards(towardsInst);
 		dump["HATE"]	= thisInst:GetHateTowards(towardsInst);
-		dump["SPARE"]	= 900 - dump["LOVE"] - dump["LIKE"] - dump["DISLIKE"] - dump["HATE"];
+		dump["SPARE"]	= 1016 - dump["LOVE"] - dump["LIKE"] - dump["DISLIKE"] - dump["HATE"];
 	end
 	return dump;
 end
@@ -335,20 +344,22 @@ function restoreHStatsFromDump(seat, towards, dump)
 	if (thisInst == nil or towardsInst == nil or dump == {} or dump == nil) then
 		return;
 	end
-		thisInst.m_char.m_characterStatus:m_totalH(towards, dump["TotalH"]);
-		thisInst.m_char.m_characterStatus:m_vaginalH(towards, dump["VaginalH"]);
-		thisInst.m_char.m_characterStatus:m_analH(towards, dump["AnalH"]);
-		thisInst.m_char.m_characterStatus:m_condomsUsed(towards, dump["CondomsUsed"]);
-		thisInst.m_char.m_characterStatus:m_climaxCount(towards, dump["ClimaxCount"]);
-		thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards, dump["SimultaneousClimax"]);
-		thisInst.m_char.m_characterStatus:m_totalCum(towards, dump["TotalCum"]);
-		thisInst.m_char.m_characterStatus:m_cumInVagina(towards, dump["CumInVagina"]);
-		thisInst.m_char.m_characterStatus:m_cumInAnal(towards, dump["CumInAnal"]);
-		thisInst.m_char.m_characterStatus:m_cumSwallowed(towards, dump["CumSwallowed"]);
-		thisInst.m_char.m_characterStatus:m_riskyCum(towards, dump["RiskyCum"]);
-		thisInst.m_char.m_characterStatus:m_cherry(towards, dump["CherryStatus"]);
-		thisInst.m_char.m_charData:m_hCompatibility(towards, dump["Compatibility"]);
+		thisInst.m_char.m_characterStatus:m_totalH(towards, dump["TotalH"] or 0);
+		thisInst.m_char.m_characterStatus:m_vaginalH(towards, dump["VaginalH"] or 0);
+		thisInst.m_char.m_characterStatus:m_analH(towards, dump["AnalH"] or 0);
+		thisInst.m_char.m_characterStatus:m_condomsUsed(towards, dump["CondomsUsed"] or 0);
+		thisInst.m_char.m_characterStatus:m_climaxCount(towards, dump["ClimaxCount"] or 0);
+		thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards, dump["SimultaneousClimax"] or 0);
+		thisInst.m_char.m_characterStatus:m_totalCum(towards, dump["TotalCum"] or 0);
+		thisInst.m_char.m_characterStatus:m_cumInVagina(towards, dump["CumInVagina"] or 0);
+		thisInst.m_char.m_characterStatus:m_cumInAnal(towards, dump["CumInAnal"] or 0);
+		thisInst.m_char.m_characterStatus:m_cumSwallowed(towards, dump["CumSwallowed"] or 0);
+		thisInst.m_char.m_characterStatus:m_riskyCum(towards, dump["RiskyCum"] or 0);
+		thisInst.m_char.m_characterStatus:m_cherry(towards, dump["CherryStatus"] or 0);
+		thisInst.m_char.m_charData:m_hCompatibility(towards, dump["Compatibility"] or 0);
 end
+
+	
 --------------------------------------------------------------------------------------------------------------------------
 -- Trigger procedure calls -----------------------------------------------------------------------------------------------
 -- Procedures that can be called from triggers require the <trigger.> prefix ---------------------------------------------
@@ -1113,6 +1124,59 @@ function trigger.flushWholeDump(params)
 
 	setCardStorage(storageCard, key, {});
 end
+
+
+----Undying specific code----
+
+function undyingCheck()
+	local period = GetGameTimeData().currentPeriod;
+	if (period == 9) then
+		local storage = getClassStorage("UndyingCount");
+		if (storage ~= nil) then
+			local count = tonumber(storage);
+			log.info("count:" .. count);
+			if (count > 0) then
+				undyingAddCards();
+			end
+		end
+	end
+end
+
+function undyingAddCards()
+	local count = tonumber(getClassStorage("UndyingCount"));
+	log.info("count:" .. count);
+	local seat = tonumber(getClassStorage("UndyingSeat1"));
+	log.info("seat:" .. seat);
+	local gender = tonumber(getClassStorage("UndyingGender1"));
+	log.info("gender:" .. gender);
+	local fileName = getClassStorage("UndyingFileName1");
+	log.info("filename:" .. fileName);
+	if (gender == 0) then
+		AddCard(fileName,false,seat);
+	else
+		AddCard(fileName,true,seat);
+	end
+	if (count == 2) then
+		local seat = tonumber(getClassStorage("UndyingSeat2"));
+		log.info("seat:" .. seat);
+		local gender = tonumber(getClassStorage("UndyingGender2"));
+		log.info("gender:" .. gender);
+		local fileName = getClassStorage("UndyingFileName2");
+		log.info("filename:" .. fileName);
+		if (gender == 0) then
+			AddCard(fileName,false,seat);
+		else
+			AddCard(fileName,true,seat);
+		end
+	end
+	log.info("end:" .. fileName);
+	setClassStorage("UndyingCount","0");
+	log.info("end2:" .. fileName);
+end 
+	
+
+
+
 --------------------------------------------------------------------------------------------------------------------------
 -- Detective specific code -----------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------

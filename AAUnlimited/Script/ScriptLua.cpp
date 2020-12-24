@@ -314,6 +314,10 @@ void Lua::bindLua() {
 		Shared::Triggers::SafeAddCardPoints(s.get(1), s.get(2), s.get(3), s.get(4));
 	});
 
+	_BINDING["AddCard"] = LUA_LAMBDA0({
+		Shared::GameState::addCard(General::utf8.from_bytes((const char*)s.get(1)), s.get(2), s.get(3));
+	});
+
 	_BINDING["GetCamera"] = LUA_LAMBDA({
 		s.push(Camera::GetCamera());
 	});
