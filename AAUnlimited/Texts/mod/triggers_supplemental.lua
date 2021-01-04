@@ -1144,13 +1144,9 @@ end
 
 function undyingAddCards()
 	local count = tonumber(getClassStorage("UndyingCount"));
-	log.info("count:" .. count);
 	local seat = tonumber(getClassStorage("UndyingSeat1"));
-	log.info("seat:" .. seat);
 	local gender = tonumber(getClassStorage("UndyingGender1"));
-	log.info("gender:" .. gender);
 	local fileName = getClassStorage("UndyingFileName1");
-	log.info("filename:" .. fileName);
 	if (gender == 0) then
 		AddCard(fileName,false,seat);
 	else
@@ -1158,20 +1154,15 @@ function undyingAddCards()
 	end
 	if (count == 2) then
 		local seat = tonumber(getClassStorage("UndyingSeat2"));
-		log.info("seat:" .. seat);
 		local gender = tonumber(getClassStorage("UndyingGender2"));
-		log.info("gender:" .. gender);
 		local fileName = getClassStorage("UndyingFileName2");
-		log.info("filename:" .. fileName);
 		if (gender == 0) then
 			AddCard(fileName,false,seat);
 		else
 			AddCard(fileName,true,seat);
 		end
 	end
-	log.info("end:" .. fileName);
 	setClassStorage("UndyingCount","0");
-	log.info("end2:" .. fileName);
 end 
 	
 
@@ -1265,7 +1256,8 @@ function detectiveMurdererPulseCheck()
 		if (getCardStorage(seat, "Detective") == true) then
 			local murderCase = getCardStorage(seat, "Murder Case");
 			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
-				local murderSeat = tonumber(getSeatFromStorageKey(murderCase));
+				local murderCaseStorage = getClassStorage(murderCase);
+				local murderSeat = tonumber(getSeatFromStorageKey(murderCaseStorage.murderer));
 				local murderInst = GetCharInstData(murderSeat);
 				if (murderInst == nil) then
 					-- close case

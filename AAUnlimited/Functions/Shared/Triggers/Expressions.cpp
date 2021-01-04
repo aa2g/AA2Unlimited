@@ -2802,7 +2802,7 @@ namespace Shared {
 				},
 				{
 					12, EXPRCAT_EVENT,
-					TEXT("Npc Answer - Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+					TEXT("Npc Answer - Conversation ID"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseConversation
 				},
