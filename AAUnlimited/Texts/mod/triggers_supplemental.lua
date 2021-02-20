@@ -330,6 +330,9 @@ function restoreRelationshipPointsFromDump(seat, towards, dump, doNuke)
 	local dislike = dump["DISLIKE"] or 0;
 	local hate = dump["HATE"] or 0;
 	local spare = 900 - love - like - dislike - hate;
+	if (love/30 + like/30 + dislike/30 + hate/30) >= 30 then
+		spare = 0;
+	end
 	thisInst:SetPointsTowards(towardsInst, love, like, dislike, hate, spare);
 end
 
@@ -1313,7 +1316,9 @@ function trigger.flushWholeDump(params)
 end
 
 
-----Undying specific code----
+--------------------------------------------------------------------------------------------------------------------------
+-- Undying specific code -------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 
 function undyingCheck()
 	local period = GetGameTimeData().currentPeriod;
