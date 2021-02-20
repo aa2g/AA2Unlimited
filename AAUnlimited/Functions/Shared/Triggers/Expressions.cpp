@@ -3465,7 +3465,7 @@ namespace Shared {
 					&Thread::GetSubmissiveInH
 				},
 				{
-					119, EXPRCAT_EVENT,
+					119, EXPRCAT_CHARPROP,
 					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetStamina

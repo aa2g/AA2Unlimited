@@ -298,22 +298,41 @@ function createRelationshipPointsDump(seat, towards)
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
 	if (thisInst ~= nil and towardsInst ~= nil) then
-		dump["LOVE"]	= thisInst:GetLoveTowards(towardsInst);
-		dump["LIKE"]	= thisInst:GetLikeTowards(towardsInst);
-		dump["DISLIKE"]	= thisInst:GetDislikeTowards(towardsInst);
-		dump["HATE"]	= thisInst:GetHateTowards(towardsInst);
-		dump["SPARE"]	= 1016 - dump["LOVE"] - dump["LIKE"] - dump["DISLIKE"] - dump["HATE"];
+		local currDump = thisInst:GetLoveTowards(towardsInst);
+		if (currDump ~= 0) then
+			dump["LOVE"]	= currDump;
+		end
+		currDump = thisInst:GetLikeTowards(towardsInst);
+		if (currDump ~= 0) then
+			dump["LIKE"]	= currDump;
+		end
+		currDump = thisInst:GetDislikeTowards(towardsInst);
+		if (currDump ~= 0) then
+			dump["DISLIKE"]	= currDump;
+		end
+		currDump = thisInst:GetHateTowards(towardsInst);
+		if (currDump ~= 0) then
+			dump["HATE"]	= currDump;
+		end
 	end
 	return dump;
 end
 
-function restoreRelationshipPointsFromDump(seat, towards, dump)
+function restoreRelationshipPointsFromDump(seat, towards, dump, doNuke)
+	doNuke = doNuke or true;
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
-	if (thisInst == nil or towardsInst == nil or dump == {} or dump == nil) then
+	if (thisInst == nil or towardsInst == nil or ((dump == {} or dump == nil) and (not doNuke))) then
+		log.info("points return");
 		return;
 	end
-	thisInst:SetPointsTowards(towardsInst, dump["LOVE"] or 0, dump["LIKE"] or 0, dump["DISLIKE"] or 0, dump["HATE"] or 0, dump["SPARE"] or 0);
+	log.info("points continue");
+	local love = dump["LOVE"] or 0;
+	local like = dump["LIKE"] or 0;
+	local dislike = dump["DISLIKE"] or 0;
+	local hate = dump["HATE"] or 0;
+	local spare = 900 - love - like - dislike - hate;
+	thisInst:SetPointsTowards(towardsInst, love, like, dislike, hate, spare);
 end
 
 function createHStatsDump(seat, towards)
@@ -321,29 +340,71 @@ function createHStatsDump(seat, towards)
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
 	if (thisInst ~= nil and towardsInst ~= nil) then
-		dump["TotalH"]    = thisInst.m_char.m_characterStatus:m_totalH(towards);
-		dump["VaginalH"]	= thisInst.m_char.m_characterStatus:m_vaginalH(towards);
-		dump["AnalH"]	= thisInst.m_char.m_characterStatus:m_analH(towards);
-		dump["CondomsUsed"]	= thisInst.m_char.m_characterStatus:m_condomsUsed(towards);
-		dump["ClimaxCount"]	= thisInst.m_char.m_characterStatus:m_climaxCount(towards);
-		dump["SimultaneousClimax"]	= thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards);
-		dump["TotalCum"]	= thisInst.m_char.m_characterStatus:m_totalCum(towards);
-		dump["CumInVagina"]	= thisInst.m_char.m_characterStatus:m_cumInVagina(towards);
-		dump["CumInAnal"]	= thisInst.m_char.m_characterStatus:m_cumInAnal(towards);
-		dump["CumSwallowed"]	= thisInst.m_char.m_characterStatus:m_cumSwallowed(towards);
-		dump["RiskyCum"]	= thisInst.m_char.m_characterStatus:m_riskyCum(towards);
-		dump["CherryStatus"]	= thisInst.m_char.m_characterStatus:m_cherry(towards);
-		dump["Compatibility"] = thisInst.m_char.m_charData:m_hCompatibility(towards);
+		local currDump = thisInst.m_char.m_characterStatus:m_totalH(towards);
+		if (currDump ~= 0) then
+			dump["TotalH"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_vaginalH(towards);
+		if (currDump ~= 0) then
+			dump["VaginalH"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_analH(towards);
+		if (currDump ~= 0) then
+			dump["AnalH"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_condomsUsed(towards);
+		if (currDump ~= 0) then
+			dump["CondomsUsed"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_climaxCount(towards);
+		if (currDump ~= 0) then
+			dump["ClimaxCount"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_simultaneousClimax(towards);
+		if (currDump ~= 0) then
+			dump["SimultaneousClimax"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_totalCum(towards);
+		if (currDump ~= 0) then
+			dump["TotalCum"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_cumInVagina(towards);
+		if (currDump ~= 0) then
+			dump["CumInVagina"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_cumInAnal(towards);
+		if (currDump ~= 0) then
+			dump["CumInAnal"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_cumSwallowed(towards);
+		if (currDump ~= 0) then
+			dump["CumSwallowed"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_riskyCum(towards);
+		if (currDump ~= 0) then
+			dump["RiskyCum"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_characterStatus:m_cherry(towards);
+		if (currDump ~= 0) then
+			dump["CherryStatus"]	= currDump;
+		end
+		currDump = thisInst.m_char.m_charData:m_hCompatibility(towards);
+		if (currDump ~= 0) then
+			dump["Compatibility"]	= currDump;
+		end
 	end
 	return dump;
 end
 
-function restoreHStatsFromDump(seat, towards, dump)
+function restoreHStatsFromDump(seat, towards, dump, doNuke)
+	doNuke = doNuke or true;
 	local thisInst = GetCharInstData(seat);
 	local towardsInst = GetCharInstData(towards);
-	if (thisInst == nil or towardsInst == nil or dump == {} or dump == nil) then
+	if (thisInst == nil or towardsInst == nil or ((dump == {} or dump == nil) and (not doNuke))) then
+		log.info("h stats return");
 		return;
 	end
+	log.info("h stats continue");
 		thisInst.m_char.m_characterStatus:m_totalH(towards, dump["TotalH"] or 0);
 		thisInst.m_char.m_characterStatus:m_vaginalH(towards, dump["VaginalH"] or 0);
 		thisInst.m_char.m_characterStatus:m_analH(towards, dump["AnalH"] or 0);
@@ -403,16 +464,27 @@ function trigger.loadRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);	
+
+	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local dump = {};
+			restoreRelationshipPointsFromDump(seat, towards, dump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			local dump = storage[storageKey];
-			restoreRelationshipPointsFromDump(seat, towards, dump);
+			restoreRelationshipPointsFromDump(seat, towards, dump, doNuke);
 			storage[storageKey] = {};
 		end
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -454,20 +526,35 @@ function trigger.loadAllRelationshipPoints(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
-
+	local doNuke = args[4] or true;
+	log.info("points enter");
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
+		log.info("points ~=nil");
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
 				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
 					local toDump = storage.toDump[storageKey];
-					restoreRelationshipPointsFromDump(seat, towards, toDump);
+					restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
 				end
 				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
 					local fromDump = storage.fromDump[storageKey];
-					restoreRelationshipPointsFromDump(towards, seat, fromDump);
+					restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
 				end
+			end
+		end
+	end
+	if ((storage == nil) and doNuke) then
+	log.info("points = nil and doNuke");
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local toDump = {};
+				restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
+				local fromDump = {};
+				restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
+				log.info("points nuked");
 			end
 		end
 	end
@@ -510,20 +597,33 @@ function trigger.loadOutgoingRelationshipPoints(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
+	local doNuke = args[4] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local toDump = {};
+				restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
+			end
+		end
+	end
+
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
 				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
 					local toDump = storage.toDump[storageKey];
-					restoreRelationshipPointsFromDump(seat, towards, toDump);
+					restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
 				end
 			end
 		end
 		storage.toDump = {};
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -563,20 +663,33 @@ function trigger.loadIncomingRelationshipPoints(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
+	local doNuke = args[4] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local fromDump = {};
+				restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
+			end
+		end
+	end
+
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
 				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
 					local fromDump = storage.fromDump[storageKey];
-					restoreRelationshipPointsFromDump(towards, seat, fromDump);
+					restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
 				end
 			end
 		end
 		storage.fromDump = {};
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -618,18 +731,28 @@ function trigger.loadOutgoingRelationshipPointsIndividual(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		if (storageKey ~= nil and seat ~= towards) then
+			local toDump = {};
+			restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
 				local toDump = storage.toDump[storageKey];
-				restoreRelationshipPointsFromDump(seat, towards, toDump);
+				restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
 				storage.toDump[storageKey] = {};
 			end
 		end
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -671,18 +794,29 @@ function trigger.loadIncomingRelationshipPointsIndividual(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local fromDump = {};
+			restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
 				local fromDump = storage.fromDump[storageKey];
-				restoreRelationshipPointsFromDump(towards, seat, fromDump);
+				restoreRelationshipPointsFromDump(towards, seat, fromDump, doNuke);
 				storage.fromDump[storageKey] = {}
 			end
 		end
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -725,16 +859,26 @@ function trigger.loadHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);	
+	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local dump = {};
+			restoreHStatsFromDump(seat, towards, dump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			local dump = storage[storageKey];
-			restoreHStatsFromDump(seat, towards, dump);
+			restoreHStatsFromDump(seat, towards, dump, doNuke);
 			storage[storageKey] = {};
 		end
 	end
+
 	setCardStorage(storageCard, key, storage);
 end
 
@@ -775,20 +919,36 @@ function trigger.loadAllHStats(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
-
+	local doNuke = args[4] or true;
+	log.info("h stats enter");
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
-				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
+				if ((storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) or doNuke) then
 					local toDump = storage.toDump[storageKey];
-					restoreHStatsFromDump(seat, towards, toDump);
+					log.info("h stats call to");
+					restoreHStatsFromDump(seat, towards, toDump, doNuke);
 				end
-				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
+				if ((storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) or doNuke) then
 					local fromDump = storage.fromDump[storageKey];
-					restoreHStatsFromDump(towards, seat, fromDump);
+					log.info("h stats call from");
+					restoreHStatsFromDump(towards, seat, fromDump, doNuke);
 				end
+			end
+		end
+	end
+	if ((storage == nil) and doNuke) then
+	log.info("hstats = nil and doNuke");
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local toDump = {};
+				restoreHStatsFromDump(seat, towards, toDump, doNuke);
+				local fromDump = {};
+				restoreHStatsFromDump(towards, seat, fromDump, doNuke);
+				log.info("hstats nuked");
 			end
 		end
 	end
@@ -830,15 +990,25 @@ function trigger.loadOutgoingHStats(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
+	local doNuke = args[4] or true;
 
 	local storage = getCardStorage(storageCard, key);
+	if ((storage == nil) and doNuke) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local toDump = {};
+				restoreHStatsFromDump(seat, towards, toDump, doNuke);
+			end
+		end
+	end
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
 				if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
 					local toDump = storage.toDump[storageKey];
-					restoreHStatsFromDump(seat, towards, toDump);
+					restoreHStatsFromDump(seat, towards, toDump, doNuke);
 				end
 			end
 		end
@@ -883,15 +1053,25 @@ function trigger.loadIncomingHStats(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
+	local doNuke = args[4] or true;
 
 	local storage = getCardStorage(storageCard, key);
+	if ((storage == nil) and doNuke) then
+		for towards=0,24 do
+			local storageKey = getCardStorageKey(towards);
+			if (storageKey ~= nil and seat ~= towards) then
+				local fromDump = {};
+				restoreHStatsFromDump(towards, seat, fromDump, doNuke);
+			end
+		end
+	end
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
 			if (storageKey ~= nil and seat ~= towards) then
 				if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
 					local fromDump = storage.fromDump[storageKey];
-					restoreHStatsFromDump(towards, seat, fromDump);
+					restoreHStatsFromDump(towards, seat, fromDump, doNuke);
 				end
 			end
 		end
@@ -938,14 +1118,24 @@ function trigger.loadOutgoingHStatsIndividual(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local toDump = {};
+			restoreHStatsFromDump(towards, seat, toDump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			if (storage.toDump ~= nil and storage.toDump[storageKey] ~= nil) then
 				local toDump = storage.toDump[storageKey];
-				restoreHStatsFromDump(seat, towards, toDump);
+				restoreHStatsFromDump(seat, towards, toDump, doNuke);
 				storage.toDump[storageKey] = {};
 			end
 		end
@@ -991,14 +1181,24 @@ function trigger.loadIncomingHStatsIndividual(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
+	local doNuke = args[5] or true;
 
 	local storage = getCardStorage(storageCard, key);
+
+	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
+		if (storageKey ~= nil and seat ~= towards) then
+			local fromDump = {};
+			restoreHStatsFromDump(towards, seat, fromDump, doNuke);
+		end
+	end
+
 	if (storage ~= nil) then
 		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			if (storage.fromDump ~= nil and storage.fromDump[storageKey] ~= nil) then
 				local fromDump = storage.fromDump[storageKey];
-				restoreHStatsFromDump(seat, towards, toDump);
+				restoreHStatsFromDump(seat, towards, toDump, doNuke);
 				storage.fromDump[storageKey] = {};
 			end
 		end
@@ -1144,18 +1344,10 @@ end
 
 function undyingAddCards()
 	local count = tonumber(getClassStorage("UndyingCount"));
-	local seat = tonumber(getClassStorage("UndyingSeat1"));
-	local gender = tonumber(getClassStorage("UndyingGender1"));
-	local fileName = getClassStorage("UndyingFileName1");
-	if (gender == 0) then
-		AddCard(fileName,false,seat);
-	else
-		AddCard(fileName,true,seat);
-	end
-	if (count == 2) then
-		local seat = tonumber(getClassStorage("UndyingSeat2"));
-		local gender = tonumber(getClassStorage("UndyingGender2"));
-		local fileName = getClassStorage("UndyingFileName2");
+	for i=1,count do
+		local seat = tonumber(getClassStorage("UndyingSeat" .. i));
+		local gender = tonumber(getClassStorage("UndyingGender" .. i));
+		local fileName = getClassStorage("UndyingFileName" .. i);
 		if (gender == 0) then
 			AddCard(fileName,false,seat);
 		else
