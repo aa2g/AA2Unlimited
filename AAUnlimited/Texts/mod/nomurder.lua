@@ -2,7 +2,6 @@
 
 local _M = {}
 local opts = {}
-local c = require 'const'
 
 function on.move(struct,user)
 	if (struct.conversationId == 81 or struct.conversationId == 82) then
