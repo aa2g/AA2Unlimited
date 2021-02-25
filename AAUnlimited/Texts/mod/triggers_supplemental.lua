@@ -1201,11 +1201,14 @@ function detectiveMurdererPulseCheck()
 		if (getCardStorage(seat, "Detective") == true) then
 			local murderCase = getCardStorage(seat, "Murder Case");
 			if (murderCase ~= nil and murderCase ~= "CLOSED" and murderCase ~= "COLD") then
-				local murderSeat = tonumber(getSeatFromStorageKey(murderCase));
-				local murderInst = GetCharInstData(murderSeat);
-				if (murderInst == nil) then
-					-- close case
-					setCardStorage(seat, "Murder Case", "COLD");
+				local murderCaseStorage = getClassStorage(murderCase) or {};
+				if (murderCaseStorage.murderer ~= nil) then
+					local murderSeat = tonumber(getSeatFromStorageKey(murderCaseStorage.murderer));
+					local murderInst = GetCharInstData(murderSeat);				
+					if (murderInst == nil) then
+						-- close case
+						setCardStorage(seat, "Murder Case", "COLD");
+					end
 				end
 			end
 		end
