@@ -1729,6 +1729,8 @@ namespace Shared {
 			}
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
 			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
+			//Will update the low poly on next room change
+			AAPlay::g_characters[seat].m_char->m_bClothesOn = 0;
 
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
@@ -2433,7 +2435,7 @@ namespace Shared {
 				&Thread::SetCardSexExperience
 			},
 			{
-				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::SexXP = %p"),
+				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::AnalXP = %p"),
 				TEXT("Set anal experience for the character"),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardAnalSexExperience

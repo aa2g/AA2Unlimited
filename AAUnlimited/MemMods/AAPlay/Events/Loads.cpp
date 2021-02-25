@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files/PNGData.h"
+#include "Files\PersistentStorage.h"
 
 using namespace Shared::Triggers;
 
@@ -402,8 +403,14 @@ void __stdcall SaveLoadEvent() {
 //	Facecam::Cleanup();
 }
 
-void __stdcall TransferInEvent(ExtClass::CharacterStruct* character) {
+void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fileName) {
+
 	AAPlay::InitTransferedCharacter(character);
+	std::string path = General::CastToString(fileName);
+	std::size_t found = path.rfind("male\\");
+	if (found != std::string::npos) path.replace(0, found+5, "");
+	auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+	storage.storeClassString(General::CastToWString("LastCardFileName"), path);
 }
 
 void __stdcall TransferOutEvent(ExtClass::CharacterStruct* character) {
@@ -443,6 +450,7 @@ void __declspec(naked) TransferInRedirect() {
 		push [esp+8]
 		call [TransferInOriginalFunc]
 		pushad
+		push [esp + 0x50]
 		push esi
 		call TransferInEvent
 		popad
