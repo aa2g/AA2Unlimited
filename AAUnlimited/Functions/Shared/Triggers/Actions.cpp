@@ -2435,7 +2435,7 @@ namespace Shared {
 				&Thread::SetCardSexExperience
 			},
 			{
-				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::SexXP = %p"),
+				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::AnalXP = %p"),
 				TEXT("Set anal experience for the character"),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardAnalSexExperience

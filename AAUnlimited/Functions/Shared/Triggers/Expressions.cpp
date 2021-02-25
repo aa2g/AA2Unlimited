@@ -2802,7 +2802,7 @@ namespace Shared {
 				},
 				{
 					12, EXPRCAT_EVENT,
-					TEXT("Npc Answer - Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+					TEXT("Npc Answer - Conversation ID"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseConversation
 				},
@@ -3465,7 +3465,7 @@ namespace Shared {
 					&Thread::GetSubmissiveInH
 				},
 				{
-					119, EXPRCAT_EVENT,
+					119, EXPRCAT_CHARPROP,
 					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetStamina
@@ -4125,7 +4125,7 @@ namespace Shared {
 				},
 				{
 					16, EXPRCAT_CHARPROP,
-					TEXT("First Anal Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					TEXT("First Anal Partner"), TEXT("%p ::FirstAnal"), TEXT("Returns the full name of the first anal partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstAnalPartner
 				},
