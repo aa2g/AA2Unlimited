@@ -3140,7 +3140,7 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				int sel = SendMessage(thisPtr->m_lbModulesAvailable,LB_GETCURSEL,0,0);
 				if(sel != LB_ERR) {
 					g_currChar.m_cardData.AddModule(thisPtr->m_modules[sel].mod);
-					thisPtr->Refresh();
+					thisPtr->RefreshUsedModules();
 				}
 			}
 			break;
@@ -3149,7 +3149,7 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
 					g_currChar.m_cardData.RemoveModule(sel);
-					thisPtr->Refresh();
+					thisPtr->RefreshUsedModules();
 				}
 			}
 			break;
@@ -3160,9 +3160,9 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					for(auto& trigger : g_currChar.m_cardData.GetModules()[sel].triggers) {
 						g_currChar.m_cardData.GetTriggers().push_back(trigger);
 					}
+					g_currChar.m_cardData.RemoveModule(sel);
+					thisPtr->RefreshUsedModules();
 				}
-				g_currChar.m_cardData.RemoveModule(sel);
-				thisPtr->Refresh();
 			}
 			break;
 		case IDC_MD_BTNUPD:
@@ -3195,6 +3195,7 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					g_currChar.m_cardData.AddModule(thisPtr->m_modules[modulesList[i]].mod);
 				}
 				thisPtr->Refresh();
+				thisPtr->RefreshUsedModules();
 			}
 			break;
 
@@ -3229,7 +3230,9 @@ void UnlimitedDialog::MDDialog::Refresh() {
 		} while (suc != FALSE);
 		FindClose(hSearch);
 	}
+}
 
+void UnlimitedDialog::MDDialog::RefreshUsedModules() {
 	//list current modules
 	SendMessage(m_lbModulesUsed,LB_RESETCONTENT,0,0);
 	for(auto& elem : g_currChar.m_cardData.GetModules()) {
