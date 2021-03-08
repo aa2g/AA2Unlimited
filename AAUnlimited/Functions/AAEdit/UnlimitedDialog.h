@@ -324,6 +324,7 @@ namespace AAEdit {
 		std::vector<ModuleFile> m_modules;
 
 		void Refresh();
+		void RefreshAvailableModules();
 		void RefreshUsedModules();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_mdDialog;

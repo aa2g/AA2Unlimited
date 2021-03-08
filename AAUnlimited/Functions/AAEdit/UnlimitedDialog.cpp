@@ -3195,7 +3195,6 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					g_currChar.m_cardData.AddModule(thisPtr->m_modules[modulesList[i]].mod);
 				}
 				thisPtr->Refresh();
-				thisPtr->RefreshUsedModules();
 			}
 			break;
 
@@ -3206,6 +3205,11 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::MDDialog::Refresh() {
+	RefreshAvailableModules();
+	RefreshUsedModules();
+}
+
+void UnlimitedDialog::MDDialog::RefreshAvailableModules() {
 	//list available modules
 	m_modules.clear();
 	SendMessage(m_lbModulesAvailable,LB_RESETCONTENT,0,0);
