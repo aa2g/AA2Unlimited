@@ -333,6 +333,10 @@ local function updateproplist()
 end
 propmgr.propschanged.connect(updateproplist)
 
+function proplist.dropfiles_cb(self, file, num, x, y)
+	propmgr.loadprop(file)
+end
+
 
 -- -----------
 -- UI Sliders
