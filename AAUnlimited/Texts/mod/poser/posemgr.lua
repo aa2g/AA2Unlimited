@@ -58,9 +58,9 @@ local cliptext
 local posename = iup.text { expand = "horizontal", visiblecolumns = 20 }
 local scenename = iup.text { expand = "horizontal", visiblecolumns = 20 }
 local posefilter = lists.listfilter()
-local poselist = lists.listbox { expand = "yes", chars = 20 }
+local poselist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local scenefilter = lists.listfilter()
-local scenelist = lists.listbox { expand = "yes", chars = 20 }
+local scenelist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
@@ -124,7 +124,10 @@ function deleteposebutton.action()
 			log.error(msg)
 		end
 		log.spam("Removed %s", path)
-		populateposelist()
+		poselist.valuestring = posename.value
+		if poselist.valuestring == posename.value then
+			poselist.removeitem = poselist.value
+		end
 	end
 end
 
@@ -271,7 +274,14 @@ local function savepose(filename)
 		file:write(json.encode(pose))
 		file:close()
 		log.spam("Poser: Pose %s saved", filename)
-		populateposelist()
+		local currentvalue = poselist.value
+		if posename.value ~= poselist.valuestring then
+			poselist.valuestring = filename
+			if poselist.value == currentvalue then
+				poselist.appenditem = filename
+				poselist.valuestring = filename
+			end
+		end
 	end
 end
 
@@ -440,7 +450,14 @@ local function savescene(filename)
 	file:write(json.encode(scene))
 	file:close()
 	log.spam("Poser: Scene %s saved", filename)
-	populatescenelist()
+	local currentvalue = scenelist.value
+	if scenename.value ~= scenelist.valuestring then
+		scenelist.valuestring = filename
+		if scenelist.value == currentvalue then
+			scenelist.appenditem = filename
+			scenelist.valuestring = filename
+		end
+	end
 end
 
 function savescenebutton.action()
@@ -456,7 +473,10 @@ function deletescenebutton.action()
 			log.error(msg)
 		end
 		log.spam("Removed %s", path)
-		populatescenelist()
+		scenelist.valuestring = scenename.value
+		if scenelist.valuestring == scenename.value then
+			scenelist.removeitem = scenelist.value
+		end
 	end
 end
 
