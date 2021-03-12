@@ -441,7 +441,7 @@ function trigger.storeRelationshipPoints(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	local storageKey = getCardStorageKey(towards);
@@ -467,7 +467,7 @@ function trigger.loadRelationshipPoints(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);	
 
@@ -504,7 +504,7 @@ function trigger.storeAllRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = {};
 	storage.toDump = {};
@@ -534,8 +534,7 @@ function trigger.loadAllRelationshipPoints(params)
 	local doNuke = args[4] or true;
 	local storage = getCardStorage(storageCard, key);
 
-	if (storageCard == 25 or seat == 25) return;
-
+	if (storageCard == 25 or seat == 25) then return end
 	if (storage ~= nil) then
 		for towards=0,24 do
 			local storageKey = getCardStorageKey(towards);
@@ -578,7 +577,7 @@ function trigger.storeOutgoingRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.toDump = {};
@@ -605,7 +604,7 @@ function trigger.loadOutgoingRelationshipPoints(params)
 	local seat = tonumber(args[3]) or storageCard;
 	local doNuke = args[4] or true;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -648,7 +647,7 @@ function trigger.storeIncomingRelationshipPoints(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.fromDump = {};
@@ -675,7 +674,7 @@ function trigger.loadIncomingRelationshipPoints(params)
 	local seat = tonumber(args[3]) or storageCard;
 	local doNuke = args[4] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -720,7 +719,7 @@ function trigger.storeOutgoingRelationshipPointsIndividual(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.toDump = {};
@@ -747,7 +746,7 @@ function trigger.loadOutgoingRelationshipPointsIndividual(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -787,7 +786,7 @@ function trigger.storeIncomingRelationshipPointsIndividual(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.fromDump = {};
@@ -814,7 +813,7 @@ function trigger.loadIncomingRelationshipPointsIndividual(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -857,7 +856,7 @@ function trigger.storeHStats(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	local storageKey = getCardStorageKey(towards);
@@ -883,7 +882,7 @@ function trigger.loadHStats(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);	
 	if ((storage == nil) and doNuke) then
@@ -919,7 +918,7 @@ function trigger.storeAllHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = {};
 	storage.toDump = {};
@@ -947,7 +946,7 @@ function trigger.loadAllHStats(params)
 	local seat = tonumber(args[3]) or storageCard;
 	local doNuke = args[4] or true;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -992,7 +991,7 @@ function trigger.storeOutgoingHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.toDump = {};
@@ -1019,7 +1018,7 @@ function trigger.loadOutgoingHStats(params)
 	local seat = tonumber(args[3]) or storageCard;
 	local doNuke = args[4] or true;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if ((storage == nil) and doNuke) then
@@ -1059,7 +1058,7 @@ function trigger.storeIncomingHStats(params)
 	local storageCard = tonumber(args[2]);
 	local seat = tonumber(args[3]) or storageCard;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.fromDump = {};
@@ -1086,7 +1085,7 @@ function trigger.loadIncomingHStats(params)
 	local seat = tonumber(args[3]) or storageCard;
 	local doNuke = args[4] or true;
 
-	if (storageCard == 25 or seat == 25) return;
+	if (storageCard == 25 or seat == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if ((storage == nil) and doNuke) then
@@ -1128,7 +1127,7 @@ function trigger.storeOutgoingHStatsIndividual(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.toDump = {};
@@ -1155,7 +1154,7 @@ function trigger.loadOutgoingHStatsIndividual(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -1195,7 +1194,7 @@ function trigger.storeIncomingHStatsIndividual(params)
 	local seat = tonumber(args[3]);
 	local towards = tonumber(args[4]);
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key) or {};
 	storage.fromDump = {};
@@ -1222,7 +1221,7 @@ function trigger.loadIncomingHStatsIndividual(params)
 	local towards = tonumber(args[4]);
 	local doNuke = args[5] or true;
 
-	if (storageCard == 25 or seat == 25 or towards == 25) return;
+	if (storageCard == 25 or seat == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 
@@ -1261,7 +1260,7 @@ function trigger.flushDump(params)
 	local storageCard = tonumber(args[2]);
 	local towards = tonumber(args[3]);
 
-	if (storageCard == 25 or towards == 25) return;
+	if (storageCard == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);	
 	if (storage ~= nil) then
@@ -1285,7 +1284,7 @@ function trigger.flushIncomingIndividualDump(params)
 	local storageCard = tonumber(args[2]);
 	local towards = tonumber(args[3]);
 
-	if (storageCard == 25 or towards == 25) return;
+	if (storageCard == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
@@ -1311,7 +1310,7 @@ function trigger.flushOutgoingIndividualDump(params)
 	local storageCard = tonumber(args[2]);
 	local towards = tonumber(args[3]);
 
-	if (storageCard == 25 or towards == 25) return;
+	if (storageCard == 25 or towards == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
@@ -1335,7 +1334,7 @@ function trigger.flushOutgoingDump(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 
-	if (storageCard == 25) return;
+	if (storageCard == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
@@ -1354,7 +1353,7 @@ function trigger.flushIncomingDump(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 
-	if (storageCard == 25) return;
+	if (storageCard == 25) then return end
 
 	local storage = getCardStorage(storageCard, key);
 	if (storage ~= nil) then
@@ -1373,7 +1372,7 @@ function trigger.flushWholeDump(params)
 	local key = args[1];
 	local storageCard = tonumber(args[2]);
 
-	if (storageCard == 25) return;
+	if (storageCard == 25) then return end
 
 	setCardStorage(storageCard, key, {});
 end
