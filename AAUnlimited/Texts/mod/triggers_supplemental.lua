@@ -185,7 +185,7 @@ function getActionName(idxAction)
 		actions[56] = "MINNA_LUNCH";
 		actions[57] = "MINNA_REST";
 		actions[58] = "MINNA_PLAY";
-		actions[59] = "MINNA_EAT"
+		actions[59] = "MINNA_EAT";
 		actions[60] = "MINNA_KARAOKE";
 		actions[61] = "MINNA_BE_FRIENDLY";
 		actions[62] = "MINNA_COME";
