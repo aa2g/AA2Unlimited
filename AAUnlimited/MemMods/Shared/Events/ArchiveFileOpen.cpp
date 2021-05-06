@@ -145,7 +145,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 
 	if (file)
 		LOGPRIONC(Logger::Priority::SPAM) std::hex << "vtable is " << file->vtable << "\r\n";*/
-
+	
 	if (readBytes)
 		*readBytes = 0;
 	wchar_t *orig_archive = *paramArchive;
