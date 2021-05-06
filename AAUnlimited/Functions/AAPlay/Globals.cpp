@@ -30,6 +30,10 @@ void InitOnLoad() {
 		g_characters[seat].idxSave = idxCharacter;
 		g_characters[seat].assetContainer = **(ExtClass::CharacterAssetContainer**)((char*)(it->m_somePointer) + 0x13c);
 
+		//const DWORD xxListOffset[]{ 0x376158, 0xA8, 0x8, 0x2C, 0xA8};
+		//std::wstring* xxListStart = (std::wstring*)ExtVars::ApplyRule(xxListOffset);
+		//std::string heck = std::string((char*)ExtVars::ApplyRule(xxListOffset));
+		//in search of the array for outfits, the pointer isn't valid
 
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;

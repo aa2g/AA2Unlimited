@@ -1730,7 +1730,8 @@ namespace Shared {
 			auto& aau = AAPlay::g_characters[seat].m_cardData;
 			aau.SwitchActiveCardStyle(newset, AAPlay::g_characters[seat].m_char->m_charData);
 			//Will update the low poly on next room change
-			AAPlay::g_characters[seat].m_char->m_bClothesOn = 0;
+			//AAPlay::g_characters[seat].m_char->m_bClothesOn = 0;
+			//makes the character naked on high poly load
 
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
