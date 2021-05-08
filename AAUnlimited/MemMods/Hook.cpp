@@ -220,6 +220,7 @@ DWORD PatchIAT(void *piat, void *newp)
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 #include "MemMods/AAPlay/Events/ClothingDialog.h"
 #include "MemMods/AAPlay/Events/NpcActions.h"
+#include "MemMods/AAPlay/Events/ClothesLimit.h"
 #include "MemMods/AAPlay/Events/ScreenCapture.h"
 #include "MemMods/AAPlay/Events/UiEvent.h"
 #include "MemMods/AAPlay/Events/CharacterRender.h"
@@ -320,6 +321,10 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
+		ClothesLimit::trimRemover();
+		ClothesLimit::clothingSlotFirstInject();
+		ClothesLimit::clothingSlotSecondInject();
+		ClothesLimit::clothingSlotThirdInject();
 		//NpcActions::headTrackingChangeInjection();
 
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing

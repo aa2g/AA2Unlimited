@@ -134,6 +134,7 @@
     <ClCompile Include="General\DrawD3D.cpp" />
     <ClCompile Include="Functions\Notifications.cpp" />
     <ClCompile Include="Functions\AAPlay\Controls.cpp" />
+    <ClCompile Include="MemMods\AAPlay\Events\ClothesLimit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -260,6 +261,7 @@
     <ClInclude Include="Functions\Notifications.h" />
     <ClInclude Include="Functions\AAPlay\Controls.h" />
     <ClInclude Include="External\ExternalClasses\CharacterAssetContainer.h" />
+    <ClInclude Include="MemMods\AAPlay\Events\ClothesLimit.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">

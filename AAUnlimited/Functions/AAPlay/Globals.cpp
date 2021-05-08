@@ -86,22 +86,6 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 		}
 	}
 
-	DWORD* uniform = (DWORD*)Shared::PNG::saved_clothes;
-	g_characters[seat].m_cardData.m_origUniform = *uniform;
-	
-
-	const DWORD offset[]{ 0x2C, 0x24, 0x28, 0xADC };
-	DWORD* sport = (DWORD*)ExtVars::ApplyRule(character, offset);
-	g_characters[seat].m_cardData.m_origSport = *sport;
-
-	const DWORD offset1[]{ 0x2C, 0x24, 0x28, 0xB38 };
-	DWORD* swim = (DWORD*)ExtVars::ApplyRule(character, offset1);
-	g_characters[seat].m_cardData.m_origSwim = *swim;
-
-	const DWORD offset2[]{ 0x2C, 0x24, 0x28, 0xB94 };
-	DWORD* club = (DWORD*)ExtVars::ApplyRule(character, offset2);
-	g_characters[seat].m_cardData.m_origClub = *club;
-
 
 	//initialize triggers
 	auto& aauData = g_characters[seat].m_cardData;
