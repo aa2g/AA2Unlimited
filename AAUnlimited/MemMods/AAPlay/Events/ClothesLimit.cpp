@@ -235,7 +235,7 @@ namespace PlayInjections {
 				DWORD address = General::GameBase + 0x1306CC;
 				DWORD redirectAddress = (DWORD)(&clothingSlotSecondRedirect);
 				Hook((BYTE*)address,
-				{ 0x0F, 0xB6, 0x4D, 0x30, 0x51 },						//expected values
+				{ 0x0F, 0xB6, 0x4B, 0x30, 0x51 },						//expected values
 				{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 					NULL);
 			}
@@ -274,7 +274,7 @@ namespace PlayInjections {
 			DWORD address = General::GameBase + 0x130974;
 			DWORD redirectAddress = (DWORD)(&clothingSlotThirdRedirect);
 			Hook((BYTE*)address,
-			{ 0x0F, 0xB6, 0x4D, 0x30, 0x51 },						//expected values
+			{ 0x0F, 0xB6, 0x4B, 0x30, 0x51 },						//expected values
 			{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 				NULL);
 		}
