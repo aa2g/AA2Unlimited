@@ -229,10 +229,6 @@ public:
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
 
-	int m_origUniform;
-	int m_origSport;
-	int m_origSwim;
-	int m_origClub;
 
 
 	//modifications can be saved in multiple sets.
