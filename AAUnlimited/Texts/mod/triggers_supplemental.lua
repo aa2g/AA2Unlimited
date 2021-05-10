@@ -752,6 +752,7 @@ function trigger.loadOutgoingRelationshipPointsIndividual(params)
 	local storage = getCardStorage(storageCard, key);
 
 	if ((storage == nil) and doNuke) then
+		local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			local toDump = {};
 			restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
