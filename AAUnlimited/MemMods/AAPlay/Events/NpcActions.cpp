@@ -1175,6 +1175,9 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
 				ThrowEvent(&data);
 			}
+			else {
+				LOGPRIO(Logger::Priority::WARN) << "virtualTablePTR is not the same as calculated one!" << "\r\n";
+			}
 			break;
 		}
 		else {
@@ -1188,6 +1191,9 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
 				data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
 				ThrowEvent(&data);
+			}
+			else {
+				LOGPRIO(Logger::Priority::WARN) << "virtualTablePTR is not the same as calculated one!" << "\r\n";
 			}
 			break;
 		}

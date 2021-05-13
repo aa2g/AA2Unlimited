@@ -10,7 +10,8 @@ namespace PlayInjections {
 		DWORD* clothingSlotReturnAddress = 0;
 		int fourByteClothes = 0;
 
-		//Is never called, it's here for if we ever need to unlock the personalitiy slots for the future
+		/*
+		Is never called, it's here for if we ever need to unlock the personalitiy slots for the future
 		void personalitySlotUnlock() {
 			if (General::IsAAPlay) {
 				DWORD address = General::GameBase + 0xBC9B4;
@@ -120,6 +121,7 @@ namespace PlayInjections {
 			}
 
 		}
+		*/
 
 		void trimRemover() {
 			//find all places where the game accesses the byte and feed it the 4 byte address instead
