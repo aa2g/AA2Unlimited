@@ -1165,22 +1165,30 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 			break;
 		}
 		else if(params->target2 == NULL) {
-			NpcWantTalkWithData data;
-			data.substruct = params;
-			data.card = AAPlay::GetSeatFromStruct(user);
-			data.action = params->conversationId;
-			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
-			ThrowEvent(&data);
+			DWORD virtualTablePTR = (DWORD)Shared::GameState::getPlayerCharacter()->m_char->m_charData->m_virtualTable + 0xA870;
+			if (params->target1->m_virtualTable == virtualTablePTR) {
+				//Checking if CharacterActivity is valid
+				NpcWantTalkWithData data;
+				data.substruct = params;
+				data.card = AAPlay::GetSeatFromStruct(user);
+				data.action = params->conversationId;
+				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+				ThrowEvent(&data);
+			}
 			break;
 		}
 		else {
-			NpcWantTalkWithAboutData data;
-			data.substruct = params;
-			data.card = AAPlay::GetSeatFromStruct(user);
-			data.action = params->conversationId;
-			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
-			data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
-			ThrowEvent(&data);
+			DWORD virtualTablePTR = (DWORD)Shared::GameState::getPlayerCharacter()->m_char->m_charData->m_virtualTable + 0xA870;
+			if (params->target1->m_virtualTable == virtualTablePTR && params->target2->m_virtualTable == virtualTablePTR) {
+				//Checking if CharacterActivity is valid
+				NpcWantTalkWithAboutData data;
+				data.substruct = params;
+				data.card = AAPlay::GetSeatFromStruct(user);
+				data.action = params->conversationId;
+				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+				data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
+				ThrowEvent(&data);
+			}
 			break;
 		}
 		break; }

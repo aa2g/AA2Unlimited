@@ -121,11 +121,13 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		if (card.m_cardData.GetHairs(idx).size()) {
 			for (int num = 0; num < card.m_cardData.GetHairs(idx).size(); num++) {
 				card.AddShadows((DWORD*)card.m_hairs[idx][num].second);
+				card.CastShadows((DWORD*)card.m_hairs[idx][num].second);
 			}
 		}
 	}
 	if (card.m_char->m_xxSkeleton) {
 		card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
+		card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
 	}
 	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);

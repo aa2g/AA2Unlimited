@@ -57,6 +57,7 @@ local function loadxx(directory, file)
 	local character = GetCharInstData(charamgr.currentcharacter().struct.m_seat)
 	if (character ~= nil) then
 		character:AddShadows(newprop);
+		character:CastShadows(newprop);
 	end
 	table.insert(loaded, proxy.wrap(newprop))
 	log.spam("loaded xx %s at index %d = %s", file, #loaded, newprop)
