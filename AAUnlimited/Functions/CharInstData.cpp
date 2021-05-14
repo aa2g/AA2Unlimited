@@ -126,6 +126,34 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 	}
 }
 
+void CharInstData::CastShadows(DWORD* xxPTR)
+{
+	if (this->IsValid() && General::IsAAPlay) {
+		if (this->m_char->m_xxSkeleton) {
+			DWORD* firstFunction;
+			DWORD* somePTR;
+			DWORD* nptr = nullptr;
+			DWORD** aptr = &nptr;
+			DWORD ** pointerToXXPTR = &xxPTR;
+
+			const DWORD offset[]{ 0x1AFFD0 };
+			firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+			const DWORD offset2[]{ 0x3A6748, 0x30, 0x00, 0x18 };
+			somePTR = (DWORD*)ExtVars::ApplyRule(offset2);
+			__asm
+			{
+				mov eax, pointerToXXPTR
+				push eax
+				mov ecx, aptr
+				push ecx
+				mov eax, somePTR
+				call[firstFunction]
+			}
+		}
+	}
+}
+
+
 int CharInstData::GetStyleCount()
 {
 	return m_cardData.m_styles.size();

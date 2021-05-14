@@ -105,6 +105,7 @@ public:
 	void ClearCache();
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
+	void CastShadows(DWORD * HairPTR);
 
 	DWORD* lastDialogue = NULL;
 
@@ -215,6 +216,9 @@ public:
 		});
 		LUA_METHOD(AddShadows, {
 			_self->AddShadows(_gl.get(2));
+		});
+		LUA_METHOD(CastShadows, {
+			_self->CastShadows(_gl.get(2));
 		});
 #undef LUA_CLASS
 	}

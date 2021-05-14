@@ -278,6 +278,7 @@ void InitializeHooks() {
 		Shared::PNG::InstallHooks();
 		ScreenCapture::InitInjection();
 		NpcActions::extraHairFixInjection();
+		ClothesLimit::trimRemover();
 	}
 
 	if (General::IsAAPlay) {
@@ -321,10 +322,10 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
-		ClothesLimit::trimRemover();
 		ClothesLimit::clothingSlotFirstInject();
 		ClothesLimit::clothingSlotSecondInject();
 		ClothesLimit::clothingSlotThirdInject();
+		//ClothesLimit::personalitySlotUnlock(); hooks are here for the time we'll need this, i'll move it to a different file when needed
 		//NpcActions::headTrackingChangeInjection();
 
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
