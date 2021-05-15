@@ -156,7 +156,7 @@ local bonelistzbox = iup.zbox {
 	expand = "yes",
 }
 
-local categories = { "All", "Torso", "Left Arm", "Right Arm", "Left Hand", "Right Hand", "Left Leg", "Right Leg", "Face", "Breasts", "Skirt", "Props", "Other" }
+local categories = { "All", "Torso", "Left Arm", "Right Arm", "Left Hand", "Right Hand", "Left Leg", "Right Leg", "Face", "Breasts", "Skirt", "Props", "Other", "Monster-Wings", "Monster-Tail" }
 categorylist.setlist(categories)
 
 local function setcategory(category)
