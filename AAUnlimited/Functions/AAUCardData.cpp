@@ -1032,7 +1032,7 @@ bool AAUCardData::SetTan(const TCHAR* name, int style) {
 	return anyGood;
 }
 
-bool AAUCardData::AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip) {
+bool AAUCardData::AddHair(BYTE kind, BYTE slot, BYTE adjustment, BYTE flip) {
 	m_styles[m_currCardStyle].m_hairs[kind].push_back({ kind,slot,flip,adjustment });
 	return true;
 }

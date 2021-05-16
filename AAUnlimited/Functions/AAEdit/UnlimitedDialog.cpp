@@ -1150,7 +1150,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SendMessage(thisPtr->m_rbKind[0], BM_SETCHECK, BST_CHECKED, 0);
 		thisPtr->m_edSlot = GetDlgItem(hwndDlg,IDC_HR_EDSLOT);
 		thisPtr->m_edAdjustment = GetDlgItem(hwndDlg,IDC_HR_EDADJUSTMENT);
-		thisPtr->m_cbFlip = GetDlgItem(hwndDlg,IDC_HR_CBFLIP);
+		thisPtr->m_cbFlip = GetDlgItem(hwndDlg, IDC_HR_EDSLOT2);
 		thisPtr->m_edHighlight = GetDlgItem(hwndDlg, IDC_HR_EDHIGHLIGHT);
 		thisPtr->m_lstHairs = GetDlgItem(hwndDlg,IDC_HR_LIST);
 
@@ -1207,11 +1207,16 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						}
 						if (kind == 4) kind = 0;
 						TCHAR buf[256];
+
 						SendMessage(thisPtr->m_edSlot, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE slot = _wtoi(buf);
+
 						SendMessage(thisPtr->m_edAdjustment, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE adjustment = _wtoi(buf);
-						bool flip = SendMessage(thisPtr->m_cbFlip, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+						SendMessage(thisPtr->m_cbFlip, WM_GETTEXT, 256, (LPARAM)buf);
+						BYTE flip = _wtoi(buf);
+
 						g_currChar.m_cardData.AddHair(kind, slot, adjustment, flip);
 						thisPtr->Refresh();
 						//redraw hair of added king
@@ -1294,9 +1299,9 @@ void UnlimitedDialog::HRDialog::RefreshHairList() {
 			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 			//flip
-			if (list[i].flip) item.pszText = TEXT("true");
-			else item.pszText = TEXT("false");
+			_itow_s(list[i].flip, buf, 10);
 			item.iSubItem = 3;
+			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 		}
 	}

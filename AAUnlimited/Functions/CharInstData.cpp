@@ -81,8 +81,9 @@ void CharInstData::SetHeadTracking(int headtracking)
 }
 
 
-void CharInstData::AddShadows(DWORD* HairPTR)
+void CharInstData::AddShadows(DWORD* xxPTR)
 {
+	if (!xxPTR) return;
 	if (this->IsValid()) {
 		if (this->m_char->m_xxSkeleton) {
 			//an IsValid() check would be nice to have, but that fucks with the display tab in maker 
@@ -104,9 +105,9 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 			__asm
 			{
 				mov esi, charPTR
-				mov edi, HairPTR
+				mov edi, xxPTR
 				call[firstFunction]
-				mov eax, HairPTR
+				mov eax, xxPTR
 				mov ecx, [eax + 0x218]
 				mov esi, [ecx + 0x0C]
 				xor edx, edx
@@ -128,6 +129,7 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 
 void CharInstData::CastShadows(DWORD* xxPTR)
 {
+	if (!xxPTR) return;
 	if (this->IsValid() && General::IsAAPlay) {
 		if (this->m_char->m_xxSkeleton) {
 			DWORD* firstFunction;

@@ -76,7 +76,7 @@ public:
 	bool RemoveBoneTransformation(int index);
 
 	//hairs
-	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip);
+	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, BYTE flip);
 	bool RemoveHair(int index);
 
 	struct BoneMod;
