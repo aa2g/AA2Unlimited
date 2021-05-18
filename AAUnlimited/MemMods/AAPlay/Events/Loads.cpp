@@ -410,12 +410,12 @@ void __stdcall SaveLoadEvent() {
 
 void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fileName) {
 
-	AAPlay::InitTransferedCharacter(character);
 	std::string path = General::CastToString(fileName);
-	std::size_t found = path.rfind("male\\");
-	if (found != std::string::npos) path.replace(0, found+5, "");
+	std::size_t found = path.rfind("ale\\");
+	if (found != std::string::npos) path.replace(0, found+4, "");
 	auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 	storage.storeClassString(General::CastToWString("LastCardFileName"), path);
+	AAPlay::InitTransferedCharacter(character);
 }
 
 void __stdcall TransferOutEvent(ExtClass::CharacterStruct* character) {

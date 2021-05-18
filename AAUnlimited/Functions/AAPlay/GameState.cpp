@@ -324,11 +324,16 @@ void Shared::GameState::kickCard(int s)
 		call[kickFunction]
 	}
 }
-
-void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
+/// <summary>
+/// Adds a card to the class
+/// </summary>
+/// <param name="cardName">- Filename of the card inside Male or Female folder</param>
+/// <param name="gender">- Card's gender. true = female, false = male</param>
+/// <param name="seat">- Class seat</param>
+void Shared::GameState::addCard(std::wstring cardName, bool isFemale, int seat)
 {
-	DWORD seat = (DWORD)s;
-	std::wstring genderPath = gender ? L"Female\\" : L"Male\\";
+	DWORD s = (DWORD)seat;
+	std::wstring genderPath = isFemale ? L"Female\\" : L"Male\\";
 	std::wstring cardPath = General::AAPlayPath + L"data\\save\\" + genderPath + cardName;
 	DWORD *p = (DWORD *)(&cardPath);
 	DWORD pushaddress = *p;
@@ -341,8 +346,8 @@ void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
 	{
 		mov edi, ediValue
 		push pushaddress
-		push gender
-		push seat
+		push isFemale
+		push s
 		call[addFunction]
 	}
 }
