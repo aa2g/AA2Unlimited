@@ -284,6 +284,10 @@ void Lua::bindLua() {
 		*PlayerCharacterPtr() = s.get(1);
 	});
 
+	_BINDING["SetAAFaceDLL"] = LUA_LAMBDA0({
+		AAEdit::SetAAFACEDLL(s.get(1));
+	});
+
 	_BINDING["AddSubtitles"] = LUA_LAMBDA0({
 		Subtitles::AddSubtitles(s.get(1), s.get(2));
 	});

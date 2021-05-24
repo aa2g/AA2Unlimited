@@ -4,7 +4,7 @@ local _M = {}
 
 function on.launch()
 	if exe_type ~= "edit" then return end
-	LoadLibraryA("aafacedll.dll")
+	SetAAFaceDLL(LoadLibraryA("aafacedll.dll"))
 end
 
 function _M:load()

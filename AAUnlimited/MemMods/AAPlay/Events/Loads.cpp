@@ -26,6 +26,8 @@ static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
 static DWORD OrigLoadXAMale, OrigLoadXAFemale;
+typedef void(*f_modelReload)(DWORD* charstruct);
+
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth, BYTE partial) {
@@ -135,6 +137,12 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		Shared::GameState::setIsOverriding(false);
 	}
 	HiPolyLoadEndEvent(loadCharacter);
+	if (AAEdit::AAFACEDLL) {
+		f_modelReload modelReload= (f_modelReload)GetProcAddress(AAEdit::AAFACEDLL, "modelReload");
+		if (modelReload) {
+			modelReload((DWORD*)loadCharacter);
+		}
+	}
 	loc_loadingCharacter = false;
 	return retv;
 }
