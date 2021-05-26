@@ -133,6 +133,7 @@
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
     <ClCompile Include="Script\ScriptLua.cpp" />
+    <ClCompile Include="Dictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="General\DirectXStructs.h" />
     <ClInclude Include="General\DrawD3D.h" />
     <ClInclude Include="General\IllusionUtil.h" />
+    <ClInclude Include="Dictionary.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterRender.h" />

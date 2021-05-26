@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files/PNGData.h"
+#include "Dictionary.h"
 
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -3127,15 +3128,30 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].name.c_str());
 					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].description.c_str());
 					return TRUE;
+					if (true) {
+						auto store = Storage::Dictionary::getStorage(L"modules");
+						auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+						if (result.isValid) {
+							SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+						}
+					}
 				}
 			}
 			break;
 		case IDC_MD_LBAVAILABLE:
 			if(notification == LBN_SELCHANGE) {
 				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
-				if(sel != LB_ERR) {
-					SendMessage(thisPtr->m_edName,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
-					SendMessage(thisPtr->m_edDescr,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+				if (sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
+					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+					if (true) {
+						auto store = Storage::Dictionary::getStorage(L"modules");
+						auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+						if (result.isValid) {
+							SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+						}
+					}
+
 					return TRUE;
 				}
 			}
