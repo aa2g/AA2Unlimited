@@ -563,7 +563,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto virtueMods = storage.getCardAAUDataValue(cardInst, L"virtueMods");
+			auto virtueMods = storage->getCardAAUDataValue(cardInst, L"virtueMods");
 			if (!virtueMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -580,7 +580,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto virtue = storage.getCardAAUDataValue(cardInst, L"virtue");
+			auto virtue = storage->getCardAAUDataValue(cardInst, L"virtue");
 			return Value(virtue.is<double>() ? (int)virtue.get<double>() : cardInst->m_char->m_charData->m_character.virtue);
 		}
 
@@ -603,7 +603,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto traitMods = storage.getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			auto traitMods = storage->getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
 			if (!traitMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -621,7 +621,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto storedTrait = storage.getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			auto storedTrait = storage->getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
 			return Value(storedTrait.is<double>() ? (int)storedTrait.get<double>() : cardInst->m_char->m_charData->m_traitBools[trait]);
 
 		}
@@ -742,7 +742,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto clubMods = storage.getCardAAUDataValue(cardInst, L"clubValueMods");
+			auto clubMods = storage->getCardAAUDataValue(cardInst, L"clubValueMods");
 			if (!clubMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -759,7 +759,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto club = storage.getCardAAUDataValue(cardInst, L"club");
+			auto club = storage->getCardAAUDataValue(cardInst, L"club");
 			return Value(club.is<double>() ? (int)club.get<double>() : (int)cardInst->m_char->m_charData->m_character.clubValue);
 		}
 
@@ -801,7 +801,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto intelligenceMods = storage.getCardAAUDataValue(cardInst, L"intelligenceValueMods");
+			auto intelligenceMods = storage->getCardAAUDataValue(cardInst, L"intelligenceValueMods");
 			if (!intelligenceMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -818,7 +818,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto intelligence = storage.getCardAAUDataValue(cardInst, L"intelligence");
+			auto intelligence = storage->getCardAAUDataValue(cardInst, L"intelligence");
 			return Value(intelligence.is<double>() ? (int)intelligence.get<double>() : (int)cardInst->m_char->m_charData->m_character.intelligenceValue);
 		}
 
@@ -932,7 +932,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto strengthMods = storage.getCardAAUDataValue(cardInst, L"strengthValueMods");
+			auto strengthMods = storage->getCardAAUDataValue(cardInst, L"strengthValueMods");
 			if (!strengthMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -949,7 +949,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto strength = storage.getCardAAUDataValue(cardInst, L"strength");
+			auto strength = storage->getCardAAUDataValue(cardInst, L"strength");
 			return Value(strength.is<double>() ? (int)strength.get<double>() : (int)cardInst->m_char->m_charData->m_character.strengthValue);
 		}
 
@@ -1019,7 +1019,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto sociabilityMods = storage.getCardAAUDataValue(cardInst, L"sociabilityMods");
+			auto sociabilityMods = storage->getCardAAUDataValue(cardInst, L"sociabilityMods");
 			if (!sociabilityMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -1036,7 +1036,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto sociability = storage.getCardAAUDataValue(cardInst, L"sociability");
+			auto sociability = storage->getCardAAUDataValue(cardInst, L"sociability");
 			return Value(sociability.is<double>() ? (int)sociability.get<double>() : cardInst->m_char->m_charData->m_character.sociability);
 		}
 
@@ -1427,8 +1427,8 @@ namespace Shared {
 			if (invalidSeat) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardInt(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardInt(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].iVal);
 		}
@@ -1438,8 +1438,8 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card)) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardFloat(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardFloat(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].fVal);
 		}
@@ -1450,8 +1450,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardString(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardString(inst, *params[1].strVal);
 			if (result.isValid) return Value(General::CastToWString(result.value));
 			else return Value(*params[2].strVal);
 		}
@@ -1462,36 +1462,36 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardBool(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardBool(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].bVal);
 		}
 		//int(string, int)
 		Value Thread::GetClassStorageInt(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassInt(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassInt(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].iVal);
 		}
 		//float(string, float)
 		Value Thread::GetClassStorageFloat(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassFloat(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassFloat(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].fVal);
 		}
 		//string(string, string)
 		Value Thread::GetClassStorageString(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassString(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassString(*params[0].strVal);
 			if (result.isValid) return Value(General::CastToWString(result.value));
 			else return Value(*params[1].strVal);
 		}
 		//bool(string, bool)
 		Value Thread::GetClassStorageBool(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassBool(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassBool(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].bVal);
 		}

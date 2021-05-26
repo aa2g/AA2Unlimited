@@ -344,13 +344,13 @@ void Lua::bindLua() {
 			s.push(err.c_str());
 			return 2;
 		}
-		PersistentStorage::current().set(key, v);
+		PersistentStorage::current()->set(key, v);
 		s.push(true);
 	});
 
 	_BINDING["GetClassJSONData"] = LUA_LAMBDA({
 		std::string key((const char*)s.get(1));
-		std::string json = PersistentStorage::current().get(key).serialize();
+		std::string json = PersistentStorage::current()->get(key).serialize();
 		s.push(json.c_str());
 	});
 

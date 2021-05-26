@@ -23,29 +23,29 @@ namespace PersistentStorage {
 		std::wstring file;	//file with its path starting at AA2_PLAY\ 
 		static std::map<std::wstring, ClassStorage> allStorages;	//collection of all the loaded storages
 
-		Option<picojson::object> getCardRecord(CharInstData* character, std::wstring key);
+		Option<picojson::object*> getCardRecord(CharInstData* character, std::wstring key);
 	public:
 		std::wstring className;
 
 		picojson::value get(std::string key);
-		ClassStorage set(std::string key, picojson::value value);
+		ClassStorage* set(std::string key, picojson::value value);
 
-		ClassStorage storeClassBool(std::wstring key, bool value);
-		ClassStorage storeClassInt(std::wstring key, int value);
-		ClassStorage storeClassFloat(std::wstring key, float value);
-		ClassStorage storeClassString(std::wstring key, std::string value);
-
-		ClassStorage storeCardBool(CharInstData* character, std::wstring key, bool value);
-		ClassStorage storeCardInt(CharInstData* character, std::wstring key, int value);
-		ClassStorage storeCardFloat(CharInstData* character, std::wstring key, float value);
-		ClassStorage storeCardString(CharInstData* character, std::wstring key, std::string value);
-		ClassStorage storeCardObject(CharInstData* character, std::wstring key, picojson::object value);
-
-		ClassStorage storeCardAAUDataBool(CharInstData* character, std::wstring key, bool value);
-		ClassStorage storeCardAAUDataInt(CharInstData* character, std::wstring key, int value);
-		ClassStorage storeCardAAUDataFloat(CharInstData* character, std::wstring key, float value);
-		ClassStorage storeCardAAUDataString(CharInstData* character, std::wstring key, std::string value);
-		ClassStorage storeCardAAUDataObject(CharInstData* character, std::wstring key, picojson::object value);
+		ClassStorage* storeClassBool(std::wstring key, bool value);
+		ClassStorage* storeClassInt(std::wstring key, int value);
+		ClassStorage* storeClassFloat(std::wstring key, float value);
+		ClassStorage* storeClassString(std::wstring key, std::string value);
+					
+		ClassStorage* storeCardBool(CharInstData* character, std::wstring key, bool value);
+		ClassStorage* storeCardInt(CharInstData* character, std::wstring key, int value);
+		ClassStorage* storeCardFloat(CharInstData* character, std::wstring key, float value);
+		ClassStorage* storeCardString(CharInstData* character, std::wstring key, std::string value);
+		ClassStorage* storeCardObject(CharInstData* character, std::wstring key, picojson::object value);
+					
+		ClassStorage* storeCardAAUDataBool(CharInstData* character, std::wstring key, bool value);
+		ClassStorage* storeCardAAUDataInt(CharInstData* character, std::wstring key, int value);
+		ClassStorage* storeCardAAUDataFloat(CharInstData* character, std::wstring key, float value);
+		ClassStorage* storeCardAAUDataString(CharInstData* character, std::wstring key, std::string value);
+		ClassStorage* storeCardAAUDataObject(CharInstData* character, std::wstring key, picojson::object value);
 
 		Option<int> getClassInt(std::wstring key);
 		Option<float> getClassFloat(std::wstring key);
@@ -56,14 +56,14 @@ namespace PersistentStorage {
 		Option<int> getCardInt(CharInstData* character, std::wstring key);
 		Option<float> getCardFloat(CharInstData* character, std::wstring key);
 		Option<std::string> getCardString(CharInstData* character, std::wstring key);
-		Option<picojson::object> getCardObject(CharInstData* character, std::wstring key);
+		Option<picojson::object*> getCardObject(CharInstData* character, std::wstring key);
 
 		picojson::value getCardAAUDataValue(CharInstData* character, std::wstring key);
 
-		static ClassStorage getStorage(std::wstring file);
-		static ClassStorage getCurrentClassStorage();
+		static ClassStorage* getStorage(std::wstring file);
+		static ClassStorage* getCurrentClassStorage();
 		static void reset(std::wstring file);
-		ClassStorage save();
+		ClassStorage* save();
 		
 		ClassStorage() {}
 		ClassStorage(ClassStorage &that)
@@ -147,5 +147,5 @@ namespace PersistentStorage {
 	}
 #undef LUA_CLASS
 */
-	ClassStorage current();
+	ClassStorage* current();
 }

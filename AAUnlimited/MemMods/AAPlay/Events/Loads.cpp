@@ -422,7 +422,7 @@ void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fi
 	std::size_t found = path.rfind("ale\\");
 	if (found != std::string::npos) path.replace(0, found+4, "");
 	auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-	storage.storeClassString(General::CastToWString("LastCardFileName"), path);
+	storage->storeClassString(General::CastToWString("LastCardFileName"), path);
 	AAPlay::InitTransferedCharacter(character);
 }
 

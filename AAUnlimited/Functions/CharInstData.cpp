@@ -18,7 +18,7 @@ void CharInstData::SetCurrentStyle(int index)
 	m_cardData.SwitchActiveCardStyle(index, this->m_char->m_charData);
 
 	auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-	storage.storeCardInt(&AAPlay::g_characters[this->m_char->m_seat], L"m_currCardStyle", index);
+	storage->storeCardInt(&AAPlay::g_characters[this->m_char->m_seat], L"m_currCardStyle", index);
 }
 
 void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
@@ -465,10 +465,10 @@ void CharInstData::StoreInitialStats()
 {
 	auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 
-	storage.storeCardAAUDataInt(this, L"virtue", this->m_char->m_charData->m_character.virtue);
-	storage.storeCardAAUDataInt(this, L"sociability", this->m_char->m_charData->m_character.sociability);
-	storage.storeCardAAUDataInt(this, L"strengthValue", this->m_char->m_charData->m_character.strengthValue);
-	storage.storeCardAAUDataInt(this, L"intelligenceValue", this->m_char->m_charData->m_character.intelligenceValue);
-	storage.storeCardAAUDataInt(this, L"clubValue", this->m_char->m_charData->m_character.clubValue);
+	storage->storeCardAAUDataInt(this, L"sociability", this->m_char->m_charData->m_character.sociability);
+	storage->storeCardAAUDataInt(this, L"virtue", this->m_char->m_charData->m_character.virtue);
+	storage->storeCardAAUDataInt(this, L"strengthValue", this->m_char->m_charData->m_character.strengthValue);
+	storage->storeCardAAUDataInt(this, L"intelligenceValue", this->m_char->m_charData->m_character.intelligenceValue);
+	storage->storeCardAAUDataInt(this, L"clubValue", this->m_char->m_charData->m_character.clubValue);
 }
 
