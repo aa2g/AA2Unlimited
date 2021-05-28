@@ -498,7 +498,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target virtue mod
-			auto allVirtueMods = storage.getCardAAUDataValue(inst, L"virtueMods");
+			auto allVirtueMods = storage->getCardAAUDataValue(inst, L"virtueMods");
 			if (!allVirtueMods.is<picojson::object>()) {
 				allVirtueMods = picojson::value(picojson::object());
 			}
@@ -508,7 +508,7 @@ namespace Shared {
 			allVirtueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 			
 			//adjust the effective virtue
-			auto oldEffectiveVirtue = storage.getCardAAUDataValue(inst, L"virtue");
+			auto oldEffectiveVirtue = storage->getCardAAUDataValue(inst, L"virtue");
 			int oldEffectiveVirtueValue = oldEffectiveVirtue.is<double>() ?
 				oldEffectiveVirtue.get<double>() : inst->m_char->m_charData->m_character.virtue;
 			//	training correction
@@ -524,8 +524,8 @@ namespace Shared {
 			auto newVirtueValue = oldEffectiveVirtueValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"virtue", newVirtueValue);
-			storage.storeCardAAUDataObject(inst, L"virtueMods", allVirtueMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"virtue", newVirtueValue);
+			storage->storeCardAAUDataObject(inst, L"virtueMods", allVirtueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.virtue = min(max(newVirtueValue, 0), 4);
 		}
@@ -558,7 +558,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target trait mod
-			auto allTraitMods = storage.getCardAAUDataValue(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			auto allTraitMods = storage->getCardAAUDataValue(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
 			if (!allTraitMods.is<picojson::object>()) {
 				allTraitMods = picojson::value(picojson::object());
 			}
@@ -567,7 +567,7 @@ namespace Shared {
 				oldTargetMod.get<double>() : 0;
 			allTraitMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 			//adjust the effective trait value
-			auto oldEffectiveTrait = storage.getCardAAUDataValue(inst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			auto oldEffectiveTrait = storage->getCardAAUDataValue(inst, L"trait_" + General::CastToWString(std::to_string(trait)));
 			int oldEffectiveTraitValue = oldEffectiveTrait.is<double>() ?
 				oldEffectiveTrait.get<double>() : inst->m_char->m_charData->m_traitBools[trait];
 			//    training correction
@@ -581,8 +581,8 @@ namespace Shared {
 			auto newTraitValue = oldEffectiveTraitValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"trait_" + General::CastToWString(std::to_string(trait)), newTraitValue);
-			storage.storeCardAAUDataObject(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)), allTraitMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"trait_" + General::CastToWString(std::to_string(trait)), newTraitValue);
+			storage->storeCardAAUDataObject(inst, L"traitMods_" + General::CastToWString(std::to_string(trait)), allTraitMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_traitBools[trait] = min(max(newTraitValue, 0), 1);
 		}
@@ -781,7 +781,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target club value mod
-			auto allClubValueMods = storage.getCardAAUDataValue(inst, L"clubValueMods");
+			auto allClubValueMods = storage->getCardAAUDataValue(inst, L"clubValueMods");
 			if (!allClubValueMods.is<picojson::object>()) {
 				allClubValueMods = picojson::value(picojson::object());
 			}
@@ -791,7 +791,7 @@ namespace Shared {
 			allClubValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 
 			//adjust the effective club value
-			auto oldEffectiveClubValue = storage.getCardAAUDataValue(inst, L"clubValue");
+			auto oldEffectiveClubValue = storage->getCardAAUDataValue(inst, L"clubValue");
 			int oldEffectiveClubValueValue = oldEffectiveClubValue.is<double>() ?
 				oldEffectiveClubValue.get<double>() : inst->m_char->m_charData->m_character.clubValue;
 			//	training correction
@@ -807,8 +807,8 @@ namespace Shared {
 			auto newClubValueValue = oldEffectiveClubValueValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"clubValue", newClubValueValue);
-			storage.storeCardAAUDataObject(inst, L"clubValueMods", allClubValueMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"clubValue", newClubValueValue);
+			storage->storeCardAAUDataObject(inst, L"clubValueMods", allClubValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.clubValue = min(max(newClubValueValue, 100), 999);
 			inst->m_char->m_charData->m_character.clubClassRanking = (inst->m_char->m_charData->m_character.clubValue - 100) / 100;
@@ -866,7 +866,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target intelligence value mod
-			auto allIntelligenceValueMods = storage.getCardAAUDataValue(inst, L"intelligenceValueMods");
+			auto allIntelligenceValueMods = storage->getCardAAUDataValue(inst, L"intelligenceValueMods");
 			if (!allIntelligenceValueMods.is<picojson::object>()) {
 				allIntelligenceValueMods = picojson::value(picojson::object());
 			}
@@ -876,7 +876,7 @@ namespace Shared {
 			allIntelligenceValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 
 			//adjust the effective intelligence value
-			auto oldEffectiveIntelligenceValue = storage.getCardAAUDataValue(inst, L"intelligenceValue");
+			auto oldEffectiveIntelligenceValue = storage->getCardAAUDataValue(inst, L"intelligenceValue");
 			int oldEffectiveIntelligenceValueValue = oldEffectiveIntelligenceValue.is<double>() ?
 				oldEffectiveIntelligenceValue.get<double>() : inst->m_char->m_charData->m_character.intelligenceValue;
 			//	training correction
@@ -892,8 +892,8 @@ namespace Shared {
 			auto newIntelligenceValueValue = oldEffectiveIntelligenceValueValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"intelligenceValue", newIntelligenceValueValue);
-			storage.storeCardAAUDataObject(inst, L"intelligenceValueMods", allIntelligenceValueMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"intelligenceValue", newIntelligenceValueValue);
+			storage->storeCardAAUDataObject(inst, L"intelligenceValueMods", allIntelligenceValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.intelligenceValue = min(max(newIntelligenceValueValue, 100), 999);
 			inst->m_char->m_charData->m_character.intelligenceClassRank = (inst->m_char->m_charData->m_character.intelligenceValue - 100) / 100;
@@ -1002,7 +1002,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target strength value mod
-			auto allStrengthValueMods = storage.getCardAAUDataValue(inst, L"strengthValueMods");
+			auto allStrengthValueMods = storage->getCardAAUDataValue(inst, L"strengthValueMods");
 			if (!allStrengthValueMods.is<picojson::object>()) {
 				allStrengthValueMods = picojson::value(picojson::object());
 			}
@@ -1012,7 +1012,7 @@ namespace Shared {
 			allStrengthValueMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 
 			//adjust the effective strength value
-			auto oldEffectiveStrengthValue = storage.getCardAAUDataValue(inst, L"strengthValue");
+			auto oldEffectiveStrengthValue = storage->getCardAAUDataValue(inst, L"strengthValue");
 			int oldEffectiveStrengthValueValue = oldEffectiveStrengthValue.is<double>() ?
 				oldEffectiveStrengthValue.get<double>() : inst->m_char->m_charData->m_character.strengthValue;
 			//	training correction
@@ -1028,8 +1028,8 @@ namespace Shared {
 			auto newStrengthValueValue = oldEffectiveStrengthValueValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"strengthValue", newStrengthValueValue);
-			storage.storeCardAAUDataObject(inst, L"strengthValueMods", allStrengthValueMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"strengthValue", newStrengthValueValue);
+			storage->storeCardAAUDataObject(inst, L"strengthValueMods", allStrengthValueMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.strengthValue = min(max(newStrengthValueValue, 100), 999);
 			inst->m_char->m_charData->m_character.strengthClassRank = (inst->m_char->m_charData->m_character.strengthValue - 100) / 100;
@@ -1097,7 +1097,7 @@ namespace Shared {
 			}
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
 			// add/replace target sociability mod
-			auto allSociabilityMods = storage.getCardAAUDataValue(inst, L"sociabilityMods");
+			auto allSociabilityMods = storage->getCardAAUDataValue(inst, L"sociabilityMods");
 			if (!allSociabilityMods.is<picojson::object>()) {
 				allSociabilityMods = picojson::value(picojson::object());
 			}
@@ -1107,7 +1107,7 @@ namespace Shared {
 			allSociabilityMods.get<picojson::object>()[General::CastToString(*modName)] = picojson::value(newModValue * 1.0);
 
 			//adjust the effective sociability
-			auto oldEffectiveSociability = storage.getCardAAUDataValue(inst, L"sociability");
+			auto oldEffectiveSociability = storage->getCardAAUDataValue(inst, L"sociability");
 			int oldEffectiveSociabilityValue = oldEffectiveSociability.is<double>() ?
 				oldEffectiveSociability.get<double>() : inst->m_char->m_charData->m_character.sociability;
 			//	training correction
@@ -1123,8 +1123,8 @@ namespace Shared {
 			auto newSociabilityValue = oldEffectiveSociabilityValue - oldTargetModValue + newModValue;
 
 			//save the values back into the storage
-			storage.storeCardAAUDataInt(inst, L"sociability", newSociabilityValue);
-			storage.storeCardAAUDataObject(inst, L"sociabilityMods", allSociabilityMods.get<picojson::object>());
+			storage->storeCardAAUDataInt(inst, L"sociability", newSociabilityValue);
+			storage->storeCardAAUDataObject(inst, L"sociabilityMods", allSociabilityMods.get<picojson::object>());
 
 			inst->m_char->m_charData->m_character.sociability = min(max(newSociabilityValue, 0), 4);
 		}
@@ -1734,7 +1734,7 @@ namespace Shared {
 			//makes the character naked on high poly load
 
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
+			storage->storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
 		}
 
 		//int card, string keyname, int value
@@ -1745,7 +1745,7 @@ namespace Shared {
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardInt(inst, *params[1].strVal, params[2].iVal);
+			storage->storeCardInt(inst, *params[1].strVal, params[2].iVal);
 		}
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
@@ -1755,7 +1755,7 @@ namespace Shared {
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardFloat(inst, *params[1].strVal, params[2].fVal);
+			storage->storeCardFloat(inst, *params[1].strVal, params[2].fVal);
 		}
 		//int card, string keyname, string value
 		void Thread::SetCardStorageString(std::vector<Value>& params) {
@@ -1765,7 +1765,7 @@ namespace Shared {
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardString(inst, *params[1].strVal, General::CastToString(*params[2].strVal));
+			storage->storeCardString(inst, *params[1].strVal, General::CastToString(*params[2].strVal));
 		}
 		//int card, string keyname, bool value
 		void Thread::SetCardStorageBool(std::vector<Value>& params) {
@@ -1775,28 +1775,28 @@ namespace Shared {
 			if (!inst->IsValid()) return;
 			inst->m_cardData.GetCardStorage()[*params[1].strVal] = params[2];
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			storage.storeCardBool(inst, *params[1].strVal, params[2].bVal);
+			storage->storeCardBool(inst, *params[1].strVal, params[2].bVal);
 		}
 
 		//string keyname, int value
 		void Thread::SetClassStorageInt(std::vector<Value>& params) {
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			storage.storeClassInt(*params[0].strVal, params[1].iVal);
+			storage->storeClassInt(*params[0].strVal, params[1].iVal);
 		}
 		//string keyname, float value
 		void Thread::SetClassStorageFloat(std::vector<Value>& params) {
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			storage.storeClassFloat(*params[0].strVal, params[1].fVal);
+			storage->storeClassFloat(*params[0].strVal, params[1].fVal);
 		}
 		//string keyname, string value
 		void Thread::SetClassStorageString(std::vector<Value>& params) {
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			storage.storeClassString(*params[0].strVal, General::CastToString(*params[1].strVal));
+			storage->storeClassString(*params[0].strVal, General::CastToString(*params[1].strVal));
 		}
 		//string keyname, bool value
 		void Thread::SetClassStorageBool(std::vector<Value>& params) {
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			storage.storeClassBool(*params[0].strVal, params[1].bVal);
+			storage->storeClassBool(*params[0].strVal, params[1].bVal);
 		}
 
 		//int card, string keyname

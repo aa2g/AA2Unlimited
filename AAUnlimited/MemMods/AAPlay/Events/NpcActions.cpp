@@ -983,6 +983,63 @@ void extraHairMakerFixInjection() {
 }
 
 
+
+void __stdcall ConversationEnd(NpcStatus* card1, NpcStatus* card2, int convoID) {
+	int triggerCard = -1;
+	int convPartner = -1;
+
+	if (card1) {
+		if (card1->m_thisChar) {
+			triggerCard = card1->m_thisChar->m_seat;
+		}
+	}
+	if (card2) {
+		if (card2->m_thisChar) {
+			convPartner = card2->m_thisChar->m_seat;
+		}
+	}
+
+	Shared::Triggers::ConversationEndData convoEndData;
+	convoEndData.card = triggerCard;
+	convoEndData.conversationTarget = convPartner;
+	convoEndData.action = convoID;
+
+	ThrowEvent(&convoEndData);
+}
+
+void __declspec(naked) conversationEndRedirect() {
+	__asm {
+		pushad
+		push [esp+0x28]
+		push eax
+		push esi
+		call ConversationEnd
+		popad
+		//original code
+		mov [esi+0x6C], ebp
+		mov [esi+0x1B], bl
+		ret
+	}
+}
+
+void conversationEndInjection() {
+	//esi has the m_npcStatus of the triggerCard
+	//eax has the m_npcStatus of the other card in the conversation
+	//AA2Play.exe+39530 - 89 6E 6C              - mov [esi+6C],ebp
+	//AA2Play.exe + 39533 - 88 5E 1B - mov[esi + 1B], bl
+
+	DWORD address = General::GameBase + 0x39530;
+	DWORD redirectAddress = (DWORD)(&conversationEndRedirect);
+	Hook((BYTE*)address,
+	{ 0x89, 0x6E, 0x6C, 0x88, 0x5E, 0x1B },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+
+
+
 #if !NEW_HOOK
 DWORD __stdcall NpcAnswerEvent2(bool result, CharacterActivity* answerChar, CharacterActivity* askingChar)
 {

@@ -1,7 +1,10 @@
 --@INFO Supplemental triggers code
 
 local _M = {}
-local opts = {}
+local variants  = { "English", "Russian", "Japanese", "Korean", "Spanish", "Yoruba" }
+local opts = {
+	{"variant", 0, "Select which language you want the modules to be in: %l|English|Russian|Japanese|Korean|Spanish|Yoruba|"},
+}
 local trigger = {}
 
 -- lookup function
@@ -2106,6 +2109,15 @@ function _M:load()
 end
 
 function _M:unload()
+end
+
+function on.launch()
+	if exe_type ~= "edit" then return end
+	Config.dictionary = variants[opts.variant+1]
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Module dictionary settings")
 end
 
 return _M

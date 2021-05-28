@@ -50,6 +50,7 @@ public:;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
+	const char* dictionary;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -76,6 +77,7 @@ public:;
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
+			LUA_BIND(dictionary)
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

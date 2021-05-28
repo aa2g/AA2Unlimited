@@ -109,6 +109,10 @@ namespace Shared {
 			{ CARD_EXPELLED, EVENTCAT_LOADS, TEXT("Card Expelled"), TEXT("Card Expelled"),
 			TEXT("The event is fired when a character expelled from class: either killed, arrested or fired."),
 				{}
+			},
+			{ CONVERSATION_END, EVENTCAT_CONVERSATION, TEXT("Conversation End"), TEXT("Conversation End"),
+			TEXT("The event is fired when a conversation ends between two cards."),
+				{}
 			}
 		};
 
