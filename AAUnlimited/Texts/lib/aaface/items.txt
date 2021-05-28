@@ -31,10 +31,10 @@
 37: Faceparts Face 11
 38: Faceparts Face 12
 39: Faceparts Face 13
-40: --NOT SPECIFIED--
-41: --NOT SPECIFIED--
-42: --NOT SPECIFIED--
-43: --NOT SPECIFIED--
+40: Faceparts Face 14
+41: Faceparts Face 15
+42: Faceparts Face 16
+43: Faceparts Face 17
 44: --NOT SPECIFIED--
 45: --NOT SPECIFIED--
 46: --NOT SPECIFIED--
@@ -94,37 +94,37 @@
 100: Face 7 Snaggletooth
 101: Face 8 Snaggletooth
 102: Face 1 Vampire Teeth
-103: Face 2 Vampire Teeth
-104: Face 3 Vampire Teeth
-105: Face 4 Vampire Teeth
-106: Face 5 Vampire Teeth
-107: Face 6 Vampire Teeth
-108: Face 7 Vampire Teeth
-109: Face 8 Vampire Teeth
-110: Face 1 Vampire Teeth w/ Bottom
-111: Face 2 Vampire Teeth w/ Bottom
-112: Face 3 Vampire Teeth w/ Bottom
-113: Face 4 Vampire Teeth w/ Bottom
-114: Face 5 Vampire Teeth w/ Bottom
-115: Face 6 Vampire Teeth w/ Bottom
-116: Face 7 Vampire Teeth w/ Bottom
+103: New Male Face 103
+104: New Male Face 104
+105: New Male Face 105
+106: New Male Face 106
+107: New Male Face 107
+108: New Male Face 108
+109: Keit_Ikemen Default nose
+110: Keit_Ikemen  Default nose-Half eyes
+111: Keit_Ikemen Turn up nose
+112: Keit_Ikemen Turn up nose-Half eyes
+113: Keit_Ikemen Pointy nose
+114: Keit_Ikemen Pointy nose-Half eyes
+115: Keit_Ikemen Roman nose
+116: Keit_Ikemen Roman nose-Half eyes
 117: Face 8 Vampire Teeth w/ Bottom
 118: Face 1 Shark Teeth
 119: Face 2 Shark Teeth
-120: Face 3 Shark Teeth
-121: Face 4 Shark Teeth
-122: Face 5 Shark Teeth
-123: Face 6 Shark Teeth
-124: Face 7 Shark Teeth
-125: Face 8 Shark Teeth
-126: Face 1 w/ Blush Sticker
-127: Face 2 w/ Blush Sticker
-128: Face 3 w/ Blush Sticker
-129: Face 4 w/ Blush Sticker
-130: Face 5 w/ Blush Sticker
-131: Face 6 w/ Blush Sticker
-132: Face 7 w/ Blush Sticker
-133: Face 8 w/ Blush Sticker
+120: Female-Male 1
+121: Female-Male 2
+122: Female-Male 3
+123: Female-Male 4
+124: Female-Male 9
+125: Female-Male 11
+126: Female-Male 13
+127: Female-Male 5
+128: Female-Male 8
+129: Female-Male 10
+130: Female-Male 12
+131: Female-Male 14
+132: Female-Male 15
+133: Female-Male 16
 134: Face 8
 135: Round Face 1
 136: Round Face 2

@@ -57,6 +57,7 @@ namespace Triggers {
 		H_END,
 		H_START,
 		CARD_EXPELLED,
+		CONVERSATION_END,
 		
 		
 		N_EVENTS
@@ -280,6 +281,13 @@ namespace Triggers {
 
 		int target;
 		int action;
+
+	EDC_END
+
+	EDC_DECLARE(ConversationEndData, CONVERSATION_END)
+
+	int action;
+	int conversationTarget;
 
 	EDC_END
 

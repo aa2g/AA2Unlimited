@@ -3127,14 +3127,12 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (sel != LB_ERR) {
 					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].name.c_str());
 					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].description.c_str());
-					return TRUE;
-					if (true) {
-						auto store = Storage::Dictionary::getStorage(L"modules");
-						auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
-						if (result.isValid) {
-							SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
-						}
+					auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
 					}
+					return TRUE;
 				}
 			}
 			break;
@@ -3144,14 +3142,11 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (sel != LB_ERR) {
 					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
 					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
-					if (true) {
-						auto store = Storage::Dictionary::getStorage(L"modules");
-						auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
-						if (result.isValid) {
-							SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
-						}
+					auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
 					}
-
 					return TRUE;
 				}
 			}

@@ -2499,6 +2499,8 @@ namespace Shared {
 				return ((PCConversationStateUpdatedData*)eventData)->action;
 			case PC_CONVERSATION_LINE_UPDATED:
 				return ((PCConversationLineUpdatedData*)eventData)->action;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->action;
 			default:
 				return 0;
 			}
@@ -2512,6 +2514,8 @@ namespace Shared {
 				return ((NpcWantTalkWithData*)eventData)->conversationTarget;
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->conversationTarget;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->conversationTarget;
 			default:
 				return 0;
 			}
@@ -2814,14 +2818,14 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
+					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation, or the conversation within conversation end event."
 					"id in the targeted actions."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcActionId
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About event, this is the character the Npc talks with."),
+					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About, or Conversation End event, this is the character the Npc talks with."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcTalkTarget
 				},

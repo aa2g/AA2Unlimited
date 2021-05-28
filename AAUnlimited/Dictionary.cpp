@@ -3,11 +3,11 @@
 
 std::map<std::wstring, Storage::Dictionary> Storage::Dictionary::allStorages;
 
-Storage::Dictionary Storage::Dictionary::getStorage(std::wstring file)
+Storage::Dictionary Storage::Dictionary::getStorage(std::wstring file, std::wstring language)
 {
 	if (Storage::Dictionary::allStorages.find(file) == Storage::Dictionary::allStorages.end())
 	{
-		Storage::Dictionary::allStorages[file] = Storage::Dictionary(file);
+		Storage::Dictionary::allStorages[file] = Storage::Dictionary(file, language);
 	}
 	return Storage::Dictionary::allStorages[file];
 }

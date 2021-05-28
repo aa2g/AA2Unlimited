@@ -322,6 +322,7 @@ void InitializeHooks() {
 		NpcActions::rosterHandleInjectionFirst();
 		NpcActions::rosterHandleInjectionSecond();
 		NpcActions::dialoguePlayInjection();
+		NpcActions::conversationEndInjection();
 		ClothesLimit::clothingSlotFirstInject();
 		ClothesLimit::clothingSlotSecondInject();
 		ClothesLimit::clothingSlotThirdInject();

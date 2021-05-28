@@ -24,7 +24,7 @@ namespace Storage {
 		static std::map<std::wstring, Dictionary> allStorages;	//collection of all the loaded storages
 	public:
 		std::wstring dictType;
-		static Dictionary getStorage(std::wstring file);
+		static Dictionary getStorage(std::wstring file, std::wstring language);
 		Option<std::string> getDictTypeString(std::wstring key);
 		Dictionary() {}
 		Dictionary(Dictionary &that)
@@ -33,9 +33,9 @@ namespace Storage {
 			this->file = that.file;
 			this->dictType = that.dictType;
 		}
-		Dictionary(std::wstring dictType) : dictType(dictType) {
+		Dictionary(std::wstring dictType, std::wstring language) : dictType(dictType) {
 			picojson::value json;
-			this->file = General::AAUPath + L"resources\\localization\\modules\\" + dictType + L".json";
+			this->file = General::AAUPath + L"resources\\localization\\modules\\" +dictType + language+ L".txt";
 			std::ifstream in(this->file);
 
 			in >> json;
