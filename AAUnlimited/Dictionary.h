@@ -35,7 +35,7 @@ namespace Storage {
 		}
 		Dictionary(std::wstring dictType, std::wstring language) : dictType(dictType) {
 			picojson::value json;
-			this->file = General::AAUPath + L"resources\\localization\\modules\\" +dictType + language+ L".txt";
+			this->file = General::AAUPath + L"resources\\localization\\modules\\" +dictType + language+ L".json";
 			std::ifstream in(this->file);
 
 			in >> json;
