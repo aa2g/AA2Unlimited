@@ -103,6 +103,7 @@ public:
 
 	void ApplyDecals(int bodyPart, int decalStrength);
 	void ClearCache();
+	void LowPolyUpdate(int state, int context);
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
 	void CastShadows(DWORD * HairPTR);
@@ -219,6 +220,11 @@ public:
 		});
 		LUA_METHOD(CastShadows, {
 			_self->CastShadows(_gl.get(2));
+		});
+		LUA_METHOD(LowPolyUpdate, {
+			int state = _gl.get(2);
+			int context = _gl.get(3);
+			_self->LowPolyUpdate(state, context);
 		});
 #undef LUA_CLASS
 	}
