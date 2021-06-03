@@ -58,6 +58,30 @@ void CharInstData::ClearCache()
 	}
 }
 
+void CharInstData::LowPolyUpdate(int state, int contex)
+{
+	if (this->IsValid()) {
+		DWORD* address;
+		ExtClass::CharacterStruct* characterStruct = this->m_char;
+		if (characterStruct->m_charData->m_gender) {
+			const DWORD offset[]{ 0x116760 };
+			address = (DWORD*)ExtVars::ApplyRule(offset);
+		}
+		else {
+			const DWORD offset[]{ 0x10DE50 };
+			address = (DWORD*)ExtVars::ApplyRule(offset);
+		}
+		characterStruct->m_currClothes = contex;
+		__asm
+		{
+			mov ecx, characterStruct
+			push 0
+			push state
+			call[address]
+		}
+	}
+}
+
 
 
 void CharInstData::SetHeadTracking(int headtracking)

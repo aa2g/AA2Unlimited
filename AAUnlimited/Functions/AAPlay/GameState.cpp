@@ -28,6 +28,7 @@ struct GameStateStruct {
 		h_ai_locked = true;
 		m_isInMainMenu = false;
 		h_info = NULL;
+		m_updateLowPoly = false;
 		m_drawShadow = true;
 		m_savingCard = false;
 		m_talkCardName = L"";
@@ -60,6 +61,7 @@ struct GameStateStruct {
 	bool m_drawShadow;
 	std::wstring m_talkCardName;		//The name of the card that is currently talking; used in subtitles.
 	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
+	bool m_updateLowPoly;				//Update low polies on the end of high poly load event
 
 
 #define CONVERSATION_CHARACTERS_N 2
@@ -92,6 +94,17 @@ bool Shared::GameState::getIsPcConversation()
 {
 	if (General::IsAAEdit) return false;
 	return loc_gameState.m_isPcConversation;
+}
+
+void Shared::GameState::setLowPolyUpdate(bool value)
+{
+	loc_gameState.m_updateLowPoly = value;
+}
+
+bool Shared::GameState::GetLowPolyUpdate()
+{
+	if (General::IsAAEdit) return false;
+	return loc_gameState.m_updateLowPoly;
 }
 
 void Shared::GameState::setIsSaving(bool value)
