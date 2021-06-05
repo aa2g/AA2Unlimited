@@ -96,6 +96,8 @@ end
 function _M.save_gsd(cfg)
 	_M.check_gsd(cfg)
 	cfg["fullscreen"] = 0
+	Config["shadowMap"] = cfg["shadowmap"]
+
 	local fn = host_path("data", "gsd.cfg")
 	--log("saving gsd to "..fn)
 	local f = io.open(fn, "wb")

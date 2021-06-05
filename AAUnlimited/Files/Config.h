@@ -51,6 +51,7 @@ public:;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
 	const char* dictionary;
+	int shadowMap;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -78,6 +79,8 @@ public:;
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
 			LUA_BIND(dictionary)
+			LUA_BIND(shadowMap)
+
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;
