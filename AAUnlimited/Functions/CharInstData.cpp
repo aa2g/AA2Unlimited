@@ -107,6 +107,7 @@ void CharInstData::SetHeadTracking(int headtracking)
 
 void CharInstData::AddShadows(DWORD* xxPTR)
 {
+	if (!g_Config.shadowMap) return;
 	if (!xxPTR) return;
 	if (this->IsValid()) {
 		if (this->m_char->m_xxSkeleton) {
@@ -153,6 +154,7 @@ void CharInstData::AddShadows(DWORD* xxPTR)
 
 void CharInstData::CastShadows(DWORD* xxPTR)
 {
+	if (!g_Config.shadowMap) return;
 	if (!xxPTR) return;
 	if (this->IsValid() && General::IsAAPlay) {
 		if (this->m_char->m_xxSkeleton) {
