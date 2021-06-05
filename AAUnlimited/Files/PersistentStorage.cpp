@@ -5,10 +5,12 @@ std::map<std::wstring, PersistentStorage::ClassStorage> PersistentStorage::Class
 
 picojson::value PersistentStorage::ClassStorage::get(std::string key)
 {
-	return data[key];
+	auto ret = data.find(key);
+	return ret == data.end() ? picojson::value() : ret->second;
 }
 
-PersistentStorage::ClassStorage* PersistentStorage::current() {
+PersistentStorage::ClassStorage* PersistentStorage::current()
+{
 	return ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 }
 
