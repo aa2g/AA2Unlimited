@@ -137,9 +137,10 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		Shared::GameState::setIsOverriding(false);
 	}
 	HiPolyLoadEndEvent(loadCharacter);
-	if (Shared::GameState::GetLowPolyUpdate()) {
-		Shared::GameState::setLowPolyUpdate(false);
-		AAPlay::g_characters[loadCharacter->m_seat].LowPolyUpdate(loadCharacter->m_clothState, loadCharacter->m_currClothes);
+	
+	if (AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd) {
+		AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd = false;
+		AAPlay::g_characters[loadCharacter->m_seat].LowPolyUpdate(loadCharacter->m_bClothesOn, loadCharacter->m_currClothes);
 	}
 	if (AAEdit::AAFACEDLL) {
 		f_modelReload modelReload= (f_modelReload)GetProcAddress(AAEdit::AAFACEDLL, "modelReload");

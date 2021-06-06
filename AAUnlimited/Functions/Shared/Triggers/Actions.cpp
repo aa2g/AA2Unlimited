@@ -1734,11 +1734,24 @@ namespace Shared {
 
 			//Update low poly if not in high poly start event. 
 			if ((this->eventData->GetId() != HI_POLY_INIT)) {
-				AAPlay::g_characters[seat].LowPolyUpdate(AAPlay::g_characters[seat].m_char->m_clothState, AAPlay::g_characters[seat].m_char->m_currClothes);
+				if (Shared::GameState::getConversationCharacter(0)) {
+					if (seat == Shared::GameState::getConversationCharacter(0)->m_seat) {
+						AAPlay::g_characters[seat].lowPolyUpd = true;
+					}
+				}
+				else if (Shared::GameState::getConversationCharacter(1)) {
+					if (seat == Shared::GameState::getConversationCharacter(1)->m_seat) {
+						AAPlay::g_characters[seat].lowPolyUpd = true;
+					}
+				}
+				else {
+					//Only update clothes immediately if we aren't in high poly
+					AAPlay::g_characters[seat].LowPolyUpdate(AAPlay::g_characters[seat].m_char->m_bClothesOn, AAPlay::g_characters[seat].m_char->m_currClothes);
+				}
 			}
 			//Otherwise, set a flag to update it at the end of high poly
 			else {
-				Shared::GameState::setLowPolyUpdate(true);
+				AAPlay::g_characters[seat].lowPolyUpd = true;
 			}
 		}
 
