@@ -1734,6 +1734,7 @@ namespace Shared {
 
 			//Update low poly if not in high poly start event. 
 			if ((this->eventData->GetId() != HI_POLY_INIT)) {
+				//If we are in high poly during a conversation, delay the reload until conversation end
 				if (Shared::GameState::getConversationCharacter(0)) {
 					if (seat == Shared::GameState::getConversationCharacter(0)->m_seat) {
 						AAPlay::g_characters[seat].lowPolyUpd = true;
