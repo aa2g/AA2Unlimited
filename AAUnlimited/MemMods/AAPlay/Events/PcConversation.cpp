@@ -30,6 +30,20 @@ void __stdcall EndEvent() {
 					LUA_EVENT_NORET("convo", false);
 					Shared::Triggers::ThrowEvent(&pcConvoStateUpdatedData);
 
+					//If we changed styles during a high poly conversation, reload the low polies since this is the conversation end
+					if (Shared::GameState::getConversationCharacter(0)) {
+						if (AAPlay::g_characters[Shared::GameState::getConversationCharacter(0)->m_seat].lowPolyUpd) {
+							AAPlay::g_characters[Shared::GameState::getConversationCharacter(0)->m_seat].LowPolyUpdate(AAPlay::g_characters[Shared::GameState::getConversationCharacter(0)->m_seat].m_char->m_bClothesOn, AAPlay::g_characters[Shared::GameState::getConversationCharacter(0)->m_seat].m_char->m_currClothes);
+							AAPlay::g_characters[Shared::GameState::getConversationCharacter(0)->m_seat].lowPolyUpd = false;
+						}
+					}
+					if (Shared::GameState::getConversationCharacter(1)) {
+						if (AAPlay::g_characters[Shared::GameState::getConversationCharacter(1)->m_seat].lowPolyUpd) {
+							AAPlay::g_characters[Shared::GameState::getConversationCharacter(1)->m_seat].LowPolyUpdate(AAPlay::g_characters[Shared::GameState::getConversationCharacter(1)->m_seat].m_char->m_bClothesOn, AAPlay::g_characters[Shared::GameState::getConversationCharacter(1)->m_seat].m_char->m_currClothes);
+							AAPlay::g_characters[Shared::GameState::getConversationCharacter(1)->m_seat].lowPolyUpd = false;
+						}
+					}
+
 					Shared::GameState::clearConversationCharacter(-1);
 				}
 			}

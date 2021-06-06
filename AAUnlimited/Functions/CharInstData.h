@@ -57,6 +57,8 @@ public:
 
 	int idxSave; //Illusion's load order
 
+	bool lowPolyUpd;
+
 	void SetCurrentStyle(int index);
 	int GetStyleCount();
 	int GetCurrentStyle();

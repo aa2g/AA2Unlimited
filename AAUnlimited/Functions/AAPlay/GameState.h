@@ -13,8 +13,6 @@ namespace Shared {
 
 		void setIsPcConversation(bool value);
 		bool getIsPcConversation();
-		void setLowPolyUpdate(bool value);
-		bool GetLowPolyUpdate();
 		void setIsSaving(bool value);
 		bool getIsSaving();
 		void setIsOverridingDialogue(bool value);
