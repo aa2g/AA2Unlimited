@@ -1732,21 +1732,24 @@ namespace Shared {
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 			storage->storeCardInt(&AAPlay::g_characters[seat], L"m_currCardStyle", AAPlay::g_characters[seat].m_cardData.m_currCardStyle);
 
+			bool notInHighPoly = true;
 			//Update low poly if not in high poly start event. 
 			if ((this->eventData->GetId() != HI_POLY_INIT)) {
 				//If we are in high poly during a conversation, delay the reload until conversation end
 				if (Shared::GameState::getConversationCharacter(0)) {
 					if (seat == Shared::GameState::getConversationCharacter(0)->m_seat) {
 						AAPlay::g_characters[seat].lowPolyUpd = true;
+						notInHighPoly = false;
 					}
 				}
-				else if (Shared::GameState::getConversationCharacter(1)) {
+				if (Shared::GameState::getConversationCharacter(1)) {
 					if (seat == Shared::GameState::getConversationCharacter(1)->m_seat) {
 						AAPlay::g_characters[seat].lowPolyUpd = true;
+						notInHighPoly = false;
 					}
 				}
-				else {
-					//Only update clothes immediately if we aren't in high poly
+				if (notInHighPoly) {
+					//Only update clothes immediately if we aren't doing so for a character that is in high poly
 					AAPlay::g_characters[seat].LowPolyUpdate(AAPlay::g_characters[seat].m_char->m_bClothesOn, AAPlay::g_characters[seat].m_char->m_currClothes);
 				}
 			}
