@@ -60,7 +60,7 @@ void CharInstData::ClearCache()
 
 void CharInstData::LowPolyUpdate(int state, int contex)
 {
-	if (this->IsValid()) {
+	if (this->IsValid() && General::IsAAPlay) {
 		DWORD* address;
 		ExtClass::CharacterStruct* characterStruct = this->m_char;
 		if (characterStruct->m_charData->m_gender) {
