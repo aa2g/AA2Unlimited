@@ -186,6 +186,7 @@ namespace Shared {
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
 			void ChangeHPosition(std::vector<Value>& params);
+			void RelationshipPointChange(std::vector<Value>& params);
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
@@ -447,6 +448,11 @@ namespace Shared {
 
 			//NPC_WANT_TALK_WITH_ABOUT
 			Value GetNpcTalkAbout(std::vector<Value>& params);
+			Value GetLove(std::vector<Value>& params);
+			Value GetLike(std::vector<Value>& params);
+			Value GetDislike(std::vector<Value>& params);
+			Value GetHate(std::vector<Value>& params);
+			Value RelationshipTowards(std::vector<Value>& params);
 
 			//PC_CONVERSATION_STATE_UPDATED
 			Value GetConversationState(std::vector<Value>& params);

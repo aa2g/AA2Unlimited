@@ -42,6 +42,29 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	}
 }
 
+void CharInstData::AddRelationshipPoints(ExtClass::CharacterStruct* towards, int love, int like, int dislike, int hate)
+{
+	if (this->IsValid() && General::IsAAPlay) {
+		int arr[4] = { love, like, dislike, hate };
+		const DWORD offset[]{ 0x1428E0 };
+		DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+		DWORD* firstChar = (DWORD*)this->m_char->m_moreData;
+		DWORD* arrayPointer = (DWORD*)arr;
+		if (this->IsValid()) {
+			auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+			__asm
+			{
+				mov eax, arrayPointer
+				push eax
+				mov eax, firstChar
+				push eax
+				mov eax, towards
+				call[address]
+			}
+		}
+	}
+}
+
 void CharInstData::ClearCache()
 {
 	const DWORD offset[]{ 0x150750 };

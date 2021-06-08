@@ -26,6 +26,7 @@ namespace NpcActions {
 	void extraHairFixInjection();
 	void extraHairMakerFixInjection();
 	void conversationEndInjection();
+	void relationshipPointChangedInjection();
 	void rosterHandleInjectionSecond();
 
 #pragma pack(push, 1)

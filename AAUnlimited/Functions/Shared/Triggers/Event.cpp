@@ -113,6 +113,10 @@ namespace Shared {
 			{ CONVERSATION_END, EVENTCAT_CONVERSATION, TEXT("Conversation End"), TEXT("Conversation End"),
 			TEXT("The event is fired when a conversation ends between two cards."),
 				{}
+			},
+			{ RELATIONSHIP_POINT_CHANGED, EVENTCAT_CONVERSATION, TEXT("Relationship Points Changed"), TEXT("Relationship Points Changed"),
+					TEXT("The event is fired just as relationship points are updated between characters."),
+				{}
 			}
 		};
 

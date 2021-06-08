@@ -186,6 +186,20 @@ namespace Shared {
 			((HPositionData*)eventData)->position = pos;
 		}
 
+		void Thread::RelationshipPointChange(std::vector<Value>& params) {
+			int love = params[0].iVal;
+			int like = params[1].iVal;
+			int dislike = params[2].iVal;
+			int hate = params[3].iVal;
+			if (this->eventData->GetId() != RELATIONSHIP_POINT_CHANGED) return;
+			((RelationshipPointChangedData*)eventData)->love = love;
+			((RelationshipPointChangedData*)eventData)->like = like;
+			((RelationshipPointChangedData*)eventData)->dislike = dislike;
+			((RelationshipPointChangedData*)eventData)->hate = hate;
+
+		}
+
+
 		//
 		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
@@ -2964,6 +2978,12 @@ namespace Shared {
 				TEXT("Set Club Competition Grade of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetClubGrade
+			},
+			{
+				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("RelationshipData:: Love:( %p ), Like:( %p ), Dislike:( %p ), Hate:( %p )"),
+				TEXT("Set Club Competition Grade of a card"),
+				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::RelationshipPointChange
 			},
 		};
 

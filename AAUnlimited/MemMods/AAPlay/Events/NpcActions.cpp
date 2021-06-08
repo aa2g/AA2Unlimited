@@ -17,6 +17,7 @@ DWORD* extraHairFixReturnAddress = 0;
 DWORD* extraHairFixVanillaAddress;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
+DWORD* relationshipReturn;
 DWORD* RosterHandleLoopNextSeat = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
@@ -1036,6 +1037,69 @@ void conversationEndInjection() {
 		NULL);
 }
 
+
+void __stdcall relationshipPointChanged(ExtClass::CharacterStruct* towards, DWORD* moreData, int arr[4]) {
+	int triggerCard = -1;
+	int targetCard = -1;
+
+	DWORD* somepointer = (DWORD*)(moreData + 0x8);
+	triggerCard = *somepointer;
+
+	if (towards) {
+		targetCard = towards->m_seat;
+	}
+
+	Shared::Triggers::RelationshipPointChangedData relationshipData;
+	relationshipData.card = triggerCard;
+	relationshipData.target = targetCard;
+	relationshipData.love = arr[0];
+	relationshipData.like = arr[1];
+	relationshipData.dislike = arr[2];
+	relationshipData.hate = arr[3];
+	ThrowEvent(&relationshipData);
+	arr[0] = relationshipData.love;
+	arr[1] = relationshipData.like;
+	arr[2] = relationshipData.dislike;
+	arr[3] = relationshipData.hate;
+}
+
+void __declspec(naked) relationshipPointChangedRedirect() {
+	__asm {
+		pushad
+		push[esp + 0x28]
+		push[esp + 0x28]
+		push eax
+		call relationshipPointChanged
+		popad
+		//original code
+		push ecx
+		push ebx
+		mov ebx,[esp+0xC]
+		jmp relationshipReturn
+	}
+}
+
+void relationshipPointChangedInjection() {
+	/*
+	esp + 4 is m_moreData
+	esp + 8 is the array
+	eax is the m_char of the target
+	AA2Play.exe+1428E0 - 51                    - push ecx
+	AA2Play.exe+1428E1 - 53                    - push ebx
+	AA2Play.exe+1428E2 - 8B 5C 24 0C           - mov ebx,[esp+0C]
+	AA2Play.exe+1428E6 - 55                    - push ebp -- return here
+	*/
+
+	const DWORD offset1[]{ 0x1428E6 };
+	relationshipReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0x1428E0;
+	DWORD redirectAddress = (DWORD)(&relationshipPointChangedRedirect);
+	Hook((BYTE*)address,
+	{ 0x51, 0x53, 0x8B, 0x5C, 0x24, 0x0C },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
 
 
 
