@@ -106,6 +106,36 @@ void CharInstData::LowPolyUpdate(int state, int contex)
 }
 
 
+void CharInstData::ArrangeDate(int targetSeat)
+{
+	if (this->IsValid() && General::IsAAPlay && AAPlay::g_characters[targetSeat].IsValid()) {
+		DWORD* firstFunction;
+		const DWORD offset[]{ 0x119900 };
+		firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+		auto fromCard = this->m_char->m_characterStatus;
+		int fromTarget = targetSeat;
+
+		DWORD* secondFunction;
+		const DWORD offset2[]{ 0x119CE0 };
+		secondFunction = (DWORD*)ExtVars::ApplyRule(offset2);
+		auto towardsCard = AAPlay::g_characters[targetSeat].m_char->m_characterStatus;
+		int towardsTarget = this->m_char->m_seat;
+
+		__asm
+		{
+			mov ecx, fromTarget
+			push ecx
+			mov edx, fromCard
+			call[firstFunction]
+			mov ecx, towardsTarget
+			push ecx
+			mov edx, towardsCard
+			call[secondFunction]
+		}
+	}
+}
+
+
 
 void CharInstData::SetHeadTracking(int headtracking)
 {
