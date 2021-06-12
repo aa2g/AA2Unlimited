@@ -1783,6 +1783,21 @@ namespace Shared {
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 			storage->storeCardInt(inst, *params[1].strVal, params[2].iVal);
 		}
+
+		//int card, string keyname, int value
+		void Thread::ArrangeDate(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) return;
+
+			int towards = params[1].iVal;
+			if (ActionSeatInvalid(towards)) return;
+			CharInstData* inst2 = &AAPlay::g_characters[towards];
+			if (!inst2->IsValid()) return;
+
+			inst->ArrangeDate(towards);
+		}
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2984,6 +2999,12 @@ namespace Shared {
 				TEXT("Set Club Competition Grade of a card"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::RelationshipPointChange
+			},
+			{
+				137, ACTIONCAT_EVENT, TEXT("Arrange Date"), TEXT("%p ::ArrangeDateWith = %p"),
+				TEXT("Makes the first character arrange a date with the other character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::ArrangeDate
 			},
 		};
 

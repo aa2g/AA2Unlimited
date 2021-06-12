@@ -152,6 +152,7 @@ namespace Shared {
 			void NpcCancelAction(std::vector<Value>& params);
 
 			void SetCardStorageInt(std::vector<Value>& params);
+			void ArrangeDate(std::vector<Value>& params);
 			void SetCardStorageFloat(std::vector<Value>& params);
 			void SetCardStorageString(std::vector<Value>& params);
 			void SetCardStorageBool(std::vector<Value>& params);
