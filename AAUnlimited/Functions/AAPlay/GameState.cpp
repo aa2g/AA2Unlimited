@@ -32,6 +32,7 @@ struct GameStateStruct {
 		m_savingCard = false;
 		m_talkCardName = L"";
 		m_talkAboutName = L"";
+		m_removedSeat = -1;
 	}
 
 	//Game state indicators
@@ -60,6 +61,7 @@ struct GameStateStruct {
 	bool m_drawShadow;
 	std::wstring m_talkCardName;		//The name of the card that is currently talking; used in subtitles.
 	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
+	int m_removedSeat;
 
 
 #define CONVERSATION_CHARACTERS_N 2
@@ -215,6 +217,16 @@ void Shared::GameState::setLockedInH(bool value)
 bool Shared::GameState::getLockedInH()
 {
 	return loc_gameState.h_ai_locked;
+}
+
+void Shared::GameState::setRemovedSeat(int value)
+{
+	loc_gameState.m_removedSeat = value;
+}
+
+int Shared::GameState::getRemovedSeat()
+{
+	return loc_gameState.m_removedSeat;
 }
 
 void Shared::GameState::setIsInH(bool value)

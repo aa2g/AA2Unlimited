@@ -120,9 +120,8 @@ void RemoveTransferedCharacter(ExtClass::CharacterStruct* character) {
 	data.card = seat;
 	ThrowEvent(&data);
 	LUA_EVENT_NORET("unload_card", seat);
-
-	//destroy
-	g_characters[seat].Reset();
+	//Save the seat we will be destroying
+	Shared::GameState::setRemovedSeat(seat);
 }
 
 

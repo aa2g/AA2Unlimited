@@ -108,6 +108,7 @@ public:
 	void ClearCache();
 	void LowPolyUpdate(int state, int context);
 	void ArrangeDate(int targetSeat);
+	void PromiseLewd(int targetSeat);
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
 	void CastShadows(DWORD * HairPTR);
@@ -235,6 +236,9 @@ public:
 		});
 		LUA_METHOD(ArrangeDate, {
 			_self->ArrangeDate(_gl.get(2));
+		});
+		LUA_METHOD(PromiseLewd, {
+			_self->PromiseLewd(_gl.get(2));
 		});
 #undef LUA_CLASS
 	}

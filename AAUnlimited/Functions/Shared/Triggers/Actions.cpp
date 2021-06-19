@@ -1798,6 +1798,20 @@ namespace Shared {
 
 			inst->ArrangeDate(towards);
 		}
+
+		void Thread::PromiseLewd(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) return;
+
+			int towards = params[1].iVal;
+			if (ActionSeatInvalid(towards)) return;
+			CharInstData* inst2 = &AAPlay::g_characters[towards];
+			if (!inst2->IsValid()) return;
+
+			inst->PromiseLewd(towards);
+		}
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -3005,6 +3019,12 @@ namespace Shared {
 				TEXT("Makes the first character arrange a date with the other character."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::ArrangeDate
+			},
+			{
+				138, ACTIONCAT_EVENT, TEXT("Promise Lewd Reward"), TEXT("%p ::LewdPromise = %p"),
+				TEXT("Makes the first character promise a lewd reward to the other character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::PromiseLewd
 			},
 		};
 

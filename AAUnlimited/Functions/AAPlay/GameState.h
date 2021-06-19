@@ -38,10 +38,10 @@ namespace Shared {
 		std::wstring getTalkingName();
 		void setTalkAboutName(std::wstring value);
 		std::wstring getTalkAboutName();
-
-
 		void setLockedInH(bool value);
 		bool getLockedInH();
+		void setRemovedSeat(int value);
+		int getRemovedSeat();
 
 		void setIsInH(bool value);
 		bool getIsInH();
