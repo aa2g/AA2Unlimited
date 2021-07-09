@@ -1457,17 +1457,17 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			274, NCONSTCAT_OPINIONS,
-			TEXT("Opinion62"), TEXT("Opinion62"), TEXT("Opinion62"),
+			TEXT("Death flag for lover cheating"), TEXT("Death flag for lover cheating"), TEXT("Death flag for lover cheating"),
 			Value(65)
 		},
 		{
 			275, NCONSTCAT_OPINIONS,
-			TEXT("Opinion63"), TEXT("Opinion63"), TEXT("Opinion63"),
+			TEXT("Inactive with > 600 love, active otherwise"), TEXT("Inactive with > 600 love, active otherwise"), TEXT("Inactive with > 600 love, active otherwise"),
 			Value(66)
 		},
 		{
 			276, NCONSTCAT_OPINIONS,
-			TEXT("Opinion64"), TEXT("Opinion64"), TEXT("Opinion64"),
+			TEXT("Seat number of the card their lover cheated with"), TEXT("Seat number of the card their lover cheated with"), TEXT("Seat number of the card their lover cheated with"),
 			Value(67)
 		},
 		{
@@ -1477,22 +1477,22 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			278, NCONSTCAT_OPINIONS,
-			TEXT("Opinion66"), TEXT("Opinion66"), TEXT("Opinion66"),
+			TEXT("Witnessed target card having public H"), TEXT("Witnessed target card having public H"), TEXT("Witnessed target card having public H"),
 			Value(69)
 		},
 		{
 			279, NCONSTCAT_OPINIONS,
-			TEXT("Opinion67"), TEXT("Opinion67"), TEXT("Opinion67"),
+			TEXT("Witnessed partner of target card having public H"), TEXT("Witnessed partner of target card having public H"), TEXT("Witnessed partner of target card having public H"),
 			Value(70)
 		},
 		{
 			280, NCONSTCAT_OPINIONS,
-			TEXT("Opinion68"), TEXT("Opinion68"), TEXT("Opinion68"),
+			TEXT("Active if insulted by target card at least once"), TEXT("Active if insulted by target card at least once"), TEXT("Active if insulted by target card at least once"),
 			Value(71)
 		},
 		{
 			281, NCONSTCAT_OPINIONS,
-			TEXT("Opinion69"), TEXT("Opinion69"), TEXT("Opinion69"),
+			TEXT("Active if lost fight to target card at least once"), TEXT("Active if lost fight to target card at least once"), TEXT("Active if lost fight to target card at least once"),
 			Value(72)
 		},
 		{
@@ -1527,12 +1527,12 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			287, NCONSTCAT_OPINIONS,
-			TEXT("Opinion75"), TEXT("Opinion75"), TEXT("Opinion75"),
+			TEXT("Active if slapped by target card at least once"), TEXT("Active if slapped by target card at least once"), TEXT("Active if slapped by target card at least once"),
 			Value(78)
 		},
 		{
 			288, NCONSTCAT_OPINIONS,
-			TEXT("Opinion76"), TEXT("Opinion76"), TEXT("Opinion76"),
+			TEXT("0 if this is a fresh class, 1 otherwise"), TEXT("0 if this is a fresh class, 1 otherwise"), TEXT("0 if this is a fresh class, 1 otherwise"),
 			Value(79)
 		},
 		{
