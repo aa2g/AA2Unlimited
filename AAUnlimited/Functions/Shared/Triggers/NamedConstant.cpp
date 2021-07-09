@@ -21,7 +21,7 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 	{ //INVALID
-		
+
 	},
 	{ //INT
 		//Relationship
@@ -1172,287 +1172,287 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 		{
 			217, NCONSTCAT_OPINIONS,
-			TEXT("Opinion5"), TEXT("Opinion5"), TEXT("Opinion5"),
+			TEXT("I hate that I..."), TEXT("I hate that I..."), TEXT("I hate that I..."),
 			Value(8)
 		},
 		{
 			218, NCONSTCAT_OPINIONS,
-			TEXT("Opinion6"), TEXT("Opinion6"), TEXT("Opinion6"),
+			TEXT("The lowest trash..."), TEXT("The lowest trash..."), TEXT("The lowest trash..."),
 			Value(9)
 		},
 		{
 			219, NCONSTCAT_OPINIONS,
-			TEXT("Opinion7"), TEXT("Opinion7"), TEXT("Opinion7"),
+			TEXT("Gone too far..."), TEXT("Gone too far..."), TEXT("Gone too far..."),
 			Value(10)
 		},
 		{
 			220, NCONSTCAT_OPINIONS,
-			TEXT("Opinion8"), TEXT("Opinion8"), TEXT("Opinion8"),
+			TEXT("What shall I do next"), TEXT("What shall I do next"), TEXT("What shall I do next"),
 			Value(11)
 		},
 		{
 			221, NCONSTCAT_OPINIONS,
-			TEXT("Opinion9"), TEXT("Opinion9"), TEXT("Opinion9"),
+			TEXT("Haven't spoken to"), TEXT("Haven't spoken to"), TEXT("Haven't spoken to"),
 			Value(12)
 		},
 		{
 			222, NCONSTCAT_OPINIONS,
-			TEXT("Opinion10"), TEXT("Opinion10"), TEXT("Opinion10"),
+			TEXT("Don't know"), TEXT("Don't know"), TEXT("Don't know"),
 			Value(13)
 		},
 		{
 			223, NCONSTCAT_OPINIONS,
-			TEXT("Opinion11"), TEXT("Opinion11"), TEXT("Opinion11"),
+			TEXT("Who?"), TEXT("Who?"), TEXT("Who?"),
 			Value(14)
 		},
 		{
 			224, NCONSTCAT_OPINIONS,
-			TEXT("Opinion12"), TEXT("Opinion12"), TEXT("Opinion12"),
+			TEXT("No interest"), TEXT("No interest"), TEXT("No interest"),
 			Value(15)
 		},
 		{
 			225, NCONSTCAT_OPINIONS,
-			TEXT("Opinion13"), TEXT("Opinion13"), TEXT("Opinion13"),
+			TEXT("I'm curious!"), TEXT("I'm curious!"), TEXT("I'm curious!"),
 			Value(16)
 		},
 		{
 			226, NCONSTCAT_OPINIONS,
-			TEXT("Opinion14"), TEXT("Opinion14"), TEXT("Opinion14"),
+			TEXT("Wanna get back together"), TEXT("Wanna get back together"), TEXT("Wanna get back together"),
 			Value(17)
 		},
 		{
 			227, NCONSTCAT_OPINIONS,
-			TEXT("Opinion15"), TEXT("Opinion15"), TEXT("Opinion15"),
+			TEXT("Former GF/BF"), TEXT("Former GF/BF"), TEXT("Former GF/BF"),
 			Value(18)
 		},
 		{
 			228, NCONSTCAT_OPINIONS,
-			TEXT("Opinion16"), TEXT("Opinion16"), TEXT("Opinion16"),
+			TEXT("Let's get married"), TEXT("Let's get married"), TEXT("Let's get married"),
 			Value(19)
 		},
 		{
 			229, NCONSTCAT_OPINIONS,
-			TEXT("Opinion17"), TEXT("Opinion17"), TEXT("Opinion17"),
+			TEXT("Mai waifu"), TEXT("Mai waifu"), TEXT("Mai waifu"),
 			Value(20)
 		},
 		{
 			230, NCONSTCAT_OPINIONS,
-			TEXT("Opinion18"), TEXT("Opinion18"), TEXT("Opinion18"),
+			TEXT("Lover, for now"), TEXT("Lover, for now"), TEXT("Lover, for now"),
 			Value(21)
 		},
 		{
 			231, NCONSTCAT_OPINIONS,
-			TEXT("Opinion19"), TEXT("Opinion19"), TEXT("Opinion19"),
+			TEXT("I want to break up"), TEXT("I want to break up"), TEXT("I want to break up"),
 			Value(22)
 		},
 		{
 			232, NCONSTCAT_OPINIONS,
-			TEXT("Opinion20"), TEXT("Opinion20"), TEXT("Opinion20"),
+			TEXT("Overflowing love!"), TEXT("Overflowing love!"), TEXT("Overflowing love!"),
 			Value(23)
 		},
 		{
 			233, NCONSTCAT_OPINIONS,
-			TEXT("Opinion21"), TEXT("Opinion21"), TEXT("Opinion21"),
+			TEXT("Angel"), TEXT("Angel"), TEXT("Angel"),
 			Value(24)
 		},
 		{
 			234, NCONSTCAT_OPINIONS,
-			TEXT("Opinion22"), TEXT("Opinion22"), TEXT("Opinion22"),
+			TEXT("Like, but can't say it"), TEXT("Like, but can't say it"), TEXT("Like, but can't say it"),
 			Value(25)
 		},
 		{
 			235, NCONSTCAT_OPINIONS,
-			TEXT("Opinion23"), TEXT("Opinion23"), TEXT("Opinion23"),
+			TEXT("One-Sided Love"), TEXT("One-Sided Love"), TEXT("One-Sided Love"),
 			Value(26)
 		},
 		{
 			236, NCONSTCAT_OPINIONS,
-			TEXT("Opinion24"), TEXT("Opinion24"), TEXT("Opinion24"),
+			TEXT("No doubt it's love!"), TEXT("No doubt it's love!"), TEXT("No doubt it's love!"),
 			Value(27)
 		},
 		{
 			237, NCONSTCAT_OPINIONS,
-			TEXT("Opinion25"), TEXT("Opinion25"), TEXT("Opinion25"),
+			TEXT("I think I like them..."), TEXT("I think I like them..."), TEXT("I think I like them..."),
 			Value(28)
 		},
 		{
 			238, NCONSTCAT_OPINIONS,
-			TEXT("Opinion26"), TEXT("Opinion26"), TEXT("Opinion26"),
+			TEXT("Shameless!"), TEXT("Shameless!"), TEXT("Shameless!"),
 			Value(29)
 		},
 		{
 			239, NCONSTCAT_OPINIONS,
-			TEXT("Opinion27"), TEXT("Opinion27"), TEXT("Opinion27"),
+			TEXT("Hate but love"), TEXT("Hate but love"), TEXT("Hate but love"),
 			Value(30)
 		},
 		{
 			240, NCONSTCAT_OPINIONS,
-			TEXT("Opinion28"), TEXT("Opinion28"), TEXT("Opinion28"),
+			TEXT("Best Friend"), TEXT("Best Friend"), TEXT("Best Friend"),
 			Value(31)
 		},
 		{
 			241, NCONSTCAT_OPINIONS,
-			TEXT("Opinion29"), TEXT("Opinion29"), TEXT("Opinion29"),
+			TEXT("Good buddies"), TEXT("Good buddies"), TEXT("Good buddies"),
 			Value(32)
 		},
 		{
 			242, NCONSTCAT_OPINIONS,
-			TEXT("Opinion30"), TEXT("Opinion30"), TEXT("Opinion30"),
+			TEXT("Hole Brother/ Rod Sister"), TEXT("Hole Brother/ Rod Sister"), TEXT("Hole Brother/ Rod Sister"),
 			Value(33)
 		},
 		{
 			243, NCONSTCAT_OPINIONS,
-			TEXT("Opinion31"), TEXT("Opinion31"), TEXT("Opinion31"),
+			TEXT("Friend"), TEXT("Friend"), TEXT("Friend"),
 			Value(34)
 		},
 		{
 			244, NCONSTCAT_OPINIONS,
-			TEXT("Opinion32"), TEXT("Opinion32"), TEXT("Opinion32"),
+			TEXT("Sex Friend"), TEXT("Sex Friend"), TEXT("Sex Friend"),
 			Value(35)
 		},
 		{
 			245, NCONSTCAT_OPINIONS,
-			TEXT("Opinion33"), TEXT("Opinion33"), TEXT("Opinion33"),
+			TEXT("Closer than friends"), TEXT("Closer than friends"), TEXT("Closer than friends"),
 			Value(36)
 		},
 		{
 			246, NCONSTCAT_OPINIONS,
-			TEXT("Opinion34"), TEXT("Opinion34"), TEXT("Opinion34"),
+			TEXT("Normal Fags go die"), TEXT("Normal Fags go die"), TEXT("Normal Fags go die"),
 			Value(37)
 		},
 		{
 			247, NCONSTCAT_OPINIONS,
-			TEXT("Opinion35"), TEXT("Opinion35"), TEXT("Opinion35"),
+			TEXT("Love Rival"), TEXT("Love Rival"), TEXT("Love Rival"),
 			Value(38)
 		},
 		{
 			248, NCONSTCAT_OPINIONS,
-			TEXT("Opinion36"), TEXT("Opinion36"), TEXT("Opinion36"),
+			TEXT("Classmate"), TEXT("Classmate"), TEXT("Classmate"),
 			Value(39)
 		},
 		{
 			249, NCONSTCAT_OPINIONS,
-			TEXT("Opinion37"), TEXT("Opinion37"), TEXT("Opinion37"),
+			TEXT("Piece of shit..."), TEXT("Piece of shit..."), TEXT("Piece of shit..."),
 			Value(40)
 		},
 		{
 			250, NCONSTCAT_OPINIONS,
-			TEXT("Opinion38"), TEXT("Opinion38"), TEXT("Opinion38"),
+			TEXT("Fated Enemies"), TEXT("Fated Enemies"), TEXT("Fated Enemies"),
 			Value(41)
 		},
 		{
 			251, NCONSTCAT_OPINIONS,
-			TEXT("Opinion39"), TEXT("Opinion39"), TEXT("Opinion39"),
+			TEXT("You should die"), TEXT("You should die"), TEXT("You should die"),
 			Value(42)
 		},
 		{
 			252, NCONSTCAT_OPINIONS,
-			TEXT("Opinion40"), TEXT("Opinion40"), TEXT("Opinion40"),
+			TEXT("1000 deaths not enough"), TEXT("1000 deaths not enough"), TEXT("1000 deaths not enough"),
 			Value(43)
 		},
 		{
 			253, NCONSTCAT_OPINIONS,
-			TEXT("Opinion41"), TEXT("Opinion41"), TEXT("Opinion41"),
+			TEXT("Love but hate"), TEXT("Love but hate"), TEXT("Love but hate"),
 			Value(44)
 		},
 		{
 			254, NCONSTCAT_OPINIONS,
-			TEXT("Opinion42"), TEXT("Opinion42"), TEXT("Opinion42"),
+			TEXT("Physically Impossible"), TEXT("Physically Impossible"), TEXT("Physically Impossible"),
 			Value(45)
 		},
 		{
 			255, NCONSTCAT_OPINIONS,
-			TEXT("Opinion43"), TEXT("Opinion43"), TEXT("Opinion43"),
+			TEXT("Don't want to get involved"), TEXT("Don't want to get involved"), TEXT("Don't want to get involved"),
 			Value(46)
 		},
 		{
 			256, NCONSTCAT_OPINIONS,
-			TEXT("Opinion44"), TEXT("Opinion44"), TEXT("Opinion44"),
+			TEXT("Not good with these types"), TEXT("Not good with these types"), TEXT("Not good with these types"),
 			Value(47)
 		},
 		{
 			257, NCONSTCAT_OPINIONS,
-			TEXT("Opinion45"), TEXT("Opinion45"), TEXT("Opinion45"),
+			TEXT("Homeroom Teacher"), TEXT("Homeroom Teacher"), TEXT("Homeroom Teacher"),
 			Value(48)
 		},
 		{
 			258, NCONSTCAT_OPINIONS,
-			TEXT("Opinion46"), TEXT("Opinion46"), TEXT("Opinion46"),
+			TEXT("Incompetent Teacher "), TEXT("Incompetent Teacher "), TEXT("Incompetent Teacher "),
 			Value(49)
 		},
 		{
 			259, NCONSTCAT_OPINIONS,
-			TEXT("Opinion47"), TEXT("Opinion47"), TEXT("Opinion47"),
+			TEXT("Ideal Teacher"), TEXT("Ideal Teacher"), TEXT("Ideal Teacher"),
 			Value(50)
 		},
 		{
 			260, NCONSTCAT_OPINIONS,
-			TEXT("Opinion48"), TEXT("Opinion48"), TEXT("Opinion48"),
+			TEXT("Teacher I've longed for "), TEXT("Teacher I've longed for "), TEXT("Teacher I've longed for "),
 			Value(51)
 		},
 		{
 			261, NCONSTCAT_OPINIONS,
-			TEXT("Opinion49"), TEXT("Opinion49"), TEXT("Opinion49"),
+			TEXT("Normal Student"), TEXT("Normal Student"), TEXT("Normal Student"),
 			Value(52)
 		},
 		{
 			262, NCONSTCAT_OPINIONS,
-			TEXT("Opinion50"), TEXT("Opinion50"), TEXT("Opinion50"),
+			TEXT("Problem Student"), TEXT("Problem Student"), TEXT("Problem Student"),
 			Value(53)
 		},
 		{
 			263, NCONSTCAT_OPINIONS,
-			TEXT("Opinion51"), TEXT("Opinion51"), TEXT("Opinion51"),
+			TEXT("Favorite Student "), TEXT("Favorite Student "), TEXT("Favorite Student "),
 			Value(54)
 		},
 		{
 			264, NCONSTCAT_OPINIONS,
-			TEXT("Opinion52"), TEXT("Opinion52"), TEXT("Opinion52"),
+			TEXT("Special Student"), TEXT("Special Student"), TEXT("Special Student"),
 			Value(55)
 		},
 		{
 			265, NCONSTCAT_OPINIONS,
-			TEXT("Opinion53"), TEXT("Opinion53"), TEXT("Opinion53"),
+			TEXT("Forbidden Relationship"), TEXT("Forbidden Relationship"), TEXT("Forbidden Relationship"),
 			Value(56)
 		},
 		{
 			266, NCONSTCAT_OPINIONS,
-			TEXT("Opinion54"), TEXT("Opinion54"), TEXT("Opinion54"),
+			TEXT("Secret Relationship"), TEXT("Secret Relationship"), TEXT("Secret Relationship"),
 			Value(57)
 		},
 		{
 			267, NCONSTCAT_OPINIONS,
-			TEXT("Opinion55"), TEXT("Opinion55"), TEXT("Opinion55"),
+			TEXT("Makes my heart throb"), TEXT("Makes my heart throb"), TEXT("Makes my heart throb"),
 			Value(58)
 		},
 		{
 			268, NCONSTCAT_OPINIONS,
-			TEXT("Opinion56"), TEXT("Opinion56"), TEXT("Opinion56"),
+			TEXT("Really pisses me off"), TEXT("Really pisses me off"), TEXT("Really pisses me off"),
 			Value(59)
 		},
 		{
 			269, NCONSTCAT_OPINIONS,
-			TEXT("Opinion57"), TEXT("Opinion57"), TEXT("Opinion57"),
+			TEXT("( •᷄ὤ•᷅)"), TEXT("( •᷄ὤ•᷅)"), TEXT("( •᷄ὤ•᷅)"),
 			Value(60)
 		},
 		{
 			270, NCONSTCAT_OPINIONS,
-			TEXT("Opinion58"), TEXT("Opinion58"), TEXT("Opinion58"),
+			TEXT("Really wanna fuck"), TEXT("Really wanna fuck"), TEXT("Really wanna fuck"),
 			Value(61)
 		},
 		{
 			271, NCONSTCAT_OPINIONS,
-			TEXT("Opinion59"), TEXT("Opinion59"), TEXT("Opinion59"),
+			TEXT("Slut"), TEXT("Slut"), TEXT("Slut"),
 			Value(62)
 		},
 		{
 			272, NCONSTCAT_OPINIONS,
-			TEXT("Opinion60"), TEXT("Opinion60"), TEXT("Opinion60"),
+			TEXT("Lewd Promise"), TEXT("Lewd Promise"), TEXT("Lewd Promise"),
 			Value(63)
 		},
 		{
 			273, NCONSTCAT_OPINIONS,
-			TEXT("Opinion61"), TEXT("Opinion61"), TEXT("Opinion61"),
+			TEXT("Good Chemistry"), TEXT("Good Chemistry"), TEXT("Good Chemistry"),
 			Value(64)
 		},
 		{
@@ -1863,13 +1863,13 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 		},
 	},
 	{ //BOOL
-		
+
 	},
 	{ //FLOAT
-		
+
 	},
 	{ //STRING
-		
+
 	}
 
 };
