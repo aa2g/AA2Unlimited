@@ -36,6 +36,7 @@ public:;
 	bool bEnableHPosButtonReorder;
 	bool bUseShadowing;
 	bool bUseHAi;
+	bool bUseCacheFix;
 	bool bUsePPeX;
 	bool bUsePP2;
 	bool bTriggers;
@@ -49,6 +50,8 @@ public:;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
+	const char* dictionary;
+	int shadowMap;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
@@ -61,6 +64,7 @@ public:;
 			LUA_BIND(bEnableHPosButtonReorder)
 			LUA_BIND(bUseShadowing)
 			LUA_BIND(bUseHAi)
+			LUA_BIND(bUseCacheFix)
 			LUA_BIND(bUsePPeX)
 			LUA_BIND(bUsePP2)
 			LUA_BIND(bTriggers)
@@ -74,6 +78,9 @@ public:;
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
+			LUA_BIND(dictionary)
+			LUA_BIND(shadowMap)
+
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

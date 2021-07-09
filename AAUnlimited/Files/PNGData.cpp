@@ -185,6 +185,7 @@ out:
 static int aaud_off;
 
 void SavePNGChunk(CharacterStruct *chr, BYTE **outbuf, DWORD *outlen) {
+	Shared::GameState::setIsSaving(true);
 	BYTE *aaudata = General::FindPngChunk(*outbuf, *outlen, AAUCardData::PngChunkIdBigEndian);
 	// if no aaud found, just nuke the IEND
 	if (!aaudata)
@@ -271,7 +272,7 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 		assert(buf);
 		got = 0;
 
-		blob_sz = ZSTD_compress(buf, worst, cd.Blob, cd.BlobAt, 22);
+		blob_sz = ZSTD_compress(buf, worst, cd.Blob, cd.BlobAt, 20);
 		if (ZSTD_isError(blob_sz)) {
 			LOGPRIO(Logger::Priority::ERR) << "Error compressing modfiles. Resulting card isn't a modcard!: " << ZSTD_getErrorName(blob_sz) << "\r\n";
 			blob_sz = 0;
@@ -304,6 +305,7 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	if (report_compression_error)
 		MessageBox(NULL, L"Warning: this card's modfiles weren't saved, please try again.", L"Warning", 0);
 	return true;
+	Shared::GameState::setIsSaving(false);
 }
 
 // Called by play to save a class

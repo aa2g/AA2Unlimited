@@ -67,9 +67,24 @@ namespace AAEdit {
 		HWND m_cbSaveEyeTexture;
 		HWND m_cbSaveEyeHighlight;
 		HWND m_lbAAuSets;
+		HWND m_lbAAuSets2;
 		HWND m_edAAuSetName;
 		HWND m_btnAAuSetAdd;
+		HWND m_btnAAuSetTransfer;
 		HWND m_btnLoadCloth;
+
+		HWND m_cbTransAA2BODY;
+		HWND m_cbTransAA2FACE;
+		HWND m_cbTransAA2EYES;
+		HWND m_cbTransAA2HAIR;
+		HWND m_cbTransAO;
+		HWND m_cbTransAR;
+		HWND m_cbTransMO;
+		HWND m_cbTransOO;
+		HWND m_cbTransBD;
+		HWND m_cbTransBS;
+		HWND m_cbTransHR;
+		HWND m_cbTransTN;
 
 		void Refresh();
 		void RefreshAAuSetList();
@@ -309,6 +324,8 @@ namespace AAEdit {
 		std::vector<ModuleFile> m_modules;
 
 		void Refresh();
+		void RefreshAvailableModules();
+		void RefreshUsedModules();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
 	} m_mdDialog;
 

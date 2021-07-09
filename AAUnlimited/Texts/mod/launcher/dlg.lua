@@ -169,7 +169,7 @@ end
 local step = "x6"
 
 local function loadPPeX()
-	os.execute("START /B " .. aau_path("ppex", "PPeXM64.exe \"" .. play_path("data") .. "\" -nowindow"))
+	os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
 end
 
 local buts = {}
@@ -399,6 +399,7 @@ local function buildtabs() return
 				aaut("bUnlimitedOnTop", iup.toggle {title = "AAU edit dialog on top", tip="Forces AAU edit dialog to be always on top save way aa2edit dialog is" }),
 				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks", tip="Disabling this disables most of modcard functions" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI", tip = "auto-h when PC is forced by NPC" }),
+				aaut("bUseCacheFix", iup.toggle {title = "Cache Fix", tip = "Clears the lingering cache from when high poly models are loaded" }),
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI", tip = "evil lovers will peridodically force PC" }),
 				aaut("bTriggers", iup.toggle {title = "Triggers and Modules", tip = "enable card trigger scripting" }),
 				aaut("bUseShadowing", iup.toggle {title = ".pp file shadowing/sets", tip="pp file shadowing as directories in /data" }),

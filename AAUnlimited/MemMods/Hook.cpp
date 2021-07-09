@@ -220,6 +220,7 @@ DWORD PatchIAT(void *piat, void *newp)
 #include "MemMods/AAPlay/Misc/TanSlotUnlimit.h"
 #include "MemMods/AAPlay/Events/ClothingDialog.h"
 #include "MemMods/AAPlay/Events/NpcActions.h"
+#include "MemMods/AAPlay/Events/ClothesLimit.h"
 #include "MemMods/AAPlay/Events/ScreenCapture.h"
 #include "MemMods/AAPlay/Events/UiEvent.h"
 #include "MemMods/AAPlay/Events/CharacterRender.h"
@@ -266,6 +267,7 @@ void InitializeHooks() {
 
 			HairMeshes::HairLoadInject();
 			HairMeshes::XXCleanupInjection();
+			HairMeshes::XXCleanupInjectionForBoys();
 
 			Shared::GameState::setIsOverriding(General::IsAAEdit); //always override in aaedit
 		}
@@ -275,6 +277,8 @@ void InitializeHooks() {
 		Loads::HiPolyLoadsInjection();
 		Shared::PNG::InstallHooks();
 		ScreenCapture::InitInjection();
+		NpcActions::extraHairFixInjection();
+		ClothesLimit::trimRemover();
 	}
 
 	if (General::IsAAPlay) {
@@ -311,6 +315,20 @@ void InitializeHooks() {
 		NpcActions::LowPolyUpdateEndInject();
 		NpcActions::LowPolyUpdateStartInjectForGirls();
 		NpcActions::LowPolyUpdateStartInjectForBoys();
+		NpcActions::murderEventInjection();
+		//readded hooks for the release
+		NpcActions::rosterPopulateInjection();
+		NpcActions::RosterCrashInjection();
+		NpcActions::rosterHandleInjectionFirst();
+		NpcActions::rosterHandleInjectionSecond();
+		NpcActions::dialoguePlayInjection();
+		NpcActions::conversationEndInjection();
+		ClothesLimit::clothingSlotFirstInject();
+		ClothesLimit::clothingSlotSecondInject();
+		ClothesLimit::clothingSlotThirdInject();
+		//ClothesLimit::personalitySlotUnlock(); hooks are here for the time we'll need this, i'll move it to a different file when needed
+		//NpcActions::headTrackingChangeInjection();
+
 		Time::PeriodChangeInjection();	//most likely PeriodChangeRedirect() needs fixing
 //		if (int(g_Config["FixLocale"]) > FixLocale::IsEmulated())
 //			FixLocale::PatchAA2Play();
@@ -323,8 +341,10 @@ void InitializeHooks() {
 			TanSlotUnlimited::LoadLoopEndInject();
 			TanSlotUnlimited::InsertLoopCall();
 			TanSlotUnlimited::InsertLoopEnd();
+
 		}
 		Loads::hairUpdateInject();
+		NpcActions::extraHairMakerFixInjection();
 
 #if 0
 		SaveCard::AddUnlimitDataInject();

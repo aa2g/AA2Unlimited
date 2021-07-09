@@ -54,6 +54,14 @@ local function loadxx(directory, file)
 	if not newprop then return end
 	log.spam("prop struct %s", getmetatable(newprop).__name)
 	walk_fixlight(newprop.m_root)
+	local currentCharacter = charamgr.currentcharacter();
+	if (currentCharacter ~= nil) then
+		local character = GetCharInstData(currentCharacter.struct.m_seat)
+		if (character ~= nil) then
+		character:AddShadows(newprop);
+		character:CastShadows(newprop);
+		end
+	end
 	table.insert(loaded, proxy.wrap(newprop))
 	log.spam("loaded xx %s at index %d = %s", file, #loaded, newprop)
 	propschanged(#loaded)

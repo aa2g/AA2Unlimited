@@ -15,7 +15,8 @@ std::wstring g_NamedConstantCategories[NCONSTCAT_N] {
 	TEXT("Event Type"),
 	TEXT("Mood"),
 	TEXT("Preferences"),
-	TEXT("Opinions")
+	TEXT("Opinions"),
+	TEXT("Room")
 };
 
 std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
@@ -1578,6 +1579,287 @@ std::vector<NamedConstant> g_NamedConstants[N_TYPES] = {
 			297, NCONSTCAT_OPINIONS,
 			TEXT("Opinion85"), TEXT("Opinion85"), TEXT("Opinion85"),
 			Value(88)
+		},
+			// Rooms
+		{
+			298, NCONSTCAT_ROOM,
+			TEXT("School gates"), TEXT("School gates"), TEXT("School gates"),
+			Value(0)
+		},
+		{
+			299, NCONSTCAT_ROOM,
+			TEXT("Back street"), TEXT("Back street"), TEXT("Back street"),
+			Value(1)
+		},
+		{
+			300, NCONSTCAT_ROOM,
+			TEXT("Outside gymnasium"), TEXT("Outside gymnasium"), TEXT("Outside gymnasium"),
+			Value(2)
+		},
+		{
+			301, NCONSTCAT_ROOM,
+			TEXT("School route"), TEXT("School route"), TEXT("School route"),
+			Value(3)
+		},
+		{
+			302, NCONSTCAT_ROOM,
+			TEXT("Boys' changing room"), TEXT("Boys' changing room"), TEXT("Boys' changing room"),
+			Value(4)
+		},
+		{
+			303, NCONSTCAT_ROOM,
+			TEXT("Girls' changing room"), TEXT("Girls' changing room"), TEXT("Girls' changing room"),
+			Value(5)
+		},
+		{
+			304, NCONSTCAT_ROOM,
+			TEXT("Boys' shower"), TEXT("Boys' shower"), TEXT("Boys' shower"),
+			Value(6)
+		},
+		{
+			305, NCONSTCAT_ROOM,
+			TEXT("Girls' shower"), TEXT("Girls' shower"), TEXT("Girls' shower"),
+			Value(7)
+		},
+		{
+			306, NCONSTCAT_ROOM,
+			TEXT("Lockers"), TEXT("Lockers"), TEXT("Lockers"),
+			Value(8)
+		},
+		{
+			307, NCONSTCAT_ROOM,
+			TEXT("Outside teachers lounge"), TEXT("Outside lounge"), TEXT("Outside lounge"),
+			Value(9)
+		},
+		{
+			308, NCONSTCAT_ROOM,
+			TEXT("Outside toilets"), TEXT("Outside toilets"), TEXT("Outside toilets"),
+			Value(10)
+		},
+		{
+			309, NCONSTCAT_ROOM,
+			TEXT("Outside classroom"), TEXT("Outside classroom"), TEXT("Outside classroom"),
+			Value(11)
+		},
+		{
+			310, NCONSTCAT_ROOM,
+			TEXT("Rooftop access"), TEXT("Rooftop access"), TEXT("Rooftop access"),
+			Value(12)
+		},
+		{
+			311, NCONSTCAT_ROOM,
+			TEXT("Old building 1st floor"), TEXT("Old building 1st floor"), TEXT("Old building 1st floor"),
+			Value(13)
+		},
+		{
+			312, NCONSTCAT_ROOM,
+			TEXT("Old building 2nd floor"), TEXT("Old building 2nd floor"), TEXT("Old building 2nd floor"),
+			Value(14)
+		},
+		{
+			313, NCONSTCAT_ROOM,
+			TEXT("Old building 3rd floor"), TEXT("Old building 3rd floor"), TEXT("Old building 3rd floor"),
+			Value(15)
+		},
+		{
+			314, NCONSTCAT_ROOM,
+			TEXT("Teachers lounge"), TEXT("Teachers lounge"), TEXT("Teachers lounge"),
+			Value(16)
+		},
+		{
+			315, NCONSTCAT_ROOM,
+			TEXT("Infirmary"), TEXT("Infirmary"), TEXT("Infirmary"),
+			Value(17)
+		},
+		{
+			316, NCONSTCAT_ROOM,
+			TEXT("Library"), TEXT("Library"), TEXT("Library"),
+			Value(18)
+		},
+		{
+			317, NCONSTCAT_ROOM,
+			TEXT("Classroom"), TEXT("Classroom"), TEXT("Classroom"),
+			Value(19)
+		},
+		{
+			318, NCONSTCAT_ROOM,
+			TEXT("Boys' Toilets"), TEXT("Boys' Toilets"), TEXT("Boys' Toilets"),
+			Value(20)
+		},
+		{
+			319, NCONSTCAT_ROOM,
+			TEXT("Girls' Toilets"), TEXT("Girls' Toilets"), TEXT("Girls' Toilets"),
+			Value(21)
+		},
+		{
+			320, NCONSTCAT_ROOM,
+			TEXT("Rooftop"), TEXT("Rooftop"), TEXT("Rooftop"),
+			Value(22)
+		},
+		{
+			321, NCONSTCAT_ROOM,
+			TEXT("Outside counsel"), TEXT("Outside counsel"), TEXT("Outside counsel"),
+			Value(23)
+		},
+		{
+			322, NCONSTCAT_ROOM,
+			TEXT("Outside cafeteria"), TEXT("Outside cafeteria"), TEXT("Outside cafeteria"),
+			Value(24)
+		},
+		{
+			323, NCONSTCAT_ROOM,
+			TEXT("Courtyard"), TEXT("Courtyard"), TEXT("Courtyard"),
+			Value(25)
+		},
+		{
+			324, NCONSTCAT_ROOM,
+			TEXT("2nd floor hallway"), TEXT("2nd floor hallway"), TEXT("2nd floor hallway"),
+			Value(26)
+		},
+		{
+			325, NCONSTCAT_ROOM,
+			TEXT("3rd floor passage"), TEXT("3rd floor passage"), TEXT("3rd floor passage"),
+			Value(27)
+		},
+		{
+			326, NCONSTCAT_ROOM,
+			TEXT("Swimming pool"), TEXT("Swimming pool"), TEXT("Swimming pool"),
+			Value(28)
+		},
+		{
+			327, NCONSTCAT_ROOM,
+			TEXT("Track"), TEXT("Track"), TEXT("Track"),
+			Value(29)
+		},
+		{
+			328, NCONSTCAT_ROOM,
+			TEXT("Baseball field"), TEXT("Baseball field"), TEXT("Baseball field"),
+			Value(30)
+		},
+		{
+			329, NCONSTCAT_ROOM,
+			TEXT("Dojo"), TEXT("Dojo"), TEXT("Dojo"),
+			Value(31)
+		},
+		{
+			330, NCONSTCAT_ROOM,
+			TEXT("Gymnasium"), TEXT("Gymnasium"), TEXT("Gymnasium"),
+			Value(32)
+		},
+		{
+			331, NCONSTCAT_ROOM,
+			TEXT("Arts room"), TEXT("Arts room"), TEXT("Arts room"),
+			Value(33)
+		},
+		{
+			332, NCONSTCAT_ROOM,
+			TEXT("Multipurpose room"), TEXT("Multipurpose room"), TEXT("Multipurpose room"),
+			Value(34)
+		},
+		{
+			333, NCONSTCAT_ROOM,
+			TEXT("Japanese room"), TEXT("Japanese room"), TEXT("Japanese room"),
+			Value(35)
+		},
+		{
+			334, NCONSTCAT_ROOM,
+			TEXT("Behind Dojo"), TEXT("Behind Dojo"), TEXT("Behind Dojo"),
+			Value(36)
+		},
+		{
+			335, NCONSTCAT_ROOM,
+			TEXT("Outside Dojo"), TEXT("Outside Dojo"), TEXT("Outside Dojo"),
+			Value(37)
+		},
+		{
+			336, NCONSTCAT_ROOM,
+			TEXT("Cafeteria"), TEXT("Cafeteria"), TEXT("Cafeteria"),
+			Value(38)
+		},
+		{
+			337, NCONSTCAT_ROOM,
+			TEXT("Outside Station"), TEXT("Outside Station"), TEXT("Outside Station"),
+			Value(39)
+		},
+		{
+			338, NCONSTCAT_ROOM,
+			TEXT("Karaoke"), TEXT("Karaoke"), TEXT("Karaoke"),
+			Value(40)
+		},
+		{
+			339, NCONSTCAT_ROOM,
+			TEXT("Boys' night room"), TEXT("Boys' night room"), TEXT("Boys' night room - might not be a thing"),
+			Value(41)
+		},
+		{
+			340, NCONSTCAT_ROOM,
+			TEXT("Girls' night room"), TEXT("Girls' night room"), TEXT("Girls' night room - might not be a thing"),
+			Value(42)
+		},
+		{
+			341, NCONSTCAT_ROOM,
+			TEXT("Boys' room"), TEXT("Boys' room"), TEXT("Boys' room"),
+			Value(43)
+		},
+		{
+			342, NCONSTCAT_ROOM,
+			TEXT("Girls' room"), TEXT("Girls' room"), TEXT("Girls' room"),
+			Value(44)
+		},
+		{
+			343, NCONSTCAT_ROOM,
+			TEXT("Boys' shower stall"), TEXT("Boys' shower stall"), TEXT("Boys' shower stall"),
+			Value(45)
+		},
+		{
+			344, NCONSTCAT_ROOM,
+			TEXT("Girls' shower stall"), TEXT("Girls' shower stall"), TEXT("Girls' shower stall"),
+			Value(46)
+		},
+		{
+			345, NCONSTCAT_ROOM,
+			TEXT("Boys' toilet stall"), TEXT("Boys' toilet stall"), TEXT("Boys' toilet stall"),
+			Value(47)
+		},
+		{
+			346, NCONSTCAT_ROOM,
+			TEXT("Girls' toilet stall"), TEXT("Girls' toilet stall"), TEXT("Girls' toilet stall"),
+			Value(48)
+		},
+		{
+			347, NCONSTCAT_ROOM,
+			TEXT("Counseling room"), TEXT("Counseling room"), TEXT("Counseling room"),
+			Value(49)
+		},
+		{
+			348, NCONSTCAT_ROOM,
+			TEXT("Gym storeroom"), TEXT("Gym storeroom"), TEXT("Gym storeroom"),
+			Value(50)
+		},
+		{
+			349, NCONSTCAT_ROOM,
+			TEXT("Love Hotel"), TEXT("Love Hotel"), TEXT("Love Hotel"),
+			Value(51)
+		},
+		{
+			350, NCONSTCAT_ROOM,
+			TEXT("Machine room"), TEXT("Machine room"), TEXT("Machine room"),
+			Value(52)
+		},
+		{
+			351, NCONSTCAT_CONVERSATIONS,
+			TEXT("MINNA_PLAY"), TEXT("MINNA_EAT"), TEXT("MINNA_EAT"),
+			Value(ExtClass::ConversationId::MINNA_PLAY)
+		},
+		{
+			352, NCONSTCAT_TIME_PERIOD,
+			TEXT("HOMEROOM"), TEXT("HOMEROOM"), TEXT("HOMEROOM"),
+			Value(ExtClass::PeriodId::HOMEROOM)
+		},
+		{
+			352, NCONSTCAT_TIME_PERIOD,
+			TEXT("EXAM"), TEXT("EXAM"), TEXT("EXAM"),
+			Value(ExtClass::PeriodId::EXAM)
 		},
 	},
 	{ //BOOL

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files/PNGData.h"
+#include "Files\PersistentStorage.h"
 
 using namespace Shared::Triggers;
 
@@ -25,13 +26,20 @@ static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
 static DWORD OrigLoadXAMale, OrigLoadXAFemale;
+typedef void(*f_modelReload)(DWORD* charstruct);
+
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth, BYTE partial) {
 	// Remove once they can cope
 	if (!General::IsAAPlay) return;
 
-
+	const DWORD offsetScreen[]{ 0x38F6B0 };
+	DWORD* screenType = (DWORD*)ExtVars::ApplyRule(offsetScreen);
+	if (screenType) {
+		//add the character to the conversation list in the clothing screen
+		if (*screenType == 5) Shared::GameState::addConversationCharacter(loadCharacter);
+	}
 
 	Shared::MeshTextureCharLoadStart(loadCharacter);
 	//Add the character to the conversation list
@@ -50,12 +58,15 @@ void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth
 		}
 	}
 	//throw high poly event
-	HiPolyInitData data;
-	data.character = loadCharacter;
-	data.clothState = &cloth;
-	data.card = AAPlay::GetSeatFromStruct(loadCharacter);
-	loc_hiPolyLoaded = data.card;
-	ThrowEvent(&data);
+	if (!(loadCharacter->m_seat == 0 && AAPlay::g_characters[0].m_char != loadCharacter)) {
+		//checking if we aren't in in preview mode
+		HiPolyInitData data;
+		data.character = loadCharacter;
+		data.clothState = &cloth;
+		data.card = AAPlay::GetSeatFromStruct(loadCharacter);
+		loc_hiPolyLoaded = data.card;
+		ThrowEvent(&data);
+	}
 }
 
 void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
@@ -67,6 +78,7 @@ void HiPolyLoadEndEvent(CharacterStruct *loadCharacter) {
 	HiPolyEndData data;
 	data.card = loc_hiPolyLoaded;
 	ThrowEvent(&data);
+
 }
 
 // wraps the calls to original load character events
@@ -101,11 +113,41 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
-
+	CharInstData card;
+	if (General::IsAAPlay) card = AAPlay::g_characters[loadCharacter->m_seat];
+	else if (General::IsAAEdit) {
+		AAEdit::g_currChar.m_char = loadCharacter;
+		card = AAEdit::g_currChar;
+	}
+	for (int idx = 0; idx < 4; idx++) {
+		if (card.m_cardData.GetHairs(idx).size()) {
+			for (int num = 0; num < card.m_cardData.GetHairs(idx).size(); num++) {
+				card.AddShadows((DWORD*)card.m_hairs[idx][num].second);
+				card.CastShadows((DWORD*)card.m_hairs[idx][num].second);
+			}
+		}
+	}
+	if (card.m_char->m_xxSkeleton) {
+		card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
+		card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
+	}
+	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
-	if (General::IsAAPlay)
+	if (General::IsAAPlay) {
 		Shared::GameState::setIsOverriding(false);
+	}
 	HiPolyLoadEndEvent(loadCharacter);
+	
+	if (AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd) {
+		AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd = false;
+		AAPlay::g_characters[loadCharacter->m_seat].LowPolyUpdate(loadCharacter->m_bClothesOn, loadCharacter->m_currClothes);
+	}
+	if (AAEdit::AAFACEDLL) {
+		f_modelReload modelReload= (f_modelReload)GetProcAddress(AAEdit::AAFACEDLL, "modelReload");
+		if (modelReload) {
+			modelReload((DWORD*)loadCharacter);
+		}
+	}
 	loc_loadingCharacter = false;
 	return retv;
 }
@@ -165,6 +207,7 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 			HiPolyDespawnData data;
 			data.card = AAPlay::GetSeatFromStruct(loadCharacter);
 			ThrowEvent(&data);
+
 		}
 		LUA_EVENT_NORET("char_despawn", loadCharacter);
 	}
@@ -184,8 +227,18 @@ DWORD __declspec(noinline) __stdcall CallOrigDespawn(DWORD who, void *_this) {
 	if (!loc_loadingCharacter) {
 		LUA_EVENT_NORET("char_despawn_after", retv, loadCharacter);
 		Poser::RemoveCharacter(loadCharacter);
+		if (!Shared::GameState::getIsPcConversation()) Shared::GameState::clearConversationCharacterBySeat(loadCharacter->m_seat);
+		if (General::IsAAPlay && g_Config.bUseCacheFix) {
+			//This code resets the cache memory
+			if (loadCharacter->m_somedata && loadCharacter->m_charData) {
+				//this event seems to be called on unloading a save, so we're just protecting for that case
+				AAPlay::g_characters[AAPlay::GetSeatFromStruct(loadCharacter)].ClearCache();
+				ExtClass::CharacterAssetContainer* something = *(ExtClass::CharacterAssetContainer**)((char*)(loadCharacter->m_somePointer) + 0x13c);
+				*something = AAPlay::g_characters[AAPlay::GetSeatFromStruct(loadCharacter)].assetContainer;
+			}
+		}
 	}
-
+	if (General::IsAAEdit) Shared::GameState::setIsDrawingShadow(true);
 	return retv;
 }
 
@@ -368,7 +421,13 @@ void __stdcall SaveLoadEvent() {
 //	Facecam::Cleanup();
 }
 
-void __stdcall TransferInEvent(ExtClass::CharacterStruct* character) {
+void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fileName) {
+
+	std::string path = General::CastToString(fileName);
+	std::size_t found = path.rfind("ale\\");
+	if (found != std::string::npos) path.replace(0, found+4, "");
+	auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+	storage->storeClassString(General::CastToWString("LastCardFileName"), path);
 	AAPlay::InitTransferedCharacter(character);
 }
 
@@ -409,6 +468,7 @@ void __declspec(naked) TransferInRedirect() {
 		push [esp+8]
 		call [TransferInOriginalFunc]
 		pushad
+		push [esp + 0x50]
 		push esi
 		call TransferInEvent
 		popad

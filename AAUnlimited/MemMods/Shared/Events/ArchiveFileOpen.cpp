@@ -145,7 +145,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 
 	if (file)
 		LOGPRIONC(Logger::Priority::SPAM) std::hex << "vtable is " << file->vtable << "\r\n";*/
-
+	
 	if (readBytes)
 		*readBytes = 0;
 	wchar_t *orig_archive = *paramArchive;
@@ -227,6 +227,7 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 		}
 	}
 
+skip:;
 	if (g_Config.bUsePPeX) {
 		if (g_PPeX.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
 			provider = "ppex";
@@ -234,7 +235,6 @@ BYTE * __stdcall OpenFileEvent(void *_this, wchar_t **paramFile, DWORD* readByte
 		}
 	}
 
-skip:;
 	if (g_Config.bUsePP2) {
 		if (g_PP2.ArchiveDecompress(parchive, pfile, readBytes, &outBuffer)) {
 			provider = "pp2";
@@ -295,7 +295,6 @@ public:;
 	   int load_audio(int a2, wchar_t **archive, void *ppcls, wchar_t **fname, int a6, int a7, int a8, int a9, int a10) {
 		   std::string mbfname = General::CastToStringN(*fname, wcslen(*fname) + 1);
 		   size_t fpos = mbfname.find_last_of("\\");
-		   LUA_EVENT_NORET("load_audio", mbfname.c_str() + fpos + 1);
 		   int ret = 0x80004005;
 		   DWORD outSize;
 		   wchar_t *p = *fname;

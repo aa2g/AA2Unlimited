@@ -27,6 +27,11 @@ struct GameStateStruct {
 		is_in_h = false;
 		h_ai_locked = true;
 		m_isInMainMenu = false;
+		h_info = NULL;
+		m_drawShadow = true;
+		m_savingCard = false;
+		m_talkCardName = L"";
+		m_talkAboutName = L"";
 	}
 
 	//Game state indicators
@@ -35,7 +40,8 @@ struct GameStateStruct {
 	bool m_isIsOverridingDialogue;		//true from conversationstart till the first conversation tick
 	bool m_isOverriding;				//true if overrides need to be applied
 	bool m_isMenuMode;					//true if in menu mode(settings, roster, save/load, etc)
-	
+	bool m_savingCard;					//true if the user is currently saving the card in the edtior
+
 	bool m_isPeeping;					//true if the current H scene does not involve the PC
 	ExtClass::CharacterStruct* m_voyeur; //the observer of the H scene. Virtually always the PC regardless of what the game thinks about it
 	ExtClass::NpcData* m_voyeurTarget; //the NPC voyeur is peeping at. Usually the first actor in the H scene
@@ -51,6 +57,11 @@ struct GameStateStruct {
 	DWORD m_HPosition;					//H position ID
 	bool is_in_h;						//Is on if H is ongoing. Used to determine when H ends to release actors.
 	bool m_isInMainMenu;				//Is true if the game is in main menu
+	bool m_drawShadow;
+	std::wstring m_talkCardName;		//The name of the card that is currently talking; used in subtitles.
+	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
+
+
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
 
@@ -79,7 +90,18 @@ void Shared::GameState::setIsPcConversation(bool value)
 
 bool Shared::GameState::getIsPcConversation()
 {
+	if (General::IsAAEdit) return false;
 	return loc_gameState.m_isPcConversation;
+}
+
+void Shared::GameState::setIsSaving(bool value)
+{
+	loc_gameState.m_savingCard = value;
+}
+
+bool Shared::GameState::getIsSaving()
+{
+	return loc_gameState.m_savingCard;
 }
 
 void Shared::GameState::setIsOverridingDialogue(bool value)
@@ -111,6 +133,19 @@ void Shared::GameState::setIsInMainMenu(bool value)
 {
 	loc_gameState.m_isInMainMenu = value;
 }
+
+
+bool Shared::GameState::getIsDrawingShadow()
+{
+	return loc_gameState.m_drawShadow;
+}
+
+void Shared::GameState::setIsDrawingShadow(bool value)
+{
+	loc_gameState.m_drawShadow = value;
+}
+
+
 
 void Shared::GameState::updateIsOverriding()
 {
@@ -148,6 +183,28 @@ void Shared::GameState::setH_AI(bool value)
 bool Shared::GameState::getH_AI()
 {
 	return loc_gameState.h_ai;
+}
+
+
+void Shared::GameState::setTalkingName(std::wstring value)
+{
+	loc_gameState.m_talkCardName = value;
+}
+
+std::wstring Shared::GameState::getTalkingName()
+{
+	return loc_gameState.m_talkCardName;
+}
+
+
+void Shared::GameState::setTalkAboutName(std::wstring value)
+{
+	loc_gameState.m_talkAboutName = value;
+}
+
+std::wstring Shared::GameState::getTalkAboutName()
+{
+	return loc_gameState.m_talkAboutName;
 }
 
 void Shared::GameState::setLockedInH(bool value)
@@ -250,6 +307,67 @@ void Shared::GameState::setHPosition(DWORD value)
 	loc_gameState.m_HPosition = value;
 }
 
+
+void Shared::GameState::kickCard(int s)
+{
+	DWORD seat = (DWORD)s;
+	const DWORD offset1[]{ 0xF46D0 };
+	DWORD* kickFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x376164, 0x28, 0x00 };
+	DWORD* ediValue = (DWORD*)ExtVars::ApplyRule(offset2);
+
+
+	__asm
+	{
+		mov eax, seat
+		push ediValue
+		call[kickFunction]
+	}
+}
+/// <summary>
+/// Adds a card to the class
+/// </summary>
+/// <param name="cardName">- Filename of the card inside Male or Female folder</param>
+/// <param name="gender">- Card's gender. true = female, false = male</param>
+/// <param name="seat">- Class seat</param>
+void Shared::GameState::addCard(std::wstring cardName, bool isFemale, int seat)
+{
+	DWORD s = (DWORD)seat;
+	std::wstring genderPath = isFemale ? L"Female\\" : L"Male\\";
+	std::wstring cardPath = General::AAPlayPath + L"data\\save\\" + genderPath + cardName;
+	DWORD *p = (DWORD *)(&cardPath);
+	DWORD pushaddress = *p;
+	const DWORD offset1[]{ 0xEBBD0 };
+	DWORD* addFunction = (DWORD*)ExtVars::ApplyRule(offset1);
+	const DWORD offset2[]{ 0x376164, 0x00 };
+	DWORD* ediValue = (DWORD*)ExtVars::ApplyRule(offset2);
+
+	__asm
+	{
+		mov edi, ediValue
+		push pushaddress
+		push isFemale
+		push s
+		call[addFunction]
+	}
+}
+
+
+
+
+DWORD Shared::GameState::getClubType(BYTE clubID)
+{
+	if (clubID >= 0 && clubID < 8) {
+		auto lastOffset = 0x18 + (0x1C * clubID);
+		const DWORD offset[]{ 0x376164, 0x44, 0x14, 0x28, 0x29C + lastOffset };
+		DWORD* clubType = (DWORD*)ExtVars::ApplyRule(offset);
+		return *clubType;
+	}
+	return -1;
+
+}
+
+
 void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* chara) {
 	for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
 		if (!loc_gameState.m_char[i]) {
@@ -259,7 +377,8 @@ void Shared::GameState::addConversationCharacter(ExtClass::CharacterStruct* char
 	}
 }
 ExtClass::CharacterStruct* Shared::GameState::getConversationCharacter(int idx) {
-	return loc_gameState.m_char[idx % CONVERSATION_CHARACTERS_N];
+	if (idx >= CONVERSATION_CHARACTERS_N) return nullptr;
+	return loc_gameState.m_char[idx];
 }
 void Shared::GameState::setConversationCharacter(ExtClass::CharacterStruct* chara, int idx) {
 	loc_gameState.m_char[idx] = chara;
@@ -273,6 +392,17 @@ void Shared::GameState::clearConversationCharacter(int idx) {
 		loc_gameState.m_char[idx] = nullptr;
 	}
 }
+
+void Shared::GameState::clearConversationCharacterBySeat(int seat) {
+	if (AAPlay::g_characters[seat].IsValid()) {	
+		for (int i = 0; i < CONVERSATION_CHARACTERS_N; i++) {
+			if (loc_gameState.m_char[i] == AAPlay::g_characters[seat].m_char) {
+				loc_gameState.m_char[i] = nullptr;
+			}
+		}
+	}
+}
+
 
 void Shared::GameState::setPlayerCharacter(int seat) {
 	if (AAPlay::g_characters[seat].IsValid()) {

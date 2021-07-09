@@ -155,6 +155,42 @@ namespace Shared {
 			//onemoreslider.
 			{ ExtClass::CharacterStruct::FACE, 49,	TEXT("A00_J_chin"),{ 1,1,0.4f, 0,0,0, 0,0.4f,-0.16f },		    Slider::ADD, AAUCardData::MODIFY_FRAME },
 
+			// male mimi sliders
+			{ ExtClass::CharacterStruct::FACE, 50,	TEXT("S00_O_mimiR"),{ 1,0,0, 0,0,0, 0.64346f,0,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Left
+			{ ExtClass::CharacterStruct::FACE, 51,	TEXT("S00_O_mimiL"),{ 1,0,0, 0,0,0, -0.64346f,0,0 },	Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale X Right
+			{ ExtClass::CharacterStruct::FACE, 52,	TEXT("S00_O_mimiR"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Left
+			{ ExtClass::CharacterStruct::FACE, 53,	TEXT("S00_O_mimiL"),{ 0,1,0, 0,0,0, 0,-0.64346f,0 },		Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Y Right
+			{ ExtClass::CharacterStruct::FACE, 54,	TEXT("S00_O_mimiL"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Left
+			{ ExtClass::CharacterStruct::FACE, 55,	TEXT("S00_O_mimiR"),{ 0,0,1, 0,0,0, 0,0,0.23f },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Scale Z Right
+			{ ExtClass::CharacterStruct::FACE, 56,	TEXT("S00_O_mimiL"),{ 0,0,0, 0,0,0, 1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Left
+			{ ExtClass::CharacterStruct::FACE, 57,	TEXT("S00_O_mimiR"),{ 0,0,0, 0,0,0, -1,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position X Right
+			{ ExtClass::CharacterStruct::FACE, 58,	TEXT("S00_O_mimiL"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Left
+			{ ExtClass::CharacterStruct::FACE, 59,	TEXT("S00_O_mimiR"),{ 0,0,0, 0,0,0, 0,0,1 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //Split Ear Position Z Right
+			{ ExtClass::CharacterStruct::FACE, 60,	TEXT("S00_O_mimi"),{ 0,0,0, 0,0,0, 0,1,0 },					Slider::ADD, AAUCardData::MODIFY_FRAME }, //ear height
+
+			//Faceparts v5.5
+			{ ExtClass::CharacterStruct::FACE, 61,	TEXT("A00_J_nosebridge"),{ 0,1,0, 0,0,0, 0,0,0 },		    Slider::ADD, AAUCardData::MODIFY_FRAME }, //nose bridge height
+			{ ExtClass::CharacterStruct::FACE, 62,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow depth
+			{ ExtClass::CharacterStruct::FACE, 63,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow depth
+			{ ExtClass::CharacterStruct::FACE, 64,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow rotation
+			{ ExtClass::CharacterStruct::FACE, 65,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 1,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow rotation
+			
+			{ ExtClass::CharacterStruct::FACE, 66,	TEXT("A00_J_teeth"),{ 0,0,0, 0,0,0, 0,0,1 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //teeth
+
+			//Iris sliders
+			{ ExtClass::CharacterStruct::FACE, 67,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,0,0, 1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris horisontal f
+			{ ExtClass::CharacterStruct::FACE, 68,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris horisontal f
+			{ ExtClass::CharacterStruct::FACE, 69,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris horisontal m
+			{ ExtClass::CharacterStruct::FACE, 70,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris horisontal m
+			{ ExtClass::CharacterStruct::FACE, 71,	TEXT("A00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris depth f
+			{ ExtClass::CharacterStruct::FACE, 72,	TEXT("A00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris depth f
+			{ ExtClass::CharacterStruct::FACE, 73,	TEXT("S00_N_hitomiL"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left iris depth m
+			{ ExtClass::CharacterStruct::FACE, 74,	TEXT("S00_N_hitomiR"),{ 0,0,0, 0,0,0, 0,1,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right iris depth m
+
+			{ ExtClass::CharacterStruct::FACE, 75,	TEXT("A00_J_kao"),{ 1,0,0, 0,0,0, 0,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //face width
+
+			{ ExtClass::CharacterStruct::FACE, 76,	TEXT("A00_J_mayuRrot"),{ 0,0,0, 0,0,0, -1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //right eyebrow horizontal
+			{ ExtClass::CharacterStruct::FACE, 77,	TEXT("A00_J_mayuLrot"),{ 0,0,0, 0,0,0, 1,0,0 },				Slider::ADD, AAUCardData::MODIFY_FRAME }, //left eyebrow horizontal
 
 		},
 		{
@@ -345,6 +381,14 @@ namespace Shared {
 			{ ExtClass::CharacterStruct::BODY,58, TEXT("a01_J_UplegL_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 			{ ExtClass::CharacterStruct::BODY,59, TEXT("a01_J_UplegR_010"),{ 0,0,0.15f, 0,0,0, 0,0,0 },	Slider::ADD, AAUCardData::MODIFY_BONE }, //thighs thickness
 
+			{ ExtClass::CharacterStruct::BODY,	60, TEXT("a01_J_LegL_01"),{ 0.15f,0,0, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	61, TEXT("a01_J_LegR_01"),{ 0.15f,0,0, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	62, TEXT("a01_J_LegL_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	63, TEXT("a01_J_LegR_01"),{ 0,0,0.15f, 0,0,0, 0,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+
+			{ ExtClass::CharacterStruct::BODY,	64, TEXT("a01_J_LegL_01"),{ 0.15f,0,0.15f, 0,0,0, -0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
+			{ ExtClass::CharacterStruct::BODY,	65, TEXT("a01_J_LegR_01"),{ 0.15f,0,0.15f, 0,0,0, 0.1f,0,0 },		Slider::ADD, AAUCardData::MODIFY_BONE }, //calves thickness
 
 		},
 		{

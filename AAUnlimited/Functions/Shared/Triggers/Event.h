@@ -56,6 +56,8 @@ namespace Triggers {
 		HI_POLY_DESPAWN,
 		H_END,
 		H_START,
+		CARD_EXPELLED,
+		CONVERSATION_END,
 		
 		
 		N_EVENTS
@@ -171,6 +173,9 @@ namespace Triggers {
 		int conversationId;
 		int effectiveResponse;
 		int effectiveChance;
+		int changedResponse;
+		int strongResponse;
+		int absoluteResponse;
 
 	EDC_END
 
@@ -253,23 +258,36 @@ namespace Triggers {
 
 		int roomTarget;
 		int action;
-		int convotarget;
 
 	EDC_END
 
 	EDC_DECLARE(KeyPressData, KEY_PRESS)
 
-	int keyVal;
+		int keyVal;
 
 	EDC_END
 
 	EDC_DECLARE(HPositionData, HPOSITION_CHANGE)
 
-	int position;
-	int actor0;
-	int actor1;
-	int dominantParticipant;
-	int submissiveParticipant;
+		int position;
+		int actor0;
+		int actor1;
+		int dominantParticipant;
+		int submissiveParticipant;
+
+	EDC_END
+
+	EDC_DECLARE(CardExpelledData, CARD_EXPELLED)
+
+		int target;
+		int action;
+
+	EDC_END
+
+	EDC_DECLARE(ConversationEndData, CONVERSATION_END)
+
+	int action;
+	int conversationTarget;
 
 	EDC_END
 

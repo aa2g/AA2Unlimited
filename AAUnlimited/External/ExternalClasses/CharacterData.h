@@ -477,6 +477,10 @@ namespace ExtClass {
 
 		bool empty() { return false; };
 		void CopyCharacterData(CharacterData* data);
+		void CopyCharacterFigureData(CharacterData* data);
+		void CopyCharacterFaceData(CharacterData* data);
+		void CopyCharacterEyesData(CharacterData* data);
+		void CopyCharacterHairData(CharacterData* data);
 	};
 
 	class CardStyleDataUnpadded : public CharacterDataTypes

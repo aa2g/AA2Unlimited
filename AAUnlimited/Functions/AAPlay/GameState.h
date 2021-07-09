@@ -13,15 +13,17 @@ namespace Shared {
 
 		void setIsPcConversation(bool value);
 		bool getIsPcConversation();
-
+		void setIsSaving(bool value);
+		bool getIsSaving();
 		void setIsOverridingDialogue(bool value);
 		bool getIsOverridingDialogue();
-
 		void setIsOverriding(bool value);
 		bool getIsOverriding();
 		void updateIsOverriding();
 
 		void setIsInMainMenu(bool value);
+		bool getIsDrawingShadow();
+		void setIsDrawingShadow(bool value);
 		bool getIsInMainMenu();
 
 		void setIsHighPolyLoaded(bool value);
@@ -32,6 +34,11 @@ namespace Shared {
 
 		void setH_AI(bool value);
 		bool getH_AI();
+		void setTalkingName(std::wstring value);
+		std::wstring getTalkingName();
+		void setTalkAboutName(std::wstring value);
+		std::wstring getTalkAboutName();
+
 
 		void setLockedInH(bool value);
 		bool getLockedInH();
@@ -63,10 +70,14 @@ namespace Shared {
 		void SetRoomNumber(int seat, int room);
 		int GetRoomNumber(int seat);
 
+		void kickCard(int s);
+		void addCard(std::wstring cardName, bool gender, int s);
+		DWORD getClubType(BYTE clubID);
 		void addConversationCharacter(ExtClass::CharacterStruct * chara);
 		ExtClass::CharacterStruct * getConversationCharacter(int idx);
 		void setConversationCharacter(ExtClass::CharacterStruct * chara, int idx);
 		void clearConversationCharacter(int idx);
+		void clearConversationCharacterBySeat(int seat);
 
 		inline CharInstData* getPlayerCharacter()
 		{

@@ -213,6 +213,7 @@ local loadstyle = exe_type == "play" and toggles.slotbuttons("Style", { "1", "2"
 			end
 			characterdata:SetCurrentStyle(style)
 			character:reload(character.struct.m_clothState, character.struct.m_xxSkeleton.m_poseNumber)
+			characterdata:LowPolyUpdate(character.struct.m_clothState, character.struct.m_currClothes)
 		end
 	end
 end)

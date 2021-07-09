@@ -24,11 +24,16 @@ void InitOnLoad() {
 	PersistentStorage::ClassStorage::reset(Shared::GameState::getCurrentClassSaveName());
 	for(start; start != end; start++, idxCharacter++) {
 		ExtClass::CharacterStruct* it = *start;
-
 		int seat = it->m_seat;
 		g_characters[seat].m_char = it;
 		g_characters[seat].LoadAAUData();		
 		g_characters[seat].idxSave = idxCharacter;
+		g_characters[seat].assetContainer = **(ExtClass::CharacterAssetContainer**)((char*)(it->m_somePointer) + 0x13c);
+
+		//const DWORD xxListOffset[]{ 0x376158, 0xA8, 0x8, 0x2C, 0xA8};
+		//std::wstring* xxListStart = (std::wstring*)ExtVars::ApplyRule(xxListOffset);
+		//std::string heck = std::string((char*)ExtVars::ApplyRule(xxListOffset));
+		//in search of the array for outfits, the pointer isn't valid
 
 		//initialize triggers
 		auto& aauData = g_characters[seat].m_cardData;
@@ -48,8 +53,8 @@ void InitOnLoad() {
 
 		auto inst = &AAPlay::g_characters[seat];
 		auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-		if (storage.getCardInt(inst, L"m_currCardStyle").isValid)
-			inst->m_cardData.m_currCardStyle = storage.getCardInt(inst, L"m_currCardStyle").value;
+		if (storage->getCardInt(inst, L"m_currCardStyle").isValid)
+			inst->m_cardData.m_currCardStyle = storage->getCardInt(inst, L"m_currCardStyle").value;
 
 		ThrowEvent(&data);
 
@@ -65,6 +70,7 @@ void InitOnLoad() {
 void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 	int seat = character->m_seat;
 	g_characters[seat].m_char = character;
+	g_characters[seat].assetContainer = **(ExtClass::CharacterAssetContainer**)((char*)(character->m_somePointer) + 0x13c);
 	bool modded = g_characters[seat].LoadAAUData();
 	if (modded)
 		LOGPRIO(Logger::Priority::INFO) << std::dec << "Loaded modcard into seat " << seat << "\n";
@@ -80,6 +86,7 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 		}
 	}
 
+
 	//initialize triggers
 	auto& aauData = g_characters[seat].m_cardData;
 	for (auto& trg : aauData.GetTriggers()) {
@@ -91,6 +98,9 @@ void InitTransferedCharacter(ExtClass::CharacterStruct* character) {
 			trg.Initialize(&aauData.GetGlobalVariables(), seat);
 		}
 	}
+	//initialize stats
+	g_characters[seat].StoreInitialStats();
+
 	//throw init event
 	CardInitializeData data;
 	data.card = seat;

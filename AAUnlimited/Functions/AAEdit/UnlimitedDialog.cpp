@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files/PNGData.h"
+#include "Dictionary.h"
 
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -199,9 +200,23 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_cbSaveEyeTexture = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYETEX);
 		thisPtr->m_cbSaveEyeHighlight = GetDlgItem(hwndDlg,IDC_GN_CBSAVEEYEHI);
 		thisPtr->m_lbAAuSets = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS);
+		thisPtr->m_lbAAuSets2 = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS2);
 		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
 		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
+		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
+		thisPtr->m_cbTransAA2BODY = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2BODY);
+		thisPtr->m_cbTransAA2FACE = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2FACE);
+		thisPtr->m_cbTransAA2EYES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2EYES);
+		thisPtr->m_cbTransAA2HAIR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2HAIR);
+		thisPtr->m_cbTransAO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAO);
+		thisPtr->m_cbTransAR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAR);
+		thisPtr->m_cbTransMO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSMO);
+		thisPtr->m_cbTransOO = GetDlgItem(hwndDlg, IDC_GN_CBTRANSOO);
+		thisPtr->m_cbTransBD = GetDlgItem(hwndDlg, IDC_GN_CBTRANSBD);
+		thisPtr->m_cbTransBS = GetDlgItem(hwndDlg, IDC_GN_CBTRANSBS);
+		thisPtr->m_cbTransHR = GetDlgItem(hwndDlg, IDC_GN_CBTRANSHR);
+		thisPtr->m_cbTransTN = GetDlgItem(hwndDlg, IDC_GN_CBTRANSTN);
 
 		return TRUE;
 		break; }
@@ -262,6 +277,56 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 					if (g_currChar.Editable()) {
 						wcscpy_s(AAEdit::g_currChar.m_cardData.m_styles[selRename].m_name, bufRename);
+					}
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETSWAPTOP:
+				{
+					//get current selection
+					int selSwap = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (!g_currChar.Editable() || selSwap == 0 || selSwap == 1) return FALSE;
+					//swap with the previous stlye
+					g_currChar.m_cardData.SwapCardStyle(selSwap, selSwap - 1);
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETSWAPBOTTOM:
+				{
+					//get current selection
+					int selSwap = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					if (!g_currChar.Editable() || selSwap == 0 || selSwap == g_currChar.m_cardData.m_styles.size() - 1) return FALSE;
+					//swap with the next style
+					g_currChar.m_cardData.SwapCardStyle(selSwap, selSwap + 1);
+
+					thisPtr->RefreshAAuSetList();
+				}
+				return TRUE;
+			case IDC_GN_BTNAAUSETTRANS:
+				{
+					//get current selection
+					int selTransFrom = SendMessage(thisPtr->m_lbAAuSets, LB_GETCURSEL, 0, 0);
+					int selTransTo= SendMessage(thisPtr->m_lbAAuSets2, LB_GETCURSEL, 0, 0);
+
+					if (g_currChar.Editable()) {
+						// collect the transfer data checkboxes
+						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2hair = SendMessage(thisPtr->m_cbTransAA2HAIR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ao = SendMessage(thisPtr->m_cbTransAO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ar = SendMessage(thisPtr->m_cbTransAR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool mo = SendMessage(thisPtr->m_cbTransMO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool oo = SendMessage(thisPtr->m_cbTransOO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bd = SendMessage(thisPtr->m_cbTransBD, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bs = SendMessage(thisPtr->m_cbTransBS, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool hr = SendMessage(thisPtr->m_cbTransHR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+						g_currChar.m_cardData.TransferCardStyleData(selTransFrom, selTransTo, g_currChar.m_char->m_charData,
+							aa2body, aa2face, aa2eyes, aa2hair,
+							ao, ar, mo, oo,
+							hr, tn, bd, bs);
 					}
 					thisPtr->RefreshAAuSetList();
 				}
@@ -353,9 +418,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
 	SendMessage(this->m_lbAAuSets,LB_RESETCONTENT,0,0);
+	SendMessage(this->m_lbAAuSets2,LB_RESETCONTENT,0,0);
 	auto list = AAEdit::g_currChar.m_cardData.GetAAUSetDataList();
 	for (size_t i = 0; i < list.size(); i++) {
 		SendMessage(this->m_lbAAuSets,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
+		SendMessage(this->m_lbAAuSets2,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
 	}
 	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
 }
@@ -416,9 +483,17 @@ INT_PTR CALLBACK UnlimitedDialog::MODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			if (identifier == IDC_MO_BTNBROWSE) {
 				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
 				if (!General::DirExists(initialDir.c_str())) {
-					CreateDirectory(initialDir.c_str(), NULL);
+					CreateDirectory(initialDir.c_str(), NULL);				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideWith, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
 				}
-				const TCHAR* choice = General::OpenFileDialog(initialDir.c_str());
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
+				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					if (General::StartsWith(choice, initialDir.c_str())) {
 						const TCHAR* rest = choice + initialDir.size();
@@ -541,11 +616,22 @@ INT_PTR CALLBACK UnlimitedDialog::AODialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_AO_BTNBROWSE) {
-				std::wstring initialEditDir = General::BuildOverridePath(NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edOverrideFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
-					if (General::StartsWith(choice, initialEditDir.c_str())) {
-						const TCHAR* rest = choice + initialEditDir.size();
+					if (General::StartsWith(choice, initialDir.c_str())) {
+						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edOverrideFile, WM_SETTEXT, 0, (LPARAM)rest);
 					}
 				}
@@ -739,16 +825,27 @@ INT_PTR CALLBACK UnlimitedDialog::OODialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
 			if (identifier == IDC_OO_BTNBROWSE) {
-				std::wstring initialPlayDir = General::BuildPlayPath(OVERRIDE_PATH,NULL);
-				std::wstring initialEditDir = General::BuildEditPath(OVERRIDE_PATH,NULL);
+				std::wstring initialDir = General::BuildEditPath(OVERRIDE_PATH, NULL);
+				if (!General::DirExists(initialDir.c_str())) {
+					CreateDirectory(initialDir.c_str(), NULL);
+				}
+
+				TCHAR buffer[1024];
+				SendMessage(thisPtr->m_edFile, WM_GETTEXT, 1024, (LPARAM)buffer);
+				std::wstring toOverride = std::wstring(buffer);
+				if (toOverride.length() > 0) {
+					toOverride = toOverride.substr(0, toOverride.find_last_of(L"\\"));
+				}
+				std::wstring initialEditDir = General::BuildOverridePath(toOverride.c_str());
+
 				const TCHAR* choice = General::OpenFileDialog(initialEditDir.c_str());
 				if (choice != NULL) {
 					/*if (General::StartsWith(choice,initialPlayDir.c_str())) {
 						const TCHAR* rest = choice + initialPlayDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
 					}*/
-					if (General::StartsWith(choice,initialEditDir.c_str())) {
-						const TCHAR* rest = choice + initialEditDir.size();
+					if (General::StartsWith(choice, initialDir.c_str())) {
+						const TCHAR* rest = choice + initialDir.size();
 						SendMessage(thisPtr->m_edFile,WM_SETTEXT,0,(LPARAM)rest);
 					}
 				}
@@ -1054,7 +1151,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SendMessage(thisPtr->m_rbKind[0], BM_SETCHECK, BST_CHECKED, 0);
 		thisPtr->m_edSlot = GetDlgItem(hwndDlg,IDC_HR_EDSLOT);
 		thisPtr->m_edAdjustment = GetDlgItem(hwndDlg,IDC_HR_EDADJUSTMENT);
-		thisPtr->m_cbFlip = GetDlgItem(hwndDlg,IDC_HR_CBFLIP);
+		thisPtr->m_cbFlip = GetDlgItem(hwndDlg, IDC_HR_EDSLOT2);
 		thisPtr->m_edHighlight = GetDlgItem(hwndDlg, IDC_HR_EDHIGHLIGHT);
 		thisPtr->m_lstHairs = GetDlgItem(hwndDlg,IDC_HR_LIST);
 
@@ -1103,7 +1200,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				if (g_currChar.Editable()) {
 
 
-					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1) {
+					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1 || AAEdit::g_currChar.m_char->m_charData->m_gender == 0) {
 
 						BYTE kind;
 						for (kind = 0; kind < 4; kind++) {
@@ -1111,11 +1208,16 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						}
 						if (kind == 4) kind = 0;
 						TCHAR buf[256];
+
 						SendMessage(thisPtr->m_edSlot, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE slot = _wtoi(buf);
+
 						SendMessage(thisPtr->m_edAdjustment, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE adjustment = _wtoi(buf);
-						bool flip = SendMessage(thisPtr->m_cbFlip, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+						SendMessage(thisPtr->m_cbFlip, WM_GETTEXT, 256, (LPARAM)buf);
+						BYTE flip = _wtoi(buf);
+
 						g_currChar.m_cardData.AddHair(kind, slot, adjustment, flip);
 						thisPtr->Refresh();
 						//redraw hair of added king
@@ -1124,10 +1226,6 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						else if (kind == 1) RedrawBodyPart(HAIR, HAIR_SIDE);
 						else if (kind == 2) RedrawBodyPart(HAIR, HAIR_BACK);
 						else if (kind == 3) RedrawBodyPart(HAIR, HAIR_EXTENSION);
-						return TRUE;
-					}
-					else {
-						MessageBox(NULL, TEXT("Extra hair does not work on boys."), TEXT("Error"), 0);
 						return TRUE;
 					}
 				}
@@ -1202,9 +1300,9 @@ void UnlimitedDialog::HRDialog::RefreshHairList() {
 			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 			//flip
-			if (list[i].flip) item.pszText = TEXT("true");
-			else item.pszText = TEXT("false");
+			_itow_s(list[i].flip, buf, 10);
 			item.iSubItem = 3;
+			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 		}
 	}
@@ -2300,17 +2398,20 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Calves Size"),
 				{ { CharacterStruct::LEGS, 4 },{ CharacterStruct::LEGS, 5 },
-				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 } },
+				{ CharacterStruct::SKIRT, 22 },{ CharacterStruct::SKIRT, 23 },
+				{ CharacterStruct::BODY, 64 },{ CharacterStruct::BODY, 65 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Calves Width"),
 				{ { CharacterStruct::LEGS, 26 },{ CharacterStruct::LEGS, 27 },
-				{ CharacterStruct::SKIRT, 60 },{ CharacterStruct::SKIRT, 61 } },
+				{ CharacterStruct::SKIRT, 60 },{ CharacterStruct::SKIRT, 61 },
+				{ CharacterStruct::BODY, 60 },{ CharacterStruct::BODY, 61 }},
 				-0.5f, 0.5f
 			},
 			{ TEXT("Calves Thickness"),
 				{ { CharacterStruct::LEGS, 28 },{ CharacterStruct::LEGS, 29 },
-				{ CharacterStruct::SKIRT, 62 },{ CharacterStruct::SKIRT, 63 } },
+				{ CharacterStruct::SKIRT, 62 },{ CharacterStruct::SKIRT, 63 },
+				{ CharacterStruct::BODY, 62 },{ CharacterStruct::BODY, 63 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Head Size"),
@@ -2342,32 +2443,57 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::FACE, 3 },{ CharacterStruct::FACE, 4 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Eyebrow Depth"),
+				{ { CharacterStruct::FACE, 62 },{ CharacterStruct::FACE, 63 } },
+				-0.1f, 0.1f
+			},
+			{ TEXT("Eyebrow Rotation"),
+				{ { CharacterStruct::FACE, 64 },{ CharacterStruct::FACE, 65 } },
+				-1.0f, 1.0f
+			},
+			{ TEXT("Eyebrow Spacing"),
+			{ { CharacterStruct::FACE, 76 },{ CharacterStruct::FACE, 77 } },
+					-0.1f, 0.2f
+			},
 			{ TEXT("Eye Depth"),
 				{ { CharacterStruct::FACE, 5 } },
 				-0.1f, 0.1f
 			},
+			{ TEXT("Iris Horizontal"),
+			{ { CharacterStruct::FACE, 67 }, { CharacterStruct::FACE, 68 }, { CharacterStruct::FACE, 69 }, { CharacterStruct::FACE, 70 } },
+					-0.1f, 0.1f
+			},
+			{ TEXT("Iris Depth"),
+			{ { CharacterStruct::FACE, 71 },{ CharacterStruct::FACE, 72 },{ CharacterStruct::FACE, 73 },{ CharacterStruct::FACE, 74 } },
+				-0.05f, 0.05f
+			},
 			{ TEXT("Ear Height"),
-				{ { CharacterStruct::FACE, 1 } },
+				{ { CharacterStruct::FACE, 1 }, { CharacterStruct::FACE, 60 } },
 				-0.5f, 0.5f
 			},
 			{ TEXT("Ear (Split) Spacing"),
-				{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 } },
+				{ { CharacterStruct::FACE, 15 },{ CharacterStruct::FACE, 16 },
+				{ CharacterStruct::FACE, 56 },{ CharacterStruct::FACE, 57 } },
 				-0.1f, 0.1f
 			},
 			{ TEXT("Ear (Split) Depth"),
-				{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 } },
+				{ { CharacterStruct::FACE, 17 },{ CharacterStruct::FACE, 18 },
+				{ CharacterStruct::FACE, 58 },{ CharacterStruct::FACE, 59 }},
 				-0.1f, 0.1f
 			},
 			{ TEXT("Ear (Split) Scale X"),
-				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 } },
+				{ { CharacterStruct::FACE, 6 },{ CharacterStruct::FACE, 7 },
+				{ CharacterStruct::FACE, 50 },{ CharacterStruct::FACE, 51 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Y"),
-				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 } },
+				{ { CharacterStruct::FACE, 8 },{ CharacterStruct::FACE, 9 },
+				{ CharacterStruct::FACE, 52 },{ CharacterStruct::FACE, 53 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Ear (Split) Scale Z"),
-			{ { CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 } },
+			{	{ CharacterStruct::FACE, 13 },{ CharacterStruct::FACE, 14 },
+				{ CharacterStruct::FACE, 54 },{ CharacterStruct::FACE, 55 }},
 				-0.3f, 0.3f
 			},
 			{ TEXT("Mouth Width"),
@@ -2406,6 +2532,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				{ { CharacterStruct::SKELETON, 34 },{ CharacterStruct::SKELETON, 35 } },
 				0.5f, 1.5f
 			},
+			{ TEXT("Face Width"),
+			{ { CharacterStruct::FACE, 75 } },
+					-0.1f, 0.1f
+			},
 
 
 			//Tot Sliders
@@ -2423,6 +2553,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Nose Length"),
 			{ { CharacterStruct::FACE, 22 } },
+					-0.05f, 0.05f
+			},
+			{ TEXT("Nose Bridge Height"),
+			{ { CharacterStruct::FACE, 61 } },
 					-0.05f, 0.05f
 			},
 			{ TEXT("Nose Bridge Depth"),
@@ -2471,6 +2605,10 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 
 			//Tot Teeth Sliders.
+			{ TEXT("Teeth Clipping"),
+			{ { CharacterStruct::FACE, 66 } },
+					-0.05f, 0.05f
+			},
 			{ TEXT("Upper Shark Teeth"),
 			{ { CharacterStruct::FACE, 33 },{ CharacterStruct::FACE, 34 } },
 					-0.03f, 0.03f
@@ -2989,6 +3127,12 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (sel != LB_ERR) {
 					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].name.c_str());
 					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].description.c_str());
+					/*auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+					}
+					*/
 					return TRUE;
 				}
 			}
@@ -2996,9 +3140,16 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case IDC_MD_LBAVAILABLE:
 			if(notification == LBN_SELCHANGE) {
 				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
-				if(sel != LB_ERR) {
-					SendMessage(thisPtr->m_edName,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
-					SendMessage(thisPtr->m_edDescr,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+				if (sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
+					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+					/*
+					auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+					}
+					*/
 					return TRUE;
 				}
 			}
@@ -3008,7 +3159,7 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				int sel = SendMessage(thisPtr->m_lbModulesAvailable,LB_GETCURSEL,0,0);
 				if(sel != LB_ERR) {
 					g_currChar.m_cardData.AddModule(thisPtr->m_modules[sel].mod);
-					thisPtr->Refresh();
+					thisPtr->RefreshUsedModules();
 				}
 			}
 			break;
@@ -3017,7 +3168,7 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				int sel = SendMessage(thisPtr->m_lbModulesUsed,LB_GETCURSEL,0,0);
 				if (sel != LB_ERR) {
 					g_currChar.m_cardData.RemoveModule(sel);
-					thisPtr->Refresh();
+					thisPtr->RefreshUsedModules();
 				}
 			}
 			break;
@@ -3028,9 +3179,9 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					for(auto& trigger : g_currChar.m_cardData.GetModules()[sel].triggers) {
 						g_currChar.m_cardData.GetTriggers().push_back(trigger);
 					}
+					g_currChar.m_cardData.RemoveModule(sel);
+					thisPtr->RefreshUsedModules();
 				}
-				g_currChar.m_cardData.RemoveModule(sel);
-				thisPtr->Refresh();
 			}
 			break;
 		case IDC_MD_BTNUPD:
@@ -3073,6 +3224,11 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 }
 
 void UnlimitedDialog::MDDialog::Refresh() {
+	RefreshAvailableModules();
+	RefreshUsedModules();
+}
+
+void UnlimitedDialog::MDDialog::RefreshAvailableModules() {
 	//list available modules
 	m_modules.clear();
 	SendMessage(m_lbModulesAvailable,LB_RESETCONTENT,0,0);
@@ -3097,7 +3253,9 @@ void UnlimitedDialog::MDDialog::Refresh() {
 		} while (suc != FALSE);
 		FindClose(hSearch);
 	}
+}
 
+void UnlimitedDialog::MDDialog::RefreshUsedModules() {
 	//list current modules
 	SendMessage(m_lbModulesUsed,LB_RESETCONTENT,0,0);
 	for(auto& elem : g_currChar.m_cardData.GetModules()) {

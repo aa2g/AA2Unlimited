@@ -10,6 +10,15 @@ namespace PlayInjections {
 		ULONG jpegQuality;
 		bool gdiInit;
 
+		bool AltScreenshotFormat = false;
+		bool AltScreenshotFormatInstant = false;
+
+		struct {
+			const wchar_t *extension = nullptr;
+			CLSID *encoderId = nullptr;
+			Gdiplus::EncoderParameters *parameters = nullptr;
+		} encoders[2];
+
 		int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 		{
 			UINT  num = 0;          // number of image encoders
@@ -52,24 +61,31 @@ namespace PlayInjections {
 				jpegParameters.Parameter[0].NumberOfValues = 1;
 				jpegParameters.Parameter[0].Value = &jpegQuality;
 				jpegQuality = 100; // make it look shit, so that people use png instead // F U
+
+				encoders[0].extension = L"jpg";
+				encoders[0].encoderId = &JPGencoderClsid;
+				encoders[0].parameters = &jpegParameters;
+
+				encoders[1].extension = L"png";
+				encoders[1].encoderId = &PNGencoderClsid;
 			}
+
+			// Update this function when we handle more formats. This shouldn't be called when screenshot format is BMP.
+			assert(g_Config.screenshotFormat > 0 && g_Config.screenshotFormat <= 2);
+
+			int screenshotFormat = g_Config.screenshotFormat - 1;
+			screenshotFormat = AltScreenshotFormat || AltScreenshotFormatInstant ? !screenshotFormat : screenshotFormat;
+
 			Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO((BITMAPINFO*)gdiBitmapInfo, (void*)gdiBitmapData);
 			size_t pathLength = wcslen(path);
-			const wchar_t *ext = L"jpg";
-			auto cls = &JPGencoderClsid;
-			auto *params = &jpegParameters;
 
-			if (g_Config.screenshotFormat == 2) {
-				cls = &PNGencoderClsid;
-				ext = L"png";
-				params = NULL;
-			}
-
-			wcsncpy_s(path + pathLength - 3, 4, ext, 3);
-			bitmap->Save(path, cls, params);
+			wcsncpy_s(path + pathLength - 3, 4, encoders[screenshotFormat].extension, 3);
+			bitmap->Save(path, encoders[screenshotFormat].encoderId, encoders[screenshotFormat].parameters);
 			delete bitmap;
 
-			Notifications::AddNotification(L"Screenshot saved (" + std::wstring(path) + L")", RegularNotification);
+			//Notifications::AddNotification(L"Screenshot saved (" + std::wstring(path) + L")", RegularNotification);
+
+			AltScreenshotFormatInstant = false;
 		}
 
 		void __declspec(naked) SaveRedirect() {
@@ -121,10 +137,22 @@ namespace PlayInjections {
 							addr = General::GameBase + 0x38F6CA;
 						else if (m->wParam == VK_F11 || m->wParam == VK_SNAPSHOT)
 							addr = General::GameBase + 0x38F6C9;
+						else if (m->wParam == VK_PAUSE) { // For some reason I can't use the F10 key?
+							addr = General::GameBase + 0x38F6C9;
+							AltScreenshotFormatInstant = true;
+						}
+
+						if (m->wParam == VK_SHIFT)
+							AltScreenshotFormat = true;
+
 						if (addr) {
 							*reinterpret_cast<BYTE*>(addr) = 1;
 							return true;
 						}
+					}
+					else if (m->message == WM_KEYUP) {
+						if (m->wParam == VK_SHIFT)
+							AltScreenshotFormat = false;
 					}
 					return false;
 				}));

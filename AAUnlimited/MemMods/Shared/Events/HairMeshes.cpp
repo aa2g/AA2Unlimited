@@ -96,7 +96,8 @@ bool __stdcall XXCleanupEvent(ExtClass::CharacterStruct* character) {
 			list = &AAEdit::g_currChar.m_hairs[kind];
 		}
 		else {
-			list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+			if (!(character->m_seat == 0 && AAPlay::g_characters[0].m_char != character)) list = &AAPlay::GetInstFromStruct(character)->m_hairs[kind];
+			else list = &AAPlay::g_previewChar.m_hairs[kind];
 		}
 		
 		if(list->size() > 0) {
@@ -372,6 +373,90 @@ void XXCleanupInjection() {
 	}
 	
 }
+
+DWORD XXCleanupFuncStartForBoys;
+void __declspec(naked) XXCleanupRedirectBoys() {
+	__asm {
+		pop ebx
+		add esp, 0x3C
+
+		push eax //save return value
+		
+		mov edx, [esp + 4 + 8 - 0x3C]
+		sub edx, 0x48 //face offest
+		push edx //save for the repeat as well
+		push edx
+		call XXCleanupEvent
+		test al, al
+		pop ecx
+		pop eax
+		jz XXCleanupRedirect_end
+
+		jmp[XXCleanupFuncStartForBoys]
+		XXCleanupRedirect_end:
+
+		ret
+	}
+}
+
+
+
+void XXCleanupInjectionForBoys() {
+	if (General::IsAAPlay) {
+		//AA2Play.exe + 10A2B0 - 6A FF - push - 01 { 255 }
+		//AA2Play.exe + 10A2B2 - 68 035E6B01 - push AA2Play.exe + 2D5E03{ (139) }
+		//AA2Play.exe + 10A2B7 - 64 A1 00000000 - mov eax, fs:[00000000]{ 0 }
+		//AA2Play.exe + 10A2BD - 50 - push eax
+		//AA2Play.exe + 10A2BE - 83 EC 30 - sub esp, 30 { 48 }
+		//AA2Play.exe + 10A2C1 - 53 - push ebx
+		//AA2Play.exe + 10A2C2 - 55 - push ebp
+		//AA2Play.exe + 10A2C3 - 56 - push esi
+		//....
+		//
+		//AA2Play.exe + 10A710 - 5B - pop ebx
+		//AA2Play.exe + 10A711 - 83 C4 3C - add esp, 3C{ 60 }
+		//AA2Play.exe + 10A714 - C3 - ret
+
+		
+		DWORD address = General::GameBase + 0x10A710;
+		DWORD redirectAddress = (DWORD)(&XXCleanupRedirectBoys);
+		Hook((BYTE*)address,
+		{ 0x5B, 0x83, 0xC4, 0x3C, 0xC3 },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		XXCleanupFuncStartForBoys = General::GameBase + 0x10A2B0;
+	}
+	else if (General::IsAAEdit) {
+		//AA2Edit.exe + F9020 - 6A FF - push - 01 { 255 }
+		//AA2Edit.exe + F9022 - 68 337BE600 - push AA2Edit.exe + 2B7B33{ (139) }
+		//AA2Edit.exe + F9027 - 64 A1 00000000 - mov eax, fs:[00000000]{ 0 }
+		//AA2Edit.exe + F902D - 50 - push eax
+		//AA2Edit.exe + F902E - 83 EC 30 - sub esp, 30 { 48 }
+		//AA2Edit.exe + F9031 - 53 - push ebx
+		//AA2Edit.exe + F9032 - 55 - push ebp
+		//AA2Edit.exe + F9033 - 56 - push esi
+		//AA2Edit.exe + F9034 - 57 - push edi
+
+		//....
+		//
+		//AA2Edit.exe+F9480 - 5B - pop ebx
+		//AA2Edit.exe+F9481 - 83 C4 3C - add esp,3C { 60 }
+		//AA2Edit.exe + F9484 - C3 - ret
+
+
+
+		DWORD address = General::GameBase + 0xF9480;
+		DWORD redirectAddress = (DWORD)(&XXCleanupRedirectBoys);
+		Hook((BYTE*)address,
+		{ 0x5B, 0x83, 0xC4, 0x3C, 0xC3 },						//expected values
+		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+			NULL);
+		XXCleanupFuncStartForBoys = General::GameBase + 0xF9020;
+	}
+}
+
+
+
 
 /*
  * return true to repeat.

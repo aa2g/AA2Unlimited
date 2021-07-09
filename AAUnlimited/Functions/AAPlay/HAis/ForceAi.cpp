@@ -16,12 +16,10 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	size_t nClimaxPoses = 0;
 
 
-	auto countPoses = [this, passive, active](DWORD start, DWORD end) -> size_t {
+	auto countPoses = [this, passive, active](DWORD i) -> size_t {
 		size_t cnt = 0;
-		for (DWORD i = start; i <= end; i++) {
-			if(passive) cnt += m_dominantPositionsPassive[i].size();
-			if(active)  cnt += m_dominantPositionsActive[i].size();
-		}
+		if (passive) cnt += m_dominantPositionsPassive[i].size();
+		if (active)  cnt += m_dominantPositionsActive[i].size();
 		return cnt;
 	};
 	auto findPose = [this, passive, active, info](size_t& chosen, DWORD start, DWORD end) -> int {
@@ -47,12 +45,85 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 		}
 		return 0;
 	};
-	
-	if (allowForeplay) nNormalPoses += countPoses(HCAT_FOREPLAY_FEMALE, HCAT_FOREPLAY_MUTUAL);
-	if (allowNormal) nNormalPoses += countPoses(HCAT_FRONTAL, HCAT_BACK);
+	auto normalCategory = 0;
+	auto climaxCategory = 0;
+	if (allowForeplay) {
+		normalCategory = rand() % 3;
+		nNormalPoses += countPoses(normalCategory);
+	}
+	if (allowNormal) {
+		if ((rand() % 3) > 1) {
+			normalCategory = 4;
+			nNormalPoses += countPoses(normalCategory);
+		}
+		else {
+			normalCategory = 3;
+			nNormalPoses += countPoses(normalCategory);
+		}
+	}
+	if (allowForeplay && allowNormal) {
+		normalCategory = 0;
+		nNormalPoses = 0;
+		if ((rand() % 3) > 1)  {
+			normalCategory = rand() % 3;
+			nNormalPoses += countPoses(normalCategory);
+		}
+		else {
+			if ((rand() % 3) > 1) {
+				normalCategory = 4;
+				nNormalPoses += countPoses(normalCategory);
+			}
+			else {
+				normalCategory = 3;
+				nNormalPoses += countPoses(normalCategory);
+			}
+		}
+	}
 	if (climaxChance > 0) {
-		if (allowForeplay) nClimaxPoses += countPoses(HCAT_CLIMAX_FOREPLAY_FEMALE, HCAT_CLIMAX_FOREPLAY_MALE);
-		if (allowNormal ) nClimaxPoses += countPoses(HCAT_CLIMAX_FRONTAL, HCAT_CLIMAX_BACK);
+		if (allowForeplay) {
+			if ((rand() % 3) > 1) {
+				climaxCategory = 6;
+				nClimaxPoses += countPoses(climaxCategory);
+			}
+			else {
+				climaxCategory = 5;
+				nClimaxPoses += countPoses(climaxCategory);
+			}
+		}
+		if (allowNormal) {
+			if ((rand() % 3) > 1) {
+				climaxCategory = 8;
+				nClimaxPoses += countPoses(climaxCategory);
+			}
+			else {
+				climaxCategory = 7;
+				nClimaxPoses += countPoses(climaxCategory);
+			}
+		}
+		if (allowForeplay && allowNormal) {
+			climaxCategory = 0;
+			nClimaxPoses = 0;
+			if ((rand() % 2) == 0) {
+				if ((rand() % 3) > 1) {
+					climaxCategory = 6;
+					nClimaxPoses += countPoses(climaxCategory);
+				}
+				else {
+					climaxCategory = 5;
+					nClimaxPoses += countPoses(climaxCategory);
+				}
+			}
+			else {
+				if ((rand() % 3) > 1) {
+					climaxCategory = 8;
+					nClimaxPoses += countPoses(climaxCategory);
+				}
+				else {
+					climaxCategory = 7;
+					nClimaxPoses += countPoses(climaxCategory);
+				}
+			}
+		}
 	}
 
 	LOGPRIO(Logger::Priority::SPAM) << "Picking dom position from " << nNormalPoses << " normal and " << nClimaxPoses <<
@@ -62,35 +133,30 @@ void ForceAi::PickRandomDomPosition(ExtClass::HInfo* info, bool passive, bool ac
 	if (nClimaxPoses > 0 && f <= climaxChance) {
 		size_t randChoice = rand() % nClimaxPoses;
 		LOGPRIO(Logger::Priority::SPAM) << "chose random climax position " << randChoice << "\r\n";
-		if (allowForeplay && (chosenPassiveActive = findPose(randChoice, HCAT_CLIMAX_FOREPLAY_FEMALE, HCAT_CLIMAX_FOREPLAY_MALE))) {
-			//TODO: if active->passive swap required, do that
-			return;
-		}
-		if (allowNormal && (chosenPassiveActive = findPose(randChoice, HCAT_CLIMAX_FRONTAL, HCAT_CLIMAX_BACK))) {
-			//TODO: if active->passive swap required, do that
-			return;
-		}
-	}
-	else if (nNormalPoses > 0) {
-		size_t randChoice = rand() % nNormalPoses;
-		LOGPRIO(Logger::Priority::SPAM) << "chose random position " << randChoice << "\r\n";
-		if (allowForeplay && (chosenPassiveActive = findPose(randChoice, HCAT_FOREPLAY_FEMALE, HCAT_FOREPLAY_MUTUAL))) {
-			//TODO: if active->passive swap required, do that
-			return;
-		}
-		if (allowNormal && (chosenPassiveActive = findPose(randChoice, HCAT_FRONTAL, HCAT_BACK))) {
+		if (chosenPassiveActive = findPose(randChoice, climaxCategory, climaxCategory)) {
 			//TODO: if active->passive swap required, do that
 			return;
 		}
 	}
 	else {
-		LOGPRIO(Logger::Priority::WARN) << "no dominant positions for this type!\r\n";
-		return;
+		if (nNormalPoses > 0) {
+			size_t randChoice = rand() % nNormalPoses;
+			LOGPRIO(Logger::Priority::SPAM) << "choose random position " << randChoice << "\r\n";
+			if (chosenPassiveActive = findPose(randChoice, normalCategory, normalCategory)) {
+				//TODO: if active->passive swap required, do that
+				return;
+			}
+		}
+		else {
+			LOGPRIO(Logger::Priority::WARN) << "no dominant positions for this type!\r\n";
+			return;
+		}
 	}
-	LOGPRIO(Logger::Priority::WARN) << "did not find corresponding position. This means the algorithm is wrong. shit.\r\n";
 }
 
 void ForceAi::PickRandomPrefPosition(ExtClass::HInfo* info, bool allowForeplay, bool allowNormal, float climaxChance) {
+	//I'll leave this function in case of future reworks, but the current H-Ai no longer uses it.
+
 	//count poses
 	size_t nNormalPoses = 0;
 	if (allowForeplay) {
@@ -215,7 +281,7 @@ ForceAi::State ForceAi::states[] = {
 	{ FOREPLAY,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
 			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, true, false, 0 );
-			thisPtr->StartTimerRandom(0, 15, 20);
+			thisPtr->StartTimerRandom(0, 25, 35);
 			if (state->m_customValue == 0) {
 				info->m_speed = 1;
 				thisPtr->SetSpeedChangeLinear(1, 2, 10);
@@ -243,7 +309,7 @@ ForceAi::State ForceAi::states[] = {
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
 			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, false, true, 0.1f);
 			if (state->m_customValue == 0) {
-				thisPtr->StartTimerRandom(0,15,20);
+				thisPtr->StartTimerRandom(0,25,35);
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2, 3);
 				thisPtr->SetRepeatParams(0, 0.8f, 0.5f);
 				if (thisPtr->m_forcee->m_clothesState == 0) {
@@ -256,7 +322,7 @@ ForceAi::State ForceAi::states[] = {
 				}
 			}
 			else {
-				thisPtr->StartTimerRandom(0,5,10);
+				thisPtr->StartTimerRandom(0,25,35);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -274,14 +340,14 @@ ForceAi::State ForceAi::states[] = {
 	//step 4: pick some position according to the rapist's preference. Include cumming position in the list
 	{ PREFERENCES,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
-			thisPtr->PickRandomPrefPosition(info, true, true, 0.1f);
+			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, true, true, 0.1f);
 			if (state->m_customValue == 0) {
-				thisPtr->StartTimerRandom(0,15.0f,20.0f);
+				thisPtr->StartTimerRandom(0,25.0f,35.0f);
 				thisPtr->SetSpeedChangeFluctuate(info->m_speed, 2.5, 3.5);
 				thisPtr->SetRepeatParams(0, 1.0f, 0.5f);
 			}
 			else {
-				thisPtr->StartTimerRandom(0,5.0f,10.0f);
+				thisPtr->StartTimerRandom(0,25.0f,30.0f);
 			}
 		},
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
@@ -299,8 +365,8 @@ ForceAi::State ForceAi::states[] = {
 	//step 5: pick some cumming position
 	{ CLIMAX,
 		[](State* state, ForceAi* thisPtr, HInfo* info) {
-			thisPtr->PickRandomPrefPosition(info, true, true, 1);
-			thisPtr->StartTimerRandom(0, 20.0f, 20.0f);
+			thisPtr->PickRandomDomPosition(info, !thisPtr->m_isActive, thisPtr->m_isActive, true, true, 1);
+			thisPtr->StartTimerRandom(0, 30.0f, 30.0f);
 			if (state->m_customValue == 0) {
 				thisPtr->SetRepeatParams(1, 1.0f, 0.1f);
 			}
@@ -380,24 +446,18 @@ void ForceAi::Initialize(ExtClass::HInfo* info) {
 			HGUIButton* btn = arrIt[j];
 			HPosData* data = info->GetHPosData(info->GetHPosition(i, j));
 			if (btn->m_posTop == 0 && btn->m_posLeft == 0) continue;
-			if (data->m_yuriAllowance == GENDERALLOW_HETERO_ONLY && m_isYuri) continue; //not allowed
-			if (data->m_yuriAllowance == GENDERALLOW_HOMO_ONLY && !m_isYuri) continue;
-			//check if it fullfills preferences
-			if (data->m_preferenceFlags & m_forcer->m_charPtr->m_charData->GetPreferenceFlags()) {
-				m_preferencePositions[i].emplace_back(i, j);
+			if (m_isYuri)
+			{
+				if (data->m_yuriAllowance == GENDERALLOW_HETERO_ONLY && m_forceeGender == 1) continue; //no lesbians
+				if (data->m_yaoiAllowance == GENDERALLOW_HETERO_ONLY && m_forceeGender == 0) continue; //no fags
 			}
+			if (data->m_yuriAllowance == GENDERALLOW_HOMO_ONLY && !m_isYuri) continue;    // no christians
+			//check if it fullfills preferences
 			//check if its dominant
 			const wchar_t* name = &(data->m_fileName[0]);
-			for (const auto& it : m_activeDomNames) {
-				if (it == name) {
-					m_dominantPositionsActive[i].emplace_back(i, j);
-				}
-			}
-			for (const auto& it : m_passiveDomNames) {
-				if (it == name) {
-					m_dominantPositionsPassive[i].emplace_back(i, j);
-				}
-			}
+			m_preferencePositions[i].emplace_back(i, j);
+			m_dominantPositionsActive[i].emplace_back(i, j);
+			m_dominantPositionsPassive[i].emplace_back(i, j);
 
 		}
 	}

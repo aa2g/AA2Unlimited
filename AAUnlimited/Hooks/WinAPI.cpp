@@ -27,7 +27,7 @@ static HANDLE WINAPI MyCF(
 		if (dwDesiredAccess == GENERIC_WRITE) {	//game saved
 			auto filenameNoExt = filename.substr(0, filename.size() - 4);
 			auto storage = PersistentStorage::ClassStorage::getStorage(filenameNoExt);
-			storage.save();
+			storage->save();
 		}
 	}
 

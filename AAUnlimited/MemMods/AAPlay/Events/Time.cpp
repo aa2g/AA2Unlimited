@@ -15,11 +15,20 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 		LOGPRIO(Logger::Priority::INFO) << "Day has changed, day of week " << timedata->day << ", " << timedata->nDays << " total days.\n";
 	}
 	Shared::Triggers::PeriodEndsData data;
-	do {
-		//assigns a random filled seat as the triggering card
-		//or use the current PC instead
-		data.card = rand() % 25;
-	} while (!AAPlay::g_characters[data.card].IsValid());
+
+	auto pc = Shared::GameState::getPlayerCharacter();
+	if (pc->IsValid()) {
+		data.card = pc->m_char->m_seat;
+	}
+
+	for (int i = 0; i < 25; i++) {
+		auto character = AAPlay::g_characters[data.card];
+		if (character.IsValid()) {
+			character.m_char->m_charData->m_character.strengthClassRank = (character.m_char->m_charData->m_character.strengthValue - 100) / 100;
+			character.m_char->m_charData->m_character.intelligenceClassRank = (character.m_char->m_charData->m_character.intelligenceValue - 100) / 100;
+			character.m_char->m_charData->m_character.clubClassRanking = (character.m_char->m_charData->m_character.clubValue - 100) / 100;
+		}
+	}
 
 	data.oldPeriod = oldPeriod;
 	data.newPeriod = timedata->currentPeriod;

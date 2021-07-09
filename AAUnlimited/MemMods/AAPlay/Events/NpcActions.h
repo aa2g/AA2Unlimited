@@ -17,6 +17,16 @@ namespace NpcActions {
 	void LowPolyUpdateStartInjectForGirls();
 	void LowPolyUpdateEndInject();
 	void hPositionChangeInjection();
+	void murderEventInjection();
+	void RosterCrashInjection();
+	void rosterPopulateInjection();
+	void rosterHandleInjectionFirst();
+	void dialoguePlayInjection();
+	void headTrackingChangeInjection();
+	void extraHairFixInjection();
+	void extraHairMakerFixInjection();
+	void conversationEndInjection();
+	void rosterHandleInjectionSecond();
 
 #pragma pack(push, 1)
 	struct AnswerStruct {

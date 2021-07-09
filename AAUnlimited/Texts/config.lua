@@ -21,6 +21,10 @@ bUseMeshTextureOverrides = true
 --enables H-AI
 bUseHAi = true						
 
+--enables cache fix
+bUseCacheFix = true						
+
+
 --when shadowing is enabled, every time a file is opened from a pp archive, the game
 --checks for a folder of the same name (excluding the pp at the end) containing
 --the same file first. If it exists, this file is taken instead.
@@ -66,14 +70,14 @@ PP2Cache = 500
 -- MB cache memory for decompressed audio
 PP2AudioCache = 150
 PP2Buffers = 300
-PP2Profiling = true
+PP2Profiling = false
 
 -- The modified launcher of MKIII decensor
 -- rewrites the string so that AS00_03_00_00_00.bmp - AS00_03_00_04_00.bmp
 -- becomes AS00_03_00_04_00.tga. This forces the game to recognize that the file
 -- actually is tga format. Sometimes it needs to be disabled for stuff which
 -- expects the BMP behavior of vanilla (SVII perhaps)
-bUseMKIII = true
+bUseMKIII = false
 
 -- List file names instead of name in card select (AA2Play)
 bListFilenames = false
@@ -92,13 +96,9 @@ mods = {
 	{ "fixlocale" },
 	{ "makertrans" },
 	{ "playtrans" },
+	{ "triggers_supplemental" },
 	{ "notifications" },
-	{ "subtitles" },
 	{ "facecam" },
-	{ "climaxbutton" },
-	{ "geass"},
-	{ "jizou"},
-	{ "timewarp" },
 	{ "extsave" },
 	{ "borderless" },
 	{ "launcher" },

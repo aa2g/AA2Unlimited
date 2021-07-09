@@ -105,7 +105,7 @@ namespace Shared {
 
 		//bool (int)
 		Value Thread::PoseExists(std::vector<Value>& params) {
-			
+
 			auto fileName = General::AAUPath + L"poser\\poses\\" + *(params[0].strVal);
 
 			std::ifstream infile(fileName);
@@ -218,12 +218,7 @@ namespace Shared {
 
 		 //int (int min, int max)
 		Value Thread::GetRandomInt(std::vector<Value>& params) {
-			int range = params[1].iVal - params[0].iVal + 1;
-			if (range > 0){
-				int r = rand() % range + params[0].iVal;
-				return Value(r);
-			}
-			return (rand() % 2 == 1) ? params[1] : params[0];
+			return Value(General::GetRandomInt(params[0].iVal, params[1].iVal));
 		}
 
 		Value Thread::AddIntegers(std::vector<Value>& params) {
@@ -381,6 +376,31 @@ namespace Shared {
 			}
 			return Value(false);
 		}
+
+		Value Thread::IsPrivateRoom(std::vector<Value>& params) {
+			int roomID = params[0].iVal;
+			if (roomID >= 43 && roomID <= 52) return Value(true);
+			return Value(false);
+		}
+
+
+		//bool(int)
+		Value Thread::IsSkipAction(std::vector<Value>& params) {
+			int sexActions[] = {
+				ExtClass::ConversationId::SKIP_CLASS,
+				ExtClass::ConversationId::SKIP_CLASS_H,
+				ExtClass::ConversationId::SKIP_CLASS_SURPRISE_H,
+				ExtClass::ConversationId::GO_HOME_TOGETHER,
+				ExtClass::ConversationId::GO_KARAOKE_TOGETHER,
+				ExtClass::ConversationId::GO_PLAY_TOGETHER,
+				ExtClass::ConversationId::GO_EAT_TOGETHER
+			};
+			for each (int action in sexActions)
+			{
+				if (action == params[0].iVal) return Value(true);
+			}
+			return Value(false);
+		}
 		//bool(int)
 		Value Thread::IsNoPromptAction(std::vector<Value>& params) {
 			int noPromptActions[] = {
@@ -423,8 +443,7 @@ namespace Shared {
 		//bool(int)
 		Value Thread::RollInt(std::vector<Value>& params) {
 			if (params[0].iVal <= 0) return Value(false);
-			int range = 100;
-			int roll = rand() % range + 1;
+			auto roll = General::GetRandomInt(1, 100);
 			return Value(roll <= params[0].iVal);
 		}
 
@@ -536,6 +555,35 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_character.virtue);
 		}
 
+		//int(int, string)
+		Value Thread::GetCardVirtueMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto virtueMods = storage->getCardAAUDataValue(cardInst, L"virtueMods");
+			if (!virtueMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto virtueMod = virtueMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto virtue = virtueMod.is<double>() ? (int)virtueMod.get<double>() : 0;
+
+
+			return Value(virtue);
+		}
+
+		Value Thread::GetCardEffectiveVirtue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto virtue = storage->getCardAAUDataValue(cardInst, L"virtue");
+			return Value(virtue.is<double>() ? (int)virtue.get<double>() : cardInst->m_char->m_charData->m_character.virtue);
+		}
+
 		//bool(int, int)
 		Value Thread::GetCardTrait(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -546,6 +594,38 @@ namespace Shared {
 
 			return Value(cardInst->m_char->m_charData->m_traitBools[trait]);
 		}
+
+		Value Thread::GetCardTraitMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int trait = params[1].iVal;
+			std::wstring* modName = params[2].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto traitMods = storage->getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			if (!traitMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto traitMod = traitMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto traitNew = traitMod.is<double>() ? (int)traitMod.get<double>() : 0;
+
+
+			return Value(traitNew);
+		}
+
+		Value Thread::GetCardUnboundTrait(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			int trait = params[1].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto storedTrait = storage->getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			return Value(storedTrait.is<double>() ? (int)storedTrait.get<double>() : cardInst->m_char->m_charData->m_traitBools[trait]);
+
+		}
+
 
 
 		//bool(int, int)
@@ -560,20 +640,20 @@ namespace Shared {
 		}
 
 		Value Thread::GetCardOpinion(std::vector<Value>& params) {
-				int seat = params[0].iVal;
-				int feeling = params[1].iVal;
-				int towards = params[2].iVal;
+			int seat = params[0].iVal;
+			int feeling = params[1].iVal;
+			int towards = params[2].iVal;
 
-				if (!AAPlay::g_characters[seat].IsValid()) return -1;
-				if (!AAPlay::g_characters[towards].IsValid()) return -1;
+			if (!AAPlay::g_characters[seat].IsValid()) return -1;
+			if (!AAPlay::g_characters[towards].IsValid()) return -1;
 
-				towards = (AAPlay::g_characters[towards].idxSave);
-				if (AAPlay::g_characters[seat].idxSave == towards) return -1;
-				if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
-				int decValue = 92 * towards + feeling;
-				return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
+			towards = (AAPlay::g_characters[towards].idxSave);
+			if (AAPlay::g_characters[seat].idxSave == towards) return -1;
+			if (AAPlay::g_characters[seat].idxSave < towards) { towards = towards - 1; } //Opinions towards yourself don't exist
+			int decValue = 92 * towards + feeling;
+			return Value(AAPlay::g_characters[seat].m_char->m_moreData2->ai01_03[0][decValue]);
 
-			}
+		}
 
 		Value Thread::GetCardFigure(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -602,7 +682,7 @@ namespace Shared {
 			{
 				int size = (int)(inst->m_char->m_charData->m_chest.size);
 				if (size <= 33) return Value(0);
-				if ((size > 33) && (size <=66)) return Value(1);
+				if ((size > 33) && (size <= 66)) return Value(1);
 				if (size > 66) return Value(2);
 			}
 		}
@@ -639,6 +719,11 @@ namespace Shared {
 			return Value(cardInst->m_char->m_charData->m_club);
 		}
 
+		Value Thread::GetClubType(std::vector<Value>& params) {
+			byte clubid = params[0].iVal;
+			return Value((int)Shared::GameState::getClubType(clubid));
+		}
+
 		//int(int)
 		Value Thread::GetCardClubValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -647,6 +732,35 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value((int)cardInst->m_char->m_charData->m_character.clubValue);
+		}
+
+		//int(int, string)
+		Value Thread::GetCardClubMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto clubMods = storage->getCardAAUDataValue(cardInst, L"clubValueMods");
+			if (!clubMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto clubMod = clubMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto club = clubMod.is<double>() ? (int)clubMod.get<double>() : 0;
+
+
+			return Value(club);
+		}
+
+		Value Thread::GetCardEffectiveClubValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto club = storage->getCardAAUDataValue(cardInst, L"club");
+			return Value(club.is<double>() ? (int)club.get<double>() : (int)cardInst->m_char->m_charData->m_character.clubValue);
 		}
 
 		//int(int)
@@ -679,6 +793,35 @@ namespace Shared {
 			return Value((int)cardInst->m_char->m_charData->m_character.intelligenceValue);
 		}
 
+		//int(int, string)
+		Value Thread::GetCardIntelligenceMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto intelligenceMods = storage->getCardAAUDataValue(cardInst, L"intelligenceValueMods");
+			if (!intelligenceMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto intelligenceMod = intelligenceMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto intelligence = intelligenceMod.is<double>() ? (int)intelligenceMod.get<double>() : 0;
+
+
+			return Value(intelligence);
+		}
+
+		Value Thread::GetCardEffectiveIntelligenceValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto intelligence = storage->getCardAAUDataValue(cardInst, L"intelligence");
+			return Value(intelligence.is<double>() ? (int)intelligence.get<double>() : (int)cardInst->m_char->m_charData->m_character.intelligenceValue);
+		}
+
 		//int(int)
 		Value Thread::GetCardIntelligenceRank(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -687,16 +830,6 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value(cardInst->m_char->m_charData->m_character.intelligenceClassRank);
-		}
-
-		//int(int)
-		Value Thread::GetCardStrength(std::vector<Value>& params) {
-			int card = params[0].iVal;
-			if (ExpressionSeatInvalid(card)) return Value(-1);
-			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (!cardInst->IsValid()) return Value(-1);
-
-			return Value(cardInst->m_char->m_charData->m_character.strength);
 		}
 
 		//int(int)
@@ -761,6 +894,27 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetCardStrength(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_charData->m_character.strength);
+		}
+
+		//int(int)
+		Value Thread::GetCurrentClothes(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value(cardInst->m_char->m_currClothes);
+		}
+
+
+		//int(int)
 		Value Thread::GetCardStrengthValue(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -768,6 +922,35 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value((int)cardInst->m_char->m_charData->m_character.strengthValue);
+		}
+
+		//int(int, string)
+		Value Thread::GetCardStrengthMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto strengthMods = storage->getCardAAUDataValue(cardInst, L"strengthValueMods");
+			if (!strengthMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto strengthMod = strengthMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto strength = strengthMod.is<double>() ? (int)strengthMod.get<double>() : 0;
+
+
+			return Value(strength);
+		}
+
+		Value Thread::GetCardEffectiveStrengthValue(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto strength = storage->getCardAAUDataValue(cardInst, L"strength");
+			return Value(strength.is<double>() ? (int)strength.get<double>() : (int)cardInst->m_char->m_charData->m_character.strengthValue);
 		}
 
 		//int(int)
@@ -779,6 +962,45 @@ namespace Shared {
 
 			return Value(cardInst->m_char->m_charData->m_character.strengthClassRank);
 		}
+
+		//int(int)
+		Value Thread::GetCardSportsExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_sportGrade);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardAcademicExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_academicGrade);
+			}
+		}
+
+		//int(int)
+		Value Thread::GetCardClubExamGrade(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			CharInstData* instance = &AAPlay::g_characters[seat];
+			if (!instance->IsValid()) {
+				return Value(-1);
+			}
+			else {
+				return Value((int)instance->m_char->m_characterStatus->m_clubGrade);
+			}
+		}
 		//int(int)
 		Value Thread::GetCardSociability(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -787,6 +1009,35 @@ namespace Shared {
 			if (!cardInst->IsValid()) return Value(-1);
 
 			return Value(cardInst->m_char->m_charData->m_character.sociability);
+		}
+
+		//int(int, string)
+		Value Thread::GetCardSociabilityMod(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			std::wstring* modName = params[1].strVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto sociabilityMods = storage->getCardAAUDataValue(cardInst, L"sociabilityMods");
+			if (!sociabilityMods.is<picojson::object>()) {
+				return Value(0);
+			}
+			auto sociabilityMod = sociabilityMods.get<picojson::object>()[General::CastToString(*modName)];
+			auto sociability = sociabilityMod.is<double>() ? (int)sociabilityMod.get<double>() : 0;
+
+
+			return Value(sociability);
+		}
+
+		Value Thread::GetCardEffectiveSociability(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
+
+			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
+			auto sociability = storage->getCardAAUDataValue(cardInst, L"sociability");
+			return Value(sociability.is<double>() ? (int)sociability.get<double>() : cardInst->m_char->m_charData->m_character.sociability);
 		}
 
 		//string(int)
@@ -840,6 +1091,17 @@ namespace Shared {
 
 		}
 
+		//int(int)
+		Value Thread::GetCardHPartnerCount(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(-1);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(-1);
+
+			return Value((int)cardInst->m_char->m_characterStatus->m_HPartnerCount);
+
+		}
+
 		Value Thread::GetDecals(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
@@ -880,7 +1142,7 @@ namespace Shared {
 				DWORD* offset = (DWORD*)ExtVars::ApplyRule(adr);
 
 				if (offset) {
-					return Value((int)*offset);
+					return Value((int)* offset);
 				}
 				else return -1;
 			}
@@ -918,6 +1180,33 @@ namespace Shared {
 			{
 				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//het, lean het, bi
 				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+
+			return Value(multiplier);
+		}
+
+		//float(int, int)
+		Value Thread::GetCardLikeOrientationMultiplier(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(0);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+
+			int towards = params[1].iVal;
+			if (ExpressionSeatInvalid(towards)) return Value(0);
+			CharInstData* towardsInst = &AAPlay::g_characters[towards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			float multiplier = 0.0;
+			if (cardInst->m_char->m_charData->m_gender == towardsInst->m_char->m_charData->m_gender)
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation <= 2) multiplier = 1.0;	//hetero, lean het, bi
+				else if (cardInst->m_char->m_charData->m_character.orientation != 4) multiplier = 0.5;	//lean homo
+			}
+			else
+			{
+				if (cardInst->m_char->m_charData->m_character.orientation >= 2) multiplier = 1.0;	//bi, lean homo, homo
+				else if (cardInst->m_char->m_charData->m_character.orientation != 0) multiplier = 0.5;	//lean het
 			}
 
 			return Value(multiplier);
@@ -1031,6 +1320,20 @@ namespace Shared {
 			return Value((bool)cardInst->m_char->m_lovers[cardTowards]);
 		}
 
+		Value Thread::GetLoverDays(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ExpressionSeatInvalid(card)) return Value(0);
+			CharInstData* cardInst = &AAPlay::g_characters[card];
+			if (!cardInst->IsValid()) return Value(0);
+			int cardTowards = params[1].iVal;
+			if (ExpressionSeatInvalid(cardTowards)) return Value(-0);
+			CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
+			if (!towardsInst->IsValid()) return Value(0);
+
+			return Value((int)cardInst->m_char->m_daysLovers[cardTowards]);
+		}
+
+
 		//bool(int)
 		Value Thread::GetHasLovers(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -1124,8 +1427,8 @@ namespace Shared {
 			if (invalidSeat) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardInt(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardInt(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].iVal);
 		}
@@ -1135,8 +1438,8 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card)) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardFloat(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardFloat(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].fVal);
 		}
@@ -1147,8 +1450,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardString(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardString(inst, *params[1].strVal);
 			if (result.isValid) return Value(General::CastToWString(result.value));
 			else return Value(*params[2].strVal);
 		}
@@ -1159,10 +1462,38 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardBool(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardBool(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].bVal);
+		}
+		//int(string, int)
+		Value Thread::GetClassStorageInt(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassInt(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].iVal);
+		}
+		//float(string, float)
+		Value Thread::GetClassStorageFloat(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassFloat(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].fVal);
+		}
+		//string(string, string)
+		Value Thread::GetClassStorageString(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassString(*params[0].strVal);
+			if (result.isValid) return Value(General::CastToWString(result.value));
+			else return Value(*params[1].strVal);
+		}
+		//bool(string, bool)
+		Value Thread::GetClassStorageBool(std::vector<Value>& params) {
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassBool(*params[0].strVal);
+			if (result.isValid) return Value(result.value);
+			else return Value(params[1].bVal);
 		}
 		//int(int, int)
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
@@ -1185,7 +1516,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(target)) return Value(0);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			CharInstData* targetInst = &AAPlay::g_characters[target];
-			
+
 			if (!cardInst->IsValid() || !targetInst->IsValid()) {
 				return 0;
 			}
@@ -1217,7 +1548,7 @@ namespace Shared {
 			}
 			return Value(AAPlay::g_characters[seat].m_cardData.FindStyleIdxByName(styleName));
 		}
-		
+
 		//bool(int)
 		Value Thread::GetSexExperience(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -1320,6 +1651,43 @@ namespace Shared {
 		}
 
 		//int(int)
+		Value Thread::GetMLocationTarget(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			int default_return = -1;
+			CharInstData* inst = &AAPlay::g_characters[seat];
+			if (!inst->IsValid())
+			{
+				return -1;
+			}
+			else
+			{
+				default_return = inst->m_char->m_characterStatus->m_npcStatus->m_locationTarget;
+				return Value(default_return);
+			}
+		}
+
+
+		//int()
+		Value Thread::GetPcTarget(std::vector<Value>& params) {
+			int default_return = -1;
+
+			const DWORD offset[]{ 0x376164, 0x8C };
+			ExtClass::CharacterActivity** pcTarget = (ExtClass::CharacterActivity **)ExtVars::ApplyRule(offset);
+
+			for (int character = 0; character < 25; character = character + 1) {
+				CharInstData* inst2 = &AAPlay::g_characters[character];
+				if (inst2->IsValid()) {
+					if ((inst2->m_char->m_moreData1->m_activity) == *pcTarget) {
+						default_return = inst2->m_char->m_seat;
+					}
+				}
+			}
+			return Value(default_return);
+		}
+
+
+		//int(int)
 		Value Thread::PCTalkAbout(std::vector<Value>& params) {
 			auto ptr = Shared::GameState::getPlayerCharacter();
 			if (ptr != nullptr) {
@@ -1406,7 +1774,7 @@ namespace Shared {
 
 		//int(int)
 		Value Thread::GetPeriodTimer(std::vector<Value>& params) {
-			const DWORD offset[]{ 0x376164, 0x2c, 0x2C};
+			const DWORD offset[]{ 0x376164, 0x2c, 0x2C };
 			DWORD* timer = (DWORD*)ExtVars::ApplyRule(offset);
 			return (*(int*)timer / 1000);
 		}
@@ -1546,7 +1914,7 @@ namespace Shared {
 				return Value(totalCums);
 			}
 		}
-		
+
 		//int(int)
 		Value Thread::GetCardCumStatInMouthTotal(std::vector<Value>& params) {
 			int seat = params[0].iVal;
@@ -1955,9 +2323,17 @@ namespace Shared {
 
 		//bool()
 		Value Thread::GetNpcResponseCurrentAnswerSuccess(std::vector<Value>& params) {
-			if (this->eventData->GetId() != NPC_RESPONSE) return false;
-			bool bResponse = ((NpcResponseData*)eventData)->changedResponse == 1;
-			return bResponse;
+			bool bResponse = false;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				bResponse = ((NpcResponseData*)eventData)->changedResponse == 1;
+				return bResponse;
+			case NPC_AFTER_RESPONSE:
+				bResponse = ((NPCAfterResponseData*)eventData)->changedResponse == 1;
+				return bResponse;
+			default:
+				return bResponse;
+			}
 		}
 
 		Value Thread::GetNpcResponseEffectiveAnswerSuccess(std::vector<Value>& params) {
@@ -1965,6 +2341,17 @@ namespace Shared {
 			bool bResponse = ((NPCAfterResponseData*)eventData)->effectiveResponse == 1;
 			return bResponse;
 		}
+
+		Value Thread::GetNpcResponseStrongAnswerSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return -1;
+			return ((NPCAfterResponseData*)eventData)->strongResponse;
+		}
+
+		Value Thread::GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params) {
+			if (this->eventData->GetId() != NPC_AFTER_RESPONSE) return -1;
+			return ((NPCAfterResponseData*)eventData)->absoluteResponse;
+		}
+
 
 		//int()
 		Value Thread::GetNpcResponseCurrentAnswer(std::vector<Value>& params) {
@@ -1986,6 +2373,25 @@ namespace Shared {
 				return ((NpcResponseData*)eventData)->answeredTowards;
 			case NPC_AFTER_RESPONSE:
 				return ((NPCAfterResponseData*)eventData)->answeredTowards;
+			default:
+				return -1;
+			}
+		}
+
+		//int()
+		Value Thread::GetPCRoomTarget(std::vector<Value>& params) {
+			//this value is temporary and I'd rather not let the user retrieve it whenever
+			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0x150 };
+			DWORD* room = nullptr;
+			switch (this->eventData->GetId()) {
+			case NPC_RESPONSE:
+				room = (DWORD*)ExtVars::ApplyRule(offset);
+				if (room) return (int)(*room);
+				else return -1;
+			case NPC_AFTER_RESPONSE:
+				room = (DWORD*)ExtVars::ApplyRule(offset);
+				if (room) return (int)(*room);
+				else return -1;
 			default:
 				return -1;
 			}
@@ -2093,6 +2499,8 @@ namespace Shared {
 				return ((PCConversationStateUpdatedData*)eventData)->action;
 			case PC_CONVERSATION_LINE_UPDATED:
 				return ((PCConversationLineUpdatedData*)eventData)->action;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->action;
 			default:
 				return 0;
 			}
@@ -2106,6 +2514,8 @@ namespace Shared {
 				return ((NpcWantTalkWithData*)eventData)->conversationTarget;
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->conversationTarget;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->conversationTarget;
 			default:
 				return 0;
 			}
@@ -2281,6 +2691,12 @@ namespace Shared {
 			return Value(this->eventData->GetId());
 		}
 
+		//str(procName)
+		Value Thread::AddLuaProcParam(std::vector<Value>& params) {
+			auto delimiter = L"\n";
+			return Value(*params[0].strVal + delimiter + *params[1].strVal);
+		}
+
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 			TEXT("General"),
 			TEXT("Event Response"),
@@ -2390,26 +2806,26 @@ namespace Shared {
 				},
 				{
 					12, EXPRCAT_EVENT,
-					TEXT("Npc Answer - Conversation"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
+					TEXT("Npc Answer - Conversation ID"), TEXT("ConversationId"), TEXT("The Type of Question the NPC answered in a NPC Answered event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcResponseConversation
 				},
 				{
 					13, EXPRCAT_EVENT,
-					TEXT("Npc Room Target"), TEXT("RoomTarget"), TEXT("Room that the Npc Walks to in a Npc Walks to Room event."),
+					TEXT("Npc Room Target"), TEXT("NPCRoomTarget"), TEXT("Room that the Npc Walks to in a Npc Walks to Room event."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcRoomTarget
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
+					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation, or the conversation within conversation end event."
 					"id in the targeted actions."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcActionId
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About event, this is the character the Npc talks with."),
+					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About, or Conversation End event, this is the character the Npc talks with."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcTalkTarget
 				},
@@ -2517,37 +2933,37 @@ namespace Shared {
 				},
 				{
 					31, EXPRCAT_CHARPROP,
-					TEXT("Intelligence"), TEXT("%p ::Intelligence"), TEXT("The intelligence of this character."),
+					TEXT("Intelligence"), TEXT("%p ::INT"), TEXT("The intelligence of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligence
 				},
 				{
 					32, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Value"), TEXT("%p ::IntelligenceValue"), TEXT("The intelligence value of this character."),
+					TEXT("Intelligence Value"), TEXT("%p ::INTValue"), TEXT("The intelligence value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceValue
 				},
 				{
 					33, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Rank"), TEXT("%p ::IntelligenceRank"), TEXT("The intelligence rank of this character."),
+					TEXT("Intelligence Rank"), TEXT("%p ::INTRank"), TEXT("The intelligence rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceRank
 				},
 				{
 					34, EXPRCAT_CHARPROP,
-					TEXT("Strength"), TEXT("%p ::Strength"), TEXT("The strength of this character."),
+					TEXT("Strength"), TEXT("%p ::STR"), TEXT("The strength of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrength
 				},
 				{
 					35, EXPRCAT_CHARPROP,
-					TEXT("Strength Value"), TEXT("%p ::StrengthValue"), TEXT("The strength value of this character."),
+					TEXT("Strength Value"), TEXT("%p ::STRValue"), TEXT("The strength value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthValue
 				},
 				{
 					36, EXPRCAT_CHARPROP,
-					TEXT("Strength Rank"), TEXT("%p ::StrengthRank"), TEXT("The strength rank of this character."),
+					TEXT("Strength Rank"), TEXT("%p ::STRRank"), TEXT("The strength rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthRank
 				},
@@ -2559,7 +2975,7 @@ namespace Shared {
 				},
 				{
 					38, EXPRCAT_CHARPROP,
-					TEXT("Partners count"), TEXT("%p ::PartnersCount"), TEXT("The sexual partners count of this character."),
+					TEXT("Partner Count"), TEXT("%p ::PartnerCount"), TEXT("Returns Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPartnerCount
 				},
@@ -2617,7 +3033,7 @@ namespace Shared {
 				},
 				{
 					47, EXPRCAT_GENERAL,
-					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("Days passed from the beginning of the save."),
+					TEXT("Days Passed"), TEXT("DaysPassed"), TEXT("The current day in a game calendar (0 to 41)."),
 					{}, (TYPE_INT),
 					&Thread::GetDaysPassed
 				},
@@ -2857,7 +3273,7 @@ namespace Shared {
 				},
 				{
 					87, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Anal"), TEXT("%p ::VaginalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
+					TEXT("H Stat - Anal"), TEXT("%p ::AnalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAnalSex
 				},
@@ -2945,7 +3361,7 @@ namespace Shared {
 					TEXT("Npc Current Response"), TEXT("CurrentResponse"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the current Answer, modified by this or previously executed Triggers. "
 					"using the Set Npc Response Answer Action"),
-					{}, (TYPE_BOOL),
+					{}, (TYPE_INT),
 					&Thread::GetNpcResponseCurrentAnswer
 				},
 				{
@@ -3053,7 +3469,7 @@ namespace Shared {
 					&Thread::GetSubmissiveInH
 				},
 				{
-					119, EXPRCAT_EVENT,
+					119, EXPRCAT_CHARPROP,
 					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetStamina
@@ -3064,6 +3480,161 @@ namespace Shared {
 					TEXT("Returns the number of seconds that have passed in the current period."),
 					{}, (TYPE_INT),
 					&Thread::GetPeriodTimer
+				},
+				{
+					121, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Int"), TEXT("GetInt(key: %p , default: %p )"),
+					TEXT("Gets the integer from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_INT }, (TYPE_INT),
+					&Thread::GetClassStorageInt
+				},
+				{
+					122, EXPRCAT_GENERAL,
+					TEXT("Get PC Target"), TEXT("PCTarget"), TEXT("Returns the seat of the card that is the current target of the player character."),
+					{}, (TYPE_INT),
+					&Thread::GetPcTarget
+				},
+				{
+					123, EXPRCAT_CHARPROP,
+					TEXT("Virtue Modifier"), TEXT("%p ::VirtueMod( %p )"), TEXT("The value of the specified virtue modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardVirtueMod
+				},
+				{
+					124, EXPRCAT_CHARPROP,
+					TEXT("Real Virtue"), TEXT("%p ::RealVirtue"), TEXT("The real unlocked virtue of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveVirtue
+				},
+				{
+					125, EXPRCAT_CHARPROP,
+					TEXT("Sociability Modifier"), TEXT("%p ::SociabilityMod( %p )"), TEXT("The value of the specified sociability modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardSociabilityMod
+				},
+				{
+					126, EXPRCAT_CHARPROP,
+					TEXT("Real Sociability"), TEXT("%p ::RealSociability"), TEXT("The real unlocked socibility of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveSociability
+				},
+				{
+					127, EXPRCAT_CHARPROP,
+					TEXT("Intelligence Modifier"), TEXT("%p ::INTMod( %p )"), TEXT("The value of the specified intelligence value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardIntelligenceMod
+				},
+				{
+					128, EXPRCAT_CHARPROP,
+					TEXT("Real Intelligence Value"), TEXT("%p ::RealINTValue"), TEXT("The real unlocked intelligenve value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveIntelligenceValue
+				},
+				{
+					129, EXPRCAT_CHARPROP,
+					TEXT("Strength Modifier"), TEXT("%p ::STRMod( %p )"), TEXT("The value of the specified strength value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardStrengthMod
+				},
+				{
+					130, EXPRCAT_CHARPROP,
+					TEXT("Real Strength Value"), TEXT("%p ::RealSTRValue"), TEXT("The real unlocked strength value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveStrengthValue
+				},
+				{
+					131, EXPRCAT_CHARPROP,
+					TEXT("Club Modifier"), TEXT("%p ::ClubMod( %p )"), TEXT("The value of the specified club value modifier."),
+					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardClubMod
+				},
+				{
+					132, EXPRCAT_CHARPROP,
+					TEXT("Real Club Value"), TEXT("%p ::RealClubValue"), TEXT("The real unlocked club value of the character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardEffectiveClubValue
+				},
+				{
+					133, EXPRCAT_CHARPROP,
+					TEXT("Get LocationTarget"), TEXT("%p ::LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around, but unavailable from NPC answers event."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetMLocationTarget
+				},
+				{
+					134, EXPRCAT_EVENT,
+					TEXT("Npc Strong Response Modifier"), TEXT("StrongResponseModifier"),
+					TEXT("Use only in After NPC Response event. This expression will ONLY return the strong response modifier that any triggers set. It will be -1 if no triggers had done so."),
+					{}, (TYPE_INT),
+					&Thread::GetNpcResponseStrongAnswerSuccess
+				},
+				{
+					135, EXPRCAT_EVENT,
+					TEXT("Npc Absolute Response Modifier"), TEXT("AbsoluteResponseModifier"),
+					TEXT("Use only in After NPC Response event. This expression will ONLY return the absolute response modifier that any triggers set. It will be -1 if no triggers had done so."),
+					{}, (TYPE_INT),
+					&Thread::GetNpcResponseAbsoluteAnswerSuccess
+				},
+				{
+					136, EXPRCAT_EVENT,
+					TEXT("Get PC Room Target"), TEXT("PCRoomTarget"),
+					TEXT("Use only in NPC/After NPC answer event. This expression will return the room that PC is walking to."),
+					{}, (TYPE_INT),
+					&Thread::GetPCRoomTarget
+				},
+				{
+					137, EXPRCAT_CHARPROP,
+					TEXT("Trait Modifier"), TEXT("%p ::TraitMod((Trait( %p ), ModName ( %p )"), TEXT("The value of the specified trait value modifier."),
+					{ TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_INT),
+					&Thread::GetCardTraitMod
+				},
+				{
+					138, EXPRCAT_CHARPROP,
+					TEXT("Unbount Trait Value"), TEXT("%p ::UnboundTraitValue(Trait( %p ))"), TEXT("The unbound trait value of the character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardUnboundTrait
+				},
+				{
+					139, EXPRCAT_CHARPROP,
+					TEXT("Get Current Outfit"), TEXT("%p ::CurrOutfit"), TEXT("Returns the ID (0-3) of the current outfit of the character. Use to figure out whether they are in uniform, sports, swim or club outfit."),
+					{ TYPE_INT}, (TYPE_INT),
+					&Thread::GetCurrentClothes
+				},
+				{
+					140, EXPRCAT_CHARPROP,
+					TEXT("Get lover days"), TEXT("%p ::GetLoverDays( %p )"), TEXT("Returns the amount of days that this card has been a lover with the other for."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
+					&Thread::GetLoverDays
+				},
+				{
+					141, EXPRCAT_CHARPROP,
+					TEXT("Get Sports Exam Grade"), TEXT("%p ::SportsExamGrade"), TEXT("Returns the grade this card got on sports exam, from 0 to 5, where 0 is F and 5 is A"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardSportsExamGrade
+				},
+				{
+					142, EXPRCAT_CHARPROP,
+					TEXT("Get Academic Exam Grade"), TEXT("%p ::AcademExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardAcademicExamGrade
+				},
+				{
+					143, EXPRCAT_CHARPROP,
+					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on club tournament, from 0 to 5, where 0 is Eliminated 1st round and 5 is Champion"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardClubExamGrade
+				},
+				{
+					144, EXPRCAT_CHARPROP,
+					TEXT("Sexual Partner Count"), TEXT("%p ::HPartnerCount"), TEXT("Returns Sexual Partner Count of this character."),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetCardHPartnerCount
+				},
+				{
+					145, EXPRCAT_GENERAL,
+					TEXT("Club Type"), TEXT("ClubType( %p )"), TEXT("Returns the type of a provided club id"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetClubType
 				},
 			},
 
@@ -3157,7 +3728,8 @@ namespace Shared {
 					15, EXPRCAT_EVENT,
 					TEXT("Npc Normal Response Success"), TEXT("NormalResponseSuccess"),
 					TEXT("If executed in a trigger with the Npc Answers Event, this is the normal answer, modified by this or previously executed Triggers"
-					"using the Set Npc Response Answer Success Action. Will not work for strong or absolute responses."),
+					"using the Set Npc Response Answer Success Action. Will not work for strong or absolute responses."
+					"Within After NPC Response event, this will return the original answer the NPC gave, or the answer modified by normal response modifier."),
 					{ }, (TYPE_BOOL),
 					&Thread::GetNpcResponseCurrentAnswerSuccess
 				},
@@ -3215,7 +3787,7 @@ namespace Shared {
 				{
 					24, EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage Bool"), TEXT("%p ::GetBool(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the bool from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
 					&Thread::GetCardStorageBool
@@ -3348,6 +3920,26 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardPreference
 				},
+				{
+					46, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Bool"), TEXT("GetBool(key: %p , default: %p )"),
+					TEXT("Gets the bool from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
+					&Thread::GetClassStorageBool
+				},
+				{
+					47, EXPRCAT_GENERAL,
+					TEXT("Check Skip Action"), TEXT("%p ::isSkip"), TEXT("Returns true if SKIP_CLASS, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, GO_HOME_TOGETHER, GO_KARAOKE_TOGETHER, GO_PLAY_TOGETHER, GO_EAT_TOGETHER"),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsSkipAction
+				},
+				{
+					48, EXPRCAT_GENERAL,
+					TEXT("Check Private Room"), TEXT("%p ::isPrivateRoom"), TEXT("Returns true if the location ID is one of the private rooms."),
+					{ TYPE_INT }, (TYPE_BOOL),
+					&Thread::IsPrivateRoom
+				},
 			},
 			{ //FLOAT
 				{
@@ -3407,7 +3999,7 @@ namespace Shared {
 				{
 					10,EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage Float"),TEXT("%p ::GetFloat(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the float from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
 						&Thread::GetCardStorageFloat
@@ -3424,6 +4016,21 @@ namespace Shared {
 					TEXT("The multiplier used when calculating interaction chances depending on actors' sex orientations and genders. Returns either 1.0, 0.5 or 0.0"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
 					&Thread::GetCardOrientationMultiplier
+				},
+				{
+					13,EXPRCAT_GENERAL,
+					TEXT("Get Class Storage Float"),TEXT("GetFloat(key: %p , default: %p )"),
+					TEXT("Gets the float from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
+					&Thread::GetClassStorageFloat
+				},
+				{
+					14, EXPRCAT_CHARPROP,
+					TEXT("Like Orientation Multiplier"), TEXT("%p ::LikeOrientationMultiplier(towards: %p )"),
+					TEXT("Returns 0 when characters can't get like points towards each other, 0.5 when their like gain is halved, and 1 when they get full amount of like points from interactions."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
+					&Thread::GetCardLikeOrientationMultiplier
 				},
 			},
 			{ //STRING
@@ -3467,7 +4074,7 @@ namespace Shared {
 				{
 					7, EXPRCAT_CHARPROP,
 					TEXT("Get Card Storage String"), TEXT("%p ::GetStr(key: %p , default: %p )"),
-					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
+					TEXT("Gets the string from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::GetCardStorageString
@@ -3522,7 +4129,7 @@ namespace Shared {
 				},
 				{
 					16, EXPRCAT_CHARPROP,
-					TEXT("First Anal Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					TEXT("First Anal Partner"), TEXT("%p ::FirstAnal"), TEXT("Returns the full name of the first anal partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstAnalPartner
 				},
@@ -3549,6 +4156,20 @@ namespace Shared {
 					TEXT("Full Name"), TEXT("%p ::FullName"), TEXT("Full name of the character in \"LastName FirstName\" format."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFullName
+				},
+				{
+					21, EXPRCAT_GENERAL,
+					TEXT("LUA Add Parameter"), TEXT("%p << %p "), TEXT("Add parameter to the LUA Procedure string."),
+					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+					&Thread::AddLuaProcParam
+				},
+				{
+					22, EXPRCAT_GENERAL,
+					TEXT("Get Class Storage String"), TEXT("GetStr(key: %p , default: %p )"),
+					TEXT("Gets the string from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
+					"it returns the default value instead"),
+					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
+					&Thread::GetClassStorageString
 				},
 			}
 

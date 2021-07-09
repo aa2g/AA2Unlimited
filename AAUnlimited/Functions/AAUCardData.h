@@ -76,7 +76,7 @@ public:
 	bool RemoveBoneTransformation(int index);
 
 	//hairs
-	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip);
+	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, BYTE flip);
 	bool RemoveHair(int index);
 
 	struct BoneMod;
@@ -98,6 +98,8 @@ public:
 	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
 	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
 	bool RemoveCardStyle(int index);
+	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
+	bool SwapCardStyle(int index1, int index2);
 	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
 	int FindStyleIdxByName(std::wstring * name);
 
@@ -226,6 +228,7 @@ public:
 
 	int m_version; //saved in FIRST chunk; no chunk means version 1
 	BYTE m_tanSlot;						//used tan slot, if slot is >5.
+
 
 
 	//modifications can be saved in multiple sets.

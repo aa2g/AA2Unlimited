@@ -23,7 +23,7 @@ bool PPeX::Connect(const wchar_t *path) {
 		if (status == L"True")
 			break;
 		Sleep(500);
-		LOGPRIO(Logger::Priority::ERR) << "Waiting for server ready, status: " << wstring(status) << "\r\n";
+		LOGPRIO(Logger::Priority::WARN) << "Waiting for server ready, status: " << wstring(status) << "\r\n";
 	}
 	is_connected = true;
 	return true;
@@ -112,7 +112,6 @@ bool PPeX::ArchiveDecompress(const wchar_t* paramArchive, const wchar_t* paramFi
 	if (wcscmp(paramArchive + parchlen - 3, L".pp"))
 		return false;
 	wstring path = (wstring(paramArchive, parchlen - 3) + L"/" + paramFile);
-	transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 	PutString(L"load");
 	PutString(path);

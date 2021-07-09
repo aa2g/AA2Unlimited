@@ -32,7 +32,7 @@ local patches = {}
 local options = {
 	-- name, default, dialog
 	{"roleswap", 1, "Enable H position role swap: %b"},
-	{"homosex", 0, "Enable homosex: %b"},
+	{"homosex", 1, "Enable homosex: %b"},
 	{"homosex2", 0, "Enable homosex (test fixes): %b"},
 }
 

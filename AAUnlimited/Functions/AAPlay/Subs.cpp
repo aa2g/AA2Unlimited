@@ -42,7 +42,19 @@ namespace Subtitles {
 			lastPopTime = GetTickCount();
 		if (lines.size() > maxLines)
 			lines.pop_front();
-		lines.push_back(std::make_tuple(General::utf8.from_bytes(subtitle) + L"\n", sexes_id));
+
+		//Adding the one who's talking and the person they're talking about to the subtitles
+		std::wstring talkingCard = Shared::GameState::getTalkingName();
+		std::wstring talkingAbout = Shared::GameState::getTalkAboutName();
+		std::wstring subject = talkingCard.append(L": " + General::utf8.from_bytes(subtitle));
+		std::wstring search = L"@";
+
+		size_t pos = 0;
+		while ((pos = subject.find(search, pos)) != std::wstring::npos) {
+			subject.replace(pos, search.length(), talkingAbout);
+			pos += talkingAbout.length();
+		}
+		lines.push_back(std::make_tuple((subject) + L"\n", sexes_id));
 	}
 
 	void InitSubtitlesParams(const char *font_family, int font_size, int line_height, int show_duration, int max_lines,

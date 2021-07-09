@@ -7,6 +7,8 @@
 #include "Files/PNGData.h"
 #include "External\ExternalClasses\ActionParamStruct.h"
 #include "External\ExternalClasses\Light.h"
+#include "External\ExternalClasses\CharacterAssetContainer.h"
+
 
 /*
  * Contains data about a character that currently exists in a game.
@@ -45,6 +47,8 @@ public:
 
 
 	ExtClass::CharacterStruct* m_char;
+	ExtClass::CharacterAssetContainer assetContainer;
+
 	AAUCardData m_cardData;
 
 	std::vector<std::pair<AAUCardData::HairPart,ExtClass::XXFile*>> m_hairs[4];
@@ -52,6 +56,8 @@ public:
 	ExtClass::ActionParamStruct m_forceAction;
 
 	int idxSave; //Illusion's load order
+
+	bool lowPolyUpd;
 
 	void SetCurrentStyle(int index);
 	int GetStyleCount();
@@ -67,19 +73,20 @@ public:
 	std::vector<float> GetLightDirection(int light);
 	std::vector<BYTE> GetAmbientColor();
 
+	int GetLoveTowards(CharInstData* towards);
+	int GetLikeTowards(CharInstData* towards);
+	int GetDislikeTowards(CharInstData* towards);
+	int GetHateTowards(CharInstData* towards);
+
+	void SetPointsTowards(CharInstData* towards, float love, float like, float dislike, float hate, float spare);
+	bool IsPC();
+
+	int GetCurrentRoom();
+	CharInstData* GetTargetInst();
+
 	void Reset();
-	inline bool IsValid() {
-		if (General::IsAAEdit) return Editable();
-		ExtClass::CharacterStruct** start = ExtVars::AAPlay::ClassMembersArray();
-		ExtClass::CharacterStruct** end = ExtVars::AAPlay::ClassMembersArrayEnd();
-		for (start; start != end; start++) {
-			ExtClass::CharacterStruct* it = *start;
-			if (it == m_char) {
-				return m_char->m_seat + 1;
-			}
-		}
-		return false;	
-	}
+	void StoreInitialStats();
+	bool IsValid();
 
 	inline bool Editable() {
 		const DWORD femaleRule[]{ 0x353254, 0x2C, 0 };
@@ -97,11 +104,27 @@ public:
 	}
 
 	void ApplyDecals(int bodyPart, int decalStrength);
+	void ClearCache();
+	void LowPolyUpdate(int state, int context);
+	void SetHeadTracking(int headtracking);
+	void AddShadows(DWORD * HairPTR);
+	void CastShadows(DWORD * HairPTR);
+
+	DWORD* lastDialogue = NULL;
 
 	static inline void bindLua() {
 #define LUA_CLASS CharInstData
 		LUA_NAME;
 		LUA_BIND(m_char);
+		LUA_METHOD(IsValid, {
+			return _gl.push(_self->IsValid()).one;
+		});
+		LUA_METHOD(IsPC, {
+			return _gl.push(_self->IsPC()).one;
+		});
+		LUA_METHOD(GetCurrentRoom, {
+			return _gl.push(_self->GetCurrentRoom()).one;
+		});
 		LUA_METHOD(SetCurrentStyle, {
 			_self->SetCurrentStyle(_gl.get(2));
 		});
@@ -170,11 +193,40 @@ public:
 			BYTE b = _gl.get(4);
 			_self->SetAmbientColor(r, g, b);
 		});
+		LUA_METHOD(GetLikeTowards, {
+			return _gl.push(_self->GetLikeTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetLoveTowards, {
+			return _gl.push(_self->GetLoveTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetDislikeTowards, {
+			return _gl.push(_self->GetDislikeTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(GetHateTowards, {
+			return _gl.push(_self->GetHateTowards(_gl.get(2))).one;
+		});
+		LUA_METHOD(SetPointsTowards, {
+			_self->SetPointsTowards(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5), _gl.get(6), _gl.get(7));
+		});
 		LUA_METHOD(ApplyDecal, {
 			int bodyPart = _gl.get(2);
 			int strength = _gl.get(3);
 			if (bodyPart >= 0 && bodyPart < 5 && strength >= 0 && strength < 4)
 				_self->ApplyDecals(bodyPart, strength);
+		});
+		LUA_METHOD(SetHeadTracking, {
+			_self->SetHeadTracking(_gl.get(2));
+		});
+		LUA_METHOD(AddShadows, {
+			_self->AddShadows(_gl.get(2));
+		});
+		LUA_METHOD(CastShadows, {
+			_self->CastShadows(_gl.get(2));
+		});
+		LUA_METHOD(LowPolyUpdate, {
+			int state = _gl.get(2);
+			int context = _gl.get(3);
+			_self->LowPolyUpdate(state, context);
 		});
 #undef LUA_CLASS
 	}
