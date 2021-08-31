@@ -127,6 +127,7 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 			}
 		}
 	}
+	
 	if (card.m_char->m_xxSkeleton) {
 		card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
 		card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
