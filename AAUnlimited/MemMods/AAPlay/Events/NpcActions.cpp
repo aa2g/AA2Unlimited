@@ -17,7 +17,9 @@ DWORD* extraHairFixReturnAddress = 0;
 DWORD* extraHairFixVanillaAddress;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
+DWORD* relationshipReturn;
 DWORD* RosterHandleLoopNextSeat = 0;
+DWORD* afterTransferOutReturn = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
 DWORD* RosterPopulateInjectionReturnAddress = 0;
@@ -1033,6 +1035,109 @@ void conversationEndInjection() {
 	Hook((BYTE*)address,
 	{ 0x89, 0x6E, 0x6C, 0x88, 0x5E, 0x1B },						//expected values
 	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+void __stdcall relationshipPointChanged(ExtClass::CharacterStruct* towards, DWORD* moreData, int arr[4]) {
+	int triggerCard = -1;
+	int targetCard = -1;
+
+	DWORD* somepointer = (DWORD*)(moreData + 0x8);
+	triggerCard = *somepointer;
+
+	if (towards) {
+		targetCard = towards->m_seat;
+	}
+
+	Shared::Triggers::RelationshipPointChangedData relationshipData;
+	relationshipData.card = triggerCard;
+	relationshipData.target = targetCard;
+	relationshipData.love = arr[0];
+	relationshipData.like = arr[1];
+	relationshipData.dislike = arr[2];
+	relationshipData.hate = arr[3];
+	ThrowEvent(&relationshipData);
+	arr[0] = relationshipData.love;
+	arr[1] = relationshipData.like;
+	arr[2] = relationshipData.dislike;
+	arr[3] = relationshipData.hate;
+}
+
+void __declspec(naked) relationshipPointChangedRedirect() {
+	__asm {
+		pushad
+		push[esp + 0x28]
+		push[esp + 0x28]
+		push eax
+		call relationshipPointChanged
+		popad
+		//original code
+		push ecx
+		push ebx
+		mov ebx,[esp+0xC]
+		jmp relationshipReturn
+	}
+}
+
+void relationshipPointChangedInjection() {
+	/*
+	esp + 4 is m_moreData
+	esp + 8 is the array
+	eax is the m_char of the target
+	AA2Play.exe+1428E0 - 51                    - push ecx
+	AA2Play.exe+1428E1 - 53                    - push ebx
+	AA2Play.exe+1428E2 - 8B 5C 24 0C           - mov ebx,[esp+0C]
+	AA2Play.exe+1428E6 - 55                    - push ebp -- return here
+	*/
+
+	const DWORD offset1[]{ 0x1428E6 };
+	relationshipReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0x1428E0;
+	DWORD redirectAddress = (DWORD)(&relationshipPointChangedRedirect);
+	Hook((BYTE*)address,
+	{ 0x51, 0x53, 0x8B, 0x5C, 0x24, 0x0C },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+void __stdcall afterTransferOutEvent() {
+	int seat = Shared::GameState::getRemovedSeat();
+	if (seat != -1) {
+		AAPlay::g_characters[seat].Reset();
+	}
+	Shared::GameState::setRemovedSeat(-1);
+}
+
+void __declspec(naked) afterTransferOutRedirect() {
+	__asm {
+		pushad
+		call afterTransferOutEvent
+		popad
+		//original code
+		add ecx, edi
+		lea edx,[ecx+0x04]
+		jmp afterTransferOutReturn
+	}
+}
+
+void afterTransferOutInjection() {
+	/*
+	AA2Play.exe+EC3DC - 03 CF                 - add ecx,edi
+	AA2Play.exe+EC3DE - 8D 51 04              - lea edx,[ecx+04]
+	AA2Play.exe+EC3E1 - 2B C2                 - sub eax,edx
+	*/
+
+	const DWORD offset1[]{ 0xEC3E1 };
+	afterTransferOutReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0xEC3DC;
+	DWORD redirectAddress = (DWORD)(&afterTransferOutRedirect);
+	Hook((BYTE*)address,
+	{ 0x03, 0xCF, 0x8D, 0x51, 0x04 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 		NULL);
 }
 

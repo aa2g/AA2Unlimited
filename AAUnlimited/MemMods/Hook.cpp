@@ -326,6 +326,8 @@ void InitializeHooks() {
 		ClothesLimit::clothingSlotFirstInject();
 		ClothesLimit::clothingSlotSecondInject();
 		ClothesLimit::clothingSlotThirdInject();
+		NpcActions::relationshipPointChangedInjection();
+		NpcActions::afterTransferOutInjection();
 		//ClothesLimit::personalitySlotUnlock(); hooks are here for the time we'll need this, i'll move it to a different file when needed
 		//NpcActions::headTrackingChangeInjection();
 

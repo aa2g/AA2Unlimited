@@ -2533,6 +2533,52 @@ namespace Shared {
 			}
 		}
 
+		Value Thread::GetLove(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->love;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetLike(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->like;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetDislike(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->dislike;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetHate(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->hate;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::RelationshipTowards(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->target;
+			default:
+				return 0;
+			}
+		}
+
+
 		//int()
 		Value Thread::GetConversationState(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
@@ -3635,6 +3681,36 @@ namespace Shared {
 					TEXT("Club Type"), TEXT("ClubType( %p )"), TEXT("Returns the type of a provided club id"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetClubType
+				},
+				{
+					146, EXPRCAT_EVENT,
+					TEXT("Get Love"), TEXT("GetLove"), TEXT("Returns the amount of love points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetLove
+				},
+				{
+					147, EXPRCAT_EVENT,
+					TEXT("Get Like"), TEXT("GetLike"), TEXT("Returns the amount of like points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetLike
+				},
+				{
+					148, EXPRCAT_EVENT,
+					TEXT("Get Dislike"), TEXT("GetDislike"), TEXT("Returns the amount of dislike points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetDislike
+				},
+				{
+					149, EXPRCAT_EVENT,
+					TEXT("Get Hate"), TEXT("GetHate"), TEXT("Returns the amount of hate points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetHate
+				},
+				{
+					150, EXPRCAT_EVENT,
+					TEXT("Relationship Points Changed Towards"), TEXT("RelationshipTowards"), TEXT("Returns the character that TriggerCard will have relationship points applied towards within Relationship Points Changed event."),
+					{}, (TYPE_INT),
+					&Thread::RelationshipTowards
 				},
 			},
 

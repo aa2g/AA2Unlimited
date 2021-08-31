@@ -42,6 +42,29 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	}
 }
 
+void CharInstData::AddRelationshipPoints(ExtClass::CharacterStruct* towards, int love, int like, int dislike, int hate)
+{
+	if (this->IsValid() && General::IsAAPlay) {
+		int arr[4] = { love, like, dislike, hate };
+		const DWORD offset[]{ 0x1428E0 };
+		DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+		DWORD* firstChar = (DWORD*)this->m_char->m_moreData;
+		DWORD* arrayPointer = (DWORD*)arr;
+		if (this->IsValid()) {
+			auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+			__asm
+			{
+				mov eax, arrayPointer
+				push eax
+				mov eax, firstChar
+				push eax
+				mov eax, towards
+				call[address]
+			}
+		}
+	}
+}
+
 void CharInstData::ClearCache()
 {
 	const DWORD offset[]{ 0x150750 };
@@ -78,6 +101,67 @@ void CharInstData::LowPolyUpdate(int state, int contex)
 			push 0
 			push state
 			call[address]
+		}
+	}
+}
+
+
+void CharInstData::ArrangeDate(int targetSeat)
+{
+	if (this->IsValid() && General::IsAAPlay && AAPlay::g_characters[targetSeat].IsValid()) {
+		DWORD* firstFunction;
+		const DWORD offset[]{ 0x119900 };
+		firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+		auto fromCard = this->m_char->m_characterStatus;
+		int fromTarget = targetSeat;
+
+		DWORD* secondFunction;
+		const DWORD offset2[]{ 0x119CE0 };
+		secondFunction = (DWORD*)ExtVars::ApplyRule(offset2);
+		auto towardsCard = AAPlay::g_characters[targetSeat].m_char->m_characterStatus;
+		int towardsTarget = this->m_char->m_seat;
+
+		__asm
+		{
+			mov ecx, fromTarget
+			push ecx
+			mov edx, fromCard
+			call[firstFunction]
+			mov ecx, towardsTarget
+			push ecx
+			mov edx, towardsCard
+			call[secondFunction]
+		}
+	}
+}
+
+void CharInstData::PromiseLewd(int targetSeat)
+{
+	if (this->IsValid() && General::IsAAPlay && AAPlay::g_characters[targetSeat].IsValid()) {
+		DWORD* firstFunction;
+		const DWORD offset[]{ 0x119640 };
+		firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+		auto fromCard = this->m_char->m_characterStatus;
+		int fromTarget = targetSeat;
+
+		DWORD* secondFunction;
+		const DWORD offset2[]{ 0x1194A0 };
+		secondFunction = (DWORD*)ExtVars::ApplyRule(offset2);
+		auto towardsCard = AAPlay::g_characters[targetSeat].m_char->m_characterStatus;
+		int towardsTarget = this->m_char->m_seat;
+
+		__asm
+		{
+			mov ecx, fromTarget
+			push ecx
+			mov edx, fromCard
+			push edx
+			call[firstFunction]
+			mov ecx, towardsTarget
+			push ecx
+			mov edx, towardsCard
+			push edx
+			call[secondFunction]
 		}
 	}
 }

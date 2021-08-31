@@ -186,6 +186,20 @@ namespace Shared {
 			((HPositionData*)eventData)->position = pos;
 		}
 
+		void Thread::RelationshipPointChange(std::vector<Value>& params) {
+			int love = params[0].iVal;
+			int like = params[1].iVal;
+			int dislike = params[2].iVal;
+			int hate = params[3].iVal;
+			if (this->eventData->GetId() != RELATIONSHIP_POINT_CHANGED) return;
+			((RelationshipPointChangedData*)eventData)->love = love;
+			((RelationshipPointChangedData*)eventData)->like = like;
+			((RelationshipPointChangedData*)eventData)->dislike = dislike;
+			((RelationshipPointChangedData*)eventData)->hate = hate;
+
+		}
+
+
 		//
 		void Thread::SetNpcResponseAnswer(std::vector<Value>& params) {
 			if (this->eventData->GetId() != NPC_RESPONSE) return;
@@ -1769,6 +1783,35 @@ namespace Shared {
 			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 			storage->storeCardInt(inst, *params[1].strVal, params[2].iVal);
 		}
+
+		//int card, string keyname, int value
+		void Thread::ArrangeDate(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) return;
+
+			int towards = params[1].iVal;
+			if (ActionSeatInvalid(towards)) return;
+			CharInstData* inst2 = &AAPlay::g_characters[towards];
+			if (!inst2->IsValid()) return;
+
+			inst->ArrangeDate(towards);
+		}
+
+		void Thread::PromiseLewd(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) return;
+
+			int towards = params[1].iVal;
+			if (ActionSeatInvalid(towards)) return;
+			CharInstData* inst2 = &AAPlay::g_characters[towards];
+			if (!inst2->IsValid()) return;
+
+			inst->PromiseLewd(towards);
+		}
 		//int card, string keyname, float value
 		void Thread::SetCardStorageFloat(std::vector<Value>& params) {
 			int card = params[0].iVal;
@@ -2964,6 +3007,24 @@ namespace Shared {
 				TEXT("Set Club Competition Grade of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetClubGrade
+			},
+			{
+				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("RelationshipData:: Love:( %p ), Like:( %p ), Dislike:( %p ), Hate:( %p )"),
+				TEXT("Set Club Competition Grade of a card"),
+				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::RelationshipPointChange
+			},
+			{
+				137, ACTIONCAT_EVENT, TEXT("Arrange Date"), TEXT("%p ::ArrangeDateWith = %p"),
+				TEXT("Makes the first character arrange a date with the other character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::ArrangeDate
+			},
+			{
+				138, ACTIONCAT_EVENT, TEXT("Promise Lewd Reward"), TEXT("%p ::LewdPromise = %p"),
+				TEXT("Makes the first character promise a lewd reward to the other character."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::PromiseLewd
 			},
 		};
 
