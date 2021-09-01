@@ -115,8 +115,12 @@ namespace Shared {
 		//bool (int)
 		Value Thread::GetCum(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
+
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "A00_O_kutisiru")) {
@@ -138,8 +142,11 @@ namespace Shared {
 
 		Value Thread::GetTears(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "00_O_namida")) {
@@ -160,8 +167,11 @@ namespace Shared {
 
 		Value Thread::GetGlasses(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "megane")) {
@@ -181,8 +191,11 @@ namespace Shared {
 		}
 		Value Thread::GetHighlight(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			bool highlight = false;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
@@ -863,9 +876,9 @@ namespace Shared {
 
 		Value Thread::GetMasturbating(std::vector<Value>& params) {
 			int card = params[0].iVal;
-			if (ExpressionSeatInvalid(card)) return Value(-1);
+			if (ExpressionSeatInvalid(card)) return Value(false);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (!cardInst->IsValid()) return Value(-1);
+			if (!cardInst->IsValid()) return Value(false);
 
 			return Value((int)cardInst->m_char->m_moreData1->m_activity->m_isMasturbating);
 		}
@@ -1313,7 +1326,7 @@ namespace Shared {
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(0);
 			int cardTowards = params[1].iVal;
-			if (ExpressionSeatInvalid(cardTowards)) return Value(-0);
+			if (ExpressionSeatInvalid(cardTowards)) return Value(0);
 			CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
 			if (!towardsInst->IsValid()) return Value(0);
 
@@ -2505,6 +2518,100 @@ namespace Shared {
 				return 0;
 			}
 		}
+
+		//bool()
+		Value Thread::HasDateWith(std::vector<Value>& params) {
+			int firstCard = params[0].iVal;
+			int secondCard = params[1].iVal;
+			if (firstCard == secondCard) return false;
+
+			//Check if they're valid cards
+			if (ExpressionSeatInvalid(firstCard)) return Value(false);
+			CharInstData* firstInstance = &AAPlay::g_characters[firstCard];
+			if (!firstInstance->IsValid()) return Value(false);
+
+			if (ExpressionSeatInvalid(secondCard)) return Value(false);
+			CharInstData* secondInstance = &AAPlay::g_characters[secondCard];
+			if (!secondInstance->IsValid()) return Value(false);
+
+			//Check the dateTo struct. The pointer is invalid when the card doesn't have a date set, so we should be careful. 
+
+			DWORD* toTailFirst = firstInstance->m_char->m_characterStatus->m_dateToStruct;
+			DWORD* toTailSecond = secondInstance->m_char->m_characterStatus->m_dateToStruct;
+
+			//Either the first card arranged a date with the second one, or the second one arranged the date with the first one, or they don't have a date
+			//First we check if the first card arranged a date with the second one
+			DWORD* tempPointer;
+			if (toTailFirst) {
+				//This means that the first card arranged dates with some cards so the struct is valid
+				//Seats start at -4 from the end and are spaced by 4 bytes. The idea is to loop through the entire thing and see if our card is there. At -4 from the top element there's a pointer, so the loop ends naturally.
+
+				tempPointer = toTailFirst -0x1; //this is equivalent to 0x4 in hex
+				//we're checking if they're valid values for seats
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == secondCard) {
+						//If the card is found, we stop checking for more cards, they have a date.
+						return true;
+					}
+					tempPointer -= 0x1;
+				}
+			}
+			if (toTailSecond) {
+				//This means that the second card arranged dates with some cards, so the struct is valid
+				//Seats start at -4 from the end and are spaced by 4 bytes. The idea is to loop through the entire thing and see if our card is there. At -4 from the top element there's a pointer, so the loop ends naturally.
+
+				tempPointer = toTailSecond - 0x1;
+				//we're checking if they're valid values for seats
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == firstCard) {
+						//If the card is found, we stop checking for more cards, they have a date.
+						return true;
+					}
+					tempPointer -= 0x1;
+				}
+			}
+			return false;
+		}
+
+
+		Value Thread::PromisedLewdRewardTo(std::vector<Value>& params) {
+			int firstCard = params[0].iVal;
+			int secondCard = params[1].iVal;
+			if (firstCard == secondCard) return false;
+
+			//Check if they're valid cards
+			if (ExpressionSeatInvalid(firstCard)) return Value(false);
+			CharInstData* firstInstance = &AAPlay::g_characters[firstCard];
+			if (!firstInstance->IsValid()) return Value(false);
+
+			if (ExpressionSeatInvalid(secondCard)) return Value(false);
+			CharInstData* secondInstance = &AAPlay::g_characters[secondCard];
+			if (!secondInstance->IsValid()) return Value(false);
+
+			//Check the lewd reward struct. The pointer is invalid when the card doesn't have a lewd reward promise made, so we should be careful. 
+
+			DWORD* toTailFirst = firstInstance->m_char->m_characterStatus->m_lewdPromiseTo;
+
+			//we check if the first card promised a lewd reward to the second one
+			DWORD* tempPointer;
+			if (toTailFirst) {
+				//This means that the first card arranged dates with some cards so the struct is valid
+				//Seats start at -0xc from the end and are spaced by 0xc bytes. The idea is to loop through the entire thing and see if our card is there.
+				tempPointer = toTailFirst - 0x3; //this is equivalent to 0xc in hex
+				
+				//we're checking if they're valid values for seats. There's a nullptr after each seat, and we should use this to identify when we're done with looping through them.
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == secondCard && *(tempPointer+1) == NULL) {
+						//If the card is found, we stop checking for more cards, they did promise a lewd reward.
+						return true;
+					}
+					tempPointer -= 0x3;
+				}
+			}
+
+			return false;
+		}
+
 
 
 		//int()
@@ -4015,6 +4122,18 @@ namespace Shared {
 					TEXT("Check Private Room"), TEXT("%p ::isPrivateRoom"), TEXT("Returns true if the location ID is one of the private rooms."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsPrivateRoom
+				},
+				{
+					49, EXPRCAT_GENERAL,
+					TEXT("Has Date With"), TEXT("%p ::HasDateWith( %p )"), TEXT("Returns true if the characters arranged to have a date on Sunday."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+					&Thread::HasDateWith
+				},
+				{
+					50, EXPRCAT_GENERAL,
+					TEXT("Promised a Lewd Reward To"), TEXT("%p ::LewdPromise( %p )"), TEXT("Returns true if the first character promised a lewd reward to the second character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+					&Thread::PromisedLewdRewardTo
 				},
 			},
 			{ //FLOAT
