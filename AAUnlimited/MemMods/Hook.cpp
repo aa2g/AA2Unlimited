@@ -347,6 +347,7 @@ void InitializeHooks() {
 		}
 		Loads::hairUpdateInject();
 		NpcActions::extraHairMakerFixInjection();
+		Loads::CharacterCardOpenInjection();
 
 #if 0
 		SaveCard::AddUnlimitDataInject();
