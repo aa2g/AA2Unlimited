@@ -15,6 +15,7 @@ void SaveFileLoadInjection();
 void TransferInInjection();
 void hairUpdateInject();
 void TransferOutInjection();
+void CharacterCardOpenInjection();
 
 }
 }

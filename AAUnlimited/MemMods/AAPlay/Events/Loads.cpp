@@ -594,6 +594,43 @@ void TransferOutInjection() {
 }
 
 
+void __stdcall CharacterCardOpen() {
+	//Reset AAU data
+	Shared::PNG::Reset();
+	if (AAEdit::g_currChar.Editable()) {
+		AAEdit::g_currChar.m_cardData.Reset();
+		AAEdit::g_currChar.m_char = NULL;
+	}
+	
+}
+
+
+void __declspec(naked) CharacterCardOpenRedirect() {
+	__asm {
+		pushad
+		call CharacterCardOpen
+		popad
+		//original code
+		mov eax, fs:[0x00000000]
+		ret
+	}
+}
+
+
+void CharacterCardOpenInjection() {
+	//For getting rid of AAU data
+	//Breakpoint is hit when a new character is opened
+	//AA2Edit.exe+12705D - 64 A1 00000000        - mov eax,fs:[00000000]
+
+	DWORD address = General::GameBase + 0x12705D;
+	DWORD redirectAddress = (DWORD)(&CharacterCardOpenRedirect);
+	Hook((BYTE*)address,
+	{ 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 },						//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
 //sets selected club when transfered or club is changed by player action. eax is character struct
 //AA2Play v12 FP v1.4.0a.exe+DED74 - 88 82 46040000        - mov [edx+00000446],al
 //AA2Play v12 FP v1.4.0a.exe+DED7A - E8 21DA0100           - call "AA2Play v12 FP v1.4.0a.exe"+FC7A0 { ->AA2Play v12 FP v1.4.0a.exe+FC7A0 }

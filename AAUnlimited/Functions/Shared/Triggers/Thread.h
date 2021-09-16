@@ -445,6 +445,10 @@ namespace Shared {
 			//NPC_WANT_ACTION_NOTARGET
 			Value GetNpcActionId(std::vector<Value>& params);
 
+			Value HasDateWith(std::vector<Value>& params);
+
+			Value PromisedLewdRewardTo(std::vector<Value>& params);
+
 			//NPC_WANT_TALK_WITH
 			Value GetNpcTalkTarget(std::vector<Value>& params);
 

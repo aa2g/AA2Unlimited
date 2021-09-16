@@ -28,8 +28,7 @@ namespace EditInjections {
 						}
 						break;
 					case 10001: //Main screen button
-					case 10031:	//New character button
-					case 10033: //Open card button
+					case 10033:	//New character button
 						if (General::IsAAEdit) {
 							// TODO do this better
 							Shared::PNG::Reset();
