@@ -876,7 +876,7 @@ namespace Shared {
 
 		Value Thread::GetMasturbating(std::vector<Value>& params) {
 			int card = params[0].iVal;
-			if (ExpressionSeatInvalid(card)) return Value(false);
+			if (ExpressionSeatInvalid(card)) return Value(-1);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(false);
 
