@@ -78,6 +78,7 @@ public:
 	//hairs
 	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, BYTE flip);
 	bool RemoveHair(int index);
+	bool RemoveAllHair();
 
 	struct BoneMod;
 	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, BoneMod mod);
@@ -92,13 +93,14 @@ public:
 	bool SetEyeHighlight(const TCHAR* texName);
 
 	bool SetHairHighlight(const TCHAR* name, int style = -1);
+	bool ResetHairHighlight(int style = -1);
 
 	bool SetTan(const TCHAR* name, int style = -1);
 
 	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
 	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
 	bool RemoveCardStyle(int index);
-	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
+	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2clothes, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
 	bool SwapCardStyle(int index1, int index2);
 	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
 	int FindStyleIdxByName(std::wstring * name);

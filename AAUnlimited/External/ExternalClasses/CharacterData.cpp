@@ -15,13 +15,17 @@ namespace ExtClass {
 		for (int i = 0; i< 4; i++) this->m_clothes[i] = data->m_clothes[i];
 	}
 
+	void CardStyleData::CopyCharacterClothesData(CharacterData* data)
+	{
+		for (int i = 0; i < 4; i++) this->m_clothes[i] = data->m_clothes[i];
+	}
+
 	void CardStyleData::CopyCharacterFigureData(CharacterData* data)
 	{
 		this->m_gender = data->m_gender;
 		this->m_figure = data->m_figure;
 		this->m_chest = data->m_chest;
 		this->m_bodyColor = data->m_bodyColor;
-		for (int i = 0; i < 4; i++) this->m_clothes[i] = data->m_clothes[i];
 	}
 
 	void CardStyleData::CopyCharacterFaceData(CharacterData* data)

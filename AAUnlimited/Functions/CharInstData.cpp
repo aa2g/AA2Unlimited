@@ -565,10 +565,48 @@ bool CharInstData::IsPC() {
 	return (Shared::GameState::getPlayerCharacter())->m_char->m_seat == this->m_char->m_seat;
 }
 
+void CharInstData::Respawn() {
+	if (this->Editable()) {
+		auto clip = this->m_char->m_xxSkeleton->m_poseNumber;
+		this->m_char->Spawn(this->m_char->m_clothState, this->m_char->m_materialSlot, 0, 1);
+		auto pp = L"data\\jg2e01_00_00.pp";
+		wchar_t xa[255];
+		auto strGender = this->m_char->m_charData->m_gender == 0 ? L"S" : L"A";
+		int figure = this->m_char->m_charData->m_figure.height;
+		if (this->m_char->m_charData->m_gender == 0) {	//male
+			figure = this->m_char->m_charData->m_figure.height + this->m_char->m_charData->m_figure.figure - 1;
+			//switch (g_currChar.m_char->m_charData->m_figure.height)
+			//{
+			//case 1:
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 0) {
+			//		//Delicate
+			//		figure = 00;
+			//	}
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+			//		//Normal
+			//		figure = 01;
+			//	}
+			//case 2:
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+			//		//Tall
+			//		figure = 02;
+			//	}
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 2) {
+			//		//Fat
+			//		figure = 03;
+			//	}
+			//}
+		}
+		swprintf(xa, L"data\\H%sE00_00_%02d_00.xa", strGender, figure);
+		this->m_char->LoadXA(pp, xa, clip, 0, 0);
+	}
+}
+
 void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
+	m_cardData.RemoveAllHair();
 	m_cardData.Reset();
-	for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
+	//for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
 }
 
 void CharInstData::StoreInitialStats()

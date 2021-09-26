@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 #include "Files/PNGData.h"
 #include "Dictionary.h"
 
@@ -191,6 +191,45 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	_In_ WPARAM wparam,_In_ LPARAM lparam)
 {
 	switch (msg) {
+
+	case WM_DRAWITEM:
+	{
+		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr->m_btnReset == ((LPDRAWITEMSTRUCT)lparam)->hwndItem) {
+
+			LPDRAWITEMSTRUCT btnReset = (LPDRAWITEMSTRUCT)lparam;
+
+			auto brush = GetSysColorBrush(COLOR_3DFACE);
+			FillRect(btnReset->hDC, &btnReset->rcItem, brush);
+
+			TEXTMETRIC fontMetric;
+			GetTextMetrics(btnReset->hDC, &fontMetric);
+			auto boldFont = CreateFont(fontMetric.tmHeight, fontMetric.tmAveCharWidth, 0, 0,
+				FW_EXTRABOLD, FALSE, FALSE, FALSE,
+				fontMetric.tmCharSet, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, fontMetric.tmPitchAndFamily, L"Arial");			
+			SelectObject(btnReset->hDC, boldFont);
+
+			if (btnReset->itemState & ODS_SELECTED)
+			{
+				SetTextColor(btnReset->hDC, RGB(255,0,0));
+				DrawEdge(btnReset->hDC, &btnReset->rcItem, EDGE_SUNKEN, BF_RECT);
+				SetBkMode(btnReset->hDC, TRANSPARENT);
+				OffsetRect(&btnReset->rcItem, 1, 1);
+				DrawText(btnReset->hDC, L"ARE YOU SURE?", 13, &btnReset->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			}
+			else
+			{
+				SetTextColor(btnReset->hDC, RGB(255, 0, 0));
+				DrawEdge(btnReset->hDC, &btnReset->rcItem, EDGE_RAISED, BF_RECT);				
+				SetBkMode(btnReset->hDC, TRANSPARENT);
+				DrawText(btnReset->hDC, L"CLEAR AAU DATA", 14, &btnReset->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			}
+
+			DeleteObject(boldFont);
+		}
+		return TRUE;
+		break;
+	}
 	case WM_INITDIALOG: {
 		//initialize dialog members from the loaded dialog
 		GNDialog* thisPtr = (GNDialog*)lparam;
@@ -203,8 +242,10 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_lbAAuSets2 = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS2);
 		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
 		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
+		thisPtr->m_btnReset = GetDlgItem(hwndDlg, IDC_GN_BTNRESET);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
+		thisPtr->m_cbTransAA2CLOTHES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2CLOTHES);
 		thisPtr->m_cbTransAA2BODY = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2BODY);
 		thisPtr->m_cbTransAA2FACE = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2FACE);
 		thisPtr->m_cbTransAA2EYES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2EYES);
@@ -235,7 +276,6 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	//		return TRUE;
 	//	}
 	//	break; }
-	
 	case WM_COMMAND: {
 		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		switch(HIWORD(wparam)) {
@@ -310,6 +350,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 					if (g_currChar.Editable()) {
 						// collect the transfer data checkboxes
+						bool aa2clothes = SendMessage(thisPtr->m_cbTransAA2CLOTHES, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
@@ -324,13 +365,25 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
 
 						g_currChar.m_cardData.TransferCardStyleData(selTransFrom, selTransTo, g_currChar.m_char->m_charData,
-							aa2body, aa2face, aa2eyes, aa2hair,
+							aa2clothes, aa2body, aa2face, aa2eyes, aa2hair,
 							ao, ar, mo, oo,
 							hr, tn, bd, bs);
 					}
 					thisPtr->RefreshAAuSetList();
 				}
 				return TRUE;
+			case IDC_GN_BTNRESET: {
+				if (AAEdit::g_currChar.IsValid())
+				{
+
+					g_currChar.m_cardData.RemoveAllHair();
+					g_currChar.m_cardData.Reset();
+					g_currChar.Respawn();
+					thisPtr->Refresh();
+				}
+				return FALSE;
+				break;
+			}
 			case IDC_GN_BTNSETCLOTH0:
 			case IDC_GN_BTNSETCLOTH1:
 			case IDC_GN_BTNSETCLOTH2:
@@ -1196,9 +1249,19 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				}
 				return TRUE;
 			}
+			else if (identifier == IDC_HR_BTNRESETHILIGHT) {
+				g_currChar.m_cardData.ResetHairHighlight();
+				//redraw all hairs
+				using namespace ExtVars::AAEdit;
+				RedrawBodyPart(HAIR, HAIR_BACK);
+				RedrawBodyPart(HAIR, HAIR_FRONT);
+				RedrawBodyPart(HAIR, HAIR_SIDE);
+				RedrawBodyPart(HAIR, HAIR_EXTENSION);
+				thisPtr->Refresh();
+				return TRUE;
+			}
 			else if(identifier == IDC_HR_BTNADD) {
 				if (g_currChar.Editable()) {
-
 
 					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1 || AAEdit::g_currChar.m_char->m_charData->m_gender == 0) {
 
@@ -1248,6 +1311,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 					if (sel == -1) return TRUE;
 					g_currChar.m_cardData.RemoveHair(sel);
 					thisPtr->Refresh();
+					g_currChar.Respawn();
 					return TRUE;
 				}
 			}
