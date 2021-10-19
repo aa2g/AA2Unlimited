@@ -72,7 +72,9 @@ namespace AAEdit {
 		HWND m_btnAAuSetAdd;
 		HWND m_btnAAuSetTransfer;
 		HWND m_btnLoadCloth;
+		HWND m_btnReset;
 
+		HWND m_cbTransAA2CLOTHES;
 		HWND m_cbTransAA2BODY;
 		HWND m_cbTransAA2FACE;
 		HWND m_cbTransAA2EYES;

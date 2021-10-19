@@ -112,6 +112,7 @@ public:
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
 	void CastShadows(DWORD * HairPTR);
+	void Respawn();
 
 	DWORD* lastDialogue = NULL;
 

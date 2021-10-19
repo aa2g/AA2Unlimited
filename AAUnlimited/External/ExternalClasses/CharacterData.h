@@ -477,6 +477,7 @@ namespace ExtClass {
 
 		bool empty() { return false; };
 		void CopyCharacterData(CharacterData* data);
+		void CopyCharacterClothesData(CharacterData* data);
 		void CopyCharacterFigureData(CharacterData* data);
 		void CopyCharacterFaceData(CharacterData* data);
 		void CopyCharacterEyesData(CharacterData* data);

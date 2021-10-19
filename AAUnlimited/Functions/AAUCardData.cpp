@@ -584,12 +584,15 @@ bool AAUCardData::CopyCardStyle(const TCHAR * name, ExtClass::CharacterData* cha
 }
 
 bool AAUCardData::TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData,
-	bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair,
+	bool aa2clothes, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair,
 	bool ao, bool ar, bool mo, bool oo,
 	bool hr, bool tn, bool bd, bool bs)
 {
 	if (index1 == index2 || index1 >= m_styles.size() || index2 >= m_styles.size()) return false;
 
+	if (aa2clothes) {
+		m_styles[index2].m_cardStyleData.CopyCharacterClothesData(charData);
+	}
 	if (aa2body) {
 		m_styles[index2].m_cardStyleData.CopyCharacterFigureData(charData);
 	}
@@ -1003,6 +1006,13 @@ bool AAUCardData::SetHairHighlight(const TCHAR* name, int style) {
 	return false;
 }
 
+bool AAUCardData::ResetHairHighlight(int style) {
+	if (style < 0) style = m_currCardStyle;
+	m_styles[style].m_hairHighlightImage = TextureImage();
+	m_styles[style].m_hairHighlightName = L"";
+	return false;
+}
+
 bool AAUCardData::SetTan(const TCHAR* name, int style) {
 	if (style < 0) style = m_currCardStyle;
 	//if empty tan name we unset and invalidate the current style tan files
@@ -1050,6 +1060,14 @@ bool AAUCardData::RemoveHair(int index) {
 
 	auto vMatch = m_styles[m_currCardStyle].m_hairs[kind].begin() + index;
 	m_styles[m_currCardStyle].m_hairs[kind].erase(vMatch);
+	return true;
+}
+
+//index is extended index for all 4 hair kinds, front, side, back, ext
+bool AAUCardData::RemoveAllHair() {
+	for (int kind = 0; kind < 4; kind++) {
+		m_styles[m_currCardStyle].m_hairs[kind].erase(m_styles[m_currCardStyle].m_hairs[kind].begin(), m_styles[m_currCardStyle].m_hairs[kind].end());
+	}
 	return true;
 }
 
