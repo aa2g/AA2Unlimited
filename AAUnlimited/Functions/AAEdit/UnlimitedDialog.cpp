@@ -305,6 +305,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						g_currChar.m_cardData.RemoveCardStyle(selRemove);
 					}
 					thisPtr->RefreshAAuSetList();
+					thisPtr->Refresh();
 				}
 				return TRUE;
 			case IDC_GN_BTNAAUSETRENAME:

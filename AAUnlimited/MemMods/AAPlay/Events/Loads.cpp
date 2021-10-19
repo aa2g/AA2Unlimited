@@ -128,9 +128,11 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		}
 	}
 	
-	if (card.m_char->m_xxSkeleton) {
-		card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
-		card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
+	if (card.IsValid()) {
+		if (card.m_char->m_xxSkeleton) {
+			card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
+			card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
+		}
 	}
 	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
