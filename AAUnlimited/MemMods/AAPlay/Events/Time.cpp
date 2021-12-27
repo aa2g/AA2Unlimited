@@ -14,6 +14,16 @@ void __stdcall PeriodChangeEvent(DWORD oldPeriod) {
 	if (timedata->currentPeriod == 1) {
 		LOGPRIO(Logger::Priority::INFO) << "Day has changed, day of week " << timedata->day << ", " << timedata->nDays << " total days.\n";
 	}
+
+	// fast-forward all the required delayed events
+	auto delayedEvents = Shared::GameState::GetDelayedEvents();
+	for (auto it = delayedEvents->begin(); it != delayedEvents->end();) {
+		if (it->required) {
+			ThrowEvent(&(*it));
+			delayedEvents->erase(it++);
+		}
+	}
+
 	Shared::Triggers::PeriodEndsData data;
 
 	auto pc = Shared::GameState::getPlayerCharacter();

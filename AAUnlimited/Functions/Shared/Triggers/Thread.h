@@ -178,11 +178,14 @@ namespace Shared {
 			void ResetVoyeur(std::vector<Value>& params);
 
 			void SetH_AI(std::vector<Value>& params);
-
 			void Set_H_AI_LOCK(std::vector<Value>& params);
+
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 			void Notification(std::vector<Value>& params);
+
+			void EmitDelayedOptionalEvent(std::vector<Value>& params);
+			void EmitDelayedRequiredEvent(std::vector<Value>& params);
 			void CallLuaProcedure(std::vector<Value>& params);
 
 			//event response
@@ -210,6 +213,10 @@ namespace Shared {
 			Value GetPassiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
+			Value GetDelayedEventLabel(std::vector<Value>& params);
+			Value GetDelayedEventPeriod(std::vector<Value>& params);
+			Value GetDelayedEventRequired(std::vector<Value>& params);
+			//string ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 

@@ -84,6 +84,35 @@ namespace Shared {
 			return this->thisCard;
 		}
 
+		//string ()
+		Value Thread::GetDelayedEventLabel(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->label);
+			default:
+				return "";
+			}
+		}
+
+		//int ()
+		Value Thread::GetDelayedEventPeriod(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->period);
+			default:
+				return -1;
+			}
+		}
+
+		//bool ()
+		Value Thread::GetDelayedEventRequired(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->required);
+			default:
+				return false;
+			}
+		}
 		Value Thread::GetPC(std::vector<Value>&) {
 			if (Shared::GameState::getPlayerCharacter() != nullptr) {
 				auto pc = Shared::GameState::getPlayerCharacter()->m_char;
@@ -2751,8 +2780,12 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
+			case HI_POLY_END:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 			default:
-				return 0;
+				return -1;
 			}
 		}
 
@@ -3819,6 +3852,12 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::RelationshipTowards
 				},
+				{
+					151, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event's Period"), TEXT("DelayedEventPeriod"), TEXT("In Delayed Execution Event returns the period it was emitted from."),
+					{}, (TYPE_INT),
+					&Thread::GetDelayedEventPeriod
+				},
 			},
 
 			{ //BOOL
@@ -4135,6 +4174,12 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::PromisedLewdRewardTo
 				},
+				{
+					51, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event Required"), TEXT("DelayedEventRequired"), TEXT("In Delayed Execution Event returns whether this is a required event."),
+					{}, (TYPE_BOOL),
+					&Thread::GetDelayedEventRequired
+				},
 			},
 			{ //FLOAT
 				{
@@ -4366,6 +4411,14 @@ namespace Shared {
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::GetClassStorageString
 				},
+				{
+					23, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event Label"), TEXT("DelayedEventLabel"),
+					TEXT("Gets the name of the delayed event."
+					"Returns empty string if it's an invalid event."),
+					{}, (TYPE_STRING),
+					&Thread::GetDelayedEventLabel
+				}
 			}
 
 		};
