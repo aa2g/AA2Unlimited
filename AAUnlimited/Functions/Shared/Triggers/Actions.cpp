@@ -2197,13 +2197,13 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				ACTION_IF, ACTIONCAT_FLOW_CONTROL, TEXT("If"), TEXT("If %p then"),
+				ACTION_IF, ACTIONCAT_FLOW_CONTROL, TEXT("If"), TEXT("If (%p) then"),
 				TEXT("Executes Actions if Boolean Expression is true. Use with \"Else if\" and \"Else\" actions."),
 				{ TYPE_BOOL },
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				ACTION_ELSEIF, ACTIONCAT_FLOW_CONTROL, TEXT("Else If"), TEXT("Else If %p then"),
+				ACTION_ELSEIF, ACTIONCAT_FLOW_CONTROL, TEXT("Else If"), TEXT("Else If (%p) then"),
 				TEXT("Executes Actions if the previous If Action was not executed, and the Boolean Expression is true. Use with \"If\" and \"Else\" actions."
 				" If this action does not preceed a \"If\" action, it acts as an \"If\" action instead."),
 				{ TYPE_BOOL },
@@ -2217,7 +2217,7 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-			ACTION_CONDJUMP,ACTIONCAT_FLOW_CONTROL,TEXT("Conditional Jump"),TEXT("Jump %p Actions if %p"),
+			ACTION_CONDJUMP,ACTIONCAT_FLOW_CONTROL,TEXT("Conditional Jump"),TEXT("Jump %p Actions if (%p)"),
 				TEXT("Skips additional actions if the given condition is true. May skip negative amounts to go back."),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::ConditionalJump
@@ -2229,13 +2229,13 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				ACTION_CONDBREAK, ACTIONCAT_FLOW_CONTROL, TEXT("Break If"), TEXT("Break If %p"),
+				ACTION_CONDBREAK, ACTIONCAT_FLOW_CONTROL, TEXT("Break If"), TEXT("Break If (%p)"),
 				TEXT("Breaks out of the enclosing Loop action if the given condition is true. No effect if no loop is around."),
 				{ TYPE_BOOL },
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				ACTION_CONDCONTINUE, ACTIONCAT_FLOW_CONTROL, TEXT("Continue If"), TEXT("Continue If %p"),
+				ACTION_CONDCONTINUE, ACTIONCAT_FLOW_CONTROL, TEXT("Continue If"), TEXT("Continue If (%p)"),
 				TEXT("Goes back to the loop header of the enclosing Loop action if the given condition is true. No effect if no loop is around."),
 				{ TYPE_BOOL },
 				&Thread::ShouldNotBeImplemented
@@ -2248,7 +2248,7 @@ namespace Shared {
 				&Thread::ShouldNotBeImplemented
 			},
 			{
-				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch Style"), TEXT("%p ::Style = %p"), TEXT("Switches current character style."),
+				10, ACTIONCAT_MODIFY_CARD, TEXT("Switch Style"), TEXT("%p.Style = %p"), TEXT("Switches current character style."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SwitchCardStyle
 			},
@@ -2259,45 +2259,45 @@ namespace Shared {
 				&Thread::EndExecution
 			},
 			{
-				12, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Love Points"), TEXT("%p ::AddLOVE( towards: %p , amount: %p )"),
+				12, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Love Points"), TEXT("%p.AddLOVE(towards: %p, amount: %p)"),
 				TEXT("Adds a certain amount of love points. 30 love points become one love interaction. A character can have up to 30 interactions "
 				"in total; after that, earlier interactions will be replaced."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddCardLovePoints
 			},
 			{
-				13, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Like Points"), TEXT("%p ::AddLIKE( towards: %p , points: %p )"),
+				13, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Like Points"), TEXT("%p.AddLIKE( towards: %p, points: %p)"),
 				TEXT("Adds a certain amount of like points. 30 like points become one like interaction. A character can have up to 30 interactions "
 				"in total; after that, earlier interactions will be replaced."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddCardLikePoints
 			},
 			{
-				14, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Dislike Points"), TEXT("%p ::AddDISLIKE( towards: %p , points: %p )"),
+				14, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Dislike Points"), TEXT("%p.AddDISLIKE( towards: %p, points: %p)"),
 				TEXT("Adds a certain amount of dislike points. 30 dislike points become one dislike interaction. A character can have up to 30 interactions "
 				"in total; after that, earlier interactions will be replaced."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddCardDislikePoints
 			},
 			{
-				15, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Hate Points"), TEXT("%p ::AddHATE( towards: %p , points: %p )"),
+				15, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Hate Points"), TEXT("%p.AddHATE( towards: %p, points: %p)"),
 				TEXT("Adds a certain amount of hate points. 30 hate points become one hate interaction. A character can have up to 30 interactions "
 				"in total; after that, earlier interactions will be replaced."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddCardHatePoints
 			},
 			{
-				16, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Points"), TEXT("%p ::AddPoints( towards: %p , %p points: %p )"),
+				16, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Points"), TEXT("%p.AddPoints( towards: %p, %p points: %p)"),
 				TEXT("Adds a certain amount of points. Point type is between 0 or 3, or use one of the named constants. "
 				"30 hate points become one hate interaction. A character can have up to 30 interactions "
 				"in total; after that, earlier interactions will be replaced."
 				"Example: "
-					"{ TriggerCard ::AddPoints( towards: ThisCard , LOVE points: 30 ) }"),
+					"{ TriggerCard.AddPoints( towards: ThisCard, LOVE points: 30 ) }"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddCardPoints
 			},
 			{
-				17, ACTIONCAT_FLOW_CONTROL, TEXT("Conditional End Execution"), TEXT("End Thread If %p"),
+				17, ACTIONCAT_FLOW_CONTROL, TEXT("Conditional End Execution"), TEXT("End Thread If (%p)"),
 				TEXT("ends execution of this thread if the given condition evaluates to true."),
 				{ TYPE_BOOL },
 				&Thread::ConditionalEndExecution
@@ -2309,14 +2309,14 @@ namespace Shared {
 				&Thread::SetNpcResponseSuccess
 			},
 			{
-				19, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Percent"), TEXT("NPCNormalResponsePercent = %p"),
+				19, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Percent"), TEXT("NPCNormalResponsePercent = %p%"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
 				&Thread::SetNpcResponsePercent
 			},
 			{
-				20, ACTIONCAT_NPCACTION, TEXT("Make Npc Move to Room"), TEXT("%p ::GoTo( %p )"),
+				20, ACTIONCAT_NPCACTION, TEXT("Make Npc Move to Room"), TEXT("%p.GoTo(%p)"),
 				TEXT("If the target character is controlled by the Computer, this Action makes them walk to the specified Room. "
 				"If the Character is allready walking somewhere, it will do this instead. "
 				"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
@@ -2324,7 +2324,7 @@ namespace Shared {
 				&Thread::NpcMoveRoom
 			},
 			{
-				21, ACTIONCAT_NPCACTION, TEXT("Make Npc do Action with no Target"), TEXT("%p ::Do(action: %p )"),
+				21, ACTIONCAT_NPCACTION, TEXT("Make Npc do Action with no Target"), TEXT("%p.Do(action: %p)"),
 				TEXT("If the target character is controlled by the Computer, this Action makes them do an Action that does not require another character to execute. "
 				"If the Character is allready walking somewhere, it will do this instead. "
 				"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
@@ -2332,7 +2332,7 @@ namespace Shared {
 				&Thread::NpcActionNoTarget
 			},
 			{
-				22, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character"), TEXT("%p ::Do(action: %p , to: %p )"),
+				22, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character"), TEXT("%p.Do(action: %p, to: %p)"),
 				TEXT("If the target character is controlled by the Computer, this Action makes them walk to and start the given conversation with the target. "
 				"If the Character is allready walking somewhere, it will do this instead. "
 				"Keep in mind that executing this Action will throw an event next tick; watch out for endless loops"),
@@ -2340,7 +2340,7 @@ namespace Shared {
 				&Thread::NpcTalkTo
 			},
 			{
-				23, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character about someone"), TEXT("%p ::Do(action: %p , to: %p , about: %p )"),
+				23, ACTIONCAT_NPCACTION, TEXT("Make Npc Talk to Character about someone"), TEXT("%p.Do(action: %p, to: %p, about: %p)"),
 				TEXT("If the target character is controlled by the Computer, this Action makes them walk to and start the given conversation with the target about "
 				"another character in class, such as asking for their opinion or spreading bad rumors. "
 				"If the Character is allready walking somewhere, it will do this instead. "
@@ -2349,7 +2349,7 @@ namespace Shared {
 				&Thread::NpcTalkToAbout
 			},
 			{
-				24, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Integer"), TEXT("%p ::SetInt( %p ) = %p "),
+				24, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Integer"), TEXT("%p.SetInt(%p) = %p"),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2357,7 +2357,7 @@ namespace Shared {
 				&Thread::SetCardStorageInt
 			},
 			{
-				25, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Float"), TEXT("%p ::SetFloat( %p ) = %p "),
+				25, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Float"), TEXT("%p.SetFloat(%p) = %p"),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2365,7 +2365,7 @@ namespace Shared {
 				&Thread::SetCardStorageFloat
 			},
 			{
-				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p ::SetString( %p ) = %p "),
+				26, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage String"), TEXT("%p.SetString(%p) = %p"),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2373,7 +2373,7 @@ namespace Shared {
 				&Thread::SetCardStorageString
 			},
 			{
-				27, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Bool"), TEXT("%p ::SetBool( %p ) = %p "),
+				27, ACTIONCAT_MODIFY_CARD, TEXT("Set Card Storage Bool"), TEXT("%p.SetBool(%p) = %p"),
 				TEXT("Sets an entry in the cards storage. The card storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2381,200 +2381,200 @@ namespace Shared {
 				&Thread::SetCardStorageBool
 			},
 			{
-				28, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Integer"), TEXT("%p ::DropInt( %p ) "),
+				28, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Integer"), TEXT("%p.DropInt(%p)"),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain an int, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageInt
 			},
 			{
-				29, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Float"), TEXT("%p ::DropFloat( %p ) "),
+				29, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Float"), TEXT("%p.DropFloat(%p)"),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a float, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageFloat
 			},
 			{
-				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p ::DropString( %p ) "),
+				30, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage String"), TEXT("%p.DropString(%p)"),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a string, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageString
 			},
 			{
-				31, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Bool"), TEXT("%p ::DropBool( %p ) "),
+				31, ACTIONCAT_MODIFY_CARD, TEXT("Remove Card Storage Bool"), TEXT("%p.DropBool(%p)"),
 				TEXT("Removes an entry from the cards storage. If the given entry exists, but does not contain a bool, this function will fail."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::RemoveCardStorageBool
 			},
 			{
-				32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Virtue"), TEXT("%p ::Virtue = %p"),
+				32, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Virtue"), TEXT("%p.Virtue = %p"),
 				TEXT("Set selected character's virtue. "
 				"0- lowest, 1 - low, 2 - normal, 3 - high, 4 - highest."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardVirtue
 			},
 			{
-				33, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Trait"), TEXT("%p ::Trait( %p ) = %p"),
+				33, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Trait"), TEXT("%p.Trait(%p) = %p"),
 				TEXT("Enable or disable selected character's trait."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardTrait
 			},
 			{
-				34, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Personality"), TEXT("%p ::Personality = %p"),
+				34, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Personality"), TEXT("%p.Personality = %p"),
 				TEXT("Set character's personality."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardPersonality
 			},
 			{
-				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p ::Pitch = %p"),
+				35, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Voice Pitch"), TEXT("%p.Pitch = %p"),
 				TEXT("Set character's voice pitch."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardVoicePitch
 			},
 			{
-				36, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club"), TEXT("%p ::Club = %p"),
+				36, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club"), TEXT("%p.Club = %p"),
 				TEXT("Set character's club."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardClub
 			},
 			{
-				37, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Value"), TEXT("%p ::ClubValue = %p"),
+				37, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Value"), TEXT("%p.ClubValue = %p"),
 				TEXT("Set character's club value."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardClubValue
 			},
 			{
-				38, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Rank"), TEXT("%p ::ClubRank = %p"),
+				38, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Rank"), TEXT("%p.ClubRank = %p"),
 				TEXT("Set character's club rank."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardClubRank
 			},
 			{
-				39, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence"), TEXT("%p ::Intelligence = %p"),
+				39, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence"), TEXT("%p.Intelligence = %p"),
 				TEXT("Set character's intelligence."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardIntelligence
 			},
 			{
-				40, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Value"), TEXT("%p ::IntelligenceValue = %p"),
+				40, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Value"), TEXT("%p.IntelligenceValue = %p"),
 				TEXT("Set character's intelligence value."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardIntelligenceValue
 			},
 			{
-				41, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Rank"), TEXT("%p ::IntelligenceRank = %p"),
+				41, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Intelligence Rank"), TEXT("%p.IntelligenceRank = %p"),
 				TEXT("Set character's intelligence rank."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardIntelligenceRank
 			},
 			{
-				42, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength"), TEXT("%p ::Strength = %p"),
+				42, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength"), TEXT("%p.Strength = %p"),
 				TEXT("Set character's strength."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardStrength
 			},
 			{
-				43, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Value"), TEXT("%p ::StrengthValue = %p"),
+				43, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Value"), TEXT("%p.StrengthValue = %p"),
 				TEXT("Set character's strength value."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardStrengthValue
 			},
 			{
-				44, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Rank"), TEXT("%p ::StrengthRank = %p"),
+				44, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Strength Rank"), TEXT("%p.StrengthRank = %p"),
 				TEXT("Set character's strength rank."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardStrengthRank
 			},
 			{
-				45, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sociability"), TEXT("%p ::Sociability = %p"),
+				45, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sociability"), TEXT("%p.Sociability = %p"),
 				TEXT("Set character's sociability."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardSociability
 			},
 			{
-				46, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First Name"), TEXT("%p ::FirstName = %p"),
+				46, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First Name"), TEXT("%p.FirstName = %p"),
 				TEXT("Set character's First Name."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardSecondName
 			},
 			{
-				47, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Last Name"), TEXT("%p ::LastName = %p"),
+				47, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Last Name"), TEXT("%p.LastName = %p"),
 				TEXT("Set character's Last Name."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardFirstName
 			},
 			{
-				48, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Orientation"), TEXT("%p ::Orientation = %p"),
+				48, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Orientation"), TEXT("%p.Orientation = %p"),
 				TEXT("Set character's sexual orientation."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardOrientation
 			},
 			{
-				49, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Description"), TEXT("%p ::Description = %p"),
+				49, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Description"), TEXT("%p.Description = %p"),
 				TEXT("Set character's description."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardDescription
 			},
 			{
-				50, ACTIONCAT_GENERAL, TEXT("Change Player Character"), TEXT("%p ::SetPC"),
+				50, ACTIONCAT_GENERAL, TEXT("Change Player Character"), TEXT("%p.SetPC"),
 				TEXT("Change current Player Character."),
 				{ TYPE_INT },
 				&Thread::SetPC
 			},
 			{
-				51, ACTIONCAT_GENERAL, TEXT("Start H scene"), TEXT("Start H(pc: %p , partner: %p )"),
+				51, ACTIONCAT_GENERAL, TEXT("Start H scene"), TEXT("StartH(pc: %p, partner: %p)"),
 				TEXT("Start H scene between 2 characters"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::StartHScene
 			},
 			{
-				52, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Vaginal"), TEXT("%p ::SexXP = %p"),
+				52, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Vaginal"), TEXT("%p.SexXP = %p"),
 				TEXT("Set vaginal experience for the character"),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardSexExperience
 			},
 			{
-				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p ::AnalXP = %p"),
+				53, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sex Experience: Anal"), TEXT("%p.AnalXP = %p"),
 				TEXT("Set anal experience for the character"),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardAnalSexExperience
 			},
 			{
-				54, ACTIONCAT_GENERAL, TEXT("Add Mood"), TEXT("%p ::AddMood(mood: %p , strength: %p"),
+				54, ACTIONCAT_GENERAL, TEXT("Add Mood"), TEXT("%p.AddMood(mood: %p, strength: %p"),
 				TEXT("Add mood strength."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddMood
 			},
 			{
-				55, ACTIONCAT_GENERAL, TEXT("Replace Mood"), TEXT("%p ::ReplaceMood(mood: %p , with mood: %p , strength: %p"),
+				55, ACTIONCAT_GENERAL, TEXT("Replace Mood"), TEXT("%p.ReplaceMood(mood: %p, with mood: %p, strength: %p"),
 				TEXT("Replace mood 1 with mood 2 up to strength."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::ReplaceMood
 			},
 			{
-				56, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Lover's"), TEXT("%p ::LoverItem = %p"),
+				56, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Lover's"), TEXT("%p.LoverItem = %p"),
 				TEXT("Rename Lover's item."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardLoversItem
 			},
 			{
-				57, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Friend's"), TEXT("%p ::FriendItem = %p"),
+				57, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Friend's"), TEXT("%p.FriendItem = %p"),
 				TEXT("Rename Friend's item."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardFriendItem
 			},
 			{
-				58, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Sexual"), TEXT("%p ::SexualItem = %p"),
+				58, ACTIONCAT_MODIFY_CARD, TEXT("Set Item - Sexual"), TEXT("%p.SexualItem = %p"),
 				TEXT("Rename Sexual item."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardSexualItem
 			},
 			{
-				59, ACTIONCAT_MODIFY_CARD, TEXT("Set H Compatibility"), TEXT("%p ::Compatibility( %p ) = %p"),
+				59, ACTIONCAT_MODIFY_CARD, TEXT("Set H Compatibility"), TEXT("%p.Compatibility(%p) = %p"),
 				TEXT("Set card's H compatibility with the selected character. 0-999 values"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardSexCompatibility
 			},
 			{
-				60, ACTIONCAT_NPCACTION, TEXT("Set NPC status"), TEXT("%p ::NpcStatus = %p"),
+				60, ACTIONCAT_NPCACTION, TEXT("Set NPC status"), TEXT("%p.NpcStatus = %p"),
 				TEXT("Set NPC status. 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetNpcStatus
@@ -2586,85 +2586,85 @@ namespace Shared {
 				&Thread::ResetVoyeur
 			},
 			{
-				62, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Points"), TEXT("%p ::SetPoints( towards: %p , LOVE: %p , LIKE: %p , DISLIKE: %p , HATE: %p , SPARE: %p )"),
+				62, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Points"), TEXT("%p.SetPoints(towards: %p, LOVE: %p, LIKE: %p, DISLIKE: %p, HATE: %p, SPARE: %p)"),
 				TEXT("Sets the full set of relationship points. The points are normalized, meaning you don't have to have them add up to 900 - the action will do it for you using the values as weights.\nIf you do have them add up to 900.0 they would be aplied as you provide them, minus the decimals."),
 				{ TYPE_INT, TYPE_INT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT, TYPE_FLOAT },
 				&Thread::SetCardPoints
 			},
 			{
-				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log( %p )"),
+				63, ACTIONCAT_GENERAL, TEXT("Write Log"), TEXT("Log(%p)"),
 				TEXT("Writes the string to the INFO log."),
 				{ TYPE_STRING },
 				&Thread::WriteLog
 			},
 			{
-				64, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Vaginal"), TEXT("%p ::SetVaginalCums(target: %p , amount: %p )"),
+				64, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Vaginal"), TEXT("%p.SetVaginalCums(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character got cummed inside their vagina by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatInVagina
 			},
 			{
-				65, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Anal"), TEXT("%p ::SetAnalCums(target: %p , amount: %p )"),
+				65, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Anal"), TEXT("%p.SetAnalCums(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character got cummed inside their rectum by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatInAnal
 			},
 			{
-				66, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Oral"), TEXT("%p ::SetOralCums(target: %p , amount: %p )"),
+				66, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Oral"), TEXT("%p.SetOralCums(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character got cummed inside their mouth by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatInMouth
 			},
 			{
-				67, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - All"), TEXT("%p ::SetTotalCums(target: %p , amount: %p )"),
+				67, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - All"), TEXT("%p.SetTotalCums(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character got cummed inside by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatTotalCum
 			},
 			{
-				68, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Single"), TEXT("%p ::SetSingleClimax(target: %p , amount: %p )"),
+				68, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Single"), TEXT("%p.SetSingleClimax(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character climaxed while having sex with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatClimaxCount
 			},
 			{
-				69, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Simultaneous"), TEXT("%p ::SetSimlimax(target: %p , amount: %p )"),
+				69, ACTIONCAT_MODIFY_CHARACTER, TEXT("Climax Stat - Simultaneous"), TEXT("%p.SetSimClimax(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character climaxed together with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatSimClimaxCount
 			},
 			{
-				70, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Condoms Used"), TEXT("%p ::SetCondomsUsed(target: %p , amount: %p )"),
+				70, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Condoms Used"), TEXT("%p.SetCondomsUsed(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character used condoms with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatCondomsUsed
 			},
 			{
-				71, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Vaginal"), TEXT("%p ::SetVaginalH(target: %p , amount: %p )"),
+				71, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Vaginal"), TEXT("%p.SetVaginalH(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character had vaginal sex with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardVaginalSex
 			},
 			{
-				72, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Anal"), TEXT("%p ::SetAnalH(target: %p , amount: %p )"),
+				72, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - Anal"), TEXT("%p.SetAnalH(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character had anal sex with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardAnalSex
 			},
 			{
-				73, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - All"), TEXT("%p ::SetAllH(target: %p , amount: %p )"),
+				73, ACTIONCAT_MODIFY_CHARACTER, TEXT("H Stat - All"), TEXT("%p.SetAllH(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character had sex with the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardAllSex
 			},
 			{
-				74, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Risky"), TEXT("%p ::SetRiskyCums(target: %p , amount: %p )"),
+				74, ACTIONCAT_MODIFY_CHARACTER, TEXT("Cum Stat - Risky"), TEXT("%p.SetRiskyCums(target: %p, amount: %p)"),
 				TEXT("Sets the amount of times this character got cummed inside on their risky days by the target."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardCumStatRiskyCums
 			},
 			{
-				75, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Lover"), TEXT("%p ::SetLover(target: %p ) = %p"),
+				75, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Lover"), TEXT("%p.SetLover(target: %p) = %p"),
 				TEXT("Set this card's lover flag for the target. NOTE: Lovers status can be one-sided."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetLover
@@ -2676,13 +2676,13 @@ namespace Shared {
 				&Thread::IsConsensualH
 			},
 			{
-				77, ACTIONCAT_NPCACTION, TEXT("Lock character"), TEXT("%p ::LockState = %p"),
+				77, ACTIONCAT_NPCACTION, TEXT("Lock character"), TEXT("%p.LockState = %p"),
 				TEXT("Locks the character from interacting. Adds the red circle around them. 1 - set red circle, 0 - unset it."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCharacterLocked
 			},
 			{
-				78, ACTIONCAT_NPCACTION, TEXT("Set Fap State"), TEXT("%p ::FapState = %p"),
+				78, ACTIONCAT_NPCACTION, TEXT("Set Fap State"), TEXT("%p.FapState = %p"),
 				TEXT("Set masturbation state of the character. 1 - to fap, -1 - not to fap."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetMasturbating
@@ -2700,49 +2700,49 @@ namespace Shared {
 				&Thread::SetPCResponse
 			},
 			{
-				81, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Clothing State"), TEXT("%p ::ClothingState = %p"),
+				81, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Clothing State"), TEXT("%p.ClothingState = %p"),
 				TEXT("Set the clothing state of some card."),
 				{ TYPE_INT, TYPE_INT},
 				&Thread::SetClothingState
 			},
 			{
-				82, ACTIONCAT_NPCACTION, TEXT("Set Cherry Status"), TEXT("%p ::SetCherryStatus(target: %p ) = %p"),
+				82, ACTIONCAT_NPCACTION, TEXT("Set Cherry Status"), TEXT("%p.SetCherryStatus(target: %p) = %p"),
 				TEXT("Sets whether the character's virginity was attempted to be taken by the target. 0 - no, 1 - yes."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCherryStatus
 			},
 			{
-				83, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Cum"), TEXT("%p ::SetCum = %p"),
+				83, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Cum"), TEXT("%p.SetCum = %p"),
 				TEXT("Set whether the character has cum in mouth."),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetCum
 			},
 			{
-				84, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Tears"), TEXT("%p ::SetTears = %p"),
+				84, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Tears"), TEXT("%p.SetTears = %p"),
 				TEXT("Set whether the character is crying."),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetTears
 			},
 			{
-				85, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Highlight"), TEXT("%p ::SetHighlight = %p"),
+				85, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Highlight"), TEXT("%p.SetHighlight = %p"),
 				TEXT("Set whether the character has highlight in their eyes."),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetHighlight
 			},
 			{
-				86, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Glasses"), TEXT("%p ::SetGlasses = %p"),
+				86, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Glasses"), TEXT("%p.SetGlasses = %p"),
 				TEXT("Set whether the character has their glasses on."),
 				{ TYPE_INT, TYPE_BOOL },
 				&Thread::SetGlasses
 			},
 			{
-				87, ACTIONCAT_NPCACTION, TEXT("Set Pose"), TEXT("%p ::Pose = %p"),
+				87, ACTIONCAT_NPCACTION, TEXT("Set Pose"), TEXT("%p.Pose = %p"),
 				TEXT("Sets pose for the scene actor."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetPose
 			},
 			{
-				88, ACTIONCAT_NPCACTION, TEXT("Cancel NPC's action"), TEXT("%p ::CancelAction"),
+				88, ACTIONCAT_NPCACTION, TEXT("Cancel NPC's action"), TEXT("%p.CancelAction"),
 				TEXT("Cancels NPC's currently issued action"),
 				{ TYPE_INT },
 				&Thread::NpcCancelAction
@@ -2778,20 +2778,20 @@ namespace Shared {
 				&Thread::SetAbsoluteResponse
 			},
 			{
-				94, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Success"), TEXT("NPCStrongResponseSuccess = %p"),
+				94, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Success"), TEXT("NPCStrongResponseSuccess = %p%"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_BOOL },
 				&Thread::SetNpcStrongResponseSuccess
 			},
 			{
-				95, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("NPCStrongResponsePercent = %p"),
+				95, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("NPCStrongResponsePercent = %p%"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
 				&Thread::SetNpcResponseStrongPercent
 			},
 			{
-				96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p"),
+				96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p%"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
@@ -2804,25 +2804,25 @@ namespace Shared {
 				&Thread::SetNpcAbsoluteResponseSuccess
 			},
 			{
-				98, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Preference"), TEXT("%p ::HPreference( %p ) = %p"),
+				98, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Preference"), TEXT("%p.HPreference(preference: %p) = %p"),
 				TEXT("Enable or disable selected character's H preference."),
 				{ TYPE_INT, TYPE_INT, TYPE_BOOL },
 				&Thread::SetCardPreference
 			},
 			{
-				99, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p ) = %p"),
+				99, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Opinion"), TEXT("%p.Opinion(id: %p, towards: %p) = %p"),
 				TEXT("Set the state of opinion of first character towards the second character."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetCardOpinion
 			},
 			{
-				100, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Decals"), TEXT("%p ::Decals(position: %p ) = %p"),
+				100, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Decals"), TEXT("%p.Decals(position: %p) = %p"),
 				TEXT("Adds decals to a character to a certain part of their body. Use only on characters that are currently loaded in high poly. For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetDecals
 			},
 			{
-				101, ACTIONCAT_NPCACTION, TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom = %p"),
+				101, ACTIONCAT_NPCACTION, TEXT("Action About Room"), TEXT("%p.ActionAboutRoom = %p"),
 				TEXT("Set the room that the NPC will talk about in their action."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetActionAboutRoom
@@ -2834,25 +2834,25 @@ namespace Shared {
 				&Thread::Set_H_AI_LOCK
 			},
 			{
-				103, ACTIONCAT_NPCACTION, TEXT("Set Room Target"), TEXT("%p ::SetRoomTarget = %p"),
+				103, ACTIONCAT_NPCACTION, TEXT("Set Room Target"), TEXT("%p.SetRoomTarget = %p"),
 				TEXT("Set the room that the NPC will walk to. //Probably doesn't work."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetRoomTarget
 			},
 			{
-				104, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Fighting Stance"), TEXT("%p ::FightStance = %p"),
+				104, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Fighting Stance"), TEXT("%p.FightStance = %p"),
 				TEXT("Set character's fighting stance."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardFightingStyle
 			},
 			{
-				105, ACTIONCAT_EVENT, TEXT("Switch Dominant"), TEXT("SwitchDominant"),
-				TEXT("Switch who is dominant and submissive in an H scene."),
+				105, ACTIONCAT_EVENT, TEXT("Swap Dominant"), TEXT("SwapDominant"),
+				TEXT("Swap who is dominant and submissive in an H scene."),
 				{ },
 				&Thread::SwitchActiveInH
 			},
 			{
-				106, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Stamina"), TEXT("%p ::SetStamina = %p"),
+				106, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Stamina"), TEXT("%p.SetStamina = %p"),
 				TEXT("Set the current stamina of a character."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetStamina
@@ -2864,19 +2864,19 @@ namespace Shared {
 				&Thread::SetPeriodTimer
 			},
 			{
-				108, ACTIONCAT_GENERAL, TEXT("Notification"), TEXT("Notification (text: %p , importantBool: %p )"),
+				108, ACTIONCAT_GENERAL, TEXT("Notification"), TEXT("Notification(text: %p, isImportant: %p)"),
 				TEXT("Display the notification on the screen."),
 				{ TYPE_STRING, TYPE_BOOL },
 				&Thread::Notification
 			},
 			{
-				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("LUA( %p )"),
+				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("LUA(%p)"),
 				TEXT("Call supplemental lua procedure."),
 				{ TYPE_STRING },
 				&Thread::CallLuaProcedure
 			},
 			{
-				110, ACTIONCAT_GENERAL, TEXT("Set Class Storage Integer"), TEXT("SetInt( %p ) = %p "),
+				110, ACTIONCAT_GENERAL, TEXT("Set Class Storage Integer"), TEXT("SetInt(%p) = %p"),
 				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2884,7 +2884,7 @@ namespace Shared {
 				&Thread::SetClassStorageInt
 			},
 			{
-				111, ACTIONCAT_GENERAL, TEXT("Set Class Storage Float"), TEXT("SetFloat( %p ) = %p "),
+				111, ACTIONCAT_GENERAL, TEXT("Set Class Storage Float"), TEXT("SetFloat(%p) = %p"),
 				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2892,7 +2892,7 @@ namespace Shared {
 				&Thread::SetClassStorageFloat
 			},
 			{
-				112, ACTIONCAT_GENERAL, TEXT("Set Class Storage String"), TEXT("SetString( %p ) = %p "),
+				112, ACTIONCAT_GENERAL, TEXT("Set Class Storage String"), TEXT("SetString(%p) = %p"),
 				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2900,7 +2900,7 @@ namespace Shared {
 				&Thread::SetClassStorageString
 			},
 			{
-				113, ACTIONCAT_GENERAL, TEXT("Set Class Storage Bool"), TEXT("SetBool( %p ) = %p "),
+				113, ACTIONCAT_GENERAL, TEXT("Set Class Storage Bool"), TEXT("SetBool(%p) = %p"),
 				TEXT("Sets an entry in the class storage. The class storage stores key-value pairs and is persistent between saves and loads. "
 				"Note that the keys are shared between value types, so that for example a given key can not hold both an int and a string. "
 				"When the key is allready in use, the function will silently fail."),
@@ -2908,31 +2908,31 @@ namespace Shared {
 				&Thread::SetClassStorageBool
 			},
 			{
-				114, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Virtue"), TEXT("%p ::AddVirtueMod( %p ) = %p "),
+				114, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Virtue"), TEXT("%p.AddVirtueMod(%p) = %p"),
 				TEXT("Add or replace a virtue modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddVirtueMod
 			},
 			{
-				115, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Sociability"), TEXT("%p ::AddSociabilityMod( %p ) = %p "),
+				115, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Sociability"), TEXT("%p.AddSociabilityMod(%p) = %p"),
 				TEXT("Add or replace a sociability modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddSociabilityMod
 			},
 			{
-				116, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Strength"), TEXT("%p ::AddStrengthMod( %p ) = %p "),
+				116, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Strength"), TEXT("%p.AddStrengthMod(%p) = %p"),
 				TEXT("Add or replace a strength value modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddStrengthMod
 			},
 			{
-				117, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Intelligence"), TEXT("%p ::AddIntelligenceMod( %p ) = %p "),
+				117, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Intelligence"), TEXT("%p.AddIntelligenceMod(%p) = %p"),
 				TEXT("Add or replace an intelligence value modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddIntelligenceMod
 			},
 			{
-				118, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Club"), TEXT("%p ::AddClubMod( %p ) = %p "),
+				118, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Stat Modifier: Club"), TEXT("%p.AddClubMod(%p) = %p"),
 				TEXT("Add or replace a club value modifier"),
 				{ TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddClubMod
@@ -2944,7 +2944,7 @@ namespace Shared {
 				&Thread::KickOut
 			},
 			{
-				120, ACTIONCAT_EVENT, TEXT("Add card to class"), TEXT("%p ::AddCardToClass( %p ) = %p "),
+				120, ACTIONCAT_EVENT, TEXT("Add card to class"), TEXT("%p.AddCardToClass(%p) = %p"),
 				TEXT("Add a card to the specified seat, with the specified gender. Input is Seat, Gender (1 for female, 0 for male), Filename respectively."),
 				{ TYPE_INT, TYPE_INT, TYPE_STRING },
 				&Thread::AddToClass
@@ -2956,115 +2956,115 @@ namespace Shared {
 				&Thread::ChangeHPosition
 			},
 			{
-				122, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Trait Modifier"), TEXT("%p ::AddTraitMod(Trait ( %p ), ModName( %p ) = %p "),
+				122, ACTIONCAT_MODIFY_CHARACTER, TEXT("Add Trait Modifier"), TEXT("%p.AddTraitMod(trait: %p, modName: %p) = %p"),
 				TEXT("Add or replace a trait modifier."),
 				{ TYPE_INT, TYPE_INT, TYPE_STRING, TYPE_INT },
 				&Thread::AddTraitMod
 			},
 			{
-				123, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Gust of Wind"), TEXT("Gust = %p "),
+				123, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Gust of Wind"), TEXT("Gust = %p"),
 				TEXT("Causes the gust of wind event to happen. Use only in pc convo state updated or pc line updated events."),
 				{ TYPE_BOOL },
 				&Thread::SetGustOfWind
 			},
 			{
-				124, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First H Partner"), TEXT("%p ::HFirst = %p"),
+				124, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First H Partner"), TEXT("%p.HFirst = %p"),
 				TEXT("Set character's First H Partner."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardFirstHPartner
 			},
 			{
-				125, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First Anal Partner"), TEXT("%p ::AnalFirst = %p"),
+				125, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set First Anal Partner"), TEXT("%p.AnalFirst = %p"),
 				TEXT("Set character's First Anal Partner."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardFirstAnalPartner
 			},
 			{
-				126, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Latest H Partner"), TEXT("%p ::HLast = %p"),
+				126, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Latest H Partner"), TEXT("%p.HLast = %p"),
 				TEXT("Set character's Latest H Partner."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::SetCardLatestHPartner
 			},
 			{
-				127, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Partner Count"), TEXT("%p ::SetPartnerCount = %p"),
+				127, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Partner Count"), TEXT("%p.SetPartnerCount = %p"),
 				TEXT("Set Partner Count of a character"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardPartnerCount
 			},
 			{
-				128, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Partner Count"), TEXT("%p ::SetHPartnerCount = %p"),
+				128, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set H Partner Count"), TEXT("%p.SetHPartnerCount = %p"),
 				TEXT("Set Sexual Partner Count of a character"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetCardHPartnerCount
 			},
 			{
-				129, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Victory Count"), TEXT("%p ::SetVictoryCount = %p"),
+				129, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Victory Count"), TEXT("%p.SetVictoryCount = %p"),
 				TEXT("Set Victory Count of a card (how many times it won a fight)"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetVictoryCount
 			},
 			{
-				130, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Classes Skipped"), TEXT("%p ::SetClassesSkipped = %p"),
+				130, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Classes Skipped"), TEXT("%p.SetClassesSkipped = %p"),
 				TEXT("Set Classes Skipped Count of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetClassesSkipped
 			},
 								{
-				131, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Winning Count"), TEXT("%p ::SetWinningCount = %p"),
+				131, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Winning Count"), TEXT("%p.SetWinningCount = %p"),
 				TEXT("Set Winning Over Someone Count of a card (how many times it won in an argument"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetWinningCount
 			},
 			{
-				132, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Reject Count"), TEXT("%p ::SetRejectCount = %p"),
+				132, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Reject Count"), TEXT("%p.SetRejectCount = %p"),
 				TEXT("Set Reject Count of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetRejectCount
 			},
 			{
-				133, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Academic Exam Grade"), TEXT("%p ::SetAcademGrade = %p"),
+				133, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Academic Exam Grade"), TEXT("%p.SetAcademicGrade = %p"),
 				TEXT("Set Academic Exam Grade of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetAcademicGrade
 			},
 			{
-				134, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sport Exam Grade"), TEXT("%p ::SetSportGrade = %p"),
+				134, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Sports Exam Grade"), TEXT("%p.SetSportsGrade = %p"),
 				TEXT("Set Sport Exam Grade of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetSportGrade
 			},
 			{
-				135, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Exam Grade"), TEXT("%p ::SetClubGrade = %p"),
+				135, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Club Exam Grade"), TEXT("%p.SetClubGrade = %p"),
 				TEXT("Set Club Competition Grade of a card"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetClubGrade
 			},
 			{
-				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("ApplyRelationshipData(Love: %p , Like: %p , Dislike: %p , Hate: %p )"),
+				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("ApplyRelationshipData(LOVE: %p, LIKE: %p, DISLIKE: %p, HATE: %p)"),
 				TEXT("In Relationship Points Changed event change the resulting relationship shift of the interaction"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::RelationshipPointChange
 			},
 			{
-				137, ACTIONCAT_EVENT, TEXT("Arrange Date"), TEXT("%p ::ArrangeDateWith = %p"),
+				137, ACTIONCAT_EVENT, TEXT("Arrange Date"), TEXT("%p.ArrangeDateWith = %p"),
 				TEXT("Makes the first character arrange a date with the other character."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::ArrangeDate
 			},
 			{
-				138, ACTIONCAT_EVENT, TEXT("Promise Lewd Reward"), TEXT("%p ::LewdPromise = %p"),
+				138, ACTIONCAT_EVENT, TEXT("Promise Lewd Reward"), TEXT("%p.LewdPromise = %p"),
 				TEXT("Makes the first character promise a lewd reward to the other character."),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::PromiseLewd
 			},
 			{
-				139, ACTIONCAT_GENERAL, TEXT("Emit Delayed Optional Event"), TEXT("EmitOptional(delay: %p , label: %p )"),
+				139, ACTIONCAT_GENERAL, TEXT("Emit Delayed Optional Event"), TEXT("EmitOptional(delay: %p, label: %p)"),
 				TEXT("Emit a delayed event. Delay time is in milliseconds. On period change may spill into the next period"),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::EmitDelayedOptionalEvent
 			},
 			{
-				140, ACTIONCAT_GENERAL, TEXT("Emit Delayed Required Event"), TEXT("EmitRequired(delay: %p , label: %p )"),
+				140, ACTIONCAT_GENERAL, TEXT("Emit Delayed Required Event"), TEXT("EmitRequired(delay: %p, label: %p)"),
 				TEXT("Emit a delayed event. Delay time is in milliseconds. On period change this event is executed sooner."),
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::EmitDelayedRequiredEvent
