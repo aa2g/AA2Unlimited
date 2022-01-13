@@ -29,6 +29,8 @@ public:;
 	}
 
 	bool bMTRenderer;
+	int renderWidth;
+	int renderHeight;
 	int screenshotFormat;
 	int savedFileUsage;
 	int bLogPPAccess;
@@ -57,6 +59,8 @@ public:;
 		LUA_SCOPE;
 #define LUA_CLASS Config
 			LUA_BIND(bMTRenderer)
+			LUA_BIND(renderWidth)
+			LUA_BIND(renderHeight)
 			LUA_BIND(screenshotFormat)
 			LUA_BIND(bLogPPAccess)
 			LUA_BIND(savedFileUsage)
