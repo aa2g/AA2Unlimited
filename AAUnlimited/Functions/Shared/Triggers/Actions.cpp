@@ -2870,7 +2870,7 @@ namespace Shared {
 				&Thread::Notification
 			},
 			{
-				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("Call( %p )"),
+				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("LUA( %p )"),
 				TEXT("Call supplemental lua procedure."),
 				{ TYPE_STRING },
 				&Thread::CallLuaProcedure

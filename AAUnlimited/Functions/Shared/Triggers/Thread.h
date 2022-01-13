@@ -413,6 +413,7 @@ namespace Shared {
 			Value FloatToString(std::vector<Value>& params); //string(float)
 			Value BoolToString(std::vector<Value>& params); //string(bool)
 			Value StringReplace(std::vector<Value>& params); //string(string, int, int)
+			Value GetCSVByIndex(std::vector<Value>& params); //string(string, int, string)
 
 			Value GetCardStorageInt(std::vector<Value>& params); //int(int, string, int)
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
@@ -479,6 +480,11 @@ namespace Shared {
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 			Value AddLuaProcParam(std::vector<Value>& params);
+
+			Value CallLuaStringFunction(std::vector<Value>& params);
+			Value CallLuaIntFunction(std::vector<Value>& params);
+			Value CallLuaBoolFunction(std::vector<Value>& params);
+			Value CallLuaFloatFunction(std::vector<Value>& params);
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);

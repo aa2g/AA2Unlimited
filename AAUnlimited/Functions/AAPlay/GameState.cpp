@@ -317,32 +317,6 @@ bool operator<(Shared::Triggers::DelayedEventData & a, Shared::Triggers::Delayed
 
 void Shared::GameState::AddDelayedEvent(Shared::Triggers::DelayedEventData data)
 {
-	//if (loc_gameState.m_delayedEvents.size() > 0)
-	//{
-	//	//for (auto& it : loc_gameState.m_delayedEvents)
-	//	//{
-	//	//	if (it.delayEnd <= data.delayEnd)
-	//	//	{
-	//	//		loc_gameState.m_delayedEvents.insert(loc_gameState.m_delayedEvents.begin(), data);
-	//	//		return;
-	//	//	}
-	//	//}
-	//	auto it = loc_gameState.m_delayedEvents.begin();
-	//	for (; it != loc_gameState.m_delayedEvents.end(); it++) {
-	//		if (it->delayEnd < data.delayEnd)
-	//		{
-	//			it++;
-	//			break;
-	//		}
-	//	}
-	//	loc_gameState.m_delayedEvents.insert(it, data);
-
-	//}
-	//else
-	//{
-	//	loc_gameState.m_delayedEvents.insert(loc_gameState.m_delayedEvents.end(), data);
-	//}
-
 	loc_gameState.m_delayedEvents.push_front(data);
 	loc_gameState.m_delayedEvents.sort([](Shared::Triggers::DelayedEventData a, Shared::Triggers::DelayedEventData b) { return a.delayEnd < b.delayEnd;  });
 }

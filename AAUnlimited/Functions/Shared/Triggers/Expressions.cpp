@@ -584,6 +584,35 @@ namespace Shared {
 			return Value(str.replace(from, length, newStr));
 		}
 
+		//string(string, int, int)
+		Value Thread::GetCSVByIndex(std::vector<Value>& params) {
+			// split helper
+			auto split = [](const std::wstring* str,
+				std::vector<std::wstring>& container,
+				std::wstring delim)
+			{
+				std::size_t current, previous = 0;
+				current = str->find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str->substr(previous, current - previous));
+					previous = current + delim.size();
+					current = str->find(delim, previous);
+				}
+				container.push_back(str->substr(previous, current - previous));
+			};
+			//
+
+			auto str = params[0].strVal;
+			int idx = params[1].iVal;
+			auto sep = params[2].strVal;
+
+			// split the string parameters
+			std::vector<std::wstring> container;
+			split(str, container, *sep);
+			idx = idx % container.size();
+			return container[idx];
+		}
+
 		/*
 		 * card attributes
 		 */
@@ -2882,6 +2911,130 @@ namespace Shared {
 			auto delimiter = L"\n";
 			return Value(*params[0].strVal + delimiter + *params[1].strVal);
 		}
+		
+		Value Thread::CallLuaStringFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = "";
+			LUA_EVENT("dispatch_string_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaIntFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = 0;
+			LUA_EVENT("dispatch_int_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaBoolFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = false;
+			LUA_EVENT("dispatch_bool_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaFloatFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = 0.0f;
+			LUA_EVENT("dispatch_float_trigger", ret, funcName, args);
+			return Value(ret);
+		}
 
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 			TEXT("General"),
@@ -3858,8 +4011,14 @@ namespace Shared {
 					{}, (TYPE_INT),
 					&Thread::GetDelayedEventPeriod
 				},
+				{
+					152, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("Lua( %p )"),
+					TEXT("Call supplemental lua int function."),
+					{TYPE_STRING}, (TYPE_INT),
+					&Thread::CallLuaIntFunction
+				}
 			},
-
 			{ //BOOL
 				{
 					EXPR_CONSTANT, EXPRCAT_GENERAL,
@@ -4180,6 +4339,13 @@ namespace Shared {
 					{}, (TYPE_BOOL),
 					&Thread::GetDelayedEventRequired
 				},
+				{
+					52, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("Lua( %p )"),
+					TEXT("Call supplemental lua bool function."),
+					{TYPE_STRING}, (TYPE_BOOL),
+					&Thread::CallLuaBoolFunction
+				}
 			},
 			{ //FLOAT
 				{
@@ -4272,6 +4438,13 @@ namespace Shared {
 					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
 					&Thread::GetCardLikeOrientationMultiplier
 				},
+				{
+					15, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("Lua( %p )"),
+					TEXT("Call supplemental lua float function."),
+					{TYPE_STRING}, (TYPE_FLOAT),
+					&Thread::CallLuaFloatFunction
+				}
 			},
 			{ //STRING
 				{
@@ -4418,6 +4591,21 @@ namespace Shared {
 					"Returns empty string if it's an invalid event."),
 					{}, (TYPE_STRING),
 					&Thread::GetDelayedEventLabel
+				},
+				{
+					24, EXPRCAT_STRINGS,
+					TEXT("Get comma separated value by index"), TEXT("%p ::GetCSV(idx: %p , separator: %p )"),
+					TEXT("Retrieves a substring of a comma separated string."
+					"E.g. \"one,two,three\" ::GetCSV(idx: 1, separator: \",\") would return  \"two\" ."),
+					{TYPE_STRING, TYPE_INT, TYPE_STRING}, (TYPE_STRING),
+					&Thread::GetCSVByIndex
+				},
+				{
+					25, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("Lua( %p  )"),
+					TEXT("Call supplemental lua string function."),
+					{TYPE_STRING}, (TYPE_STRING),
+					&Thread::CallLuaStringFunction
 				}
 			}
 
