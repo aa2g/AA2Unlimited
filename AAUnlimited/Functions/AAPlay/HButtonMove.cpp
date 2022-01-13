@@ -6,7 +6,7 @@ namespace HButtonMove {
 ExtClass::HGUIButton* loc_controlButton = NULL;
 DWORD loc_controlX = 0;
 const DWORD MAX_BUTTONS_PER_ROW = 19;
-const bool bJMCP = true;	//whether to use hardcoded JMCP button positions
+const bool bJMCP = false;	//whether to use hardcoded JMCP button positions
 
 float screenScaleX = 0;
 float screenScaleY = 0;
