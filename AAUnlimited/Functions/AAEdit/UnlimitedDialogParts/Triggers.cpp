@@ -134,40 +134,35 @@ std::wstring UnlimitedDialog::TRDialog::ExpressionToString(const ParameterisedEx
 
 	return TEXT("()");
 }
-
-std::wstring UnlimitedDialog::TRDialog::EVANameToString(const std::wstring& name,const std::vector<ParameterisedExpression>& actualParameters) {
+std::wstring UnlimitedDialog::TRDialog::EVANameToString(const std::wstring& name, const std::vector<ParameterisedExpression>& actualParameters) {
 	std::wstring retVal;
-	//split string at whitespaces
-	int n = 0;
-	int last = 0,i = 1;
-	for (i = 1; i < name.size(); i++) {
-		if (isspace(name[i]) && i != last) {
-			std::wstring part = name.substr(last,i-last);
-			if (retVal.size() != 0) retVal.push_back(L' ');
-			if (part == TEXT("%p")) {
-				std::wstring paramString = ExpressionToString(actualParameters[n++]);
-				retVal.push_back(L'(');
-				retVal += paramString;
-				retVal.push_back(L')');
-			}
-			else {
-				retVal += part;
-			}
-			last = i+1;
+
+	// split helper
+	auto split = [](const std::wstring* str,
+		std::vector<std::wstring>& container,
+		std::wstring delim)
+	{
+		std::size_t current, previous = 0;
+		current = str->find(delim);
+		while (current != std::string::npos) {
+			container.push_back(str->substr(previous, current - previous));
+			previous = current + delim.size();
+			current = str->find(delim, previous);
 		}
+		container.push_back(str->substr(previous, current - previous));
+	};
+
+	//split string at %p
+	std::vector<std::wstring> container;
+	split(&name, container, L"%p");
+
+	int i = 0;
+	// assuming there's exactly enough actual parameters
+	for (i = 0; i < actualParameters.size();) {
+		retVal += container[i];
+		retVal += ExpressionToString(actualParameters[i++]);
 	}
-	std::wstring part = name.substr(last,i-last);
-	if (retVal.size() != 0) retVal.push_back(L' ');
-	if (part == TEXT("%p")) {
-		std::wstring paramString = ExpressionToString(actualParameters[n++]);
-		retVal.push_back(L'(');
-		retVal += paramString;
-		retVal.push_back(L')');
-	}
-	else {
-		retVal += part;
-	}
-	last = i+1;
+	retVal += container[i];
 	return retVal;
 }
 
