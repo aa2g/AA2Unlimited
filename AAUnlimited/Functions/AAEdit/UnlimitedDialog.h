@@ -71,6 +71,7 @@ namespace AAEdit {
 		HWND m_edAAuSetName;
 		HWND m_btnAAuSetAdd;
 		HWND m_btnAAuSetTransfer;
+		HWND m_btnAAuSetLoad;
 		HWND m_btnLoadCloth;
 		HWND m_btnReset;
 
