@@ -63,6 +63,7 @@ struct GameStateStruct {
 	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
 	int m_removedSeat;
 
+	std::list<Shared::Triggers::DelayedEventData> m_delayedEvents;
 
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
@@ -307,6 +308,22 @@ void Shared::GameState::SetRoomNumber(int seat, int room) {
 int Shared::GameState::GetRoomNumber(int seat) {
 	if (seat < 0 || seat >= 25) return -1;
 	return loc_gameState.roomNumber[seat];
+}
+
+bool operator<(Shared::Triggers::DelayedEventData & a, Shared::Triggers::DelayedEventData & b)
+{
+	return a.delayEnd < b.delayEnd;
+}
+
+void Shared::GameState::AddDelayedEvent(Shared::Triggers::DelayedEventData data)
+{
+	loc_gameState.m_delayedEvents.push_front(data);
+	loc_gameState.m_delayedEvents.sort([](Shared::Triggers::DelayedEventData a, Shared::Triggers::DelayedEventData b) { return a.delayEnd < b.delayEnd;  });
+}
+
+std::list<Shared::Triggers::DelayedEventData>* Shared::GameState::GetDelayedEvents()
+{
+	return &loc_gameState.m_delayedEvents;
 }
 
 DWORD Shared::GameState::getHPosition()

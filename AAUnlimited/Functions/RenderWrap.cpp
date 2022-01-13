@@ -1038,6 +1038,8 @@ public:;
 		if (hres == D3D_OK) {
 			int trueGameWindowWidth = pPresentationParameters->BackBufferWidth; // True game Width, Height for current resolution
 			int trueGameWindowHeight = trueGameWindowWidth / 16.00 * 9;
+			g_Config.renderWidth = trueGameWindowWidth;
+			g_Config.renderHeight = trueGameWindowHeight;
 			int trueGameMarginY = round((pPresentationParameters->BackBufferHeight - trueGameWindowHeight) / 2.0);
 			// Create D3D fonts
 			DrawD3D::MakeFonts(trueGameWindowWidth / 1920.0000000000, trueGameMarginY, hFocusWindow);

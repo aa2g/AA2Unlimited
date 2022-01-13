@@ -178,11 +178,14 @@ namespace Shared {
 			void ResetVoyeur(std::vector<Value>& params);
 
 			void SetH_AI(std::vector<Value>& params);
-
 			void Set_H_AI_LOCK(std::vector<Value>& params);
+
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 			void Notification(std::vector<Value>& params);
+
+			void EmitDelayedOptionalEvent(std::vector<Value>& params);
+			void EmitDelayedRequiredEvent(std::vector<Value>& params);
 			void CallLuaProcedure(std::vector<Value>& params);
 
 			//event response
@@ -210,6 +213,10 @@ namespace Shared {
 			Value GetPassiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
+			Value GetDelayedEventLabel(std::vector<Value>& params);
+			Value GetDelayedEventPeriod(std::vector<Value>& params);
+			Value GetDelayedEventRequired(std::vector<Value>& params);
+			//string ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
@@ -406,6 +413,7 @@ namespace Shared {
 			Value FloatToString(std::vector<Value>& params); //string(float)
 			Value BoolToString(std::vector<Value>& params); //string(bool)
 			Value StringReplace(std::vector<Value>& params); //string(string, int, int)
+			Value GetCSVByIndex(std::vector<Value>& params); //string(string, int, string)
 
 			Value GetCardStorageInt(std::vector<Value>& params); //int(int, string, int)
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
@@ -472,6 +480,11 @@ namespace Shared {
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 			Value AddLuaProcParam(std::vector<Value>& params);
+
+			Value CallLuaStringFunction(std::vector<Value>& params);
+			Value CallLuaIntFunction(std::vector<Value>& params);
+			Value CallLuaBoolFunction(std::vector<Value>& params);
+			Value CallLuaFloatFunction(std::vector<Value>& params);
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);

@@ -2370,7 +2370,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Hip Height"),
 				{	{ CharacterStruct::BODY, 21 },
-				//	{ CharacterStruct::SKIRT, 7 },
+					{ CharacterStruct::SKIRT, 7 },
 					{ CharacterStruct::LEGS, 16 }
 				},
 				-1, 1
@@ -2458,7 +2458,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Zetthigh Ryouiki"),
 				{ { CharacterStruct::LEGS, 6 },{ CharacterStruct::LEGS, 7 },
 				{ CharacterStruct::BODY, 24 },{ CharacterStruct::BODY, 25 },
-				/*{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 }*/ },
+				{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 } },
 				-3.0f, 3.0f
 			},
 			{ TEXT("Calves Size"),

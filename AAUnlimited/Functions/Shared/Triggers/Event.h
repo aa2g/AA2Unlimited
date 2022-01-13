@@ -12,7 +12,6 @@ namespace Shared {
 namespace Triggers {
 
 
-
 	/*
 	* An Event. Certain actions in the game fire certain events.
 	*/
@@ -34,6 +33,7 @@ namespace Triggers {
 		EVENTCAT_LOADS,
 		EVENTCAT_TIME,
 		EVENTCAT_CONVERSATION,
+		EVENTCAT_OTHER,
 		EVENTCAT_N
 	};
 
@@ -59,6 +59,7 @@ namespace Triggers {
 		CARD_EXPELLED,
 		CONVERSATION_END,
 		RELATIONSHIP_POINT_CHANGED,
+		DELAYED_EXECUTION,
 		
 		
 		N_EVENTS
@@ -287,22 +288,30 @@ namespace Triggers {
 
 	EDC_DECLARE(ConversationEndData, CONVERSATION_END)
 
-	int action;
-	int conversationTarget;
+		int action;
+		int conversationTarget;
 
 	EDC_END
 
 	EDC_DECLARE(RelationshipPointChangedData, RELATIONSHIP_POINT_CHANGED)
 
-	int target;
-	int love;
-	int like;
-	int dislike;
-	int hate;
+		int target;
+		int love;
+		int like;
+		int dislike;
+		int hate;
+	EDC_END
+
+
+	EDC_DECLARE(DelayedEventData, DELAYED_EXECUTION)
+		std::wstring label;
+		DWORD delayStart;
+		DWORD delayEnd;
+		int period;
+		bool required;
 	EDC_END
 
 #undef EDC_DECLARE
 #undef EDC_END
-
 }
 }

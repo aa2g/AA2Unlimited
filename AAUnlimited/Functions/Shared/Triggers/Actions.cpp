@@ -2111,6 +2111,37 @@ namespace Shared {
 			Notifications::AddNotification(*text, important);
 		}
 
+		// string text, bool important
+		void Thread::EmitDelayedOptionalEvent(std::vector<Value>& params) {
+			auto delay = params[0].iVal;
+			auto label = params[1].strVal;
+
+			DelayedEventData data;
+			data.card = this->thisCard;
+			data.delayStart = GameTick::now;
+			data.delayEnd = data.delayStart + delay;
+			data.label = std::wstring(*label);
+			data.period = ExtVars::AAPlay::GameTimeData()->currentPeriod;
+			data.required = false;
+
+			Shared::GameState::AddDelayedEvent(data);
+		}
+
+		// string text, bool important
+		void Thread::EmitDelayedRequiredEvent(std::vector<Value>& params) {
+			auto delay = params[0].iVal;
+			auto label = params[1].strVal;
+
+			DelayedEventData data;
+			data.card = this->thisCard;
+			data.delayStart = GameTick::now;
+			data.delayEnd = data.delayStart + delay;
+			data.label = std::wstring(*label);
+			data.period = ExtVars::AAPlay::GameTimeData()->currentPeriod;
+			data.required = true;
+
+			Shared::GameState::AddDelayedEvent(data);
+		}
 
 		// string functionDef ("functionName\nparam1\nparam2...")
 		void Thread::CallLuaProcedure(std::vector<Value>& params) {
@@ -2151,7 +2182,7 @@ namespace Shared {
 			TEXT("Card Modification"),
 			TEXT("Flow Control"),
 			TEXT("Character Modification"),
-			TEXT("Event Response"),
+			TEXT("Event"),
 			TEXT("Npc Action")
 		};
 
@@ -2223,7 +2254,7 @@ namespace Shared {
 			},
 
 			{
-				11, ACTIONCAT_FLOW_CONTROL, TEXT("End Execution"), TEXT("End"), TEXT("ends execution of this thread. think of a return statement."),
+				11, ACTIONCAT_FLOW_CONTROL, TEXT("End Execution"), TEXT("End"), TEXT("Ends execution of this thread. Similar to a return statement."),
 				{ },
 				&Thread::EndExecution
 			},
@@ -2839,7 +2870,7 @@ namespace Shared {
 				&Thread::Notification
 			},
 			{
-				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("Call( %p )"),
+				109, ACTIONCAT_GENERAL, TEXT("Call LUA Procedure"), TEXT("LUA( %p )"),
 				TEXT("Call supplemental lua procedure."),
 				{ TYPE_STRING },
 				&Thread::CallLuaProcedure
@@ -3009,8 +3040,8 @@ namespace Shared {
 				&Thread::SetClubGrade
 			},
 			{
-				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("RelationshipData:: Love:( %p ), Like:( %p ), Dislike:( %p ), Hate:( %p )"),
-				TEXT("Set Club Competition Grade of a card"),
+				136, ACTIONCAT_EVENT, TEXT("Set Applied Relationship Data"), TEXT("ApplyRelationshipData(Love: %p , Like: %p , Dislike: %p , Hate: %p )"),
+				TEXT("In Relationship Points Changed event change the resulting relationship shift of the interaction"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::RelationshipPointChange
 			},
@@ -3026,6 +3057,19 @@ namespace Shared {
 				{ TYPE_INT, TYPE_INT },
 				&Thread::PromiseLewd
 			},
+			{
+				139, ACTIONCAT_GENERAL, TEXT("Emit Delayed Optional Event"), TEXT("EmitOptional(delay: %p , label: %p )"),
+				TEXT("Emit a delayed event. Delay time is in milliseconds. On period change may spill into the next period"),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::EmitDelayedOptionalEvent
+			},
+			{
+				140, ACTIONCAT_GENERAL, TEXT("Emit Delayed Required Event"), TEXT("EmitRequired(delay: %p , label: %p )"),
+				TEXT("Emit a delayed event. Delay time is in milliseconds. On period change this event is executed sooner."),
+				{ TYPE_INT, TYPE_STRING },
+				&Thread::EmitDelayedRequiredEvent
+			},
+
 		};
 
 

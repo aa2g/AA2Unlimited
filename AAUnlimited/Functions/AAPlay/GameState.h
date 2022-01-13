@@ -70,6 +70,9 @@ namespace Shared {
 		void SetRoomNumber(int seat, int room);
 		int GetRoomNumber(int seat);
 
+		void AddDelayedEvent(Shared::Triggers::DelayedEventData);
+		std::list<Shared::Triggers::DelayedEventData>* GetDelayedEvents();
+
 		void kickCard(int s);
 		void addCard(std::wstring cardName, bool gender, int s);
 		DWORD getClubType(BYTE clubID);
