@@ -463,90 +463,123 @@ int AAUCardData::ToBuffer(char** buffer) {
 /*****************************/
 
 bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
-	if (m_styles[m_currCardStyle].m_meshOverrideMap.find(texture) != m_styles[m_currCardStyle].m_meshOverrideMap.end()) return false;
+	return AddMeshOverride(texture, override, m_currCardStyle);
+}
+
+bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override, int styleIdx) {
+	if (m_styles[styleIdx].m_meshOverrideMap.find(texture) != m_styles[styleIdx].m_meshOverrideMap.end()) return false;
 	TextureImage img(override, TextureImage::OVERRIDE);
 	if (img.IsGood()) {
 		std::wstring texStr(texture);
-		m_styles[m_currCardStyle].m_meshOverrides.emplace_back(texStr, std::wstring(override));
-		m_styles[m_currCardStyle].m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
+		m_styles[styleIdx].m_meshOverrides.emplace_back(texStr, std::wstring(override));
+		m_styles[styleIdx].m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
 	}
 	return false;
 }
 
 bool AAUCardData::RemoveMeshOverride(int index) {
-	if (index < 0 || (size_t)index >= m_styles[m_currCardStyle].m_meshOverrides.size()) return false;
-	auto vMatch = m_styles[m_currCardStyle].m_meshOverrides.begin() + index;
-	auto mapMatch = m_styles[m_currCardStyle].m_meshOverrideMap.find(vMatch->first);
-	m_styles[m_currCardStyle].m_meshOverrides.erase(vMatch);
-	if (mapMatch != m_styles[m_currCardStyle].m_meshOverrideMap.end()) m_styles[m_currCardStyle].m_meshOverrideMap.erase(mapMatch);
+	return RemoveMeshOverride(index, m_currCardStyle);
+}
+
+bool AAUCardData::RemoveMeshOverride(int index, int styleIdx) {
+	if (index < 0 || (size_t)index >= m_styles[styleIdx].m_meshOverrides.size()) return false;
+	auto vMatch = m_styles[styleIdx].m_meshOverrides.begin() + index;
+	auto mapMatch = m_styles[styleIdx].m_meshOverrideMap.find(vMatch->first);
+	m_styles[styleIdx].m_meshOverrides.erase(vMatch);
+	if (mapMatch != m_styles[styleIdx].m_meshOverrideMap.end()) m_styles[styleIdx].m_meshOverrideMap.erase(mapMatch);
 	return true;
 }
 
 bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override) {
-	if (m_styles[m_currCardStyle].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, archivefile)) != m_styles[m_currCardStyle].m_archiveOverrideMap.end()) return false;
+	return AddArchiveOverride(archive, archivefile, override, m_currCardStyle);
+}
+
+bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override, int styleIdx) {
+	if (m_styles[styleIdx].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, archivefile)) != m_styles[styleIdx].m_archiveOverrideMap.end()) return false;
 	OverrideFile img(override, OverrideFile::OVERRIDE);
 	if (img.IsGood()) {
 		auto toOverride = std::pair<std::wstring, std::wstring>(archive, archivefile);
-		m_styles[m_currCardStyle].m_archiveOverrides.emplace_back(toOverride, override);
-		m_styles[m_currCardStyle].m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
+		m_styles[styleIdx].m_archiveOverrides.emplace_back(toOverride, override);
+		m_styles[styleIdx].m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
 		return true;
 	}
 	return false;
 }
 
 bool AAUCardData::RemoveArchiveOverride(int index) {
-	if (index < 0 || (size_t)index >= m_styles[m_currCardStyle].m_archiveOverrides.size()) return false;
-	auto vMatch = m_styles[m_currCardStyle].m_archiveOverrides.begin() + index;
-	auto mapMatch = m_styles[m_currCardStyle].m_archiveOverrideMap.find(vMatch->first);
-	m_styles[m_currCardStyle].m_archiveOverrides.erase(vMatch);
-	if (mapMatch != m_styles[m_currCardStyle].m_archiveOverrideMap.end()) m_styles[m_currCardStyle].m_archiveOverrideMap.erase(mapMatch);
+	return RemoveArchiveOverride(index, m_currCardStyle);
+}
+
+bool AAUCardData::RemoveArchiveOverride(int index, int styleIdx) {
+	if (index < 0 || (size_t)index >= m_styles[styleIdx].m_archiveOverrides.size()) return false;
+	auto vMatch = m_styles[styleIdx].m_archiveOverrides.begin() + index;
+	auto mapMatch = m_styles[styleIdx].m_archiveOverrideMap.find(vMatch->first);
+	m_styles[styleIdx].m_archiveOverrides.erase(vMatch);
+	if (mapMatch != m_styles[styleIdx].m_archiveOverrideMap.end()) m_styles[styleIdx].m_archiveOverrideMap.erase(mapMatch);
 	return true;
 }
 
 bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile) {
+	return AddArchiveRedirect(archive, archivefile, redirectarchive, redirectfile, m_currCardStyle);
+}
+
+bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile, int styleIdx) {
 	//here i should check if the archive is valid, but meh
 	auto left = std::pair<std::wstring, std::wstring>(archive, archivefile);
 	auto right = std::pair<std::wstring, std::wstring>(redirectarchive, redirectfile);
-	if (m_styles[m_currCardStyle].m_archiveRedirectMap.find(left) != m_styles[m_currCardStyle].m_archiveRedirectMap.end()) return false; //allready contains it
-	m_styles[m_currCardStyle].m_archiveRedirects.emplace_back(left, right);
-	m_styles[m_currCardStyle].m_archiveRedirectMap.insert(std::make_pair(left, right));
+	if (m_styles[styleIdx].m_archiveRedirectMap.find(left) != m_styles[styleIdx].m_archiveRedirectMap.end()) return false; //allready contains it
+	m_styles[styleIdx].m_archiveRedirects.emplace_back(left, right);
+	m_styles[styleIdx].m_archiveRedirectMap.insert(std::make_pair(left, right));
 	return true;
 }
+
 bool AAUCardData::RemoveArchiveRedirect(int index) {
-	if (index < 0 || (size_t)index >= m_styles[m_currCardStyle].m_archiveRedirects.size()) return false;
-	auto vMatch = m_styles[m_currCardStyle].m_archiveRedirects.begin() + index;
-	auto mapMatch = m_styles[m_currCardStyle].m_archiveRedirectMap.find(vMatch->first);
-	m_styles[m_currCardStyle].m_archiveRedirects.erase(vMatch);
-	if (mapMatch != m_styles[m_currCardStyle].m_archiveRedirectMap.end()) m_styles[m_currCardStyle].m_archiveRedirectMap.erase(mapMatch);
+	return RemoveArchiveRedirect(index, m_currCardStyle);
+}
+
+bool AAUCardData::RemoveArchiveRedirect(int index, int styleIdx) {
+	if (index < 0 || (size_t)index >= m_styles[styleIdx].m_archiveRedirects.size()) return false;
+	auto vMatch = m_styles[styleIdx].m_archiveRedirects.begin() + index;
+	auto mapMatch = m_styles[styleIdx].m_archiveRedirectMap.find(vMatch->first);
+	m_styles[styleIdx].m_archiveRedirects.erase(vMatch);
+	if (mapMatch != m_styles[styleIdx].m_archiveRedirectMap.end()) m_styles[styleIdx].m_archiveRedirectMap.erase(mapMatch);
 	return true;
 }
 
 bool AAUCardData::AddObjectOverride(const TCHAR * object, const TCHAR * file) {
+	return AddObjectOverride(object, file, m_currCardStyle);
+}
+
+bool AAUCardData::AddObjectOverride(const TCHAR* object, const TCHAR* file, int styleIdx) {
 	char buff[256];
 	size_t n;
 	wcstombs_s(&n, buff, object, 256);
 	std::string strObject = buff;
 	wcstombs_s(&n, buff, file, 256);
 	std::string strFile = buff;
-	if (m_styles[m_currCardStyle].m_objectOverrideMap.find(strObject) != m_styles[m_currCardStyle].m_objectOverrideMap.end()) return false; //allready contains it
+	if (m_styles[styleIdx].m_objectOverrideMap.find(strObject) != m_styles[styleIdx].m_objectOverrideMap.end()) return false; //allready contains it
 	XXObjectFile ofile(file, XXObjectFile::OVERRIDE);
 	if (ofile.IsGood()) {
-		m_styles[m_currCardStyle].m_objectOverrides.emplace_back(object, file);
-		m_styles[m_currCardStyle].m_objectOverrideMap.insert(std::make_pair(strObject, std::move(ofile)));
+		m_styles[styleIdx].m_objectOverrides.emplace_back(object, file);
+		m_styles[styleIdx].m_objectOverrideMap.insert(std::make_pair(strObject, std::move(ofile)));
 	}
 	return true;
 }
 
 bool AAUCardData::RemoveObjectOverride(int index) {
-	if (index < 0 || (size_t)index >= m_styles[m_currCardStyle].m_objectOverrides.size()) return false;
-	auto vMatch = m_styles[m_currCardStyle].m_objectOverrides.begin() + index;
+	return RemoveObjectOverride(index, m_currCardStyle);
+}
+
+bool AAUCardData::RemoveObjectOverride(int index, int styleIdx) {
+	if (index < 0 || (size_t)index >= m_styles[styleIdx].m_objectOverrides.size()) return false;
+	auto vMatch = m_styles[styleIdx].m_objectOverrides.begin() + index;
 	char buff[256];
 	size_t n;
 	wcstombs_s(&n, buff, vMatch->first.c_str(), 256);
-	auto mapMatch = m_styles[m_currCardStyle].m_objectOverrideMap.find(buff);
-	m_styles[m_currCardStyle].m_objectOverrides.erase(vMatch);
-	if (mapMatch != m_styles[m_currCardStyle].m_objectOverrideMap.end()) m_styles[m_currCardStyle].m_objectOverrideMap.erase(mapMatch);
+	auto mapMatch = m_styles[styleIdx].m_objectOverrideMap.find(buff);
+	m_styles[styleIdx].m_objectOverrides.erase(vMatch);
+	if (mapMatch != m_styles[styleIdx].m_objectOverrideMap.end()) m_styles[styleIdx].m_objectOverrideMap.erase(mapMatch);
 	return true;
 }
 
@@ -659,6 +692,184 @@ bool AAUCardData::TransferCardStyleData(int index1, int index2, ExtClass::Charac
 	return true;
 }
 
+bool AAUCardData::LoadCardStyleData(int index1, int index2, AAUCardData* srcChar, AAUCardData* destChar,
+	bool aa2clothes, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair,
+	bool ao, bool ar, bool mo, bool oo,
+	bool hr, bool tn, bool bd, bool bs)
+{
+	if (index1 >= srcChar->m_styles.size() || index2 >= destChar->m_styles.size()) return false;
+
+	if (aa2clothes) {	// full copy
+		for (int i = 0; i < 4; i++)
+		{
+			destChar->m_styles[index2].m_cardStyleData.m_clothes[i] = srcChar->m_styles[index1].m_cardStyleData.m_clothes[i];
+		}
+	}
+	if (aa2body) {	// full copy
+		destChar->m_styles[index2].m_cardStyleData.m_figure = srcChar->m_styles[index1].m_cardStyleData.m_figure;
+		destChar->m_styles[index2].m_cardStyleData.m_gender = srcChar->m_styles[index1].m_cardStyleData.m_gender;
+		destChar->m_styles[index2].m_cardStyleData.m_chest = srcChar->m_styles[index1].m_cardStyleData.m_chest;
+		destChar->m_styles[index2].m_cardStyleData.m_bodyColor = srcChar->m_styles[index1].m_cardStyleData.m_bodyColor;
+	}
+	if (aa2face) {	// full copy
+		destChar->m_styles[index2].m_cardStyleData.m_faceSlot = srcChar->m_styles[index1].m_cardStyleData.m_faceSlot;
+		destChar->m_styles[index2].m_cardStyleData.m_faceDetails = srcChar->m_styles[index1].m_cardStyleData.m_faceDetails;
+		destChar->m_styles[index2].m_cardStyleData.m_eyebrows = srcChar->m_styles[index1].m_cardStyleData.m_eyebrows;
+	}
+	if (aa2eyes) {	// full copy
+		destChar->m_styles[index2].m_cardStyleData.m_eyes = srcChar->m_styles[index1].m_cardStyleData.m_eyes;
+	}
+	if (aa2hair) {	// full copy
+		destChar->m_styles[index2].m_cardStyleData.m_hair = srcChar->m_styles[index1].m_cardStyleData.m_hair;
+	}
+	if (ao) {	// add or replace
+		//cleanup already mapped files from the destination
+		auto source = srcChar->m_styles[index1].m_archiveOverrides;
+		auto sourceMap = srcChar->m_styles[index1].m_archiveOverrideMap;
+		auto dest = destChar->m_styles[index2].m_archiveOverrides;
+		auto destMap = destChar->m_styles[index2].m_archiveOverrideMap;
+
+		for (int i = dest.size() - 1; i >= 0; i--) {
+			if (sourceMap.find(dest[i].first) != sourceMap.end()) {
+				destChar->RemoveArchiveOverride(i, index2);
+			}
+		}
+		//append everything from the source
+		for (int i = 0; i < source.size(); i++) {
+			destChar->AddArchiveOverride(
+				source[i].first.first.c_str(),
+				source[i].first.second.c_str(),
+				source[i].second.c_str(),
+				index2);
+		}
+	}
+	if (ar) {	// add or replace
+		//cleanup already mapped files from the destination
+		for (int i = destChar->m_styles[index2].m_archiveRedirects.size() - 1; i >= 0; i--) {
+			if (srcChar->m_styles[index1].m_archiveRedirectMap.find(destChar->m_styles[index2].m_archiveRedirects[i].first) != srcChar->m_styles[index1].m_archiveRedirectMap.end()) {
+				destChar->RemoveArchiveRedirect(i, index2);
+			}
+		}
+		//append everything from the source
+		for (int i = 0; i < srcChar->m_styles[index1].m_archiveRedirects.size(); i++) {
+			destChar->AddArchiveRedirect(
+				srcChar->m_styles[index1].m_archiveRedirects[i].first.first.c_str(),
+				srcChar->m_styles[index1].m_archiveRedirects[i].first.second.c_str(),
+				srcChar->m_styles[index1].m_archiveRedirects[i].second.first.c_str(),
+				srcChar->m_styles[index1].m_archiveRedirects[i].second.second.c_str(),
+				index2);
+		}
+	}
+	if (mo) {	// add or replace
+		//cleanup already mapped files from the destination
+		for (int i = destChar->m_styles[index2].m_meshOverrides.size() - 1; i >= 0; i--) {
+			if (srcChar->m_styles[index1].m_meshOverrideMap.find(destChar->m_styles[index2].m_meshOverrides[i].first) != srcChar->m_styles[index1].m_meshOverrideMap.end()) {
+				destChar->RemoveMeshOverride(i, index2);
+			}
+		}
+		//append everything from the source
+		for (int i = 0; i < srcChar->m_styles[index1].m_meshOverrides.size(); i++) {
+			destChar->AddMeshOverride(
+				srcChar->m_styles[index1].m_meshOverrides[i].first.c_str(),
+				srcChar->m_styles[index1].m_meshOverrides[i].second.c_str(),
+				index2);
+		}
+	}
+	if (oo) {	// add or replace
+		//cleanup already mapped files from the destination
+		for (int i = destChar->m_styles[index2].m_objectOverrides.size() - 1; i >= 0; i--) {
+			char buff[256];
+			size_t n;
+			wcstombs_s(&n, buff, destChar->m_styles[index2].m_objectOverrides[i].first.c_str(), 256);
+			if (srcChar->m_styles[index1].m_objectOverrideMap.find(buff) != srcChar->m_styles[index1].m_objectOverrideMap.end()) {
+				destChar->RemoveObjectOverride(i, index2);
+			}
+		}
+		//append everything from the source
+		for (int i = 0; i < srcChar->m_styles[index1].m_objectOverrides.size(); i++) {
+			destChar->AddObjectOverride(
+				srcChar->m_styles[index1].m_objectOverrides[i].first.c_str(),
+				srcChar->m_styles[index1].m_objectOverrides[i].second.c_str(),
+				index2);
+		}
+	}
+	if (hr) {	// add hairpieces and replace highlight
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < srcChar->m_styles[index1].m_hairs[0].size(); j++) {
+				destChar->m_styles[index2].m_hairs[i].push_back(srcChar->m_styles[index1].m_hairs[i][j]);
+			}
+		}
+
+		destChar->m_styles[index2].m_hairHighlightName = srcChar->m_styles[index1].m_hairHighlightName;
+		destChar->m_styles[index2].m_hairHighlightImage = srcChar->m_styles[index1].m_hairHighlightImage;
+	}
+	if (tn) {	// full copy
+		destChar->m_styles[index2].m_tanImages[0] = srcChar->m_styles[index1].m_tanImages[0];
+		destChar->m_styles[index2].m_tanImages[1] = srcChar->m_styles[index1].m_tanImages[1];
+		destChar->m_styles[index2].m_tanImages[2] = srcChar->m_styles[index1].m_tanImages[2];
+		destChar->m_styles[index2].m_tanImages[3] = srcChar->m_styles[index1].m_tanImages[3];
+		destChar->m_styles[index2].m_tanImages[4] = srcChar->m_styles[index1].m_tanImages[4];
+		destChar->m_styles[index2].m_bTanColor = srcChar->m_styles[index1].m_bTanColor;
+		destChar->m_styles[index2].m_tanColor = srcChar->m_styles[index1].m_tanColor;
+		destChar->m_styles[index2].m_tanName = srcChar->m_styles[index1].m_tanName;
+	}
+	if (bs) {	// full copy
+		destChar->m_styles[index2].m_sliders = srcChar->m_styles[index1].m_sliders;
+		for (int i = 0; i < ExtClass::CharacterStruct::N_MODELS; i++) {
+			destChar->m_styles[index2].m_boneSliderMap[i] = srcChar->m_styles[index1].m_boneSliderMap[i];
+			destChar->m_styles[index2].m_frameSliderMap[i] = srcChar->m_styles[index1].m_frameSliderMap[i];
+		}
+	}
+	if (bd) {
+		destChar->m_styles[index2].m_boneTransforms = srcChar->m_styles[index1].m_boneTransforms;		// deprecated, can be left out?
+		destChar->m_styles[index2].m_boneTransformMap = srcChar->m_styles[index1].m_boneTransformMap;	// ditto
+
+		//bone rules
+		for (int i = srcChar->m_styles[index1].m_boneRules.size() - 1; i >= 0; i--)
+		{
+			auto flags = srcChar->m_styles[index1].m_boneRules[i].first.first;
+			auto xxname = srcChar->m_styles[index1].m_boneRules[i].first.second.first;
+			auto bonename = srcChar->m_styles[index1].m_boneRules[i].first.second.second;
+
+			//remove transformation if it allready exists
+			const auto& vec = destChar->GetMeshRuleList();
+			unsigned int match;
+			for (match = 0; match < vec.size(); match++) {
+				if (vec[match].first.first == flags && vec[match].first.second.first == xxname && vec[match].first.second.second == bonename) break;
+			}
+			if (match < vec.size()) destChar->RemoveBoneRule(match, index2);
+
+			//get matrix
+			AAUCardData::BoneMod mod = srcChar->m_styles[index1].m_boneRules[i].second;
+			//save
+			destChar->AddBoneRule((AAUCardData::MeshModFlag)flags, xxname.c_str(), bonename.c_str(), mod, index2);
+		}
+
+		// SMOL
+		for (int i = 0; i < srcChar->m_styles[index1].m_submeshOutlines.size(); i++) {
+			destChar->SetSubmeshOutlineColor(
+				srcChar->m_styles[index1].m_submeshOutlines[i].first.first.first,	//file
+				srcChar->m_styles[index1].m_submeshOutlines[i].first.first.second,	//bone
+				srcChar->m_styles[index1].m_submeshOutlines[i].first.second,		//material
+				srcChar->m_styles[index1].m_submeshOutlines[i].second,				//color
+				index2);
+		}
+
+		// SMSH
+		for (int i = 0; i < srcChar->m_styles[index1].m_submeshShadows.size(); i++) {
+			destChar->SetSubmeshShadowColor(
+				srcChar->m_styles[index1].m_submeshShadows[i].first.first.first,	//file
+				srcChar->m_styles[index1].m_submeshShadows[i].first.first.second,	//bone
+				srcChar->m_styles[index1].m_submeshShadows[i].first.second,			//material
+				srcChar->m_styles[index1].m_submeshShadows[i].second,				//color
+				index2);
+		}
+	}
+
+	return true;
+}
+
+
 bool AAUCardData::RemoveCardStyle(int index) {
 	if (index >= m_styles.size()) return false;
 	if (index == 0) return false;
@@ -688,12 +899,15 @@ int AAUCardData::FindStyleIdxByName(std::wstring* name) {
 	return 0;
 }
 
-
 bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, AAUCardData::BoneMod mod) {
-	m_styles[m_currCardStyle].m_boneRules.push_back(std::make_pair(std::make_pair(flags, std::pair<std::wstring, std::wstring>(xxFileName, boneName)), mod));
+	return AddBoneRule(flags, xxFileName, boneName, mod, m_currCardStyle);
+}
+
+bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, AAUCardData::BoneMod mod, int styleIdx) {
+	m_styles[styleIdx].m_boneRules.push_back(std::make_pair(std::make_pair(flags, std::pair<std::wstring, std::wstring>(xxFileName, boneName)), mod));
 	if (flags & MODIFY_BONE) {
-		auto mapIt = m_styles[m_currCardStyle].m_boneRuleMap.find(xxFileName);
-		if (mapIt != m_styles[m_currCardStyle].m_boneRuleMap.end()) {
+		auto mapIt = m_styles[styleIdx].m_boneRuleMap.find(xxFileName);
+		if (mapIt != m_styles[styleIdx].m_boneRuleMap.end()) {
 			auto map2it = mapIt->second.find(boneName);
 			if (map2it != mapIt->second.end()) {
 				//add mod
@@ -711,12 +925,12 @@ bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const 
 			std::vector<BoneMod> vec;
 			vec.push_back(mod);
 			map.emplace(boneName, vec);
-			m_styles[m_currCardStyle].m_boneRuleMap.emplace(xxFileName, std::move(map));
+			m_styles[styleIdx].m_boneRuleMap.emplace(xxFileName, std::move(map));
 		}
 	}
 	if (flags & MODIFY_FRAME) {
-		auto mapIt = m_styles[m_currCardStyle].m_frameRuleMap.find(xxFileName);
-		if (mapIt != m_styles[m_currCardStyle].m_frameRuleMap.end()) {
+		auto mapIt = m_styles[styleIdx].m_frameRuleMap.find(xxFileName);
+		if (mapIt != m_styles[styleIdx].m_frameRuleMap.end()) {
 			auto map2it = mapIt->second.find(boneName);
 			if (map2it != mapIt->second.end()) {
 				//add mod
@@ -734,7 +948,7 @@ bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const 
 			std::vector<BoneMod> vec;
 			vec.push_back(mod);
 			map.emplace(boneName, vec);
-			m_styles[m_currCardStyle].m_frameRuleMap.emplace(xxFileName, std::move(map));
+			m_styles[styleIdx].m_frameRuleMap.emplace(xxFileName, std::move(map));
 		}
 	}
 
@@ -742,11 +956,15 @@ bool AAUCardData::AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const 
 }
 
 bool AAUCardData::RemoveBoneRule(int index) {
-	if (index < 0 || (size_t)index >= m_styles[m_currCardStyle].m_boneRules.size()) return false;
-	auto vIt = m_styles[m_currCardStyle].m_boneRules.begin() + index;
+	return RemoveBoneRule(index, m_currCardStyle);
+}
+
+bool AAUCardData::RemoveBoneRule(int index, int styleIdx) {
+	if (index < 0 || (size_t)index >= m_styles[styleIdx].m_boneRules.size()) return false;
+	auto vIt = m_styles[styleIdx].m_boneRules.begin() + index;
 	int flags = vIt->first.first;
 	if (flags & MODIFY_BONE) {
-		auto mapIt = m_styles[m_currCardStyle].m_boneRuleMap.find(vIt->first.second.first);
+		auto mapIt = m_styles[styleIdx].m_boneRuleMap.find(vIt->first.second.first);
 		std::map<std::wstring, std::vector<BoneMod>>& map = mapIt->second;
 		auto map2It = map.find(vIt->first.second.second);
 		auto& modVec = map2It->second;
@@ -763,11 +981,11 @@ bool AAUCardData::RemoveBoneRule(int index) {
 		}
 		//if this map is now empty, remove it from first map
 		if (map.size() == 0) {
-			m_styles[m_currCardStyle].m_boneRuleMap.erase(mapIt);
+			m_styles[styleIdx].m_boneRuleMap.erase(mapIt);
 		}
 	}
 	if (flags & MODIFY_FRAME) {
-		auto mapIt = m_styles[m_currCardStyle].m_frameRuleMap.find(vIt->first.second.first);
+		auto mapIt = m_styles[styleIdx].m_frameRuleMap.find(vIt->first.second.first);
 		std::map<std::wstring, std::vector<BoneMod>>& map = mapIt->second;
 		auto map2It = map.find(vIt->first.second.second);
 		auto& modVec = map2It->second;
@@ -784,10 +1002,10 @@ bool AAUCardData::RemoveBoneRule(int index) {
 		}
 		//if this map is now empty, remove it from first map
 		if (map.size() == 0) {
-			m_styles[m_currCardStyle].m_frameRuleMap.erase(mapIt);
+			m_styles[styleIdx].m_frameRuleMap.erase(mapIt);
 		}
 	}
-	m_styles[m_currCardStyle].m_boneRules.erase(vIt);
+	m_styles[styleIdx].m_boneRules.erase(vIt);
 	return true;
 }
 

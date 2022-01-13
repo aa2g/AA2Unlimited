@@ -245,6 +245,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_btnReset = GetDlgItem(hwndDlg, IDC_GN_BTNRESET);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
+		thisPtr->m_btnAAuSetLoad = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETLOAD);
 		thisPtr->m_cbTransAA2CLOTHES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2CLOTHES);
 		thisPtr->m_cbTransAA2BODY = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2BODY);
 		thisPtr->m_cbTransAA2FACE = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2FACE);
@@ -373,6 +374,170 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					thisPtr->RefreshAAuSetList();
 				}
 				return TRUE;
+			case IDC_GN_BTNAAUSETLOAD:
+				{
+					if (!g_currChar.IsValid()) return FALSE;
+					// get the target style
+					int selTransTo = SendMessage(thisPtr->m_lbAAuSets2, LB_GETCURSEL, 0, 0);
+					if (selTransTo == LB_ERR) return FALSE;
+					auto gender = g_currChar.m_char->m_charData->m_gender ? TEXT("Female") : TEXT("Male");
+					const TCHAR* path = General::OpenFileDialog(General::BuildEditPath(TEXT("data\\save\\"), gender).c_str());
+					if (path != NULL) {
+						// 1. load all the data into memory
+						Shared::PNG::Footer footer = { 0 };
+
+						auto fh = CreateFile((LPCTSTR)path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+						if (fh == INVALID_HANDLE_VALUE)
+						{
+							auto lastError = GetLastError();
+							CloseHandle(fh);
+							return FALSE;
+						}
+
+						DWORD sz = GetFileSize(fh, NULL);
+						DWORD orig_sz = sz;
+
+						// Read the magic footer
+						SetFilePointer(fh, sz - sizeof(Shared::PNG::Footer), NULL, FILE_BEGIN);
+
+						DWORD got = 0;
+						ReadFile(fh, &footer, sizeof(footer), &got, NULL);
+
+						AAUCardData cd;
+						cd.Reset();
+
+						// Now try to extract aau data
+						BYTE* aaud_ptr, * buf = NULL;
+						int aaud_sz;
+						int aaud_off;
+						int blob_sz = 0;
+						int blob_off = 0;
+						int illusion_off = sz - footer.illusion_delta; // also points to end of our blob, if there is any
+						char* cbuf = NULL, * dbuf = NULL;
+
+						// seems corrupted
+						if ((illusion_off < 64) || (illusion_off > sz))
+						{
+							CloseHandle(fh);
+							return FALSE;
+						}
+
+						// newer card, has a magic (and possibly a blob)
+						aaud_off = sz - footer.aaud_delta;
+						if (!memcmp(footer.vermagic, Shared::PNG::vermagic, 8)) {
+							// 4 is trailing crc, 12 is the IEND chunk
+							aaud_sz = illusion_off - aaud_off - 4 - 12;
+							if (aaud_sz < 0) {
+								CloseHandle(fh);
+								return FALSE;
+							}
+							// seek to AAUD contents
+							SetFilePointer(fh, aaud_off, 0, FILE_BEGIN);
+							aaud_ptr = buf = new BYTE[sz];
+							got = 0;
+							ReadFile(fh, buf, aaud_sz, &got, NULL);
+
+							// set up blob
+							blob_off = sz - footer.aaublob_delta;
+							blob_sz = footer.aaublob_delta - sizeof(footer);
+						}
+						// older card, no magic, we'll scan for the chunk
+						else {
+							// no magic, no blob to substract
+							footer.aaublob_delta = 0;
+
+							buf = new BYTE[illusion_off];
+							DWORD got = 0;
+							SetFilePointer(fh, 0, NULL, FILE_BEGIN);
+							ReadFile(fh, buf, illusion_off, &got, NULL);
+
+							aaud_ptr = General::FindPngChunk(buf, illusion_off, AAUCardData::PngChunkIdBigEndian);
+
+							// No aau data, plain card
+							if (!aaud_ptr) {
+								CloseHandle(fh);
+								return FALSE;
+							}
+
+							aaud_sz = _byteswap_ulong(*((DWORD*)(aaud_ptr)));
+							// get past size and chunk tag
+							aaud_ptr += 8;
+
+						}
+
+						cd.FromBuffer((char*)aaud_ptr, aaud_sz);	// TODO: skip if file extraction is disabled
+						cd.BlobReset();
+						cd.GenAllFileMaps();
+
+						static const int BACKUP_START = 0xa57;
+						static const int BACKUP_END = 0xbc3;
+
+						Shared::PNG::CardClothes saved_clothes[4];
+
+						SetFilePointer(fh, illusion_off + BACKUP_START, NULL, FILE_BEGIN);
+						got = 0;
+						ReadFile(fh, saved_clothes, BACKUP_END - BACKUP_START, &got, NULL);
+
+						//AAEdit::g_AAUnlimitDialog.Refresh();
+						if (buf) delete buf;
+
+						// return size without aau blob
+						sz -= footer.aaublob_delta;
+						if ((sz < 0) || (sz > orig_sz))
+							sz = 0;
+						SetFilePointer(fh, 0, NULL, FILE_BEGIN);
+						// 2. check the selected checkboxes
+						bool aa2clothes = SendMessage(thisPtr->m_cbTransAA2CLOTHES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2hair = SendMessage(thisPtr->m_cbTransAA2HAIR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ao = SendMessage(thisPtr->m_cbTransAO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ar = SendMessage(thisPtr->m_cbTransAR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool mo = SendMessage(thisPtr->m_cbTransMO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool oo = SendMessage(thisPtr->m_cbTransOO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bd = SendMessage(thisPtr->m_cbTransBD, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bs = SendMessage(thisPtr->m_cbTransBS, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool hr = SendMessage(thisPtr->m_cbTransHR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						// 3. transfer data
+						g_currChar.m_cardData.LoadCardStyleData(0, selTransTo, &cd, &g_currChar.m_cardData,
+							aa2clothes, aa2body, aa2face, aa2eyes, aa2hair,
+							ao, ar, mo, oo,
+							hr, tn, bd, bs);
+						// 4. update if it's the current style
+						if (selTransTo == g_currChar.GetCurrentStyle())
+						{
+							auto currStyleCardData = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_cardStyleData;
+							if (aa2clothes) {
+								for (int i = 0; i < 4; i++)
+								{
+									g_currChar.m_char->m_charData->m_clothes[i] = currStyleCardData.m_clothes[i];
+								}
+							}
+							if (aa2body) {
+								g_currChar.m_char->m_charData->m_figure = currStyleCardData.m_figure;
+								g_currChar.m_char->m_charData->m_gender = currStyleCardData.m_gender;
+								g_currChar.m_char->m_charData->m_chest = currStyleCardData.m_chest;
+								g_currChar.m_char->m_charData->m_bodyColor = currStyleCardData.m_bodyColor;
+							}
+							if (aa2face) {
+								g_currChar.m_char->m_charData->m_faceSlot = currStyleCardData.m_faceSlot;
+								g_currChar.m_char->m_charData->m_faceDetails = currStyleCardData.m_faceDetails;
+								g_currChar.m_char->m_charData->m_eyebrows = currStyleCardData.m_eyebrows;
+							}
+							if (aa2eyes) {
+								g_currChar.m_char->m_charData->m_eyes = currStyleCardData.m_eyes;
+							}
+							if (aa2hair) {
+								g_currChar.m_char->m_charData->m_hair = currStyleCardData.m_hair;
+							}
+							g_currChar.Respawn();
+						}
+						thisPtr->Refresh();
+					}
+				}
+				return TRUE;
 			case IDC_GN_BTNRESET: {
 				if (AAEdit::g_currChar.IsValid())
 				{
@@ -383,7 +548,6 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					thisPtr->Refresh();
 				}
 				return FALSE;
-				break;
 			}
 			case IDC_GN_BTNSETCLOTH0:
 			case IDC_GN_BTNSETCLOTH1:
@@ -391,7 +555,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_GN_BTNSETCLOTH3:
 				{
 					auto idx = IDC_GN_BTNSETCLOTH0;
-					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					const TCHAR* path = General::OpenFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
 					if (path != NULL) {
 						auto buf = General::FileToBuffer(path);
 						//Replacing the wrong bytes, that's just how it is. 
