@@ -163,75 +163,8 @@ std::wstring UnlimitedDialog::TRDialog::EVANameToString(const std::wstring& name
 		retVal += ExpressionToString(actualParameters[i++]);
 	}
 	retVal += container[i];
-
-	//int n = 0;
-	//int last = 0, i = 1;
-	//for (i = 1; i < name.size(); i++) {
-	//	if (isspace(name[i]) && i != last) {
-	//		std::wstring part = name.substr(last, i - last);
-	//		if (retVal.size() != 0) retVal.push_back(L' ');
-	//		if (part == TEXT("%p")) {
-	//			std::wstring paramString = ExpressionToString(actualParameters[n++]);
-	//			//retVal.push_back(L'(');
-	//			retVal += paramString;
-	//			//retVal.push_back(L')');
-	//		}
-	//		else {
-	//			retVal += part;
-	//		}
-	//		last = i + 1;
-	//	}
-	//}
-	//std::wstring part = name.substr(last, i - last);
-	//if (retVal.size() != 0) retVal.push_back(L' ');
-	//if (part == TEXT("%p")) {
-	//	std::wstring paramString = ExpressionToString(actualParameters[n++]);
-	//	//retVal.push_back(L'(');
-	//	retVal += paramString;
-	//	//retVal.push_back(L')');
-	//}
-	//else {
-	//	retVal += part;
-	//}
-	//last = i + 1;
 	return retVal;
 }
-
-//std::wstring UnlimitedDialog::TRDialog::EVANameToString(const std::wstring& name,const std::vector<ParameterisedExpression>& actualParameters) {
-//	std::wstring retVal;
-//	//split string at whitespaces
-//	int n = 0;
-//	int last = 0,i = 1;
-//	for (i = 1; i < name.size(); i++) {
-//		if (isspace(name[i]) && i != last) {
-//			std::wstring part = name.substr(last,i-last);
-//			if (retVal.size() != 0) retVal.push_back(L' ');
-//			if (part == TEXT("%p")) {
-//				std::wstring paramString = ExpressionToString(actualParameters[n++]);
-//				//retVal.push_back(L'(');
-//				retVal += paramString;
-//				//retVal.push_back(L')');
-//			}
-//			else {
-//				retVal += part;
-//			}
-//			last = i+1;
-//		}
-//	}
-//	std::wstring part = name.substr(last,i-last);
-//	if (retVal.size() != 0) retVal.push_back(L' ');
-//	if (part == TEXT("%p")) {
-//		std::wstring paramString = ExpressionToString(actualParameters[n++]);
-//		//retVal.push_back(L'(');
-//		retVal += paramString;
-//		//retVal.push_back(L')');
-//	}
-//	else {
-//		retVal += part;
-//	}
-//	last = i+1;
-//	return retVal;
-//}
 
 /*************************
  * Trigger (main) window *
