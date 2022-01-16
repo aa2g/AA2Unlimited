@@ -89,6 +89,8 @@ namespace AAEdit {
 		HWND m_cbTransHR;
 		HWND m_cbTransTN;
 
+		bool m_isFileOpenDialogOpen;
+
 		void Refresh();
 		void RefreshAAuSetList();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
