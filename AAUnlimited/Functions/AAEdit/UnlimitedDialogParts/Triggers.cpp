@@ -137,24 +137,9 @@ std::wstring UnlimitedDialog::TRDialog::ExpressionToString(const ParameterisedEx
 std::wstring UnlimitedDialog::TRDialog::EVANameToString(const std::wstring& name, const std::vector<ParameterisedExpression>& actualParameters) {
 	std::wstring retVal;
 
-	// split helper
-	auto split = [](const std::wstring* str,
-		std::vector<std::wstring>& container,
-		std::wstring delim)
-	{
-		std::size_t current, previous = 0;
-		current = str->find(delim);
-		while (current != std::string::npos) {
-			container.push_back(str->substr(previous, current - previous));
-			previous = current + delim.size();
-			current = str->find(delim, previous);
-		}
-		container.push_back(str->substr(previous, current - previous));
-	};
-
 	//split string at %p
 	std::vector<std::wstring> container;
-	split(&name, container, L"%p");
+	General::SplitW(&name, container, L"%p");
 
 	int i = 0;
 	// assuming there's exactly enough actual parameters
@@ -1224,20 +1209,25 @@ void loc_AddData::SelectFromComboBox(HWND dlg,int index,const std::wstring* name
 		SendMessage(stDescr,WM_SETTEXT,0,(LPARAM)descr->c_str());
 	}
 
+	//split string at %p
+	std::vector<std::wstring> container;
+	General::SplitW(name, container, L"%p");
+
+	//count %p in name
+	int paramCount = 0;
+	for (auto i = name->find(L"%p"); i != std::wstring::npos; i = name->find(L"%p", i + 2/*"%p".length*/)) {
+		++paramCount;
+	}
+
 	if (name != NULL) {
 		HWND stName = GetDlgItem(dlg,IDC_TR_AA_STNAME);
-		//split string at whitespaces
-		int last = 0,i = 1;
-		for (i = 1; i < name->size(); i++) {
-			if (isspace((*name)[i]) && i != last) {
-				std::wstring part = name->substr(last,i-last);
-				parts.push_back(std::move(part));
-				last = i+1;
-			}
+		int i = 0;
+
+		for (i = 0; i < paramCount;) {
+			parts.push_back(container[i++]);
+			parts.push_back(L"%p");
 		}
-		std::wstring part = name->substr(last,i-last);
-		parts.push_back(std::move(part));
-		last = i+1;
+		parts.push_back(container[i]);
 
 		DrawName(stName,NULL,this);
 
@@ -1396,20 +1386,27 @@ void loc_AddActionData::SelectFromComboBox(HWND dlg,int index) {
 			SendMessage(stDescr,WM_SETTEXT,0,(LPARAM)descr->c_str());
 		}
 
+
 		if (name != NULL) {
 			HWND stName = GetDlgItem(dlg,IDC_TR_AA_STNAME);
-			//split string at whitespaces
-			int last = 0,i = 1;
-			for (i = 1; i < name->size(); i++) {
-				if (isspace((*name)[i]) && i != last) {
-					std::wstring part = name->substr(last,i-last);
-					parts.push_back(std::move(part));
-					last = i+1;
-				}
+
+			//split string at %p
+			std::vector<std::wstring> container;
+			General::SplitW(name, container, L"%p");
+
+			//count %p in name
+			int paramCount = 0;
+			for (auto i = name->find(L"%p"); i != std::wstring::npos; i = name->find(L"%p", i + 2/*"%p".length*/)) {
+				++paramCount;
 			}
-			std::wstring part = name->substr(last,i-last);
-			parts.push_back(std::move(part));
-			last = i+1;
+
+			int i = 0;
+
+			for (i = 0; i < paramCount;) {
+				parts.push_back(container[i++]);
+				parts.push_back(L"%p");
+			}
+			parts.push_back(container[i]);
 
 			DrawName(stName,NULL,this);
 

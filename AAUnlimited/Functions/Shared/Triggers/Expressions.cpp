@@ -586,29 +586,13 @@ namespace Shared {
 
 		//string(string, int, int)
 		Value Thread::GetCSVByIndex(std::vector<Value>& params) {
-			// split helper
-			auto split = [](const std::wstring* str,
-				std::vector<std::wstring>& container,
-				std::wstring delim)
-			{
-				std::size_t current, previous = 0;
-				current = str->find(delim);
-				while (current != std::string::npos) {
-					container.push_back(str->substr(previous, current - previous));
-					previous = current + delim.size();
-					current = str->find(delim, previous);
-				}
-				container.push_back(str->substr(previous, current - previous));
-			};
-			//
-
 			auto str = params[0].strVal;
 			int idx = params[1].iVal;
 			auto sep = params[2].strVal;
 
 			// split the string parameters
 			std::vector<std::wstring> container;
-			split(str, container, *sep);
+			General::SplitW(str, container, *sep);
 			idx = idx % container.size();
 			return container[idx];
 		}
