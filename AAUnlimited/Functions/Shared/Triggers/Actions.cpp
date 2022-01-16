@@ -2309,7 +2309,7 @@ namespace Shared {
 				&Thread::SetNpcResponseSuccess
 			},
 			{
-				19, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Percent"), TEXT("NPCNormalResponsePercent = %p%"),
+				19, ACTIONCAT_EVENT, TEXT("Set Npc Normal Response Percent"), TEXT("NPCNormalResponsePercent = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
@@ -2538,13 +2538,13 @@ namespace Shared {
 				&Thread::SetCardAnalSexExperience
 			},
 			{
-				54, ACTIONCAT_GENERAL, TEXT("Add Mood"), TEXT("%p.AddMood(mood: %p, strength: %p"),
+				54, ACTIONCAT_GENERAL, TEXT("Add Mood"), TEXT("%p.AddMood(mood: %p, strength: %p)"),
 				TEXT("Add mood strength."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::AddMood
 			},
 			{
-				55, ACTIONCAT_GENERAL, TEXT("Replace Mood"), TEXT("%p.ReplaceMood(mood: %p, with mood: %p, strength: %p"),
+				55, ACTIONCAT_GENERAL, TEXT("Replace Mood"), TEXT("%p.ReplaceMood(mood: %p, with mood: %p, strength: %p)"),
 				TEXT("Replace mood 1 with mood 2 up to strength."),
 				{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::ReplaceMood
@@ -2778,20 +2778,20 @@ namespace Shared {
 				&Thread::SetAbsoluteResponse
 			},
 			{
-				94, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Success"), TEXT("NPCStrongResponseSuccess = %p%"),
+				94, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Success"), TEXT("NPCStrongResponseSuccess = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the answer the character will do. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_BOOL },
 				&Thread::SetNpcStrongResponseSuccess
 			},
 			{
-				95, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("NPCStrongResponsePercent = %p%"),
+				95, ACTIONCAT_EVENT, TEXT("Set Npc Strong Response Percent"), TEXT("NPCStrongResponsePercent = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
 				&Thread::SetNpcResponseStrongPercent
 			},
 			{
-				96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p%"),
+				96, ACTIONCAT_EVENT, TEXT("Set Npc Absolute Response Percent"), TEXT("NPCAbsoluteResponsePercent = %p"),
 				TEXT("When executed with a Npc Answers Event, this can be used to modify the success percentage showed. Note that changing this value "
 				"does not influence the Nps Answer, as it has allready been made. This Action only modifies the Percentage displayed in the UI. Adhers to the following priority and override each other: Normal < Strong < Absolute."),
 				{ TYPE_INT },
