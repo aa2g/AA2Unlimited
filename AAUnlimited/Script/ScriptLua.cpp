@@ -10,6 +10,15 @@ Lua *g_Lua_p;
 using namespace General;
 Shared::Triggers::KeyPressData keyPressData;
 
+
+void invoke_haircolor_ui_update(void* addr, DWORD val) {
+	__asm
+	{
+		mov edi, val
+		call[addr]
+	};
+}
+
 // direct assembly code callback, stdcall/thiscall/cdecl
 int __stdcall callback_ptr(int _this, const DWORD *argbuf, int narg, int idx) {
 	lua_State *L = LUA_GLOBAL.L();
@@ -212,6 +221,10 @@ void Lua::bindLua() {
 		lua_pushinteger(L, saved_eax);
 		lua_pushinteger(L, saved_edx);
 		return 2;
+	});
+
+	_BINDING["invoke_hair_update"] = LUA_LAMBDA({
+		invoke_haircolor_ui_update((void*)s.get(1), (DWORD)s.get(2));
 	});
 	_BINDING["callback"] = DWORD(&callback_ptr);
 	_BINDING["x_pages"] = LUA_LAMBDA({

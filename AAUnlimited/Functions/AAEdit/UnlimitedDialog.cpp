@@ -372,16 +372,19 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							hr, tn, bd, bs);
 					}
 					thisPtr->RefreshAAuSetList();
+					SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
 				}
 				return TRUE;
 			case IDC_GN_BTNAAUSETLOAD:
 				{
-					if (!g_currChar.IsValid()) return FALSE;
+					if (!g_currChar.IsValid() || thisPtr->m_isFileOpenDialogOpen) return FALSE;
 					// get the target style
 					int selTransTo = SendMessage(thisPtr->m_lbAAuSets2, LB_GETCURSEL, 0, 0);
 					if (selTransTo == LB_ERR) return FALSE;
 					auto gender = g_currChar.m_char->m_charData->m_gender ? TEXT("Female") : TEXT("Male");
+					thisPtr->m_isFileOpenDialogOpen = true;
 					const TCHAR* path = General::OpenFileDialog(General::BuildEditPath(TEXT("data\\save\\"), gender).c_str());
+					thisPtr->m_isFileOpenDialogOpen = false;
 					if (path != NULL) {
 						// 1. load all the data into memory
 						Shared::PNG::Footer footer = { 0 };
@@ -508,7 +511,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						// 4. update if it's the current style
 						if (selTransTo == g_currChar.GetCurrentStyle())
 						{
-							auto currStyleCardData = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_cardStyleData;
+							auto currStyleCardData = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_cardStyleData;	// current style after it has been modified
 							if (aa2clothes) {
 								for (int i = 0; i < 4; i++)
 								{
@@ -532,9 +535,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							if (aa2hair) {
 								g_currChar.m_char->m_charData->m_hair = currStyleCardData.m_hair;
 							}
+							LUA_EVENT_NORET("update_edit_gui");
 							g_currChar.Respawn();
 						}
 						thisPtr->Refresh();
+						SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
 					}
 				}
 				return TRUE;
@@ -554,8 +559,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			case IDC_GN_BTNSETCLOTH2:
 			case IDC_GN_BTNSETCLOTH3:
 				{
+					if (!g_currChar.IsValid() || thisPtr->m_isFileOpenDialogOpen) return FALSE;
 					auto idx = IDC_GN_BTNSETCLOTH0;
+					thisPtr->m_isFileOpenDialogOpen = true;
 					const TCHAR* path = General::OpenFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					thisPtr->m_isFileOpenDialogOpen = false;
 					if (path != NULL) {
 						auto buf = General::FileToBuffer(path);
 						//Replacing the wrong bytes, that's just how it is. 
@@ -618,7 +626,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
-					LUA_EVENT_NORET("update_edit_gui")
+
+					LUA_EVENT_NORET("update_edit_gui");
 					Shared::preservingFrontHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.frontHair;
 					Shared::preservingSideHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.sideHair;
 					Shared::preservingBackHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.backhair;
@@ -643,6 +652,7 @@ void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
 		SendMessage(this->m_lbAAuSets2,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
 	}
 	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
+	SendMessage(this->m_lbAAuSets2, LB_SETCURSEL, 0, 0);
 }
 
 void UnlimitedDialog::GNDialog::Refresh() {
