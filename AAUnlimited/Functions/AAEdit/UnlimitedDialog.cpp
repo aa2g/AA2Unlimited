@@ -1,6 +1,7 @@
 ﻿#include "StdAfx.h"
 #include "Files/PNGData.h"
 #include "Dictionary.h"
+#include "zstd.h"
 
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -469,6 +470,47 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						}
 
 						cd.FromBuffer((char*)aaud_ptr, aaud_sz);	// TODO: skip if file extraction is disabled
+
+						//TODO: support old modcard card formats
+						// if this is an old card with File entries, convert those to (already decompressed) blob first
+						// bool converted = false;
+						// bool skipBlob = false;
+						// if ((cd.m_version < cd.CurrentVersion) && (blob_sz == 0)) {
+						// 	converted = true;
+						// 	cd.ConvertFilesToBlob();
+						// 	if (!cd.PrepareDumpBlob())
+						// 		goto skip_blob;
+						// 	goto skip_load;
+						// }
+
+						if (blob_sz)
+						{
+							// rewrite file paths and check if something is missing or something requests to abort
+							if (cd.PrepareDumpBlob()) {
+								// we need blob, so load and decompress it
+								cbuf = new char[blob_sz];
+								SetFilePointer(fh, blob_off, 0, FILE_BEGIN);
+								got = 0;
+								ReadFile(fh, cbuf, blob_sz, &got, NULL);
+								if (got == blob_sz) {
+									LOGPRIO(Logger::Priority::SPAM) << std::dec << "Decompressing blob of " << blob_sz << " bytes\r\n";
+									int dbsize = ZSTD_getDecompressedSize(cbuf, blob_sz);
+									dbuf = new char[dbsize];
+									if (ZSTD_decompress(dbuf, dbsize, cbuf, blob_sz) >= 0) {
+										cd.Blob = dbuf;
+										dbuf = NULL;
+
+										if (cd.Blob) {
+											cd.DumpBlob();
+										}
+									}
+								}
+							}
+						}
+
+						if (cbuf) delete cbuf;
+						if (dbuf) delete dbuf;
+						AAEdit::g_AAUnlimitDialog.SetSaveFiles((cd.m_blobInfo.size() > 0));
 						cd.BlobReset();
 						cd.GenAllFileMaps();
 
@@ -536,7 +578,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 								g_currChar.m_char->m_charData->m_hair = currStyleCardData.m_hair;
 							}
 							LUA_EVENT_NORET("update_edit_gui");
-							g_currChar.Respawn();
+							//g_currChar.Respawn();
 						}
 						thisPtr->Refresh();
 						SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
