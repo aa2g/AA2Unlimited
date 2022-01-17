@@ -272,10 +272,12 @@
     <None Include="resource.hm" />
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
+    <None Include="Texts\mod\aaface.lua" />
     <None Include="Texts\mod\aaface\init.lua" />
     <None Include="Texts\mod\borderless.lua" />
     <None Include="Texts\mod\butthurt.lua" />
     <None Include="Texts\mod\charex.lua" />
+    <None Include="Texts\mod\climaxbutton.lua" />
     <None Include="Texts\mod\com.lua" />
     <None Include="Texts\mod\const.lua" />
     <None Include="Texts\mod\cram_school.lua" />
@@ -304,7 +306,12 @@
     <None Include="Texts\mod\makertrans\init.lua" />
     <None Include="Texts\mod\memory.lua" />
     <None Include="Texts\mod\meshfix.lua" />
+    <None Include="Texts\mod\music.lua" />
+    <None Include="Texts\mod\musicconfig.lua" />
+    <None Include="Texts\mod\nobra.lua" />
     <None Include="Texts\mod\nocd.lua" />
+    <None Include="Texts\mod\nomurder.lua" />
+    <None Include="Texts\mod\notifications.lua" />
     <None Include="Texts\mod\patcher.lua" />
     <None Include="Texts\mod\patches.lua" />
     <None Include="Texts\mod\playtrans.lua" />

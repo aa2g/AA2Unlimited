@@ -583,5 +583,26 @@
     <None Include="Texts\mod\cram_school.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\aaface.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\climaxbutton.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\music.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\musicconfig.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\nobra.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\nomurder.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\notifications.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
