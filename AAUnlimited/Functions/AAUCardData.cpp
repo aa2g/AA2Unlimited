@@ -795,7 +795,7 @@ bool AAUCardData::LoadCardStyleData(int index1, int index2, AAUCardData* srcChar
 	}
 	if (hr) {	// add hairpieces and replace highlight
 		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < srcChar->m_styles[index1].m_hairs[0].size(); j++) {
+			for (int j = 0; j < srcChar->m_styles[index1].m_hairs[i].size(); j++) {
 				destChar->m_styles[index2].m_hairs[i].push_back(srcChar->m_styles[index1].m_hairs[i][j]);
 			}
 		}
