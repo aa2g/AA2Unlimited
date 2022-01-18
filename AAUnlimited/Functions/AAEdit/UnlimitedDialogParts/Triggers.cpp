@@ -1054,9 +1054,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 			ParameterisedExpression dummy(elem.type,elem.defaultValue);
 			str += thisPtr->ExpressionToString(dummy);
 			int ret = SendMessage(lb,LB_ADDSTRING,0,(LPARAM)str.c_str());
-
-		}
-		
+		}		
 		
 		return TRUE;
 		break; }
@@ -1091,7 +1089,34 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 			break;
 		case IDC_TR_GV_BTNEDIT:
 			if (notification == BN_CLICKED) {
+				int sel = SendMessage(GetDlgItem(hwndDlg, IDC_TR_GV_LBLIST), LB_GETCURSEL, 0, 0);
+				if (sel != LB_ERR) {
+					auto& list = g_currChar.m_cardData.GetGlobalVariables();
+					auto globalVar = list[sel];
+					loc_AddVariableData data;
+					data.thisPtr = thisPtr;
+					data.gvar = globalVar;
+					data.checkGlobalNameConflict = true;
+					data.onlyConstantInit = true;
+					data.editGlobalVar = true;
+					int result = DialogBoxParam(General::DllInst, MAKEINTRESOURCE(IDD_TRIGGERS_ADDVARIABLE), hwndDlg, &AddVariableDialogProc, (LPARAM)&data);
+					if (result == 1) {
+						//list.push_back(data.var);
 
+						auto type = data.editGlobalVar ? data.gvar.type : data.var.type;
+						std::wstring str = g_Types[type].name + TEXT(" ") + data.var.name;
+						str += TEXT(" = ");
+						str += thisPtr->ExpressionToString(data.var.defaultValue);
+
+						list[sel].defaultValue = data.gvar.defaultValue;
+						list[sel].currentValue = data.gvar.defaultValue;
+						list[sel].name = data.var.name;
+
+						SendMessage(GetDlgItem(hwndDlg, IDC_TR_GV_LBLIST), LB_DELETESTRING, sel, 0);
+						SendMessage(GetDlgItem(hwndDlg, IDC_TR_GV_LBLIST), LB_INSERTSTRING, sel, (LPARAM)str.c_str());
+					}
+				}
+				return TRUE;
 			}
 			break;
 		case IDC_TR_GV_BTNDELETE:
@@ -1547,7 +1572,7 @@ void loc_AddExpressionData::SelectFromComboBox(HWND dlg,int index) {
 			SendMessage(cb,WM_SETTEXT,0,(LPARAM)std::to_wstring(expression.constant.bVal).c_str());
 			break;
 		case TYPE_STRING:
-			SendMessage(cb,WM_SETTEXT,0,(LPARAM)expression.constant.strVal);
+			SendMessage(cb,WM_SETTEXT,0,(LPARAM)expression.constant.strVal->c_str());
 			break;
 		default:
 			break;
@@ -1927,11 +1952,31 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 	case WM_INITDIALOG: {
 		SetWindowLongPtr(hwndDlg,GWLP_USERDATA,(LONG)lparam);
 		EnableWindow(GetDlgItem(hwndDlg,IDC_TR_AV_BTNADD),FALSE);
-		HWND cb = GetDlgItem(hwndDlg,IDC_TR_AV_CBTYPE);
-		//add all types
-		for(int i = 0; i < ARRAYSIZE(g_Types); i++) {
-			auto& elem = g_Types[i];
-			SendMessage(cb,CB_ADDSTRING,0,(LPARAM)elem.name.c_str());
+		HWND cbTypes = GetDlgItem(hwndDlg, IDC_TR_AV_CBTYPE);
+		HWND edVarName = GetDlgItem(hwndDlg, IDC_TR_AV_EDNAME);
+		HWND txtDefaultValue = GetDlgItem(hwndDlg, IDC_TR_AV_STINITVAL);
+		HWND btnAdd = GetDlgItem(hwndDlg, IDC_TR_AV_BTNADD);
+		auto input = (loc_AddVariableData*)lparam;
+		if (input && input->editGlobalVar)
+		{
+			SendMessage(cbTypes, CB_ADDSTRING, 0, (LPARAM)g_Types[input->gvar.type].name.c_str());
+			SendMessage(cbTypes, CB_SELECTSTRING, -1, (LPARAM)g_Types[input->gvar.type].name.c_str());
+			SendMessage(edVarName, WM_SETTEXT, 0, (LPARAM)input->gvar.name.c_str());
+			SendMessage(txtDefaultValue, WM_SETTEXT, 0, (LPARAM)input->gvar.defaultValue.strVal->c_str());
+			input->var.defaultValue = ParameterisedExpression(input->gvar.type, Value(input->gvar.type));
+			input->var.defaultValue.constant = input->gvar.defaultValue;
+			input->var.type = input->gvar.type;
+			input->var.id = input->gvar.id;
+			input->var.name = input->gvar.name;
+			EnableWindow(btnAdd, TRUE);
+		}
+		else {
+			// add all types
+			for (int i = 0; i < ARRAYSIZE(g_Types); i++)
+			{
+				auto& elem = g_Types[i];
+				SendMessage(cbTypes, CB_ADDSTRING, 0, (LPARAM)elem.name.c_str());
+			}
 		}
 		
 		return TRUE;
@@ -1950,6 +1995,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 			break;
 		case IDC_TR_AV_BTNADD:
 			if (notification == BN_CLICKED) {
+				loc_AddVariableData* data = (loc_AddVariableData*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 				EndDialog(hwndDlg,1);
 				return TRUE;
 			}
@@ -1980,7 +2026,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 				data->var.name = name;
 				bool valid = false;
 
-				if(data->var.name.size() > 0  && data->var.defaultValue.expression != NULL) {
+				if(data->var.name.size() > 0  && (data->var.defaultValue.expression != NULL || data->editGlobalVar)) {
 					valid = true;
 				}
 				if(data->checkLocalNameConflict) {
@@ -1992,7 +2038,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 					auto& globals = g_currChar.m_cardData.GetGlobalVariables();
 					for(auto& var : globals) {
 						if(var.name == data->var.name) {
-							valid = false;
+							valid = data->editGlobalVar && var.id == data->gvar.id;
 							break;
 						}
 					}
@@ -2012,15 +2058,28 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 				loc_AddVariableData* data = (loc_AddVariableData*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 				if(data->var.type != TYPE_INVALID) {
 					loc_AddExpressionData edata;
-					edata.retType = data->var.type;
+					if (data->editGlobalVar) {
+						edata.retType = data->gvar.type;
+					}
+					else {
+						edata.retType = data->var.type;
+					}
 					edata.thisPtr = data->thisPtr;
 					if(data->onlyConstantInit) {
 						edata.allowChange = false;
-						edata.expression = ParameterisedExpression(data->var.type,Value(data->var.type));
+						if (data->editGlobalVar) {
+							edata.expression = ParameterisedExpression(data->gvar.type, Value(data->gvar.type));
+						}
+						else {
+							edata.expression = ParameterisedExpression(data->var.type, Value(data->var.type));
+						}
 					}
 
 					//check if this expression allready is valid to initialize the window accordingly
-					if (data->var.defaultValue.expression != NULL) {
+					if (data->editGlobalVar) {
+						edata.expression.constant = data->gvar.defaultValue;
+					}
+					else if (data->var.defaultValue.expression != NULL) {
 						edata.expression = data->var.defaultValue;
 						edata.valid.resize(edata.expression.actualParameters.size());
 						for (int i = 0; i < edata.valid.size(); i++) edata.valid[i] = true;
@@ -2028,13 +2087,20 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 					}
 					int result = DialogBoxParam(General::DllInst,MAKEINTRESOURCE(IDD_TRIGGERS_ADDACTION),hwndDlg,&AddActionDialogProc,(LPARAM)&edata);
 					if(result == 1) {
+						if (data->editGlobalVar)
+						{
+							data->gvar.defaultValue = edata.expression.constant;
+							data->var.type = data->gvar.type;
+						}
 						data->var.defaultValue = edata.expression;
-						auto& existingGlobals = g_currChar.m_cardData.GetGlobalVariables();
 						bool found = false;
-						for(auto& var : existingGlobals) {
-							if(var.name == data->var.name) {
-								found = true;
-								break;
+						if (!data->editGlobalVar) {
+							auto& existingGlobals = g_currChar.m_cardData.GetGlobalVariables();
+							for (auto& var : existingGlobals) {
+								if (var.name == data->var.name) {
+									found = true;
+									break;
+								}
 							}
 						}
 						if (data->var.name.size() > 0 && !found) {

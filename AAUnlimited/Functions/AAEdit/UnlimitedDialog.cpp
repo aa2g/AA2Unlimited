@@ -582,13 +582,13 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						}
 						thisPtr->Refresh();
 						SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
+						CloseHandle(fh);
 					}
 				}
 				return TRUE;
 			case IDC_GN_BTNRESET: {
 				if (AAEdit::g_currChar.IsValid())
 				{
-
 					g_currChar.m_cardData.RemoveAllHair();
 					g_currChar.m_cardData.Reset();
 					g_currChar.Respawn();
