@@ -100,9 +100,11 @@ struct loc_AddExpressionData : public loc_AddData {
 struct loc_AddVariableData {
 	UnlimitedDialog::TRDialog* thisPtr;
 	Variable var;
+	GlobalVariable gvar;
 	bool onlyConstantInit = false;
 	bool checkLocalNameConflict = false;
 	bool checkGlobalNameConflict = false;
+	bool editGlobalVar = false;
 };
 
 struct loc_ModuleInfo {

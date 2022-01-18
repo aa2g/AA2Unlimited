@@ -71,16 +71,14 @@ void AAUCardData::UpdateModules() {
 			if (modfile.IsGood()) {
 				*module = modfile.mod;
 				for (int index = 0; index < modfile.mod.globals.size(); index++) {
-					bool global_added = false;
+					bool add_global_var = true;
 					for (auto global = m_globalVars.begin(); global != m_globalVars.end(); global++) {
 						if (global->name == modfile.mod.globals[index].name) {
-							global->currentValue = modfile.mod.globals[index].currentValue;
-							global->defaultValue = modfile.mod.globals[index].defaultValue;
-							global_added = true;
+							add_global_var = false;
 							break;
 						}
 					}
-					if (!global_added) {
+					if (add_global_var) {
 						m_globalVars.push_back(modfile.mod.globals[index]);
 
 					}
@@ -821,9 +819,6 @@ bool AAUCardData::LoadCardStyleData(int index1, int index2, AAUCardData* srcChar
 		}
 	}
 	if (bd) {
-		destChar->m_styles[index2].m_boneTransforms = srcChar->m_styles[index1].m_boneTransforms;		// deprecated, can be left out?
-		destChar->m_styles[index2].m_boneTransformMap = srcChar->m_styles[index1].m_boneTransformMap;	// ditto
-
 		//bone rules
 		for (int i = srcChar->m_styles[index1].m_boneRules.size() - 1; i >= 0; i--)
 		{
