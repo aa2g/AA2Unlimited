@@ -1096,6 +1096,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddGlobalVariableDialogProc(_In_ HWN
 					loc_AddVariableData data;
 					data.thisPtr = thisPtr;
 					data.gvar = globalVar;
+					data.var.defaultValue = ParameterisedExpression(data.gvar.type, data.gvar.defaultValue);
 					data.checkGlobalNameConflict = true;
 					data.onlyConstantInit = true;
 					data.editGlobalVar = true;
@@ -1962,7 +1963,7 @@ INT_PTR CALLBACK UnlimitedDialog::TRDialog::AddVariableDialogProc(_In_ HWND hwnd
 			SendMessage(cbTypes, CB_ADDSTRING, 0, (LPARAM)g_Types[input->gvar.type].name.c_str());
 			SendMessage(cbTypes, CB_SELECTSTRING, -1, (LPARAM)g_Types[input->gvar.type].name.c_str());
 			SendMessage(edVarName, WM_SETTEXT, 0, (LPARAM)input->gvar.name.c_str());
-			SendMessage(txtDefaultValue, WM_SETTEXT, 0, (LPARAM)input->gvar.defaultValue.strVal->c_str());
+			SendMessage(txtDefaultValue, WM_SETTEXT, 0, (LPARAM)(input->thisPtr->ExpressionToString(input->var.defaultValue).c_str()));
 			input->var.defaultValue = ParameterisedExpression(input->gvar.type, Value(input->gvar.type));
 			input->var.defaultValue.constant = input->gvar.defaultValue;
 			input->var.type = input->gvar.type;

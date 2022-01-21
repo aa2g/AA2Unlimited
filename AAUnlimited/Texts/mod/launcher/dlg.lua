@@ -413,7 +413,7 @@ local function buildtabs() return
 					tip="Saves statistics to make loading faster",
 					}),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
-				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII uncensor" }),
+				aaut("bUseMKIII", iup.toggle {title = "MKIII/CIV (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII or CIV uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
 			}
 		},
