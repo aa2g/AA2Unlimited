@@ -90,7 +90,7 @@ function on.load_class()
 end
 
 function on.period(new, old)
-	if (opts.bAutosave) then
+	if (opts.bAutosave == 1) then
 		for autosave in string.gmatch(opts.sAutosave, "%d+") do
 			if (("" .. new) == autosave) then
 				quicksave();
