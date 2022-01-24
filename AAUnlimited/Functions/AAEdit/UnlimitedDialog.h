@@ -208,6 +208,7 @@ namespace AAEdit {
 		HWND m_edSubmeshColorSat;
 		HWND m_edSubmeshColorVal;
 		HWND m_edSubmeshColorAT;
+		HWND m_bmBtnColorPick;
 
 		HWND m_edSubmeshColorSH1;
 		HWND m_edSubmeshColorSH2;

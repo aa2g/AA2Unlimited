@@ -339,6 +339,12 @@ static int HexadecimalToDecimal(std::string hex) {
 	return (int)dec;
 }
 
+COLORREF ARGBtoCOLORREF(DWORD color)
+{
+	COLORREF ret;
+	ret = RGB(GetBValue(color), GetGValue(color), GetRValue(color));
+	return ret;
+}
 
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel) {
 	D3DCOLOR result = colorDefault;

@@ -232,6 +232,8 @@ std::vector<BYTE> FileToBuffer(const TCHAR* path);
 
 static int HexadecimalToDecimal(std::string hex);
 
+COLORREF ARGBtoCOLORREF(DWORD color);
+
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255);
 
 }

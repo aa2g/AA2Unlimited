@@ -1640,6 +1640,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edSubmeshColorSat = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SAT);
 		thisPtr->m_edSubmeshColorVal = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_VAL);
 		thisPtr->m_edSubmeshColorAT = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_AT);
+		thisPtr->m_bmBtnColorPick = GetDlgItem(hwndDlg, IDC_BD_BM_BTNCLRPICK);
 
 		thisPtr->m_edSubmeshColorSH1 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH1);
 		thisPtr->m_edSubmeshColorSH2 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH2);
@@ -1711,15 +1712,72 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		switch (HIWORD(wparam)) {
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
-			if(identifier == IDC_BD_CBOUTLINECOLOR) {
+			switch (identifier) {
+			case IDC_BD_CBOUTLINECOLOR:{
 				BOOL visible = SendMessage(thisPtr->m_cbOutlineColor,BM_GETCHECK,0,0) == BST_CHECKED;
 				g_currChar.m_cardData.SetHasOutlineColor(visible == TRUE);
 				thisPtr->Refresh();
 				return TRUE;
 			}
-			else if(identifier == IDC_BD_BM_BTNADD) {
+			case IDC_BD_BM_BTNADD:{
 				thisPtr->ApplyInput();
 				return TRUE;
+			}
+			case IDC_BD_BM_BTNCLRPICK: {
+				BOOL isOutlineSelected = SendMessage(thisPtr->m_cbOutlineColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				int red = General::GetEditInt(thisPtr->m_edSubmeshColorRed);
+				int green = General::GetEditInt(thisPtr->m_edSubmeshColorGreen);
+				int blue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
+
+				CHOOSECOLOR cc;                 // common dialog box structure 
+				//ZeroMemory(&cc, sizeof(cc));
+				cc.lStructSize = sizeof(cc);
+				cc.hwndOwner = hwndDlg;
+				static DWORD rgbCurrent;        // initial color selection
+				rgbCurrent = RGB(red, green, blue);
+				cc.rgbResult = rgbCurrent;
+
+				static COLORREF acrCustClr[16]; // array of custom colors 
+				// initialize custom colors with hair color, eyebrow color, etc
+				acrCustClr[0] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.skinColor);							// skin color
+				acrCustClr[1] = General::ARGBtoCOLORREF(g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_tanColor);		// tan color
+				acrCustClr[2] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.pubicColor);							// pube color
+				acrCustClr[3] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_hair.hairColor);								// hair color
+				acrCustClr[4] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_eyebrows.color);								// eyebrow color
+				acrCustClr[5] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_faceDetails.glassesColor);						// glasses color
+				acrCustClr[6] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop1);							// clothes top 1
+				acrCustClr[7] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop2);							// clothes top 2
+				acrCustClr[8] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop3);							// clothes top 3
+				acrCustClr[9] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop4);							// clothes top 4
+				acrCustClr[10] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom1);						// clothes bottom 1
+				acrCustClr[11] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom2);						// clothes bottomm 2
+				acrCustClr[12] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorUnderwear);						// clothes underwear
+				acrCustClr[13] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorSocks);							// clothes socks
+				acrCustClr[14] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorIndoorShoes);					// clothes indoor shoes
+				acrCustClr[15] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorOutdoorShoes);					// clothes outdoor shoes
+				cc.lpCustColors = (LPDWORD)acrCustClr;
+
+				cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+				if (ChooseColor(&cc) == TRUE) {
+					TCHAR text[10];
+
+					red = GetRValue(cc.rgbResult);
+					green = GetGValue(cc.rgbResult);
+					blue = GetBValue(cc.rgbResult);
+
+					_itow_s(red, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(green, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(blue, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+
+					if (thisPtr->IsSubmeshRuleSelected()) {
+						thisPtr->ApplySubmeshRule(true);
+					}
+				}
+			}
 			}
 			return TRUE; }
 		case EN_CHANGE: {
