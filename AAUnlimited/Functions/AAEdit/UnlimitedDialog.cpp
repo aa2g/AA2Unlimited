@@ -1,6 +1,7 @@
 ﻿#include "StdAfx.h"
 #include "Files/PNGData.h"
 #include "Dictionary.h"
+#include "General/Util.h"
 #include "zstd.h"
 
 
@@ -1890,6 +1891,57 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				return TRUE;
 			}
 			break; }
+		case CBN_DROPDOWN: {
+			HWND wnd = (HWND)lparam;
+			if (wnd == thisPtr->m_bmCbBone) {
+				TCHAR xxname[128];
+				SendMessage(thisPtr->m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
+				auto cxxname = General::CastToStringN(xxname, lstrlen(xxname) + 1);
+				
+				ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
+				ExtClass::XXFile* xxlist[] = {
+					curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+					curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+					curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
+				};
+				if (curr->m_charData->m_gender == 0) {
+					xxlist[10] = NULL;
+				}
+
+				ExtClass::XXFile* xxtarget = nullptr;
+				for (int i = 0; i < 11; i++) {
+					if (xxlist[i] && cxxname == xxlist[i]->m_name) {
+						xxtarget = xxlist[i];
+						break;
+					}
+				}
+
+				if (xxtarget != nullptr) {
+					SendMessage(thisPtr->m_bmCbBone, CB_RESETCONTENT, 0, 0);
+					TCHAR tmpBuff[256];
+					std::queue<ExtClass::Frame*> frameQueue;
+					ExtClass::Frame* root = xxtarget->m_root;
+					frameQueue.push(root);
+					while (!frameQueue.empty()) {
+						ExtClass::Frame* bone = frameQueue.front();
+						frameQueue.pop();
+
+						if (!(General::StartsWith(bone->m_name, "A_") || General::StartsWith(bone->m_name, "AP_") ||
+							General::StartsWith(bone->m_name, "artf_") || General::StartsWith(bone->m_name, "pose_"))) {
+							size_t conv;
+							mbstowcs_s(&conv, tmpBuff, bone->m_name, bone->m_nameBufferSize);
+
+							if (SendMessage(thisPtr->m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a frame with this name is not already present in the list
+								SendMessage(thisPtr->m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
+							}
+						}
+						for (unsigned int i = 0; i < bone->m_nChildren; i++) {
+							frameQueue.push(bone->m_children + i);
+						}
+					}
+				}
+			}
+			break; }
 		};
 		break; }
 	case WM_NOTIFY: {
@@ -2367,35 +2419,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	//list possible bones
 	ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
 	if(curr != NULL) {
-		SendMessage(m_bmCbBone, CB_RESETCONTENT, 0, 0);
-		ExtClass::XXFile* xxlist[] = {
-			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
-			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
-			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
-		};
-		if (curr->m_charData->m_gender == 0) {
-			xxlist[10] = NULL;
-		}
-		TCHAR tmpBuff[256];
-		std::queue<ExtClass::Frame*> fileQueue;
-		for (ExtClass::XXFile* file : xxlist) {
-			if (file == NULL) continue;
-			ExtClass::Frame* root = file->m_root;
-			fileQueue.push(root);
-			while (!fileQueue.empty()) {
-				ExtClass::Frame* bone = fileQueue.front();
-				fileQueue.pop();
-				size_t conv;
-				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
-
-				if (SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a frame with this name is not already present in the list
-					SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
-				}
-				for (unsigned int i = 0; i < bone->m_nChildren; i++) {
-					fileQueue.push(bone->m_children + i);
-				}
-			}
-		}
 		auto selIdx = SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)bonename);
 		if (selIdx == CB_ERR) {
 			SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)bonename);
