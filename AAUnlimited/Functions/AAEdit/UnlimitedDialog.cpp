@@ -2254,8 +2254,9 @@ void UnlimitedDialog::BDDialog::LoadMatrixData(int listboxId) {
 
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			std::wstring num = std::to_wstring(rule.second.mods[i][j]);
-			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num.c_str());
+			TCHAR num[128];
+			swprintf_s(num, L"%g", rule.second.mods[i][j]);
+			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num);
 		}
 	}
 	//
