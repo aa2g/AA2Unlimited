@@ -79,6 +79,7 @@ void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, cons
 	item.pszText = (LPWSTR)tabName;
 	item.lParam = (LPARAM)dialog;
 	TabCtrl_InsertItem(this->m_tabs, tabN, &item);
+	this->m_tabNames.push_back(tabName);
 }
 
 /******
@@ -120,6 +121,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				MDDialog::DialogProc);
 		}
 
+		thisPtr->m_btnHelp = GetDlgItem(hwndDlg, IDC_BTNHELP);
+
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
 		GetClientRect(thisPtr->m_tabs,&rct);
@@ -144,6 +147,26 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		thisPtr->Refresh();
 		return TRUE;
 		break; }
+	case WM_COMMAND: {
+		UnlimitedDialog* thisPtr = (UnlimitedDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			switch (identifier) {
+			case IDC_BTNHELP: {
+				std::string dialogName = "";
+				int tabIdx = SendMessage(thisPtr->m_tabs, TCM_GETCURSEL, 0, 0);
+				dialogName = General::CastToString(thisPtr->m_tabNames[tabIdx]);
+				LUA_EVENT_NORET("open_help_page", dialogName);
+				return TRUE;
+			}
+			}
+			break;
+		}
+		}
+		break;
+	}
 	case WM_NOTIFY: {
 		UnlimitedDialog* thisPtr = (UnlimitedDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		NMHDR* param = (NMHDR*)(lparam);
@@ -1430,9 +1453,11 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			}
 			break;}
 		}
+		return TRUE;
+		break;
 	}
 	case WM_NOTIFY: {
-		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
 		auto ncode = ((LPNMHDR)lparam)->code;
 		auto sender = HWND(lparam);
@@ -1441,6 +1466,7 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			thisPtr->UpdateHexCodeText();
 		}
 		}
+		break;
 	}
 	}
 	return FALSE;
@@ -2254,8 +2280,9 @@ void UnlimitedDialog::BDDialog::LoadMatrixData(int listboxId) {
 
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			std::wstring num = std::to_wstring(rule.second.mods[i][j]);
-			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num.c_str());
+			TCHAR num[128];
+			swprintf_s(num, L"%g", rule.second.mods[i][j]);
+			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num);
 		}
 	}
 	//

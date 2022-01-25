@@ -52,7 +52,27 @@ function on.update_edit_gui()
 	_M.update_ui()
 end
 
+function on.open_help_page(tabName)
+	local url = "https://github.com/aa2g/AA2Unlimited/wiki/";
+	local help_pages = {};
+	help_pages["General"] = "General";
+	help_pages["Eye Textures"] = "Eye-Texture";
+	help_pages["Tan"] = "Tan";
+	help_pages["Hair"] = "Hair";
+	help_pages["Mesh Overrides"] = "Mesh-Overrides";
+	help_pages["Archive Overrides"] = "Archive-Overrides";
+	help_pages["Archive Redirects"] = "Archive-Redirects";
+	help_pages["Object Overrides"] = "Object-Overrides";
+	help_pages["Body"] = "Body";
+	help_pages["Body Slider"] = "Body-Sliders";
+	help_pages["Triggers"] = "Triggers";
+	help_pages["Modules"] = "Modules";
 
+	if (help_pages[tabName] ~= nil) then
+		url = url .. help_pages[tabName];
+	end
+	os.execute('start "" "' .. url .. '"');
+end
 
 function _M:load()
 	mod_load_config(self, opts)
