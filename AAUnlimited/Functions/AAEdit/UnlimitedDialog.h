@@ -346,6 +346,9 @@ namespace AAEdit {
 	HWND m_dialog;
 	HWND m_tabs;
 
+	HWND m_btnHelp;
+	std::vector<std::wstring> m_tabNames;
+
 	bool m_visible;
 
 	void AddDialog(int resourceName, Dialog* dialog, int tabN, const TCHAR* tabName, 
