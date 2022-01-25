@@ -1430,9 +1430,11 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			}
 			break;}
 		}
+		return TRUE;
+		break;
 	}
 	case WM_NOTIFY: {
-		BDDialog* thisPtr = (BDDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		if (thisPtr == NULL) return FALSE;
 		auto ncode = ((LPNMHDR)lparam)->code;
 		auto sender = HWND(lparam);
@@ -1441,6 +1443,7 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			thisPtr->UpdateHexCodeText();
 		}
 		}
+		break;
 	}
 	}
 	return FALSE;
