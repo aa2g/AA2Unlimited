@@ -268,7 +268,11 @@ namespace PlayInjections {
 				{ 0x75, 0x09 },
 				{ 0x90, 0x90 },
 					NULL);
-				
+				address = General::GameBase + 0xA7321;
+				Hook((BYTE*)address,
+				{ 0x0F, 0xB6, 0x13 },
+				{ 0x8B, 0x13, 0x90 },
+					NULL);
 			}
 
 			//Right now there's a big issue, the 4byte value in the stack is being corrupted by a function down the line, and we can't just restore it since doing so would crash. Down below are "safe to do" hooks.
