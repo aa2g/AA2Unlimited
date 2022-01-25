@@ -346,6 +346,111 @@ COLORREF ARGBtoCOLORREF(DWORD color)
 	return ret;
 }
 
+std::wstring ARGBToWString(DWORD color)
+{
+
+	TCHAR str[11];
+	swprintf_s(str, L"#%06X", color);
+
+
+	//std::wostringstream oss;
+	//oss << L"#" << std::hex << std::fill('0') << std::setw(5) << color;
+	return std::wstring(str);
+}
+
+std::wstring ARGBToWString(int a, int r, int g, int b, bool showAlpha)
+{
+	DWORD color = 0;
+	if (showAlpha) {
+		color |= a;
+		color = color << 8;
+	}
+	color |= r;
+	color = color << 8;
+	color |= g;
+	color = color << 8;
+	color |= b;
+
+	return ARGBToWString(color);
+}
+
+bool WStringIsARGB(std::wstring color)
+{
+	std::string strColor = CastToString(color);
+
+	std::smatch matches;
+	std::regex regExpRGBHEX("([a-fA-F0-9]{6})");
+	std::regex regExpRGBHEXAlt("(#[a-fA-F0-9]{6})");
+	std::regex regExpARGBHEX("([a-fA-F0-9]{8})");
+	std::regex regExpARGBHEXAlt("(#[a-fA-F0-9]{8})");
+
+	return std::regex_match(strColor, matches, regExpRGBHEX)
+		|| std::regex_match(strColor, matches, regExpRGBHEXAlt)
+		|| std::regex_match(strColor, matches, regExpARGBHEX)
+		|| std::regex_match(strColor, matches, regExpARGBHEXAlt);
+}
+
+DWORD WStringToARGB(std::wstring color, unsigned char defaultAlpha)
+{
+	DWORD ret = -1;
+	std::string strColor = CastToString(color);
+	unsigned char A = 0;
+	unsigned char R = 0;
+	unsigned char G = 0;
+	unsigned char B = 0;
+
+	std::smatch matches;
+	std::regex regExpRGBHEX("([a-fA-F0-9]{6})");
+	std::regex regExpRGBHEXAlt("(#[a-fA-F0-9]{6})");
+	std::regex regExpARGBHEX("([a-fA-F0-9]{8})");
+	std::regex regExpARGBHEXAlt("(#[a-fA-F0-9]{8})");
+
+	if (std::regex_match(strColor, matches, regExpRGBHEX))
+	{
+		A = defaultAlpha;
+		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 2));
+		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 2));
+		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(4, 2));
+		ret = 0;
+	}
+	else if (std::regex_match(strColor, matches, regExpRGBHEXAlt))
+	{
+		A = defaultAlpha;
+		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(1, 2));
+		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(3, 2));
+		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(5, 2));
+		ret = 0;
+	}
+	else if (std::regex_match(strColor, matches, regExpARGBHEX))
+	{
+		A = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 2));
+		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 2));
+		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(4, 2));
+		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(6, 2));
+		ret = 0;
+	}
+	else if (std::regex_match(strColor, matches, regExpARGBHEXAlt))
+	{
+		A = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(1, 2));
+		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(3, 2));
+		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(5, 2));
+		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(7, 2));
+		ret = 0;
+	}
+
+	if (ret == 0) {
+		ret |= A;
+		ret = ret << 8;
+		ret |= R;
+		ret = ret << 8;
+		ret |= G;
+		ret = ret << 8;
+		ret |= B;
+	}
+
+	return ret;
+}
+
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel) {
 	D3DCOLOR result = colorDefault;
 	int R = 0;
@@ -360,28 +465,28 @@ D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int 
 	std::regex regExpHEX("([A-F0-9]{6})");
 	std::regex regExpRGB("(\\d{1,3})[^\\d]+(\\d{1,3})[^\\d]+(\\d{1,3})");
 	std::regex regExpShortHEX("([A-F0-9]{3})");
-	bool finded_color = false;
+	bool found_color = false;
 	if (std::regex_match(stringHEX_RGB, matches, regExpHEX))		// Try to find HEX
 	{
 		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 2));
 		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 2));
 		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(4, 2));
-		finded_color = true;
+		found_color = true;
 	}
 	else if (std::regex_match(stringHEX_RGB, matches, regExpRGB)) { // Try to find RGB
 		R = std::stoi(matches[1].str());
 		G = std::stoi(matches[2].str());
 		B = std::stoi(matches[3].str());
-		finded_color = true;
+		found_color = true;
 	}
 	else if (std::regex_match(stringHEX_RGB, matches, regExpShortHEX)) { // Try to find short HEX
 		R = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(0, 1) + matches[0].str().substr(0, 1));
 		G = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(1, 1) + matches[0].str().substr(1, 1));
 		B = (unsigned char)HexadecimalToDecimal(matches[0].str().substr(2, 1) + matches[0].str().substr(2, 1));
-		finded_color = true;
+		found_color = true;
 	}
 
-	if (finded_color) {
+	if (found_color) {
 		if (R > 255) { R = 255; }
 		if (G > 255) { G = 255; }
 		if (B > 255) { B = 255; }

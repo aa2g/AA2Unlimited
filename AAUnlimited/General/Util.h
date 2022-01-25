@@ -234,6 +234,11 @@ static int HexadecimalToDecimal(std::string hex);
 
 COLORREF ARGBtoCOLORREF(DWORD color);
 
+std::wstring ARGBToWString(DWORD color);
+std::wstring ARGBToWString(int a, int r, int g, int b, bool showAlpha = false);
+bool WStringIsARGB(std::wstring color);
+DWORD WStringToARGB(std::wstring color, unsigned char defaultAlpha = 0);
+
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255);
 
 }
