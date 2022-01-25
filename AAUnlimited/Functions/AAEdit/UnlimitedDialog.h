@@ -161,8 +161,12 @@ namespace AAEdit {
 		HWND m_edTanColorHue;
 		HWND m_edTanColorSat;
 		HWND m_edTanColorVal;
+		HWND m_edColorCode;
+		HWND m_btnColorPick;
 
 		bool m_bRefreshingColorBoxes;
+
+		void UpdateHexCodeText();
 
 		void LoadTanList();
 		void Refresh();
@@ -209,6 +213,7 @@ namespace AAEdit {
 		HWND m_edSubmeshColorVal;
 		HWND m_edSubmeshColorAT;
 		HWND m_bmBtnColorPick;
+		HWND m_edColorCode;
 
 		HWND m_edSubmeshColorSH1;
 		HWND m_edSubmeshColorSH2;
@@ -216,6 +221,8 @@ namespace AAEdit {
 		void LoadMatrixData(int listboxId);
 		void LoadColorData(int listboxId);
 		void ApplySubmeshRule(bool forceRefresh);
+
+		void UpdateHexCodeText();
 		void ApplyInput();
 		void Refresh();
 		static INT_PTR CALLBACK DialogProc(_In_ HWND hwndDlg,_In_ UINT msg,_In_ WPARAM wparam,_In_ LPARAM lparam);
