@@ -54,19 +54,21 @@ end
 
 function on.open_help_page(tabName)
 	local url = "https://github.com/aa2g/AA2Unlimited/wiki/";
-	local help_pages = {};
-	help_pages["General"] = "General";
-	help_pages["Eye Textures"] = "Eye-Texture";
-	help_pages["Tan"] = "Tan";
-	help_pages["Hair"] = "Hair";
-	help_pages["Mesh Overrides"] = "Mesh-Overrides";
-	help_pages["Archive Overrides"] = "Archive-Overrides";
-	help_pages["Archive Redirects"] = "Archive-Redirects";
-	help_pages["Object Overrides"] = "Object-Overrides";
-	help_pages["Body"] = "Body";
-	help_pages["Body Slider"] = "Body-Sliders";
-	help_pages["Triggers"] = "Triggers";
-	help_pages["Modules"] = "Modules";
+	local help_pages = {
+		["General"] = "General",
+		["Eye Textures"] = "Eye-Texture",
+		["Tan"] = "Tan",
+		["Hair"] = "Hair",
+		["Mesh Overrides"] = "Mesh-Overrides",
+		["Archive Overrides"] = "Archive-Overrides",
+		["Archive Redirects"] = "Archive-Redirects",
+		["Object Overrides"] = "Object-Overrides",
+		["Body"] = "Body",
+		["Body Slider"] = "Body-Sliders",
+		["Triggers"] = "Triggers",
+		["Modules"] = "Modules"
+	};
+
 
 	if (help_pages[tabName] ~= nil) then
 		url = url .. help_pages[tabName];
