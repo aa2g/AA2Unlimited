@@ -72,8 +72,8 @@ function on.open_help_page(tabName)
 
 	if (help_pages[tabName] ~= nil) then
 		url = url .. help_pages[tabName];
+		os.execute('start "" "' .. url .. '"');
 	end
-	os.execute('start "" "' .. url .. '"');
 end
 
 function _M:load()

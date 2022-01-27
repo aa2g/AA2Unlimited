@@ -461,17 +461,52 @@ int AAUCardData::ToBuffer(char** buffer) {
 /*****************************/
 
 bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override) {
+	if (m_styles[m_currCardStyle].m_meshOverrideMap.find(texture) != m_styles[m_currCardStyle].m_meshOverrideMap.end())
+	{
+		std::wstringstream text;
+		text << "A Mesh Override rule for" <<
+			std::endl <<
+			std::endl << texture <<
+			std::endl <<
+			std::endl << "already exists." <<
+			std::endl << "Do you wish to overwrite it?";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Apply"), MB_YESNO | MB_TASKMODAL);
+		if (res != IDYES) {
+			//doesnt want to extract, abort
+			return false;
+		}
+	}
 	return AddMeshOverride(texture, override, m_currCardStyle);
 }
 
 bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override, int styleIdx) {
-	if (m_styles[styleIdx].m_meshOverrideMap.find(texture) != m_styles[styleIdx].m_meshOverrideMap.end()) return false;
 	TextureImage img(override, TextureImage::OVERRIDE);
 	if (img.IsGood()) {
 		std::wstring texStr(texture);
+		std::wstring ovrStr(texture);
+		for (int i = 0; i < m_styles[styleIdx].m_meshOverrides.size(); i++)
+		{
+			if (!m_styles[styleIdx].m_meshOverrides[i].first.compare(texture))
+			{
+				//replace
+				m_styles[styleIdx].m_meshOverrides[i].second = ovrStr;
+				m_styles[styleIdx].m_meshOverrideMap[texStr] = img;
+				return true;
+			}
+		}
+		//add
 		m_styles[styleIdx].m_meshOverrides.emplace_back(texStr, std::wstring(override));
 		m_styles[styleIdx].m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
+	}
+	else
+	{
+		std::wstringstream text;
+		text << override <<
+			std::endl <<
+			std::endl << "does not exist.";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Error"), MB_OK | MB_TASKMODAL);
+		return false;
 	}
 	return false;
 }
@@ -490,19 +525,55 @@ bool AAUCardData::RemoveMeshOverride(int index, int styleIdx) {
 }
 
 bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override) {
+	if (m_styles[m_currCardStyle].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, archivefile)) != m_styles[m_currCardStyle].m_archiveOverrideMap.end())
+	{
+		//show an overwrite dialog
+		std::wstringstream text;
+		text << "An Archive Override rule for" <<
+			std::endl <<
+			std::endl << archive << "/" << archivefile <<
+			std::endl <<
+			std::endl << "already exists" <<
+			std::endl <<
+			std::endl << "Do you wish to overwrite it?";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Apply"), MB_YESNO | MB_TASKMODAL);
+		if (res != IDYES) {
+			//doesnt want to extract, abort
+			return false;
+		}
+	}
+
 	return AddArchiveOverride(archive, archivefile, override, m_currCardStyle);
 }
 
 bool AAUCardData::AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override, int styleIdx) {
-	if (m_styles[styleIdx].m_archiveOverrideMap.find(std::pair<std::wstring, std::wstring>(archive, archivefile)) != m_styles[styleIdx].m_archiveOverrideMap.end()) return false;
 	OverrideFile img(override, OverrideFile::OVERRIDE);
-	if (img.IsGood()) {
+	if (img.IsGood())
+	{
 		auto toOverride = std::pair<std::wstring, std::wstring>(archive, archivefile);
+		for (int i = 0; i < m_styles[styleIdx].m_archiveOverrides.size(); i++)
+		{
+			if (m_styles[styleIdx].m_archiveOverrides[i].first == toOverride)
+			{
+				//replace
+				m_styles[styleIdx].m_archiveOverrides[i].second = std::move(override);
+				m_styles[styleIdx].m_archiveOverrideMap[toOverride] = std::move(img);
+				return true;
+			}
+		}
+		//add
 		m_styles[styleIdx].m_archiveOverrides.emplace_back(toOverride, override);
 		m_styles[styleIdx].m_archiveOverrideMap.emplace(std::move(toOverride), std::move(img));
 		return true;
 	}
-	return false;
+	else {
+		std::wstringstream text;
+		text << override <<
+			std::endl <<
+			std::endl << "does not exist.";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Error"), MB_OK | MB_TASKMODAL);
+		return false;
+	}
 }
 
 bool AAUCardData::RemoveArchiveOverride(int index) {
@@ -519,14 +590,45 @@ bool AAUCardData::RemoveArchiveOverride(int index, int styleIdx) {
 }
 
 bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile) {
+	//here i should check if the archive is valid, but meh
+	auto left = std::pair<std::wstring, std::wstring>(archive, archivefile);
+	auto right = std::pair<std::wstring, std::wstring>(redirectarchive, redirectfile);
+	if (m_styles[m_currCardStyle].m_archiveRedirectMap.find(left) != m_styles[m_currCardStyle].m_archiveRedirectMap.end())
+	{
+		//show an overwrite dialog
+		std::wstringstream text;
+		text << "An Archive Redirect rule for" <<
+			std::endl <<
+			std::endl << archive << "/" << archivefile <<
+			std::endl <<
+			std::endl << "already exists." <<
+			std::endl <<
+			std::endl << "Do you wish to overwrite it?";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Apply"), MB_YESNO | MB_TASKMODAL);
+		if (res != IDYES) {
+			//doesnt want to extract, abort
+			return false;
+		}
+	}
+
 	return AddArchiveRedirect(archive, archivefile, redirectarchive, redirectfile, m_currCardStyle);
 }
 
 bool AAUCardData::AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile, int styleIdx) {
-	//here i should check if the archive is valid, but meh
+
 	auto left = std::pair<std::wstring, std::wstring>(archive, archivefile);
 	auto right = std::pair<std::wstring, std::wstring>(redirectarchive, redirectfile);
-	if (m_styles[styleIdx].m_archiveRedirectMap.find(left) != m_styles[styleIdx].m_archiveRedirectMap.end()) return false; //allready contains it
+
+	for (int i = 0; i < m_styles[styleIdx].m_archiveRedirects.size(); i++) {
+		if (m_styles[styleIdx].m_archiveRedirects[i].first == left)
+		{//replace
+			m_styles[styleIdx].m_archiveRedirects[i].second = std::move(right);
+			m_styles[styleIdx].m_archiveRedirectMap[left] = std::move(right);
+			return true;
+		}
+	}
+	
+	//add
 	m_styles[styleIdx].m_archiveRedirects.emplace_back(left, right);
 	m_styles[styleIdx].m_archiveRedirectMap.insert(std::make_pair(left, right));
 	return true;
@@ -546,6 +648,27 @@ bool AAUCardData::RemoveArchiveRedirect(int index, int styleIdx) {
 }
 
 bool AAUCardData::AddObjectOverride(const TCHAR * object, const TCHAR * file) {
+	char buff[256];
+	size_t n;
+	wcstombs_s(&n, buff, object, 256);
+	std::string strObject = buff;
+	wcstombs_s(&n, buff, file, 256);
+	std::string strFile = buff;
+
+	if (m_styles[m_currCardStyle].m_objectOverrideMap.find(strObject) != m_styles[m_currCardStyle].m_objectOverrideMap.end()) {
+		std::wstringstream text;
+		text << "An Object Override rule for" <<
+			std::endl <<
+			std::endl << General::CastToWString(strObject) <<
+			std::endl <<
+			std::endl << "already exists." <<
+			std::endl << "Do you wish to overwrite it?";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Apply"), MB_YESNO | MB_TASKMODAL);
+		if (res != IDYES) {
+			//doesnt want to extract, abort
+			return false;
+		}
+	}
 	return AddObjectOverride(object, file, m_currCardStyle);
 }
 
@@ -556,13 +679,33 @@ bool AAUCardData::AddObjectOverride(const TCHAR* object, const TCHAR* file, int 
 	std::string strObject = buff;
 	wcstombs_s(&n, buff, file, 256);
 	std::string strFile = buff;
-	if (m_styles[styleIdx].m_objectOverrideMap.find(strObject) != m_styles[styleIdx].m_objectOverrideMap.end()) return false; //allready contains it
+
 	XXObjectFile ofile(file, XXObjectFile::OVERRIDE);
 	if (ofile.IsGood()) {
+
+		for (int i = 0; i < m_styles[styleIdx].m_objectOverrides.size(); i++)
+		{
+			if (!m_styles[styleIdx].m_objectOverrides[i].first.compare(object)) {
+				//replace
+				m_styles[styleIdx].m_objectOverrides[i].second = std::wstring(file);
+				m_styles[styleIdx].m_objectOverrideMap[strObject] = std::move(ofile);
+				return true;
+			}
+		}
+		//add
 		m_styles[styleIdx].m_objectOverrides.emplace_back(object, file);
 		m_styles[styleIdx].m_objectOverrideMap.insert(std::make_pair(strObject, std::move(ofile)));
+		return true;
 	}
-	return true;
+	else
+	{
+		std::wstringstream text;
+		text << General::CastToWString(strObject) <<
+			std::endl <<
+			std::endl << "does not exist.";
+		int res = MessageBox(NULL, text.str().c_str(), TEXT("Error"), MB_OK | MB_TASKMODAL);
+		return false;
+	}
 }
 
 bool AAUCardData::RemoveObjectOverride(int index) {
