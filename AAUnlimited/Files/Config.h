@@ -41,6 +41,7 @@ public:;
 	bool bUseCacheFix;
 	bool bUsePPeX;
 	bool bUsePP2;
+	bool bPngSkirtSitagi;
 	bool bTriggers;
 	unsigned PP2Cache;
 	unsigned PP2AudioCache;

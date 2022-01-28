@@ -403,6 +403,7 @@ local function buildtabs() return
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI", tip = "evil lovers will peridodically force PC" }),
 				aaut("bTriggers", iup.toggle {title = "Triggers and Modules", tip = "enable card trigger scripting" }),
 				aaut("bUseShadowing", iup.toggle {title = ".pp file shadowing/sets", tip="pp file shadowing as directories in /data" }),
+				aaut("bPngSkirtSitagi", iup.toggle {title = "Use .png for custom textures", tip="skirt_###.bmp and sitagi_###.bmp textures are now called tx_###.png" }),
 --				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
 --				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
 --				aaut("bUseDialoguePoser", iup.toggle {title = "Dialogue poser" }),
