@@ -3269,22 +3269,22 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ { CharacterStruct::FACE, 35 },{ CharacterStruct::FACE, 36 } },
 					-0.03f, 0.03f
 			},
-			//{ TEXT("Upper Left Incisor"),
-			//	{ { CharacterStruct::FACE, 37 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Upper Right Incisor"),
-			//	{ { CharacterStruct::FACE, 38 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Lower Left Incisor"),
-			//	{ { CharacterStruct::FACE, 39 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Lower Right Incisor"),
-			//	{ { CharacterStruct::FACE, 40 } },
-			//	-0.05f, 0.05f
-			//},
+			{ TEXT("Upper Left Incisor"),
+				{ { CharacterStruct::FACE, 37 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Upper Right Incisor"),
+				{ { CharacterStruct::FACE, 38 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Left Incisor"),
+				{ { CharacterStruct::FACE, 39 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Right Incisor"),
+				{ { CharacterStruct::FACE, 40 } },
+				-0.05f, 0.05f
+			},
 			{ TEXT("Upper Left Canine"),
 			{ { CharacterStruct::FACE, 41 } },
 					-0.05f, 0.05f
