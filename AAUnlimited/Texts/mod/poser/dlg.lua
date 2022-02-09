@@ -209,6 +209,16 @@ signals.connect(charamgr, "characterschanged", updatecharacterlist)
 local charswapprevbutton = iup.button { title = "/\\", expand = "vertical", action = function() charamgr.swapprev(tonumber(characterlist.value)) end }
 local charswapnextbutton = iup.button { title = "\\/", expand = "vertical", action = function() charamgr.swapnext(tonumber(characterlist.value)) end }
 
+function characterlist.dropfiles_cb(self, file, num, x, y)
+	local size
+	if file then file, size = fileutils.readfile(file) end
+	if file and size == 92 then
+		local character = charamgr.current
+		character:loadcloth(file)
+		character:reload(character.struct.m_clothState, character.struct.m_xxSkeleton.m_poseNumber)
+	end
+end
+
 
 -- -----------------
 -- Char spawning
