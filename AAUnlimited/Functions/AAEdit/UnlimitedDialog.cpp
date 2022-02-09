@@ -2168,19 +2168,26 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					xxlist[10] = NULL;
 				}
 
-				ExtClass::XXFile* xxtarget = nullptr;
+				ExtClass::XXFile* xx = nullptr;
+				int xxlistpos = 10;
 				for (int i = 0; i < 11; i++) {
 					if (xxlist[i] && cxxname == xxlist[i]->m_name) {
-						xxtarget = xxlist[i];
+						xxlistpos = -1;
+						xx = xxlist[i];
 						break;
 					}
 				}
 
-				if (xxtarget != nullptr) {
-					SendMessage(thisPtr->m_bmCbBone, CB_RESETCONTENT, 0, 0);
+				SendMessage(thisPtr->m_bmCbBone, CB_RESETCONTENT, 0, 0);
+				do {
+					if (xx == nullptr && xxlistpos >= 0)
+						xx = xxlist[xxlistpos--];
+					if (xx == nullptr) {
+						continue;
+					}
 					TCHAR tmpBuff[256];
 					std::queue<ExtClass::Frame*> frameQueue;
-					ExtClass::Frame* root = xxtarget->m_root;
+					ExtClass::Frame* root = xx->m_root;
 					frameQueue.push(root);
 					while (!frameQueue.empty()) {
 						ExtClass::Frame* bone = frameQueue.front();
@@ -2199,7 +2206,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 							frameQueue.push(bone->m_children + i);
 						}
 					}
-				}
+					xx = nullptr;
+				} while (xxlistpos >= 0);
 			}
 			break; }
 		};
