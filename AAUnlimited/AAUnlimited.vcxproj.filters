@@ -604,5 +604,8 @@
     <None Include="Texts\mod\notifications.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\JMCP.lua">
+      <Filter>Lua</Filter>
+    </None>
   </ItemGroup>
 </Project>
