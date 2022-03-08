@@ -335,6 +335,10 @@ void Lua::bindLua() {
 		Shared::GameState::addCard(General::utf8.from_bytes((const char*)s.get(1)), s.get(2), s.get(3));
 	});
 
+	_BINDING["KickCard"] = LUA_LAMBDA0({
+		Shared::GameState::kickCard(s.get(1));
+	});
+
 	_BINDING["GetCamera"] = LUA_LAMBDA({
 		s.push(Camera::GetCamera());
 	});
