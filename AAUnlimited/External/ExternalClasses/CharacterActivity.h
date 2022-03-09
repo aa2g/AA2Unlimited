@@ -14,14 +14,15 @@ public:
 	BYTE m_unknown1[0x10]; // +4
 	BYTE m_animLocked;	//? // +20
 	BYTE m_loading; //statue or conversation loading?
-	BYTE m_interactionLock;
-	BYTE m_unknown2[2];
+	BYTE m_unknown2[3];
 	BYTE m_isInConversation;
 	BYTE m_conversationLoading; //?
 	BYTE m_currentlyTalking; //?
-	BYTE m_unknown3[0x20]; //37
+	BYTE m_unknown3[0x3];
+	BYTE m_interactionLock;
+	BYTE m_unknown4[0x1C]; //37
 	BYTE m_currentMovementType; //0=stand, 1=move, 2=roam, 3=walk to character, 4 = follow, 7 = talk, 8=mina
-	BYTE m_unknown4[3];
+	BYTE m_unknown5[3];
 	DWORD m_currConversationId; //if this is an npc that plans a conversation, this is set once the character starts walking towards its target
 	DWORD m_actionAboutRoom; //This is room the NPC talks about in a come here event. Has seemingly no effect in follow_me_h and follow_me
 	DWORD m_currRoomTarget; //similarily, set when getting the command to walk to a room
