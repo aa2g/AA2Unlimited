@@ -30,6 +30,11 @@ local function patches_edit()
 		g_poke(0x30810C, "t\0x\0\0\0")	-- ‰º’… -> tx
 		g_poke_dword(0x9F77A, GameBase+0x30568E) -- use .png constant instead of .bmp
 	end
+
+	-- Stretches the background texture to fill the preview window
+	local x,y = _CONFIG.res_edit:match("^([0-9]+)x([0-9]+).*$")
+	-- g_poke(0x315248, string.pack("<f", x))
+	g_poke(0x314E14, string.pack("<f", y / x * 1024))
 end
 
 if exe_type == "play" then
