@@ -483,7 +483,7 @@ bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override, i
 	TextureImage img(override, TextureImage::OVERRIDE);
 	if (img.IsGood()) {
 		std::wstring texStr(texture);
-		std::wstring ovrStr(texture);
+		std::wstring ovrStr(override);
 		for (int i = 0; i < m_styles[styleIdx].m_meshOverrides.size(); i++)
 		{
 			if (!m_styles[styleIdx].m_meshOverrides[i].first.compare(texture))
@@ -495,7 +495,7 @@ bool AAUCardData::AddMeshOverride(const TCHAR* texture, const TCHAR* override, i
 			}
 		}
 		//add
-		m_styles[styleIdx].m_meshOverrides.emplace_back(texStr, std::wstring(override));
+		m_styles[styleIdx].m_meshOverrides.emplace_back(texStr, ovrStr);
 		m_styles[styleIdx].m_meshOverrideMap.emplace(std::move(texStr), std::move(img));
 		return true;
 	}

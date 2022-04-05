@@ -24,8 +24,8 @@ local function patches_edit()
 	end
 
 	if (Config.bPngSkirtSitagi) then
-		g_poke(0x3081d0, "t\0x\0_\0%\0\x30\0\x33\0d\0.\0p\0n\0g\0\0\0\0")	-- スカート_%03d.bmp -> tx_%03d.png
-		g_poke(0x3081ec, "t\0x\0_\0%\0\x30\0\x33\0d\0.\0p\0n\0g\0\0\0\0")	-- 下着_%03d.bmp -> tx_%03d.png
+		g_poke(0x3081D0, "t\0x\0_\0%\0\x30\0\x33\0d\0.\0p\0n\0g\0\0\0\0")	-- スカート_%03d.bmp -> tx_%03d.png
+		g_poke(0x3081EC, "t\0x\0_\0%\0\x30\0\x33\0d\0.\0p\0n\0g\0\0\0\0")	-- 下着_%03d.bmp -> tx_%03d.png
 		g_poke(0x3080B4, "t\0x\0\0\0\0\0")	-- スカート -> tx
 		g_poke(0x30810C, "t\0x\0\0\0")	-- 下着 -> tx
 		g_poke_dword(0x9F77A, GameBase+0x30568E) -- use .png constant instead of .bmp

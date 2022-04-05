@@ -169,7 +169,11 @@ end
 local step = "x6"
 
 local function loadPPeX()
-	os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
+	if (Config.bPersistPPeXConsole) then
+		os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\""))		
+	else
+		os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
+	end
 end
 
 local buts = {}
@@ -414,6 +418,7 @@ local function buildtabs() return
 					tip="Saves statistics to make loading faster",
 					}),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
+				aaut("bPersistPPeXConsole", iup.toggle {title = "Keep PPeX window open", tip="Keeps the PPeX window open after launching the game" }),
 				aaut("bUseMKIII", iup.toggle {title = "MKIII/CIV (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII or CIV uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
 			}
