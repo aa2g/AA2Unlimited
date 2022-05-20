@@ -2436,7 +2436,7 @@ namespace Shared {
 		//int()
 		Value Thread::GetPCRoomTarget(std::vector<Value>& params) {
 			//this value is temporary and I'd rather not let the user retrieve it whenever
-			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0x150 };
+			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0xC8 };
 			DWORD* room = nullptr;
 			switch (this->eventData->GetId()) {
 			case NPC_RESPONSE:
