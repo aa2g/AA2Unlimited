@@ -11,6 +11,7 @@ local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
 local toggles = require "poser.toggles"
+local os = require "os"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
@@ -20,8 +21,16 @@ local sceneloaded = signals.signal()
 _M.poseloaded = poseloaded
 _M.sceneloaded = sceneloaded
 
+local create_thumbnail_function
+local create_thumbnail_message = '\x0F'
 local posesdir = aau_path("poser\\poses")
 local scenesdir = aau_path("poser\\scenes")
+local embed_file = nil
+local embed_magic = nil
+local embed_save_path = nil
+local png_magic_pose = "POSE\x00\x00\x00\x00"
+local png_magic_scene = "SCENE\x00\x00\x00"
+local save_restore_ui = false
 
 local lock_camera = false
 local lock_light = true
@@ -44,15 +53,6 @@ local function setclip(clip)
 	end
 end
 clipchanged.connect(setclip)
-
-local function savedposes()
-	return readdir(posesdir .. "\\*.pose")
-end
-
-local function savedscenes()
-	return readdir(scenesdir .. "\\*.scene")
-end
-
 
 local cliptext
 local posename = iup.text { expand = "horizontal", visiblecolumns = 20 }
@@ -77,33 +77,57 @@ signals.connect(scenelist, "selectionchanged", function() scenename.value = scen
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
 signals.connect(scenefilter, "setfilter", scenelist, "setfilter")
 
-local function populateposelist()
+local function findposerfiles(directory, match)
 	local newlist = {}
 	local i = 1
-	for f in savedposes() do
-		f = f:match("^(.*)%.pose$")
-		if f then
-			newlist[i] = f
-			i = i + 1
+	local last
+	local pattern = directory .. "\\*.*"
+	for f in readdir(pattern) do
+		f = f:match(match) or f:match("^(.*)%.png$")
+		if f ~= last then
+			if f then
+				newlist[i] = f
+				i = i + 1
+				last = f
+			end
 		end
 	end
-	poselist.setlist(newlist)
+	return newlist
 end
-populateposelist()
+
+local function populateposelist()
+	poselist.setlist(findposerfiles(posesdir, "^(.*)%.pose$"))
+end
 
 local function populatescenelist()
-	local newlist = {}
-	local i = 1
-	for f in savedscenes() do
-		f = f:match("^(.*)%.scene$")
-		if f then
-			newlist[i] = f
-			i = i + 1
-		end
-	end
-	scenelist.setlist(newlist)
+	scenelist.setlist(findposerfiles(scenesdir, "^(.*)%.scene$"))
 end
-populatescenelist()
+
+function on.launch()
+	if exe_type == "edit" then
+		create_thumbnail_function = 0x36C6C1
+	else
+		create_thumbnail_function = 0x38F6C9
+	end
+	populateposelist()
+	populatescenelist()
+end
+
+function on.poser_saved_thumbnail()
+	log.spam("Saving poser thumbnail")
+	local screenshot = play_path("poser-screenshot.png")
+	os.remove(embed_save_path)
+	os.rename(screenshot, embed_save_path)
+	local file = io.open(embed_save_path, "a")
+	file:write(embed_file)
+	file:write(string.pack("<I4", #embed_file))
+	file:write(embed_magic)
+	file:close()
+	embed_save_path = nil
+	embed_file = nil
+	embed_magic = nil
+	SetHideUI(save_restore_ui)
+end
 
 function useposesfolderbutton.action()
 	posesdir = fileutils.getfolderdialog(posesdir)
@@ -131,6 +155,21 @@ function deleteposebutton.action()
 	end
 end
 
+local function readpng(path)
+	local file = io.open(path, "rb")
+	if not file then return nil end
+	file:seek("end", -12)
+	local size = string.unpack("<I4", file:read(4))
+	local data = file:read()
+	if data == png_magic_pose or data == png_magic_scene then
+		file:seek("end", (size + 12) * -1)
+		data = file:read(size)
+	else
+		data = nil
+	end
+	file:close()
+	return data
+end
 
 local function readfile(path)
     local file = io.open(path, "rb")
@@ -194,9 +233,11 @@ local function loadpose(character, filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
 	if character and character.ischaracter == true then
-		local path = posesdir .. "\\" .. filename .. ".pose"
-		log.spam("Poser: Reading %s", path)
-		local data = readfile(path)
+		log.spam("Poser: Reading pose %s", filename)
+		local data = readpng(posesdir .. "\\" .. filename .. ".png")
+		if data == nil then
+			data = readfile(posesdir .. "\\" .. filename .. ".pose")
+		end
 		if data then
 			local ok, ret = pcall(json.decode, data)
 			if not ok then
@@ -271,7 +312,8 @@ local function savepose(filename)
 	if pose then
 		local file = io.open(path, "w")
 		if not file then return nil end
-		file:write(json.encode(pose))
+		local content = json.encode(pose)
+		file:write(content)
 		file:close()
 		log.spam("Poser: Pose %s saved", filename)
 		local currentvalue = poselist.value
@@ -282,6 +324,12 @@ local function savepose(filename)
 				poselist.valuestring = filename
 			end
 		end
+
+		embed_file = content
+		embed_magic = png_magic_pose
+		embed_save_path = posesdir .. "\\" .. filename .. ".png"
+		save_restore_ui = SetHideUI(true)
+		g_poke(create_thumbnail_function, create_thumbnail_message)
 	end
 end
 
@@ -293,9 +341,11 @@ end
 -- == Scenes ==
 
 local function loadscene(filename)
-	local path = scenesdir .. "\\" .. filename .. ".scene"
-	log.spam("Poser: Loading scene %s", path)
-	local data = readfile(path)
+	log.spam("Poser: Loading scene %s", filename)
+	local data = readpng(scenesdir .. "\\" .. filename .. ".png")
+	if data == nil then
+		data = readfile(scenesdir .. "\\" .. filename .. ".scene")
+	end
 	if data then
 		local ok, scene = pcall(json.decode, data)
 		if not ok then
@@ -447,8 +497,16 @@ local function savescene(filename)
 	
 	local file = io.open(path, "w")
 	if not file then return nil end
-	file:write(json.encode(scene))
+	local content = json.encode(scene)
+	file:write(content)
 	file:close()
+
+	embed_file = content
+	embed_magic = png_magic_scene
+	embed_save_path = scenesdir .. "\\" .. filename .. ".png"
+	save_restore_ui = SetHideUI(true)
+	g_poke(create_thumbnail_function, create_thumbnail_message)
+
 	log.spam("Poser: Scene %s saved", filename)
 	local currentvalue = scenelist.value
 	if scenename.value ~= scenelist.valuestring then
