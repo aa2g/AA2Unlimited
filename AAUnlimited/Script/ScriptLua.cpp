@@ -384,6 +384,7 @@ void Lua::bindLua() {
 		s.push(GameTick::tick);
 	});
 	_BINDING["SetHideUI"] = LUA_LAMBDA({
+		s.push(Render::g_hideUI);
 		Render::g_hideUI = s.get(1);
 	});
 

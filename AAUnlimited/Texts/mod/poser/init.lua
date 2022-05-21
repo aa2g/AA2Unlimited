@@ -8,7 +8,7 @@ local _M = {}
 local dlg
 local signals = require "poser.signals"
 local charamgr = require "poser.charamgr"
-local posemgr
+local posemgr = require "poser.posemgr"
 local propmgr = require "poser.propmgr"
 local opts = {
 	{"autoloading", 0, "Autoload character pose: %b"},
