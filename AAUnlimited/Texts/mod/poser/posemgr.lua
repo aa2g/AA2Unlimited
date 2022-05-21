@@ -310,12 +310,12 @@ local function savepose(filename)
 	local character = charamgr.current
 	local pose = pose2table(character)
 	if pose then
-		local file = io.open(path, "w")
-		if not file then return nil end
+		-- local file = io.open(path, "w")
+		-- if not file then return nil end
 		local content = json.encode(pose)
-		file:write(content)
-		file:close()
-		log.spam("Poser: Pose %s saved", filename)
+		-- file:write(content)
+		-- file:close()
+		-- log.spam("Poser: Pose %s saved", filename)
 		local currentvalue = poselist.value
 		if posename.value ~= poselist.valuestring then
 			poselist.valuestring = filename
@@ -440,7 +440,7 @@ end
 
 local function savescene(filename)
 	local path = scenesdir .. "\\" .. filename .. ".scene"
-	log.spam("Poser: Saving scene %s to %s", filename, path)
+	-- log.spam("Poser: Saving scene %s to %s", filename, path)
 
 	local characters = {}
 	local props = {}
@@ -495,11 +495,11 @@ local function savescene(filename)
 	end
 	scene.camera = c
 	
-	local file = io.open(path, "w")
-	if not file then return nil end
+	-- local file = io.open(path, "w")
+	-- if not file then return nil end
 	local content = json.encode(scene)
-	file:write(content)
-	file:close()
+	-- file:write(content)
+	-- file:close()
 
 	embed_file = content
 	embed_magic = png_magic_scene
