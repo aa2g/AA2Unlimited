@@ -79,19 +79,19 @@ namespace PlayInjections {
 			Gdiplus::Bitmap* bitmap = Gdiplus::Bitmap::FromBITMAPINFO((BITMAPINFO*)gdiBitmapInfo, (void*)gdiBitmapData);
 			size_t pathLength = wcslen(path);
 
-#define POSER_THUMBNAIL_WIDTH 480
-#define POSER_THUMBNAIL_HEIGHT 270
+#define POSER_THUMBNAIL_WIDTH 1024
+#define POSER_THUMBNAIL_HEIGHT 576
 			if ((General::IsAAPlay && *reinterpret_cast<BYTE*>(General::GameBase + 0x38F6C9) == 0xF) ||
 				(General::IsAAEdit && *reinterpret_cast<BYTE*>(General::GameBase + 0x36C6C1) == 0xF)) {
 				Gdiplus::Bitmap* poserThumb = new Gdiplus::Bitmap(POSER_THUMBNAIL_WIDTH, POSER_THUMBNAIL_HEIGHT, bitmap->GetPixelFormat());
 				poserThumb->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
 				{
 					auto scaleRatio = (Gdiplus::REAL)POSER_THUMBNAIL_HEIGHT / (Gdiplus::REAL)bitmap->GetHeight();
-					auto horizontalOffset = ((Gdiplus::REAL)POSER_THUMBNAIL_WIDTH - (Gdiplus::REAL)bitmap->GetWidth() * scaleRatio) / 2.0f;
-					horizontalOffset = max(horizontalOffset, 0);
+					auto horizontalOffset = ((Gdiplus::REAL)POSER_THUMBNAIL_WIDTH - ((Gdiplus::REAL)bitmap->GetWidth()) * scaleRatio) / 2.0f;
+					horizontalOffset = max(horizontalOffset, 0) / scaleRatio;
 					Gdiplus::Graphics g(poserThumb);
 					g.ScaleTransform(scaleRatio, scaleRatio);
-					g.DrawImage(bitmap, int(horizontalOffset), 0);
+					g.DrawImage(bitmap, static_cast<int>(horizontalOffset), 0);
 				}
 				auto screenshotFilePath = General::BuildPlayPath(L"poser-screenshot.png");
 				poserThumb->Save(screenshotFilePath.c_str(), encoders[1].encoderId, encoders[1].parameters);
