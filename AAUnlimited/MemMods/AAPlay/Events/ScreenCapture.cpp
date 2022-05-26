@@ -92,7 +92,7 @@ namespace PlayInjections {
 					Gdiplus::Graphics g(poserThumb);
 					g.ScaleTransform(scaleRatio, scaleRatio);
 					g.DrawImage(bitmap, static_cast<int>(horizontalOffset), 0);
-					auto thumbnailOverlay = poserMessage == 0x0F ? /*0x0F*/ General::BuildAAUPath(L"PoseOverlay.png") : /*0x1F*/ General::BuildAAUPath(L"SceneOverlay.png");
+					auto thumbnailOverlay = poserMessage == 0x0F ? /*0x0F*/ General::BuildAAUPath(L"poser\\PoseOverlay.png") : /*0x1F*/ General::BuildAAUPath(L"poser\\SceneOverlay.png");
 					auto overlay = new Gdiplus::Bitmap(thumbnailOverlay.c_str());
 					overlay->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
 					g.ResetTransform();
