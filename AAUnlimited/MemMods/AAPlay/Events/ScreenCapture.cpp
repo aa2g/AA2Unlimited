@@ -81,8 +81,8 @@ namespace PlayInjections {
 
 #define POSER_THUMBNAIL_WIDTH 1024
 #define POSER_THUMBNAIL_HEIGHT 576
-			if ((General::IsAAPlay && *reinterpret_cast<BYTE*>(General::GameBase + 0x38F6C9) == 0xF) ||
-				(General::IsAAEdit && *reinterpret_cast<BYTE*>(General::GameBase + 0x36C6C1) == 0xF)) {
+			auto poserMessage = General::IsAAPlay ? *reinterpret_cast<BYTE*>(General::GameBase + 0x38F6C9) : *reinterpret_cast<BYTE*>(General::GameBase + 0x36C6C1);
+			if ((poserMessage & 0xF) == 0xF) {
 				Gdiplus::Bitmap* poserThumb = new Gdiplus::Bitmap(POSER_THUMBNAIL_WIDTH, POSER_THUMBNAIL_HEIGHT, bitmap->GetPixelFormat());
 				poserThumb->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
 				{
@@ -92,6 +92,12 @@ namespace PlayInjections {
 					Gdiplus::Graphics g(poserThumb);
 					g.ScaleTransform(scaleRatio, scaleRatio);
 					g.DrawImage(bitmap, static_cast<int>(horizontalOffset), 0);
+					auto thumbnailOverlay = poserMessage == 0x0F ? /*0x0F*/ General::BuildAAUPath(L"PoseOverlay.png") : /*0x1F*/ General::BuildAAUPath(L"SceneOverlay.png");
+					auto overlay = new Gdiplus::Bitmap(thumbnailOverlay.c_str());
+					overlay->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
+					g.ResetTransform();
+					g.DrawImage(overlay, 0, 0);
+					delete overlay;
 				}
 				auto screenshotFilePath = General::BuildPlayPath(L"poser-screenshot.png");
 				poserThumb->Save(screenshotFilePath.c_str(), encoders[1].encoderId, encoders[1].parameters);
