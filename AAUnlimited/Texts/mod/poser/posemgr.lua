@@ -22,7 +22,6 @@ _M.poseloaded = poseloaded
 _M.sceneloaded = sceneloaded
 
 local create_thumbnail_function
-local create_thumbnail_message = '\x0F'
 local posesdir = aau_path("poser\\poses")
 local scenesdir = aau_path("poser\\scenes")
 local embed_file = nil
@@ -142,12 +141,8 @@ end
 function deleteposebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this pose?", "Yes", "No")
 	if resp == 1 then
-		local path = posesdir  .. "\\" .. posename.value .. ".pose"
-		local ret, msg = os.remove(path)
-		if not ret then
-			log.error(msg)
-		end
-		log.spam("Removed %s", path)
+		os.remove(posesdir  .. "\\" .. posename.value .. ".pose")
+		os.remove(posesdir  .. "\\" .. posename.value .. ".png")
 		poselist.valuestring = posename.value
 		if poselist.valuestring == posename.value then
 			poselist.removeitem = poselist.value
@@ -329,7 +324,7 @@ local function savepose(filename)
 		embed_magic = png_magic_pose
 		embed_save_path = posesdir .. "\\" .. filename .. ".png"
 		save_restore_ui = SetHideUI(true)
-		g_poke(create_thumbnail_function, create_thumbnail_message)
+		g_poke(create_thumbnail_function, '\x0F')
 	end
 end
 
@@ -505,7 +500,7 @@ local function savescene(filename)
 	embed_magic = png_magic_scene
 	embed_save_path = scenesdir .. "\\" .. filename .. ".png"
 	save_restore_ui = SetHideUI(true)
-	g_poke(create_thumbnail_function, create_thumbnail_message)
+	g_poke(create_thumbnail_function, '\x1F')
 
 	log.spam("Poser: Scene %s saved", filename)
 	local currentvalue = scenelist.value
@@ -525,12 +520,8 @@ end
 function deletescenebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this scene?", "Yes", "No")
 	if resp == 1 then
-		local path = scenesdir .. "\\" .. scenename.value .. ".scene"
-		local ret, msg = os.remove(path)
-		if not ret then
-			log.error(msg)
-		end
-		log.spam("Removed %s", path)
+		os.remove(scenesdir .. "\\" .. scenename.value .. ".scene")
+		os.remove(scenesdir .. "\\" .. scenename.value .. ".png")
 		scenelist.valuestring = scenename.value
 		if scenelist.valuestring == scenename.value then
 			scenelist.removeitem = scenelist.value
