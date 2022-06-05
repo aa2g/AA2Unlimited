@@ -1,0 +1,1 @@
+AAUnlimited now saves scenes as pictures with a .png extension. This picture file contains the data necessary to load it back into the game in a future time. Please don't edit it in any kind of software as you risk losing the posing data inside of it.
