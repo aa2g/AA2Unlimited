@@ -304,8 +304,8 @@ bool __cdecl FinishPNG(HANDLE hf, DWORD *delta, bool dummy) {
 	}
 	if (report_compression_error)
 		MessageBox(NULL, L"Warning: this card's modfiles weren't saved, please try again.", L"Warning", 0);
-	Shared::GameState::setIsSaving(false);
 	return true;
+	Shared::GameState::setIsSaving(false);
 }
 
 // Called by play to save a class
