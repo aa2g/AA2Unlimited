@@ -62,8 +62,10 @@ local scenefilter = lists.listfilter()
 local scenelist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
+local saveposetexttoggle = iup.toggle { title = "Save as .pose", value = "OFF" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
+local savescenetexttoggle = iup.toggle { title = "Save as .scene", value = "OFF" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 local refreshposelistbutton = iup.button { title = "Refresh" }
@@ -301,15 +303,18 @@ end
 local function savepose(filename)
 	if filename == "" then return end
 	local path = posesdir .. "\\" .. filename .. ".pose"
-	log.spam("Poser: Saving pose %s to %s", filename, path)
+	-- log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
 	local pose = pose2table(character)
 	if pose then
-		-- local file = io.open(path, "w")
-		-- if not file then return nil end
 		local content = json.encode(pose)
-		-- file:write(content)
-		-- file:close()
+		if saveposetexttoggle.value == "ON" then
+			local file = io.open(path, "w")
+			if file then
+				file:write(content)
+				file:close()
+			end
+		end
 		-- log.spam("Poser: Pose %s saved", filename)
 		local currentvalue = poselist.value
 		if posename.value ~= poselist.valuestring then
@@ -490,11 +495,14 @@ local function savescene(filename)
 	end
 	scene.camera = c
 	
-	-- local file = io.open(path, "w")
-	-- if not file then return nil end
 	local content = json.encode(scene)
-	-- file:write(content)
-	-- file:close()
+	if savescenetexttoggle.value == "ON" then
+		local file = io.open(path, "w")
+		if file then
+			file:write(content)
+			file:close()
+		end
+	end
 
 	embed_file = content
 	embed_magic = png_magic_scene
@@ -584,6 +592,7 @@ _M.dialogposes = iup.dialog {
 						iup.fill { size = 10, },
 						saveposebutton,
 					},
+					saveposetexttoggle,
 					iup.label { title = "Locks" },
 					lockworldtoggle,
 					lockfacetoggle1,
@@ -609,6 +618,7 @@ _M.dialogposes = iup.dialog {
 						iup.fill { size = 10, },
 						savescenebutton,
 					},
+					savescenetexttoggle,
 					iup.label { title = "Locks" },
 					lockfacetoggle2,
 					lockpropstoggle,
