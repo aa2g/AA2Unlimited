@@ -114,6 +114,15 @@ function on.launch()
 	populatescenelist()
 end
 
+local function get_thumbnail_rotation(angle)
+	local half = math.pi / 6
+	local right = math.pi / 2
+	local left = math.pi / 2 * 3
+	if math.abs(angle - right) < half then return 2 end
+	if math.abs(angle - left) < half then return 1 end
+	return 0
+end
+
 function on.poser_saved_thumbnail()
 	log.spam("Saving poser thumbnail")
 	local screenshot = play_path("poser-screenshot.png")
@@ -329,7 +338,8 @@ local function savepose(filename)
 		embed_magic = png_magic_pose
 		embed_save_path = posesdir .. "\\" .. filename .. ".png"
 		save_restore_ui = SetHideUI(true)
-		g_poke(create_thumbnail_function, '\x0F')
+		local thumbnail_message = 0x20 + get_thumbnail_rotation(camera.rotz)
+		g_poke(create_thumbnail_function, string.char(thumbnail_message))
 	end
 end
 
@@ -508,7 +518,8 @@ local function savescene(filename)
 	embed_magic = png_magic_scene
 	embed_save_path = scenesdir .. "\\" .. filename .. ".png"
 	save_restore_ui = SetHideUI(true)
-	g_poke(create_thumbnail_function, '\x1F')
+	local thumbnail_message = 0x10 + get_thumbnail_rotation(camera.rotz)
+	g_poke(create_thumbnail_function, string.char(thumbnail_message))
 
 	log.spam("Poser: Scene %s saved", filename)
 	local currentvalue = scenelist.value

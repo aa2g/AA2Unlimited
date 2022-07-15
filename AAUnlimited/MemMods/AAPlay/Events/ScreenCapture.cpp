@@ -82,17 +82,51 @@ namespace PlayInjections {
 #define POSER_THUMBNAIL_WIDTH 1024
 #define POSER_THUMBNAIL_HEIGHT 576
 			auto poserMessage = General::IsAAPlay ? *reinterpret_cast<BYTE*>(General::GameBase + 0x38F6C9) : *reinterpret_cast<BYTE*>(General::GameBase + 0x36C6C1);
-			if ((poserMessage & 0xF) == 0xF) {
-				Gdiplus::Bitmap* poserThumb = new Gdiplus::Bitmap(POSER_THUMBNAIL_WIDTH, POSER_THUMBNAIL_HEIGHT, bitmap->GetPixelFormat());
+			if ((poserMessage & 0xFF) > 1) {
+				const TCHAR* sceneOverlay = L"poser\\SceneOverlay.png";
+				const TCHAR* poseOverlay = L"poser\\PoseOverlay.png";
+				const TCHAR* sceneOverlayVertical = L"poser\\SceneOverlay-Vertical.png";
+				const TCHAR* poseOverlayVertical = L"poser\\PoseOverlay-Vertical.png";
+				bool isScene = (poserMessage & 0xF0) == 0x10;
+				std::wstring thumbnailOverlay = isScene ? General::BuildAAUPath(sceneOverlay) : General::BuildAAUPath(poseOverlay);
+				int thumbnailWidth = POSER_THUMBNAIL_WIDTH;
+				int thumbnailHeight = POSER_THUMBNAIL_HEIGHT;
+				float rotate;
+				switch (poserMessage & 0xF)
+				{
+				case 0x1:
+					rotate = 90.0f;
+					break;
+				case 0x2:
+					rotate = -90.0f;
+					break;
+				default:
+					rotate = 0.0f;
+					break;
+				}
+				if (rotate != 0.0f) {
+					thumbnailWidth = POSER_THUMBNAIL_HEIGHT;
+					thumbnailHeight = POSER_THUMBNAIL_WIDTH;
+					thumbnailOverlay = isScene ? General::BuildAAUPath(sceneOverlayVertical) : General::BuildAAUPath(poseOverlayVertical);
+				}
+				Gdiplus::Bitmap* poserThumb = new Gdiplus::Bitmap(thumbnailWidth, thumbnailHeight, bitmap->GetPixelFormat());
 				poserThumb->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
 				{
 					auto scaleRatio = (Gdiplus::REAL)POSER_THUMBNAIL_HEIGHT / (Gdiplus::REAL)bitmap->GetHeight();
 					auto horizontalOffset = ((Gdiplus::REAL)POSER_THUMBNAIL_WIDTH - ((Gdiplus::REAL)bitmap->GetWidth()) * scaleRatio) / 2.0f;
 					horizontalOffset = max(horizontalOffset, 0) / scaleRatio;
+					float verticalOffset = 0.0f;
 					Gdiplus::Graphics g(poserThumb);
+					if (rotate < 0.0f) {
+						g.RotateTransform(rotate);
+						horizontalOffset -= (Gdiplus::REAL)POSER_THUMBNAIL_WIDTH / scaleRatio;
+					}
+					else if (rotate > 0.0f) {
+						g.RotateTransform(rotate);
+						verticalOffset -= (Gdiplus::REAL)POSER_THUMBNAIL_HEIGHT / scaleRatio;
+					}
 					g.ScaleTransform(scaleRatio, scaleRatio);
-					g.DrawImage(bitmap, static_cast<int>(horizontalOffset), 0);
-					auto thumbnailOverlay = poserMessage == 0x0F ? /*0x0F*/ General::BuildAAUPath(L"poser\\PoseOverlay.png") : /*0x1F*/ General::BuildAAUPath(L"poser\\SceneOverlay.png");
+					g.DrawImage(bitmap, static_cast<int>(horizontalOffset), static_cast<int>(verticalOffset));
 					auto overlay = new Gdiplus::Bitmap(thumbnailOverlay.c_str());
 					overlay->SetResolution(bitmap->GetHorizontalResolution(), bitmap->GetVerticalResolution());
 					g.ResetTransform();
