@@ -115,6 +115,7 @@ function on.launch()
 end
 
 local function get_thumbnail_rotation(angle)
+	if is_key_pressed(0x10) then return 0 end
 	local half = math.pi / 6
 	local right = math.pi / 2
 	local left = math.pi / 2 * 3
