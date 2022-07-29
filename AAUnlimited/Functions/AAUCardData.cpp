@@ -847,9 +847,10 @@ bool AAUCardData::LoadCardStyleData(int index1, int index2, AAUCardData* srcChar
 		}
 	}
 	if (aa2body) {	// full copy
-		destChar->m_styles[index2].m_cardStyleData.m_figure = srcChar->m_styles[index1].m_cardStyleData.m_figure;
-		//destChar->m_styles[index2].m_cardStyleData.m_gender = srcChar->m_styles[index1].m_cardStyleData.m_gender;
-		destChar->m_styles[index2].m_cardStyleData.m_chest = srcChar->m_styles[index1].m_cardStyleData.m_chest;
+		if (destChar->m_styles[index2].m_cardStyleData.m_gender == srcChar->m_styles[index1].m_cardStyleData.m_gender) {
+			destChar->m_styles[index2].m_cardStyleData.m_figure = srcChar->m_styles[index1].m_cardStyleData.m_figure;
+			destChar->m_styles[index2].m_cardStyleData.m_chest = srcChar->m_styles[index1].m_cardStyleData.m_chest;
+		}
 		destChar->m_styles[index2].m_cardStyleData.m_bodyColor = srcChar->m_styles[index1].m_cardStyleData.m_bodyColor;
 	}
 	if (aa2face) {	// full copy
