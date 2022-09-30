@@ -1952,6 +1952,22 @@ namespace Shared {
 			*autopc = autoVal;
 		}
 
+		//bool condom-override
+		void Thread::CondomOverride(std::vector<Value>& params) {
+			int autoVal = params[0].bVal ? 1 : 0;
+			const DWORD offset[]{ 0x376164, 0x38, 0x302 };
+			DWORD* condomOverride = (DWORD*)ExtVars::ApplyRule(offset);
+			*condomOverride = autoVal;
+		}
+
+		//bool condom-value
+		void Thread::CondomValue(std::vector<Value>& params) {
+			int autoVal = params[0].bVal ? 1 : 0;
+			const DWORD offset[]{ 0x376164, 0x38, 0x303 };
+			DWORD* condomOverride = (DWORD*)ExtVars::ApplyRule(offset);
+			*condomOverride = autoVal;
+		}
+
 		//int seatPC, int seatPartner
 		void Thread::StartHScene(std::vector<Value>& params) {
 			int seatPC = params[0].iVal;
@@ -3069,7 +3085,18 @@ namespace Shared {
 				{ TYPE_INT, TYPE_STRING },
 				&Thread::EmitDelayedRequiredEvent
 			},
-
+			{
+				141, ACTIONCAT_NPCACTION, TEXT("Set Condom-Override state"), TEXT("CondomOverride = %p"),
+				TEXT("Toggle Condom-Override on or off."),
+				{ TYPE_BOOL },
+				&Thread::CondomOverride
+			},
+			{
+				142, ACTIONCAT_NPCACTION, TEXT("Set Condom-Value state"), TEXT("CondomValue = %p"),
+				TEXT("Toggles condoms on or off, provided CondomOverride is turned on."),
+				{ TYPE_BOOL },
+				&Thread::CondomValue
+			},
 		};
 
 

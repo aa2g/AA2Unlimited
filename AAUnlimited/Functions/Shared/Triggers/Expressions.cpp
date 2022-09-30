@@ -2421,6 +2421,22 @@ namespace Shared {
 			return *autopc == 1;
 		}
 
+
+		//bool()
+		Value Thread::GetCondomOverride(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x38, 0x302 };
+			DWORD* condom = (DWORD*)ExtVars::ApplyRule(offset);
+			return *condom == 1;
+		}
+
+		//bool()
+		Value Thread::GetCondomValue(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x38, 0x303 };
+			DWORD* condom = (DWORD*)ExtVars::ApplyRule(offset);
+			return *condom == 1;
+		}
+
+
 		//int()
 		Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
 			switch (this->eventData->GetId()) {
@@ -4329,7 +4345,21 @@ namespace Shared {
 					TEXT("Call supplemental lua bool function."),
 					{TYPE_STRING}, (TYPE_BOOL),
 					&Thread::CallLuaBoolFunction
-				}
+				},
+				{
+					53, EXPRCAT_EVENT,
+					TEXT("Get Condom-Override"), TEXT("CondomOverride"),
+					TEXT("Returns whether CondomOverride is toggled on or off."),
+					{}, (TYPE_BOOL),
+					&Thread::GetCondomOverride
+				},
+				{
+					54, EXPRCAT_EVENT,
+					TEXT("Get Condom-Value"), TEXT("CondomValue"),
+					TEXT("Returns whether the global condom setting is set to have them on or off."),
+					{}, (TYPE_BOOL),
+					&Thread::GetCondomValue
+				},
 			},
 			{ //FLOAT
 				{

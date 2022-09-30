@@ -172,6 +172,8 @@ namespace Shared {
 			void SetPose(std::vector<Value>& params);
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
+			void CondomOverride(std::vector<Value>& params);
+			void CondomValue(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 			void SwitchActiveInH(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
@@ -439,6 +441,8 @@ namespace Shared {
 			Value GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
+			Value GetCondomOverride(std::vector<Value>& params);
+			Value GetCondomValue(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetPCRoomTarget(std::vector<Value>& params);
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
