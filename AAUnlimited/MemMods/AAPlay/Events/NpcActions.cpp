@@ -872,10 +872,8 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 		if (character->m_xxSkeleton) {
 			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
 			if (charAddress == somepointer) {
-				AAUCardData hairs;
 				if (General::IsAAEdit) {
-					hairs = AAEdit::g_currChar.m_cardData;
-					if (Shared::GameState::getIsDrawingShadow() && !Shared::GameState::getIsSaving()) {
+					if (Shared::GameState::getIsDrawingShadow() && !Shared::GameState::getIsSaving() && false) {
 						Shared::GameState::setIsDrawingShadow(false);
 						for (int idx = 0; idx < 4; idx++) {
 							if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
@@ -886,11 +884,13 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 						}
 					}
 				}
-				if (General::IsAAPlay) hairs = AAPlay::g_characters[character->m_seat].m_cardData;
-				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+				CharInstData* instance;
+				if (General::IsAAPlay) instance = &AAPlay::g_characters[character->m_seat];
+				if (General::IsAAEdit) instance = &AAEdit::g_currChar;
+				if (instance->m_cardData.GetHairs(0).size() || instance->m_cardData.GetHairs(1).size() || instance->m_cardData.GetHairs(2).size() || instance->m_cardData.GetHairs(3).size()) {
 					extraHairTest = 1;
 					return;
-				}
+				}				
 			}
 		}
 		i++;
