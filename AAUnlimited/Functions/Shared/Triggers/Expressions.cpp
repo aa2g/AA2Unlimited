@@ -2417,7 +2417,7 @@ namespace Shared {
 		//bool()
 		Value Thread::GetAutoPC(std::vector<Value>& params) {
 			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
-			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* autopc = (BYTE*)ExtVars::ApplyRule(offset);
 			return *autopc == 1;
 		}
 
@@ -2425,14 +2425,14 @@ namespace Shared {
 		//bool()
 		Value Thread::GetCondomOverride(std::vector<Value>& params) {
 			const DWORD offset[]{ 0x376164, 0x38, 0x302 };
-			DWORD* condom = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* condom = (BYTE*)ExtVars::ApplyRule(offset);
 			return *condom == 1;
 		}
 
 		//bool()
 		Value Thread::GetCondomValue(std::vector<Value>& params) {
 			const DWORD offset[]{ 0x376164, 0x38, 0x303 };
-			DWORD* condom = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* condom = (BYTE*)ExtVars::ApplyRule(offset);
 			return *condom == 1;
 		}
 

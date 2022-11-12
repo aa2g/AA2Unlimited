@@ -1948,7 +1948,7 @@ namespace Shared {
 		void Thread::AutoPC(std::vector<Value>& params) {
 			int autoVal = params[0].bVal ? 1 : 0;
 			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
-			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* autopc = (BYTE*)ExtVars::ApplyRule(offset);
 			*autopc = autoVal;
 		}
 
@@ -1956,7 +1956,7 @@ namespace Shared {
 		void Thread::CondomOverride(std::vector<Value>& params) {
 			int autoVal = params[0].bVal ? 1 : 0;
 			const DWORD offset[]{ 0x376164, 0x38, 0x302 };
-			DWORD* condomOverride = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* condomOverride = (BYTE*)ExtVars::ApplyRule(offset);
 			*condomOverride = autoVal;
 		}
 
@@ -1964,7 +1964,7 @@ namespace Shared {
 		void Thread::CondomValue(std::vector<Value>& params) {
 			int autoVal = params[0].bVal ? 1 : 0;
 			const DWORD offset[]{ 0x376164, 0x38, 0x303 };
-			DWORD* condomOverride = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* condomOverride = (BYTE*)ExtVars::ApplyRule(offset);
 			*condomOverride = autoVal;
 		}
 
@@ -1988,7 +1988,7 @@ namespace Shared {
 
 			//save interrupts
 			const DWORD offset6[]{ 0x376164, 0x38, 0x305 };
-			DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
+			BYTE* interrupt = (BYTE*)ExtVars::ApplyRule(offset6);
 			GameState::setInterrupt(*interrupt);
 			*interrupt = 1;
 
@@ -2045,7 +2045,7 @@ namespace Shared {
 				const DWORD offstPCNPC[] = { 0x376164, 0x28, 0x28 };
 				auto pc = (ExtClass::CharacterStruct * *)ExtVars::ApplyRule(offstPC);
 				auto pcnpc = (ExtClass::NpcData * *)ExtVars::ApplyRule(offstPCNPC);
-				DWORD* interrupt = (DWORD*)ExtVars::ApplyRule(offset6);
+				BYTE* interrupt = (BYTE*)ExtVars::ApplyRule(offset6);
 				(*pc)->m_characterStatus->m_npcStatus->m_status = 0;
 				if (!Shared::GameState::getVoyeur()) return;
 				*pc = Shared::GameState::getVoyeur();
