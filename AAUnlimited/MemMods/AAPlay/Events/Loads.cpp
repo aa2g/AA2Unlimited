@@ -113,25 +113,25 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
-	CharInstData card;
-	if (General::IsAAPlay) card = AAPlay::g_characters[loadCharacter->m_seat];
+	CharInstData* card;
+	if (General::IsAAPlay) card = &AAPlay::g_characters[loadCharacter->m_seat];
 	else if (General::IsAAEdit) {
 		AAEdit::g_currChar.m_char = loadCharacter;
-		card = AAEdit::g_currChar;
+		card = &AAEdit::g_currChar;
 	}
 	for (int idx = 0; idx < 4; idx++) {
-		if (card.m_cardData.GetHairs(idx).size()) {
-			for (int num = 0; num < card.m_cardData.GetHairs(idx).size(); num++) {
-				card.AddShadows((DWORD*)card.m_hairs[idx][num].second);
-				card.CastShadows((DWORD*)card.m_hairs[idx][num].second);
+		if (card->m_cardData.GetHairs(idx).size()) {
+			for (int num = 0; num < card->m_cardData.GetHairs(idx).size(); num++) {
+				card->AddShadows((DWORD*)card->m_hairs[idx][num].second);
+				card->CastShadows((DWORD*)card->m_hairs[idx][num].second);
 			}
 		}
 	}
 	
-	if (card.IsValid()) {
-		if (card.m_char->m_xxSkeleton) {
-			card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
-			card.CastShadows((DWORD*)card.m_char->m_xxSkeleton);
+	if (card->IsValid()) {
+		if (card->m_char->m_xxSkeleton) {
+			card->AddShadows((DWORD*)card->m_char->m_xxSkeleton);
+			card->CastShadows((DWORD*)card->m_char->m_xxSkeleton);
 		}
 	}
 	

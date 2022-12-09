@@ -872,10 +872,8 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 		if (character->m_xxSkeleton) {
 			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
 			if (charAddress == somepointer) {
-				AAUCardData hairs;
-				if (General::IsAAEdit && !Shared::GameState::getIsSaving()) {
-					hairs = AAEdit::g_currChar.m_cardData;
-					if (Shared::GameState::getIsDrawingShadow()) {
+				if (General::IsAAEdit) {
+					if (Shared::GameState::getIsDrawingShadow() && !Shared::GameState::getIsSaving()) {
 						Shared::GameState::setIsDrawingShadow(false);
 						for (int idx = 0; idx < 4; idx++) {
 							if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
@@ -886,11 +884,13 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 						}
 					}
 				}
-				if (General::IsAAPlay) hairs = AAPlay::g_characters[character->m_seat].m_cardData;
-				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+				CharInstData* instance;
+				if (General::IsAAPlay) instance = &AAPlay::g_characters[character->m_seat];
+				if (General::IsAAEdit) instance = &AAEdit::g_currChar;
+				if (instance->m_cardData.GetHairs(0).size() || instance->m_cardData.GetHairs(1).size() || instance->m_cardData.GetHairs(2).size() || instance->m_cardData.GetHairs(3).size()) {
 					extraHairTest = 1;
 					return;
-				}
+				}				
 			}
 		}
 		i++;
@@ -1000,11 +1000,23 @@ void __stdcall ConversationEnd(NpcStatus* card1, NpcStatus* card2, int convoID) 
 			convPartner = card2->m_thisChar->m_seat;
 		}
 	}
+	int defaultConvo = convoID;
+	if (convoID == -1) {
+		//Case where a card is interrupted
+		for (int character = 0; character < 25; character = character + 1) {
+			CharInstData* inst2 = &AAPlay::g_characters[character];
+			if (inst2->IsValid()) {
+				if (inst2->m_char->m_npcData == card1->m_thisChar->m_npcData->m_target) {
+					defaultConvo = inst2->m_char->m_moreData1->m_activity->m_currConversationId;
+				}
+			}
+		}
+	}
 
 	Shared::Triggers::ConversationEndData convoEndData;
 	convoEndData.card = triggerCard;
 	convoEndData.conversationTarget = convPartner;
-	convoEndData.action = convoID;
+	convoEndData.action = defaultConvo;
 
 	ThrowEvent(&convoEndData);
 }

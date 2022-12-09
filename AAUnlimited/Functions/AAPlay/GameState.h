@@ -61,7 +61,7 @@ namespace Shared {
 		void setNPCLineState(DWORD value);
 		DWORD getNPCLineState();
 
-		void setInterrupt(DWORD value);
+		void setInterrupt(BYTE value);
 		DWORD getInterrupt();
 
 		DWORD getHPosition();
