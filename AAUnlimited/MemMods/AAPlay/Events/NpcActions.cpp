@@ -1000,11 +1000,23 @@ void __stdcall ConversationEnd(NpcStatus* card1, NpcStatus* card2, int convoID) 
 			convPartner = card2->m_thisChar->m_seat;
 		}
 	}
+	int defaultConvo = convoID;
+	if (convoID == -1) {
+		//Case where a card is interrupted
+		for (int character = 0; character < 25; character = character + 1) {
+			CharInstData* inst2 = &AAPlay::g_characters[character];
+			if (inst2->IsValid()) {
+				if (inst2->m_char->m_npcData == card1->m_thisChar->m_npcData->m_target) {
+					defaultConvo = inst2->m_char->m_moreData1->m_activity->m_currConversationId;
+				}
+			}
+		}
+	}
 
 	Shared::Triggers::ConversationEndData convoEndData;
 	convoEndData.card = triggerCard;
 	convoEndData.conversationTarget = convPartner;
-	convoEndData.action = convoID;
+	convoEndData.action = defaultConvo;
 
 	ThrowEvent(&convoEndData);
 }
