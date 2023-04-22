@@ -65,8 +65,10 @@ local lock_face = false
 local lock_props = false
 local lock_world = false
 local auto_load = false
+local auto_repeat = true
 local auto_play = false -- loop
--- local auto_load_props = false -- loop
+local auto_load_props = false -- loop
+local auto_load_chars = false -- loop
 local lock_world_bone = "a01_N_Zentai_010"
 
 local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
@@ -110,34 +112,35 @@ lockcameratoggle2 = iup.toggle { title = "Camera", action = function(self, state
 	lock_camera = state == 1
 	lockcameratoggle1.value = (state == 1 and "ON") or "OFF"
 end }
-local autoloadtoggle = iup.toggle { title = "Load Scene", action = function(self, state) auto_load = state == 1 end }
--- local delay
--- local autoplaytoggle = iup.toggle { title = "Advance", action = function(self, state)
-	-- auto_play = state == 1
-	-- if auto_play then
-		-- local timer;
-		-- if timer1.run ~= "YES" then
-			-- timer = timer1
-		-- else
-			-- timer = timer2
-		-- end
-		-- timer.time = tonumber(delay.value) or 1000	-- default delay = 1s
-		-- timer.run = "YES"
-	-- else
-		-- timer1.run = "NO"
-		-- timer2.run = "NO"
-	-- end
--- end }
--- local autoloadpropstoggle = iup.toggle { title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
+local autorepeattoggle = iup.toggle { title = "Repeat Album", value = "ON", action = function(self, state) auto_repeat = state == 1 end }
+local autoloadscenetoggle = iup.toggle { title = "Load Scene", action = function(self, state) auto_load = state == 1 end }
+local autoloadpropstoggle = iup.toggle { active="no", title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
+local autounloadpropstoggle = iup.toggle { active="no", title = "Unload Props", action = function(self, state) auto_load_props = state == 1 end }
+local autoloadcharstoggle = iup.toggle { active="no", title = "Load Characters", action = function(self, state) auto_load_chars = state == 1 end }
+local autounloadcharstoggle = iup.toggle { active="no", title = "Unload Characters", action = function(self, state) auto_load_chars = state == 1 end }
+
 locklighttoggle2 = iup.toggle { title = "Light", action = function(self, state)
 	lock_light = state == 1
 	locklighttoggle1.value = (state == 1 and "ON") or "OFF"
 end, value = "ON" }
 
-local thumbnailbtn = iup.flatbutton {expand="yes"}
-local thumbnailvbox = iup.vbox {
-	iup.label { title = "Preview" },
-	thumbnailbtn
+local thumbnailbtn = iup.flatbutton { expand="VERTICALFREE",
+	shrink="yes",
+	--floating="yes",
+	--image = iup.LoadImage(albumsdir .. "\\" .. "autosave.png"),
+	minsize = "492x279",
+	maxsize = "1024x558",
+}
+local thumbnailvbox = iup.vbox{
+	iup.label { title = "Preview" , expand="horizontal", shrink="yes" },
+	iup.expander {
+		iup.vbox{
+			thumbnailbtn,
+			expandchildren = "yes",
+			state = "CLOSE",
+		},
+	},
+	expandchildren = "yes",
 }
 		
 local function setclip(clip)
@@ -186,21 +189,52 @@ local playbacknextbtn = iup.flatbutton { title = playbacksymbols.next, expand = 
 local playbacklastbtn = iup.flatbutton { title = playbacksymbols.last, expand = "horizontal", padding = 3, size = "15x12"  }
 
 local function drawscenethumbnail(dir, filename)
-	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")	
-		
+	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")		
 	-- put away the old image on the button
 	local oldImg = thumbnailbtn.image
 	-- load a png  of the scene
 	local newImg = iup.LoadImage(dir .. "\\" .. filename .. ".png")
-	-- scale it down
-	newImg.autoscale = 0.45
-	-- apply to the button
-	thumbnailbtn.image = newImg
-	-- if button had an image before - nuke that
-	if oldImg ~= nil then iup.Destroy(oldImg) end
+	if newImg == nil then
+		newImg = iup.LoadImage(dir .. "\\" .. filename .. ".jpg")
+	end
+	if newImg ~= nil then	-- skip failed images
+		-- scale it down
+
+		-- get the pixel size of the label
+		local size_str = iup.GetAttribute(thumbnailbtn, "RASTERSIZE")
+		local label_width, label_height = string.match(size_str or "492x279", "(%d+)x(%d+)")
+
+		-- get the pixel size of the image
+		local image_width = newImg.width
+		local image_height = newImg.height
+
+		-- calculate the aspect ratios of the label and image
+		local label_aspect = label_width / label_height
+		local image_aspect = image_width / image_height
+
+		log.spam("drawscenethumbnail: labelsize: %sx%s", label_width, label_height)
+		log.spam("drawscenethumbnail: imagesize: %sx%s", image_width, image_height)
+
+		-- determine the scale factor to fit the image to the label
+		local scale_factor_fit2width = label_width / newImg.width 
+		local scale_factor_fit2height = label_height / newImg.height
+		local scale_factor = math.min(scale_factor_fit2width,scale_factor_fit2height) -- pick the one that doesn't' stick out
+		log.spam("drawscenethumbnail: scale_factor: %s", scale_factor)
+		newImg.autoscale = scale_factor
+
+		-- apply to the button
+		thumbnailbtn.image = newImg
+		-- if button had an image before - nuke that
+		if oldImg ~= nil then iup.Destroy(oldImg) end
+	end
 	-- redraw the button
-	iup.Redraw(thumbnailbtn, 0)	
+	iup.Redraw(thumbnailvbox, 1)	
 end
+
+--function thumbnailbtn.flat_action()	
+--	-- redraw the button
+--	iup.Redraw(thumbnailbtn, 0)	
+--end
 
 signals.connect(poselist, "selectionchanged", function() posename.value = poselist[poselist.value] end )
 signals.connect(scenelist, "selectionchanged", function() scenename.value = scenelist[scenelist.value]; if auto_load then loadscenebutton.action() end end )
@@ -210,17 +244,29 @@ signals.connect(scenelist2, "selectionchanged", function()
 	delay.value = ""
 		
 	local text = require("pl.text");
+	require 'pl.List'
 	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local length = args:len()
 		
-	delay.value = table.remove(args)
-	pagenumber.value = table.remove(args)	
-	albumname.value = table.concat(args, "-")
-		
+	if length > 2 then	-- 3+ elements - last two are page and delay, the rest are albumname
+		delay.value = table.remove(args)
+		pagenumber.value = table.remove(args)	
+		albumname.value = table.concat(args, "-")
+	elseif length == 2  then	-- 2 elements - albumname and pagenumber, delay defaults to 1s
+		delay.value = 1000
+		pagenumber.value = table.remove(args)	
+		albumname.value = table.concat(args, "-")
+	else -- 1 element - albumname, default pagenumber is the index in the list
+		delay.value = 1000
+		pagenumber.value = scenelist2.value
+		albumname.value = scenelist2[scenelist2.value]
+	end
+
 	if auto_load then
-		loadscenebutton2.action()
+		_M.loadalbumscene()
 	end
 	
-	drawscenethumbnail(albumsdir, getalbumfilename())
+	drawscenethumbnail(albumsdir, scenelist2[scenelist2.value])
 end )
 
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
@@ -746,6 +792,10 @@ function timer1.action_cb()
 	else
 	-- select the next scene, loop if needed
 		scenelist2.value = ((idx % scenelist2.count) + 1)
+		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
+			playbackplaypausebtn.value = "OFF"
+			auto_play = false
+		end
 	end
 	
 	-- update the scene name
@@ -761,7 +811,7 @@ function timer1.action_cb()
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
 	if auto_load then
-		loadscenebutton2.action()
+		_M.loadalbumscene()
 	end	
 	
 	if auto_play then
@@ -783,6 +833,10 @@ function timer2.action_cb()
 	else
 	-- select the next scene, loop if needed
 		scenelist2.value = ((idx % scenelist2.count) + 1)
+		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
+			playbackplaypausebtn.value = "OFF"
+			auto_play = false
+		end
 	end
 	
 	-- update the scene name
@@ -798,7 +852,7 @@ function timer2.action_cb()
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
 	if auto_load then
-		loadscenebutton2.action()
+		_M.loadalbumscene()
 	end	
 	
 	if auto_play then
@@ -812,7 +866,7 @@ function timer2.action_cb()
   return iup.DEFAULT
 end
 
-function loadscenebutton2.action()
+function _M.loadalbumscene()
 	local ok, ret = pcall(loadscene, getalbumfilename(), albumsdir)
 	if not ok then
 		log.error("Error loading scene %s/%s:", albumsdir, getalbumfilename())
@@ -820,8 +874,16 @@ function loadscenebutton2.action()
 	end
 end
 
+function loadscenebutton2.action()
+	_M.loadalbumscene()
+	playbackplaypausebtn.value = "OFF"
+	playbackplaypausebtn.flat_action()
+end
+
 function savescenebutton2.action()
 	savescene(getalbumfilename(), albumsdir, scenelist2)
+	playbackplaypausebtn.value = "OFF"
+	playbackplaypausebtn.flat_action()
 end
 
 function deletescenebutton2.action()
@@ -841,7 +903,7 @@ function refreshscenelistbutton2.action()
 end
 
 
-function playbackplaypausebtn.valuechanged_cb(self)
+function playbackplaypausebtn.flat_action(self)
 	auto_play = playbackplaypausebtn.value == "ON" and 1 or 0
 	if auto_play == 1 then
 		local timer;
@@ -882,7 +944,7 @@ function playbackprevbtn.flat_action(self)
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
 	if auto_load then
-		loadscenebutton2.action()
+		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
 	
@@ -916,7 +978,7 @@ function playbacknextbtn.flat_action(self)
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
 	if auto_load then
-		loadscenebutton2.action()
+		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
 	
@@ -1002,7 +1064,7 @@ _M.dialogposes = iup.dialog {
 					lockpropstoggle1,
 					lockcameratoggle1,
 					locklighttoggle1,
-				--	autoloadtoggle,
+				--	autoloadscenetoggle,
 				--	autoplaytoggle,
 					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
@@ -1049,20 +1111,39 @@ _M.dialogposes = iup.dialog {
 						-- iup.fill { size = 2, },
 						-- playbacklastbtn,
 					},
-					iup.hbox {
-						iup.vbox {
-							iup.label { title = "Lock ..." },
-							lockfacetoggle3,
-							lockpropstoggle2,
-							lockcameratoggle2,
-							locklighttoggle2,
+					iup.tabs {
+						iup.hbox{
+							iup.vbox {
+								-- iup.label { title = "Lock ..." },
+								lockfacetoggle3,
+								lockpropstoggle2,
+								lockcameratoggle2,
+								locklighttoggle2,
+								gap = 3,
+								expand = "horizontal",
+							},
+							expand="yes",
+							tabtitle = "Locks",
 						},
-						iup.vbox {
-							iup.label { title = "Auto-" },
-							autoloadtoggle,
-							autoplaytoggle
-							-- autoloadpropstoggle
+						iup.hbox{							
+							iup.vbox {
+								-- iup.label { title = "Auto" },
+								autorepeattoggle,
+								autoloadscenetoggle,
+								autoplaytoggle,
+								autoloadpropstoggle,
+								autounloadpropstoggle,
+								autoloadcharstoggle,
+								autounloadcharstoggle,
+								gap = 3,
+								expand = "horizontal",
+							},
+							expand="yes",
+							tabtitle = "Auto",
 						},
+						expandchildren = "yes",
+						expand = "horizontal",
+						tabtype = "left",
 					},
 					usealbumsfolderbutton,
 					iup.label { title = "Delete scene:" },
@@ -1076,14 +1157,17 @@ _M.dialogposes = iup.dialog {
 			end,
 		},
 		thumbnailvbox,
+		iup.fill { size = 3, },
 		iup.hbox {
 			iup.button { title = "Show UI", action = function() SetHideUI(false) end },
 			iup.button { title = "Hide UI", action = function() SetHideUI(true) end },
 		},
+		expandchildren="yes",
 	},
 	nmargin = "3x3",
 	maxbox = "no",
 	minbox = "no",
+	shrink = "yes"
 }
 
 _M.loadpose = loadpose
