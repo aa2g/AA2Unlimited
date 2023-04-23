@@ -112,12 +112,22 @@ lockcameratoggle2 = iup.toggle { title = "Camera", action = function(self, state
 	lock_camera = state == 1
 	lockcameratoggle1.value = (state == 1 and "ON") or "OFF"
 end }
-local autorepeattoggle = iup.toggle { title = "Repeat Album", value = "ON", action = function(self, state) auto_repeat = state == 1 end }
-local autoloadscenetoggle = iup.toggle { title = "Load Scene", action = function(self, state) auto_load = state == 1 end }
-local autoloadpropstoggle = iup.toggle { active="no", title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
-local autounloadpropstoggle = iup.toggle { active="no", title = "Unload Props", action = function(self, state) auto_load_props = state == 1 end }
-local autoloadcharstoggle = iup.toggle { active="no", title = "Load Characters", action = function(self, state) auto_load_chars = state == 1 end }
-local autounloadcharstoggle = iup.toggle { active="no", title = "Unload Characters", action = function(self, state) auto_load_chars = state == 1 end }
+local lockbonestoggle1
+lockbonestoggle1 = iup.toggle { active="no", title = "Bones", action = function(self, state)
+	lock_bones = state == 1
+	lockbonestoggle2.value = (state == 1 and "ON") or "OFF"
+end }
+lockbonestoggle2 = iup.toggle { active="no", title = "Bones", action = function(self, state)
+	lock_bones = state == 1
+	lockbonestoggle1.value = (state == 1 and "ON") or "OFF"
+end }
+
+local autorepeattoggle = iup.toggle { title = "Repeat Album", expand = "horizontal", alignment="ARIGHT", value = "ON", action = function(self, state) auto_repeat = state == 1 end }
+local autoloadscenetoggle = iup.toggle { title = "Load Scene", expand = "horizontal", alignment="ARIGHT", action = function(self, state) auto_load = state == 1 end }
+local autoloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
+local autounloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Props", action = function(self, state) auto_load_props = state == 1 end }
+local autoloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Characters", action = function(self, state) auto_load_chars = state == 1 end }
+local autounloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Characters", action = function(self, state) auto_load_chars = state == 1 end }
 
 locklighttoggle2 = iup.toggle { title = "Light", action = function(self, state)
 	lock_light = state == 1
@@ -163,7 +173,7 @@ local posefilter = lists.listfilter()
 local poselist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local scenefilter = lists.listfilter()
 local scenefilter2 = lists.listfilter()
-local scenelist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
+local scenelist1 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local scenelist2 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
@@ -236,8 +246,16 @@ end
 --	iup.Redraw(thumbnailbtn, 0)	
 --end
 
-signals.connect(poselist, "selectionchanged", function() posename.value = poselist[poselist.value] end )
-signals.connect(scenelist, "selectionchanged", function() scenename.value = scenelist[scenelist.value]; if auto_load then loadscenebutton.action() end end )
+signals.connect(poselist, "selectionchanged", function()
+	posename.value = poselist[poselist.value]
+
+	drawscenethumbnail(posesdir, poselist[poselist.value])
+end )
+signals.connect(scenelist1, "selectionchanged", function()
+	scenename.value = scenelist1[scenelist1.value]
+	
+	drawscenethumbnail(scenesdir, scenelist1[scenelist1.value])
+end )
 signals.connect(scenelist2, "selectionchanged", function()
 	albumname.value = ""
 	pagenumber.value = ""
@@ -270,7 +288,7 @@ signals.connect(scenelist2, "selectionchanged", function()
 end )
 
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
-signals.connect(scenefilter, "setfilter", scenelist, "setfilter")
+signals.connect(scenefilter, "setfilter", scenelist1, "setfilter")
 signals.connect(scenefilter2, "setfilter", scenelist2, "setfilter")
 
 local function findposerfiles(directory, match)
@@ -306,7 +324,7 @@ function on.launch()
 		create_thumbnail_function = 0x38F6C9
 	end
 	populateposelist()
-	populatescenelist(scenelist, scenesdir)
+	populatescenelist(scenelist1, scenesdir)
 	populatescenelist(scenelist2, albumsdir)
 end
 
@@ -343,7 +361,7 @@ end
 
 function usescenesfolderbutton.action()
 	scenesdir = fileutils.getfolderdialog(scenesdir)
-	populatescenelist(scenelist, scenesdir)
+	populatescenelist(scenelist1, scenesdir)
 end
 
 function usealbumsfolderbutton.action()
@@ -624,7 +642,7 @@ local function loadscene(filename, dir)
 					end
 				end
 				if #not_found > 0 then
-					log.error("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
+					log.warn("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
 				end
 			end
 			
@@ -736,9 +754,9 @@ local function savescene(filename, dir, list)
 	g_poke(create_thumbnail_function, string.char(thumbnail_message))
 
 	log.spam("Poser: Scene %s saved", filename)
-	local currentvalue = (list or scenelist).value
+	local currentvalue = (list or scenelist1).value
 	
-	if list == scenelist then
+	if list == scenelist1 then
 		if scenename.value ~= list.valuestring then
 			log.spam("Poser: savescene: scenename.value: ", scenename.value);
 			log.spam("Poser: savescene: list.valuestring: ", list.valuestring);
@@ -762,7 +780,7 @@ local function savescene(filename, dir, list)
 end
 
 function savescenebutton.action()
-	savescene(scenename.value, scenesdir, scenelist)
+	savescene(scenename.value, scenesdir, scenelist1)
 end
 
 function deletescenebutton.action()
@@ -770,15 +788,15 @@ function deletescenebutton.action()
 	if resp == 1 then
 		os.remove(scenesdir .. "\\" .. scenename.value .. ".scene")
 		os.remove(scenesdir .. "\\" .. scenename.value .. ".png")
-		scenelist.valuestring = scenename.value
-		if scenelist.valuestring == scenename.value then
-			scenelist.removeitem = scenelist.value
+		scenelist1.valuestring = scenename.value
+		if scenelist1.valuestring == scenename.value then
+			scenelist1.removeitem = scenelist1.value
 		end
 	end
 end
 
 function refreshscenelistbutton.action()	
-	populatescenelist(scenelist, scenesdir)
+	populatescenelist(scenelist1, scenesdir)
 end
 
 -- == Anims ==
@@ -1046,7 +1064,7 @@ _M.dialogposes = iup.dialog {
 			iup.hbox {
 				iup.vbox {
 					scenefilter,
-					scenelist,
+					scenelist1,
 					refreshscenelistbutton,
 					expand = "no",
 				},
@@ -1061,6 +1079,7 @@ _M.dialogposes = iup.dialog {
 					savescenetexttoggle,
 					iup.label { title = "Locks" },
 					lockfacetoggle2,
+					lockbonestoggle1,
 					lockpropstoggle1,
 					lockcameratoggle1,
 					locklighttoggle1,
@@ -1116,6 +1135,7 @@ _M.dialogposes = iup.dialog {
 							iup.vbox {
 								-- iup.label { title = "Lock ..." },
 								lockfacetoggle3,
+								lockbonestoggle2,
 								lockpropstoggle2,
 								lockcameratoggle2,
 								locklighttoggle2,
