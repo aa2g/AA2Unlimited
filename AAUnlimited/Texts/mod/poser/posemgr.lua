@@ -199,7 +199,9 @@ local playbacknextbtn = iup.flatbutton { title = playbacksymbols.next, expand = 
 local playbacklastbtn = iup.flatbutton { title = playbacksymbols.last, expand = "horizontal", padding = 3, size = "15x12"  }
 
 local function drawscenethumbnail(dir, filename)
-	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")		
+	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")
+	-- don't do anything if the preview window is closed
+	if thumbnailvbox[2].state == "CLOSE" then return end
 	-- put away the old image on the button
 	local oldImg = thumbnailbtn.image
 	-- load a png  of the scene
