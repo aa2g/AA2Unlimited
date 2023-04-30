@@ -6,19 +6,19 @@ local _M = {}
 -- _M.dialogposes = {}
 
 local  playbacksymbols  = 
-{	
+{
 	-- first = "⏮",
 	-- prev = "⏪",
 	-- playpause = "⏯",
 	-- next = "⏩",
 	-- last = "⏭",
-	
+
 	-- first = "|<<",
 	-- prev = "|<",
 	-- playpause = ">||",
 	-- next = ">|",
 	-- last = ">>|",
-	
+
 	first = "First",	
 	prev = "Prev",
 	playpause = "Play/Pause",
@@ -33,7 +33,6 @@ local lists = require "poser.lists"
 local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
-local toggles = require "poser.toggles"
 local os = require "os"
 
 local clipchanged= signals.signal()
@@ -59,80 +58,84 @@ local save_restore_ui = false
 local timer1 = iup.timer{time=1000}
 local timer2 = iup.timer{time=1000}
 
-local lock_camera = false
-local lock_light = true
-local lock_face = false
-local lock_props = false
-local lock_world = false
-local auto_load = false
-local auto_repeat = true
-local auto_play = false -- loop
-local auto_load_props = false -- loop
-local auto_load_chars = false -- loop
+local settings_state = {
+	lock_camera = false,
+	lock_light = true,
+	lock_face = false,
+	lock_props = false,
+	lock_world = false,
+	unlock_bones = false,
+	auto_load_scene = false,
+	auto_repeat = true,
+	auto_play = false, -- loop -- remove/change the uses of a variable directly. later. btw it's global not local atm
+	auto_load_props = false, -- loop
+	auto_load_chars = false, -- loop
+}
+
+local shared_settings_toggles = {
+	lock_camera = {},
+	lock_light = {},
+	lock_face = {},
+	lock_props = {},
+	unlock_bones = {},
+}
+
+local function get_setting(setting)
+	return settings_state[setting]
+end
+
+local function settings_toggles_update(setting, state, true_value, skip_toggle)
+	local value = state == true_value
+	settings_state[setting] = value
+	local toggles = shared_settings_toggles[setting]
+	if toggles ~= nil then
+		for index, toggle in ipairs(toggles) do
+			if toggle ~= skip_toggle then
+				toggle.value = (value and "ON") or "OFF"
+			end
+		end
+	end
+end
+
 local lock_world_bone = "a01_N_Zentai_010"
 
-local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
-local lockfacetoggle3
-local lockfacetoggle2
-local lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle2.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle3.value = (state == 1 and "ON") or "OFF"
-end }
-lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle1.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle3.value = (state == 1 and "ON") or "OFF"
-end }
-local lockpropstoggle2
-local lockpropstoggle1 = iup.toggle { title = "Lock Props", action = function(self, state)
-	lock_props = state == 1
-	lockpropstoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-local lockcameratoggle2
-local lockcameratoggle1 = iup.toggle { title = "Lock Camera", action = function(self, state)
-	lock_camera = state == 1
-	lockcameratoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-local locklighttoggle2
-local locklighttoggle1 = iup.toggle { title = "Lock Light", action = function(self, state)
-	lock_light = state == 1
-	locklighttoggle2.value = (state == 1 and "ON") or "OFF"
-end, value = "ON" }
-lockfacetoggle3 = iup.toggle { title = "Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle1.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-lockpropstoggle2 = iup.toggle { title = "Props", action = function(self, state)
-	lock_props = state == 1
-	lockpropstoggle1.value = (state == 1 and "ON") or "OFF"
-end }
-lockcameratoggle2 = iup.toggle { title = "Camera", action = function(self, state)
-	lock_camera = state == 1
-	lockcameratoggle1.value = (state == 1 and "ON") or "OFF"
-end }
-local lockbonestoggle1
-lockbonestoggle1 = iup.toggle { active="no", title = "Bones", action = function(self, state)
-	lock_bones = state == 1
-	lockbonestoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-lockbonestoggle2 = iup.toggle { active="no", title = "Bones", action = function(self, state)
-	lock_bones = state == 1
-	lockbonestoggle1.value = (state == 1 and "ON") or "OFF"
-end }
+local function create_settings_toggle(toggle_title, setting, true_value)
+	local toggle = iup.toggle { title = toggle_title }
+	toggle.action = function(self, state)
+		settings_toggles_update(setting, state, true_value, toggle)
+	end
+	local toggles = shared_settings_toggles[setting]
+	if toggles ~= nil then
+		table.insert(shared_settings_toggles[setting], toggle)
+	end
+	return toggle
+end
 
-local autorepeattoggle = iup.toggle { title = "Repeat Album", expand = "horizontal", alignment="ARIGHT", value = "ON", action = function(self, state) auto_repeat = state == 1 end }
-local autoloadscenetoggle = iup.toggle { title = "Load Scene", expand = "horizontal", alignment="ARIGHT", action = function(self, state) auto_load = state == 1 end }
-local autoloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
-local autounloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Props", action = function(self, state) auto_load_props = state == 1 end }
-local autoloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Characters", action = function(self, state) auto_load_chars = state == 1 end }
-local autounloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Characters", action = function(self, state) auto_load_chars = state == 1 end }
+local lock_world_toggle = create_settings_toggle("Lock World Bone", "lock_world", 1)
+local lock_face_toggle_pose = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_face_toggle_scene = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_face_toggle_album = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_props_toggle_scene = create_settings_toggle("Lock Props", "lock_props", 1)
+local lock_props_toggle_album = create_settings_toggle("Lock Props", "lock_props", 1)
+local lock_camera_toggle_scene = create_settings_toggle("Lock Camera", "lock_camera", 1)
+local lock_camera_toggle_album = create_settings_toggle("Lock Camera", "lock_camera", 1)
+local lock_light_toggle_scene = create_settings_toggle("Lock Light", "lock_light", 1)
+local lock_light_toggle_album = create_settings_toggle("Lock Light", "lock_light", 1)
+local unlock_bones_toggle_scene = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
+local unlock_bones_toggle_album = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
+unlock_bones_toggle_scene.active = "no"
+unlock_bones_toggle_album.active = "no"
 
-locklighttoggle2 = iup.toggle { title = "Light", action = function(self, state)
-	lock_light = state == 1
-	locklighttoggle1.value = (state == 1 and "ON") or "OFF"
-end, value = "ON" }
+local auto_repeat_album_toggle = create_settings_toggle("Repeat Album", "auto_repeat", 1)
+local auto_load_scene_toggle = create_settings_toggle("Load Scene", "auto_load_scene", 1)
+local auto_load_props_toggle = create_settings_toggle("Load Props", "auto_load_props", 1)
+local auto_unload_props_toggle = create_settings_toggle("Load Props", "auto_unload_props", 1)
+local auto_load_chars_toggle = create_settings_toggle("Load Characters", "auto_load_chars", 1)
+local auto_unload_chars_toggle = create_settings_toggle("Load Characters", "auto_unload_chars", 1)
+auto_load_props_toggle.active = "no"
+auto_unload_props_toggle.active = "no"
+auto_load_chars_toggle.active = "no"
+auto_unload_chars_toggle.active = "no"
 
 local thumbnailbtn = iup.flatbutton { expand="VERTICALFREE",
 	shrink="yes",
@@ -319,7 +322,7 @@ local function populatescenelist(list, dir)
 	list.setlist(findposerfiles(dir, "^(.*)%.scene$"))
 end
 
-function on.launch()
+function _M.init()
 	if exe_type == "edit" then
 		create_thumbnail_function = 0x36C6C1
 	else
@@ -346,10 +349,13 @@ function on.poser_saved_thumbnail()
 	os.remove(embed_save_path)
 	os.rename(screenshot, embed_save_path)
 	local file = io.open(embed_save_path, "ab")
-	file:write(embed_file)
-	file:write(string.pack("<I4", #embed_file))
-	file:write(embed_magic)
-	file:close()
+	if file ~= nil then
+		file:write(embed_file)
+		file:write(string.pack("<I4", #embed_file))
+		file:write(embed_magic)
+		file:close()
+		log.error("Error saving thumbnail with data! File not found?")
+	end
 	embed_save_path = nil
 	embed_file = nil
 	embed_magic = nil
@@ -421,7 +427,7 @@ local function table2pose(pose, character)
 	local frame = pose.frame
 	if pose.sliders then
 		for k,v in pairs(pose.sliders) do
-			local slider = not (k == lock_world_bone and lock_world) and character:getslider(k)
+			local slider = not (k == lock_world_bone and get_setting("lock_world")) and character:getslider(k)
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
@@ -442,7 +448,7 @@ local function table2pose(pose, character)
 		end
 	end
 	local face = pose.face
-	if face and not lock_face then
+	if face and not get_setting("lock_face") then
 		if face.mouth then character.mouth = face.mouth end
 		if face.mouthopen then character.mouthopen = face.mouthopen end
 		if face.eye then character.eye = face.eye end
@@ -610,7 +616,7 @@ local function loadscene(filename, dir)
 			
 			local not_found = {}
 
-			if not lock_props then
+			if not get_setting("lock_props") then
 				for i,readprop in ipairs(props) do
 					local find
 					for j,p in pairs(loadedprops) do
@@ -648,13 +654,13 @@ local function loadscene(filename, dir)
 				end
 			end
 			
-			if not lock_camera then
+			if not get_setting("lock_camera") then
 				for k,v in pairs(scene.camera or {}) do
 					camera[k] = v
 				end
 			end
 
-			if not lock_light and scene.light then
+			if not get_setting("lock_light") and scene.light then
 				local direction = scene.light.direction
 				for _,character in pairs(charamgr.characters) do
 					local skeleton = character.struct.m_xxSkeleton
@@ -812,7 +818,7 @@ function timer1.action_cb()
 	else
 	-- select the next scene, loop if needed
 		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
+		if not get_setting("auto_repeat") and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
 			playbackplaypausebtn.value = "OFF"
 			auto_play = false
 		end
@@ -830,7 +836,7 @@ function timer1.action_cb()
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	
@@ -853,7 +859,7 @@ function timer2.action_cb()
 	else
 	-- select the next scene, loop if needed
 		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
+		if not get_setting("auto_repeat") and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
 			playbackplaypausebtn.value = "OFF"
 			auto_play = false
 		end
@@ -871,7 +877,7 @@ function timer2.action_cb()
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	
@@ -1054,8 +1060,8 @@ _M.dialogposes = iup.dialog {
 					},
 					saveposetexttoggle,
 					iup.label { title = "Locks" },
-					lockworldtoggle,
-					lockfacetoggle1,
+					lock_world_toggle,
+					lock_face_toggle_pose,
 					useposesfolderbutton,
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
@@ -1080,13 +1086,12 @@ _M.dialogposes = iup.dialog {
 					},
 					savescenetexttoggle,
 					iup.label { title = "Locks" },
-					lockfacetoggle2,
-					lockbonestoggle1,
-					lockpropstoggle1,
-					lockcameratoggle1,
-					locklighttoggle1,
-				--	autoloadscenetoggle,
-				--	autoplaytoggle,
+					lock_face_toggle_scene,
+					unlock_bones_toggle_scene,
+					lock_props_toggle_scene,
+					lock_camera_toggle_scene,
+					lock_light_toggle_scene,
+				--	auto_load_scene_toggle,
 					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
@@ -1133,38 +1138,30 @@ _M.dialogposes = iup.dialog {
 						-- playbacklastbtn,
 					},
 					iup.tabs {
-						iup.hbox{
-							iup.vbox {
-								-- iup.label { title = "Lock ..." },
-								lockfacetoggle3,
-								lockbonestoggle2,
-								lockpropstoggle2,
-								lockcameratoggle2,
-								locklighttoggle2,
-								gap = 3,
-								expand = "horizontal",
-							},
-							expand="yes",
+						iup.vbox {
+							-- iup.label { title = "Lock ..." },
+							lock_face_toggle_album,
+							unlock_bones_toggle_album,
+							lock_props_toggle_album,
+							lock_camera_toggle_album,
+							lock_light_toggle_album,
+							gap = 3,
+							expandchildren = "yes",
 							tabtitle = "Locks",
 						},
-						iup.hbox{							
-							iup.vbox {
-								-- iup.label { title = "Auto" },
-								autorepeattoggle,
-								autoloadscenetoggle,
-								autoplaytoggle,
-								autoloadpropstoggle,
-								autounloadpropstoggle,
-								autoloadcharstoggle,
-								autounloadcharstoggle,
-								gap = 3,
-								expand = "horizontal",
-							},
-							expand="yes",
+						iup.vbox {
+							-- iup.label { title = "Auto" },
+							-- auto_play_toggle,
+							auto_repeat_album_toggle,
+							auto_load_scene_toggle,
+							auto_load_props_toggle,
+							auto_unload_props_toggle,
+							auto_load_chars_toggle,
+							auto_unload_chars_toggle,
+							gap = 3,
+							expandchildren = "yes",
 							tabtitle = "Auto",
 						},
-						expandchildren = "yes",
-						expand = "horizontal",
 						tabtype = "left",
 					},
 					usealbumsfolderbutton,
@@ -1174,9 +1171,6 @@ _M.dialogposes = iup.dialog {
 				tabtitle = "Albums",
 				gap = 3,
 			},
-			tabchangepos_cb = function(self, newpos, oldpos)
-				lock_world = newpos == 0 and lockworldtoggle.value == "ON"
-			end,
 		},
 		thumbnailvbox,
 		iup.fill { size = 3, },
