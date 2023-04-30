@@ -878,18 +878,22 @@ local dialogsliders = iup.dialog {
 						},
 						iup.frame { title = "Eyes",
 							iup.vbox {
-								eyeshapes,
-								dimeyes,
-								tears,
-							},
-								expand = "no"
-						},
-						iup.vbox {
-							iup.frame { title = "Eye Tracking",
-								iup.vbox {
-									trackeyescontrols,
+								iup.hbox {
+									eyeshapes,
+									iup.vbox {
+										dimeyes,
+										tears,
+									},
+								},
+								iup.frame { title = "Eye Tracking",
+									iup.vbox {
+										trackeyescontrols,
+									},
 								},
 							},
+							expand = "no",
+						},
+						iup.vbox {
 							iup.frame { title = "Eyebrow",
 								iup.vbox {
 									eyebrowshapes
