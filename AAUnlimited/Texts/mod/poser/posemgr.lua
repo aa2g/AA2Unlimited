@@ -55,7 +55,7 @@ local png_magic_scene = "SCENE\x00\x00\x00"
 local png_magic_album = "ALBUM\x00\x00\x00"
 local save_restore_ui = false
 
-local timer1 = iup.timer{time=1000}
+local album_playback_timer = iup.timer{time=1000}
 local timer2 = iup.timer{time=1000}
 
 local settings_state = {
@@ -175,30 +175,30 @@ end
 local posefilter = lists.listfilter()
 local poselist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local scenefilter = lists.listfilter()
-local scenefilter2 = lists.listfilter()
+local album_frame_filter = lists.listfilter()
 local scenelist1 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
-local scenelist2 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
+local album_frame_list = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
 local saveposetexttoggle = iup.toggle { title = "Save as .pose", value = "OFF" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
-local loadscenebutton2 = iup.button { title = "Load", expand = "horizontal" }
-local savescenebutton2 = iup.button { title = "Save", expand = "horizontal" }
+local load_album_frame_button = iup.button { title = "Load", expand = "horizontal" }
+local save_album_frame_button = iup.button { title = "Save", expand = "horizontal" }
 local savescenetexttoggle = iup.toggle { title = "Save as .scene", value = "OFF" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 local deletescenebutton2 = iup.button { title = "Delete" }
 local refreshposelistbutton = iup.button { title = "Refresh" }
 local refreshscenelistbutton = iup.button { title = "Refresh" }
-local refreshscenelistbutton2 = iup.button { title = "Refresh" }
+local album_refresh_frame_list_button = iup.button { title = "Refresh" }
 local useposesfolderbutton = iup.button { title = "Use Folder" }
 local usescenesfolderbutton = iup.button { title = "Use Folder" }
 local usealbumsfolderbutton = iup.button { title = "Open Album" }
 local playbackfirstbtn = iup.flatbutton { title = playbacksymbols.first, expand = "horizontal", padding = 3, size = "15x12"  }
-local playbackprevbtn = iup.flatbutton { title = playbacksymbols.prev, expand = "horizontal", padding = 3, size = "15x12"  }
-local playbackplaypausebtn = iup.flatbutton { title = playbacksymbols.playpause, toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
-local playbacknextbtn = iup.flatbutton { title = playbacksymbols.next, expand = "horizontal", padding = 3, size = "15x12"  }
+local album_goto_previous_frame_button = iup.flatbutton { title = playbacksymbols.prev, expand = "horizontal", padding = 3, size = "15x12"  }
+local album_playback_button = iup.flatbutton { title = playbacksymbols.playpause, toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
+local album_goto_next_frame_button = iup.flatbutton { title = playbacksymbols.next, expand = "horizontal", padding = 3, size = "15x12"  }
 local playbacklastbtn = iup.flatbutton { title = playbacksymbols.last, expand = "horizontal", padding = 3, size = "15x12"  }
 
 local function drawscenethumbnail(dir, filename)
@@ -261,40 +261,40 @@ signals.connect(scenelist1, "selectionchanged", function()
 	
 	drawscenethumbnail(scenesdir, scenelist1[scenelist1.value])
 end )
-signals.connect(scenelist2, "selectionchanged", function()
+signals.connect(album_frame_list, "selectionchanged", function()
 	albumname.value = ""
 	pagenumber.value = ""
 	delay.value = ""
 		
 	local text = require("pl.text");
 	require 'pl.List'
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 	local length = args:len()
 		
 	if length > 2 then	-- 3+ elements - last two are page and delay, the rest are albumname
 		delay.value = table.remove(args)
-		pagenumber.value = table.remove(args)	
+		pagenumber.value = table.remove(args)
 		albumname.value = table.concat(args, "-")
 	elseif length == 2  then	-- 2 elements - albumname and pagenumber, delay defaults to 1s
 		delay.value = 1000
-		pagenumber.value = table.remove(args)	
+		pagenumber.value = table.remove(args)
 		albumname.value = table.concat(args, "-")
 	else -- 1 element - albumname, default pagenumber is the index in the list
 		delay.value = 1000
-		pagenumber.value = scenelist2.value
-		albumname.value = scenelist2[scenelist2.value]
+		pagenumber.value = album_frame_list.value
+		albumname.value = album_frame_list[album_frame_list.value]
 	end
 
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end
 	
-	drawscenethumbnail(albumsdir, scenelist2[scenelist2.value])
+	drawscenethumbnail(albumsdir, album_frame_list[album_frame_list.value])
 end )
 
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
 signals.connect(scenefilter, "setfilter", scenelist1, "setfilter")
-signals.connect(scenefilter2, "setfilter", scenelist2, "setfilter")
+signals.connect(album_frame_filter, "setfilter", album_frame_list, "setfilter")
 
 local function findposerfiles(directory, match)
 	local newlist = {}
@@ -330,7 +330,7 @@ function _M.init()
 	end
 	populateposelist()
 	populatescenelist(scenelist1, scenesdir)
-	populatescenelist(scenelist2, albumsdir)
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 local function get_thumbnail_rotation(angle)
@@ -374,7 +374,7 @@ end
 
 function usealbumsfolderbutton.action()
 	albumsdir = fileutils.getfolderdialog(albumsdir)
-	populatescenelist(scenelist2, albumsdir)
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 function deleteposebutton.action()
@@ -774,7 +774,7 @@ local function savescene(filename, dir, list)
 				list.valuestring = filename
 			end
 		end
-	elseif list == scenelist2 then
+	elseif list == album_frame_list then
 		if getalbumfilename() ~= list.valuestring then
 			log.spam("Poser: savealbumscene: getalbumfilename(): ", getalbumfilename());
 			log.spam("Poser: savealbumscene: list.valuestring: ", list.valuestring);
@@ -809,17 +809,17 @@ end
 
 -- == Anims ==
 
-function timer1.action_cb()
-	local idx = tonumber(scenelist2.value)
+function album_playback_timer.action_cb()
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not get_setting("auto_repeat") and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
-			playbackplaypausebtn.value = "OFF"
+		album_frame_list.value = ((idx % album_frame_list.count) + 1)
+		if not get_setting("auto_repeat") and tonumber(album_frame_list.value) == tonumber(album_frame_list.count) then
+			album_playback_button.value = "OFF"
 			auto_play = false
 		end
 	end
@@ -830,7 +830,7 @@ function timer1.action_cb()
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
@@ -845,22 +845,22 @@ function timer1.action_cb()
 		timer2.time = tonumber(delay.value) or 1000
 		timer2.run = "YES"
 	end
-	timer1.run = "NO"
+	album_playback_timer.run = "NO"
 	drawscenethumbnail(albumsdir, getalbumfilename())
   return iup.DEFAULT
 end
 
 function timer2.action_cb()
-	local idx = tonumber(scenelist2.value)
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not get_setting("auto_repeat") and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
-			playbackplaypausebtn.value = "OFF"
+		album_frame_list.value = ((idx % album_frame_list.count) + 1)
+		if not get_setting("auto_repeat") and tonumber(album_frame_list.value) == tonumber(album_frame_list.count) then
+			album_playback_button.value = "OFF"
 			auto_play = false
 		end
 	end
@@ -871,7 +871,7 @@ function timer2.action_cb()
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
@@ -883,8 +883,8 @@ function timer2.action_cb()
 	
 	if auto_play then
 		-- prepare the next frame
-		timer1.time = tonumber(delay.value) or 1000
-		timer1.run = "YES"
+		album_playback_timer.time = tonumber(delay.value) or 1000
+		album_playback_timer.run = "YES"
 	end
 	
 	timer2.run = "NO"
@@ -900,16 +900,16 @@ function _M.loadalbumscene()
 	end
 end
 
-function loadscenebutton2.action()
+function load_album_frame_button.action()
 	_M.loadalbumscene()
-	playbackplaypausebtn.value = "OFF"
-	playbackplaypausebtn.flat_action()
+	album_playback_button.value = "OFF"
+	album_playback_button.flat_action()
 end
 
-function savescenebutton2.action()
-	savescene(getalbumfilename(), albumsdir, scenelist2)
-	playbackplaypausebtn.value = "OFF"
-	playbackplaypausebtn.flat_action()
+function save_album_frame_button.action()
+	savescene(getalbumfilename(), albumsdir, album_frame_list)
+	album_playback_button.value = "OFF"
+	album_playback_button.flat_action()
 end
 
 function deletescenebutton2.action()
@@ -917,44 +917,44 @@ function deletescenebutton2.action()
 	if resp == 1 then
 		os.remove(albumsdir .. "\\" .. getalbumfilename() .. ".scene")
 		os.remove(albumsdir .. "\\" .. getalbumfilename() .. ".png")
-		scenelist2.valuestring = getalbumfilename()
-		if scenelist2.valuestring == getalbumfilename() then
-			scenelist2.removeitem = scenelist2.value
+		album_frame_list.valuestring = getalbumfilename()
+		if album_frame_list.valuestring == getalbumfilename() then
+			album_frame_list.removeitem = album_frame_list.value
 		end
 	end
 end
 
-function refreshscenelistbutton2.action()
-	populatescenelist(scenelist2, albumsdir)
+function album_refresh_frame_list_button.action()
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 
-function playbackplaypausebtn.flat_action(self)
-	auto_play = playbackplaypausebtn.value == "ON" and 1 or 0
+function album_playback_button.flat_action(self)
+	auto_play = album_playback_button.value == "ON" and 1 or 0
 	if auto_play == 1 then
 		local timer;
-		if timer1.run ~= "YES" then
-			timer = timer1
+		if album_playback_timer.run ~= "YES" then
+			timer = album_playback_timer
 		else
 			timer = timer2
 		end
 		timer.time = tonumber(delay.value) or 1000	-- default delay = 1s
 		timer.run = "YES"
 	else
-		timer1.run = "NO"
+		album_playback_timer.run = "NO"
 		timer2.run = "NO"
 	end
 end
 
-function playbackprevbtn.flat_action(self)
-	local idx = tonumber(scenelist2.value)
+function album_goto_previous_frame_button.flat_action(self)
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx - 2) % scenelist2.count) + 1
+		album_frame_list.value = ((idx - 2) % album_frame_list.count) + 1
 	end
 	
 	-- update the scene name
@@ -963,13 +963,13 @@ function playbackprevbtn.flat_action(self)
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
@@ -978,17 +978,17 @@ function playbackprevbtn.flat_action(self)
   return iup.DEFAULT
 end
 
-function playbacknextbtn.flat_action(self)
+function album_goto_next_frame_button.flat_action(self)
 
-	-- log.spam("playbacknextbtn.valuechanged_cb")
-	local idx = tonumber(scenelist2.value)
+	-- log.spam("album_goto_next_frame_button.valuechanged_cb")
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
+		album_frame_list.value = ((idx % album_frame_list.count) + 1)
 	end
 	
 	-- update the scene name
@@ -997,13 +997,13 @@ function playbacknextbtn.flat_action(self)
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
@@ -1101,9 +1101,9 @@ _M.dialogposes = iup.dialog {
 			},
 			iup.hbox  {
 				iup.vbox {
-					scenefilter2,
-					scenelist2,
-					refreshscenelistbutton2,
+					album_frame_filter,
+					album_frame_list,
+					album_refresh_frame_list_button,
 					expand = "no",
 				},
 				iup.vbox {			
@@ -1122,18 +1122,18 @@ _M.dialogposes = iup.dialog {
 						},
 					}, 
 					iup.hbox {
-						loadscenebutton2,
+						load_album_frame_button,
 						iup.fill { size = 10, },
-						savescenebutton2,
+						save_album_frame_button,
 					},
 					iup.hbox {
 						-- playbackfirstbtn,
 						-- iup.fill { size = 2, },
-						playbackprevbtn,
+						album_goto_previous_frame_button,
 						iup.fill { size = 2, },
-						playbacknextbtn,
+						album_goto_next_frame_button,
 						iup.fill { size = 2, },
-						playbackplaypausebtn,
+						album_playback_button,
 						-- iup.fill { size = 2, },
 						-- playbacklastbtn,
 					},
