@@ -21,7 +21,7 @@ local  playbacksymbols  =
 
 	first = "First",	
 	prev = "Prev",
-	playpause = "Play/Pause",
+	playpause = "Play",
 	next = "Next",
 	last = "Last",
 }
@@ -55,8 +55,9 @@ local png_magic_scene = "SCENE\x00\x00\x00"
 local png_magic_album = "ALBUM\x00\x00\x00"
 local save_restore_ui = false
 
-local album_playback_timer = iup.timer{time=1000}
-local timer2 = iup.timer{time=1000}
+local album_playlist
+local album_playback_position = 1
+local album_playback_timer = iup.timer{}
 
 local settings_state = {
 	lock_camera = false,
@@ -457,11 +458,11 @@ local function table2pose(pose, character)
 
 		local facestruct = character.struct.m_xxFace
 		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho") 
-		if material then
+		if material and face.blush then
 			material:m_lightingAttributes(3, face.blush / 9)
 		end
 		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen") 
-		if material then
+		if material and face.blushlines then
 			material:m_lightingAttributes(3, face.blushlines / 9)
 		end
 	end
@@ -809,87 +810,64 @@ end
 
 -- == Anims ==
 
-function album_playback_timer.action_cb()
-	local idx = tonumber(album_frame_list.value)
-	
-	if idx == nil or idx < 1 then
-	-- if no scene selected - select the first one
-		album_frame_list.value = 1
-	else
-	-- select the next scene, loop if needed
-		album_frame_list.value = ((idx % album_frame_list.count) + 1)
-		if not get_setting("auto_repeat") and tonumber(album_frame_list.value) == tonumber(album_frame_list.count) then
-			album_playback_button.value = "OFF"
-			auto_play = false
-		end
+local function album_show_frame(frame)
+	local ok, ret = pcall(loadscene, frame, albumsdir)
+	if not ok then
+		album_playback_timer.run = "NO"
+		log.error("There was an error playing this album")
+		log.error(ret)
 	end
-	
-	-- update the scene name
-	albumname.value = ""
-	pagenumber.value = ""
-	delay.value = ""
-		
-	local text = require("pl.text");
-	local args = text.split(album_frame_list[album_frame_list.value], "-");
-		
-	delay.value = table.remove(args)
-	pagenumber.value = table.remove(args)	
-	albumname.value = table.concat(args, "-")
-	-- and autoload if needed
-	if get_setting("auto_load_scene") then
-		_M.loadalbumscene()
-	end	
-	
-	if auto_play then
-		-- prepare the next frame
-		timer2.time = tonumber(delay.value) or 1000
-		timer2.run = "YES"
-	end
-	album_playback_timer.run = "NO"
-	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
+	return ok, ret
 end
 
-function timer2.action_cb()
-	local idx = tonumber(album_frame_list.value)
-	
-	if idx == nil or idx < 1 then
-	-- if no scene selected - select the first one
-		album_frame_list.value = 1
-	else
-	-- select the next scene, loop if needed
-		album_frame_list.value = ((idx % album_frame_list.count) + 1)
-		if not get_setting("auto_repeat") and tonumber(album_frame_list.value) == tonumber(album_frame_list.count) then
-			album_playback_button.value = "OFF"
-			auto_play = false
-		end
+local function album_playback(playlist, starting_position)
+	if type(playlist) ~= "table" or type(starting_position) ~= "number" then
+		return
 	end
-	
-	-- update the scene name
-	albumname.value = ""
-	pagenumber.value = ""
-	delay.value = ""
-		
-	local text = require("pl.text");
-	local args = text.split(album_frame_list[album_frame_list.value], "-");
-		
-	delay.value = table.remove(args)
-	pagenumber.value = table.remove(args)	
-	albumname.value = table.concat(args, "-")
-	-- and autoload if needed
-	if get_setting("auto_load_scene") then
-		_M.loadalbumscene()
-	end	
-	
-	if auto_play then
-		-- prepare the next frame
-		album_playback_timer.time = tonumber(delay.value) or 1000
-		album_playback_timer.run = "YES"
+
+	if starting_position < 1 or #playlist > starting_position then
+		starting_position = 1
 	end
-	
-	timer2.run = "NO"
-	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
+
+	local frame = playlist[starting_position]
+	local ok, ret = album_show_frame(frame[2])
+	if not ok then
+		return
+	end
+
+	album_playlist = playlist
+	album_playback_position = starting_position + 1
+	album_playback_timer.time = frame[1]
+	album_playback_timer.run = "YES"
+end
+
+local function album_pause()
+	album_playback_timer.run = "NO"
+--	album_playback_timer.run = status == "ON" and "OFF" or "ON"
+end
+
+function album_playback_timer.action_cb()
+	if album_playlist == nil then
+		log.info("Something's wrong with the albm playback state. Aborting")
+		album_playback_timer.run = "NO"
+	end
+
+	if album_playback_position > #album_playlist and get_setting("auto_repeat") then
+		album_playback_position = 1
+	end
+
+	local current_frame = album_playlist[album_playback_position]
+	local delay = current_frame[1]
+	local frame_name = current_frame[2]
+
+	local ok, ret = album_show_frame(frame_name)
+	if not ok then
+		album_playback_timer.run = "NO"
+		return
+	end
+
+	album_playback_position = album_playback_position + 1
+	album_playback_timer.time = delay
 end
 
 function _M.loadalbumscene()
@@ -929,20 +907,29 @@ function album_refresh_frame_list_button.action()
 end
 
 
-function album_playback_button.flat_action(self)
-	auto_play = album_playback_button.value == "ON" and 1 or 0
-	if auto_play == 1 then
-		local timer;
-		if album_playback_timer.run ~= "YES" then
-			timer = album_playback_timer
-		else
-			timer = timer2
-		end
-		timer.time = tonumber(delay.value) or 1000	-- default delay = 1s
-		timer.run = "YES"
+function album_playback_button.valuechanged_cb(self)
+	local starting_frame_index = tonumber(album_frame_list.value)
+	
+	if starting_frame_index == nil or starting_frame_index < 1 then
+	-- if no scene selected - select the first one
+		starting_frame_index = 1
+	end
+
+	local frame_playlist = {}
+	for frame_position = 1,album_frame_list.count do
+		local frame_name = album_frame_list[tostring(frame_position)]
+		local text = require("pl.text");
+		local args = text.split(frame_name, "-");
+		local delay = tonumber(table.remove(args)) or 1000
+		table.insert(frame_playlist, {delay, frame_name})
+	end
+
+	if album_playback_button.value == "ON" then
+		album_playback(frame_playlist, starting_frame_index)
+		album_playback_button.title = "Pause"
 	else
-		album_playback_timer.run = "NO"
-		timer2.run = "NO"
+		album_pause()
+		album_playback_button.title = "Play"
 	end
 end
 
