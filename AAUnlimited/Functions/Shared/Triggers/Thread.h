@@ -152,6 +152,8 @@ namespace Shared {
 			void NpcCancelAction(std::vector<Value>& params);
 
 			void SetCardStorageInt(std::vector<Value>& params);
+			void ArrangeDate(std::vector<Value>& params);
+			void PromiseLewd(std::vector<Value>& params);
 			void SetCardStorageFloat(std::vector<Value>& params);
 			void SetCardStorageString(std::vector<Value>& params);
 			void SetCardStorageBool(std::vector<Value>& params);
@@ -170,22 +172,28 @@ namespace Shared {
 			void SetPose(std::vector<Value>& params);
 			void IsConsensualH(std::vector<Value>& params);
 			void AutoPC(std::vector<Value>& params);
+			void CondomOverride(std::vector<Value>& params);
+			void CondomValue(std::vector<Value>& params);
 			void StartHScene(std::vector<Value>& params);
 			void SwitchActiveInH(std::vector<Value>& params);
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
 			void SetH_AI(std::vector<Value>& params);
-
 			void Set_H_AI_LOCK(std::vector<Value>& params);
+
 			void AddMood(std::vector<Value>& params);
 			void ReplaceMood(std::vector<Value>& params);
 			void Notification(std::vector<Value>& params);
+
+			void EmitDelayedOptionalEvent(std::vector<Value>& params);
+			void EmitDelayedRequiredEvent(std::vector<Value>& params);
 			void CallLuaProcedure(std::vector<Value>& params);
 
 			//event response
 			void SetNpcResponseSuccess(std::vector<Value>& params);
 			void ChangeHPosition(std::vector<Value>& params);
+			void RelationshipPointChange(std::vector<Value>& params);
 			void SetNpcResponseAnswer(std::vector<Value>& params);
 			void SetNpcResponsePercent(std::vector<Value>& params);	//int()
 
@@ -207,6 +215,10 @@ namespace Shared {
 			Value GetPassiveInH(std::vector<Value>&);
 			Value GetHPosition(std::vector<Value>&);
 			Value GetThisCard(std::vector<Value>& params); //int ()
+			Value GetDelayedEventLabel(std::vector<Value>& params);
+			Value GetDelayedEventPeriod(std::vector<Value>& params);
+			Value GetDelayedEventRequired(std::vector<Value>& params);
+			//string ()
 			Value GetPC(std::vector<Value>&); //int()
 			Value IsSeatFilled(std::vector<Value>& params); //bool (int)
 
@@ -403,6 +415,7 @@ namespace Shared {
 			Value FloatToString(std::vector<Value>& params); //string(float)
 			Value BoolToString(std::vector<Value>& params); //string(bool)
 			Value StringReplace(std::vector<Value>& params); //string(string, int, int)
+			Value GetCSVByIndex(std::vector<Value>& params); //string(string, int, string)
 
 			Value GetCardStorageInt(std::vector<Value>& params); //int(int, string, int)
 			Value GetCardStorageFloat(std::vector<Value>& params); //float(int, string, float)
@@ -428,6 +441,8 @@ namespace Shared {
 			Value GetNpcResponseAbsoluteAnswerSuccess(std::vector<Value>& params);
 			Value GetNpcResponseCurrentAnswer(std::vector<Value>& params);
 			Value GetAutoPC(std::vector<Value>& params);
+			Value GetCondomOverride(std::vector<Value>& params);
+			Value GetCondomValue(std::vector<Value>& params);
 			Value GetNpcResponseTarget(std::vector<Value>& params);	//int()
 			Value GetPCRoomTarget(std::vector<Value>& params);
 			Value GetNpcResponseConversation(std::vector<Value>& params);	//int()
@@ -442,11 +457,20 @@ namespace Shared {
 			//NPC_WANT_ACTION_NOTARGET
 			Value GetNpcActionId(std::vector<Value>& params);
 
+			Value HasDateWith(std::vector<Value>& params);
+
+			Value PromisedLewdRewardTo(std::vector<Value>& params);
+
 			//NPC_WANT_TALK_WITH
 			Value GetNpcTalkTarget(std::vector<Value>& params);
 
 			//NPC_WANT_TALK_WITH_ABOUT
 			Value GetNpcTalkAbout(std::vector<Value>& params);
+			Value GetLove(std::vector<Value>& params);
+			Value GetLike(std::vector<Value>& params);
+			Value GetDislike(std::vector<Value>& params);
+			Value GetHate(std::vector<Value>& params);
+			Value RelationshipTowards(std::vector<Value>& params);
 
 			//PC_CONVERSATION_STATE_UPDATED
 			Value GetConversationState(std::vector<Value>& params);
@@ -460,6 +484,11 @@ namespace Shared {
 			Value GetConversationCurrentlyAnswering(std::vector<Value>& params);
 			Value GetEventID(std::vector<Value>& params);
 			Value AddLuaProcParam(std::vector<Value>& params);
+
+			Value CallLuaStringFunction(std::vector<Value>& params);
+			Value CallLuaIntFunction(std::vector<Value>& params);
+			Value CallLuaBoolFunction(std::vector<Value>& params);
+			Value CallLuaFloatFunction(std::vector<Value>& params);
 
 			//ROOM_CHANGE
 			Value GetEventPreviousRoom(std::vector<Value>& params);

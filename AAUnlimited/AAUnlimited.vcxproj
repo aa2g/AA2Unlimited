@@ -133,6 +133,7 @@
     <ClCompile Include="MemMods\Shared\Misc\EyeTexture.cpp" />
     <ClCompile Include="MemMods\Shared\Misc\FixLocale.cpp" />
     <ClCompile Include="Script\ScriptLua.cpp" />
+    <ClCompile Include="Dictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\picojson\picojson.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="General\DirectXStructs.h" />
     <ClInclude Include="General\DrawD3D.h" />
     <ClInclude Include="General\IllusionUtil.h" />
+    <ClInclude Include="Dictionary.h" />
     <ClInclude Include="Hooks\WinAPI.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterActions.h" />
     <ClInclude Include="MemMods\AAPlay\Events\CharacterRender.h" />
@@ -270,10 +272,12 @@
     <None Include="resource.hm" />
     <None Include="Texts\config.lua" />
     <None Include="Texts\init.lua" />
+    <None Include="Texts\mod\aaface.lua" />
     <None Include="Texts\mod\aaface\init.lua" />
     <None Include="Texts\mod\borderless.lua" />
     <None Include="Texts\mod\butthurt.lua" />
     <None Include="Texts\mod\charex.lua" />
+    <None Include="Texts\mod\climaxbutton.lua" />
     <None Include="Texts\mod\com.lua" />
     <None Include="Texts\mod\const.lua" />
     <None Include="Texts\mod\cram_school.lua" />
@@ -292,6 +296,7 @@
     <None Include="Texts\mod\hirestex.lua" />
     <None Include="Texts\mod\homosex.lua" />
     <None Include="Texts\mod\jizou.lua" />
+    <None Include="Texts\mod\JMCP.lua" />
     <None Include="Texts\mod\json.lua" />
     <None Include="Texts\mod\launcher\dlg.lua" />
     <None Include="Texts\mod\launcher\dlglist.lua" />
@@ -302,7 +307,12 @@
     <None Include="Texts\mod\makertrans\init.lua" />
     <None Include="Texts\mod\memory.lua" />
     <None Include="Texts\mod\meshfix.lua" />
+    <None Include="Texts\mod\music.lua" />
+    <None Include="Texts\mod\musicconfig.lua" />
+    <None Include="Texts\mod\nobra.lua" />
     <None Include="Texts\mod\nocd.lua" />
+    <None Include="Texts\mod\nomurder.lua" />
+    <None Include="Texts\mod\notifications.lua" />
     <None Include="Texts\mod\patcher.lua" />
     <None Include="Texts\mod\patches.lua" />
     <None Include="Texts\mod\playtrans.lua" />
@@ -375,7 +385,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AA2A22EF-17CB-4B53-B921-05C18036AD15}</ProjectGuid>
     <RootNamespace>AAUnlimited</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
     <ProjectName>AAUnlimitedDll</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -3,13 +3,13 @@
 namespace Shared {
 	namespace Triggers {
 
-
 		std::wstring g_EventCategories[EVENTCAT_N] = {
 			TEXT("Card"),
 			TEXT("Character Action"),
 			TEXT("Load"),
 			TEXT("Time"),
-			TEXT("Conversation")
+			TEXT("Conversation"),
+			TEXT("Other")
 		};
 
 		std::vector<Event> g_Events = {
@@ -75,39 +75,51 @@ namespace Shared {
 				{}
 			},
 			{ ROOM_CHANGE, EVENTCAT_CONVERSATION, TEXT("Card Changes Room"), TEXT("Card Changes Room"),
-			TEXT("Card enters a new room. Works for all cards."),
+				TEXT("Card enters a new room. Works for all cards."),
 				{}
 			},
 			{ KEY_PRESS, EVENTCAT_CONVERSATION, TEXT("Key Press"), TEXT("Key was pressed"),
-			TEXT("Key was pressed"),
+				TEXT("Key was pressed"),
 				{}
 			},
 			{ HPOSITION_CHANGE, EVENTCAT_CONVERSATION, TEXT("H Position Change"), TEXT("H Position Change"),
-			TEXT("The H position changed."),
+				TEXT("The H position changed."),
 				{}
 			},
 			{ PC_AFTER_RESPONSE, EVENTCAT_CONVERSATION, TEXT("After PC Response"), TEXT("After PC Response"),
-			TEXT("The event is fired after all the triggers have finished editing PC Response."),
+				TEXT("The event is fired after all the triggers have finished editing PC Response."),
 				{}
 			},
 			{ NPC_AFTER_RESPONSE, EVENTCAT_CONVERSATION, TEXT("After NPC Response"), TEXT("After NPC Response"),
-			TEXT("The event is fired after all the triggers have finished editing NPC Response."),
+				TEXT("The event is fired after all the triggers have finished editing NPC Response."),
 				{}
 			},
 			{ HI_POLY_DESPAWN, EVENTCAT_LOADS, TEXT("HI Poly Despawn"), TEXT("HI Poly Despawn"),
-			TEXT("The event is fired as the character's hi poly is despawning."),
+				TEXT("The event is fired as the character's hi poly is despawning."),
 				{}
 			},
 			{ H_END, EVENTCAT_LOADS, TEXT("H End"), TEXT("H Ends"),
-			TEXT("The event is fired as the H scene ends."),
+				TEXT("The event is fired as the H scene ends."),
 				{}
 			},
 			{ H_START, EVENTCAT_LOADS, TEXT("H Start"), TEXT("H Starts"),
-			TEXT("The event is fired as the H scene starts."),
+				TEXT("The event is fired as the H scene starts."),
 				{}
 			},
 			{ CARD_EXPELLED, EVENTCAT_LOADS, TEXT("Card Expelled"), TEXT("Card Expelled"),
-			TEXT("The event is fired when a character expelled from class: either killed, arrested or fired."),
+				TEXT("The event is fired when a character expelled from class: either killed, arrested or fired."),
+				{}
+			},
+			{ CONVERSATION_END, EVENTCAT_CONVERSATION, TEXT("Conversation End"), TEXT("Conversation End"),
+				TEXT("The event is fired when a conversation ends between two cards."),
+				{}
+			},
+			{ RELATIONSHIP_POINT_CHANGED, EVENTCAT_CONVERSATION, TEXT("Relationship Points Changed"), TEXT("Relationship Points Changed"),
+				TEXT("The event is fired just as relationship points are updated between characters."),
+				{}
+			},
+			{ DELAYED_EXECUTION, EVENTCAT_OTHER, TEXT("Delayed Execution"), TEXT("Delayed Execution"),
+				TEXT("This event is fired from other triggers after a delaay. TriggeringCard is the card whose trigger emitted this event. It does not persist between sessions."),
 				{}
 			}
 		};

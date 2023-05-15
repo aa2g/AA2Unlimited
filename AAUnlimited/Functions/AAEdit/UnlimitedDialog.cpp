@@ -1,5 +1,8 @@
-#include "StdAfx.h"
+﻿#include "StdAfx.h"
 #include "Files/PNGData.h"
+#include "Dictionary.h"
+#include "General/Util.h"
+#include "zstd.h"
 
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
@@ -76,6 +79,7 @@ void UnlimitedDialog::AddDialog(int resourceName, Dialog* dialog, int tabN, cons
 	item.pszText = (LPWSTR)tabName;
 	item.lParam = (LPARAM)dialog;
 	TabCtrl_InsertItem(this->m_tabs, tabN, &item);
+	this->m_tabNames.push_back(tabName);
 }
 
 /******
@@ -117,6 +121,8 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 				MDDialog::DialogProc);
 		}
 
+		thisPtr->m_btnHelp = GetDlgItem(hwndDlg, IDC_BTNHELP);
+
 		int count = TabCtrl_GetItemCount(thisPtr->m_tabs);
 		RECT rct;
 		GetClientRect(thisPtr->m_tabs,&rct);
@@ -141,6 +147,26 @@ INT_PTR CALLBACK UnlimitedDialog::MainDialogProc(_In_ HWND hwndDlg, _In_ UINT ms
 		thisPtr->Refresh();
 		return TRUE;
 		break; }
+	case WM_COMMAND: {
+		UnlimitedDialog* thisPtr = (UnlimitedDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		switch (HIWORD(wparam)) {
+		case BN_CLICKED: {
+			DWORD identifier = LOWORD(wparam);
+			switch (identifier) {
+			case IDC_BTNHELP: {
+				std::string dialogName = "";
+				int tabIdx = SendMessage(thisPtr->m_tabs, TCM_GETCURSEL, 0, 0);
+				dialogName = General::CastToString(thisPtr->m_tabNames[tabIdx]);
+				LUA_EVENT_NORET("open_help_page", dialogName);
+				return TRUE;
+			}
+			}
+			break;
+		}
+		}
+		break;
+	}
 	case WM_NOTIFY: {
 		UnlimitedDialog* thisPtr = (UnlimitedDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 		NMHDR* param = (NMHDR*)(lparam);
@@ -190,6 +216,45 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	_In_ WPARAM wparam,_In_ LPARAM lparam)
 {
 	switch (msg) {
+
+	case WM_DRAWITEM:
+	{
+		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr->m_btnReset == ((LPDRAWITEMSTRUCT)lparam)->hwndItem) {
+
+			LPDRAWITEMSTRUCT btnReset = (LPDRAWITEMSTRUCT)lparam;
+
+			auto brush = GetSysColorBrush(COLOR_3DFACE);
+			FillRect(btnReset->hDC, &btnReset->rcItem, brush);
+
+			TEXTMETRIC fontMetric;
+			GetTextMetrics(btnReset->hDC, &fontMetric);
+			auto boldFont = CreateFont(fontMetric.tmHeight, fontMetric.tmAveCharWidth, 0, 0,
+				FW_EXTRABOLD, FALSE, FALSE, FALSE,
+				fontMetric.tmCharSet, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, fontMetric.tmPitchAndFamily, L"Arial");			
+			SelectObject(btnReset->hDC, boldFont);
+
+			if (btnReset->itemState & ODS_SELECTED)
+			{
+				SetTextColor(btnReset->hDC, RGB(255,0,0));
+				DrawEdge(btnReset->hDC, &btnReset->rcItem, EDGE_SUNKEN, BF_RECT);
+				SetBkMode(btnReset->hDC, TRANSPARENT);
+				OffsetRect(&btnReset->rcItem, 1, 1);
+				DrawText(btnReset->hDC, L"ARE YOU SURE?", 13, &btnReset->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			}
+			else
+			{
+				SetTextColor(btnReset->hDC, RGB(255, 0, 0));
+				DrawEdge(btnReset->hDC, &btnReset->rcItem, EDGE_RAISED, BF_RECT);				
+				SetBkMode(btnReset->hDC, TRANSPARENT);
+				DrawText(btnReset->hDC, L"CLEAR AAU DATA", 14, &btnReset->rcItem, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+			}
+
+			DeleteObject(boldFont);
+		}
+		return TRUE;
+		break;
+	}
 	case WM_INITDIALOG: {
 		//initialize dialog members from the loaded dialog
 		GNDialog* thisPtr = (GNDialog*)lparam;
@@ -202,8 +267,11 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_lbAAuSets2 = GetDlgItem(hwndDlg,IDC_GN_LBAAUSETS2);
 		thisPtr->m_btnAAuSetAdd = GetDlgItem(hwndDlg,IDC_GN_BTNAAUSETADD);
 		thisPtr->m_btnLoadCloth = GetDlgItem(hwndDlg, IDC_GN_BTNLOADCLOTH);
+		thisPtr->m_btnReset = GetDlgItem(hwndDlg, IDC_GN_BTNRESET);
 		thisPtr->m_edAAuSetName = GetDlgItem(hwndDlg,IDC_GN_EDAAUSETNAME);
 		thisPtr->m_btnAAuSetTransfer = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETTRANS);
+		thisPtr->m_btnAAuSetLoad = GetDlgItem(hwndDlg, IDC_GN_BTNAAUSETLOAD);
+		thisPtr->m_cbTransAA2CLOTHES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2CLOTHES);
 		thisPtr->m_cbTransAA2BODY = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2BODY);
 		thisPtr->m_cbTransAA2FACE = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2FACE);
 		thisPtr->m_cbTransAA2EYES = GetDlgItem(hwndDlg, IDC_GN_CBTRANSAA2EYES);
@@ -234,7 +302,6 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 	//		return TRUE;
 	//	}
 	//	break; }
-	
 	case WM_COMMAND: {
 		GNDialog* thisPtr = (GNDialog*)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 		switch(HIWORD(wparam)) {
@@ -264,6 +331,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						g_currChar.m_cardData.RemoveCardStyle(selRemove);
 					}
 					thisPtr->RefreshAAuSetList();
+					thisPtr->Refresh();
 				}
 				return TRUE;
 			case IDC_GN_BTNAAUSETRENAME:
@@ -309,6 +377,7 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 					if (g_currChar.Editable()) {
 						// collect the transfer data checkboxes
+						bool aa2clothes = SendMessage(thisPtr->m_cbTransAA2CLOTHES, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
 						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
@@ -323,20 +392,244 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
 
 						g_currChar.m_cardData.TransferCardStyleData(selTransFrom, selTransTo, g_currChar.m_char->m_charData,
-							aa2body, aa2face, aa2eyes, aa2hair,
+							aa2clothes, aa2body, aa2face, aa2eyes, aa2hair,
 							ao, ar, mo, oo,
 							hr, tn, bd, bs);
 					}
 					thisPtr->RefreshAAuSetList();
+					SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
 				}
 				return TRUE;
+			case IDC_GN_BTNAAUSETLOAD:
+				{
+					if (!g_currChar.IsValid() || thisPtr->m_isFileOpenDialogOpen) return FALSE;
+					// get the target style
+					int selTransTo = SendMessage(thisPtr->m_lbAAuSets2, LB_GETCURSEL, 0, 0);
+					if (selTransTo == LB_ERR) return FALSE;
+					auto gender = g_currChar.m_char->m_charData->m_gender ? TEXT("Female") : TEXT("Male");
+					thisPtr->m_isFileOpenDialogOpen = true;
+					const TCHAR* path = General::OpenFileDialog(General::BuildEditPath(TEXT("data\\save\\"), gender).c_str());
+					thisPtr->m_isFileOpenDialogOpen = false;
+					if (path != NULL) {
+						// 1. load all the data into memory
+						Shared::PNG::Footer footer = { 0 };
+
+						auto fh = CreateFile((LPCTSTR)path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+						if (fh == INVALID_HANDLE_VALUE)
+						{
+							auto lastError = GetLastError();
+							CloseHandle(fh);
+							return FALSE;
+						}
+
+						DWORD sz = GetFileSize(fh, NULL);
+						DWORD orig_sz = sz;
+
+						// Read the magic footer
+						SetFilePointer(fh, sz - sizeof(Shared::PNG::Footer), NULL, FILE_BEGIN);
+
+						DWORD got = 0;
+						ReadFile(fh, &footer, sizeof(footer), &got, NULL);
+
+						AAUCardData cd;
+						cd.Reset();
+
+						// Now try to extract aau data
+						BYTE* aaud_ptr, * buf = NULL;
+						int aaud_sz;
+						int aaud_off;
+						int blob_sz = 0;
+						int blob_off = 0;
+						int illusion_off = sz - footer.illusion_delta; // also points to end of our blob, if there is any
+						char* cbuf = NULL, * dbuf = NULL;
+
+						// seems corrupted
+						if ((illusion_off < 64) || (illusion_off > sz))
+						{
+							CloseHandle(fh);
+							return FALSE;
+						}
+
+						// newer card, has a magic (and possibly a blob)
+						aaud_off = sz - footer.aaud_delta;
+						if (!memcmp(footer.vermagic, Shared::PNG::vermagic, 8)) {
+							// 4 is trailing crc, 12 is the IEND chunk
+							aaud_sz = illusion_off - aaud_off - 4 - 12;
+							if (aaud_sz < 0) {
+								CloseHandle(fh);
+								return FALSE;
+							}
+							// seek to AAUD contents
+							SetFilePointer(fh, aaud_off, 0, FILE_BEGIN);
+							aaud_ptr = buf = new BYTE[sz];
+							got = 0;
+							ReadFile(fh, buf, aaud_sz, &got, NULL);
+
+							// set up blob
+							blob_off = sz - footer.aaublob_delta;
+							blob_sz = footer.aaublob_delta - sizeof(footer);
+						}
+						// older card, no magic, we'll scan for the chunk
+						else {
+							// no magic, no blob to substract
+							footer.aaublob_delta = 0;
+
+							buf = new BYTE[illusion_off];
+							DWORD got = 0;
+							SetFilePointer(fh, 0, NULL, FILE_BEGIN);
+							ReadFile(fh, buf, illusion_off, &got, NULL);
+
+							aaud_ptr = General::FindPngChunk(buf, illusion_off, AAUCardData::PngChunkIdBigEndian);
+
+							// No aau data, plain card
+							if (!aaud_ptr) {
+								CloseHandle(fh);
+								return FALSE;
+							}
+
+							aaud_sz = _byteswap_ulong(*((DWORD*)(aaud_ptr)));
+							// get past size and chunk tag
+							aaud_ptr += 8;
+
+						}
+
+						cd.FromBuffer((char*)aaud_ptr, aaud_sz);	// TODO: skip if file extraction is disabled
+
+						//TODO: support old modcard card formats
+						// if this is an old card with File entries, convert those to (already decompressed) blob first
+						// bool converted = false;
+						// bool skipBlob = false;
+						// if ((cd.m_version < cd.CurrentVersion) && (blob_sz == 0)) {
+						// 	converted = true;
+						// 	cd.ConvertFilesToBlob();
+						// 	if (!cd.PrepareDumpBlob())
+						// 		goto skip_blob;
+						// 	goto skip_load;
+						// }
+
+						if (blob_sz)
+						{
+							// rewrite file paths and check if something is missing or something requests to abort
+							if (cd.PrepareDumpBlob()) {
+								// we need blob, so load and decompress it
+								cbuf = new char[blob_sz];
+								SetFilePointer(fh, blob_off, 0, FILE_BEGIN);
+								got = 0;
+								ReadFile(fh, cbuf, blob_sz, &got, NULL);
+								if (got == blob_sz) {
+									LOGPRIO(Logger::Priority::SPAM) << std::dec << "Decompressing blob of " << blob_sz << " bytes\r\n";
+									int dbsize = ZSTD_getDecompressedSize(cbuf, blob_sz);
+									dbuf = new char[dbsize];
+									if (ZSTD_decompress(dbuf, dbsize, cbuf, blob_sz) >= 0) {
+										cd.Blob = dbuf;
+										dbuf = NULL;
+
+										if (cd.Blob) {
+											cd.DumpBlob();
+										}
+									}
+								}
+							}
+						}
+
+						if (cbuf) delete cbuf;
+						if (dbuf) delete dbuf;
+						AAEdit::g_AAUnlimitDialog.SetSaveFiles((cd.m_blobInfo.size() > 0));
+						cd.BlobReset();
+						cd.GenAllFileMaps();
+
+						static const int BACKUP_START = 0xa57;
+						static const int BACKUP_END = 0xbc3;
+
+						Shared::PNG::CardClothes saved_clothes[4];
+
+						SetFilePointer(fh, illusion_off + BACKUP_START, NULL, FILE_BEGIN);
+						got = 0;
+						ReadFile(fh, saved_clothes, BACKUP_END - BACKUP_START, &got, NULL);
+
+						//AAEdit::g_AAUnlimitDialog.Refresh();
+						if (buf) delete buf;
+
+						// return size without aau blob
+						sz -= footer.aaublob_delta;
+						if ((sz < 0) || (sz > orig_sz))
+							sz = 0;
+						SetFilePointer(fh, 0, NULL, FILE_BEGIN);
+						// 2. check the selected checkboxes
+						bool aa2clothes = SendMessage(thisPtr->m_cbTransAA2CLOTHES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2body = SendMessage(thisPtr->m_cbTransAA2BODY, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2face = SendMessage(thisPtr->m_cbTransAA2FACE, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2eyes = SendMessage(thisPtr->m_cbTransAA2EYES, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool aa2hair = SendMessage(thisPtr->m_cbTransAA2HAIR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ao = SendMessage(thisPtr->m_cbTransAO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool ar = SendMessage(thisPtr->m_cbTransAR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool mo = SendMessage(thisPtr->m_cbTransMO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool oo = SendMessage(thisPtr->m_cbTransOO, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bd = SendMessage(thisPtr->m_cbTransBD, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool bs = SendMessage(thisPtr->m_cbTransBS, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool hr = SendMessage(thisPtr->m_cbTransHR, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						bool tn = SendMessage(thisPtr->m_cbTransTN, BM_GETCHECK, 0, 0) == BST_CHECKED;
+						// 3. transfer data
+						g_currChar.m_cardData.LoadCardStyleData(0, selTransTo, &cd, &g_currChar.m_cardData,
+							aa2clothes, aa2body, aa2face, aa2eyes, aa2hair,
+							ao, ar, mo, oo,
+							hr, tn, bd, bs);
+						// 4. update if it's the current style
+						if (selTransTo == g_currChar.GetCurrentStyle())
+						{
+							auto currStyleCardData = g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_cardStyleData;	// current style after it has been modified
+							if (aa2clothes) {
+								for (int i = 0; i < 4; i++)
+								{
+									g_currChar.m_char->m_charData->m_clothes[i] = currStyleCardData.m_clothes[i];
+								}
+							}
+							if (aa2body) {
+								g_currChar.m_char->m_charData->m_figure = currStyleCardData.m_figure;
+								g_currChar.m_char->m_charData->m_gender = currStyleCardData.m_gender;
+								g_currChar.m_char->m_charData->m_chest = currStyleCardData.m_chest;
+								g_currChar.m_char->m_charData->m_bodyColor = currStyleCardData.m_bodyColor;
+							}
+							if (aa2face) {
+								g_currChar.m_char->m_charData->m_faceSlot = currStyleCardData.m_faceSlot;
+								g_currChar.m_char->m_charData->m_faceDetails = currStyleCardData.m_faceDetails;
+								g_currChar.m_char->m_charData->m_eyebrows = currStyleCardData.m_eyebrows;
+							}
+							if (aa2eyes) {
+								g_currChar.m_char->m_charData->m_eyes = currStyleCardData.m_eyes;
+							}
+							if (aa2hair) {
+								g_currChar.m_char->m_charData->m_hair = currStyleCardData.m_hair;
+							}
+							LUA_EVENT_NORET("update_edit_gui");
+							//g_currChar.Respawn();
+						}
+						thisPtr->Refresh();
+						SendMessage(thisPtr->m_lbAAuSets2, LB_SETCURSEL, selTransTo, 0);
+						CloseHandle(fh);
+					}
+				}
+				return TRUE;
+			case IDC_GN_BTNRESET: {
+				if (AAEdit::g_currChar.IsValid())
+				{
+					g_currChar.m_cardData.RemoveAllHair();
+					g_currChar.m_cardData.Reset();
+					g_currChar.Respawn();
+					thisPtr->Refresh();
+				}
+				return FALSE;
+			}
 			case IDC_GN_BTNSETCLOTH0:
 			case IDC_GN_BTNSETCLOTH1:
 			case IDC_GN_BTNSETCLOTH2:
 			case IDC_GN_BTNSETCLOTH3:
 				{
+					if (!g_currChar.IsValid() || thisPtr->m_isFileOpenDialogOpen) return FALSE;
 					auto idx = IDC_GN_BTNSETCLOTH0;
-					const TCHAR* path = General::SaveFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					thisPtr->m_isFileOpenDialogOpen = true;
+					const TCHAR* path = General::OpenFileDialog(General::BuildPlayPath(TEXT("data\\save\\cloth")).c_str());
+					thisPtr->m_isFileOpenDialogOpen = false;
 					if (path != NULL) {
 						auto buf = General::FileToBuffer(path);
 						//Replacing the wrong bytes, that's just how it is. 
@@ -399,7 +692,8 @@ INT_PTR CALLBACK UnlimitedDialog::GNDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 						AAEdit::g_currChar.m_cardData.SwitchActiveCardStyle(sel, g_currChar.m_char->m_charData);
 					}
 					using namespace ExtVars::AAEdit;
-					LUA_EVENT_NORET("update_edit_gui")
+
+					LUA_EVENT_NORET("update_edit_gui");
 					Shared::preservingFrontHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.frontHair;
 					Shared::preservingSideHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.sideHair;
 					Shared::preservingBackHairSlot = AAEdit::g_currChar.m_char->m_charData->m_hair.backhair;
@@ -424,6 +718,7 @@ void UnlimitedDialog::GNDialog::RefreshAAuSetList() {
 		SendMessage(this->m_lbAAuSets2,LB_INSERTSTRING,i,(LPARAM)list[i].c_str());
 	}
 	SendMessage(this->m_lbAAuSets,LB_SETCURSEL,AAEdit::g_currChar.m_cardData.GetCurrAAUSet(),0);
+	SendMessage(this->m_lbAAuSets2, LB_SETCURSEL, 0, 0);
 }
 
 void UnlimitedDialog::GNDialog::Refresh() {
@@ -995,10 +1290,14 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		thisPtr->m_edTanColorHue = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_HUE);
 		thisPtr->m_edTanColorSat = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_SAT);
 		thisPtr->m_edTanColorVal = GetDlgItem(hwndDlg, IDC_BD_EDTANCOLOR_VAL);
+		thisPtr->m_edColorCode = GetDlgItem(hwndDlg, IDC_TN_EDCOLORCODE);
+		thisPtr->m_btnColorPick = GetDlgItem(hwndDlg, IDC_TN_BTNCOLORPICK);
 
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINREDTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINGREENTAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINBLUETAN), UDM_SETRANGE, 0, MAKELPARAM(255, 0));
+
+		SendMessage(GetDlgItem(hwndDlg, IDC_TN_EDCOLORCODE), EM_SETLIMITTEXT, 9, MAKELPARAM(1, 0));
 
 		thisPtr->LoadTanList();
 		thisPtr->m_bRefreshingColorBoxes = false;
@@ -1010,11 +1309,72 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		switch (HIWORD(wparam)) {
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
-			if (identifier == IDC_BD_CBTANCOLOR) {
-				BOOL visible = SendMessage(thisPtr->m_cbTanColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
-				g_currChar.m_cardData.SetHasTanColor(visible == TRUE);
+			switch (identifier) {
+			case IDC_BD_CBTANCOLOR: {
+				BOOL checked = SendMessage(thisPtr->m_cbTanColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				g_currChar.m_cardData.SetHasTanColor(checked == TRUE);
+				thisPtr->UpdateHexCodeText();
 				thisPtr->Refresh();
 				return TRUE;
+			}
+			case IDC_TN_BTNCOLORPICK: {
+				int red = General::GetEditInt(thisPtr->m_edTanColorBlue);
+				int green = General::GetEditInt(thisPtr->m_edTanColorGreen);
+				int blue = General::GetEditInt(thisPtr->m_edTanColorRed);
+
+				CHOOSECOLOR cc;                 // common dialog box structure 
+				//ZeroMemory(&cc, sizeof(cc));
+				cc.lStructSize = sizeof(cc);
+				cc.hwndOwner = hwndDlg;
+				static DWORD rgbCurrent;        // initial color selection
+				rgbCurrent = RGB(red, green, blue);
+				cc.rgbResult = rgbCurrent;
+
+				static COLORREF acrCustClr[16]; // array of custom colors 
+				// initialize custom colors with hair color, eyebrow color, etc
+				acrCustClr[0] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.skinColor);							// skin color
+				acrCustClr[1] = General::ARGBtoCOLORREF(g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_tanColor);		// tan color
+				acrCustClr[2] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.pubicColor);							// pube color
+				acrCustClr[3] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_hair.hairColor);								// hair color
+				acrCustClr[4] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_eyebrows.color);								// eyebrow color
+				acrCustClr[5] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_faceDetails.glassesColor);						// glasses color
+				acrCustClr[6] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop1);							// clothes top 1
+				acrCustClr[7] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop2);							// clothes top 2
+				acrCustClr[8] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop3);							// clothes top 3
+				acrCustClr[9] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop4);							// clothes top 4
+				acrCustClr[10] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom1);						// clothes bottom 1
+				acrCustClr[11] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom2);						// clothes bottomm 2
+				acrCustClr[12] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorUnderwear);						// clothes underwear
+				acrCustClr[13] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorSocks);							// clothes socks
+				acrCustClr[14] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorIndoorShoes);					// clothes indoor shoes
+				acrCustClr[15] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorOutdoorShoes);					// clothes outdoor shoes
+				cc.lpCustColors = (LPDWORD)acrCustClr;
+
+				cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+				if (ChooseColor(&cc) == TRUE) {
+					TCHAR text[10];
+
+					red = GetRValue(cc.rgbResult);
+					green = GetGValue(cc.rgbResult);
+					blue = GetBValue(cc.rgbResult);
+
+					SendMessage(thisPtr->m_cbTanColor, BM_SETCHECK, BST_CHECKED, 0);
+					g_currChar.m_cardData.SetHasTanColor(true);
+
+					_itow_s(red, text, 10);
+					SendMessage(thisPtr->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(green, text, 10);
+					SendMessage(thisPtr->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(blue, text, 10);
+					SendMessage(thisPtr->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)text);
+
+					//auto color = RGB(red, green, blue);
+					//g_currChar.m_cardData.SetTanColor(color);
+					//thisPtr->UpdateHexCodeText();
+					//ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_SKINTONE);
+				}
+			}
 			}
 		}
 		case CBN_SELCHANGE: {
@@ -1026,6 +1386,7 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 			}
 			g_currChar.m_cardData.SetTan(name);
 			//redraw tan
+			thisPtr->UpdateHexCodeText();
 			ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_TAN);
 			break; }
 		case EN_CHANGE: {
@@ -1048,14 +1409,84 @@ INT_PTR CALLBACK UnlimitedDialog::TSDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 					int blue = General::GetEditInt(thisPtr->m_edTanColorBlue);
 					auto color = RGB(red, green, blue);
 					g_currChar.m_cardData.SetTanColor(color);
+					thisPtr->UpdateHexCodeText();
 					ExtVars::AAEdit::RedrawBodyPart(ExtVars::AAEdit::BODY_COLOR, ExtVars::AAEdit::BODYCOLOR_SKINTONE);
+				}
+			}
+			else if (ed == thisPtr->m_edColorCode)
+			{
+				auto colorCode = General::GetEditString(ed);
+				auto selection = Edit_GetSel(ed);
+
+				if (General::WStringIsARGB(colorCode))
+				{
+					DWORD color = General::WStringToARGB(colorCode);
+
+					int r = (color & 0x00FF0000) >> 16;
+					int g = (color & 0x0000FF00) >> 8;
+					int b = color & 0x000000FF;
+					TCHAR R[4];
+					TCHAR G[4];
+					TCHAR B[4];
+
+					swprintf_s(R, L"%u", r);
+					swprintf_s(G, L"%u", g);
+					swprintf_s(B, L"%u", b);
+
+					//red and blue are flipped
+					auto oldRed = General::GetEditInt(thisPtr->m_edTanColorBlue);
+					auto oldGreen = General::GetEditInt(thisPtr->m_edTanColorGreen);
+					auto oldBlue = General::GetEditInt(thisPtr->m_edTanColorRed);
+
+					if (oldRed != r) {
+						SendMessage(thisPtr->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)R);
+					}
+					if (oldGreen != g) {
+						SendMessage(thisPtr->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)G);
+					}
+					if (oldBlue != b) {
+						SendMessage(thisPtr->m_edTanColorRed, WM_SETTEXT, 0, (LPARAM)B);
+					}
+
+					Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
 				}
 			}
 			break;}
 		}
+		return TRUE;
+		break;
+	}
+	case WM_NOTIFY: {
+		TSDialog* thisPtr = (TSDialog*)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+		if (thisPtr == NULL) return FALSE;
+		auto ncode = ((LPNMHDR)lparam)->code;
+		auto sender = HWND(lparam);
+		switch (ncode) {
+		case UDN_DELTAPOS: {
+			thisPtr->UpdateHexCodeText();
+		}
+		}
+		break;
 	}
 	}
 	return FALSE;
+}
+
+
+
+void UnlimitedDialog::TSDialog::UpdateHexCodeText()
+{
+	// red and blue are flipped on the tans pages
+	int red = General::GetEditInt(m_edTanColorBlue);
+	int green = General::GetEditInt(m_edTanColorGreen);
+	int blue = General::GetEditInt(m_edTanColorRed);
+
+	// update the color hex field
+	auto wstrHex = General::ARGBToWString(0xFF, red, green, blue, false);
+	auto oldHex = General::GetEditString(m_edColorCode);
+	if (oldHex.compare(wstrHex)) {
+		SendMessage(m_edColorCode, WM_SETTEXT, 128, (LPARAM)(wstrHex.c_str()));
+	}
 }
 
 void UnlimitedDialog::TSDialog::LoadTanList() {
@@ -1128,6 +1559,7 @@ void UnlimitedDialog::TSDialog::Refresh() {
 	SendMessage(this->m_edTanColorGreen, WM_SETTEXT, 0, (LPARAM)text);
 	_itow_s(GetBValue(tanColor), text, 10);
 	SendMessage(this->m_edTanColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+	UpdateHexCodeText();
 	m_bRefreshingColorBoxes = false;
 }
 
@@ -1150,7 +1582,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 		SendMessage(thisPtr->m_rbKind[0], BM_SETCHECK, BST_CHECKED, 0);
 		thisPtr->m_edSlot = GetDlgItem(hwndDlg,IDC_HR_EDSLOT);
 		thisPtr->m_edAdjustment = GetDlgItem(hwndDlg,IDC_HR_EDADJUSTMENT);
-		thisPtr->m_cbFlip = GetDlgItem(hwndDlg,IDC_HR_CBFLIP);
+		thisPtr->m_cbFlip = GetDlgItem(hwndDlg, IDC_HR_EDSLOT2);
 		thisPtr->m_edHighlight = GetDlgItem(hwndDlg, IDC_HR_EDHIGHLIGHT);
 		thisPtr->m_lstHairs = GetDlgItem(hwndDlg,IDC_HR_LIST);
 
@@ -1195,9 +1627,19 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 				}
 				return TRUE;
 			}
+			else if (identifier == IDC_HR_BTNRESETHILIGHT) {
+				g_currChar.m_cardData.ResetHairHighlight();
+				//redraw all hairs
+				using namespace ExtVars::AAEdit;
+				RedrawBodyPart(HAIR, HAIR_BACK);
+				RedrawBodyPart(HAIR, HAIR_FRONT);
+				RedrawBodyPart(HAIR, HAIR_SIDE);
+				RedrawBodyPart(HAIR, HAIR_EXTENSION);
+				thisPtr->Refresh();
+				return TRUE;
+			}
 			else if(identifier == IDC_HR_BTNADD) {
 				if (g_currChar.Editable()) {
-
 
 					if (AAEdit::g_currChar.m_char->m_charData->m_gender == 1 || AAEdit::g_currChar.m_char->m_charData->m_gender == 0) {
 
@@ -1207,11 +1649,16 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 						}
 						if (kind == 4) kind = 0;
 						TCHAR buf[256];
+
 						SendMessage(thisPtr->m_edSlot, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE slot = _wtoi(buf);
+
 						SendMessage(thisPtr->m_edAdjustment, WM_GETTEXT, 256, (LPARAM)buf);
 						BYTE adjustment = _wtoi(buf);
-						bool flip = SendMessage(thisPtr->m_cbFlip, BM_GETCHECK, 0, 0) == BST_CHECKED;
+
+						SendMessage(thisPtr->m_cbFlip, WM_GETTEXT, 256, (LPARAM)buf);
+						BYTE flip = _wtoi(buf);
+
 						g_currChar.m_cardData.AddHair(kind, slot, adjustment, flip);
 						thisPtr->Refresh();
 						//redraw hair of added king
@@ -1242,6 +1689,7 @@ INT_PTR CALLBACK UnlimitedDialog::HRDialog::DialogProc(_In_ HWND hwndDlg, _In_ U
 					if (sel == -1) return TRUE;
 					g_currChar.m_cardData.RemoveHair(sel);
 					thisPtr->Refresh();
+					g_currChar.Respawn();
 					return TRUE;
 				}
 			}
@@ -1294,9 +1742,9 @@ void UnlimitedDialog::HRDialog::RefreshHairList() {
 			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 			//flip
-			if (list[i].flip) item.pszText = TEXT("true");
-			else item.pszText = TEXT("false");
+			_itow_s(list[i].flip, buf, 10);
 			item.iSubItem = 3;
+			item.pszText = buf;
 			ListView_SetItem(m_lstHairs,&item);
 		}
 	}
@@ -1353,6 +1801,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		thisPtr->m_edSubmeshColorSat = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SAT);
 		thisPtr->m_edSubmeshColorVal = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_VAL);
 		thisPtr->m_edSubmeshColorAT = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_AT);
+		thisPtr->m_bmBtnColorPick = GetDlgItem(hwndDlg, IDC_BD_BM_BTNCLRPICK);
+		thisPtr->m_edColorCode = GetDlgItem(hwndDlg, IDC_BD_EDCOLORCODE);
 
 		thisPtr->m_edSubmeshColorSH1 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH1);
 		thisPtr->m_edSubmeshColorSH2 = GetDlgItem(hwndDlg, IDC_BD_EDSMCOLOR_SH2);
@@ -1373,6 +1823,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMAT), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMSH1), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
+		SendMessage(GetDlgItem(hwndDlg, IDC_BD_EDCOLORCODE), EM_SETLIMITTEXT, 9, MAKELPARAM(1, 0));
+
 		SendMessage(GetDlgItem(hwndDlg, IDC_BD_SPINSMSH2), UDM_SETRANGE, 0, MAKELPARAM(1, 0));
 
 		SendMessage(GetDlgItem(hwndDlg,IDC_BD_BM_RBFRAME),BM_SETCHECK,BST_CHECKED,0);
@@ -1424,15 +1876,74 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		switch (HIWORD(wparam)) {
 		case BN_CLICKED: {
 			DWORD identifier = LOWORD(wparam);
-			if(identifier == IDC_BD_CBOUTLINECOLOR) {
+			switch (identifier) {
+			case IDC_BD_CBOUTLINECOLOR:{
 				BOOL visible = SendMessage(thisPtr->m_cbOutlineColor,BM_GETCHECK,0,0) == BST_CHECKED;
 				g_currChar.m_cardData.SetHasOutlineColor(visible == TRUE);
 				thisPtr->Refresh();
 				return TRUE;
 			}
-			else if(identifier == IDC_BD_BM_BTNADD) {
+			case IDC_BD_BM_BTNADD:{
 				thisPtr->ApplyInput();
 				return TRUE;
+			}
+			case IDC_BD_BM_BTNCLRPICK: {
+				BOOL isOutlineSelected = SendMessage(thisPtr->m_cbOutlineColor, BM_GETCHECK, 0, 0) == BST_CHECKED;
+				int red = General::GetEditInt(thisPtr->m_edSubmeshColorRed);
+				int green = General::GetEditInt(thisPtr->m_edSubmeshColorGreen);
+				int blue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
+
+				CHOOSECOLOR cc;                 // common dialog box structure 
+				//ZeroMemory(&cc, sizeof(cc));
+				cc.lStructSize = sizeof(cc);
+				cc.hwndOwner = hwndDlg;
+				static DWORD rgbCurrent;        // initial color selection
+				rgbCurrent = RGB(red, green, blue);
+				cc.rgbResult = rgbCurrent;
+
+				static COLORREF acrCustClr[16]; // array of custom colors 
+				// initialize custom colors with hair color, eyebrow color, etc
+				acrCustClr[0] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.skinColor);							// skin color
+				acrCustClr[1] = General::ARGBtoCOLORREF(g_currChar.m_cardData.m_styles[g_currChar.GetCurrentStyle()].m_tanColor);		// tan color
+				acrCustClr[2] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_bodyColor.pubicColor);							// pube color
+				acrCustClr[3] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_hair.hairColor);								// hair color
+				acrCustClr[4] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_eyebrows.color);								// eyebrow color
+				acrCustClr[5] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_faceDetails.glassesColor);						// glasses color
+				acrCustClr[6] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop1);							// clothes top 1
+				acrCustClr[7] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop2);							// clothes top 2
+				acrCustClr[8] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop3);							// clothes top 3
+				acrCustClr[9] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorTop4);							// clothes top 4
+				acrCustClr[10] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom1);						// clothes bottom 1
+				acrCustClr[11] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorBottom2);						// clothes bottomm 2
+				acrCustClr[12] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorUnderwear);						// clothes underwear
+				acrCustClr[13] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorSocks);							// clothes socks
+				acrCustClr[14] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorIndoorShoes);					// clothes indoor shoes
+				acrCustClr[15] = General::ARGBtoCOLORREF(g_currChar.m_char->m_charData->m_clothes->colorOutdoorShoes);					// clothes outdoor shoes
+				cc.lpCustColors = (LPDWORD)acrCustClr;
+
+				cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+				if (ChooseColor(&cc) == TRUE) {
+					TCHAR text[10];
+
+					red = GetRValue(cc.rgbResult);
+					green = GetGValue(cc.rgbResult);
+					blue = GetBValue(cc.rgbResult);
+
+					_itow_s(red, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(green, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)text);
+					_itow_s(blue, text, 10);
+					SendMessage(thisPtr->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)text);
+
+					thisPtr->UpdateHexCodeText();
+
+					if (thisPtr->IsSubmeshRuleSelected()) {
+						thisPtr->ApplySubmeshRule(true);
+					}
+				}
+			}
 			}
 			return TRUE; }
 		case EN_CHANGE: {
@@ -1440,7 +1951,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			if (ed == thisPtr->m_edOutlineColorBlue
 				|| ed == thisPtr->m_edOutlineColorGreen
 				|| ed == thisPtr->m_edOutlineColorRed)
-			{
+			{	// legacy global outline color. Ignore this block of code
 				int newval = General::GetEditInt(ed);
 				if (newval < 0) {
 					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)TEXT("0"));
@@ -1454,6 +1965,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					int blue = General::GetEditInt(thisPtr->m_edOutlineColorBlue);
 					g_currChar.m_cardData.SetOutlineColor(RGB(red, green, blue));
 				}
+				thisPtr->UpdateHexCodeText();
 			}
 			else if (ed == thisPtr->m_edSubmeshColorRed
 				|| ed == thisPtr->m_edSubmeshColorGreen
@@ -1472,6 +1984,7 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	int blue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
 				//	std::vector<BYTE> color{(BYTE)red, (BYTE)green, (BYTE)blue, 255};
 				//}
+				thisPtr->UpdateHexCodeText();
 			}
 			else if (ed == thisPtr->m_edSubmeshColorAT || 
 				ed == thisPtr->m_edSubmeshColorSH1 ||
@@ -1490,6 +2003,46 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				//	SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
 				//}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+				thisPtr->UpdateHexCodeText();
+			}
+			else if (ed == thisPtr->m_edColorCode) {
+				auto selection = Edit_GetSel(ed);
+				TCHAR num[11];
+				SendMessage(ed, WM_GETTEXT, 10, (LPARAM)num);
+				std::wstring colorCode(num);
+
+				if (General::WStringIsARGB(colorCode))
+				{
+					auto color = General::WStringToARGB(colorCode);
+
+					int r = (color & 0x00FF0000) >> 16;
+					int g = (color & 0x0000FF00) >> 8;
+					int b = color & 0x000000FF;
+					TCHAR R[4];
+					TCHAR G[4];
+					TCHAR B[4];
+
+					swprintf_s(R, L"%u", r);
+					swprintf_s(G, L"%u", g);
+					swprintf_s(B, L"%u", b);
+
+
+					auto oldRed = General::GetEditInt(thisPtr->m_edSubmeshColorRed);
+					auto oldGreen = General::GetEditInt(thisPtr->m_edSubmeshColorGreen);
+					auto oldBlue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
+
+					if (oldRed != r) {
+						SendMessage(thisPtr->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)R);
+					}
+					if (oldGreen != g) {
+						SendMessage(thisPtr->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)G);
+					}
+					if (oldBlue != b) {
+						SendMessage(thisPtr->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)B);
+					}
+
+					Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+				}
 			}
 			return TRUE;
 		}
@@ -1511,8 +2064,49 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
 				}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+				thisPtr->UpdateHexCodeText();
 			}
-			else {
+			//else if (ed == thisPtr->m_edColorCode) {
+			//	TCHAR num[11];
+			//	SendMessage(ed, WM_GETTEXT, 10, (LPARAM)num);
+			//	std::wstring colorCode(num);
+
+			//	if (General::WStringIsARGB(colorCode))
+			//	{
+			//		auto color = General::WStringToARGB(colorCode);
+
+			//		int r = (color & 0x00FF0000) >> 16;
+			//		int g = (color & 0x0000FF00) >> 8;
+			//		int b = color & 0x000000FF;
+			//		TCHAR R[4];
+			//		TCHAR G[4];
+			//		TCHAR B[4];
+
+			//		swprintf_s(R, L"%u", r);
+			//		swprintf_s(G, L"%u", g);
+			//		swprintf_s(B, L"%u", b);
+
+			//		auto oldRed = General::GetEditInt(thisPtr->m_edSubmeshColorRed);
+			//		auto oldGreen = General::GetEditInt(thisPtr->m_edSubmeshColorGreen);
+			//		auto oldBlue = General::GetEditInt(thisPtr->m_edSubmeshColorBlue);
+
+			//		if (oldRed != r) {
+			//			SendMessage(thisPtr->m_edSubmeshColorRed, WM_SETTEXT, 0, (LPARAM)R);
+			//		}
+			//		if (oldGreen != g) {
+			//			SendMessage(thisPtr->m_edSubmeshColorGreen, WM_SETTEXT, 0, (LPARAM)G);
+			//		}
+			//		if (oldBlue != b) {
+			//			SendMessage(thisPtr->m_edSubmeshColorBlue, WM_SETTEXT, 0, (LPARAM)B);
+			//		}
+			//	}
+			//	if (thisPtr->IsSubmeshRuleSelected()) {
+			//		thisPtr->ApplySubmeshRule(true);
+			//	}
+			//}
+			else if (ed == thisPtr->m_edSubmeshColorRed || 
+				ed == thisPtr->m_edSubmeshColorGreen ||
+				ed == thisPtr->m_edSubmeshColorBlue) {
 				auto selection = Edit_GetSel(ed);
 				TCHAR num[128];
 				SendMessage(ed, WM_GETTEXT, 128, (LPARAM)num);
@@ -1525,9 +2119,21 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					SendMessage(ed, WM_SETTEXT, 0, (LPARAM)str);
 				}
 				Edit_SetSel(ed, LOWORD(selection), HIWORD(selection));
+				if (thisPtr->IsSubmeshRuleSelected()) {
+					thisPtr->ApplySubmeshRule(true);
+				}
+				thisPtr->UpdateHexCodeText();
 			}
 			
 			return TRUE; }
+		case EN_SETFOCUS: {
+			HWND ed = (HWND)lparam;
+			if (ed == thisPtr->m_edColorCode) {
+				
+				Edit_SetSel(ed, 0, 8);
+			}
+			return TRUE;
+		}
 		case LBN_SELCHANGE: {
 			HWND wnd = (HWND)lparam;
 			if(wnd == thisPtr->m_bmList) {
@@ -1543,6 +2149,65 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 					thisPtr->LoadColorData(sel);
 				}
 				return TRUE;
+			}
+			break; }
+		case CBN_DROPDOWN: {
+			HWND wnd = (HWND)lparam;
+			if (wnd == thisPtr->m_bmCbBone) {
+				TCHAR xxname[128];
+				SendMessage(thisPtr->m_bmCbXXFile, WM_GETTEXT, 128, (LPARAM)xxname);
+				auto cxxname = General::CastToStringN(xxname, lstrlen(xxname) + 1);
+				
+				ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
+				ExtClass::XXFile* xxlist[] = {
+					curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
+					curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
+					curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
+				};
+				if (curr->m_charData->m_gender == 0) {
+					xxlist[10] = NULL;
+				}
+
+				ExtClass::XXFile* xx = nullptr;
+				int xxlistpos = 10;
+				for (int i = 0; i < 11; i++) {
+					if (xxlist[i] && cxxname == xxlist[i]->m_name) {
+						xxlistpos = -1;
+						xx = xxlist[i];
+						break;
+					}
+				}
+
+				SendMessage(thisPtr->m_bmCbBone, CB_RESETCONTENT, 0, 0);
+				do {
+					if (xx == nullptr && xxlistpos >= 0)
+						xx = xxlist[xxlistpos--];
+					if (xx == nullptr) {
+						continue;
+					}
+					TCHAR tmpBuff[256];
+					std::queue<ExtClass::Frame*> frameQueue;
+					ExtClass::Frame* root = xx->m_root;
+					frameQueue.push(root);
+					while (!frameQueue.empty()) {
+						ExtClass::Frame* bone = frameQueue.front();
+						frameQueue.pop();
+
+						if (!(General::StartsWith(bone->m_name, "A_") || General::StartsWith(bone->m_name, "AP_") ||
+							General::StartsWith(bone->m_name, "artf_") || General::StartsWith(bone->m_name, "pose_"))) {
+							size_t conv;
+							mbstowcs_s(&conv, tmpBuff, bone->m_name, bone->m_nameBufferSize);
+
+							if (SendMessage(thisPtr->m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a frame with this name is not already present in the list
+								SendMessage(thisPtr->m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
+							}
+						}
+						for (unsigned int i = 0; i < bone->m_nChildren; i++) {
+							frameQueue.push(bone->m_children + i);
+						}
+					}
+					xx = nullptr;
+				} while (xxlistpos >= 0);
 			}
 			break; }
 		};
@@ -1587,6 +2252,8 @@ INT_PTR CALLBACK UnlimitedDialog::BDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				SendMessage(thisPtr->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)num);
 				break; }
 			}
+
+			thisPtr->UpdateHexCodeText();
 			if (thisPtr->IsSubmeshRuleSelected()) {
 				thisPtr->ApplySubmeshRule(true);
 			}
@@ -1621,8 +2288,9 @@ void UnlimitedDialog::BDDialog::LoadMatrixData(int listboxId) {
 
 	for(int i = 0; i < 3; i++) {
 		for(int j = 0; j < 3; j++) {
-			std::wstring num = std::to_wstring(rule.second.mods[i][j]);
-			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num.c_str());
+			TCHAR num[128];
+			swprintf_s(num, L"%g", rule.second.mods[i][j]);
+			SendMessage(m_bmEdMatrix[i][j],WM_SETTEXT,0,(LPARAM)num);
 		}
 	}
 	//
@@ -1667,6 +2335,7 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		floatyDWORD.i = submeshOutlineColor[3];
 		swprintf_s(text, L"%g", floatyDWORD.f);
 		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
+		UpdateHexCodeText();
 	}
 	else if (General::StartsWith(listEntry, L"[SMSH]")) {
 		SendMessage(m_bmRbBoneMod, BM_SETCHECK, BST_UNCHECKED, 0);
@@ -1704,11 +2373,33 @@ void UnlimitedDialog::BDDialog::LoadColorData(int listboxId) {
 		floatyDWORD.i = submeshShadowColor[5];
 		swprintf_s(text, L"%g", floatyDWORD.f);
 		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)text);
+		UpdateHexCodeText();
 	}
 
 	delete[] textBuffer;
 	textBuffer = nullptr;
 	//
+}
+
+void UnlimitedDialog::BDDialog::UpdateHexCodeText()
+{
+	bool showAlpha = false;
+	//if (SendMessage(m_bmRbSMSH, BM_GETCHECK, 0, 0) == BST_CHECKED)
+	//{
+	//	showAlpha = true;
+	//}
+
+	int alpha = floor(General::GetEditFloat(m_edSubmeshColorAT) * 255);
+	int red = General::GetEditInt(m_edSubmeshColorRed);
+	int green = General::GetEditInt(m_edSubmeshColorGreen);
+	int blue = General::GetEditInt(m_edSubmeshColorBlue);
+
+	// update the color hex field
+	auto wstrHex = General::ARGBToWString(alpha, red, green, blue, showAlpha);
+	auto oldHex = General::GetEditString(m_edColorCode);
+	if (oldHex.compare(wstrHex)) {
+		SendMessage(m_edColorCode, WM_SETTEXT, 128, (LPARAM)(wstrHex.c_str()));
+	}
 }
 
 void UnlimitedDialog::BDDialog::ApplySubmeshRule(bool lightRefresh)
@@ -1952,6 +2643,8 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		floatyDWORD.i = submeshOutlineColor[3];
 		swprintf_s(text, L"%g", floatyDWORD.f);
 		SendMessage(this->m_edSubmeshColorAT, WM_SETTEXT, 0, (LPARAM)text);
+
+		UpdateHexCodeText();
 	}
 	else if (bSubmeshShadow) {
 		auto submeshShadowColor = g_currChar.m_cardData.GetSubmeshShadowColor(xxname, bonename, materialName);
@@ -1971,6 +2664,8 @@ void UnlimitedDialog::BDDialog::Refresh() {
 		floatyDWORD.i = submeshShadowColor[5];
 		swprintf_s(text, L"%g", floatyDWORD.f);
 		SendMessage(this->m_edSubmeshColorSH2, WM_SETTEXT, 0, (LPARAM)text);
+
+		UpdateHexCodeText();
 	}
 	
 	//submesh mods listbox
@@ -2022,35 +2717,6 @@ void UnlimitedDialog::BDDialog::Refresh() {
 	//list possible bones
 	ExtClass::CharacterStruct* curr = ExtVars::AAEdit::GetCurrentCharacter();
 	if(curr != NULL) {
-		SendMessage(m_bmCbBone, CB_RESETCONTENT, 0, 0);
-		ExtClass::XXFile* xxlist[] = {
-			curr->m_xxFace, curr->m_xxGlasses, curr->m_xxFrontHair, curr->m_xxSideHair,
-			curr->m_xxBackHair, curr->m_xxHairExtension, curr->m_xxTounge, curr->m_xxSkeleton,
-			curr->m_xxBody, curr->m_xxLegs, curr->m_xxSkirt
-		};
-		if (curr->m_charData->m_gender == 0) {
-			xxlist[10] = NULL;
-		}
-		TCHAR tmpBuff[256];
-		std::queue<ExtClass::Frame*> fileQueue;
-		for (ExtClass::XXFile* file : xxlist) {
-			if (file == NULL) continue;
-			ExtClass::Frame* root = file->m_root;
-			fileQueue.push(root);
-			while (!fileQueue.empty()) {
-				ExtClass::Frame* bone = fileQueue.front();
-				fileQueue.pop();
-				size_t conv;
-				mbstowcs_s(&conv,tmpBuff,bone->m_name,bone->m_nameBufferSize);
-
-				if (SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)tmpBuff) == CB_ERR) {	//if a frame with this name is not already present in the list
-					SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)tmpBuff);
-				}
-				for (unsigned int i = 0; i < bone->m_nChildren; i++) {
-					fileQueue.push(bone->m_children + i);
-				}
-			}
-		}
 		auto selIdx = SendMessage(m_bmCbBone, CB_FINDSTRINGEXACT, (WPARAM)-1, (LPARAM)bonename);
 		if (selIdx == CB_ERR) {
 			SendMessage(m_bmCbBone, CB_ADDSTRING, 0, (LPARAM)bonename);
@@ -2299,7 +2965,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			},
 			{ TEXT("Hip Height"),
 				{	{ CharacterStruct::BODY, 21 },
-				//	{ CharacterStruct::SKIRT, 7 },
+					{ CharacterStruct::SKIRT, 7 },
 					{ CharacterStruct::LEGS, 16 }
 				},
 				-1, 1
@@ -2387,7 +3053,7 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ TEXT("Zetthigh Ryouiki"),
 				{ { CharacterStruct::LEGS, 6 },{ CharacterStruct::LEGS, 7 },
 				{ CharacterStruct::BODY, 24 },{ CharacterStruct::BODY, 25 },
-				/*{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 }*/ },
+				{ CharacterStruct::SKIRT, 10 },{ CharacterStruct::SKIRT, 11 } },
 				-3.0f, 3.0f
 			},
 			{ TEXT("Calves Size"),
@@ -2611,22 +3277,22 @@ INT_PTR CALLBACK UnlimitedDialog::BSDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 			{ { CharacterStruct::FACE, 35 },{ CharacterStruct::FACE, 36 } },
 					-0.03f, 0.03f
 			},
-			//{ TEXT("Upper Left Incisor"),
-			//	{ { CharacterStruct::FACE, 37 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Upper Right Incisor"),
-			//	{ { CharacterStruct::FACE, 38 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Lower Left Incisor"),
-			//	{ { CharacterStruct::FACE, 39 } },
-			//	-0.05f, 0.05f
-			//},
-			//{ TEXT("Lower Right Incisor"),
-			//	{ { CharacterStruct::FACE, 40 } },
-			//	-0.05f, 0.05f
-			//},
+			{ TEXT("Upper Left Incisor"),
+				{ { CharacterStruct::FACE, 37 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Upper Right Incisor"),
+				{ { CharacterStruct::FACE, 38 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Left Incisor"),
+				{ { CharacterStruct::FACE, 39 } },
+				-0.05f, 0.05f
+			},
+			{ TEXT("Lower Right Incisor"),
+				{ { CharacterStruct::FACE, 40 } },
+				-0.05f, 0.05f
+			},
 			{ TEXT("Upper Left Canine"),
 			{ { CharacterStruct::FACE, 41 } },
 					-0.05f, 0.05f
@@ -3121,6 +3787,12 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 				if (sel != LB_ERR) {
 					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].name.c_str());
 					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)g_currChar.m_cardData.GetModules()[sel].description.c_str());
+					/*auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+					}
+					*/
 					return TRUE;
 				}
 			}
@@ -3128,9 +3800,16 @@ INT_PTR CALLBACK UnlimitedDialog::MDDialog::DialogProc(_In_ HWND hwndDlg,_In_ UI
 		case IDC_MD_LBAVAILABLE:
 			if(notification == LBN_SELCHANGE) {
 				int sel = SendMessage(wnd,LB_GETCURSEL,0,0);
-				if(sel != LB_ERR) {
-					SendMessage(thisPtr->m_edName,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
-					SendMessage(thisPtr->m_edDescr,WM_SETTEXT,0,(LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+				if (sel != LB_ERR) {
+					SendMessage(thisPtr->m_edName, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.name.c_str());
+					SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)thisPtr->m_modules[sel].mod.description.c_str());
+					/*
+					auto store = Storage::Dictionary::getStorage(L"modules", General::CastToWString(g_Config.dictionary));
+					auto result = store.getDictTypeString(thisPtr->m_modules[sel].mod.name.c_str());
+					if (result.isValid) {
+						SendMessage(thisPtr->m_edDescr, WM_SETTEXT, 0, (LPARAM)General::CastToWString(result.value).c_str());
+					}
+					*/
 					return TRUE;
 				}
 			}

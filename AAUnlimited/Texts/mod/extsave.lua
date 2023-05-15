@@ -10,10 +10,12 @@ local bcodes = { 0x02, 0x04, 0x10, 0x11, 0x12 }
 
 local keyf = ""
 local opts = {
-	{"qskey", 1, "Quick save key: %l|None|F3|F4|F5|F6|F7|F8|"},
+	{"qskey", 1, "Quick save key: %l|None|F3|F4|F5|F6|F7|F8|" },
 	{ "bkey", 3, "Backup on save key: %l|None|Right Mouse Button|Middle Mouse Button|Shift Key|Control Key|Alt Key|" },
 	{ "signal", 1, "Signal save done: %b" },
-	{ "period", 1, "Remember period: %b"},
+	{ "period", 1, "Remember period: %b" },
+	{ "bAutosave", 0, "Autosave: %b"},
+	{ "sAutosave", "1 4 6 8 9", "Autosave on periods: %s" }
 }
 
 
@@ -35,22 +37,6 @@ end
 
 local function save_name(info)
 	return unicode_to_utf8(fixptr(info) + 100)
-end
-
-local just_loaded
-function on.load_class()
-	just_loaded = true
-end
-
-function on.period(new, old)
-	if (old ~= 9) then return end
-	local ldname = save_name(get_save_info())
-	log.info("Loaded %s", ldname)
-	local toload = just_loaded and (opts.period == 1) and cfg[ldname]
-	just_loaded = false
-	if toload ~= 9 and toload ~= 0 then
-		return toload
-	end
 end
 
 local function save_handler(data)
@@ -88,15 +74,44 @@ local function save_handler(data)
 	end
 end
 
+local function quicksave()	
+	if not GetGameTimeData() then return end
+	local data = get_save_info()
+	save_handler(data)
+	proc_invoke(GameBase+0xF36D0, 0, data)
+	if opts.signal == 1 then
+		SetCursorPos(0,0)
+	end
+end
+
+local just_loaded
+function on.load_class()
+	just_loaded = true
+end
+
+function on.period(new, old)
+	if (opts.bAutosave == 1) then
+		for autosave in string.gmatch(opts.sAutosave, "%d+") do
+			if (("" .. new) == autosave) then
+				quicksave();
+				return;
+			end
+		end
+	end
+	if (old ~= 9) then return end
+	local ldname = save_name(get_save_info())
+	log.info("Loaded %s", ldname)
+	local toload = just_loaded and (opts.period == 1) and cfg[ldname]
+	just_loaded = false
+	if toload ~= 9 and toload ~= 0 then
+		return toload
+	end
+end
+
+
 function on.keyup(key)
 	if codes[opts.qskey] == key then
-		if not GetGameTimeData() then return end
-		local data = get_save_info()
-		save_handler(data)
-		proc_invoke(GameBase+0xF36D0, 0, data)
-		if opts.signal == 1 then
-			SetCursorPos(0,0)
-		end
+		quicksave();
 	end
 end
 

@@ -18,7 +18,7 @@ void CharInstData::SetCurrentStyle(int index)
 	m_cardData.SwitchActiveCardStyle(index, this->m_char->m_charData);
 
 	auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-	storage.storeCardInt(&AAPlay::g_characters[this->m_char->m_seat], L"m_currCardStyle", index);
+	storage->storeCardInt(&AAPlay::g_characters[this->m_char->m_seat], L"m_currCardStyle", index);
 }
 
 void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
@@ -42,6 +42,29 @@ void CharInstData::ApplyDecals(int bodyPart, int decalStrength)
 	}
 }
 
+void CharInstData::AddRelationshipPoints(ExtClass::CharacterStruct* towards, int love, int like, int dislike, int hate)
+{
+	if (this->IsValid() && General::IsAAPlay) {
+		int arr[4] = { love, like, dislike, hate };
+		const DWORD offset[]{ 0x1428E0 };
+		DWORD* address = (DWORD*)ExtVars::ApplyRule(offset);
+		DWORD* firstChar = (DWORD*)this->m_char->m_moreData;
+		DWORD* arrayPointer = (DWORD*)arr;
+		if (this->IsValid()) {
+			auto somepointer = *(DWORD*)((char*)(this->m_char->m_somePointer) + 0x13c);
+			__asm
+			{
+				mov eax, arrayPointer
+				push eax
+				mov eax, firstChar
+				push eax
+				mov eax, towards
+				call[address]
+			}
+		}
+	}
+}
+
 void CharInstData::ClearCache()
 {
 	const DWORD offset[]{ 0x150750 };
@@ -54,6 +77,91 @@ void CharInstData::ClearCache()
 			push esi
 			call[address]
 
+		}
+	}
+}
+
+void CharInstData::LowPolyUpdate(int state, int contex)
+{
+	if (this->IsValid() && General::IsAAPlay) {
+		DWORD* address;
+		ExtClass::CharacterStruct* characterStruct = this->m_char;
+		if (characterStruct->m_charData->m_gender) {
+			const DWORD offset[]{ 0x116760 };
+			address = (DWORD*)ExtVars::ApplyRule(offset);
+		}
+		else {
+			const DWORD offset[]{ 0x10DE50 };
+			address = (DWORD*)ExtVars::ApplyRule(offset);
+		}
+		characterStruct->m_currClothes = contex;
+		__asm
+		{
+			mov ecx, characterStruct
+			push 0
+			push state
+			call[address]
+		}
+	}
+}
+
+
+void CharInstData::ArrangeDate(int targetSeat)
+{
+	if (this->IsValid() && General::IsAAPlay && AAPlay::g_characters[targetSeat].IsValid()) {
+		DWORD* firstFunction;
+		const DWORD offset[]{ 0x119900 };
+		firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+		auto fromCard = this->m_char->m_characterStatus;
+		int fromTarget = targetSeat;
+
+		DWORD* secondFunction;
+		const DWORD offset2[]{ 0x119CE0 };
+		secondFunction = (DWORD*)ExtVars::ApplyRule(offset2);
+		auto towardsCard = AAPlay::g_characters[targetSeat].m_char->m_characterStatus;
+		int towardsTarget = this->m_char->m_seat;
+
+		__asm
+		{
+			mov ecx, fromTarget
+			push ecx
+			mov edx, fromCard
+			call[firstFunction]
+			mov ecx, towardsTarget
+			push ecx
+			mov edx, towardsCard
+			call[secondFunction]
+		}
+	}
+}
+
+void CharInstData::PromiseLewd(int targetSeat)
+{
+	if (this->IsValid() && General::IsAAPlay && AAPlay::g_characters[targetSeat].IsValid()) {
+		DWORD* firstFunction;
+		const DWORD offset[]{ 0x119640 };
+		firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+		auto fromCard = this->m_char->m_characterStatus;
+		int fromTarget = targetSeat;
+
+		DWORD* secondFunction;
+		const DWORD offset2[]{ 0x1194A0 };
+		secondFunction = (DWORD*)ExtVars::ApplyRule(offset2);
+		auto towardsCard = AAPlay::g_characters[targetSeat].m_char->m_characterStatus;
+		int towardsTarget = this->m_char->m_seat;
+
+		__asm
+		{
+			mov ecx, fromTarget
+			push ecx
+			mov edx, fromCard
+			push edx
+			call[firstFunction]
+			mov ecx, towardsTarget
+			push ecx
+			mov edx, towardsCard
+			push edx
+			call[secondFunction]
 		}
 	}
 }
@@ -81,8 +189,10 @@ void CharInstData::SetHeadTracking(int headtracking)
 }
 
 
-void CharInstData::AddShadows(DWORD* HairPTR)
+void CharInstData::AddShadows(DWORD* xxPTR)
 {
+	if (!g_Config.shadowMap) return;
+	if (!xxPTR) return;
 	if (this->IsValid()) {
 		if (this->m_char->m_xxSkeleton) {
 			//an IsValid() check would be nice to have, but that fucks with the display tab in maker 
@@ -104,9 +214,9 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 			__asm
 			{
 				mov esi, charPTR
-				mov edi, HairPTR
+				mov edi, xxPTR
 				call[firstFunction]
-				mov eax, HairPTR
+				mov eax, xxPTR
 				mov ecx, [eax + 0x218]
 				mov esi, [ecx + 0x0C]
 				xor edx, edx
@@ -125,6 +235,36 @@ void CharInstData::AddShadows(DWORD* HairPTR)
 		}
 	}
 }
+
+void CharInstData::CastShadows(DWORD* xxPTR)
+{
+	if (!g_Config.shadowMap) return;
+	if (!xxPTR) return;
+	if (this->IsValid() && General::IsAAPlay) {
+		if (this->m_char->m_xxSkeleton) {
+			DWORD* firstFunction;
+			DWORD* somePTR;
+			DWORD* nptr = nullptr;
+			DWORD** aptr = &nptr;
+			DWORD ** pointerToXXPTR = &xxPTR;
+
+			const DWORD offset[]{ 0x1AFFD0 };
+			firstFunction = (DWORD*)ExtVars::ApplyRule(offset);
+			const DWORD offset2[]{ 0x3A6748, 0x30, 0x00, 0x18 };
+			somePTR = (DWORD*)ExtVars::ApplyRule(offset2);
+			__asm
+			{
+				mov eax, pointerToXXPTR
+				push eax
+				mov ecx, aptr
+				push ecx
+				mov eax, somePTR
+				call[firstFunction]
+			}
+		}
+	}
+}
+
 
 int CharInstData::GetStyleCount()
 {
@@ -425,20 +565,58 @@ bool CharInstData::IsPC() {
 	return (Shared::GameState::getPlayerCharacter())->m_char->m_seat == this->m_char->m_seat;
 }
 
+void CharInstData::Respawn() {
+	if (this->Editable()) {
+		auto clip = this->m_char->m_xxSkeleton->m_poseNumber;
+		this->m_char->Spawn(this->m_char->m_clothState, this->m_char->m_materialSlot, 0, 1);
+		auto pp = L"data\\jg2e01_00_00.pp";
+		wchar_t xa[255];
+		auto strGender = this->m_char->m_charData->m_gender == 0 ? L"S" : L"A";
+		int figure = this->m_char->m_charData->m_figure.height;
+		if (this->m_char->m_charData->m_gender == 0) {	//male
+			figure = this->m_char->m_charData->m_figure.height + this->m_char->m_charData->m_figure.figure - 1;
+			//switch (g_currChar.m_char->m_charData->m_figure.height)
+			//{
+			//case 1:
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 0) {
+			//		//Delicate
+			//		figure = 00;
+			//	}
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+			//		//Normal
+			//		figure = 01;
+			//	}
+			//case 2:
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 1) {
+			//		//Tall
+			//		figure = 02;
+			//	}
+			//	if (g_currChar.m_char->m_charData->m_figure.figure == 2) {
+			//		//Fat
+			//		figure = 03;
+			//	}
+			//}
+		}
+		swprintf(xa, L"data\\H%sE00_00_%02d_00.xa", strGender, figure);
+		this->m_char->LoadXA(pp, xa, clip, 0, 0);
+	}
+}
+
 void CharInstData::Reset() {
 	m_char = NULL; //pointer pointing to the illusion data, now invalid
+	m_cardData.RemoveAllHair();
 	m_cardData.Reset();
-	for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
+	//for (int i = 0; i < 4; i++) m_hairs[i].clear(); //TODO: proper cleanup
 }
 
 void CharInstData::StoreInitialStats()
 {
 	auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
 
-	storage.storeCardAAUDataInt(this, L"virtue", this->m_char->m_charData->m_character.virtue);
-	storage.storeCardAAUDataInt(this, L"sociability", this->m_char->m_charData->m_character.sociability);
-	storage.storeCardAAUDataInt(this, L"strengthValue", this->m_char->m_charData->m_character.strengthValue);
-	storage.storeCardAAUDataInt(this, L"intelligenceValue", this->m_char->m_charData->m_character.intelligenceValue);
-	storage.storeCardAAUDataInt(this, L"clubValue", this->m_char->m_charData->m_character.clubValue);
+	storage->storeCardAAUDataInt(this, L"sociability", this->m_char->m_charData->m_character.sociability);
+	storage->storeCardAAUDataInt(this, L"virtue", this->m_char->m_charData->m_character.virtue);
+	storage->storeCardAAUDataInt(this, L"strengthValue", this->m_char->m_charData->m_character.strengthValue);
+	storage->storeCardAAUDataInt(this, L"intelligenceValue", this->m_char->m_charData->m_character.intelligenceValue);
+	storage->storeCardAAUDataInt(this, L"clubValue", this->m_char->m_charData->m_character.clubValue);
 }
 

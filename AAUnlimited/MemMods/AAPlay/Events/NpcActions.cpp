@@ -17,7 +17,9 @@ DWORD* extraHairFixReturnAddress = 0;
 DWORD* extraHairFixVanillaAddress;
 DWORD* SecondRosterHandleReturnAddress = 0;
 DWORD* SomeVanillaAddress = 0;
+DWORD* relationshipReturn;
 DWORD* RosterHandleLoopNextSeat = 0;
+DWORD* afterTransferOutReturn = 0;
 void __stdcall Answer(AnswerStruct*);
 BYTE __stdcall AnswerLow(AnswerStruct*);
 DWORD* RosterPopulateInjectionReturnAddress = 0;
@@ -869,11 +871,9 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 	while (character) {
 		if (character->m_xxSkeleton) {
 			DWORD* somepointer = (DWORD*)((char*)(character->m_xxSkeleton->m_unknown13) + 0x88);
-			if (charAddress == somepointer && !Shared::GameState::getIsSaving()) {
-				AAUCardData hairs;
+			if (charAddress == somepointer) {
 				if (General::IsAAEdit) {
-					hairs = AAEdit::g_currChar.m_cardData;
-					if (Shared::GameState::getIsDrawingShadow()) {
+					if (Shared::GameState::getIsDrawingShadow() && !Shared::GameState::getIsSaving()) {
 						Shared::GameState::setIsDrawingShadow(false);
 						for (int idx = 0; idx < 4; idx++) {
 							if (AAEdit::g_currChar.m_cardData.GetHairs(idx).size()) {
@@ -884,11 +884,13 @@ void __stdcall extraHairFix(DWORD* charAddress, BYTE value) {
 						}
 					}
 				}
-				if (General::IsAAPlay) hairs = AAPlay::g_characters[character->m_seat].m_cardData;
-				if (hairs.GetHairs(0).size() || hairs.GetHairs(1).size() || hairs.GetHairs(2).size() || hairs.GetHairs(3).size()) {
+				CharInstData* instance;
+				if (General::IsAAPlay) instance = &AAPlay::g_characters[character->m_seat];
+				if (General::IsAAEdit) instance = &AAEdit::g_currChar;
+				if (instance->m_cardData.GetHairs(0).size() || instance->m_cardData.GetHairs(1).size() || instance->m_cardData.GetHairs(2).size() || instance->m_cardData.GetHairs(3).size()) {
 					extraHairTest = 1;
 					return;
-				}
+				}				
 			}
 		}
 		i++;
@@ -981,6 +983,178 @@ void extraHairMakerFixInjection() {
 		{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
 			NULL);
 }
+
+
+
+void __stdcall ConversationEnd(NpcStatus* card1, NpcStatus* card2, int convoID) {
+	int triggerCard = -1;
+	int convPartner = -1;
+
+	if (card1) {
+		if (card1->m_thisChar) {
+			triggerCard = card1->m_thisChar->m_seat;
+		}
+	}
+	if (card2) {
+		if (card2->m_thisChar) {
+			convPartner = card2->m_thisChar->m_seat;
+		}
+	}
+	int defaultConvo = convoID;
+	if (convoID == -1) {
+		//Case where a card is interrupted
+		for (int character = 0; character < 25; character = character + 1) {
+			CharInstData* inst2 = &AAPlay::g_characters[character];
+			if (inst2->IsValid()) {
+				if (inst2->m_char->m_npcData == card1->m_thisChar->m_npcData->m_target) {
+					defaultConvo = inst2->m_char->m_moreData1->m_activity->m_currConversationId;
+				}
+			}
+		}
+	}
+
+	Shared::Triggers::ConversationEndData convoEndData;
+	convoEndData.card = triggerCard;
+	convoEndData.conversationTarget = convPartner;
+	convoEndData.action = defaultConvo;
+
+	ThrowEvent(&convoEndData);
+}
+
+void __declspec(naked) conversationEndRedirect() {
+	__asm {
+		pushad
+		push [esp+0x28]
+		push eax
+		push esi
+		call ConversationEnd
+		popad
+		//original code
+		mov [esi+0x6C], ebp
+		mov [esi+0x1B], bl
+		ret
+	}
+}
+
+void conversationEndInjection() {
+	//esi has the m_npcStatus of the triggerCard
+	//eax has the m_npcStatus of the other card in the conversation
+	//AA2Play.exe+39530 - 89 6E 6C              - mov [esi+6C],ebp
+	//AA2Play.exe + 39533 - 88 5E 1B - mov[esi + 1B], bl
+
+	DWORD address = General::GameBase + 0x39530;
+	DWORD redirectAddress = (DWORD)(&conversationEndRedirect);
+	Hook((BYTE*)address,
+	{ 0x89, 0x6E, 0x6C, 0x88, 0x5E, 0x1B },						//expected values
+	{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+void __stdcall relationshipPointChanged(ExtClass::CharacterStruct* towards, DWORD* moreData, int arr[4]) {
+	int triggerCard = -1;
+	int targetCard = -1;
+
+	DWORD* somepointer = (DWORD*)(moreData + 0x8);
+	triggerCard = *somepointer;
+
+	if (towards) {
+		targetCard = towards->m_seat;
+	}
+
+	Shared::Triggers::RelationshipPointChangedData relationshipData;
+	relationshipData.card = triggerCard;
+	relationshipData.target = targetCard;
+	relationshipData.love = arr[0];
+	relationshipData.like = arr[1];
+	relationshipData.dislike = arr[2];
+	relationshipData.hate = arr[3];
+	ThrowEvent(&relationshipData);
+	arr[0] = relationshipData.love;
+	arr[1] = relationshipData.like;
+	arr[2] = relationshipData.dislike;
+	arr[3] = relationshipData.hate;
+}
+
+void __declspec(naked) relationshipPointChangedRedirect() {
+	__asm {
+		pushad
+		push[esp + 0x28]
+		push[esp + 0x28]
+		push eax
+		call relationshipPointChanged
+		popad
+		//original code
+		push ecx
+		push ebx
+		mov ebx,[esp+0xC]
+		jmp relationshipReturn
+	}
+}
+
+void relationshipPointChangedInjection() {
+	/*
+	esp + 4 is m_moreData
+	esp + 8 is the array
+	eax is the m_char of the target
+	AA2Play.exe+1428E0 - 51                    - push ecx
+	AA2Play.exe+1428E1 - 53                    - push ebx
+	AA2Play.exe+1428E2 - 8B 5C 24 0C           - mov ebx,[esp+0C]
+	AA2Play.exe+1428E6 - 55                    - push ebp -- return here
+	*/
+
+	const DWORD offset1[]{ 0x1428E6 };
+	relationshipReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0x1428E0;
+	DWORD redirectAddress = (DWORD)(&relationshipPointChangedRedirect);
+	Hook((BYTE*)address,
+	{ 0x51, 0x53, 0x8B, 0x5C, 0x24, 0x0C },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
+}
+
+
+void __stdcall afterTransferOutEvent() {
+	int seat = Shared::GameState::getRemovedSeat();
+	if (seat != -1) {
+		AAPlay::g_characters[seat].Reset();
+	}
+	Shared::GameState::setRemovedSeat(-1);
+}
+
+void __declspec(naked) afterTransferOutRedirect() {
+	__asm {
+		pushad
+		call afterTransferOutEvent
+		popad
+		//original code
+		add ecx, edi
+		lea edx,[ecx+0x04]
+		jmp afterTransferOutReturn
+	}
+}
+
+void afterTransferOutInjection() {
+	/*
+	AA2Play.exe+EC3DC - 03 CF                 - add ecx,edi
+	AA2Play.exe+EC3DE - 8D 51 04              - lea edx,[ecx+04]
+	AA2Play.exe+EC3E1 - 2B C2                 - sub eax,edx
+	*/
+
+	const DWORD offset1[]{ 0xEC3E1 };
+	afterTransferOutReturn = (DWORD*)ExtVars::ApplyRule(offset1);
+
+	DWORD address = General::GameBase + 0xEC3DC;
+	DWORD redirectAddress = (DWORD)(&afterTransferOutRedirect);
+	Hook((BYTE*)address,
+	{ 0x03, 0xCF, 0x8D, 0x51, 0x04 },						//expected values
+	{ 0xE9, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
+		NULL);
+}
+
+
+
 
 
 #if !NEW_HOOK
@@ -1165,22 +1339,36 @@ void __stdcall NpcMovingActionEvent(void* moreUnknownData, ExtClass::ActionParam
 			break;
 		}
 		else if(params->target2 == NULL) {
-			NpcWantTalkWithData data;
-			data.substruct = params;
-			data.card = AAPlay::GetSeatFromStruct(user);
-			data.action = params->conversationId;
-			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
-			ThrowEvent(&data);
+			DWORD virtualTablePTR = (DWORD)Shared::GameState::getPlayerCharacter()->m_char->m_charData->m_virtualTable + 0xA870;
+			if (params->target1->m_virtualTable == virtualTablePTR) {
+				//Checking if CharacterActivity is valid
+				NpcWantTalkWithData data;
+				data.substruct = params;
+				data.card = AAPlay::GetSeatFromStruct(user);
+				data.action = params->conversationId;
+				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+				ThrowEvent(&data);
+			}
+			else {
+				LOGPRIO(Logger::Priority::WARN) << "virtualTablePTR is not the same as calculated one!" << "\r\n";
+			}
 			break;
 		}
 		else {
-			NpcWantTalkWithAboutData data;
-			data.substruct = params;
-			data.card = AAPlay::GetSeatFromStruct(user);
-			data.action = params->conversationId;
-			data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
-			data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
-			ThrowEvent(&data);
+			DWORD virtualTablePTR = (DWORD)Shared::GameState::getPlayerCharacter()->m_char->m_charData->m_virtualTable + 0xA870;
+			if (params->target1->m_virtualTable == virtualTablePTR && params->target2->m_virtualTable == virtualTablePTR) {
+				//Checking if CharacterActivity is valid
+				NpcWantTalkWithAboutData data;
+				data.substruct = params;
+				data.card = AAPlay::GetSeatFromStruct(user);
+				data.action = params->conversationId;
+				data.conversationTarget = AAPlay::GetSeatFromStruct(params->target1->m_thisChar);
+				data.conversationAbout = AAPlay::GetSeatFromStruct(params->target2->m_thisChar);
+				ThrowEvent(&data);
+			}
+			else {
+				LOGPRIO(Logger::Priority::WARN) << "virtualTablePTR is not the same as calculated one!" << "\r\n";
+			}
 			break;
 		}
 		break; }

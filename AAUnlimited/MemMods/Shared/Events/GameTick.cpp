@@ -73,11 +73,15 @@ int __stdcall GameTick() {
 		}
 		else break;
 	}*/
+	auto delayedEvents = Shared::GameState::GetDelayedEvents();
+	for (auto it = delayedEvents->begin(); it != delayedEvents->end() && it->delayEnd < now;) {
+		ThrowEvent(&(*it));
+		delayedEvents->erase(it++);
+	}
 
 	ResetOnTitle();
 	return orig_GameTick();
 }
-
 
 void Initialize() {
 	hwnd = (HANDLE*)(General::GameBase + 0x34526C);

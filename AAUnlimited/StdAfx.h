@@ -26,6 +26,7 @@
 #include <set>
 #include <stack>
 #include <vector>
+#include <list>
 #include <string>
 
 #include "lua.hpp"

@@ -26,6 +26,8 @@ static DWORD OrigLoadMale, OrigLoadFemale;
 static DWORD OrigUpdateMale, OrigUpdateFemale;
 static DWORD OrigDespawnMale, OrigDespawnFemale;
 static DWORD OrigLoadXAMale, OrigLoadXAFemale;
+typedef void(*f_modelReload)(DWORD* charstruct);
+
 
 bool loc_loadingCharacter = false;
 void HiPolyLoadStartEvent(ExtClass::CharacterStruct* loadCharacter, DWORD &cloth, BYTE partial) {
@@ -111,21 +113,26 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		call dword ptr[who]
 		mov retv, eax
 	}
-	CharInstData card;
-	if (General::IsAAPlay) card = AAPlay::g_characters[loadCharacter->m_seat];
+	CharInstData* card;
+	if (General::IsAAPlay) card = &AAPlay::g_characters[loadCharacter->m_seat];
 	else if (General::IsAAEdit) {
 		AAEdit::g_currChar.m_char = loadCharacter;
-		card = AAEdit::g_currChar;
+		card = &AAEdit::g_currChar;
 	}
 	for (int idx = 0; idx < 4; idx++) {
-		if (card.m_cardData.GetHairs(idx).size()) {
-			for (int num = 0; num < card.m_cardData.GetHairs(idx).size(); num++) {
-				card.AddShadows((DWORD*)card.m_hairs[idx][num].second);
+		if (card->m_cardData.GetHairs(idx).size()) {
+			for (int num = 0; num < card->m_cardData.GetHairs(idx).size(); num++) {
+				card->AddShadows((DWORD*)card->m_hairs[idx][num].second);
+				card->CastShadows((DWORD*)card->m_hairs[idx][num].second);
 			}
 		}
 	}
-	if (card.m_char->m_xxSkeleton) {
-		card.AddShadows((DWORD*)card.m_char->m_xxSkeleton);
+	
+	if (card->IsValid()) {
+		if (card->m_char->m_xxSkeleton) {
+			card->AddShadows((DWORD*)card->m_char->m_xxSkeleton);
+			card->CastShadows((DWORD*)card->m_char->m_xxSkeleton);
+		}
 	}
 	
 	LUA_EVENT_NORET("char_spawn_end", retv, loadCharacter, cloth, a3, a4, partial);
@@ -133,6 +140,17 @@ DWORD __declspec(noinline) __stdcall CallOrigLoad(DWORD who, void *_this, DWORD 
 		Shared::GameState::setIsOverriding(false);
 	}
 	HiPolyLoadEndEvent(loadCharacter);
+	
+	if (AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd) {
+		AAPlay::g_characters[loadCharacter->m_seat].lowPolyUpd = false;
+		AAPlay::g_characters[loadCharacter->m_seat].LowPolyUpdate(loadCharacter->m_bClothesOn, loadCharacter->m_currClothes);
+	}
+	if (AAEdit::AAFACEDLL) {
+		f_modelReload modelReload= (f_modelReload)GetProcAddress(AAEdit::AAFACEDLL, "modelReload");
+		if (modelReload) {
+			modelReload((DWORD*)loadCharacter);
+		}
+	}
 	loc_loadingCharacter = false;
 	return retv;
 }
@@ -408,12 +426,12 @@ void __stdcall SaveLoadEvent() {
 
 void __stdcall TransferInEvent(ExtClass::CharacterStruct* character, wchar_t* fileName) {
 
-	AAPlay::InitTransferedCharacter(character);
 	std::string path = General::CastToString(fileName);
-	std::size_t found = path.rfind("male\\");
-	if (found != std::string::npos) path.replace(0, found+5, "");
+	std::size_t found = path.rfind("ale\\");
+	if (found != std::string::npos) path.replace(0, found+4, "");
 	auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-	storage.storeClassString(General::CastToWString("LastCardFileName"), path);
+	storage->storeClassString(General::CastToWString("LastCardFileName"), path);
+	AAPlay::InitTransferedCharacter(character);
 }
 
 void __stdcall TransferOutEvent(ExtClass::CharacterStruct* character) {
@@ -575,6 +593,43 @@ void TransferOutInjection() {
 		{ 0xE8, HookControl::ANY_DWORD },							//expected values
 		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress },	//redirect to our function
 			&TransferOutOriginalFunc);
+}
+
+
+void __stdcall CharacterCardOpen() {
+	//Reset AAU data
+	Shared::PNG::Reset();
+	if (AAEdit::g_currChar.Editable()) {
+		AAEdit::g_currChar.m_cardData.Reset();
+		AAEdit::g_currChar.m_char = NULL;
+	}
+	
+}
+
+
+void __declspec(naked) CharacterCardOpenRedirect() {
+	__asm {
+		pushad
+		call CharacterCardOpen
+		popad
+		//original code
+		mov eax, fs:[0x00000000]
+		ret
+	}
+}
+
+
+void CharacterCardOpenInjection() {
+	//For getting rid of AAU data
+	//Breakpoint is hit when a new character is opened
+	//AA2Edit.exe+12705D - 64 A1 00000000        - mov eax,fs:[00000000]
+
+	DWORD address = General::GameBase + 0x12705D;
+	DWORD redirectAddress = (DWORD)(&CharacterCardOpenRedirect);
+	Hook((BYTE*)address,
+	{ 0x64, 0xA1, 0x00, 0x00, 0x00, 0x00 },						//expected values
+		{ 0xE8, HookControl::RELATIVE_DWORD, redirectAddress, 0x90 },	//redirect to our function
+		NULL);
 }
 
 

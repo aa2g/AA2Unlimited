@@ -169,7 +169,11 @@ end
 local step = "x6"
 
 local function loadPPeX()
-	os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
+	if (Config.bPersistPPeXConsole) then
+		os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\""))		
+	else
+		os.execute("START \"\" /B " .. "\"" .. aau_path("ppex", "PPeXM64.exe\" \"" .. play_path("data") .. "\" -nowindow"))
+	end
 end
 
 local buts = {}
@@ -321,7 +325,7 @@ local function buildtabs() return
 					title = "Resolution:", }, gsdres(iup.list(table.append({ dropdown="YES",editbox="YES",mask="^[0-9]+x[0-9]+$", visibleitems=#reslist }, reslist))),
 				iup.label {
 					tip = "Invalid aliasing modes default to 8x",
-					title = "Antialiasing*:",}, gsdl("aa", iup.list { 
+					title = "Antialiasing:",}, gsdl("aa", iup.list { 
 					"None", "2x MSAA", "4x MSAA", "6x MSAA", "8x CSAA", "8x MSAA", "16x CSAA", "16xQ CSAA", dropdown="YES", visibleitems=9 }),
 				iup.label {title = "Shadowmap:", }, gsdl("shadowmap", iup.list {
 					"None", "256", "512", "1024", dropdown="YES" }),
@@ -333,17 +337,17 @@ local function buildtabs() return
 			iup.vbox {
 			nmargin="8x",
 				gsdt("bilinear", iup.toggle {title = "Bilinear filtering", tip = "Smooth textures (no hard minecraft pixel edges)" }),
-				gsdt("dynlight", iup.toggle {title = "Draw skin textures", tip = "Will use only skin color instead" }),
+--				gsdt("dynlight", iup.toggle {title = "Draw skin textures", tip = "Will use only skin color instead" }),
 				gsdt("outline", iup.toggle {title = "Outline shader", tip = "Same as ingame outline switch, but works in edit too" }),
 				gsdt("fastrender", iup.toggle {title = "Type 2 renderer", tip = "Renderers have slightly different physics and z-order" }),
 				gsdt("zoom", iup.toggle {title = "16:9 edit background", tip = "Sets edit screen background 16:9, just like the game" }),
 				aaut("bEnableOverlays", iup.toggle {title = "Enable overlays", tip = "Enables the display of FPS counter, subtitles and notification overlays" }),
 				aaut("bDrawFPS", iup.toggle {title = "Show FPS", tip = "FPS counter in top left corner" }),
-				aaut("bFullscreen", iup.toggle {title = "Fullscreen", tip = "Will switch desktop resolution to the one you configure" }),
-				gsdt("rim", iup.toggle {title = "Rim lighting (slow)", tip ="Show shadows around rim edges" }),
-				gsdt("svp", iup.toggle {title = "Software vertex processing**", tip ="Necessary for some broken drivers, also drops FPS" }),
+--				aaut("bFullscreen", iup.toggle {title = "Fullscreen", tip = "Will switch desktop resolution to the one you configure" }),
+				gsdt("rim", iup.toggle {title = "Rim lighting", tip ="Show highlights around rim edges" }),
+				gsdt("svp", iup.toggle {title = "Software vertex processing", tip ="Necessary for some broken drivers, also drops FPS" }),
 				gsdt("blur", iup.toggle {title = "Blur output", tip = "Blur video output, poor mans anti-aliasing" }),
-				gsdt("sharp", iup.toggle {title = "Blur textures", tip = "To help with the setting above" }),
+--				gsdt("sharp", iup.toggle {title = "Blur textures", tip = "To help with the setting above" }),
 			}
 		},
 	},
@@ -395,15 +399,16 @@ local function buildtabs() return
 			title = "Toggles",
 			iup.vbox {
 				gap="0",
-				aaut("bUseVisualStyles", iup.toggle {title = "Use ux theme", tip = "Enables moder windows look, otherwise classic windows" }),
+				aaut("bUseVisualStyles", iup.toggle {title = "Use ux theme", tip = "Enables modern windows look, otherwise classic windows" }),
 				aaut("bUnlimitedOnTop", iup.toggle {title = "AAU edit dialog on top", tip="Forces AAU edit dialog to be always on top save way aa2edit dialog is" }),
-				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides/hooks", tip="Disabling this disables most of modcard functions" }),
+				aaut("bUseMeshTextureOverrides", iup.toggle {title = "Mesh/texture overrides", tip="Disabling this disables most of modcard functions" }),
 				aaut("bUseHAi", iup.toggle {title = "H AI", tip = "auto-h when PC is forced by NPC" }),
 				aaut("bUseCacheFix", iup.toggle {title = "Cache Fix", tip = "Clears the lingering cache from when high poly models are loaded" }),
 				aaut("bHAiOnNoPromptH", iup.toggle {title = "Evil lovers H-AI", tip = "evil lovers will peridodically force PC" }),
 				aaut("bTriggers", iup.toggle {title = "Triggers and Modules", tip = "enable card trigger scripting" }),
 				aaut("bUseShadowing", iup.toggle {title = ".pp file shadowing/sets", tip="pp file shadowing as directories in /data" }),
-				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
+				aaut("bPngSkirtSitagi", iup.toggle {title = "Use .png for custom textures", tip="skirt_###.bmp and sitagi_###.bmp textures are now called tx_###.png" }),
+--				aaut("bEnableHPosButtonReorder", iup.toggle {title = "Reorder H buttons" }),
 --				aaut("bUseClothesPoser", iup.toggle {title = "Clothes poser" }),
 --				aaut("bUseDialoguePoser", iup.toggle {title = "Dialogue poser" }),
 --				aaut("bSaveFileAutoRemove", iup.toggle {title = "Demod modcards after extracting" }),
@@ -413,7 +418,8 @@ local function buildtabs() return
 					tip="Saves statistics to make loading faster",
 					}),
 				aaut("bUsePPeX", iup.toggle {title = "Use .ppx resource loader", tip="Connects to ppex resource daemon" }),
-				aaut("bUseMKIII", iup.toggle {title = "MKIII (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII uncensor" }),
+				aaut("bPersistPPeXConsole", iup.toggle {title = "Keep PPeX window open", tip="Keeps the PPeX window open after launching the game" }),
+				aaut("bUseMKIII", iup.toggle {title = "MKIII/CIV (chinpo .bmp->.tga texture)", tip="Enable/Disable modification for MKIII or CIV uncensor" }),
 				aaut("bListFilenames", iup.toggle {title = "List card file names", tip="List cards by filename in game instead of character name" }),
 			}
 		},

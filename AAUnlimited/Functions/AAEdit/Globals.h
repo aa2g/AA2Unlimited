@@ -7,5 +7,6 @@ namespace AAEdit {
 
 
 extern CharInstData g_currChar;
-
+extern HINSTANCE AAFACEDLL;
+void SetAAFACEDLL(HINSTANCE ptr);
 }

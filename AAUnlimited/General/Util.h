@@ -41,6 +41,36 @@ inline std::string CastToStringN(const WCHAR* str, size_t count) {
 	return std::string(str, str + count - 1);
 }
 
+// split helper
+inline void SplitW(const std::wstring* str,
+	std::vector<std::wstring>& container,
+	std::wstring delim)
+{
+	std::size_t current, previous = 0;
+	current = str->find(delim);
+	while (current != std::string::npos) {
+		container.push_back(str->substr(previous, current - previous));
+		previous = current + delim.size();
+		current = str->find(delim, previous);
+	}
+	container.push_back(str->substr(previous, current - previous));
+};
+
+// split helper
+inline void Split(const std::string* str,
+	std::vector<std::string>& container,
+	std::string delim)
+{
+	std::size_t current, previous = 0;
+	current = str->find(delim);
+	while (current != std::string::npos) {
+		container.push_back(str->substr(previous, current - previous));
+		previous = current + delim.size();
+		current = str->find(delim, previous);
+	}
+	container.push_back(str->substr(previous, current - previous));
+};
+
 inline TCHAR* FindFileInPath(TCHAR* path) {
 	TCHAR* lastSlash = path;
 	while (*path) {
@@ -201,6 +231,13 @@ D3DMATRIX MatrixFromSRT(D3DXVECTOR3& scales,D3DXVECTOR3& rots,D3DXVECTOR3& trans
 std::vector<BYTE> FileToBuffer(const TCHAR* path);
 
 static int HexadecimalToDecimal(std::string hex);
+
+COLORREF ARGBtoCOLORREF(DWORD color);
+
+std::wstring ARGBToWString(DWORD color);
+std::wstring ARGBToWString(int a, int r, int g, int b, bool showAlpha = false);
+bool WStringIsARGB(std::wstring color);
+DWORD WStringToARGB(std::wstring color, unsigned char defaultAlpha = 0);
 
 D3DCOLOR sHEX_sRGB_toRGBA(std::string stringHEX_RGB, D3DCOLOR colorDefault, int alphaChannel = 255);
 

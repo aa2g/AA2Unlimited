@@ -84,6 +84,35 @@ namespace Shared {
 			return this->thisCard;
 		}
 
+		//string ()
+		Value Thread::GetDelayedEventLabel(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->label);
+			default:
+				return "";
+			}
+		}
+
+		//int ()
+		Value Thread::GetDelayedEventPeriod(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->period);
+			default:
+				return -1;
+			}
+		}
+
+		//bool ()
+		Value Thread::GetDelayedEventRequired(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case DELAYED_EXECUTION:
+				return Value(((DelayedEventData*)eventData)->required);
+			default:
+				return false;
+			}
+		}
 		Value Thread::GetPC(std::vector<Value>&) {
 			if (Shared::GameState::getPlayerCharacter() != nullptr) {
 				auto pc = Shared::GameState::getPlayerCharacter()->m_char;
@@ -115,8 +144,12 @@ namespace Shared {
 		//bool (int)
 		Value Thread::GetCum(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
+
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "A00_O_kutisiru")) {
@@ -138,8 +171,11 @@ namespace Shared {
 
 		Value Thread::GetTears(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "00_O_namida")) {
@@ -160,8 +196,11 @@ namespace Shared {
 
 		Value Thread::GetGlasses(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
 					if (strstr((*frame)->m_name, "megane")) {
@@ -181,8 +220,11 @@ namespace Shared {
 		}
 		Value Thread::GetHighlight(std::vector<Value>& params) {
 			int seat = params[0].iVal;
-			ExtClass::Frame** frame = AAPlay::g_characters[seat].m_char->m_bonePtrArray;
-			ExtClass::Frame** arrayEnd = AAPlay::g_characters[seat].m_char->m_bonePtrArrayEnd;
+			CharInstData* cardInst = &AAPlay::g_characters[seat];
+			if (ExpressionSeatInvalid(seat) || !cardInst->IsValid()) return Value(false);
+
+			ExtClass::Frame** frame = cardInst->m_char->m_bonePtrArray;
+			ExtClass::Frame** arrayEnd = cardInst->m_char->m_bonePtrArrayEnd;
 			bool highlight = false;
 			while (frame < arrayEnd && ExpressionSeatValid(seat)) {
 				if (*frame != nullptr) {
@@ -542,6 +584,19 @@ namespace Shared {
 			return Value(str.replace(from, length, newStr));
 		}
 
+		//string(string, int, int)
+		Value Thread::GetCSVByIndex(std::vector<Value>& params) {
+			auto str = params[0].strVal;
+			int idx = params[1].iVal;
+			auto sep = params[2].strVal;
+
+			// split the string parameters
+			std::vector<std::wstring> container;
+			General::SplitW(str, container, *sep);
+			idx = idx % container.size();
+			return container[idx];
+		}
+
 		/*
 		 * card attributes
 		 */
@@ -563,7 +618,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto virtueMods = storage.getCardAAUDataValue(cardInst, L"virtueMods");
+			auto virtueMods = storage->getCardAAUDataValue(cardInst, L"virtueMods");
 			if (!virtueMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -580,7 +635,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto virtue = storage.getCardAAUDataValue(cardInst, L"virtue");
+			auto virtue = storage->getCardAAUDataValue(cardInst, L"virtue");
 			return Value(virtue.is<double>() ? (int)virtue.get<double>() : cardInst->m_char->m_charData->m_character.virtue);
 		}
 
@@ -603,7 +658,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto traitMods = storage.getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
+			auto traitMods = storage->getCardAAUDataValue(cardInst, L"traitMods_" + General::CastToWString(std::to_string(trait)));
 			if (!traitMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -621,7 +676,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto storedTrait = storage.getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
+			auto storedTrait = storage->getCardAAUDataValue(cardInst, L"trait_" + General::CastToWString(std::to_string(trait)));
 			return Value(storedTrait.is<double>() ? (int)storedTrait.get<double>() : cardInst->m_char->m_charData->m_traitBools[trait]);
 
 		}
@@ -742,7 +797,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto clubMods = storage.getCardAAUDataValue(cardInst, L"clubValueMods");
+			auto clubMods = storage->getCardAAUDataValue(cardInst, L"clubValueMods");
 			if (!clubMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -759,7 +814,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto club = storage.getCardAAUDataValue(cardInst, L"club");
+			auto club = storage->getCardAAUDataValue(cardInst, L"club");
 			return Value(club.is<double>() ? (int)club.get<double>() : (int)cardInst->m_char->m_charData->m_character.clubValue);
 		}
 
@@ -801,7 +856,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto intelligenceMods = storage.getCardAAUDataValue(cardInst, L"intelligenceValueMods");
+			auto intelligenceMods = storage->getCardAAUDataValue(cardInst, L"intelligenceValueMods");
 			if (!intelligenceMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -818,7 +873,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto intelligence = storage.getCardAAUDataValue(cardInst, L"intelligence");
+			auto intelligence = storage->getCardAAUDataValue(cardInst, L"intelligence");
 			return Value(intelligence.is<double>() ? (int)intelligence.get<double>() : (int)cardInst->m_char->m_charData->m_character.intelligenceValue);
 		}
 
@@ -865,7 +920,7 @@ namespace Shared {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(-1);
 			CharInstData* cardInst = &AAPlay::g_characters[card];
-			if (!cardInst->IsValid()) return Value(-1);
+			if (!cardInst->IsValid()) return Value(false);
 
 			return Value((int)cardInst->m_char->m_moreData1->m_activity->m_isMasturbating);
 		}
@@ -932,7 +987,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto strengthMods = storage.getCardAAUDataValue(cardInst, L"strengthValueMods");
+			auto strengthMods = storage->getCardAAUDataValue(cardInst, L"strengthValueMods");
 			if (!strengthMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -949,7 +1004,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto strength = storage.getCardAAUDataValue(cardInst, L"strength");
+			auto strength = storage->getCardAAUDataValue(cardInst, L"strength");
 			return Value(strength.is<double>() ? (int)strength.get<double>() : (int)cardInst->m_char->m_charData->m_character.strengthValue);
 		}
 
@@ -1019,7 +1074,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto sociabilityMods = storage.getCardAAUDataValue(cardInst, L"sociabilityMods");
+			auto sociabilityMods = storage->getCardAAUDataValue(cardInst, L"sociabilityMods");
 			if (!sociabilityMods.is<picojson::object>()) {
 				return Value(0);
 			}
@@ -1036,7 +1091,7 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card) || !cardInst->IsValid()) return Value(0);
 
 			auto storage = PersistentStorage::ClassStorage::getCurrentClassStorage();
-			auto sociability = storage.getCardAAUDataValue(cardInst, L"sociability");
+			auto sociability = storage->getCardAAUDataValue(cardInst, L"sociability");
 			return Value(sociability.is<double>() ? (int)sociability.get<double>() : cardInst->m_char->m_charData->m_character.sociability);
 		}
 
@@ -1313,7 +1368,7 @@ namespace Shared {
 			CharInstData* cardInst = &AAPlay::g_characters[card];
 			if (!cardInst->IsValid()) return Value(0);
 			int cardTowards = params[1].iVal;
-			if (ExpressionSeatInvalid(cardTowards)) return Value(-0);
+			if (ExpressionSeatInvalid(cardTowards)) return Value(0);
 			CharInstData* towardsInst = &AAPlay::g_characters[cardTowards];
 			if (!towardsInst->IsValid()) return Value(0);
 
@@ -1427,8 +1482,8 @@ namespace Shared {
 			if (invalidSeat) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardInt(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardInt(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].iVal);
 		}
@@ -1438,8 +1493,8 @@ namespace Shared {
 			if (ExpressionSeatInvalid(card)) return params[2];
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardFloat(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardFloat(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].fVal);
 		}
@@ -1450,8 +1505,8 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardString(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardString(inst, *params[1].strVal);
 			if (result.isValid) return Value(General::CastToWString(result.value));
 			else return Value(*params[2].strVal);
 		}
@@ -1462,36 +1517,36 @@ namespace Shared {
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) return params[2];
 
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getCardBool(inst, *params[1].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getCardBool(inst, *params[1].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[2].bVal);
 		}
 		//int(string, int)
 		Value Thread::GetClassStorageInt(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassInt(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassInt(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].iVal);
 		}
 		//float(string, float)
 		Value Thread::GetClassStorageFloat(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassFloat(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassFloat(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].fVal);
 		}
 		//string(string, string)
 		Value Thread::GetClassStorageString(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassString(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassString(*params[0].strVal);
 			if (result.isValid) return Value(General::CastToWString(result.value));
 			else return Value(*params[1].strVal);
 		}
 		//bool(string, bool)
 		Value Thread::GetClassStorageBool(std::vector<Value>& params) {
-			auto store = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
-			auto result = store.getClassBool(*params[0].strVal);
+			auto storage = PersistentStorage::ClassStorage::getStorage(Shared::GameState::getCurrentClassSaveName());
+			auto result = storage->getClassBool(*params[0].strVal);
 			if (result.isValid) return Value(result.value);
 			else return Value(params[1].bVal);
 		}
@@ -2362,9 +2417,25 @@ namespace Shared {
 		//bool()
 		Value Thread::GetAutoPC(std::vector<Value>& params) {
 			const DWORD offset[]{ 0x376164, 0x38, 0x2e3 };
-			DWORD* autopc = (DWORD*)ExtVars::ApplyRule(offset);
+			BYTE* autopc = (BYTE*)ExtVars::ApplyRule(offset);
 			return *autopc == 1;
 		}
+
+
+		//bool()
+		Value Thread::GetCondomOverride(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x38, 0x302 };
+			BYTE* condom = (BYTE*)ExtVars::ApplyRule(offset);
+			return *condom == 1;
+		}
+
+		//bool()
+		Value Thread::GetCondomValue(std::vector<Value>& params) {
+			const DWORD offset[]{ 0x376164, 0x38, 0x303 };
+			BYTE* condom = (BYTE*)ExtVars::ApplyRule(offset);
+			return *condom == 1;
+		}
+
 
 		//int()
 		Value Thread::GetNpcResponseTarget(std::vector<Value>& params) {
@@ -2381,7 +2452,7 @@ namespace Shared {
 		//int()
 		Value Thread::GetPCRoomTarget(std::vector<Value>& params) {
 			//this value is temporary and I'd rather not let the user retrieve it whenever
-			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0x150 };
+			const DWORD offset[]{ 0x3A6748, 0x3C, 0x8, 0x80, 0xC8 };
 			DWORD* room = nullptr;
 			switch (this->eventData->GetId()) {
 			case NPC_RESPONSE:
@@ -2499,10 +2570,106 @@ namespace Shared {
 				return ((PCConversationStateUpdatedData*)eventData)->action;
 			case PC_CONVERSATION_LINE_UPDATED:
 				return ((PCConversationLineUpdatedData*)eventData)->action;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->action;
 			default:
 				return 0;
 			}
 		}
+
+		//bool()
+		Value Thread::HasDateWith(std::vector<Value>& params) {
+			int firstCard = params[0].iVal;
+			int secondCard = params[1].iVal;
+			if (firstCard == secondCard) return false;
+
+			//Check if they're valid cards
+			if (ExpressionSeatInvalid(firstCard)) return Value(false);
+			CharInstData* firstInstance = &AAPlay::g_characters[firstCard];
+			if (!firstInstance->IsValid()) return Value(false);
+
+			if (ExpressionSeatInvalid(secondCard)) return Value(false);
+			CharInstData* secondInstance = &AAPlay::g_characters[secondCard];
+			if (!secondInstance->IsValid()) return Value(false);
+
+			//Check the dateTo struct. The pointer is invalid when the card doesn't have a date set, so we should be careful. 
+
+			DWORD* toTailFirst = firstInstance->m_char->m_characterStatus->m_dateToStruct;
+			DWORD* toTailSecond = secondInstance->m_char->m_characterStatus->m_dateToStruct;
+
+			//Either the first card arranged a date with the second one, or the second one arranged the date with the first one, or they don't have a date
+			//First we check if the first card arranged a date with the second one
+			DWORD* tempPointer;
+			if (toTailFirst) {
+				//This means that the first card arranged dates with some cards so the struct is valid
+				//Seats start at -4 from the end and are spaced by 4 bytes. The idea is to loop through the entire thing and see if our card is there. At -4 from the top element there's a pointer, so the loop ends naturally.
+
+				tempPointer = toTailFirst -0x1; //this is equivalent to 0x4 in hex
+				//we're checking if they're valid values for seats
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == secondCard) {
+						//If the card is found, we stop checking for more cards, they have a date.
+						return true;
+					}
+					tempPointer -= 0x1;
+				}
+			}
+			if (toTailSecond) {
+				//This means that the second card arranged dates with some cards, so the struct is valid
+				//Seats start at -4 from the end and are spaced by 4 bytes. The idea is to loop through the entire thing and see if our card is there. At -4 from the top element there's a pointer, so the loop ends naturally.
+
+				tempPointer = toTailSecond - 0x1;
+				//we're checking if they're valid values for seats
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == firstCard) {
+						//If the card is found, we stop checking for more cards, they have a date.
+						return true;
+					}
+					tempPointer -= 0x1;
+				}
+			}
+			return false;
+		}
+
+
+		Value Thread::PromisedLewdRewardTo(std::vector<Value>& params) {
+			int firstCard = params[0].iVal;
+			int secondCard = params[1].iVal;
+			if (firstCard == secondCard) return false;
+
+			//Check if they're valid cards
+			if (ExpressionSeatInvalid(firstCard)) return Value(false);
+			CharInstData* firstInstance = &AAPlay::g_characters[firstCard];
+			if (!firstInstance->IsValid()) return Value(false);
+
+			if (ExpressionSeatInvalid(secondCard)) return Value(false);
+			CharInstData* secondInstance = &AAPlay::g_characters[secondCard];
+			if (!secondInstance->IsValid()) return Value(false);
+
+			//Check the lewd reward struct. The pointer is invalid when the card doesn't have a lewd reward promise made, so we should be careful. 
+
+			DWORD* toTailFirst = firstInstance->m_char->m_characterStatus->m_lewdPromiseTo;
+
+			//we check if the first card promised a lewd reward to the second one
+			DWORD* tempPointer;
+			if (toTailFirst) {
+				//This means that the first card arranged dates with some cards so the struct is valid
+				//Seats start at -0xc from the end and are spaced by 0xc bytes. The idea is to loop through the entire thing and see if our card is there.
+				tempPointer = toTailFirst - 0x3; //this is equivalent to 0xc in hex
+				
+				//we're checking if they're valid values for seats. There's a nullptr after each seat, and we should use this to identify when we're done with looping through them.
+				while (ExpressionSeatValid(*tempPointer)) {
+					if (*tempPointer == secondCard && *(tempPointer+1) == NULL) {
+						//If the card is found, we stop checking for more cards, they did promise a lewd reward.
+						return true;
+					}
+					tempPointer -= 0x3;
+				}
+			}
+
+			return false;
+		}
+
 
 
 		//int()
@@ -2512,6 +2679,8 @@ namespace Shared {
 				return ((NpcWantTalkWithData*)eventData)->conversationTarget;
 			case NPC_WANT_TALK_WITH_ABOUT:
 				return ((NpcWantTalkWithAboutData*)eventData)->conversationTarget;
+			case CONVERSATION_END:
+				return ((ConversationEndData*)eventData)->conversationTarget;
 			default:
 				return 0;
 			}
@@ -2528,6 +2697,52 @@ namespace Shared {
 				return 0;
 			}
 		}
+
+		Value Thread::GetLove(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->love;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetLike(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->like;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetDislike(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->dislike;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::GetHate(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->hate;
+			default:
+				return 0;
+			}
+		}
+
+		Value Thread::RelationshipTowards(std::vector<Value>& params) {
+			switch (this->eventData->GetId()) {
+			case RELATIONSHIP_POINT_CHANGED:
+				return ((RelationshipPointChangedData*)eventData)->target;
+			default:
+				return 0;
+			}
+		}
+
 
 		//int()
 		Value Thread::GetConversationState(std::vector<Value>& params) {
@@ -2594,8 +2809,12 @@ namespace Shared {
 				if (Shared::GameState::getConversationCharacter(params[0].iVal))
 					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
 				else return -1;
+			case HI_POLY_END:
+				if (Shared::GameState::getConversationCharacter(params[0].iVal))
+					return Shared::GameState::getConversationCharacter(params[0].iVal)->m_seat;
+				else return -1;
 			default:
-				return 0;
+				return -1;
 			}
 		}
 
@@ -2692,6 +2911,130 @@ namespace Shared {
 			auto delimiter = L"\n";
 			return Value(*params[0].strVal + delimiter + *params[1].strVal);
 		}
+		
+		Value Thread::CallLuaStringFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = "";
+			LUA_EVENT("dispatch_string_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaIntFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = 0;
+			LUA_EVENT("dispatch_int_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaBoolFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = false;
+			LUA_EVENT("dispatch_bool_trigger", ret, funcName, args);
+			return Value(ret);
+		}
+
+		Value Thread::CallLuaFloatFunction(std::vector<Value>& params) {
+			// split lambda
+			auto split = [](const std::string& str,
+				std::vector<std::string>& container,
+				char delim = '\n')
+			{
+				std::size_t current, previous = 0;
+				current = str.find(delim);
+				while (current != std::string::npos) {
+					container.push_back(str.substr(previous, current - previous));
+					previous = current + 1;
+					current = str.find(delim, previous);
+				}
+				container.push_back(str.substr(previous, current - previous));
+			};
+
+			// split the incoming parameters
+			std::vector<std::string> container;
+			split(General::CastToString(*params[0].strVal), container, '\n');
+
+			// construct the lua function name and parameters array
+			auto funcName = container[0];
+			std::string args = "";
+			for (int i = 1; i < container.size(); i++) {
+				args += container[i] + "\n";
+			}
+			auto ret = 0.0f;
+			LUA_EVENT("dispatch_float_trigger", ret, funcName, args);
+			return Value(ret);
+		}
 
 		std::wstring g_ExpressionCategories[EXPRCAT_N] = {
 			TEXT("General"),
@@ -2753,31 +3096,31 @@ namespace Shared {
 				},
 				{
 					4, EXPRCAT_MATH,
-					TEXT("Random Int"), TEXT("RandomInt(min: %p , max: %p )"), TEXT("Generates a random integer between the two arguments (including both)"),
+					TEXT("Random Int"), TEXT("RandomInt(min: %p, max: %p)"), TEXT("Generates a random integer between the two arguments (including both)"),
 					{(TYPE_INT), (TYPE_INT)}, (TYPE_INT),
 					&Thread::GetRandomInt
 				},
 				{
 					EXPR_INT_PLUS, EXPRCAT_MATH,
-					TEXT("+"), TEXT("%p + %p"), TEXT("Adds two integers"),
+					TEXT("+"), TEXT("(%p + %p)"), TEXT("Adds two integers"),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::AddIntegers
 				},
 				{
 					6, EXPRCAT_MATH,
-					TEXT("-"), TEXT("%p - %p"), TEXT("Substracts two integers"),
+					TEXT("-"), TEXT("(%p - %p)"), TEXT("Substracts two integers"),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::SubstractIntegers
 				},
 				{
 					7, EXPRCAT_MATH,
-					TEXT("/"), TEXT("%p / %p"), TEXT("Divide two integers"),
+					TEXT("/"), TEXT("(%p / %p)"), TEXT("Divide two integers"),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::DivideIntegers
 				},
 				{
 					8, EXPRCAT_MATH,
-					TEXT("*"), TEXT("%p * %p"), TEXT("Multiply two integers"),
+					TEXT("*"), TEXT("(%p * %p)"), TEXT("Multiply two integers"),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::MultiplyIntegers
 				},
@@ -2814,14 +3157,14 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_EVENT,
-					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation "
+					TEXT("Npc Action"), TEXT("ActionId"), TEXT("The Type of Action an Npc Wants to Perform in a no-target-action event, or the conversation, or the conversation within conversation end event."
 					"id in the targeted actions."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcActionId
 				},
 				{
 					15, EXPRCAT_EVENT,
-					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About event, this is the character the Npc talks with."),
+					TEXT("Npc Talk Target"), TEXT("TalkTarget"), TEXT("In a Npc Talk With, or Npc Talk With About, or Conversation End event, this is the character the Npc talks with."),
 					{}, (TYPE_INT),
 					&Thread::GetNpcTalkTarget
 				},
@@ -2845,7 +3188,7 @@ namespace Shared {
 				},
 				{
 					19, EXPRCAT_CHARPROP,
-					TEXT("Love Points"), TEXT("%p ::LOVE(towards: %p )"), TEXT("The total sum of love points. This includes the love history, "
+					TEXT("Love Points"), TEXT("%p.LOVE(towards: %p)"), TEXT("The total sum of love points. This includes the love history, "
 					"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
 					"single points, that have not added up to 30 and were therefor not converted to love history yet."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
@@ -2853,7 +3196,7 @@ namespace Shared {
 				},
 				{
 					20, EXPRCAT_CHARPROP,
-					TEXT("Like Points"), TEXT("%p ::LIKE(towards: %p )"), TEXT("The total sum of like points. This includes the like history, "
+					TEXT("Like Points"), TEXT("%p.LIKE(towards: %p)"), TEXT("The total sum of like points. This includes the like history, "
 					"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
 					"single points, that have not added up to 30 and were therefor not converted to like history yet."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
@@ -2861,7 +3204,7 @@ namespace Shared {
 				},
 				{
 					21, EXPRCAT_CHARPROP,
-					TEXT("Dislike Points"), TEXT("%p ::DISLIKE(towards: %p )"), TEXT("The total sum of dislike points. This includes the dislike history, "
+					TEXT("Dislike Points"), TEXT("%p.DISLIKE(towards: %p)"), TEXT("The total sum of dislike points. This includes the dislike history, "
 					"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
 					"single points, that have not added up to 30 and were therefor not converted to dislike history yet."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
@@ -2869,7 +3212,7 @@ namespace Shared {
 				},
 				{
 					22, EXPRCAT_CHARPROP,
-					TEXT("Hate Points"), TEXT("%p ::HATE(towards: %p )"), TEXT("The total sum of hate points. This includes the hate history, "
+					TEXT("Hate Points"), TEXT("%p.HATE(towards: %p)"), TEXT("The total sum of hate points. This includes the hate history, "
 					"where each entry translates to 30 points, but which are limited to 30 history entrys (=900 points) across all 4 categories, as well as "
 					"single points, that have not added up to 30 and were therefor not converted to hate history yet."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
@@ -2877,13 +3220,13 @@ namespace Shared {
 				},
 				{
 					23, EXPRCAT_MATH,
-					TEXT("Float to Int"), TEXT("Int( %p )"), TEXT("Converts a Float to an Int by cutting off the decimals."),
+					TEXT("Float to Int"), TEXT("Int(%p)"), TEXT("Converts a Float to an Int by cutting off the decimals."),
 					{ TYPE_FLOAT }, (TYPE_INT),
 					&Thread::Float2Int
 				},
 				{
 					24, EXPRCAT_CHARPROP,
-					TEXT("Get Card Storage Int"), TEXT("%p ::GetInt(key: %p , default: %p )"),
+					TEXT("Get Card Storage Int"), TEXT("%p.GetInt(key: %p, default: %p)"),
 					TEXT("Gets the integer from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_INT }, (TYPE_INT),
@@ -2891,87 +3234,87 @@ namespace Shared {
 				},
 				{
 					25, EXPRCAT_CHARPROP,
-					TEXT("Virtue"), TEXT("%p ::Virtue"), TEXT("The virtue of this character."
+					TEXT("Virtue"), TEXT("%p.Virtue"), TEXT("The virtue of this character."
 					" 0 = Lowest ... 4 = Highest"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVirtue
 				},
 				{
 					26, EXPRCAT_CHARPROP,
-					TEXT("Personality"), TEXT("%p ::Personality"), TEXT("The personalityId of this character."),
+					TEXT("Personality"), TEXT("%p.Personality"), TEXT("The personalityId of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPersonality
 				},
 				{
 					27, EXPRCAT_CHARPROP,
-					TEXT("Voice Pitch"), TEXT("%p ::Pitch"), TEXT("The voice pitch of this character."
+					TEXT("Voice Pitch"), TEXT("%p.Pitch"), TEXT("The voice pitch of this character."
 					" 0 = Lowest ... 4 = Highest"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVoicePitch
 				},
 				{
 					28, EXPRCAT_CHARPROP,
-					TEXT("Club"), TEXT("%p ::Club"), TEXT("The clubId of this character."),
+					TEXT("Club"), TEXT("%p.Club"), TEXT("The clubId of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClub
 				},
 				{
 					29, EXPRCAT_CHARPROP,
-					TEXT("Club Value"), TEXT("%p ::ClubValue"), TEXT("The club value of this character."),
+					TEXT("Club Value"), TEXT("%p.ClubValue"), TEXT("The club value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClubValue
 				},
 				{
 					30, EXPRCAT_CHARPROP,
-					TEXT("Club Rank"), TEXT("%p ::ClubRank"), TEXT("The club rank of this character."),
+					TEXT("Club Rank"), TEXT("%p.ClubRank"), TEXT("The club rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClubRank
 				},
 				{
 					31, EXPRCAT_CHARPROP,
-					TEXT("Intelligence"), TEXT("%p ::INT"), TEXT("The intelligence of this character."),
+					TEXT("Intelligence"), TEXT("%p.INT"), TEXT("The intelligence of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligence
 				},
 				{
 					32, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Value"), TEXT("%p ::INTValue"), TEXT("The intelligence value of this character."),
+					TEXT("Intelligence Value"), TEXT("%p.INTValue"), TEXT("The intelligence value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceValue
 				},
 				{
 					33, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Rank"), TEXT("%p ::INTRank"), TEXT("The intelligence rank of this character."),
+					TEXT("Intelligence Rank"), TEXT("%p.INTRank"), TEXT("The intelligence rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardIntelligenceRank
 				},
 				{
 					34, EXPRCAT_CHARPROP,
-					TEXT("Strength"), TEXT("%p ::STR"), TEXT("The strength of this character."),
+					TEXT("Strength"), TEXT("%p.STR"), TEXT("The strength of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrength
 				},
 				{
 					35, EXPRCAT_CHARPROP,
-					TEXT("Strength Value"), TEXT("%p ::STRValue"), TEXT("The strength value of this character."),
+					TEXT("Strength Value"), TEXT("%p.STRValue"), TEXT("The strength value of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthValue
 				},
 				{
 					36, EXPRCAT_CHARPROP,
-					TEXT("Strength Rank"), TEXT("%p ::STRRank"), TEXT("The strength rank of this character."),
+					TEXT("Strength Rank"), TEXT("%p.STRRank"), TEXT("The strength rank of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardStrengthRank
 				},
 				{
 					37, EXPRCAT_CHARPROP,
-					TEXT("Sociability"), TEXT("%p ::Sociability"), TEXT("The sociability of this character."),
+					TEXT("Sociability"), TEXT("%p.Sociability"), TEXT("The sociability of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardSociability
 				},
 				{
 					38, EXPRCAT_CHARPROP,
-					TEXT("Partner Count"), TEXT("%p ::PartnerCount"), TEXT("Returns Partner Count of this character."),
+					TEXT("Partner Count"), TEXT("%p.PartnerCount"), TEXT("Returns Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardPartnerCount
 				},
@@ -2992,38 +3335,38 @@ namespace Shared {
 				},
 				{
 					41, EXPRCAT_CHARPROP,
-					TEXT("Sex Orientation"), TEXT("%p ::Orientation"),
+					TEXT("Sex Orientation"), TEXT("%p.Orientation"),
 					TEXT("The sexual orientation of this character. 0 = Straight, 1 = Lean Straight , 2 = Bisexual , 3 = Lean Homo, 4 = Homo"),
 					{TYPE_INT}, (TYPE_INT),
 					&Thread::GetCardOrientation
 				},
 				{
 					42, EXPRCAT_STRINGS,
-					TEXT("String Length"), TEXT("Length( %p )"), TEXT("Retrieves the length of the given string"),
+					TEXT("String Length"), TEXT("Length(%p)"), TEXT("Retrieves the length of the given string"),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::StrLength
 				},
 				{
 					43, EXPRCAT_STRINGS,
-					TEXT("First Index Of"), TEXT("%p ::FirstIndexOf( str: %p )"), TEXT("Retrieves the first occurence of str string."),
+					TEXT("First Index Of"), TEXT("%p.FirstIndexOf(str: %p)"), TEXT("Retrieves the first occurence of str string."),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_INT),
 					&Thread::FirstIndexOf
 				},
 				{
 					44, EXPRCAT_MATH,
-					TEXT("String to Int"), TEXT("Int( %p )"), TEXT("Converts a String to an Int. Returns 0 if string can't be converted."),
+					TEXT("String to Int"), TEXT("Int(%p)"), TEXT("Converts a String to an Int. Returns 0 if string can't be converted."),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::String2Int
 				},
 				{
 					45, EXPRCAT_STRINGS,
-					TEXT("First Index Of Starting At"), TEXT("%p ::FirstIndexOf( str: %p , from: %p )"), TEXT("Retrieves the first occurence of str string starting from from: index."),
+					TEXT("First Index Of Starting At"), TEXT("%p.FirstIndexOf(str: %p, from: %p)"), TEXT("Retrieves the first occurence of str string starting from from: index."),
 					{ TYPE_STRING, TYPE_STRING, TYPE_INT }, (TYPE_INT),
 					&Thread::FirstIndexOfFrom
 				},
 				{
 					46, EXPRCAT_CHARPROP,
-					TEXT("Gender"), TEXT("%p ::Gender"), TEXT("Character's gender. 0 means Male, 1 means Female. No tumblr here."),
+					TEXT("Gender"), TEXT("%p.Gender"), TEXT("Character's gender. 0 means Male, 1 means Female. No tumblr here."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardGender
 				},
@@ -3047,13 +3390,13 @@ namespace Shared {
 				},
 				{
 					50, EXPRCAT_CHARPROP,
-					TEXT("Pregnancy Risk"), TEXT("%p ::PregnancyRisk(day: %p )"), TEXT("Pregnancy risk of %p character at %p day. 2 = dangerous, 1 = safe, 0 = normal"),
+					TEXT("Pregnancy Risk"), TEXT("%p.PregnancyRisk(day: %p)"), TEXT("Pregnancy risk of %p character at %p day. 2 = dangerous, 1 = safe, 0 = normal"),
 					{ (TYPE_INT), (TYPE_INT) }, (TYPE_INT),
 					&Thread::GetPregnancyRisk
 				},
 				{
 					51, EXPRCAT_CHARPROP,
-					TEXT("Current Style"), TEXT("%p ::Style"), TEXT("Currently used Style."),
+					TEXT("Current Style"), TEXT("%p.Style"), TEXT("Currently used Style."),
 					{ (TYPE_INT) }, (TYPE_INT),
 					&Thread::GetCurrentSyle
 				},
@@ -3065,7 +3408,7 @@ namespace Shared {
 				},
 				{
 					53, EXPRCAT_CONVERSATION,
-					TEXT("Actor"), TEXT("Actor:: %p "), TEXT("Conversation actor, listed from left to right."),
+					TEXT("Actor"), TEXT("Actor(%p) "), TEXT("Conversation actor's seat. Actors are listed from left to right starting at 0."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetConversationActor
 				},
@@ -3083,31 +3426,31 @@ namespace Shared {
 				},
 				{
 					56, EXPRCAT_GENERAL,
-					TEXT("Find Seat"), TEXT("Seat( %p )"), TEXT("Find a character with the provided full name(last name first name). Returns -1 if no such character is found"),
+					TEXT("Find Seat"), TEXT("Seat(%p)"), TEXT("Find a character with the provided full name(last name first name). Returns -1 if no such character is found"),
 					{ TYPE_STRING }, (TYPE_INT),
 					&Thread::FindSeat
 				},
 				{
 					57, EXPRCAT_CHARPROP,
-					TEXT("Reject Count"), TEXT("%p ::Rejects"), TEXT("Returns how many times this character was rejected."),
+					TEXT("Reject Count"), TEXT("%p.Rejects"), TEXT("Returns how many times this character was rejected."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardRejectCount
 				},
 				{
 					58, EXPRCAT_CHARPROP,
-					TEXT("Win Count"), TEXT("%p ::Wins"), TEXT("Returns how many times this character won when competing over someone."),
+					TEXT("Win Count"), TEXT("%p.Wins"), TEXT("Returns how many times this character won when competing over someone."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardWinCount
 				},
 				{
 					59, EXPRCAT_CHARPROP,
-					TEXT("Victory Count"), TEXT("%p ::Victories"), TEXT("Returns how many times this character won in a fight."),
+					TEXT("Victory Count"), TEXT("%p.Victories"), TEXT("Returns how many times this character won in a fight."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVictoryCount
 				},
 				{
 					60, EXPRCAT_CHARPROP,
-					TEXT("Skip Count"), TEXT("%p ::Skips"), TEXT("Returns how many times this character skipped a class."),
+					TEXT("Skip Count"), TEXT("%p.Skips"), TEXT("Returns how many times this character skipped a class."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardSkipCount
 				},
@@ -3131,31 +3474,31 @@ namespace Shared {
 				},
 				{
 					64, EXPRCAT_CHARPROP,
-					TEXT("Find Style"), TEXT("%p ::Style( %p )"), TEXT("Find Style index by name."),
+					TEXT("Find Style"), TEXT("%p.Style(%p)"), TEXT("Find Style index by name."),
 					{ (TYPE_INT), TYPE_STRING }, (TYPE_INT),
 					&Thread::GetStyle
 				},
 				{
 					65, EXPRCAT_CHARPROP,
-					TEXT("Get Mood Strength"), TEXT("%p ::Mood( %p )"), TEXT("Get mood strength for the chosen mood."),
+					TEXT("Get Mood Strength"), TEXT("%p.Mood(%p)"), TEXT("Get mood strength for the chosen mood."),
 					{ (TYPE_INT), TYPE_INT }, (TYPE_INT),
 					&Thread::GetMoodStrength
 				},
 				{
 					66, EXPRCAT_CHARPROP,
-					TEXT("Get Strongest Mood"), TEXT("%p ::Mood"), TEXT("Get the most prevalent mood."),
+					TEXT("Get Strongest Mood"), TEXT("%p.Mood"), TEXT("Get the most prevalent mood."),
 					{ (TYPE_INT) }, (TYPE_INT),
 					&Thread::GetStrongestMood
 				},
 				{
 					67, EXPRCAT_CHARPROP,
-					TEXT("Get H compatibility"), TEXT("%p ::Compatibility( %p )"), TEXT("Get compatibility with the selected character"),
+					TEXT("Get H compatibility"), TEXT("%p.Compatibility(%p)"), TEXT("Get compatibility with the selected character"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetSexCompatibility
 				},
 				{
 					68, EXPRCAT_CHARPROP,
-					TEXT("Get NPC Status"), TEXT("%p ::NpcStatus"), TEXT("Get NPC status of the character. Returns -1=invalid, 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
+					TEXT("Get NPC Status"), TEXT("%p.NpcStatus"), TEXT("Get NPC status of the character. Returns -1=invalid, 0=still, 1=settle in location, 2=move to location, 3=walk to character, 4=follow, 7=talk, 8=minna"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetNpcStatus
 				},
@@ -3173,151 +3516,151 @@ namespace Shared {
 				},
 				{
 					71, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Vaginal"), TEXT("%p ::VaginalCums( %p )"), TEXT("Returns how many times this character got cummed inside their vagina by the other character."),
+					TEXT("Cum Stat - Vaginal"), TEXT("%p.VaginalCums(with: %p)"), TEXT("Returns how many times this character got cummed inside their vagina by the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInVagina
 				},
 				{
 					72, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Anal"), TEXT("%p ::AnalCums( %p )"), TEXT("Returns how many times this character got cummed inside their rectum by the other character."),
+					TEXT("Cum Stat - Anal"), TEXT("%p.AnalCums(with: %p)"), TEXT("Returns how many times this character got cummed inside their rectum by the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInAnal
 				},
 				{
 					73, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Oral"), TEXT("%p ::OralCums( %p )"), TEXT("Returns how many times this character got cummed inside their mouth by the other character."),
+					TEXT("Cum Stat - Oral"), TEXT("%p.OralCums(with: %p)"), TEXT("Returns how many times this character got cummed inside their mouth by the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInMouth
 				},
 				{
 					74, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Total Vaginal"), TEXT("%p ::VaginalCumsTotal"), TEXT("Returns how many times this character got cummed inside their vagina."),
+					TEXT("Cum Stat - Total Vaginal"), TEXT("%p.VaginalCumsTotal"), TEXT("Returns how many times this character got cummed inside their vagina."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInVaginaTotal
 				},
 				{
 					75, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Total Anal"), TEXT("%p ::AnalCumsTotal"), TEXT("Returns how many times this character got cummed inside their rectum."),
+					TEXT("Cum Stat - Total Anal"), TEXT("%p.AnalCumsTotal"), TEXT("Returns how many times this character got cummed inside their rectum."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInAnalTotal
 				},
 				{
 					76, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Total Oral"), TEXT("%p ::OralCumsTotal"), TEXT("Returns how many times this character got cummed inside their mouth."),
+					TEXT("Cum Stat - Total Oral"), TEXT("%p.OralCumsTotal"), TEXT("Returns how many times this character got cummed inside their mouth."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatInMouthTotal
 				},
 				{
 					77, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - All"), TEXT("%p ::AllCums( %p )"), TEXT("Returns how many times this character got cummed inside by the other character."),
+					TEXT("Cum Stat - All"), TEXT("%p.AllCums(with: %p)"), TEXT("Returns how many times this character got cummed inside by the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatTotalCum
 				},
 				{
 					78, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Total All"), TEXT("%p ::AllCumsTotal"), TEXT("Returns how many times this character got cummed inside."),
+					TEXT("Cum Stat - Total All"), TEXT("%p.AllCumsTotal"), TEXT("Returns how many times this character got cummed inside."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatTotalCumTotal
 				},
 				{
 					79, EXPRCAT_CHARPROP,
-					TEXT("Climax Stat - Single"), TEXT("%p ::SingleClimax( %p )"), TEXT("Returns how many times this character climaxed while having sex with the other character."),
+					TEXT("Climax Stat - Single"), TEXT("%p.SingleClimax(with: %p)"), TEXT("Returns how many times this character climaxed while having sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatClimaxCount
 				},
 				{
 					80, EXPRCAT_CHARPROP,
-					TEXT("Climax Stat - Total Single"), TEXT("%p ::SingleClimaxTotal"), TEXT("Returns how many times this character climaxed while having sex."),
+					TEXT("Climax Stat - Total Single"), TEXT("%p.SingleClimaxTotal"), TEXT("Returns how many times this character climaxed while having sex."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatClimaxCountTotal
 				},
 				{
 					81, EXPRCAT_CHARPROP,
-					TEXT("Climax Stat - Simultaneous"), TEXT("%p ::SimClimax( %p )"), TEXT("Returns how many times this character climaxed together with the other character."),
+					TEXT("Climax Stat - Simultaneous"), TEXT("%p.SimClimax(with: %p)"), TEXT("Returns how many times this character climaxed together with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatClimaxCount
 				},
 				{
 					82, EXPRCAT_CHARPROP,
-					TEXT("Climax Stat - Total Simultaneous"), TEXT("%p ::SimClimaxTotal"), TEXT("Returns how many times this character climaxed together with everyone."),
+					TEXT("Climax Stat - Total Simultaneous"), TEXT("%p.SimClimaxTotal"), TEXT("Returns how many times this character climaxed together with everyone."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatClimaxCountTotal
 				},
 				{
 					83, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Condoms Used"), TEXT("%p ::CondomsUsed( %p )"), TEXT("Returns how many times this character used condoms with the other character."),
+					TEXT("H Stat - Condoms Used"), TEXT("%p.CondomsUsed(with: %p)"), TEXT("Returns how many times this character used condoms with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatCondomsUsed
 				},
 				{
 					84, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Total Condoms Used"), TEXT("%p ::CondomsUsedTotal"), TEXT("Returns how many times this character used condoms."),
+					TEXT("H Stat - Total Condoms Used"), TEXT("%p.CondomsUsedTotal"), TEXT("Returns how many times this character used condoms."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatCondomsUsedTotal
 				},
 				{
 					85, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Vaginal"), TEXT("%p ::VaginalH( %p )"), TEXT("Returns how many times this character had vaginal sex with the other character."),
+					TEXT("H Stat - Vaginal"), TEXT("%p.VaginalH(with: %p)"), TEXT("Returns how many times this character had vaginal sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVaginalSex
 				},
 				{
 					86, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Total Vaginal"), TEXT("%p ::VaginalHTotal"), TEXT("Returns how many times this character had vaginal sex."),
+					TEXT("H Stat - Total Vaginal"), TEXT("%p.VaginalHTotal"), TEXT("Returns how many times this character had vaginal sex."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardVaginalSexTotal
 				},
 				{
 					87, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Anal"), TEXT("%p ::AnalH( %p )"), TEXT("Returns how many times this character had anal sex with the other character."),
+					TEXT("H Stat - Anal"), TEXT("%p.AnalH(with: %p)"), TEXT("Returns how many times this character had anal sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAnalSex
 				},
 				{
 					88, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Total Anal"), TEXT("%p ::AnalHTotal"), TEXT("Returns how many times this character had anal sex."),
+					TEXT("H Stat - Total Anal"), TEXT("%p.AnalHTotal"), TEXT("Returns how many times this character had anal sex."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAnalSexTotal
 				},
 				{
 					89, EXPRCAT_CHARPROP,
-					TEXT("H Stat - All"), TEXT("%p ::AllH( %p )"), TEXT("Returns how many times this character had sex with the other character."),
+					TEXT("H Stat - All"), TEXT("%p.AllH(with: %p)"), TEXT("Returns how many times this character had sex with the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAllSex
 				},
 				{
 					90, EXPRCAT_CHARPROP,
-					TEXT("H Stat - Total All"), TEXT("%p ::AllHTotal"), TEXT("Returns how many times this character had sex."),
+					TEXT("H Stat - Total All"), TEXT("%p.AllHTotal"), TEXT("Returns how many times this character had sex."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAllSexTotal
 				},
 				{
 					91, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Risky"), TEXT("%p ::RiskyCums( %p )"), TEXT("Returns how many times this character got cummed inside on their risky days by the other character."),
+					TEXT("Cum Stat - Risky"), TEXT("%p.RiskyCums(with: %p)"), TEXT("Returns how many times this character got cummed inside on their risky days by the other character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatRiskyCums
 				},
 				{
 					92, EXPRCAT_CHARPROP,
-					TEXT("Cum Stat - Total Risky"), TEXT("%p ::RiskyCumsTotal"), TEXT("Returns how many times this character got cummed inside on their risky days."),
+					TEXT("Cum Stat - Total Risky"), TEXT("%p.RiskyCumsTotal"), TEXT("Returns how many times this character got cummed inside on their risky days."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardCumStatRiskyCumsTotal
 				},
 				{
 					93, EXPRCAT_CHARPROP,
-					TEXT("Locked state"), TEXT("%p ::LockState"), TEXT("Returns whether the character has the red circle around them or not. 1 is yes, 0 is no."),
+					TEXT("Locked state"), TEXT("%p.LockState"), TEXT("Returns whether the character has the red circle around them or not. 1 is yes, 0 is no."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardLocked
 				},
 				{
 					94, EXPRCAT_CHARPROP,
-					TEXT("FapState"), TEXT("%p ::FapState"), TEXT("Returns whether the character is fapping or not. 1 is yes, -1 is no."),
+					TEXT("FapState"), TEXT("%p.FapState"), TEXT("Returns whether the character is fapping or not. 1 is yes, -1 is no."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetMasturbating
 				},
 				{
 					95, EXPRCAT_CHARPROP,
-					TEXT("Cherry Status"), TEXT("%p ::GetCherryState( %p )"), TEXT("Returns whether other character attempted to take virginity of the card passed as the first argument. 1 - yes, 0 - no."),
+					TEXT("Cherry Status"), TEXT("%p.GetCherryState(with: %p)"), TEXT("Returns whether other character attempted to take virginity of the card passed as the first argument. 1 - yes, 0 - no."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCherryStatus
 				},
@@ -3329,7 +3672,7 @@ namespace Shared {
 				},
 				{
 					97, EXPRCAT_CHARPROP,
-					TEXT("Current Room"), TEXT("%p ::CurrentRoom"), TEXT("Current room the character is in."),
+					TEXT("Current Room"), TEXT("%p.CurrentRoom"), TEXT("Current room the character is in."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetNpcCurrentRoom
 				},
@@ -3368,13 +3711,13 @@ namespace Shared {
 				},
 				{
 					103, EXPRCAT_GENERAL,
-					TEXT("Get Target"), TEXT("%p ::GetTarget"), TEXT("Returns the seat of the card that is the current target of the specified card."),
+					TEXT("Get Target"), TEXT("%p.GetTarget"), TEXT("Returns the seat of the card that is the current target of the specified card."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetTarget
 				},
 				{
 					104, EXPRCAT_CHARPROP,
-					TEXT("Current Conversation"), TEXT("%p ::CurrConvo"), TEXT("Get the conversation that some character is currently in."),
+					TEXT("Current Conversation"), TEXT("%p.CurrConvo"), TEXT("Get the conversation that some character is currently in."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCurrentConvo
 				},
@@ -3386,7 +3729,7 @@ namespace Shared {
 				},
 				{
 					106, EXPRCAT_CHARPROP,
-					TEXT("Get Height"), TEXT("%p ::Height"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
+					TEXT("Get Height"), TEXT("%p.Height"), TEXT("Get the height of the character. 0=short, 1=normal, 2=tall"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetHeight
 				},
@@ -3418,37 +3761,37 @@ namespace Shared {
 				},
 				{
 					111, EXPRCAT_CHARPROP,
-					TEXT("Get Figure"), TEXT("%p ::Figure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
+					TEXT("Get Figure"), TEXT("%p.Figure"), TEXT("Get the figure of the character. 0=thin, 1=normal, 2=chubby"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardFigure
 				},
 				{
 					112, EXPRCAT_CHARPROP,
-					TEXT("Get Opinion"), TEXT("%p ::Opinion(id: %p , towards: %p )"), TEXT("Get the state of some opinion of the first character towards the second character."),
+					TEXT("Get Opinion"), TEXT("%p.Opinion(id: %p, towards: %p)"), TEXT("Get the state of some opinion of the first character towards the second character."),
 					{ TYPE_INT, TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardOpinion
 				},
 				{
 					113, EXPRCAT_CHARPROP,
-					TEXT("Get Breast Size"), TEXT("%p ::Breast"), TEXT("Get breast size of the character. 0=small, 1=normal, 2=large"),
+					TEXT("Get Breast Size"), TEXT("%p.Breast"), TEXT("Get breast size of the character. 0=small, 1=normal, 2=large"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardBreastSize
 				},
 				{
 					114, EXPRCAT_CHARPROP,
-					TEXT("Get Decals"), TEXT("%p ::Decals(position: %p )"), TEXT("Get strength of decals at certain body part of some character. Use only during h! For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
+					TEXT("Get Decals"), TEXT("%p.Decals(position: %p)"), TEXT("Get strength of decals at certain body part of some character. Use only during h! For position 0 - chest, 1 - back, 2 - crotch / legs, 3 - butt, 4 - face. Decals have multiple possible strengths (0-3), 0 being no decals and 3 being strongest."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetDecals
 				},
 				{
 					115, EXPRCAT_CHARPROP,
-					TEXT("Action About Room"), TEXT("%p ::ActionAboutRoom"), TEXT("Returns the ID of the room that the character is talking about."),
+					TEXT("Action About Room"), TEXT("%p.ActionAboutRoom"), TEXT("Returns the ID of the room that the character is talking about."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetActionAboutRoom
 				},
 				{
 					116, EXPRCAT_CHARPROP,
-					TEXT("Fighting Stance"), TEXT("%p ::FightStance"), TEXT("The fighting stance of this character."),
+					TEXT("Fighting Stance"), TEXT("%p.FightStance"), TEXT("The fighting stance of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardFightingStyle
 				},
@@ -3466,7 +3809,7 @@ namespace Shared {
 				},
 				{
 					119, EXPRCAT_CHARPROP,
-					TEXT("Get Stamina"), TEXT("%p ::GetStamina"), TEXT("Gets the current amount of stamina."),
+					TEXT("Get Stamina"), TEXT("%p.GetStamina"), TEXT("Gets the current amount of stamina."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetStamina
 				},
@@ -3479,7 +3822,7 @@ namespace Shared {
 				},
 				{
 					121, EXPRCAT_GENERAL,
-					TEXT("Get Class Storage Int"), TEXT("GetInt(key: %p , default: %p )"),
+					TEXT("Get Class Storage Int"), TEXT("GetInt(key: %p, default: %p)"),
 					TEXT("Gets the integer from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_INT }, (TYPE_INT),
@@ -3493,67 +3836,67 @@ namespace Shared {
 				},
 				{
 					123, EXPRCAT_CHARPROP,
-					TEXT("Virtue Modifier"), TEXT("%p ::VirtueMod( %p )"), TEXT("The value of the specified virtue modifier."),
+					TEXT("Virtue Modifier"), TEXT("%p.VirtueMod(%p)"), TEXT("The value of the specified virtue modifier."),
 					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardVirtueMod
 				},
 				{
 					124, EXPRCAT_CHARPROP,
-					TEXT("Real Virtue"), TEXT("%p ::RealVirtue"), TEXT("The real unlocked virtue of the character."),
+					TEXT("Real Virtue"), TEXT("%p.RealVirtue"), TEXT("The real unlocked virtue of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveVirtue
 				},
 				{
 					125, EXPRCAT_CHARPROP,
-					TEXT("Sociability Modifier"), TEXT("%p ::SociabilityMod( %p )"), TEXT("The value of the specified sociability modifier."),
+					TEXT("Sociability Modifier"), TEXT("%p.SociabilityMod(%p)"), TEXT("The value of the specified sociability modifier."),
 					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardSociabilityMod
 				},
 				{
 					126, EXPRCAT_CHARPROP,
-					TEXT("Real Sociability"), TEXT("%p ::RealSociability"), TEXT("The real unlocked socibility of the character."),
+					TEXT("Real Sociability"), TEXT("%p.RealSociability"), TEXT("The real unlocked socibility of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveSociability
 				},
 				{
 					127, EXPRCAT_CHARPROP,
-					TEXT("Intelligence Modifier"), TEXT("%p ::INTMod( %p )"), TEXT("The value of the specified intelligence value modifier."),
+					TEXT("Intelligence Modifier"), TEXT("%p.INTMod(%p)"), TEXT("The value of the specified intelligence value modifier."),
 					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardIntelligenceMod
 				},
 				{
 					128, EXPRCAT_CHARPROP,
-					TEXT("Real Intelligence Value"), TEXT("%p ::RealINTValue"), TEXT("The real unlocked intelligenve value of the character."),
+					TEXT("Real Intelligence Value"), TEXT("%p.RealINTValue"), TEXT("The real unlocked intelligenve value of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveIntelligenceValue
 				},
 				{
 					129, EXPRCAT_CHARPROP,
-					TEXT("Strength Modifier"), TEXT("%p ::STRMod( %p )"), TEXT("The value of the specified strength value modifier."),
+					TEXT("Strength Modifier"), TEXT("%p.STRMod(%p)"), TEXT("The value of the specified strength value modifier."),
 					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardStrengthMod
 				},
 				{
 					130, EXPRCAT_CHARPROP,
-					TEXT("Real Strength Value"), TEXT("%p ::RealSTRValue"), TEXT("The real unlocked strength value of the character."),
+					TEXT("Real Strength Value"), TEXT("%p.RealSTRValue"), TEXT("The real unlocked strength value of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveStrengthValue
 				},
 				{
 					131, EXPRCAT_CHARPROP,
-					TEXT("Club Modifier"), TEXT("%p ::ClubMod( %p )"), TEXT("The value of the specified club value modifier."),
+					TEXT("Club Modifier"), TEXT("%p.ClubMod(%p)"), TEXT("The value of the specified club value modifier."),
 					{ TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardClubMod
 				},
 				{
 					132, EXPRCAT_CHARPROP,
-					TEXT("Real Club Value"), TEXT("%p ::RealClubValue"), TEXT("The real unlocked club value of the character."),
+					TEXT("Real Club Value"), TEXT("%p.RealClubValue"), TEXT("The real unlocked club value of the character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardEffectiveClubValue
 				},
 				{
 					133, EXPRCAT_CHARPROP,
-					TEXT("Get LocationTarget"), TEXT("%p ::LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around, but unavailable from NPC answers event."),
+					TEXT("Get LocationTarget"), TEXT("%p.LocationTarget"), TEXT("Returns the m_locationTarget of the character. Believed to be room that PC is targeting when he clicks around, but unavailable from NPC answers event."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetMLocationTarget
 				},
@@ -3580,60 +3923,102 @@ namespace Shared {
 				},
 				{
 					137, EXPRCAT_CHARPROP,
-					TEXT("Trait Modifier"), TEXT("%p ::TraitMod((Trait( %p ), ModName ( %p )"), TEXT("The value of the specified trait value modifier."),
+					TEXT("Trait Modifier"), TEXT("%p.TraitMod(trait: %p, modName: %p)"), TEXT("The value of the specified trait value modifier."),
 					{ TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_INT),
 					&Thread::GetCardTraitMod
 				},
 				{
 					138, EXPRCAT_CHARPROP,
-					TEXT("Unbount Trait Value"), TEXT("%p ::UnboundTraitValue(Trait( %p ))"), TEXT("The unbound trait value of the character."),
+					TEXT("Unbount Trait Value"), TEXT("%p.UnboundTraitValue(trait: %p)"), TEXT("The unbound trait value of the character."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardUnboundTrait
 				},
 				{
 					139, EXPRCAT_CHARPROP,
-					TEXT("Get Current Outfit"), TEXT("%p ::CurrOutfit"), TEXT("Returns the ID (0-3) of the current outfit of the character. Use to figure out whether they are in uniform, sports, swim or club outfit."),
+					TEXT("Get Current Outfit"), TEXT("%p.CurrOutfit"), TEXT("Returns the ID (0-3) of the current outfit of the character. Use to figure out whether they are in uniform, sports, swim or club outfit."),
 					{ TYPE_INT}, (TYPE_INT),
 					&Thread::GetCurrentClothes
 				},
 				{
 					140, EXPRCAT_CHARPROP,
-					TEXT("Get lover days"), TEXT("%p ::GetLoverDays( %p )"), TEXT("Returns the amount of days that this card has been a lover with the other for."),
+					TEXT("Get lover days"), TEXT("%p.GetLoverDays(with: %p)"), TEXT("Returns the amount of days that this card has been a lover with the other for."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_INT),
 					&Thread::GetLoverDays
 				},
 				{
 					141, EXPRCAT_CHARPROP,
-					TEXT("Get Sports Exam Grade"), TEXT("%p ::SportsExamGrade"), TEXT("Returns the grade this card got on sports exam, from 0 to 5, where 0 is F and 5 is A"),
+					TEXT("Get Sports Exam Grade"), TEXT("%p.SportsExamGrade"), TEXT("Returns the grade this card got on sports exam, from 0 to 5, where 0 is F and 5 is A"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardSportsExamGrade
 				},
 				{
 					142, EXPRCAT_CHARPROP,
-					TEXT("Get Academic Exam Grade"), TEXT("%p ::AcademExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
+					TEXT("Get Academic Exam Grade"), TEXT("%p.AcademExamGrade"), TEXT("Returns the grade this card got on academic exam, from 0 to 5, where 0 is F and 5 is A"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardAcademicExamGrade
 				},
 				{
 					143, EXPRCAT_CHARPROP,
-					TEXT("Get Club Exam Grade"), TEXT("%p ::ClubExamGrade"), TEXT("Returns the grade this card got on club tournament, from 0 to 5, where 0 is Eliminated 1st round and 5 is Champion"),
+					TEXT("Get Club Exam Grade"), TEXT("%p.ClubExamGrade"), TEXT("Returns the grade this card got on club tournament, from 0 to 5, where 0 is Eliminated 1st round and 5 is Champion"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardClubExamGrade
 				},
 				{
 					144, EXPRCAT_CHARPROP,
-					TEXT("Sexual Partner Count"), TEXT("%p ::HPartnerCount"), TEXT("Returns Sexual Partner Count of this character."),
+					TEXT("Sexual Partner Count"), TEXT("%p.HPartnerCount"), TEXT("Returns Sexual Partner Count of this character."),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetCardHPartnerCount
 				},
 				{
 					145, EXPRCAT_GENERAL,
-					TEXT("Club Type"), TEXT("ClubType( %p )"), TEXT("Returns the type of a provided club id"),
+					TEXT("Club Type"), TEXT("ClubType(%p)"), TEXT("Returns the type of a provided club id"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetClubType
 				},
+				{
+					146, EXPRCAT_EVENT,
+					TEXT("Get Love"), TEXT("GetLove"), TEXT("Returns the amount of love points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetLove
+				},
+				{
+					147, EXPRCAT_EVENT,
+					TEXT("Get Like"), TEXT("GetLike"), TEXT("Returns the amount of like points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetLike
+				},
+				{
+					148, EXPRCAT_EVENT,
+					TEXT("Get Dislike"), TEXT("GetDislike"), TEXT("Returns the amount of dislike points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetDislike
+				},
+				{
+					149, EXPRCAT_EVENT,
+					TEXT("Get Hate"), TEXT("GetHate"), TEXT("Returns the amount of hate points that are about to be applied. Only works in relationship points changed event."),
+					{}, (TYPE_INT),
+					&Thread::GetHate
+				},
+				{
+					150, EXPRCAT_EVENT,
+					TEXT("Relationship Points Changed Towards"), TEXT("RelationshipTowards"), TEXT("Returns the character that TriggerCard will have relationship points applied towards within Relationship Points Changed event."),
+					{}, (TYPE_INT),
+					&Thread::RelationshipTowards
+				},
+				{
+					151, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event's Period"), TEXT("DelayedEventPeriod"), TEXT("In Delayed Execution Event returns the period it was emitted from."),
+					{}, (TYPE_INT),
+					&Thread::GetDelayedEventPeriod
+				},
+				{
+					152, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("LUA(%p)"),
+					TEXT("Call supplemental lua int function."),
+					{TYPE_STRING}, (TYPE_INT),
+					&Thread::CallLuaIntFunction
+				}
 			},
-
 			{ //BOOL
 				{
 					EXPR_CONSTANT, EXPRCAT_GENERAL,
@@ -3655,61 +4040,61 @@ namespace Shared {
 				},
 				{
 					4,EXPRCAT_COMPARISION_BOOL,
-					TEXT("Logical And"),TEXT("%p && %p"),TEXT("Logical and, including short-circut evaluation"),
+					TEXT("Logical And"),TEXT("(%p && %p)"),TEXT("Logical and, including short-circut evaluation"),
 					{ TYPE_BOOL, TYPE_BOOL },(TYPE_BOOL),
 					NULL
 				},
 				{
 					5, EXPRCAT_COMPARISION_BOOL,
-					TEXT("Logical Or"),TEXT("%p || %p"), TEXT("Logical or, including short-circut evaluation"),
+					TEXT("Logical Or"),TEXT("(%p || %p)"), TEXT("Logical or, including short-circut evaluation"),
 					{ TYPE_BOOL, TYPE_BOOL }, (TYPE_BOOL),
 					NULL
 				},
 				{
 					6, EXPRCAT_COMPARISION_INT,
-					TEXT("Greater Than"), TEXT("%p > %p"), TEXT("Greater-Than"),
+					TEXT("Greater Than"), TEXT("(%p > %p)"), TEXT("Greater-Than"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GreaterThanIntegers
 				},
 				{
 					EXPR_BOOL_GTE_INT, EXPRCAT_COMPARISION_INT,
-					TEXT("Greater Than or Equal"), TEXT("%p >= %p"), TEXT("Greater-Than or equal"),
+					TEXT("Greater Than or Equal"), TEXT("(%p >= %p)"), TEXT("Greater-Than or equal"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GreaterEqualsIntegers
 				},
 				{
 					8, EXPRCAT_COMPARISION_INT,
-					TEXT("Equal"), TEXT("%p == %p"), TEXT("Equal"),
+					TEXT("Equal"), TEXT("(%p == %p)"), TEXT("Equal"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::EqualsIntegers
 				},
 				{
 					9, EXPRCAT_COMPARISION_INT,
-					TEXT("Less Than or Equal"), TEXT("%p <= %p"), TEXT("less than or equal"),
+					TEXT("Less Than or Equal"), TEXT("(%p <= %p)"), TEXT("less than or equal"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::LessEqualsIntegers
 				},
 				{
 					10, EXPRCAT_COMPARISION_INT,
-					TEXT("Less Than"), TEXT("%p < %p"), TEXT("less than"),
+					TEXT("Less Than"), TEXT("(%p < %p)"), TEXT("less than"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::LessThanIntegers
 				},
 				{
 					EXPR_BOOL_NOT, EXPRCAT_COMPARISION_BOOL,
-					TEXT("Not"), TEXT("! %p"), TEXT("Logical Not"),
+					TEXT("Not"), TEXT("!(%p)"), TEXT("Logical Not"),
 					{ TYPE_BOOL }, (TYPE_BOOL),
 					&Thread::BoolNot
 				},
 				{
 					12, EXPRCAT_COMPARISION_STRING,
-					TEXT("String - Equal"), TEXT("%p == %p"), TEXT("Compares two strings"),
+					TEXT("String - Equal"), TEXT("(%p == %p)"), TEXT("Compares two strings"),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_BOOL),
 					&Thread::EqualsStrings
 				},
 				{
 					13, EXPRCAT_COMPARISION_INT,
-					TEXT("Not Equal"), TEXT("%p != %p"), TEXT("Not Equal"),
+					TEXT("Not Equal"), TEXT("(%p != %p)"), TEXT("Not Equal"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::NotEqualsIntegers
 				},
@@ -3731,7 +4116,7 @@ namespace Shared {
 				},
 				{
 					16, EXPRCAT_CHARPROP,
-					TEXT("Is Seat Filled"), TEXT("%p ::IsSeatFilled"),
+					TEXT("Is Seat Filled"), TEXT("%p.IsSeatFilled"),
 					TEXT("Whether the given Seat has a character behind it. Characters are identified using their seat number. Use this in a loop through all seats "
 					"do determine if a character exists or not."),
 					{ TYPE_INT }, (TYPE_BOOL),
@@ -3739,50 +4124,50 @@ namespace Shared {
 				},
 				{
 					17, EXPRCAT_CHARPROP,
-					TEXT("Is Lover"), TEXT("%p ::HasLover( %p )"),
+					TEXT("Is Lover"), TEXT("%p.HasLover(%p)"),
 					TEXT("True if the characters are currently in a relationship. (technically, it checks if the first parameter is in a relationship with the second)"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsLover
 				},
 				{
 					18,EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Greater Than"),TEXT("%p > %p"),TEXT("Greater-Than"),
+					TEXT("Greater Than"),TEXT("(%p > %p)"),TEXT("Greater-Than"),
 					{ TYPE_FLOAT, TYPE_FLOAT },(TYPE_BOOL),
 					&Thread::GreaterThanFloats
 				},
 				{
 					19, EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Greater Than or Equal"), TEXT("%p >= %p"), TEXT("Greater-Than or equal"),
+					TEXT("Greater Than or Equal"), TEXT("(%p >= %p)"), TEXT("Greater-Than or equal"),
 					{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::GreaterEqualsFloats
 				},
 				{
 					20, EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Equal"), TEXT("%p == %p"), TEXT("Equal"),
+					TEXT("Equal"), TEXT("(%p == %p)"), TEXT("Equal"),
 					{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::EqualsFloats
 				},
 				{
 					21, EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Less Than or Equal"), TEXT("%p <= %p"), TEXT("less than or equal"),
+					TEXT("Less Than or Equal"), TEXT("(%p <= %p)"), TEXT("less than or equal"),
 					{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::LessEqualsFloats
 				},
 				{
 					22, EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Less Than"), TEXT("%p < %p"), TEXT("less than"),
+					TEXT("Less Than"), TEXT("(%p < %p)"), TEXT("less than"),
 					{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::LessThanFloats
 				},
 				{
 					23, EXPRCAT_COMPARISION_FLOAT,
-					TEXT("Not Equal"), TEXT("%p != %p"), TEXT("not equal"),
+					TEXT("Not Equal"), TEXT("(%p != %p)"), TEXT("not equal"),
 					{ TYPE_FLOAT, TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::NotEqualsFloats
 				},
 				{
 					24, EXPRCAT_CHARPROP,
-					TEXT("Get Card Storage Bool"), TEXT("%p ::GetBool(key: %p , default: %p )"),
+					TEXT("Get Card Storage Bool"), TEXT("%p.GetBool(key: %p, default: %p)"),
 					TEXT("Gets the bool from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
@@ -3790,79 +4175,79 @@ namespace Shared {
 				},
 				{
 					25, EXPRCAT_CHARPROP,
-					TEXT("Trait"), TEXT("%p ::Trait( %p )"), TEXT(""),
+					TEXT("Trait"), TEXT("%p.Trait(%p)"), TEXT(""),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardTrait
 				},
 				{
 					26, EXPRCAT_GENERAL,
-					TEXT("Check Interruption Action"), TEXT("%p ::isInterrupt"), TEXT("Returs true if INTERRUPT_COMPETE, INTERRUPT_STOP_QUARREL, INTERRUPT_WHAT_ARE_YOU_DOING, H_END, H_NOTE, BREAK_CHAT, BREAK_H"),
+					TEXT("Check Interruption Action"), TEXT("%p.isInterrupt"), TEXT("Returs true if INTERRUPT_COMPETE, INTERRUPT_STOP_QUARREL, INTERRUPT_WHAT_ARE_YOU_DOING, H_END, H_NOTE, BREAK_CHAT, BREAK_H"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsInterruptAction
 				},
 				{
 					27, EXPRCAT_GENERAL,
-					TEXT("Check Minna Action"), TEXT("%p ::isMinna"), TEXT("Returs true if MINNA_BE_FRIENDLY, MINNA_CLUB, MINNA_COME, MINNA_EAT, MINNA_H, MINNA_KARAOKE, MINNA_LUNCH, MINNA_REST, MINNA_SPORTS, MINNA_STUDY"),
+					TEXT("Check Minna Action"), TEXT("%p.isMinna"), TEXT("Returs true if MINNA_BE_FRIENDLY, MINNA_CLUB, MINNA_COME, MINNA_EAT, MINNA_H, MINNA_KARAOKE, MINNA_LUNCH, MINNA_REST, MINNA_SPORTS, MINNA_STUDY"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsMinnaAction
 				},
 				{
 					28, EXPRCAT_GENERAL,
-					TEXT("Check Force Action"), TEXT("%p ::isForce"), TEXT("Returns true if FIGHT, FORCE_H, FORCE_IGNORE, FORCE_PUT_THIS_ON, FORCE_SHOW_THAT, INSULT, SLAP"),
+					TEXT("Check Force Action"), TEXT("%p.isForce"), TEXT("Returns true if FIGHT, FORCE_H, FORCE_IGNORE, FORCE_PUT_THIS_ON, FORCE_SHOW_THAT, INSULT, SLAP"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsForceAction
 				},
 				{
 					29, EXPRCAT_GENERAL,
-					TEXT("Check Sex Action"), TEXT("%p ::isSex"), TEXT("Returns true if FOLLOW_ME_H, FORCE_H, MINNA_H, NORMAL_H, NO_PROMPT_H, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, STUDY_HOME_H, LEWD_REWARD"),
+					TEXT("Check Sex Action"), TEXT("%p.isSex"), TEXT("Returns true if FOLLOW_ME_H, FORCE_H, MINNA_H, NORMAL_H, NO_PROMPT_H, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, STUDY_HOME_H, LEWD_REWARD"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsSexAction
 				},
 				{
 					30, EXPRCAT_GENERAL,
-					TEXT("Check NoPrompt Action"), TEXT("%p ::isNoPrompt"), TEXT("Returns true if EXPLOITABLE_LINE, FORCE_BREAKUP, GOOD_BYE_KISS, GOOD_MORNING_KISS, I_SAW_SOMEONE_HAVE_H, I_WILL_CHEAT, MURDER, MURDER_NOTICE, NEVERMIND, NO_PROMPT_H, NO_PROMPT_KISS, REVEAL_PREGNANCY, SHAMELESS, SLAP, SOMEONE_GOT_CONFESSED_TO, SOMEONE_LIKES_YOU, STOP_FOLLOWING, TOGETHER_FOREVER"),
+					TEXT("Check NoPrompt Action"), TEXT("%p.isNoPrompt"), TEXT("Returns true if EXPLOITABLE_LINE, FORCE_BREAKUP, GOOD_BYE_KISS, GOOD_MORNING_KISS, I_SAW_SOMEONE_HAVE_H, I_WILL_CHEAT, MURDER, MURDER_NOTICE, NEVERMIND, NO_PROMPT_H, NO_PROMPT_KISS, REVEAL_PREGNANCY, SHAMELESS, SLAP, SOMEONE_GOT_CONFESSED_TO, SOMEONE_LIKES_YOU, STOP_FOLLOWING, TOGETHER_FOREVER"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsNoPromptAction
 				},
 				{
 					31, EXPRCAT_GENERAL,
-					TEXT("Check Game Over Action"), TEXT("%p ::isGameOver"), TEXT("Returns true if MURDER, REVEAL_PREGNANCY, TOGETHER_FOREVER"),
+					TEXT("Check Game Over Action"), TEXT("%p.isGameOver"), TEXT("Returns true if MURDER, REVEAL_PREGNANCY, TOGETHER_FOREVER"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsGameOverAction
 				},
 				{
 					32, EXPRCAT_GENERAL,
-					TEXT("Check No Target Action"), TEXT("%p ::isNoTarget"), TEXT("Returns true if CHANGE_CLOTHES, DO_CLUB, DO_EXERCISE, DO_STUDY"),
+					TEXT("Check No Target Action"), TEXT("%p.isNoTarget"), TEXT("Returns true if CHANGE_CLOTHES, DO_CLUB, DO_EXERCISE, DO_STUDY"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsNoTargetAction
 				},
 				{
 					33, EXPRCAT_MATH,
-					TEXT("Roll Float"), TEXT("Roll( %p )"), TEXT("Generates a random [0.0, 1.0] float value and if it's less than or equal to the provided argument returns true. Arguments over 1.0 always roll success"),
+					TEXT("Roll Float"), TEXT("Roll(%p)"), TEXT("Generates a random [0.0, 1.0] float value and if it's less than or equal to the provided argument returns true. Arguments over 1.0 always roll success"),
 					{ TYPE_FLOAT }, (TYPE_BOOL),
 					&Thread::RollFloat
 				},
 				{
 					34, EXPRCAT_MATH,
-					TEXT("Roll Int"), TEXT("Roll( %p )"), TEXT("Generates a random [1, 100] integer value and if it's less than or equal to the provided argument returns true. Arguments over 100 always roll success"),
+					TEXT("Roll Int"), TEXT("Roll(%p)"), TEXT("Generates a random [1, 100] integer value and if it's less than or equal to the provided argument returns true. Arguments over 100 always roll success"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::RollInt
 				},
 				{
 					35, EXPRCAT_CHARPROP,
-					TEXT("Sex Experience: Vaginal"), TEXT("%p ::SexXP"), TEXT("Returns true if the character is not a virgin."),
+					TEXT("Sex Experience: Vaginal"), TEXT("%p.SexXP"), TEXT("Returns true if the character is not a virgin."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetSexExperience
 				},
 				{
 					36, EXPRCAT_CHARPROP,
-					TEXT("Sex Experience: Anal"), TEXT("%p ::AnalXP"), TEXT("Returns true if the character is not an anal virgin."),
+					TEXT("Sex Experience: Anal"), TEXT("%p.AnalXP"), TEXT("Returns true if the character is not an anal virgin."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetAnalSexExperience
 				},
 				{
 					37, EXPRCAT_CHARPROP,
-					TEXT("Has Lovers"), TEXT("%p ::HasLovers"), TEXT("Returns true if the character is in at least one rleationship."),
+					TEXT("Has Lovers"), TEXT("%p.HasLovers"), TEXT("Returns true if the character is in at least one rleationship."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetHasLovers
 				},
@@ -3875,31 +4260,31 @@ namespace Shared {
 				},
 				{
 					39, EXPRCAT_CHARPROP,
-					TEXT("Get Cum"), TEXT("%p ::GetCum"), TEXT("Returns true if the character has cum in their mouth."),
+					TEXT("Get Cum"), TEXT("%p.GetCum"), TEXT("Returns true if the character has cum in their mouth."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCum
 				},
 				{
 					40, EXPRCAT_CHARPROP,
-					TEXT("Get Tears"), TEXT("%p ::GetTears"), TEXT("Returns true if the character is crying."),
+					TEXT("Get Tears"), TEXT("%p.GetTears"), TEXT("Returns true if the character is crying."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetTears
 				},
 				{
 					41, EXPRCAT_CHARPROP,
-					TEXT("Get Highlight"), TEXT("%p ::GetHighlight"), TEXT("Returns true if the character has highlight in their eyes."),
+					TEXT("Get Highlight"), TEXT("%p.GetHighlight"), TEXT("Returns true if the character has highlight in their eyes."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetHighlight
 				},
 				{
 					42, EXPRCAT_CHARPROP,
-					TEXT("Get Glasses"), TEXT("%p ::GetGlasses"), TEXT("Returns true if the character has their glasses on."),
+					TEXT("Get Glasses"), TEXT("%p.GetGlasses"), TEXT("Returns true if the character has their glasses on."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetGlasses
 				},
 				{
 					43, EXPRCAT_GENERAL,
-					TEXT("Pose exists"), TEXT("PoseExists( %p )"), TEXT("Return whether a .pose exists."),
+					TEXT("Pose exists"), TEXT("PoseExists(%p)"), TEXT("Return whether a .pose exists."),
 					{ TYPE_STRING }, (TYPE_BOOL),
 					&Thread::PoseExists
 				},
@@ -3912,13 +4297,13 @@ namespace Shared {
 				},
 				{
 					45, EXPRCAT_CHARPROP,
-					TEXT("Get H Preference"), TEXT("%p ::HPreference( %p )"), TEXT("Returns whether the card has some H preference."),
+					TEXT("Get H Preference"), TEXT("%p.HPreference(%p)"), TEXT("Returns whether the card has some H preference."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
 					&Thread::GetCardPreference
 				},
 				{
 					46, EXPRCAT_GENERAL,
-					TEXT("Get Class Storage Bool"), TEXT("GetBool(key: %p , default: %p )"),
+					TEXT("Get Class Storage Bool"), TEXT("GetBool(key: %p, default: %p)"),
 					TEXT("Gets the bool from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_BOOL }, (TYPE_BOOL),
@@ -3926,15 +4311,54 @@ namespace Shared {
 				},
 				{
 					47, EXPRCAT_GENERAL,
-					TEXT("Check Skip Action"), TEXT("%p ::isSkip"), TEXT("Returns true if SKIP_CLASS, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, GO_HOME_TOGETHER, GO_KARAOKE_TOGETHER, GO_PLAY_TOGETHER, GO_EAT_TOGETHER"),
+					TEXT("Check Skip Action"), TEXT("%p.isSkip"), TEXT("Returns true if SKIP_CLASS, SKIP_CLASS_H, SKIP_CLASS_SURPRISE_H, GO_HOME_TOGETHER, GO_KARAOKE_TOGETHER, GO_PLAY_TOGETHER, GO_EAT_TOGETHER"),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsSkipAction
 				},
 				{
 					48, EXPRCAT_GENERAL,
-					TEXT("Check Private Room"), TEXT("%p ::isPrivateRoom"), TEXT("Returns true if the location ID is one of the private rooms."),
+					TEXT("Check Private Room"), TEXT("%p.isPrivateRoom"), TEXT("Returns true if the location ID is one of the private rooms."),
 					{ TYPE_INT }, (TYPE_BOOL),
 					&Thread::IsPrivateRoom
+				},
+				{
+					49, EXPRCAT_GENERAL,
+					TEXT("Has Date With"), TEXT("%p.HasDateWith(%p)"), TEXT("Returns true if the characters arranged to have a date on Sunday."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+					&Thread::HasDateWith
+				},
+				{
+					50, EXPRCAT_GENERAL,
+					TEXT("Promised a Lewd Reward To"), TEXT("%p.LewdPromise(%p)"), TEXT("Returns true if the first character promised a lewd reward to the second character."),
+					{ TYPE_INT, TYPE_INT }, (TYPE_BOOL),
+					&Thread::PromisedLewdRewardTo
+				},
+				{
+					51, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event Required"), TEXT("DelayedEventRequired"), TEXT("In Delayed Execution Event returns whether this is a required event."),
+					{}, (TYPE_BOOL),
+					&Thread::GetDelayedEventRequired
+				},
+				{
+					52, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("LUA(%p)"),
+					TEXT("Call supplemental lua bool function."),
+					{TYPE_STRING}, (TYPE_BOOL),
+					&Thread::CallLuaBoolFunction
+				},
+				{
+					53, EXPRCAT_EVENT,
+					TEXT("Get Condom-Override"), TEXT("CondomOverride"),
+					TEXT("Returns whether CondomOverride is toggled on or off."),
+					{}, (TYPE_BOOL),
+					&Thread::GetCondomOverride
+				},
+				{
+					54, EXPRCAT_EVENT,
+					TEXT("Get Condom-Value"), TEXT("CondomValue"),
+					TEXT("Returns whether the global condom setting is set to have them on or off."),
+					{}, (TYPE_BOOL),
+					&Thread::GetCondomValue
 				},
 			},
 			{ //FLOAT
@@ -3958,43 +4382,43 @@ namespace Shared {
 				},
 				{
 					4, EXPRCAT_MATH,
-					TEXT("Random Float"), TEXT("RandomFloat(min: %p , max: %p )"), TEXT("Generates a random float between the two arguments (including both)"),
+					TEXT("Random Float"), TEXT("RandomFloat(min: %p, max: %p)"), TEXT("Generates a random float between the two arguments (including both)"),
 					{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
 					&Thread::GetRandomFloat
 				},
 				{
 					EXPR_INT_PLUS, EXPRCAT_MATH,
-					TEXT("+"), TEXT("%p + %p"), TEXT("Adds two floats"),
+					TEXT("+"), TEXT("(%p + %p)"), TEXT("Adds two floats"),
 					{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
 					&Thread::AddFloats
 				},
 				{
 					6, EXPRCAT_MATH,
-					TEXT("-"), TEXT("%p - %p"), TEXT("Substracts two floats"),
+					TEXT("-"), TEXT("(%p - %p)"), TEXT("Substracts two floats"),
 					{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
 					&Thread::SubstractFloats
 				},
 				{
 					7, EXPRCAT_MATH,
-					TEXT("/"), TEXT("%p / %p"), TEXT("Divide two floats"),
+					TEXT("/"), TEXT("(%p / %p)"), TEXT("Divide two floats"),
 					{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
 					&Thread::DivideFloats
 				},
 				{
 					8, EXPRCAT_MATH,
-					TEXT("*"), TEXT("%p * %p"), TEXT("Multiply two floats"),
+					TEXT("*"), TEXT("(%p * %p)"), TEXT("Multiply two floats"),
 					{ (TYPE_FLOAT), (TYPE_FLOAT) }, (TYPE_FLOAT),
 					&Thread::MultiplyFloats
 				},
 				{
 					9, EXPRCAT_MATH,
-					TEXT("Int to Float"), TEXT("Float( %p )"), TEXT("Converts an Int to Float"),
+					TEXT("Int to Float"), TEXT("Float(%p)"), TEXT("Converts an Int to Float"),
 					{ TYPE_INT }, (TYPE_FLOAT),
 					&Thread::Int2Float
 				},
 				{
 					10,EXPRCAT_CHARPROP,
-					TEXT("Get Card Storage Float"),TEXT("%p ::GetFloat(key: %p , default: %p )"),
+					TEXT("Get Card Storage Float"),TEXT("%p.GetFloat(key: %p, default: %p)"),
 					TEXT("Gets the float from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
@@ -4002,20 +4426,20 @@ namespace Shared {
 				},
 				{
 					11, EXPRCAT_MATH,
-					TEXT("String to Float"), TEXT("Float( %p )"), TEXT("Converts a String to a Float."),
+					TEXT("String to Float"), TEXT("Float(%p)"), TEXT("Converts a String to a Float."),
 					{ TYPE_STRING }, (TYPE_FLOAT),
 					&Thread::String2Float
 				},
 				{
 					12, EXPRCAT_CHARPROP,
-					TEXT("Sex Orientation Multiplier"), TEXT("%p ::OrientationMultiplier(towards: %p )"),
+					TEXT("Sex Orientation Multiplier"), TEXT("%p.OrientationMultiplier(towards: %p)"),
 					TEXT("The multiplier used when calculating interaction chances depending on actors' sex orientations and genders. Returns either 1.0, 0.5 or 0.0"),
 					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
 					&Thread::GetCardOrientationMultiplier
 				},
 				{
 					13,EXPRCAT_GENERAL,
-					TEXT("Get Class Storage Float"),TEXT("GetFloat(key: %p , default: %p )"),
+					TEXT("Get Class Storage Float"),TEXT("GetFloat(key: %p, default: %p)"),
 					TEXT("Gets the float from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_FLOAT },(TYPE_FLOAT),
@@ -4023,11 +4447,18 @@ namespace Shared {
 				},
 				{
 					14, EXPRCAT_CHARPROP,
-					TEXT("Like Orientation Multiplier"), TEXT("%p ::LikeOrientationMultiplier(towards: %p )"),
+					TEXT("Like Orientation Multiplier"), TEXT("%p.LikeOrientationMultiplier(towards: %p)"),
 					TEXT("Returns 0 when characters can't get like points towards each other, 0.5 when their like gain is halved, and 1 when they get full amount of like points from interactions."),
 					{ TYPE_INT, TYPE_INT }, (TYPE_FLOAT),
 					&Thread::GetCardLikeOrientationMultiplier
 				},
+				{
+					15, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("LUA(%p)"),
+					TEXT("Call supplemental lua float function."),
+					{TYPE_STRING}, (TYPE_FLOAT),
+					&Thread::CallLuaFloatFunction
+				}
 			},
 			{ //STRING
 				{
@@ -4050,26 +4481,26 @@ namespace Shared {
 				},
 				{
 					4, EXPRCAT_STRINGS,
-					TEXT("Substring"), TEXT("%p ::Substring(startIdx: %p , length: %p )"), TEXT("A substring that starts at the first parameter (inclusive) and has "
+					TEXT("Substring"), TEXT("%p.Substring(startIdx: %p, length: %p)"), TEXT("A substring that starts at the first parameter (inclusive) and has "
 					"a specific length"),
 					{TYPE_STRING, TYPE_INT, TYPE_INT}, (TYPE_STRING),
 					&Thread::SubString
 				},
 				{
 					5, EXPRCAT_CHARPROP,
-					TEXT("Last Name"), TEXT("%p ::LastName"), TEXT("Last name of this character. Family name. The top name in the maker."),
+					TEXT("Last Name"), TEXT("%p.LastName"), TEXT("Last name of this character. Family name. The top name in the maker."),
 					{  TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardLastName
 				},
 				{
 					6, EXPRCAT_CHARPROP,
-					TEXT("First Name"), TEXT("%p ::FirstName"), TEXT("First name of this character. Given name. The bottom name in the maker."),
+					TEXT("First Name"), TEXT("%p.FirstName"), TEXT("First name of this character. Given name. The bottom name in the maker."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstName
 				},
 				{
 					7, EXPRCAT_CHARPROP,
-					TEXT("Get Card Storage String"), TEXT("%p ::GetStr(key: %p , default: %p )"),
+					TEXT("Get Card Storage String"), TEXT("%p.GetStr(key: %p, default: %p)"),
 					TEXT("Gets the string from the given cards storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_INT, TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
@@ -4077,96 +4508,119 @@ namespace Shared {
 				},
 				{
 					8, EXPRCAT_CHARPROP,
-					TEXT("+"), TEXT("%p + %p"), TEXT("Concatenate two strings"),
+					TEXT("+"), TEXT("(%p + %p)"), TEXT("Concatenate two strings"),
 					{ (TYPE_STRING), (TYPE_STRING) }, (TYPE_STRING),
 					&Thread::StringConcat
 				},
 				{
 					9, EXPRCAT_MATH,
-					TEXT("Int to String"), TEXT("String( %p )"), TEXT("Converts an Int to String"),
+					TEXT("Int to String"), TEXT("String(%p)"), TEXT("Converts an Int to String"),
 					{ (TYPE_INT) }, (TYPE_STRING),
 					&Thread::IntToString
 				},
 				{
 					10, EXPRCAT_MATH,
-					TEXT("Float to String"), TEXT("String( %p )"), TEXT("Converts a Float to String"),
+					TEXT("Float to String"), TEXT("String(%p)"), TEXT("Converts a Float to String"),
 					{ (TYPE_FLOAT) }, (TYPE_STRING),
 					&Thread::FloatToString
 				},
 				{
 					11, EXPRCAT_MATH,
-					TEXT("Bool to String"), TEXT("String( %p )"), TEXT("Converts a Bool to String"),
+					TEXT("Bool to String"), TEXT("String(%p)"), TEXT("Converts a Bool to String"),
 					{ (TYPE_BOOL) }, (TYPE_STRING),
 					&Thread::BoolToString
 				},
 				{
 					12, EXPRCAT_CHARPROP,
-					TEXT("Description"), TEXT("%p ::Description"), TEXT("This character's description"),
+					TEXT("Description"), TEXT("%p.Description"), TEXT("This character's description"),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardDescription
 				},
 				{
 					13, EXPRCAT_STRINGS,
-					TEXT("Replace substring"), TEXT("%p ::Replace( from: %p , to: %p , str: %p )"), TEXT("Replace substring starting from the from: and ending with to:"),
+					TEXT("Replace substring"), TEXT("%p.Replace(from: %p, to: %p, str: %p)"), TEXT("Replace substring starting from the from: and ending with to:"),
 					{ TYPE_INT, TYPE_INT, TYPE_INT, TYPE_STRING }, (TYPE_STRING),
 					&Thread::StringReplace
 				},
 				{
 					14, EXPRCAT_CHARPROP,
-					TEXT("Last Sex Partner"), TEXT("%p ::LastSex"), TEXT("Returns the full name of the last sex partner as it appears on the character sheet."),
+					TEXT("Last Sex Partner"), TEXT("%p.LastSex"), TEXT("Returns the full name of the last sex partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardLastHPartner
 				},
 				{
 					15, EXPRCAT_CHARPROP,
-					TEXT("First Sex Partner"), TEXT("%p ::FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
+					TEXT("First Sex Partner"), TEXT("%p.FirstSex"), TEXT("Returns the full name of the first sex partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstHPartner
 				},
 				{
 					16, EXPRCAT_CHARPROP,
-					TEXT("First Anal Partner"), TEXT("%p ::FirstAnal"), TEXT("Returns the full name of the first anal partner as it appears on the character sheet."),
+					TEXT("First Anal Partner"), TEXT("%p.FirstAnal"), TEXT("Returns the full name of the first anal partner as it appears on the character sheet."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFirstAnalPartner
 				},
 				{
 					17, EXPRCAT_CHARPROP,
-					TEXT("Item - Lover's"), TEXT("%p ::LoverItem"), TEXT("Returns the Lover's item"),
+					TEXT("Item - Lover's"), TEXT("%p.LoverItem"), TEXT("Returns the Lover's item"),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardLoversItem
 				},
 				{
 					18, EXPRCAT_CHARPROP,
-					TEXT("Item - Friend's"), TEXT("%p ::FriendItem"), TEXT("Returns the Friend's item"),
+					TEXT("Item - Friend's"), TEXT("%p.FriendItem"), TEXT("Returns the Friend's item"),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFriendItem
 				},
 				{
 					19, EXPRCAT_CHARPROP,
-					TEXT("Item - Sexual"), TEXT("%p ::SexualItem"), TEXT("Returns the Sexual item"),
+					TEXT("Item - Sexual"), TEXT("%p.SexualItem"), TEXT("Returns the Sexual item"),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardSexualItem
 				},
 				{
 					20, EXPRCAT_CHARPROP,
-					TEXT("Full Name"), TEXT("%p ::FullName"), TEXT("Full name of the character in \"LastName FirstName\" format."),
+					TEXT("Full Name"), TEXT("%p.FullName"), TEXT("Full name of the character in \"LastName FirstName\" format."),
 					{ TYPE_INT }, (TYPE_STRING),
 					&Thread::GetCardFullName
 				},
 				{
 					21, EXPRCAT_GENERAL,
-					TEXT("LUA Add Parameter"), TEXT("%p << %p "), TEXT("Add parameter to the LUA Procedure string."),
+					TEXT("LUA Add Parameter"), TEXT("%p << %p"), TEXT("Add parameter to the LUA Procedure string."),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::AddLuaProcParam
 				},
 				{
 					22, EXPRCAT_GENERAL,
-					TEXT("Get Class Storage String"), TEXT("GetStr(key: %p , default: %p )"),
+					TEXT("Get Class Storage String"), TEXT("GetStr(key: %p, default: %p)"),
 					TEXT("Gets the string from the given class storage entry. If the entry doesnt exist or holds a value of a different type, "
 					"it returns the default value instead"),
 					{ TYPE_STRING, TYPE_STRING }, (TYPE_STRING),
 					&Thread::GetClassStorageString
 				},
+				{
+					23, EXPRCAT_EVENT,
+					TEXT("Get Delayed Event Label"), TEXT("DelayedEventLabel"),
+					TEXT("Gets the name of the delayed event."
+					"Returns empty string if it's an invalid event."),
+					{}, (TYPE_STRING),
+					&Thread::GetDelayedEventLabel
+				},
+				{
+					24, EXPRCAT_STRINGS,
+					TEXT("Get comma separated value by index"), TEXT("%p.GetCSV(idx: %p, separator: %p)"),
+					TEXT("Retrieves a substring of a comma separated string."
+					"E.g. \"one,two,three\".GetCSV(idx: 1, separator: \",\") would return  \"two\" ."),
+					{TYPE_STRING, TYPE_INT, TYPE_STRING}, (TYPE_STRING),
+					&Thread::GetCSVByIndex
+				},
+				{
+					25, ACTIONCAT_GENERAL,
+					TEXT("Call LUA Function"), TEXT("LUA(%p)"),
+					TEXT("Call supplemental lua string function."),
+					{TYPE_STRING}, (TYPE_STRING),
+					&Thread::CallLuaStringFunction
+				}
 			}
 
 		};

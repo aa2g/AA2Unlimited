@@ -57,6 +57,8 @@ public:
 
 	int idxSave; //Illusion's load order
 
+	bool lowPolyUpd;
+
 	void SetCurrentStyle(int index);
 	int GetStyleCount();
 	int GetCurrentStyle();
@@ -102,9 +104,15 @@ public:
 	}
 
 	void ApplyDecals(int bodyPart, int decalStrength);
+	void AddRelationshipPoints(ExtClass::CharacterStruct * towards, int love, int like, int dislike, int hate);
 	void ClearCache();
+	void LowPolyUpdate(int state, int context);
+	void ArrangeDate(int targetSeat);
+	void PromiseLewd(int targetSeat);
 	void SetHeadTracking(int headtracking);
 	void AddShadows(DWORD * HairPTR);
+	void CastShadows(DWORD * HairPTR);
+	void Respawn();
 
 	DWORD* lastDialogue = NULL;
 
@@ -215,6 +223,23 @@ public:
 		});
 		LUA_METHOD(AddShadows, {
 			_self->AddShadows(_gl.get(2));
+		});
+		LUA_METHOD(CastShadows, {
+			_self->CastShadows(_gl.get(2));
+		});
+		LUA_METHOD(LowPolyUpdate, {
+			int state = _gl.get(2);
+			int context = _gl.get(3);
+			_self->LowPolyUpdate(state, context);
+		});
+		LUA_METHOD(AddRelationshipPoints, {
+			_self->AddRelationshipPoints(_gl.get(2), _gl.get(3), _gl.get(4), _gl.get(5), _gl.get(6));
+		});
+		LUA_METHOD(ArrangeDate, {
+			_self->ArrangeDate(_gl.get(2));
+		});
+		LUA_METHOD(PromiseLewd, {
+			_self->PromiseLewd(_gl.get(2));
 		});
 #undef LUA_CLASS
 	}

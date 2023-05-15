@@ -29,6 +29,8 @@ public:;
 	}
 
 	bool bMTRenderer;
+	int renderWidth;
+	int renderHeight;
 	int screenshotFormat;
 	int savedFileUsage;
 	int bLogPPAccess;
@@ -39,6 +41,7 @@ public:;
 	bool bUseCacheFix;
 	bool bUsePPeX;
 	bool bUsePP2;
+	bool bPngSkirtSitagi;
 	bool bTriggers;
 	unsigned PP2Cache;
 	unsigned PP2AudioCache;
@@ -50,11 +53,15 @@ public:;
 	bool bListFilenames;
 	bool bUnlimitedOnTop;
 	bool bExtractOnListing;
+	const char* dictionary;
+	int shadowMap;
 
 	static inline void bindLua() {
 		LUA_SCOPE;
 #define LUA_CLASS Config
 			LUA_BIND(bMTRenderer)
+			LUA_BIND(renderWidth)
+			LUA_BIND(renderHeight)
 			LUA_BIND(screenshotFormat)
 			LUA_BIND(bLogPPAccess)
 			LUA_BIND(savedFileUsage)
@@ -76,6 +83,9 @@ public:;
 			LUA_BIND(bListFilenames)
 			LUA_BIND(bUnlimitedOnTop)
 			LUA_BIND(bExtractOnListing)
+			LUA_BIND(dictionary)
+			LUA_BIND(shadowMap)
+
 
 #undef LUA_CLASS
 		g_Lua[LUA_BINDING_TABLE]["Config"] = &g_Config;

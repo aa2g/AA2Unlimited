@@ -32,6 +32,7 @@ struct GameStateStruct {
 		m_savingCard = false;
 		m_talkCardName = L"";
 		m_talkAboutName = L"";
+		m_removedSeat = -1;
 	}
 
 	//Game state indicators
@@ -51,7 +52,7 @@ struct GameStateStruct {
 	DWORD m_PCConversationState;		//0 = still speaking, 1 = waiting for answer, 2/3 = answering/end?
 	DWORD m_NPCLineState;				//increments from 0 to whatever
 	int roomNumber[25];					//Current room ID
-	DWORD interrupt;					//Disabled interruptions
+	BYTE interrupt;					//Disabled interruptions
 	bool h_ai;							//Disable or enable h-ai
 	bool h_ai_locked;					//Disable or enable ability to leave h-ai
 	DWORD m_HPosition;					//H position ID
@@ -60,7 +61,9 @@ struct GameStateStruct {
 	bool m_drawShadow;
 	std::wstring m_talkCardName;		//The name of the card that is currently talking; used in subtitles.
 	std::wstring m_talkAboutName;		//The name of the card that is currently being talked about; used in subtitles
+	int m_removedSeat;
 
+	std::list<Shared::Triggers::DelayedEventData> m_delayedEvents;
 
 #define CONVERSATION_CHARACTERS_N 2
 	ExtClass::CharacterStruct* m_char[CONVERSATION_CHARACTERS_N];
@@ -217,6 +220,16 @@ bool Shared::GameState::getLockedInH()
 	return loc_gameState.h_ai_locked;
 }
 
+void Shared::GameState::setRemovedSeat(int value)
+{
+	loc_gameState.m_removedSeat = value;
+}
+
+int Shared::GameState::getRemovedSeat()
+{
+	return loc_gameState.m_removedSeat;
+}
+
 void Shared::GameState::setIsInH(bool value)
 {
 	loc_gameState.is_in_h = value;
@@ -252,7 +265,7 @@ void Shared::GameState::setVoyeurTarget(ExtClass::NpcData* target)
 	loc_gameState.m_voyeurTarget = target;
 }
 
-void Shared::GameState::setInterrupt(DWORD value)
+void Shared::GameState::setInterrupt(BYTE value)
 {
 	loc_gameState.interrupt = value;
 }
@@ -297,6 +310,22 @@ int Shared::GameState::GetRoomNumber(int seat) {
 	return loc_gameState.roomNumber[seat];
 }
 
+bool operator<(Shared::Triggers::DelayedEventData & a, Shared::Triggers::DelayedEventData & b)
+{
+	return a.delayEnd < b.delayEnd;
+}
+
+void Shared::GameState::AddDelayedEvent(Shared::Triggers::DelayedEventData data)
+{
+	loc_gameState.m_delayedEvents.push_front(data);
+	loc_gameState.m_delayedEvents.sort([](Shared::Triggers::DelayedEventData a, Shared::Triggers::DelayedEventData b) { return a.delayEnd < b.delayEnd;  });
+}
+
+std::list<Shared::Triggers::DelayedEventData>* Shared::GameState::GetDelayedEvents()
+{
+	return &loc_gameState.m_delayedEvents;
+}
+
 DWORD Shared::GameState::getHPosition()
 {
 	return loc_gameState.m_HPosition;
@@ -324,11 +353,16 @@ void Shared::GameState::kickCard(int s)
 		call[kickFunction]
 	}
 }
-
-void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
+/// <summary>
+/// Adds a card to the class
+/// </summary>
+/// <param name="cardName">- Filename of the card inside Male or Female folder</param>
+/// <param name="gender">- Card's gender. true = female, false = male</param>
+/// <param name="seat">- Class seat</param>
+void Shared::GameState::addCard(std::wstring cardName, bool isFemale, int seat)
 {
-	DWORD seat = (DWORD)s;
-	std::wstring genderPath = gender ? L"Female\\" : L"Male\\";
+	DWORD s = (DWORD)seat;
+	std::wstring genderPath = isFemale ? L"Female\\" : L"Male\\";
 	std::wstring cardPath = General::AAPlayPath + L"data\\save\\" + genderPath + cardName;
 	DWORD *p = (DWORD *)(&cardPath);
 	DWORD pushaddress = *p;
@@ -341,8 +375,8 @@ void Shared::GameState::addCard(std::wstring cardName, bool gender, int s)
 	{
 		mov edi, ediValue
 		push pushaddress
-		push gender
-		push seat
+		push isFemale
+		push s
 		call[addFunction]
 	}
 }

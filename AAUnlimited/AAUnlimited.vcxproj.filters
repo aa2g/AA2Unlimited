@@ -135,6 +135,7 @@
     <ClCompile Include="Functions\Notifications.cpp" />
     <ClCompile Include="Functions\AAPlay\Controls.cpp" />
     <ClCompile Include="MemMods\AAPlay\Events\ClothesLimit.cpp" />
+    <ClCompile Include="Dictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Files\Config.h" />
@@ -262,6 +263,7 @@
     <ClInclude Include="Functions\AAPlay\Controls.h" />
     <ClInclude Include="External\ExternalClasses\CharacterAssetContainer.h" />
     <ClInclude Include="MemMods\AAPlay\Events\ClothesLimit.h" />
+    <ClInclude Include="Dictionary.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AAUnlimitedDll.rc">
@@ -579,6 +581,30 @@
       <Filter>Lua</Filter>
     </None>
     <None Include="Texts\mod\cram_school.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\aaface.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\climaxbutton.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\music.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\musicconfig.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\nobra.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\nomurder.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\notifications.lua">
+      <Filter>Lua</Filter>
+    </None>
+    <None Include="Texts\mod\JMCP.lua">
       <Filter>Lua</Filter>
     </None>
   </ItemGroup>

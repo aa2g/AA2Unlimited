@@ -11,6 +11,7 @@ local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
 local toggles = require "poser.toggles"
+local os = require "os"
 
 local clipchanged= signals.signal()
 local framechanged= signals.signal()
@@ -20,8 +21,15 @@ local sceneloaded = signals.signal()
 _M.poseloaded = poseloaded
 _M.sceneloaded = sceneloaded
 
+local create_thumbnail_function
 local posesdir = aau_path("poser\\poses")
 local scenesdir = aau_path("poser\\scenes")
+local embed_file = nil
+local embed_magic = nil
+local embed_save_path = nil
+local png_magic_pose = "POSE\x00\x00\x00\x00"
+local png_magic_scene = "SCENE\x00\x00\x00"
+local save_restore_ui = false
 
 local lock_camera = false
 local lock_light = true
@@ -45,15 +53,6 @@ local function setclip(clip)
 end
 clipchanged.connect(setclip)
 
-local function savedposes()
-	return readdir(posesdir .. "\\*.pose")
-end
-
-local function savedscenes()
-	return readdir(scenesdir .. "\\*.scene")
-end
-
-
 local cliptext
 local posename = iup.text { expand = "horizontal", visiblecolumns = 20 }
 local scenename = iup.text { expand = "horizontal", visiblecolumns = 20 }
@@ -63,8 +62,10 @@ local scenefilter = lists.listfilter()
 local scenelist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
+local saveposetexttoggle = iup.toggle { title = "Save as .pose", value = "OFF" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
+local savescenetexttoggle = iup.toggle { title = "Save as .scene", value = "OFF" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 local refreshposelistbutton = iup.button { title = "Refresh" }
@@ -77,33 +78,67 @@ signals.connect(scenelist, "selectionchanged", function() scenename.value = scen
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
 signals.connect(scenefilter, "setfilter", scenelist, "setfilter")
 
-local function populateposelist()
+local function findposerfiles(directory, match)
 	local newlist = {}
 	local i = 1
-	for f in savedposes() do
-		f = f:match("^(.*)%.pose$")
-		if f then
-			newlist[i] = f
-			i = i + 1
+	local last
+	local pattern = directory .. "\\*.*"
+	for f in readdir(pattern) do
+		f = f:match(match) or f:match("^(.*)%.png$")
+		if f ~= last then
+			if f then
+				newlist[i] = f
+				i = i + 1
+				last = f
+			end
 		end
 	end
-	poselist.setlist(newlist)
+	return newlist
 end
-populateposelist()
+
+local function populateposelist()
+	poselist.setlist(findposerfiles(posesdir, "^(.*)%.pose$"))
+end
 
 local function populatescenelist()
-	local newlist = {}
-	local i = 1
-	for f in savedscenes() do
-		f = f:match("^(.*)%.scene$")
-		if f then
-			newlist[i] = f
-			i = i + 1
-		end
-	end
-	scenelist.setlist(newlist)
+	scenelist.setlist(findposerfiles(scenesdir, "^(.*)%.scene$"))
 end
-populatescenelist()
+
+function on.launch()
+	if exe_type == "edit" then
+		create_thumbnail_function = 0x36C6C1
+	else
+		create_thumbnail_function = 0x38F6C9
+	end
+	populateposelist()
+	populatescenelist()
+end
+
+local function get_thumbnail_rotation(angle)
+	if is_key_pressed(0x10) then return 0 end
+	local half = math.pi / 6
+	local right = math.pi / 2
+	local left = math.pi / 2 * 3
+	if math.abs(angle - right) < half then return 2 end
+	if math.abs(angle - left) < half then return 1 end
+	return 0
+end
+
+function on.poser_saved_thumbnail()
+	log.spam("Saving poser thumbnail")
+	local screenshot = play_path("poser-screenshot.png")
+	os.remove(embed_save_path)
+	os.rename(screenshot, embed_save_path)
+	local file = io.open(embed_save_path, "ab")
+	file:write(embed_file)
+	file:write(string.pack("<I4", #embed_file))
+	file:write(embed_magic)
+	file:close()
+	embed_save_path = nil
+	embed_file = nil
+	embed_magic = nil
+	SetHideUI(save_restore_ui)
+end
 
 function useposesfolderbutton.action()
 	posesdir = fileutils.getfolderdialog(posesdir)
@@ -118,12 +153,8 @@ end
 function deleteposebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this pose?", "Yes", "No")
 	if resp == 1 then
-		local path = posesdir  .. "\\" .. posename.value .. ".pose"
-		local ret, msg = os.remove(path)
-		if not ret then
-			log.error(msg)
-		end
-		log.spam("Removed %s", path)
+		os.remove(posesdir  .. "\\" .. posename.value .. ".pose")
+		os.remove(posesdir  .. "\\" .. posename.value .. ".png")
 		poselist.valuestring = posename.value
 		if poselist.valuestring == posename.value then
 			poselist.removeitem = poselist.value
@@ -131,6 +162,21 @@ function deleteposebutton.action()
 	end
 end
 
+local function readpng(path)
+	local file = io.open(path, "rb")
+	if not file then return nil end
+	file:seek("end", -12)
+	local size = string.unpack("<I4", file:read(4))
+	local data = file:read()
+	if data == png_magic_pose or data == png_magic_scene then
+		file:seek("end", (size + 12) * -1)
+		data = file:read(size)
+	else
+		data = nil
+	end
+	file:close()
+	return data
+end
 
 local function readfile(path)
     local file = io.open(path, "rb")
@@ -194,9 +240,11 @@ local function loadpose(character, filename)
 	assert(filename ~= "")
 	log.spam("Poser: Loading pose %s", filename)
 	if character and character.ischaracter == true then
-		local path = posesdir .. "\\" .. filename .. ".pose"
-		log.spam("Poser: Reading %s", path)
-		local data = readfile(path)
+		log.spam("Poser: Reading pose %s", filename)
+		local data = readpng(posesdir .. "\\" .. filename .. ".png")
+		if data == nil then
+			data = readfile(posesdir .. "\\" .. filename .. ".pose")
+		end
 		if data then
 			local ok, ret = pcall(json.decode, data)
 			if not ok then
@@ -265,15 +313,19 @@ end
 local function savepose(filename)
 	if filename == "" then return end
 	local path = posesdir .. "\\" .. filename .. ".pose"
-	log.spam("Poser: Saving pose %s to %s", filename, path)
+	-- log.spam("Poser: Saving pose %s to %s", filename, path)
 	local character = charamgr.current
 	local pose = pose2table(character)
 	if pose then
-		local file = io.open(path, "w")
-		if not file then return nil end
-		file:write(json.encode(pose))
-		file:close()
-		log.spam("Poser: Pose %s saved", filename)
+		local content = json.encode(pose)
+		if saveposetexttoggle.value == "ON" then
+			local file = io.open(path, "w")
+			if file then
+				file:write(content)
+				file:close()
+			end
+		end
+		-- log.spam("Poser: Pose %s saved", filename)
 		local currentvalue = poselist.value
 		if posename.value ~= poselist.valuestring then
 			poselist.valuestring = filename
@@ -282,6 +334,13 @@ local function savepose(filename)
 				poselist.valuestring = filename
 			end
 		end
+
+		embed_file = content
+		embed_magic = png_magic_pose
+		embed_save_path = posesdir .. "\\" .. filename .. ".png"
+		save_restore_ui = SetHideUI(true)
+		local thumbnail_message = 0x20 + get_thumbnail_rotation(camera.rotz)
+		g_poke(create_thumbnail_function, string.char(thumbnail_message))
 	end
 end
 
@@ -293,9 +352,11 @@ end
 -- == Scenes ==
 
 local function loadscene(filename)
-	local path = scenesdir .. "\\" .. filename .. ".scene"
-	log.spam("Poser: Loading scene %s", path)
-	local data = readfile(path)
+	log.spam("Poser: Loading scene %s", filename)
+	local data = readpng(scenesdir .. "\\" .. filename .. ".png")
+	if data == nil then
+		data = readfile(scenesdir .. "\\" .. filename .. ".scene")
+	end
 	if data then
 		local ok, scene = pcall(json.decode, data)
 		if not ok then
@@ -390,7 +451,7 @@ end
 
 local function savescene(filename)
 	local path = scenesdir .. "\\" .. filename .. ".scene"
-	log.spam("Poser: Saving scene %s to %s", filename, path)
+	-- log.spam("Poser: Saving scene %s to %s", filename, path)
 
 	local characters = {}
 	local props = {}
@@ -445,10 +506,22 @@ local function savescene(filename)
 	end
 	scene.camera = c
 	
-	local file = io.open(path, "w")
-	if not file then return nil end
-	file:write(json.encode(scene))
-	file:close()
+	local content = json.encode(scene)
+	if savescenetexttoggle.value == "ON" then
+		local file = io.open(path, "w")
+		if file then
+			file:write(content)
+			file:close()
+		end
+	end
+
+	embed_file = content
+	embed_magic = png_magic_scene
+	embed_save_path = scenesdir .. "\\" .. filename .. ".png"
+	save_restore_ui = SetHideUI(true)
+	local thumbnail_message = 0x10 + get_thumbnail_rotation(camera.rotz)
+	g_poke(create_thumbnail_function, string.char(thumbnail_message))
+
 	log.spam("Poser: Scene %s saved", filename)
 	local currentvalue = scenelist.value
 	if scenename.value ~= scenelist.valuestring then
@@ -467,12 +540,8 @@ end
 function deletescenebutton.action()
 	local resp = iup.Alarm("Confirmation", "Are you sure you want to delete this scene?", "Yes", "No")
 	if resp == 1 then
-		local path = scenesdir .. "\\" .. scenename.value .. ".scene"
-		local ret, msg = os.remove(path)
-		if not ret then
-			log.error(msg)
-		end
-		log.spam("Removed %s", path)
+		os.remove(scenesdir .. "\\" .. scenename.value .. ".scene")
+		os.remove(scenesdir .. "\\" .. scenename.value .. ".png")
 		scenelist.valuestring = scenename.value
 		if scenelist.valuestring == scenename.value then
 			scenelist.removeitem = scenelist.value
@@ -535,6 +604,7 @@ _M.dialogposes = iup.dialog {
 						iup.fill { size = 10, },
 						saveposebutton,
 					},
+					saveposetexttoggle,
 					iup.label { title = "Locks" },
 					lockworldtoggle,
 					lockfacetoggle1,
@@ -560,6 +630,7 @@ _M.dialogposes = iup.dialog {
 						iup.fill { size = 10, },
 						savescenebutton,
 					},
+					savescenetexttoggle,
 					iup.label { title = "Locks" },
 					lockfacetoggle2,
 					lockpropstoggle,

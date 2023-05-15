@@ -13,7 +13,13 @@ class CharacterStatus {
 public:
 	BYTE m_unknown0[0x28];
 	NpcStatus* m_npcStatus; //28
-	BYTE m_unknown1[0x1B0]; //from TAA2: pointers to meet, date and lewd promises
+	BYTE m_unknown1[0x118];
+	DWORD* m_dateToStruct; //Should be at 0x144
+	BYTE m_unknown2[0xC];
+	DWORD* m_dateFromStruct; //Is at 0x154
+	BYTE m_unknown3[0x3c];
+	DWORD* m_lewdPromiseTo; //Is at 0x194
+	BYTE m_unknown4[0x44]; //from TAA2: pointers to meet, date and lewd promises
 	DWORD m_victoryCount; //1DC
 	DWORD m_classesSkipped;
 	DWORD m_winningOverSomeoneCount;
@@ -22,10 +28,10 @@ public:
 	DWORD m_academicGrade; //5 = A, 0 = F
 	DWORD m_sportGrade;
 	DWORD m_clubGrade;
-	BYTE m_unknown2[0x08];
+	BYTE m_unknown5[0x08];
 	DWORD m_penetrativeHCount;
 	WORD m_HPartnerCount;
-	WORD m_unknown2_1;
+	WORD m_unknown6;
 	char m_firstHPartner[32];
 	char m_firstAnalPartner[32];
 	char m_latestHPartner[32];
@@ -45,7 +51,7 @@ public:
 			DWORD m_cumSwallowed[25];
 			DWORD m_unknown[25];
 			DWORD m_riskyCum[25];
-			DWORD m_unknown4[25];
+			DWORD m_unknown7[25];
 			DWORD m_cherry[25];
 		};
 		DWORD m_statArrays[17][25];

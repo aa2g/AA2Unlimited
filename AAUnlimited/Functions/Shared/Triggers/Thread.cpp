@@ -39,7 +39,11 @@ void Thread::ExecuteTrigger(Trigger* trg) {
 	for(ip = 0; ip < trg->actions.size() && !execFinished; ip++) {
 		//get action
 		auto& action = trg->actions[ip];
-		Shared::Triggers::triggers_log[Shared::Triggers::triggers_idxLog] = "Trigger [" + General::CastToString(execTrigger->name) + "]" + "\tThis card: [" + std::to_string(thisCardInstance->m_char->m_seat) + "]" + "\tTriggering card: [" + std::to_string(triggeringCardInstance->m_char->m_seat) + "]"+ "\tAction: " + General::CastToString(action.action->name) +"\r\n";
+
+		auto thisCardSeat = thisCardInstance->IsValid() ? thisCardInstance->m_char->m_seat : -1;
+		auto trigCardSeat = triggeringCardInstance->IsValid() ? triggeringCardInstance->m_char->m_seat : -1;
+
+		Shared::Triggers::triggers_log[Shared::Triggers::triggers_idxLog] = "Trigger [" + General::CastToString(execTrigger->name) + "]" + "\tThis card: [" + std::to_string(thisCardSeat) + "]" + "\tTriggering card: [" + std::to_string(trigCardSeat) + "]"+ "\tAction: " + General::CastToString(action.action->name) +"\r\n";
 		Shared::Triggers::triggers_idxLog = (Shared::Triggers::triggers_idxLog + 1) % 100;
 		ExecuteAction(action);
 		if(executeCount > maxExecuteCount) {

@@ -38,10 +38,10 @@ namespace Shared {
 		std::wstring getTalkingName();
 		void setTalkAboutName(std::wstring value);
 		std::wstring getTalkAboutName();
-
-
 		void setLockedInH(bool value);
 		bool getLockedInH();
+		void setRemovedSeat(int value);
+		int getRemovedSeat();
 
 		void setIsInH(bool value);
 		bool getIsInH();
@@ -61,7 +61,7 @@ namespace Shared {
 		void setNPCLineState(DWORD value);
 		DWORD getNPCLineState();
 
-		void setInterrupt(DWORD value);
+		void setInterrupt(BYTE value);
 		DWORD getInterrupt();
 
 		DWORD getHPosition();
@@ -69,6 +69,9 @@ namespace Shared {
 
 		void SetRoomNumber(int seat, int room);
 		int GetRoomNumber(int seat);
+
+		void AddDelayedEvent(Shared::Triggers::DelayedEventData);
+		std::list<Shared::Triggers::DelayedEventData>* GetDelayedEvents();
 
 		void kickCard(int s);
 		void addCard(std::wstring cardName, bool gender, int s);

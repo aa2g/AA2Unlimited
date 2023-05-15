@@ -1,13 +1,48 @@
 --@INFO Supplemental triggers code
 
 local _M = {}
-local opts = {}
+local variants  = { "English", "Russian", "Japanese", "Korean", "Spanish", "Yoruba" }
+local opts = {
+	{"variant", 0, "Select which language you want the modules to be in: %l|English|Russian|Japanese|Korean|Spanish|Yoruba|"},
+}
 local trigger = {}
+trigger.string = {}
+trigger.int = {}
+trigger.bool = {}
+trigger.float = {}
 
 -- lookup function
 function on.dispatch_trigger(name, args)
 	if (trigger[name] ~= nil) then
 		trigger[name](args);
+	end
+end
+
+function on.dispatch_string_trigger(ret, name, args)
+	if (trigger.string[name] ~= nil) then
+		ret = trigger.string[name](args);
+		return ret;
+	end
+end
+
+function on.dispatch_int_trigger(ret, name, args)
+	if (trigger.int[name] ~= nil) then
+		ret = trigger.int[name](args);
+		return ret;
+	end
+end
+
+function on.dispatch_bool_trigger(ret, name, args)
+	if (trigger.bool[name] ~= nil) then
+		ret = trigger.bool[name](args);
+		return ret;
+	end
+end
+
+function on.dispatch_float_trigger(ret, name, args)
+	if (trigger.float[name] ~= nil) then
+		ret = trigger.float[name](args);
+		return ret;
 	end
 end
 
@@ -426,6 +461,36 @@ end
 -- Procedures that can be called from triggers require the <trigger.> prefix ---------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------
 
+-- Demos -----------------------------------------------------------------------------------------------------------------
+
+function trigger.string.stringCallDemo(params)
+	local args = splitArgs(params);
+	local input = args[1];
+
+	return input .. "-" .. input;
+end
+
+function trigger.int.intCallDemo(params)
+	local args = splitArgs(params);
+	local input = args[1];
+
+	return input * 1000;
+end
+
+function trigger.bool.boolCallDemo(params)
+	local args = splitArgs(params);
+	local input = args[1];
+
+	return ~input;
+end
+
+function trigger.float.floatCallDemo(params)
+	local args = splitArgs(params);
+	local input = args[1];
+
+	return input / 2.0;
+end
+
 -- Relationship points ---------------------------------------------------------------------------------------------------
 
 --[[ Store the relationship points from one card to another. Dump can be restored with loadRelationshipPoints
@@ -752,7 +817,7 @@ function trigger.loadOutgoingRelationshipPointsIndividual(params)
 	local storage = getCardStorage(storageCard, key);
 
 	if ((storage == nil) and doNuke) then
-		local storageKey = getCardStorageKey(towards);
+	    local storageKey = getCardStorageKey(towards);
 		if (storageKey ~= nil and seat ~= towards) then
 			local toDump = {};
 			restoreRelationshipPointsFromDump(seat, towards, toDump, doNuke);
@@ -2106,6 +2171,15 @@ function _M:load()
 end
 
 function _M:unload()
+end
+
+function on.launch()
+	if exe_type ~= "edit" then return end
+	Config.dictionary = variants[opts.variant+1]
+end
+
+function _M:config()
+	mod_edit_config(self, opts, "Module dictionary settings")
 end
 
 return _M

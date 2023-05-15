@@ -60,28 +60,39 @@ public:
 
 	//overrides
 	bool AddMeshOverride(const TCHAR* texture, const TCHAR* override);
+	bool AddMeshOverride(const TCHAR* texture, const TCHAR* override, int styleIdx);
 	bool RemoveMeshOverride(int index);
+	bool RemoveMeshOverride(int index, int styleIdx);
 
 	bool AddArchiveOverride(const TCHAR* archice, const TCHAR* archivefile, const TCHAR* override);
+	bool AddArchiveOverride(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* override, int styleIdx);
 	bool RemoveArchiveOverride(int index);
+	bool RemoveArchiveOverride(int index, int styleIdx);
 
 	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile);
+	bool AddArchiveRedirect(const TCHAR* archive, const TCHAR* archivefile, const TCHAR* redirectarchive, const TCHAR* redirectfile, int styleIdx);
 	bool RemoveArchiveRedirect(int index);
+	bool RemoveArchiveRedirect(int index, int styleIdx);
 
 	bool AddObjectOverride(const TCHAR* object, const TCHAR* file);
+	bool AddObjectOverride(const TCHAR* object, const TCHAR* file, int styleIdx);
 	bool RemoveObjectOverride(int index);
+	bool RemoveObjectOverride(int index, int styleIdx);
 
 	//bone transformations (deprecated)
 	bool AddBoneTransformation(const TCHAR* boneName, D3DMATRIX transform);
 	bool RemoveBoneTransformation(int index);
 
 	//hairs
-	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, bool flip);
+	bool AddHair(BYTE kind, BYTE slot, BYTE adjustment, BYTE flip);
 	bool RemoveHair(int index);
+	bool RemoveAllHair();
 
 	struct BoneMod;
 	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, BoneMod mod);
+	bool AddBoneRule(MeshModFlag flags, const TCHAR* xxFileName, const TCHAR* boneName, AAUCardData::BoneMod mod, int styleIdx);
 	bool RemoveBoneRule(int index);
+	bool RemoveBoneRule(int index, int styleIdx);
 
 	bool AddSubmeshRule(MeshModFlag flags, const TCHAR * xxFileName, const TCHAR * boneName, const TCHAR * materialName, std::vector<DWORD> color);
 	bool RemoveSubmeshRule(int index, MeshModFlag flags);
@@ -92,13 +103,15 @@ public:
 	bool SetEyeHighlight(const TCHAR* texName);
 
 	bool SetHairHighlight(const TCHAR* name, int style = -1);
+	bool ResetHairHighlight(int style = -1);
 
 	bool SetTan(const TCHAR* name, int style = -1);
 
 	bool UpdateCardStyle(int set, ExtClass::CharacterData* charData);
 	bool CopyCardStyle(const TCHAR* name, ExtClass::CharacterData* charData);
 	bool RemoveCardStyle(int index);
-	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
+	bool TransferCardStyleData(int index1, int index2, ExtClass::CharacterData* charData, bool aa2clothes, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
+	bool LoadCardStyleData(int index1, int index2, AAUCardData* srcChar, AAUCardData* destChar, bool aa2clothes, bool aa2body, bool aa2face, bool aa2eyes, bool aa2hair, bool ao, bool ar, bool mo, bool oo, bool hr, bool tn, bool bd, bool bs);
 	bool SwapCardStyle(int index1, int index2);
 	void SwitchActiveCardStyle(int newSet, ExtClass::CharacterData* charData);
 	int FindStyleIdxByName(std::wstring * name);
@@ -190,10 +203,16 @@ public:
 	const bool									HasOutlineColor();
 	const DWORD									SetHasOutlineColor(bool has);
 
+	const std::vector<DWORD> GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, int styleIdx);
+
 	const std::vector<DWORD>					GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material);
 	const std::vector<DWORD>					SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
+	const std::vector<DWORD> SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color, int styleIdx);
+	const std::vector<DWORD> GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, int styleIdx);
 	const std::vector<DWORD>					GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material);
 	const std::vector<DWORD>					SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color);
+
+	const std::vector<DWORD> SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color, int styleIdx);
 
 	const DWORD									GetTanColor();
 	const DWORD									SetTanColor(COLORREF color);
@@ -401,7 +420,11 @@ inline const DWORD AAUCardData::SetOutlineColor(COLORREF color) {
 inline const bool AAUCardData::HasOutlineColor() { return m_styles[m_currCardStyle].m_bOutlineColor; }
 inline const DWORD AAUCardData::SetHasOutlineColor(bool has) { return m_styles[m_currCardStyle].m_bOutlineColor = has; }
 
-inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material){
+inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material) {
+	return GetSubmeshOutlineColor(mesh, frame, material, m_currCardStyle);
+}
+
+inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, int styleIdx){
 
 	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
 	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
@@ -418,14 +441,19 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshOutlineColor(std::wstring
 
 	std::vector<DWORD> blankColor{ 0, 0, 0, floatyDWORD.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ {mesh, frame}, material };
-	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
-		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) return m_styles[m_currCardStyle].m_submeshOutlines[i].second;
+	for (int i = 0; i < m_styles[styleIdx].m_submeshOutlines.size(); i++) {
+		if (key == m_styles[styleIdx].m_submeshOutlines[i].first) return m_styles[styleIdx].m_submeshOutlines[i].second;
 	}
 
 	return blankColor;
 }
 
-inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color){
+inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color) {
+
+	return SetSubmeshOutlineColor(mesh, frame,  material, color, m_currCardStyle);
+}
+
+inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color, int styleIdx){
 
 	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
 	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
@@ -436,17 +464,20 @@ inline const std::vector<DWORD> AAUCardData::SetSubmeshOutlineColor(std::wstring
 
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
 	SubmeshColorRule newColor{ key, color };
-	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshOutlines.size(); i++) {
-		if (key == m_styles[m_currCardStyle].m_submeshOutlines[i].first) {
-			m_styles[m_currCardStyle].m_submeshOutlines.erase(m_styles[m_currCardStyle].m_submeshOutlines.begin() + i);
+	for (int i = 0; i < m_styles[styleIdx].m_submeshOutlines.size(); i++) {
+		if (key == m_styles[styleIdx].m_submeshOutlines[i].first) {
+			m_styles[styleIdx].m_submeshOutlines.erase(m_styles[styleIdx].m_submeshOutlines.begin() + i);
 		}
 	}
-	m_styles[m_currCardStyle].m_submeshOutlines.push_back(newColor);
+	m_styles[styleIdx].m_submeshOutlines.push_back(newColor);
 
 	return color;
 }
 
 inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material) {
+	return GetSubmeshShadowColor(mesh, frame, material, m_currCardStyle);
+}
+inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, int styleIdx) {
 	
 	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
 	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
@@ -473,14 +504,18 @@ inline const std::vector<DWORD> AAUCardData::GetSubmeshShadowColor(std::wstring 
 
 	std::vector<DWORD> blankColor{ 100, 30, 30, floatyDWORDAT.i, floatyDWORDSH1.i, floatyDWORDSH2.i };
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
-	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {
-		if (key == m_styles[m_currCardStyle].m_submeshShadows[i].first) return m_styles[m_currCardStyle].m_submeshShadows[i].second;
+	for (int i = 0; i < m_styles[styleIdx].m_submeshShadows.size(); i++) {
+		if (key == m_styles[styleIdx].m_submeshShadows[i].first) return m_styles[styleIdx].m_submeshShadows[i].second;
 	}
 
 	return blankColor;
 }
 
 inline const std::vector<DWORD> AAUCardData::SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color) {
+	return SetSubmeshShadowColor(mesh, frame, material, color, m_currCardStyle);
+}
+
+inline const std::vector<DWORD> AAUCardData::SetSubmeshShadowColor(std::wstring mesh, std::wstring frame, std::wstring material, std::vector<DWORD> color, int styleIdx) {
 
 	auto newMeshSize = mesh.size() % 2 == 0 ? mesh.size() : (mesh.size() + 1);
 	auto newFrameSize = frame.size() % 2 == 0 ? frame.size() : (frame.size() + 1);
@@ -491,12 +526,12 @@ inline const std::vector<DWORD> AAUCardData::SetSubmeshShadowColor(std::wstring 
 
 	std::pair<std::pair<std::wstring, std::wstring>, std::wstring> key{ { mesh, frame }, material };
 	SubmeshColorRule newColor{ key, color };
-	for (int i = 0; i < m_styles[m_currCardStyle].m_submeshShadows.size(); i++) {
-		if (key == m_styles[m_currCardStyle].m_submeshShadows[i].first) {
-			m_styles[m_currCardStyle].m_submeshShadows.erase(m_styles[m_currCardStyle].m_submeshShadows.begin() + i);
+	for (int i = 0; i < m_styles[styleIdx].m_submeshShadows.size(); i++) {
+		if (key == m_styles[styleIdx].m_submeshShadows[i].first) {
+			m_styles[styleIdx].m_submeshShadows.erase(m_styles[styleIdx].m_submeshShadows.begin() + i);
 		}
 	}
-	m_styles[m_currCardStyle].m_submeshShadows.push_back(newColor);
+	m_styles[styleIdx].m_submeshShadows.push_back(newColor);
 
 	return color;
 }
