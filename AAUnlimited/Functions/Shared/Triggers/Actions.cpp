@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files\PersistentStorage.h"
+#include "External/ExternalClasses/Frame.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -643,6 +644,30 @@ namespace Shared {
 			}
 			else {
 				AAPlay::g_characters[seat].m_char->Update(state, 0);
+			}
+		}
+
+		void Thread::SetSkirtState(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto currchar = AAPlay::g_characters[seat].m_char;
+			if (currchar == nullptr || currchar->m_xxSkirt == nullptr) {
+				return;
+			}
+			auto skirtBaseFrame = currchar->m_xxSkirt->FindBone("A00_null_sukato");
+			int skirtCount = skirtBaseFrame->m_nChildren;
+			for (int i = 0; i < skirtCount; ++i) {
+				if (i == params[1].iVal) {
+					auto frame = skirtBaseFrame->GetChild(i);
+					//unhideMeshes(frame);
+					frame->m_renderFlag = 0;
+				}
+				else {
+					auto frame = skirtBaseFrame->GetChild(i);
+					//unhideMeshes(frame);
+					frame->m_renderFlag = 2;
+					//skirtBaseFrame->GetChild(i)->setRenderFlag(2);
+				}
 			}
 		}
 
@@ -3096,6 +3121,12 @@ namespace Shared {
 				TEXT("Toggles condoms on or off, provided CondomOverride is turned on."),
 				{ TYPE_BOOL },
 				&Thread::CondomValue
+			},
+			{
+				143, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Skirt State"), TEXT("%p.SkirtState = %p"),
+				TEXT("Set the clothing state of some card."),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetSkirtState
 			},
 		};
 
