@@ -160,17 +160,9 @@ local categories = {
 	"All",
 	"Torso",
 	"Left Arm",
-	"Left Arm 2",
-	"Left Arm 3",
 	"Right Arm",
-	"Right Arm 2",
-	"Right Arm 3",
 	"Left Hand",
-	"Left Hand 2",
-	"Left Hand 3",
 	"Right Hand",
-	"Right Hand 2",
-	"Right Hand 3",
 	"Left Leg",
 	"Right Leg",
 	"Face",
@@ -878,18 +870,22 @@ local dialogsliders = iup.dialog {
 						},
 						iup.frame { title = "Eyes",
 							iup.vbox {
-								eyeshapes,
-								dimeyes,
-								tears,
-							},
-								expand = "no"
-						},
-						iup.vbox {
-							iup.frame { title = "Eye Tracking",
-								iup.vbox {
-									trackeyescontrols,
+								iup.hbox {
+									eyeshapes,
+									iup.vbox {
+										dimeyes,
+										tears,
+									},
+								},
+								iup.frame { title = "Eye Tracking",
+									iup.vbox {
+										trackeyescontrols,
+									},
 								},
 							},
+							expand = "no",
+						},
+						iup.vbox {
 							iup.frame { title = "Eyebrow",
 								iup.vbox {
 									eyebrowshapes

@@ -247,6 +247,32 @@ log.spam("applydecal %d %d", bodypart, decalstrength)
 })
 
 
+-- ####
+-- Body
+-- ####
+
+local pubichairshow = iup.flatbutton { title = "Show", value = "ON", toggle = "yes", border = "yes", padding = 3, valuechanged_cb = function(self)
+	local struct = charamgr.current and charamgr.current.struct
+	if struct then
+		local show = self.value == "ON" and 0 or 2
+		local kmozaframe = struct.m_xxBody.m_root:FindFrame("A00_O_Kmoza00")
+		if kmozaframe then kmozaframe.m_renderFlag = show end
+		kmozaframe = struct.m_xxBody.m_root:FindFrame("A00_O_Kmoza01")
+		if kmozaframe then kmozaframe.m_renderFlag = show end
+	end
+end
+}
+local pubichairalpha = iup.val { orientation = "horizontal", expand = "horizontal", min = 0, max = 1.2, value = 0,
+	valuechanged_cb = function(self)
+		local body = charamgr.current.struct.m_xxBody
+		local material = body:FindMaterial("A00_M_Kmoza_00")
+		if material then
+			material:m_lightingAttributes(3, tonumber(self.value))
+		end
+	end
+}
+
+
 local _M = iup.hbox {
 	iup.vbox {
 		iup.frame {
@@ -261,6 +287,13 @@ local _M = iup.hbox {
 			},
 		},
 		decals,
+		iup.frame {
+			title = "Pubic Hair",
+			iup.hbox {
+				pubichairshow,
+				pubichairalpha,
+			},
+		},
 	},
 	iup.frame {
 		title = "Leg Wear",

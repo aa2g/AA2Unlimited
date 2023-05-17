@@ -5,23 +5,24 @@ require "iupluaim"
 local _M = {}
 -- _M.dialogposes = {}
 
-local  playbacksymbols  = 
-{	
+local  album_playback_labels  = 
+{
 	-- first = "⏮",
 	-- prev = "⏪",
 	-- playpause = "⏯",
 	-- next = "⏩",
 	-- last = "⏭",
-	
+
 	-- first = "|<<",
 	-- prev = "|<",
 	-- playpause = ">||",
 	-- next = ">|",
 	-- last = ">>|",
-	
+
 	first = "First",	
 	prev = "Prev",
-	playpause = "Play/Pause",
+	play = "Play",
+	pause = "Pause",
 	next = "Next",
 	last = "Last",
 }
@@ -33,7 +34,6 @@ local lists = require "poser.lists"
 local camera = require "poser.camera"
 local charamgr = require "poser.charamgr"
 local propmgr = require "poser.propmgr"
-local toggles = require "poser.toggles"
 local os = require "os"
 
 local clipchanged= signals.signal()
@@ -56,83 +56,86 @@ local png_magic_scene = "SCENE\x00\x00\x00"
 local png_magic_album = "ALBUM\x00\x00\x00"
 local save_restore_ui = false
 
-local timer1 = iup.timer{time=1000}
-local timer2 = iup.timer{time=1000}
+local settings_state = {
+	lock_camera = false,
+	lock_light = true,
+	lock_face = false,
+	lock_props = false,
+	lock_world = false,
+	unlock_bones = false,
+	auto_load_scene = false,
+	auto_repeat = false,
+	-- auto_play = false, -- loop -- remove/change the uses of a variable directly. later. btw it's global not local atm
+	auto_load_props = false, -- loop
+	auto_load_chars = false, -- loop
+}
 
-local lock_camera = false
-local lock_light = true
-local lock_face = false
-local lock_props = false
-local lock_world = false
-local auto_load = false
-local auto_repeat = true
-local auto_play = false -- loop
-local auto_load_props = false -- loop
-local auto_load_chars = false -- loop
+local shared_settings_toggles = {
+	lock_camera = {},
+	lock_light = {},
+	lock_face = {},
+	lock_props = {},
+	unlock_bones = {},
+}
+
+local function get_setting(setting)
+	return settings_state[setting]
+end
+
+local function settings_toggles_update(setting, state, true_value, skip_toggle)
+	local value = state == true_value
+	settings_state[setting] = value
+	local toggles = shared_settings_toggles[setting]
+	if toggles ~= nil then
+		for index, toggle in ipairs(toggles) do
+			if toggle ~= skip_toggle then
+				toggle.value = (value and "ON") or "OFF"
+			end
+		end
+	end
+end
+
 local lock_world_bone = "a01_N_Zentai_010"
 
-local lockworldtoggle = iup.toggle { title = "Lock World Bone", action = function(self, state) lock_world = state == 1 end }
-local lockfacetoggle3
-local lockfacetoggle2
-local lockfacetoggle1 = iup.toggle { title = "Lock Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle2.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle3.value = (state == 1 and "ON") or "OFF"
-end }
-lockfacetoggle2 = iup.toggle { title = "Lock Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle1.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle3.value = (state == 1 and "ON") or "OFF"
-end }
-local lockpropstoggle2
-local lockpropstoggle1 = iup.toggle { title = "Lock Props", action = function(self, state)
-	lock_props = state == 1
-	lockpropstoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-local lockcameratoggle2
-local lockcameratoggle1 = iup.toggle { title = "Lock Camera", action = function(self, state)
-	lock_camera = state == 1
-	lockcameratoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-local locklighttoggle2
-local locklighttoggle1 = iup.toggle { title = "Lock Light", action = function(self, state)
-	lock_light = state == 1
-	locklighttoggle2.value = (state == 1 and "ON") or "OFF"
-end, value = "ON" }
-lockfacetoggle3 = iup.toggle { title = "Face", action = function(self, state)
-	lock_face = state == 1
-	lockfacetoggle1.value = (state == 1 and "ON") or "OFF"
-	lockfacetoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-lockpropstoggle2 = iup.toggle { title = "Props", action = function(self, state)
-	lock_props = state == 1
-	lockpropstoggle1.value = (state == 1 and "ON") or "OFF"
-end }
-lockcameratoggle2 = iup.toggle { title = "Camera", action = function(self, state)
-	lock_camera = state == 1
-	lockcameratoggle1.value = (state == 1 and "ON") or "OFF"
-end }
-local lockbonestoggle1
-lockbonestoggle1 = iup.toggle { active="no", title = "Bones", action = function(self, state)
-	lock_bones = state == 1
-	lockbonestoggle2.value = (state == 1 and "ON") or "OFF"
-end }
-lockbonestoggle2 = iup.toggle { active="no", title = "Bones", action = function(self, state)
-	lock_bones = state == 1
-	lockbonestoggle1.value = (state == 1 and "ON") or "OFF"
-end }
+local function create_settings_toggle(toggle_title, setting, true_value)
+	local toggle = iup.toggle { title = toggle_title }
+	local state = get_setting(setting) and "ON" or "OFF"
+	toggle.value = state
+	toggle.action = function(self, state)
+		settings_toggles_update(setting, state, true_value, toggle)
+	end
+	local toggles = shared_settings_toggles[setting]
+	if toggles ~= nil then
+		table.insert(shared_settings_toggles[setting], toggle)
+	end
+	return toggle
+end
 
-local autorepeattoggle = iup.toggle { title = "Repeat Album", expand = "horizontal", alignment="ARIGHT", value = "ON", action = function(self, state) auto_repeat = state == 1 end }
-local autoloadscenetoggle = iup.toggle { title = "Load Scene", expand = "horizontal", alignment="ARIGHT", action = function(self, state) auto_load = state == 1 end }
-local autoloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Props", action = function(self, state) auto_load_props = state == 1 end }
-local autounloadpropstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Props", action = function(self, state) auto_load_props = state == 1 end }
-local autoloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Load Characters", action = function(self, state) auto_load_chars = state == 1 end }
-local autounloadcharstoggle = iup.toggle { active="no", expand = "horizontal", alignment="ARIGHT", title = "Unload Characters", action = function(self, state) auto_load_chars = state == 1 end }
+local lock_world_toggle = create_settings_toggle("Lock World Bone", "lock_world", 1)
+local lock_face_toggle_pose = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_face_toggle_scene = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_face_toggle_album = create_settings_toggle("Lock Face", "lock_face", 1)
+local lock_props_toggle_scene = create_settings_toggle("Lock Props", "lock_props", 1)
+local lock_props_toggle_album = create_settings_toggle("Lock Props", "lock_props", 1)
+local lock_camera_toggle_scene = create_settings_toggle("Lock Camera", "lock_camera", 1)
+local lock_camera_toggle_album = create_settings_toggle("Lock Camera", "lock_camera", 1)
+local lock_light_toggle_scene = create_settings_toggle("Lock Light", "lock_light", 1)
+local lock_light_toggle_album = create_settings_toggle("Lock Light", "lock_light", 1)
+local unlock_bones_toggle_scene = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
+local unlock_bones_toggle_album = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
+unlock_bones_toggle_scene.active = "no"
+unlock_bones_toggle_album.active = "no"
 
-locklighttoggle2 = iup.toggle { title = "Light", action = function(self, state)
-	lock_light = state == 1
-	locklighttoggle1.value = (state == 1 and "ON") or "OFF"
-end, value = "ON" }
+local auto_repeat_album_toggle = create_settings_toggle("Repeat Album", "auto_repeat", 1)
+local auto_load_scene_toggle = create_settings_toggle("Load Selected Scene", "auto_load_scene", 1)
+local auto_load_props_toggle = create_settings_toggle("Load Props", "auto_load_props", 1)
+local auto_unload_props_toggle = create_settings_toggle("Load Props", "auto_unload_props", 1)
+local auto_load_chars_toggle = create_settings_toggle("Load Characters", "auto_load_chars", 1)
+local auto_unload_chars_toggle = create_settings_toggle("Load Characters", "auto_unload_chars", 1)
+auto_load_props_toggle.active = "no"
+auto_unload_props_toggle.active = "no"
+auto_load_chars_toggle.active = "no"
+auto_unload_chars_toggle.active = "no"
 
 local thumbnailbtn = iup.flatbutton { expand="VERTICALFREE",
 	shrink="yes",
@@ -172,31 +175,31 @@ end
 local posefilter = lists.listfilter()
 local poselist = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local scenefilter = lists.listfilter()
-local scenefilter2 = lists.listfilter()
+local album_frame_filter = lists.listfilter()
 local scenelist1 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
-local scenelist2 = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
+local album_frame_list = lists.listbox { expand = "yes", chars = 20, sort = "yes" }
 local loadposebutton = iup.button { title = "Load", expand = "horizontal" }
 local saveposebutton = iup.button { title = "Save", expand = "horizontal" }
 local saveposetexttoggle = iup.toggle { title = "Save as .pose", value = "OFF" }
 local loadscenebutton = iup.button { title = "Load", expand = "horizontal" }
 local savescenebutton = iup.button { title = "Save", expand = "horizontal" }
-local loadscenebutton2 = iup.button { title = "Load", expand = "horizontal" }
-local savescenebutton2 = iup.button { title = "Save", expand = "horizontal" }
+local load_album_frame_button = iup.button { title = "Load", expand = "horizontal" }
+local save_album_frame_button = iup.button { title = "Save", expand = "horizontal" }
 local savescenetexttoggle = iup.toggle { title = "Save as .scene", value = "OFF" }
 local deleteposebutton = iup.button { title = "Delete" }
 local deletescenebutton = iup.button { title = "Delete" }
 local deletescenebutton2 = iup.button { title = "Delete" }
 local refreshposelistbutton = iup.button { title = "Refresh" }
 local refreshscenelistbutton = iup.button { title = "Refresh" }
-local refreshscenelistbutton2 = iup.button { title = "Refresh" }
+local album_refresh_frame_list_button = iup.button { title = "Refresh" }
 local useposesfolderbutton = iup.button { title = "Use Folder" }
 local usescenesfolderbutton = iup.button { title = "Use Folder" }
-local usealbumsfolderbutton = iup.button { title = "Open Album" }
-local playbackfirstbtn = iup.flatbutton { title = playbacksymbols.first, expand = "horizontal", padding = 3, size = "15x12"  }
-local playbackprevbtn = iup.flatbutton { title = playbacksymbols.prev, expand = "horizontal", padding = 3, size = "15x12"  }
-local playbackplaypausebtn = iup.flatbutton { title = playbacksymbols.playpause, toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
-local playbacknextbtn = iup.flatbutton { title = playbacksymbols.next, expand = "horizontal", padding = 3, size = "15x12"  }
-local playbacklastbtn = iup.flatbutton { title = playbacksymbols.last, expand = "horizontal", padding = 3, size = "15x12"  }
+local open_album_button = iup.button { title = "Open Album" }
+-- local album_goto_first_frame_button = iup.flatbutton { title = album_playback_labels.first, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
+local album_goto_previous_frame_button = iup.flatbutton { title = album_playback_labels.prev, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
+local album_playback_button = iup.flatbutton { title = album_playback_labels.play, border="yes", toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
+local album_goto_next_frame_button = iup.flatbutton { title = album_playback_labels.next, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
+-- local album_goto_last_frame_button = iup.flatbutton { title = album_playback_labels.last, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
 
 local function drawscenethumbnail(dir, filename)
 	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")
@@ -258,40 +261,40 @@ signals.connect(scenelist1, "selectionchanged", function()
 	
 	drawscenethumbnail(scenesdir, scenelist1[scenelist1.value])
 end )
-signals.connect(scenelist2, "selectionchanged", function()
+signals.connect(album_frame_list, "selectionchanged", function()
 	albumname.value = ""
 	pagenumber.value = ""
 	delay.value = ""
 		
 	local text = require("pl.text");
 	require 'pl.List'
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 	local length = args:len()
 		
 	if length > 2 then	-- 3+ elements - last two are page and delay, the rest are albumname
 		delay.value = table.remove(args)
-		pagenumber.value = table.remove(args)	
+		pagenumber.value = table.remove(args)
 		albumname.value = table.concat(args, "-")
 	elseif length == 2  then	-- 2 elements - albumname and pagenumber, delay defaults to 1s
 		delay.value = 1000
-		pagenumber.value = table.remove(args)	
+		pagenumber.value = table.remove(args)
 		albumname.value = table.concat(args, "-")
 	else -- 1 element - albumname, default pagenumber is the index in the list
 		delay.value = 1000
-		pagenumber.value = scenelist2.value
-		albumname.value = scenelist2[scenelist2.value]
+		pagenumber.value = album_frame_list.value
+		albumname.value = album_frame_list[album_frame_list.value]
 	end
 
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end
 	
-	drawscenethumbnail(albumsdir, scenelist2[scenelist2.value])
+	drawscenethumbnail(albumsdir, album_frame_list[album_frame_list.value])
 end )
 
 signals.connect(posefilter, "setfilter", poselist, "setfilter")
 signals.connect(scenefilter, "setfilter", scenelist1, "setfilter")
-signals.connect(scenefilter2, "setfilter", scenelist2, "setfilter")
+signals.connect(album_frame_filter, "setfilter", album_frame_list, "setfilter")
 
 local function findposerfiles(directory, match)
 	local newlist = {}
@@ -319,7 +322,7 @@ local function populatescenelist(list, dir)
 	list.setlist(findposerfiles(dir, "^(.*)%.scene$"))
 end
 
-function on.launch()
+function _M.init()
 	if exe_type == "edit" then
 		create_thumbnail_function = 0x36C6C1
 	else
@@ -327,7 +330,7 @@ function on.launch()
 	end
 	populateposelist()
 	populatescenelist(scenelist1, scenesdir)
-	populatescenelist(scenelist2, albumsdir)
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 local function get_thumbnail_rotation(angle)
@@ -346,10 +349,13 @@ function on.poser_saved_thumbnail()
 	os.remove(embed_save_path)
 	os.rename(screenshot, embed_save_path)
 	local file = io.open(embed_save_path, "ab")
-	file:write(embed_file)
-	file:write(string.pack("<I4", #embed_file))
-	file:write(embed_magic)
-	file:close()
+	if file ~= nil then
+		file:write(embed_file)
+		file:write(string.pack("<I4", #embed_file))
+		file:write(embed_magic)
+		file:close()
+		log.error("Error saving thumbnail with data! File not found?")
+	end
 	embed_save_path = nil
 	embed_file = nil
 	embed_magic = nil
@@ -366,9 +372,9 @@ function usescenesfolderbutton.action()
 	populatescenelist(scenelist1, scenesdir)
 end
 
-function usealbumsfolderbutton.action()
+function open_album_button.action()
 	albumsdir = fileutils.getfolderdialog(albumsdir)
-	populatescenelist(scenelist2, albumsdir)
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 function deleteposebutton.action()
@@ -421,7 +427,7 @@ local function table2pose(pose, character)
 	local frame = pose.frame
 	if pose.sliders then
 		for k,v in pairs(pose.sliders) do
-			local slider = not (k == lock_world_bone and lock_world) and character:getslider(k)
+			local slider = not (k == lock_world_bone and get_setting("lock_world")) and character:getslider(k)
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
@@ -442,7 +448,7 @@ local function table2pose(pose, character)
 		end
 	end
 	local face = pose.face
-	if face and not lock_face then
+	if face and not get_setting("lock_face") then
 		if face.mouth then character.mouth = face.mouth end
 		if face.mouthopen then character.mouthopen = face.mouthopen end
 		if face.eye then character.eye = face.eye end
@@ -451,11 +457,11 @@ local function table2pose(pose, character)
 
 		local facestruct = character.struct.m_xxFace
 		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho") 
-		if material then
+		if material and face.blush then
 			material:m_lightingAttributes(3, face.blush / 9)
 		end
 		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen") 
-		if material then
+		if material and face.blushlines then
 			material:m_lightingAttributes(3, face.blushlines / 9)
 		end
 	end
@@ -610,7 +616,7 @@ local function loadscene(filename, dir)
 			
 			local not_found = {}
 
-			if not lock_props then
+			if not get_setting("lock_props") then
 				for i,readprop in ipairs(props) do
 					local find
 					for j,p in pairs(loadedprops) do
@@ -648,13 +654,13 @@ local function loadscene(filename, dir)
 				end
 			end
 			
-			if not lock_camera then
+			if not get_setting("lock_camera") then
 				for k,v in pairs(scene.camera or {}) do
 					camera[k] = v
 				end
 			end
 
-			if not lock_light and scene.light then
+			if not get_setting("lock_light") and scene.light then
 				local direction = scene.light.direction
 				for _,character in pairs(charamgr.characters) do
 					local skeleton = character.struct.m_xxSkeleton
@@ -768,7 +774,7 @@ local function savescene(filename, dir, list)
 				list.valuestring = filename
 			end
 		end
-	elseif list == scenelist2 then
+	elseif list == album_frame_list then
 		if getalbumfilename() ~= list.valuestring then
 			log.spam("Poser: savealbumscene: getalbumfilename(): ", getalbumfilename());
 			log.spam("Poser: savealbumscene: list.valuestring: ", list.valuestring);
@@ -803,87 +809,182 @@ end
 
 -- == Anims ==
 
-function timer1.action_cb()
-	local idx = tonumber(scenelist2.value)
-	
-	if idx == nil or idx < 1 then
-	-- if no scene selected - select the first one
-		scenelist2.value = 1
-	else
-	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
-			playbackplaypausebtn.value = "OFF"
-			auto_play = false
-		end
-	end
-	
-	-- update the scene name
-	albumname.value = ""
-	pagenumber.value = ""
-	delay.value = ""
-		
-	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
-		
-	delay.value = table.remove(args)
-	pagenumber.value = table.remove(args)	
-	albumname.value = table.concat(args, "-")
-	-- and autoload if needed
-	if auto_load then
-		_M.loadalbumscene()
-	end	
-	
-	if auto_play then
-		-- prepare the next frame
-		timer2.time = tonumber(delay.value) or 1000
-		timer2.run = "YES"
-	end
-	timer1.run = "NO"
-	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
+local album_playlist
+local album_playback_position = 1
+
+local animation_time = 0
+local animation_program
+local animation_program_operation
+
+local album_playback_timer_callback
+local album_program_timer_callback
+
+local album_show_frame
+
+local timers = {}
+local function create_timer(name, time, callback)
+	-- log.spam("Creater timer %s (%d)", name, time)
+	local old = timers[name]
+	if old then old.run = "NO" end
+	local timer = iup.timer {time = time, action_cb = callback}
+	timer.run = "YES"
+	timers[name] = timer
+	return timer
 end
 
-function timer2.action_cb()
-	local idx = tonumber(scenelist2.value)
-	
-	if idx == nil or idx < 1 then
-	-- if no scene selected - select the first one
-		scenelist2.value = 1
-	else
-	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
-		if not auto_repeat and tonumber(scenelist2.value) == tonumber(scenelist2.count) then
-			playbackplaypausebtn.value = "OFF"
-			auto_play = false
+local function stop_timer(name)
+	local timer = timers[name]
+	if timer then
+		-- log.spam("Destroyed timer %s", name)
+		timers[name].run = "NO"
+		timers[name] = nil
+	end
+end
+
+local function album_program_timer_callback_protected()
+	local ok, err = pcall(album_program_timer_callback)
+	if not ok then
+		stop_timer("program")
+		log.error("Error in album program processing!\n%s", err)
+	end
+end
+
+local function album_playback_timer_callback_protected()
+	local ok, err = pcall(album_playback_timer_callback)
+	if not ok then
+		stop_timer("playback")
+		log.error("Error in album playback processing!\n%s", err)
+	end
+end
+
+album_playback_timer_callback = function()
+	if album_playlist == nil then
+		log.error("Something is wrong with the album playback state. Aborting")
+		stop_timer("playback")
+	end
+
+	animation_time = animation_time + timers.playback.time
+
+	if album_playback_position > #album_playlist and get_setting("auto_repeat") then
+		album_playback_position = 1
+	end
+
+	local current_frame = album_playlist[album_playback_position]
+	local delay = current_frame[1]
+	local frame_name = current_frame[2]
+
+	local ok, ret = album_show_frame(frame_name)
+	if not ok then
+		stop_timer("playback")
+		return
+	end
+
+	album_playback_position = album_playback_position + 1
+	create_timer("playback", delay, album_playback_timer_callback_protected)
+end
+
+album_program_timer_callback = function()
+	animation_time = animation_program_operation[1]
+	-- log.info("program callback. time is %d", animation_time)
+	local time = 0
+	while time do
+		time = animation_program_operation[1]
+		if animation_time >= time then
+			local character = animation_program_operation[2]
+			local operations = animation_program_operation[3]
+			for _,op in ipairs(operations) do
+				character[op[1]] = op[2]
+			end
+			animation_program_operation = nil
+		else
+			time = nil
+			return
+		end
+		table.remove(animation_program, 1)
+		animation_program_operation = animation_program[1]
+		if animation_program_operation == nil then
+			time = nil
+			animation_program = nil
+			stop_timer("program")
+		else
+			time = animation_program_operation[1]
+			local remainder = time - animation_time
+			if remainder < 10 then
+				log.error("Program difference (%d at %d)is too small! Smaller than 10. Stopped program processing.", remainder, animation_time, time)
+				stop_timer("program")
+				return
+			end
+			create_timer("program", remainder, album_program_timer_callback_protected)
+			return
 		end
 	end
-	
-	-- update the scene name
-	albumname.value = ""
-	pagenumber.value = ""
-	delay.value = ""
-		
-	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
-		
-	delay.value = table.remove(args)
-	pagenumber.value = table.remove(args)	
-	albumname.value = table.concat(args, "-")
-	-- and autoload if needed
-	if auto_load then
-		_M.loadalbumscene()
-	end	
-	
-	if auto_play then
-		-- prepare the next frame
-		timer1.time = tonumber(delay.value) or 1000
-		timer1.run = "YES"
+end
+
+album_show_frame = function(frame)
+	local ok, ret = pcall(loadscene, frame, albumsdir)
+	if not ok then
+		stop_timer("playback")
+		log.error("There was an error playing this album")
+		log.error(ret)
 	end
-	
-	timer2.run = "NO"
-	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
+	return ok, ret
+end
+
+local function album_playback(playlist, starting_position)
+	if type(playlist) ~= "table" or type(starting_position) ~= "number" then
+		return
+	end
+
+	if starting_position < 1 or #playlist > starting_position then
+		starting_position = 1
+	end
+
+	local frame = playlist[starting_position]
+	local ok, ret = album_show_frame(frame[2])
+	if not ok then
+		return
+	end
+
+	album_playlist = playlist
+	album_playback_position = starting_position + 1
+	create_timer("playback", frame[1], album_playback_timer_callback_protected)
+	animation_time = 0
+
+	if animation_program ~= nil then
+		create_timer("program", animation_program[1][1], album_program_timer_callback_protected)
+	end
+end
+
+local function album_pause()
+	stop_timer("playback")
+	stop_timer("program")
+end
+
+local function setup_animation_program()
+	animation_program = nil
+	local program_path = make_path(albumsdir,"program.data")
+	local program_data = io.open(program_path, "r")
+	if program_data then
+		local new_program = {}
+		for line in program_data:lines() do
+			for time, character_index, operations in string.gmatch(line, "(%d+) (%d+) (.*)$") do
+				local time = tonumber(time)
+				local character = tonumber(character_index)
+				character = charamgr.characters[character]
+				local ops = {}
+				local reg = {time, character, ops}
+				for property, value in string.gmatch(operations, "(%w+)=(%d+)") do
+					table.insert(ops, {property, tonumber(value)})
+				end
+				-- log.info("Added program data %d %s %s %d", time, character.name, property, value)
+				table.insert(new_program, {time, character, ops})
+			end
+		end
+		if #new_program > 0 then
+			animation_program = new_program
+			animation_program_operation = new_program[1]
+		end
+	end
 end
 
 function _M.loadalbumscene()
@@ -894,16 +995,14 @@ function _M.loadalbumscene()
 	end
 end
 
-function loadscenebutton2.action()
+function load_album_frame_button.action()
 	_M.loadalbumscene()
-	playbackplaypausebtn.value = "OFF"
-	playbackplaypausebtn.flat_action()
+	album_playback_button.value = "OFF"
 end
 
-function savescenebutton2.action()
-	savescene(getalbumfilename(), albumsdir, scenelist2)
-	playbackplaypausebtn.value = "OFF"
-	playbackplaypausebtn.flat_action()
+function save_album_frame_button.action()
+	savescene(getalbumfilename(), albumsdir, album_frame_list)
+	album_playback_button.value = "OFF"
 end
 
 function deletescenebutton2.action()
@@ -911,44 +1010,60 @@ function deletescenebutton2.action()
 	if resp == 1 then
 		os.remove(albumsdir .. "\\" .. getalbumfilename() .. ".scene")
 		os.remove(albumsdir .. "\\" .. getalbumfilename() .. ".png")
-		scenelist2.valuestring = getalbumfilename()
-		if scenelist2.valuestring == getalbumfilename() then
-			scenelist2.removeitem = scenelist2.value
+		album_frame_list.valuestring = getalbumfilename()
+		if album_frame_list.valuestring == getalbumfilename() then
+			album_frame_list.removeitem = album_frame_list.value
 		end
 	end
 end
 
-function refreshscenelistbutton2.action()
-	populatescenelist(scenelist2, albumsdir)
+function album_refresh_frame_list_button.action()
+	populatescenelist(album_frame_list, albumsdir)
 end
 
 
-function playbackplaypausebtn.flat_action(self)
-	auto_play = playbackplaypausebtn.value == "ON" and 1 or 0
-	if auto_play == 1 then
-		local timer;
-		if timer1.run ~= "YES" then
-			timer = timer1
-		else
-			timer = timer2
-		end
-		timer.time = tonumber(delay.value) or 1000	-- default delay = 1s
-		timer.run = "YES"
-	else
-		timer1.run = "NO"
-		timer2.run = "NO"
+function album_playback_button.valuechanged_cb(self)
+	if album_playback_button.value == "OFF" then
+		album_pause()
+		album_playback_button.title = album_playback_labels.play
+		return
+	end
+
+	local starting_frame_index = tonumber(album_frame_list.value)
+	
+	if starting_frame_index == nil or starting_frame_index < 1 then
+	-- if no scene selected - select the first one
+		starting_frame_index = 1
+	end
+
+	local frame_playlist = {}
+	for frame_position = 1,album_frame_list.count do
+		local frame_name = album_frame_list[tostring(frame_position)]
+		local text = require("pl.text");
+		local args = text.split(frame_name, "-");
+		local delay = tonumber(table.remove(args)) or 1000
+		table.insert(frame_playlist, {delay, frame_name})
+	end
+
+	setup_animation_program()
+
+	if album_playback_button.value == "ON" then
+		album_playback(frame_playlist, starting_frame_index)
+		album_playback_button.title = album_playback_labels.pause
 	end
 end
 
-function playbackprevbtn.flat_action(self)
-	local idx = tonumber(scenelist2.value)
+function album_goto_previous_frame_button.flat_action(self)
+	if not album_frame_list.value then return end
+
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx - 2) % scenelist2.count) + 1
+		album_frame_list.value = ((idx - 2) % album_frame_list.count) + 1
 	end
 	
 	-- update the scene name
@@ -957,32 +1072,31 @@ function playbackprevbtn.flat_action(self)
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
 	
 	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
 end
 
-function playbacknextbtn.flat_action(self)
+function album_goto_next_frame_button.flat_action(self)
+	if not album_frame_list.value then return end
 
-	-- log.spam("playbacknextbtn.valuechanged_cb")
-	local idx = tonumber(scenelist2.value)
+	local idx = tonumber(album_frame_list.value)
 	
 	if idx == nil or idx < 1 then
 	-- if no scene selected - select the first one
-		scenelist2.value = 1
+		album_frame_list.value = 1
 	else
 	-- select the next scene, loop if needed
-		scenelist2.value = ((idx % scenelist2.count) + 1)
+		album_frame_list.value = ((idx % album_frame_list.count) + 1)
 	end
 	
 	-- update the scene name
@@ -991,19 +1105,18 @@ function playbacknextbtn.flat_action(self)
 	delay.value = ""
 		
 	local text = require("pl.text");
-	local args = text.split(scenelist2[scenelist2.value], "-");	
+	local args = text.split(album_frame_list[album_frame_list.value], "-");
 		
 	delay.value = table.remove(args)
 	pagenumber.value = table.remove(args)	
 	albumname.value = table.concat(args, "-")
 	-- and autoload if needed
-	if auto_load then
+	if get_setting("auto_load_scene") then
 		_M.loadalbumscene()
 	end	
 	-- TODO: maybe cancel the current timer and start a new one?
 	
 	drawscenethumbnail(albumsdir, getalbumfilename())
-  return iup.DEFAULT
 end
 
 cliptext = iup.text { spin = "yes", spinvalue = 0, spinmin = 0, spinmax = 9999, visiblecolumns = 2, expand = "horizontal" }
@@ -1054,8 +1167,8 @@ _M.dialogposes = iup.dialog {
 					},
 					saveposetexttoggle,
 					iup.label { title = "Locks" },
-					lockworldtoggle,
-					lockfacetoggle1,
+					lock_world_toggle,
+					lock_face_toggle_pose,
 					useposesfolderbutton,
 					iup.label { title = "Delete pose:" },
 					deleteposebutton,
@@ -1080,13 +1193,12 @@ _M.dialogposes = iup.dialog {
 					},
 					savescenetexttoggle,
 					iup.label { title = "Locks" },
-					lockfacetoggle2,
-					lockbonestoggle1,
-					lockpropstoggle1,
-					lockcameratoggle1,
-					locklighttoggle1,
-				--	autoloadscenetoggle,
-				--	autoplaytoggle,
+					lock_face_toggle_scene,
+					unlock_bones_toggle_scene,
+					lock_props_toggle_scene,
+					lock_camera_toggle_scene,
+					lock_light_toggle_scene,
+				--	auto_load_scene_toggle,
 					usescenesfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton,
@@ -1096,9 +1208,12 @@ _M.dialogposes = iup.dialog {
 			},
 			iup.hbox  {
 				iup.vbox {
-					scenefilter2,
-					scenelist2,
-					refreshscenelistbutton2,
+					album_frame_filter,
+					album_frame_list,
+					iup.hbox {
+						album_refresh_frame_list_button,
+						open_album_button,
+					},
 					expand = "no",
 				},
 				iup.vbox {			
@@ -1117,66 +1232,54 @@ _M.dialogposes = iup.dialog {
 						},
 					}, 
 					iup.hbox {
-						loadscenebutton2,
+						load_album_frame_button,
 						iup.fill { size = 10, },
-						savescenebutton2,
+						save_album_frame_button,
 					},
 					iup.hbox {
-						-- playbackfirstbtn,
+						-- album_goto_first_frame_button,
 						-- iup.fill { size = 2, },
-						playbackprevbtn,
+						album_goto_previous_frame_button,
 						iup.fill { size = 2, },
-						playbacknextbtn,
+						album_goto_next_frame_button,
 						iup.fill { size = 2, },
-						playbackplaypausebtn,
+						album_playback_button,
 						-- iup.fill { size = 2, },
-						-- playbacklastbtn,
+						-- album_goto_last_frame_button,
 					},
 					iup.tabs {
-						iup.hbox{
-							iup.vbox {
-								-- iup.label { title = "Lock ..." },
-								lockfacetoggle3,
-								lockbonestoggle2,
-								lockpropstoggle2,
-								lockcameratoggle2,
-								locklighttoggle2,
-								gap = 3,
-								expand = "horizontal",
-							},
-							expand="yes",
+						iup.vbox {
+							-- iup.label { title = "Lock ..." },
+							lock_face_toggle_album,
+							unlock_bones_toggle_album,
+							lock_props_toggle_album,
+							lock_camera_toggle_album,
+							lock_light_toggle_album,
+							gap = 3,
+							expandchildren = "yes",
 							tabtitle = "Locks",
 						},
-						iup.hbox{							
-							iup.vbox {
-								-- iup.label { title = "Auto" },
-								autorepeattoggle,
-								autoloadscenetoggle,
-								autoplaytoggle,
-								autoloadpropstoggle,
-								autounloadpropstoggle,
-								autoloadcharstoggle,
-								autounloadcharstoggle,
-								gap = 3,
-								expand = "horizontal",
-							},
-							expand="yes",
+						iup.vbox {
+							-- iup.label { title = "Auto" },
+							-- auto_play_toggle,
+							auto_repeat_album_toggle,
+							auto_load_scene_toggle,
+							auto_load_props_toggle,
+							auto_unload_props_toggle,
+							auto_load_chars_toggle,
+							auto_unload_chars_toggle,
+							gap = 3,
+							expandchildren = "yes",
 							tabtitle = "Auto",
 						},
-						expandchildren = "yes",
-						expand = "horizontal",
 						tabtype = "left",
 					},
-					usealbumsfolderbutton,
 					iup.label { title = "Delete scene:" },
 					deletescenebutton2,
 				},
 				tabtitle = "Albums",
 				gap = 3,
 			},
-			tabchangepos_cb = function(self, newpos, oldpos)
-				lock_world = newpos == 0 and lockworldtoggle.value == "ON"
-			end,
 		},
 		thumbnailvbox,
 		iup.fill { size = 3, },
@@ -1205,5 +1308,11 @@ function _M.tpose(character)
 	_M.resetpose(character)
 	character.pose = 0
 end
+
+function _M.albumdir()
+	return albumsdir
+end
+
+_M.albumfilename = getalbumfilename
 
 return _M

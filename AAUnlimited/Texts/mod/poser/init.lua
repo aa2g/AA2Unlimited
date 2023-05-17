@@ -136,6 +136,7 @@ function _M:load()
 		dlg.fullscreen = detect_fs(GetGameHwnd())
 	end
 	propmgr:init()
+	posemgr:init()
 	update_tweaks()
 end
 
