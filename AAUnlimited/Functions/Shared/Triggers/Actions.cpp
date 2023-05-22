@@ -616,6 +616,19 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_preferenceBools[preference] = enable;
 		}
 
+		//int seat, int day, int risk
+		void Thread::SetPregnancyRisk(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, starts every Sunday of the exam week.
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) {
+				return;
+			}
+			else {
+				inst->m_char->m_charData->m_pregnancyRisks[dayOfCycle] = params[2].iVal;
+			}
+		}
 		//int seat, int trait, bool enable
 		void Thread::SetCherryStatus(std::vector<Value>& params)
 		{
@@ -3124,9 +3137,15 @@ namespace Shared {
 			},
 			{
 				143, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Skirt State"), TEXT("%p.SkirtState = %p"),
-				TEXT("Set the clothing state of some card."),
+				TEXT("Set the skirt state of some card. 0 - long, 1 - short, 2 - rolled up, 3 - no skirt"),
 				{ TYPE_INT, TYPE_INT },
 				&Thread::SetSkirtState
+			},
+			{
+				144, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Pregnancy Risk"), TEXT("%p.PregnancyRisk(day: %p) = %p"),
+				TEXT("Set the pregnancy risk on the specified day of the 14 day cycle. 2 = dangerous, 1 = safe, 0 = normal"),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetPregnancyRisk
 			},
 		};
 

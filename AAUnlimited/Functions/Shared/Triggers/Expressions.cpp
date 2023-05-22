@@ -1572,7 +1572,7 @@ namespace Shared {
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(3);
-			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, first Monday is a 1nd day in DaysPassed but 1st index in pregnancyRisks
+			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, starts every Sunday of the exam week.
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) {
 				return 3;
@@ -4038,7 +4038,7 @@ namespace Shared {
 				},
 				{
 					153, EXPRCAT_CHARPROP,
-					TEXT("Get Skirt State"), TEXT("%p.SkirtState"), TEXT("Returns true if the character has their glasses on."),
+					TEXT("Get Skirt State"), TEXT("%p.SkirtState"), TEXT("Returns skirt state of some card. 0 - long, 1 - short, 2 - rolled up, 3 - no skirt"),
 					{ TYPE_INT }, (TYPE_INT),
 					&Thread::GetSkirtState
 				}
