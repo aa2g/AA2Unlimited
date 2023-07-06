@@ -1,6 +1,7 @@
 require "iuplua"
 require "iupluacontrols"
 require "memory"
+require "iupluaim"
 
 local _M = { 
 	visible = false,
@@ -33,6 +34,7 @@ local charamgr = require "poser.charamgr"
 local posemgr = require "poser.posemgr"
 local propmgr = require "poser.propmgr"
 local fileutils = require "poser.fileutils"
+local plList = require 'pl.list'
 local unpack = table.unpack
 
 local boneentries = {}
@@ -62,8 +64,14 @@ local currentslider = dummyslider
 
 local bones = {
 	bonemap = {},
-	bones = {},
-	categories = { },
+	bones = {},	
+	framedata = {	
+		--	[{ 
+		--		frameLocked = { a01_N_Skeleton_010 = "[Skeleton]"|nil },	-- locked bones put in brackets
+		--		frameHidden = {	a01_N_Skeleton_010 = "YES"|"NO"|nil },		-- hidden/unhidden bones capitalized
+		--	}]
+	},
+	categories = {},
 	props = {},
 	rooms = {},
 }
@@ -90,7 +98,7 @@ local characterschanged = signals.signal()
 -- -----------
 
 local bonefilter = lists.listfilter()
-local categorylist = lists.listbox { }
+local categorylist = lists.listbox {}
 local bonelist = lists.listbox {}
 
 local propbonefilter = lists.listfilter()
@@ -102,6 +110,10 @@ local function showframe(frame, show)
 	frame.m_renderFlag = show
 	frame.m_meshFlagHide = show
 end
+
+local btnBoneLockToggle = iup.button { title = "Lock",
+	expand = "horizontal",
+}
 
 local bonelistzbox = iup.zbox {
 	iup.backgroundbox {
@@ -125,6 +137,7 @@ local bonelistzbox = iup.zbox {
 							showframe(currentslider.frame, false)
 						end,
 					},
+					btnBoneLockToggle,
 				},
 				expand = "yes",
 			},
@@ -175,9 +188,43 @@ local categories = {
 	}
 categorylist.setlist(categories)
 
+
+local characterlist = lists.listbox { lines = 8, expand = "yes" }
+
+
+local function lockFrame(frameName, boneName)
+  local idx = tonumber(characterlist.value)
+	
+	if not bones.framedata[idx] then bones.framedata[idx] = { frameLocked = {} } end
+	
+	bones.framedata[idx].frameLocked[frameName] =  "[" .. boneName .. "]"
+	bones.bonemap["[" .. boneName .. "]"] = frameName
+	posemgr.lockBone(idx, frameName,  "[" .. boneName .. "]")	
+end
+
+local function unlockFrame(frameName)		
+  local idx = tonumber(characterlist.value)
+	
+	if not bones.framedata[idx] then bones.framedata[idx] = { frameLocked = {} } end
+	
+	bones.framedata[idx].frameLocked[frameName] = nil
+	posemgr.unlockBone(idx, frameName, bones.framedata[idx].frameLocked[frameName])	
+end
+
+function getFunnyBoneName(unfunnyBoneName, frameName)	
+	local frameName = frameName or bones.bonemap[unfunnyBoneName]
+	local framedata = (bones.framedata or {})[tonumber(characterlist.value)]
+	if framedata ~= nil then
+		local funnyBoneName = framedata.frameLocked[frameName]	-- todo: also capitalize if hidden/unhiddden
+		return funnyBoneName or unfunnyBoneName
+	end
+	return unfunnyBoneName
+end
+
 local function setcategory(category)
 	if category == "All" then
-		bonelist.setlist(bones.bones)
+		local displayList = plList(bones.bones):map(function(defaultName) return getFunnyBoneName(defaultName) end)
+		bonelist.setlist(displayList or {})
 	elseif category == "Props" then
 		local props = {}
 		local character = charamgr.current
@@ -189,19 +236,92 @@ local function setcategory(category)
 		bonelist.setlist(props)
 	elseif category == "Room" then
 		bonelist.setlist({})
-	else
-		bonelist.setlist(bones.categories[category] or {})
+	else	
+		local displayList = plList(bones.categories[category] or {}):map(function(defaultName) return getFunnyBoneName(defaultName) end)
+		bonelist.setlist(displayList or {})
 	end
 end
 setcategory("All")
 
+local function refreshCurrentCategory()
+
+	local category = categories[tonumber(categorylist.value)] or "All"
+
+	-- store current bone selection
+	local sel = tonumber(bonelist.value)
+
+	if category == "All" then		
+		for i,v in ipairs(bones.bones) do			
+			bonelist[i] = getFunnyBoneName(v)			
+		end
+	
+	elseif category == "Props" then
+		local props = {}
+		local character = charamgr.current
+		if character and character.ischaracter then
+			for p,_ in character:props() do
+				table.insert(props, p)
+			end
+		end
+		bonelist.setlist(props)
+	elseif category == "Room" then
+		bonelist.setlist({})
+	else	
+		local displayList = plList(bones.categories[category] or {}):map(function(defaultName) return getFunnyBoneName(defaultName) end)
+		bonelist.setlist(displayList or {})
+		
+				
+		for i,v in ipairs(bones.categories[category] or {}) do			
+			bonelist[i] = getFunnyBoneName(v)
+		end
+	end
+	-- restore current selection
+	bonelist.value = sel
+end
+
 signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
-local characterlist = lists.listbox { lines = 8, expand = "yes" }
+local function toggleLockCurrentBone()
+
+	local currBone = bonelist[bonelist.value];
+	local frame = bones.bonemap[currBone];
+	
+	if currBone ~= nil then
+	
+		local idx = tonumber(characterlist.value)	
+		if bones.framedata[idx] == nil then
+			bones.framedata[idx] = { frameLocked = {} , frameHidden = {} }
+		end	
+	
+		if bones.framedata[idx].frameLocked[frame] ~= nil then
+			-- unlock
+			-- local newBone = string.sub(currBone, 2, -2) 
+			-- renameBone(currBone, newBone)
+			-- bones.framedata[idx].frameLocked[frame] = nil
+			-- posemgr.unlockBone(idx, frame)
+			
+			unlockFrame(frame)
+		else
+			--lock
+			-- local newBone = "[" .. currBone .. "]"
+			-- renameBone(currBone, newBone)
+			-- bones.framedata[idx].frameLocked[frame] = newBone
+			-- posemgr.lockBone(idx, frame, bones.framedata[idx].frameLocked[frame])
+			
+			lockFrame(frame, currBone)
+		end
+		refreshCurrentCategory()
+		
+		-- lockBones()
+	end
+end
+
+btnBoneLockToggle.action = toggleLockCurrentBone
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
+	refreshCurrentCategory()
 	_M.restorecharui()
 end
 signals.connect(characterlist, "selectionchanged", updatecurrentcharacter)
@@ -222,8 +342,25 @@ local function updatecharacterlist()
 end
 signals.connect(charamgr, "characterschanged", updatecharacterlist)
 
-local charswapprevbutton = iup.button { title = "/\\", expand = "vertical", action = function() charamgr.swapprev(tonumber(characterlist.value)) end }
-local charswapnextbutton = iup.button { title = "\\/", expand = "vertical", action = function() charamgr.swapnext(tonumber(characterlist.value)) end }
+local charswapprevbutton = iup.button { title = "/\\", expand = "vertical",
+	action = function()
+		local currIdx = tonumber(characterlist.value)
+		if currIdx > 1 then
+			log.spam("POSER: dlg char swap prev")
+			bones.framedata[currIdx - 1], bones.framedata[currIdx] = bones.framedata[currIdx], bones.framedata[currIdx - 1]
+			charamgr.swapprev(currIdx)
+		end
+	end }
+	
+local charswapnextbutton = iup.button { title = "\\/", expand = "vertical",
+	action = function()
+		local currIdx = tonumber(characterlist.value)
+		if currIdx < tonumber(characterlist.count) then
+			log.spam("POSER: dlg char swap next")
+			bones.framedata[currIdx + 1], bones.framedata[currIdx] = bones.framedata[currIdx], bones.framedata[currIdx + 1]
+			charamgr.swapnext(currIdx)
+		end
+	end }
 
 function characterlist.dropfiles_cb(self, file, num, x, y)
 	local size

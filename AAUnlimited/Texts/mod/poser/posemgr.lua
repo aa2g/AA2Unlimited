@@ -163,6 +163,30 @@ local function setclip(clip)
 end
 clipchanged.connect(setclip)
 
+
+-- local bonelocks = { a01_N_Skeleton_010 = "[Skeleton]" }
+local bonelocks = {}	-- TODO generalize and expand to include other stuff like hidden frames data
+
+function _M.lockBone(idx, frame, name)
+	log.spam("lockBone " .. name .. " = " .. frame)	
+	local chara = charamgr.characters and charamgr.characters[idx] or charamgr.currentcharacter()
+	if chara ~= nil then
+		if bonelocks[chara] == nil then bonelocks[chara] = {} end		
+		bonelocks[chara][frame] = name
+	end
+
+end
+
+function _M.unlockBone(idx, frame)
+	log.spam("unlockBone " .. frame)
+	local chara = charamgr.characters[idx]	
+	if chara ~= nil then
+		if bonelocks[chara] == nil then bonelocks[chara] = {} end
+		bonelocks[chara][frame] = nil
+	end
+end
+
+
 local cliptext
 local posename = iup.text { expand = "horizontal", visiblecolumns = 20 }
 local scenename = iup.text { expand = "horizontal", visiblecolumns = 20 }
@@ -202,6 +226,7 @@ local album_goto_next_frame_button = iup.flatbutton { title = album_playback_lab
 -- local album_goto_last_frame_button = iup.flatbutton { title = album_playback_labels.last, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
 
 local function drawscenethumbnail(dir, filename)
+-- TODO: refresh thumbnail when we open it and when we save a scene or pose
 	log.spam("Poser: drawscenethumbnail: %s", dir .. "\\" .. filename .. ".png")
 	-- don't do anything if the preview window is closed
 	if thumbnailvbox[2].state == "CLOSE" then return end
@@ -354,6 +379,8 @@ function on.poser_saved_thumbnail()
 		file:write(string.pack("<I4", #embed_file))
 		file:write(embed_magic)
 		file:close()
+		log.spam("Thumbnail with data saved")
+	else	
 		log.error("Error saving thumbnail with data! File not found?")
 	end
 	embed_save_path = nil
@@ -426,8 +453,13 @@ local function table2pose(pose, character)
 	end
 	local frame = pose.frame
 	if pose.sliders then
-		for k,v in pairs(pose.sliders) do
-			local slider = not (k == lock_world_bone and get_setting("lock_world")) and character:getslider(k)
+		for k,v in pairs(pose.sliders) do		
+			local slider = not ((k == lock_world_bone and get_setting("lock_world")) or (bonelocks[character] ~= nil and bonelocks[character][k] ~= nil and not get_setting("unlock_bones"))) and character:getslider(k)
+			
+			if bonelocks[character] ~= nil and bonelocks[character][k] ~= nil then
+				log.spam("bonelock enabled [%s]: %s", k, bonelocks[character][k])
+			end
+			
 			if slider then
 				if version == 1 then
 					slider:SetValues(v[1], v[2], v[3])
