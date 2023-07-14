@@ -34,6 +34,7 @@ local charamgr = require "poser.charamgr"
 local posemgr = require "poser.posemgr"
 local propmgr = require "poser.propmgr"
 local fileutils = require "poser.fileutils"
+local camera = require "poser.camera"
 local plList = require 'pl.list'
 local unpack = table.unpack
 
@@ -191,7 +192,34 @@ categorylist.setlist(categories)
 
 local characterlist = lists.listbox { lines = 8, expand = "yes" }
 
+local function snapCamera()	
+ 
+	local character = charamgr.current
+	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
+	log.spam("shifty = %s", currentslider.frame:m_matrix2(13))
+	log.spam("shiftx = %s", currentslider.frame:m_matrix2(14))
+	
+	if character and character.ischaracter == true then	
+		local scene = 
+		posemgr.loadSceneData({ camera = {
+			rotx = currentslider:eulerangle(0),
+			roty = currentslider:eulerangle(1),
+			rotz = currentslider:eulerangle(2),	
+			shiftx = currentslider.frame:m_matrix2(12),
+			shifty = currentslider.frame:m_matrix2(13),
+			shiftx = currentslider.frame:m_matrix2(14),
+			fov = camera.fov,  -- preserve FOV
+			dist_to_mid = 0, -- snap to anchor
+		}})
+	end
+end
 
+local snapcamerabutton = iup.flatbutton { title = "Snap Camera", toggle = "no", border = "yes", padding = 3,
+	flat_action = function()
+		log.spam("snapcamerabutton")
+		snapCamera()
+	end
+ }
 local function lockFrame(frameName, boneName)
   local idx = tonumber(characterlist.value)
 	
@@ -588,7 +616,7 @@ end
 
 local function setcurrentslider(slider)
 	currentslider = slider or dummyslider
-	-- log.spam("Poser: Set slider to %s", currentslider)
+	--log.spam("Poser: Set slider to %s", currentslider)
 	setslidervalues()
 end
 
@@ -986,6 +1014,11 @@ local dialogsliders = iup.dialog {
 								},
 								iup.vbox {
 									resetsliderbutton,
+									alignment = "aright",
+									expand = "horizontal",
+								},
+								iup.vbox {
+									snapcamerabutton,
 									alignment = "aright",
 									expand = "horizontal",
 								},

@@ -538,7 +538,7 @@ local function pose2table(character)
 		t.frame = character.frame
 		local sliders = {}
 		local function tolist(v)
-		  return { v:rotation(0), v:rotation(1), v:rotation(2),	v:rotation(3),
+		  return { v:rotation(0), v:rotation(1), v:rotation(2),	v:rotation(3), 
 				v:translate(0), v:translate(1), v:translate(2),
 				v:scale(0), v:scale(1), v:scale(2) }
 		end
@@ -617,6 +617,84 @@ end
 
 -- == Scenes ==
 
+function _M.loadSceneData(scene)
+	if scene then
+		local characters = scene.characters or {}
+		local props = scene.props or {}
+		
+		local loadedprops = {}
+		for i,v in pairs(propmgr.props) do
+			loadedprops[i] = v
+		end
+		
+		for i,readchara in ipairs(characters) do
+			local chara = charamgr.characters[i]
+			if chara then
+				table2pose(readchara.pose, chara)
+			end
+		end
+		
+		local not_found = {}
+
+		if not get_setting("lock_props") then
+			for i,readprop in ipairs(props) do
+				local find
+				for j,p in pairs(loadedprops) do
+					if p.name == readprop.name then
+						find = j
+						break
+					end
+				end
+				if not find then
+					table.insert(not_found, readprop.name)
+				else
+					find = table.remove(loadedprops, find)
+					if find then
+						for k,v in pairs(readprop.sliders) do
+							local slider = find:getslider(k)
+							if slider then
+								slider:rotation(0,v[1])
+								slider:rotation(1,v[2])
+								slider:rotation(2,v[3])
+								slider:rotation(3,v[4])
+								slider:translate(0,v[5])
+								slider:translate(1,v[6])
+								slider:translate(2,v[7])
+								slider:scale(0,v[8])
+								slider:scale(1,v[9])
+								slider:scale(2,v[10])
+								slider:Apply()
+							end
+						end
+					end
+				end
+			end
+			if #not_found > 0 then
+				log.warn("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
+			end
+		end
+		
+		if not get_setting("lock_camera") then
+			for k,v in pairs(scene.camera or {}) do
+				camera[k] = v
+			end
+		end
+
+		if not get_setting("lock_light") and scene.light then
+			local direction = scene.light.direction
+			for _,character in pairs(charamgr.characters) do
+				local skeleton = character.struct.m_xxSkeleton
+				local lightcount = skeleton.m_lightsCount
+				for i = 1, lightcount, 1 do
+					local light = skeleton:m_lightsArray(i - 1)
+					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+				end
+			end
+		end
+	end
+	
+end
+
 local function loadscene(filename, dir)
 	local isPng = true
 	log.spam("Poser: Loading scene %s\\%s", dir or scenesdir, filename)
@@ -630,80 +708,7 @@ local function loadscene(filename, dir)
 		if not ok then
 			error("Error decoding scene %s data:" % filename)
 		end
-		if scene then
-			local characters = scene.characters or {}
-			local props = scene.props or {}
-			
-			local loadedprops = {}
-			for i,v in pairs(propmgr.props) do
-				loadedprops[i] = v
-			end
-			
-			for i,readchara in ipairs(characters) do
-				local chara = charamgr.characters[i]
-				if chara then
-					table2pose(readchara.pose, chara)
-				end
-			end
-			
-			local not_found = {}
-
-			if not get_setting("lock_props") then
-				for i,readprop in ipairs(props) do
-					local find
-					for j,p in pairs(loadedprops) do
-						if p.name == readprop.name then
-							find = j
-							break
-						end
-					end
-					if not find then
-						table.insert(not_found, readprop.name)
-					else
-						find = table.remove(loadedprops, find)
-						if find then
-							for k,v in pairs(readprop.sliders) do
-								local slider = find:getslider(k)
-								if slider then
-									slider:rotation(0,v[1])
-									slider:rotation(1,v[2])
-									slider:rotation(2,v[3])
-									slider:rotation(3,v[4])
-									slider:translate(0,v[5])
-									slider:translate(1,v[6])
-									slider:translate(2,v[7])
-									slider:scale(0,v[8])
-									slider:scale(1,v[9])
-									slider:scale(2,v[10])
-									slider:Apply()
-								end
-							end
-						end
-					end
-				end
-				if #not_found > 0 then
-					log.warn("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
-				end
-			end
-			
-			if not get_setting("lock_camera") then
-				for k,v in pairs(scene.camera or {}) do
-					camera[k] = v
-				end
-			end
-
-			if not get_setting("lock_light") and scene.light then
-				local direction = scene.light.direction
-				for _,character in pairs(charamgr.characters) do
-					local skeleton = character.struct.m_xxSkeleton
-					local lightcount = skeleton.m_lightsCount
-					for i = 1, lightcount, 1 do
-						local light = skeleton:m_lightsArray(i - 1)
-						light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
-					end
-				end
-			end
-		end
+		_M.loadSceneData(scene)
 	else
 		log.spam("Couldn't find %s\\%s", (dir or scenesdir), filename)
 	end
@@ -773,7 +778,7 @@ local function savescene(filename, dir, list)
 	
 	local c = {}
 	for _,k in ipairs(camera.keys) do
-		c[k] = camera[k]
+		c[k] = camera[k] 
 	end
 	scene.camera = c
 	
