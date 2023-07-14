@@ -218,6 +218,24 @@ namespace Shared {
 			}
 			return Value(false);
 		}
+		Value Thread::GetSkirtState(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ExpressionSeatInvalid(seat)) return Value(-1);
+			auto currchar = AAPlay::g_characters[seat].m_char;
+			if (currchar == nullptr || currchar->m_xxSkirt == nullptr) {
+				return Value(-1);
+			}
+			auto skirtBaseFrame = currchar->m_xxSkirt->FindBone("A00_null_sukato");
+			if (skirtBaseFrame == nullptr) return Value(-1);
+			int skirtCount = skirtBaseFrame->m_nChildren;
+			for (int i = 0; i < skirtCount; ++i) {
+				auto frame = skirtBaseFrame->GetChild(i);
+				if (frame->m_renderFlag == 0) {
+					return Value(i);
+				}
+			}
+			return Value(-1);
+		}
 		Value Thread::GetHighlight(std::vector<Value>& params) {
 			int seat = params[0].iVal;
 			CharInstData* cardInst = &AAPlay::g_characters[seat];
@@ -1554,7 +1572,7 @@ namespace Shared {
 		Value Thread::GetPregnancyRisk(std::vector<Value>& params) {
 			int card = params[0].iVal;
 			if (ExpressionSeatInvalid(card)) return Value(3);
-			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, first Monday is a 1nd day in DaysPassed but 1st index in pregnancyRisks
+			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, starts every Sunday of the exam week.
 			CharInstData* inst = &AAPlay::g_characters[card];
 			if (!inst->IsValid()) {
 				return 3;
@@ -4017,6 +4035,12 @@ namespace Shared {
 					TEXT("Call supplemental lua int function."),
 					{TYPE_STRING}, (TYPE_INT),
 					&Thread::CallLuaIntFunction
+				},
+				{
+					153, EXPRCAT_CHARPROP,
+					TEXT("Get Skirt State"), TEXT("%p.SkirtState"), TEXT("Returns skirt state of some card. 0 - long, 1 - short, 2 - rolled up, 3 - no skirt"),
+					{ TYPE_INT }, (TYPE_INT),
+					&Thread::GetSkirtState
 				}
 			},
 			{ //BOOL

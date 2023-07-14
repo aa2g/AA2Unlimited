@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Files\PersistentStorage.h"
+#include "External/ExternalClasses/Frame.h"
 
 namespace Shared {
 	namespace Triggers {
@@ -615,6 +616,19 @@ namespace Shared {
 			AAPlay::g_characters[seat].m_char->m_charData->m_preferenceBools[preference] = enable;
 		}
 
+		//int seat, int day, int risk
+		void Thread::SetPregnancyRisk(std::vector<Value>& params) {
+			int card = params[0].iVal;
+			if (ActionSeatInvalid(card)) return;
+			int dayOfCycle = (params[1].iVal) % 14; // 2 weeks cycle, starts every Sunday of the exam week.
+			CharInstData* inst = &AAPlay::g_characters[card];
+			if (!inst->IsValid()) {
+				return;
+			}
+			else {
+				inst->m_char->m_charData->m_pregnancyRisks[dayOfCycle] = params[2].iVal;
+			}
+		}
 		//int seat, int trait, bool enable
 		void Thread::SetCherryStatus(std::vector<Value>& params)
 		{
@@ -643,6 +657,30 @@ namespace Shared {
 			}
 			else {
 				AAPlay::g_characters[seat].m_char->Update(state, 0);
+			}
+		}
+
+		void Thread::SetSkirtState(std::vector<Value>& params) {
+			int seat = params[0].iVal;
+			if (ActionSeatInvalid(seat)) return;
+			auto currchar = AAPlay::g_characters[seat].m_char;
+			if (currchar == nullptr || currchar->m_xxSkirt == nullptr) {
+				return;
+			}
+			auto skirtBaseFrame = currchar->m_xxSkirt->FindBone("A00_null_sukato");
+			int skirtCount = skirtBaseFrame->m_nChildren;
+			for (int i = 0; i < skirtCount; ++i) {
+				if (i == params[1].iVal) {
+					auto frame = skirtBaseFrame->GetChild(i);
+					//unhideMeshes(frame);
+					frame->m_renderFlag = 0;
+				}
+				else {
+					auto frame = skirtBaseFrame->GetChild(i);
+					//unhideMeshes(frame);
+					frame->m_renderFlag = 2;
+					//skirtBaseFrame->GetChild(i)->setRenderFlag(2);
+				}
 			}
 		}
 
@@ -3096,6 +3134,18 @@ namespace Shared {
 				TEXT("Toggles condoms on or off, provided CondomOverride is turned on."),
 				{ TYPE_BOOL },
 				&Thread::CondomValue
+			},
+			{
+				143, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Skirt State"), TEXT("%p.SkirtState = %p"),
+				TEXT("Set the skirt state of some card. 0 - long, 1 - short, 2 - rolled up, 3 - no skirt"),
+				{ TYPE_INT, TYPE_INT },
+				&Thread::SetSkirtState
+			},
+			{
+				144, ACTIONCAT_MODIFY_CHARACTER, TEXT("Set Pregnancy Risk"), TEXT("%p.PregnancyRisk(day: %p) = %p"),
+				TEXT("Set the pregnancy risk on the specified day of the 14 day cycle. 2 = dangerous, 1 = safe, 0 = normal"),
+				{ TYPE_INT, TYPE_INT, TYPE_INT },
+				&Thread::SetPregnancyRisk
 			},
 		};
 

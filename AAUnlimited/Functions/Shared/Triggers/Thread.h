@@ -76,8 +76,10 @@ namespace Shared {
 			void SetCardTrait(std::vector<Value>& params);
 			void AddTraitMod(std::vector<Value>& params);
 			void SetCardPreference(std::vector<Value>& params);
+			void SetPregnancyRisk(std::vector<Value>& params);
 			void SetCherryStatus(std::vector<Value>& params);
 			void SetClothingState(std::vector<Value>& params);
+			void SetSkirtState(std::vector<Value>& params);
 			void SetCardPersonality(std::vector<Value>& params);
 			void SetCardVoicePitch(std::vector<Value>& params);
 			void SetCum(std::vector<Value>& params);
@@ -229,6 +231,8 @@ namespace Shared {
 			Value GetTears(std::vector<Value>& params);
 
 			Value GetGlasses(std::vector<Value>& params);
+
+			Value GetSkirtState(std::vector<Value>& params);
 
 			Value GetHighlight(std::vector<Value>& params);
 
