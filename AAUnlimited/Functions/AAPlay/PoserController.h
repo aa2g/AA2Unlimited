@@ -239,6 +239,13 @@ namespace Poser {
 				LUA_METHOD(StopSlide, {
 					_self->stopSlide();
 				});
+				LUA_METHOD(eulerangle, {
+					float angles[3];
+					_self->rotation.getEulerAngles(angles);
+					auto idx = _gl.get(2);
+					_gl.push(angles[idx]);
+					return 1;
+				});
 				LUA_BINDARRE(translate, .value, 3);
 				LUA_BINDARRE(scale, .value, 3);
 				GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, rotation, { \
