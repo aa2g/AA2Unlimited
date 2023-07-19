@@ -1013,12 +1013,12 @@ local dialogsliders = iup.dialog {
 									}
 								},
 								iup.vbox {
-									resetsliderbutton,
+									snapcamerabutton,
 									alignment = "aright",
 									expand = "horizontal",
 								},
 								iup.vbox {
-									snapcamerabutton,
+									resetsliderbutton,
 									alignment = "aright",
 									expand = "horizontal",
 								},

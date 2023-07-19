@@ -58,7 +58,7 @@ local save_restore_ui = false
 
 local settings_state = {
 	lock_camera = false,
-	lock_light = true,
+	lock_light = false,
 	lock_face = false,
 	lock_props = false,
 	lock_world = false,
@@ -123,8 +123,8 @@ local lock_light_toggle_scene = create_settings_toggle("Lock Light", "lock_light
 local lock_light_toggle_album = create_settings_toggle("Lock Light", "lock_light", 1)
 local unlock_bones_toggle_scene = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
 local unlock_bones_toggle_album = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
-unlock_bones_toggle_scene.active = "no"
-unlock_bones_toggle_album.active = "no"
+-- unlock_bones_toggle_scene.active = "no"
+-- unlock_bones_toggle_album.active = "no"
 
 local auto_repeat_album_toggle = create_settings_toggle("Repeat Album", "auto_repeat", 1)
 local auto_load_scene_toggle = create_settings_toggle("Load Selected Scene", "auto_load_scene", 1)
@@ -224,7 +224,7 @@ local album_goto_previous_frame_button = iup.flatbutton { title = album_playback
 local album_playback_button = iup.flatbutton { title = album_playback_labels.play, border="yes", toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
 local album_goto_next_frame_button = iup.flatbutton { title = album_playback_labels.next, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
 -- local album_goto_last_frame_button = iup.flatbutton { title = album_playback_labels.last, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
-local album_scene_interpolate_button = iup.flatbutton { title = "Interpolate", expand = "horizontal" }
+local album_scene_interpolate_button = iup.flatbutton { title = "Interpolate" }
 local album_scene_interpolate_slider = iup.val { orientation = "horizontal", value = 0.5, expand = "horizontal" }
 local album_scene_interpolate_slider_text = iup.text {
 	value = tostring(album_scene_interpolate_slider.value),
@@ -947,18 +947,15 @@ _M.interpolateScene = function(scene)
 						for k,v in pairs(readprop.sliders) do
 							local slider = find:getslider(k)
 							if slider then
+								slerpSlider(slider, {v[1], v[2], v[3], v[4]}, interpolationValue);
 
-								-- slerpSlider(slider, {v[1], v[2], v[3], v[4]}, interpolationValue);
-								-- slider:rotation(0, v[1])
-								-- slider:rotation(1, v[2])
-								-- slider:rotation(2, v[3])
-								-- slider:rotation(3, v[4])
-								-- slider:translate(0, slider:translate(0) + (slider:translate(0) + v[5]) * interpolationValue)
-								-- slider:translate(1, slider:translate(1) + (slider:translate(1) + v[6]) * interpolationValue)
-								-- slider:translate(2, slider:translate(2) + (slider:translate(2) + v[7]) * interpolationValue)
-								-- slider:scale(0, slider:scale(0) + (slider:scale(0) + v[8]) * interpolationValue)
-								-- slider:scale(1, slider:scale(1) + (slider:scale(1) + v[9]) * interpolationValue)
-								-- slider:scale(2, slider:scale(2) + (slider:scale(2) + v[10]) * interpolationValue)
+								slider:translate(0, slider:translate(0) + (v[5] - slider:translate(0)) * interpolationValue)
+								slider:translate(1, slider:translate(1) + (v[6] - slider:translate(1)) * interpolationValue)
+								slider:translate(2, slider:translate(2) + (v[7] - slider:translate(2)) * interpolationValue)
+								
+								slider:scale(0, slider:scale(0) + (v[8] - slider:scale(0)) * interpolationValue)
+								slider:scale(1, slider:scale(1) + (v[9] - slider:scale(1)) * interpolationValue)
+								slider:scale(2, slider:scale(2) + (v[10] - slider:scale(2)) * interpolationValue)
 
 								slider:Apply()
 							end
@@ -1462,17 +1459,17 @@ _M.dialogposes = iup.dialog {
 							lock_light_toggle_album,
 							gap = 3,
 							expandchildren = "yes",
-							tabtitle = "Locks",
+							tabtitle = "Lock",
 						},
 						iup.vbox {
 							-- iup.label { title = "Auto" },
 							-- auto_play_toggle,
 							auto_repeat_album_toggle,
 							auto_load_scene_toggle,
-							auto_load_props_toggle,
-							auto_unload_props_toggle,
-							auto_load_chars_toggle,
-							auto_unload_chars_toggle,
+							-- auto_load_props_toggle,
+							-- auto_unload_props_toggle,
+							-- auto_load_chars_toggle,
+							-- auto_unload_chars_toggle,
 							gap = 3,
 							expandchildren = "yes",
 							tabtitle = "Auto",
