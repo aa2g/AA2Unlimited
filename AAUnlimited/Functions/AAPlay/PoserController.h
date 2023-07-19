@@ -26,6 +26,7 @@
 #include "../Shared/Globals.h"
 #include "../../3rdparty/picojson/picojson.h"
 #include "Script/glua_stl.h"
+#include <DirectXMath.h>
 
 namespace Poser {
 
@@ -291,6 +292,8 @@ namespace Poser {
 
 			void LoadCloth(const char *file);
 
+			void QuatSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value);
+
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
@@ -321,6 +324,18 @@ namespace Poser {
 						}
 					}
 					return 0;
+				});
+				LUA_METHOD(QuatSlerp, {
+					auto q1 = _gl.get(2); // slider
+					auto a2 = _gl.get(3); // rotQ
+					D3DXQUATERNION q2;
+					q2.x = a2[1];
+					q2.y = a2[2];
+					q2.z = a2[3];
+					q2.w = a2[4];
+					auto val = _gl.get(4);// value
+					_self->QuatSlerp(q1, q2, val); 
+					
 				});
 				LUA_METHOD(SetHidden, {
 					_self->SetHidden(_gl.get(2), _gl.get(3));

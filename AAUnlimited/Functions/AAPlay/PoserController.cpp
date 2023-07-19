@@ -113,7 +113,7 @@ namespace Poser {
 		m_characters.resize(25);
 	}
 
-	PoserController::~PoserController()	{
+	PoserController::~PoserController() {
 	}
 
 	void PoserController::StartPoser() {
@@ -216,7 +216,7 @@ namespace Poser {
 						bone->SetFrame(boneFrame->m_children);
 					}
 				}
-			});
+				});
 		}
 	}
 
@@ -293,7 +293,7 @@ namespace Poser {
 	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter) {
 		PoserController::SliderInfo* slider;
 		ExtClass::Frame* modFrame;
-		size_t len = filter? strlen(filter) : 0;
+		size_t len = filter ? strlen(filter) : 0;
 
 		tree->EnumTreeLevelOrder([this, &slider, &modFrame, &source, &filter, &len](ExtClass::Frame* frame) {
 			// skip body slider bones
@@ -335,7 +335,7 @@ namespace Poser {
 				slider = nullptr;
 			}
 			return true;
-		});
+			});
 	}
 
 	void PoserController::PoserCharacter::FrameModSkeleton(ExtClass::XXFile* xxFile) {
@@ -358,7 +358,7 @@ namespace Poser {
 						slider->guide = frame;
 					}
 				}
-				if(isProp) {
+				if (isProp) {
 					// Search for this frame slider if it exists
 					slider = GetSlider(frame->m_name);
 					// If it doesn't exist we create a new one and claim it for this model source
@@ -383,7 +383,7 @@ namespace Poser {
 					slider = nullptr;
 				}
 				return true;
-			});
+				});
 		}
 
 		ExtClass::Frame* dankon = root->FindFrame("a_J_dan00");
@@ -463,7 +463,7 @@ namespace Poser {
 			root->EnumTreeLevelOrder([&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 				auto MakeSlider = [&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 					// Search for this frame slider if it exists
-					SliderInfo *slider = prop->GetSlider(frame->m_name);
+					SliderInfo* slider = prop->GetSlider(frame->m_name);
 					// If it doesn't exist we create a new one and claim it for this model source
 					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 					if (!slider) {
@@ -496,7 +496,7 @@ namespace Poser {
 					MakeSlider(frame);
 				}
 				return true;
-			});
+				});
 		}
 	}
 
@@ -523,8 +523,8 @@ namespace Poser {
 		}
 		return poserCharacter;
 	}
-	
-	void PoserController::PoserCharacter::LoadCloth(const char *file) {
+
+	void PoserController::PoserCharacter::LoadCloth(const char* file) {
 		ClothFile load(file);
 		if (!load.IsValid()) return;
 		ExtClass::CharacterData::Clothes* cloth = &m_character->m_charData->m_clothes[m_character->m_currClothes];
@@ -558,6 +558,22 @@ namespace Poser {
 		cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
 	}
 
+	void PoserController::PoserCharacter::QuatSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value)
+	{
+		auto r1 = slider->getRotation();
+		DirectX::XMFLOAT4 q1(r1.x, r1.y, r1.z, r1.w);
+		DirectX::XMFLOAT4 q2(rotQ.x, rotQ.y, rotQ.z, rotQ.w);// get the target quat
+		
+		auto ret = DirectX::XMQuaternionSlerp(DirectX::XMQuaternionNormalize(XMLoadFloat4(&q1)), DirectX::XMQuaternionNormalize(XMLoadFloat4(&q2)), value);
+		D3DXQUATERNION out;
+		out.x = DirectX::XMVectorGetX(ret),
+		out.y = DirectX::XMVectorGetY(ret),
+		out.z = DirectX::XMVectorGetZ(ret),
+		out.w = DirectX::XMVectorGetW(ret);
+		slider->rotation.setRotationQuaternion(out);
+		//this->GetSlider(frameName)->Apply();
+	}
+
 	std::wstring PoserController::GetOverride(const std::wstring& file) {
 		//A00_00_01_00h.xx - skeleton
 		/*if (m_useGuides && file.length() == 16 && General::StartsWith(file, L"A00_00") && file.substr(10, 6) == L"00h.xx") {
@@ -575,7 +591,7 @@ namespace Poser {
 		return std::wstring();
 	}
 
-	void PoserController::SetOverride(const std::wstring& file, const std::wstring& override) {
+	void PoserController::SetOverride(const std::wstring& file, const std::wstring & override) {
 		if (override.empty()) {
 			m_overrides.erase(file);
 		}
