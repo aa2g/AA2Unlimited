@@ -195,21 +195,22 @@ local characterlist = lists.listbox { lines = 8, expand = "yes" }
 local function snapCamera()	
  
 	local character = charamgr.current
-	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
+	log.spam("shiftz = %s", currentslider.frame:m_matrix2(14))
 	log.spam("shifty = %s", currentslider.frame:m_matrix2(13))
-	log.spam("shiftx = %s", currentslider.frame:m_matrix2(14))
+	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
 	
 	if character and character.ischaracter == true then	
-		local scene = 
 		posemgr.loadSceneData({ camera = {
 			rotx = currentslider:eulerangle(0),
 			roty = currentslider:eulerangle(1),
 			rotz = currentslider:eulerangle(2),	
-			shiftx = currentslider.frame:m_matrix2(12),
-			shifty = currentslider.frame:m_matrix2(13),
 			shiftx = currentslider.frame:m_matrix2(14),
+			shifty = currentslider.frame:m_matrix2(13),
+			shiftz = currentslider.frame:m_matrix2(12),
 			fov = camera.fov,  -- preserve FOV
-			dist_to_mid = 0, -- snap to anchor
+			-- dist_to_mid = 0, -- snap to anchor
+			dist_to_mid = camera.dist_to_mid, -- keep current
+			-- dist_to_mid = currentslider:scale(2), -- use z scale as dist_to_mid
 		}})
 	end
 end
