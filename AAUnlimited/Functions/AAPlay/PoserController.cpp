@@ -12,6 +12,35 @@ namespace Poser {
 #define Z 2
 #define W 3
 
+	void PoserController::PoserCharacter::quat2euler(D3DXQUATERNION q, FLOAT* out)
+	{
+		float yy = q.y * q.y;
+
+		float t0 = 2.0f * (q.w * q.x + q.y * q.z);
+		float t1 = 1.0f - 2.0f * (q.x * q.x + yy);
+		out[0] = std::atan2(t0, t1);
+
+		float t2 = 2.0f * (q.w * q.y - q.z * q.x);
+		t2 = t2 > 1.0f ? 1.0f : t2;
+		t2 = t2 < -1.0f ? -1.0f : t2;
+		out[1] = std::asin(t2);
+
+		float t3 = 2.0f * (q.w * q.z + q.x * q.y);
+		float t4 = 1.0f - 2.0f * (yy + q.z * q.z);
+		out[2] = std::atan2(t3, t4);
+	}
+
+	D3DXQUATERNION PoserController::PoserCharacter::euler2quat(FLOAT* angle)
+	{
+		auto q = DirectX::XMQuaternionRotationRollPitchYaw(angle[X], angle[Y], angle[Z]);
+		D3DXQUATERNION ret;
+		ret.x = DirectX::XMVectorGetX(q);
+		ret.y = DirectX::XMVectorGetY(q);
+		ret.z = DirectX::XMVectorGetZ(q);
+		ret.w = DirectX::XMVectorGetW(q);
+		return ret;
+	}
+
 	void PoserController::SliderInfo::setValue(int axis, float value) {
 		if (currentOperation == Rotate) {
 			float angle[3];
@@ -558,20 +587,27 @@ namespace Poser {
 		cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
 	}
 
-	void PoserController::PoserCharacter::QuatSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value)
+	void PoserController::PoserCharacter::QuatSliderSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value)
 	{
-		auto r1 = slider->getRotation();
-		DirectX::XMFLOAT4 q1(r1.x, r1.y, r1.z, r1.w);
-		DirectX::XMFLOAT4 q2(rotQ.x, rotQ.y, rotQ.z, rotQ.w);// get the target quat
-		
-		auto ret = DirectX::XMQuaternionSlerp(DirectX::XMQuaternionNormalize(XMLoadFloat4(&q1)), DirectX::XMQuaternionNormalize(XMLoadFloat4(&q2)), value);
+		slider->rotation.setRotationQuaternion(QuatSlerp(slider->getRotation(), rotQ, value));
+	}
+
+	D3DXQUATERNION PoserController::PoserCharacter::QuatSlerp(D3DXQUATERNION q1, D3DXQUATERNION q2, float value)
+	{
+		DirectX::XMFLOAT4 dxq1(q1.x, q1.y, q1.z, q1.w);
+		DirectX::XMFLOAT4 dxq2(q2.x, q2.y, q2.z, q2.w);// get the target quat
+
+		auto ret = DirectX::XMQuaternionSlerp(
+			DirectX::XMQuaternionNormalize(XMLoadFloat4(&dxq1)),
+			DirectX::XMQuaternionNormalize(XMLoadFloat4(&dxq2)),
+			value);
 		D3DXQUATERNION out;
 		out.x = DirectX::XMVectorGetX(ret),
 		out.y = DirectX::XMVectorGetY(ret),
 		out.z = DirectX::XMVectorGetZ(ret),
 		out.w = DirectX::XMVectorGetW(ret);
-		slider->rotation.setRotationQuaternion(out);
-		//this->GetSlider(frameName)->Apply();
+
+		return out;
 	}
 
 	std::wstring PoserController::GetOverride(const std::wstring& file) {

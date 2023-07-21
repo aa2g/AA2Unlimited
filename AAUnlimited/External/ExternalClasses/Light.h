@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "Script/ScriptLua.h"
+#include <DirectXMath.h>
 
 namespace ExtClass {
 
@@ -89,14 +90,26 @@ namespace ExtClass {
 			LUA_BINDARR(m_origLightArray);
 			LUA_BINDARR(m_lightArray);
 			LUA_METHOD(SetLightDirection, {
-				float x = _gl.get(2);
-				float y = _gl.get(3);
-				float z = _gl.get(4);
-				float w = _gl.get(5);
-				_self->m_lightMatrix[2][0] = x;
-				_self->m_lightMatrix[2][1] = y;
-				_self->m_lightMatrix[2][2] = z;
-				_self->m_lightMatrix[2][3] = w;
+				float newX = _gl.get(2);
+				float newY = _gl.get(3);
+				float newZ = _gl.get(4);
+				float newW = _gl.get(5);
+				float interpolationValue = _gl.get(6);
+				float oldX = _self->m_lightMatrix[2][0];
+				float oldY = _self->m_lightMatrix[2][1];
+				float oldZ = _self->m_lightMatrix[2][2];
+				float oldW = _self->m_lightMatrix[2][3];
+				// quat
+				DirectX::XMFLOAT4 q1(oldX, oldY, oldZ, oldW);
+				DirectX::XMFLOAT4 q2(newX, newY, newZ, newW);
+				auto ret = DirectX::XMQuaternionSlerp(
+					DirectX::XMQuaternionNormalize(XMLoadFloat4(&q1)),
+					DirectX::XMQuaternionNormalize(XMLoadFloat4(&q2)),
+					interpolationValue);
+				_self->m_lightMatrix[2][0] = DirectX::XMVectorGetX(ret);
+				_self->m_lightMatrix[2][1] = DirectX::XMVectorGetY(ret);
+				_self->m_lightMatrix[2][2] = DirectX::XMVectorGetZ(ret);
+				_self->m_lightMatrix[2][3] = DirectX::XMVectorGetW(ret);
 			});
 			LUA_METHOD(SetLightMaterialColor, {
 				int material = _gl.get(2);

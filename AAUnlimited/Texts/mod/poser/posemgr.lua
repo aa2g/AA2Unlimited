@@ -453,7 +453,7 @@ local function readfile(path)
 end
 
 local function slerpSlider(slider, q, val)
-	charamgr.current:quatslerp(slider, q, val)
+	charamgr.current:quatsliderslerp(slider, q, val)
 end
 
 local function table2poseInterpolated(pose, character, interpolation)
@@ -753,7 +753,7 @@ function _M.loadSceneData(scene)
 				local lightcount = skeleton.m_lightsCount
 				for i = 1, lightcount, 1 do
 					local light = skeleton:m_lightsArray(i - 1)
-					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4], 1.0)
 				end
 			end
 		end
@@ -969,9 +969,31 @@ _M.interpolateScene = function(scene)
 		end
 		
 		if not get_setting("lock_camera") then
-			for k,v in pairs(scene.camera or {}) do
-				camera[k] = v
-			end
+			
+			log.spam("interpolateScene: original camera eu: [%s, %s, %s]", camera.rotx, camera.roty, camera.rotz);
+			log.spam("interpolateScene:   target camera eu: [%s, %s, %s]", scene.camera.rotx, scene.camera.roty, scene.camera.rotz);
+			local oldX, oldY, oldZ, oldW = charamgr.current:euler2quat({ camera.rotx, camera.roty, camera.rotz })
+			log.spam("interpolateScene: camera old qu: [%s, %s, %s, %s]", oldX, oldY, oldZ, oldW);
+			local newX, newY, newZ, newW = charamgr.current:euler2quat({ scene.camera.rotx, scene.camera.roty, scene.camera.rotz })
+			log.spam("interpolateScene: camera new qu: [%s, %s, %s, %s]", newX, newY, newZ, newW);
+			local outqX, outqY, outqZ, outqW = charamgr.current:quatslerp(
+				{ oldX, oldY, oldZ, oldW },
+				{ newX, newY, newZ, newW },
+				interpolationValue);
+			log.spam("interpolateScene: camera in: [%s, %s, %s, %s]", outqX, outqY, outqZ, outqW);
+			local qx, qy, qz = charamgr.current:quat2euler({outqX, outqY, outqZ, outqW});
+			camera.rotx = qx
+			camera.roty = qy
+			camera.rotz = qz
+			
+			log.spam("interpolateScene: result euler camera: [%s, %s, %s]", qx, qy, qz);
+
+			camera.shiftx = camera.shiftx + (scene.camera.shiftx - camera.shiftx) * interpolationValue
+			camera.shifty = camera.shifty + (scene.camera.shifty - camera.shifty) * interpolationValue
+			camera.shiftz = camera.shiftz + (scene.camera.shiftz - camera.shiftz) * interpolationValue
+
+			camera.fov = camera.fov + (scene.camera.fov - camera.fov) * interpolationValue
+			camera.dist_to_mid = camera.dist_to_mid + (scene.camera.dist_to_mid - camera.dist_to_mid) * interpolationValue -- use x scale ratio to modify current distance
 		end
 
 		if not get_setting("lock_light") and scene.light then
@@ -981,7 +1003,7 @@ _M.interpolateScene = function(scene)
 				local lightcount = skeleton.m_lightsCount
 				for i = 1, lightcount, 1 do
 					local light = skeleton:m_lightsArray(i - 1)
-					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4], interpolationValue)
 				end
 			end
 		end

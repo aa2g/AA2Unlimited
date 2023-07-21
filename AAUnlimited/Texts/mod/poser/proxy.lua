@@ -5,7 +5,7 @@ local facekeys = { eye = { "m_eye" }, eyeopen = { "m_eyeOpenMax", "m_eyeOpenMin"
 local skelkeys = { pose = "m_poseNumber", frame = "m_animFrame", skelname = "m_name" }
 local charkeys = { clothtype = "m_currClothes", clothstate = "m_clothState", materialslot = "m_materialSlot" }
 local structfuncs = { destroy = "Destroy", unload = "Unload", update = "Update", spawn = "Spawn" }
-local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props", loadcloth = "LoadCloth", quatslerp = "QuatSlerp" }
+local poserfuncs = { getslider = "GetSlider", sliders = "Sliders", override = "Override", props = "Props", loadcloth = "LoadCloth", quatsliderslerp = "QuatSliderSlerp", quatslerp = "QuatSlerp", quat2euler = "quat2euler", euler2quat = "euler2quat" }
 
 function _M.wrap(entity, entmgr)
 	log.spam("Poser: Wrapping %s", entity)

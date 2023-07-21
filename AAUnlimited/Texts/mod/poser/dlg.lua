@@ -200,6 +200,7 @@ local function snapCamera()
 	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
 	
 	if character and character.ischaracter == true then	
+		local scene = 
 		posemgr.loadSceneData({ camera = {
 			rotx = currentslider:eulerangle(0),
 			roty = currentslider:eulerangle(1),
@@ -209,8 +210,9 @@ local function snapCamera()
 			shiftz = currentslider.frame:m_matrix2(12),
 			fov = camera.fov,  -- preserve FOV
 			-- dist_to_mid = 0, -- snap to anchor
-			dist_to_mid = camera.dist_to_mid, -- keep current
-			-- dist_to_mid = currentslider:scale(2), -- use z scale as dist_to_mid
+			-- dist_to_mid = camera.dist_to_mid, -- keep current distance
+			-- dist_to_mid = currentslider:scale(0), -- use x scale as dist_to_mid
+			dist_to_mid = currentslider:scale(0) * camera.dist_to_mid, -- use x scale ratio to modify current distance
 		}})
 	end
 end
