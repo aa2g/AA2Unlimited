@@ -112,7 +112,10 @@ local function showframe(frame, show)
 	frame.m_meshFlagHide = show
 end
 
-local btnBoneLockToggle = iup.button { title = "Lock",
+local btnBoneLockToggle = iup.button { title = "🔒 Selected",
+	expand = "horizontal",
+}
+local btnFilteredBoneLockToggle = iup.button { title = "🔒 Filtered",
 	expand = "horizontal",
 }
 
@@ -138,7 +141,11 @@ local bonelistzbox = iup.zbox {
 							showframe(currentslider.frame, false)
 						end,
 					},
+				},
+				iup.hbox {
+					-- iup.label { title = "Toggle Lock" },
 					btnBoneLockToggle,
+					btnFilteredBoneLockToggle,
 				},
 				expand = "yes",
 			},
@@ -313,42 +320,35 @@ end
 signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
-local function toggleLockCurrentBone()
-
-	local currBone = bonelist[bonelist.value];
-	local frame = bones.bonemap[currBone];
+local function toggleLockBone(currBone)
 	
-	if currBone ~= nil then
-	
+	if currBone ~= nil then	
+		local frame = bones.bonemap[currBone];
 		local idx = tonumber(characterlist.value)	
 		if bones.framedata[idx] == nil then
 			bones.framedata[idx] = { frameLocked = {} , frameHidden = {} }
 		end	
 	
 		if bones.framedata[idx].frameLocked[frame] ~= nil then
-			-- unlock
-			-- local newBone = string.sub(currBone, 2, -2) 
-			-- renameBone(currBone, newBone)
-			-- bones.framedata[idx].frameLocked[frame] = nil
-			-- posemgr.unlockBone(idx, frame)
-			
 			unlockFrame(frame)
 		else
-			--lock
-			-- local newBone = "[" .. currBone .. "]"
-			-- renameBone(currBone, newBone)
-			-- bones.framedata[idx].frameLocked[frame] = newBone
-			-- posemgr.lockBone(idx, frame, bones.framedata[idx].frameLocked[frame])
-			
 			lockFrame(frame, currBone)
 		end
-		refreshCurrentCategory()
 		
-		-- lockBones()
 	end
 end
 
-btnBoneLockToggle.action = toggleLockCurrentBone
+btnBoneLockToggle.action = function()
+	toggleLockBone(bonelist[bonelist.value]);
+	refreshCurrentCategory()
+end
+
+btnFilteredBoneLockToggle.action = function()
+	for i, v in ipairs(bonelist) do
+		toggleLockBone(v);
+	end
+	refreshCurrentCategory()
+end
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
