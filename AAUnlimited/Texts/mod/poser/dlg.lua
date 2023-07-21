@@ -112,7 +112,10 @@ local function showframe(frame, show)
 	frame.m_meshFlagHide = show
 end
 
-local btnBoneLockToggle = iup.button { title = "Lock",
+local btnBoneLockToggle = iup.button { title = "🔒 Selected",
+	expand = "horizontal",
+}
+local btnFilteredBoneLockToggle = iup.button { title = "🔒 Filtered",
 	expand = "horizontal",
 }
 
@@ -138,7 +141,11 @@ local bonelistzbox = iup.zbox {
 							showframe(currentslider.frame, false)
 						end,
 					},
+				},
+				iup.hbox {
+					-- iup.label { title = "Toggle Lock" },
 					btnBoneLockToggle,
+					btnFilteredBoneLockToggle,
 				},
 				expand = "yes",
 			},
@@ -195,9 +202,9 @@ local characterlist = lists.listbox { lines = 8, expand = "yes" }
 local function snapCamera()	
  
 	local character = charamgr.current
-	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
+	log.spam("shiftz = %s", currentslider.frame:m_matrix2(14))
 	log.spam("shifty = %s", currentslider.frame:m_matrix2(13))
-	log.spam("shiftx = %s", currentslider.frame:m_matrix2(14))
+	log.spam("shiftx = %s", currentslider.frame:m_matrix2(12))
 	
 	if character and character.ischaracter == true then	
 		local scene = 
@@ -205,11 +212,14 @@ local function snapCamera()
 			rotx = currentslider:eulerangle(0),
 			roty = currentslider:eulerangle(1),
 			rotz = currentslider:eulerangle(2),	
-			shiftx = currentslider.frame:m_matrix2(12),
-			shifty = currentslider.frame:m_matrix2(13),
 			shiftx = currentslider.frame:m_matrix2(14),
+			shifty = currentslider.frame:m_matrix2(13),
+			shiftz = currentslider.frame:m_matrix2(12),
 			fov = camera.fov,  -- preserve FOV
-			dist_to_mid = 0, -- snap to anchor
+			-- dist_to_mid = 0, -- snap to anchor
+			-- dist_to_mid = camera.dist_to_mid, -- keep current distance
+			-- dist_to_mid = currentslider:scale(0), -- use x scale as dist_to_mid
+			dist_to_mid = currentslider:scale(0) * camera.dist_to_mid, -- use x scale ratio to modify current distance
 		}})
 	end
 end
@@ -310,42 +320,35 @@ end
 signals.connect(categorylist, "selectionchanged", setcategory)
 signals.connect(bonefilter, "setfilter", bonelist, "setfilter")
 
-local function toggleLockCurrentBone()
-
-	local currBone = bonelist[bonelist.value];
-	local frame = bones.bonemap[currBone];
+local function toggleLockBone(currBone)
 	
-	if currBone ~= nil then
-	
+	if currBone ~= nil then	
+		local frame = bones.bonemap[currBone];
 		local idx = tonumber(characterlist.value)	
 		if bones.framedata[idx] == nil then
 			bones.framedata[idx] = { frameLocked = {} , frameHidden = {} }
 		end	
 	
 		if bones.framedata[idx].frameLocked[frame] ~= nil then
-			-- unlock
-			-- local newBone = string.sub(currBone, 2, -2) 
-			-- renameBone(currBone, newBone)
-			-- bones.framedata[idx].frameLocked[frame] = nil
-			-- posemgr.unlockBone(idx, frame)
-			
 			unlockFrame(frame)
 		else
-			--lock
-			-- local newBone = "[" .. currBone .. "]"
-			-- renameBone(currBone, newBone)
-			-- bones.framedata[idx].frameLocked[frame] = newBone
-			-- posemgr.lockBone(idx, frame, bones.framedata[idx].frameLocked[frame])
-			
 			lockFrame(frame, currBone)
 		end
-		refreshCurrentCategory()
 		
-		-- lockBones()
 	end
 end
 
-btnBoneLockToggle.action = toggleLockCurrentBone
+btnBoneLockToggle.action = function()
+	toggleLockBone(bonelist[bonelist.value]);
+	refreshCurrentCategory()
+end
+
+btnFilteredBoneLockToggle.action = function()
+	for i, v in ipairs(bonelist) do
+		toggleLockBone(v);
+	end
+	refreshCurrentCategory()
+end
 
 local function updatecurrentcharacter(_, index)
 	charamgr.setcurrentcharacter(tonumber(index))
@@ -1013,12 +1016,12 @@ local dialogsliders = iup.dialog {
 									}
 								},
 								iup.vbox {
-									resetsliderbutton,
+									snapcamerabutton,
 									alignment = "aright",
 									expand = "horizontal",
 								},
 								iup.vbox {
-									snapcamerabutton,
+									resetsliderbutton,
 									alignment = "aright",
 									expand = "horizontal",
 								},

@@ -58,7 +58,7 @@ local save_restore_ui = false
 
 local settings_state = {
 	lock_camera = false,
-	lock_light = true,
+	lock_light = false,
 	lock_face = false,
 	lock_props = false,
 	lock_world = false,
@@ -123,15 +123,15 @@ local lock_light_toggle_scene = create_settings_toggle("Lock Light", "lock_light
 local lock_light_toggle_album = create_settings_toggle("Lock Light", "lock_light", 1)
 local unlock_bones_toggle_scene = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
 local unlock_bones_toggle_album = create_settings_toggle("Unlock Bones", "unlock_bones", 1)
-unlock_bones_toggle_scene.active = "no"
-unlock_bones_toggle_album.active = "no"
+-- unlock_bones_toggle_scene.active = "no"
+-- unlock_bones_toggle_album.active = "no"
 
 local auto_repeat_album_toggle = create_settings_toggle("Repeat Album", "auto_repeat", 1)
 local auto_load_scene_toggle = create_settings_toggle("Load Selected Scene", "auto_load_scene", 1)
 local auto_load_props_toggle = create_settings_toggle("Load Props", "auto_load_props", 1)
-local auto_unload_props_toggle = create_settings_toggle("Load Props", "auto_unload_props", 1)
+local auto_unload_props_toggle = create_settings_toggle("Unload Props", "auto_unload_props", 1)
 local auto_load_chars_toggle = create_settings_toggle("Load Characters", "auto_load_chars", 1)
-local auto_unload_chars_toggle = create_settings_toggle("Load Characters", "auto_unload_chars", 1)
+local auto_unload_chars_toggle = create_settings_toggle("Unload Characters", "auto_unload_chars", 1)
 auto_load_props_toggle.active = "no"
 auto_unload_props_toggle.active = "no"
 auto_load_chars_toggle.active = "no"
@@ -224,6 +224,14 @@ local album_goto_previous_frame_button = iup.flatbutton { title = album_playback
 local album_playback_button = iup.flatbutton { title = album_playback_labels.play, border="yes", toggle = "yes", expand = "horizontal", padding = 3, size = "15x12"  }
 local album_goto_next_frame_button = iup.flatbutton { title = album_playback_labels.next, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
 -- local album_goto_last_frame_button = iup.flatbutton { title = album_playback_labels.last, border="yes", expand = "horizontal", padding = 3, size = "15x12"  }
+local album_scene_interpolate_button = iup.flatbutton { title = "Interpolate" }
+local album_scene_interpolate_slider = iup.val { orientation = "horizontal", value = 0.5, expand = "horizontal" }
+local album_scene_interpolate_slider_text = iup.text {
+	value = tostring(album_scene_interpolate_slider.value),
+	valuechanged_cb = function(self) if tonumber(self.value) then album_scene_interpolate_slider.value = tonumber(self.value) end end
+}
+album_scene_interpolate_slider.valuechanged_cb = function() album_scene_interpolate_slider_text.value = tostring(album_scene_interpolate_slider.value) end
+
 
 local function drawscenethumbnail(dir, filename)
 -- TODO: refresh thumbnail when we open it and when we save a scene or pose
@@ -442,6 +450,64 @@ local function readfile(path)
 	local data = file:read "*a"
 	file:close()
 	return data
+end
+
+local function slerpSlider(slider, q, val)
+	charamgr.current:quatsliderslerp(slider, q, val)
+end
+
+local function table2poseInterpolated(pose, character, interpolation)
+	local version = pose._VERSION_ or 1
+	local clip = pose.pose
+	if clip then
+		character:setclip(clip)
+		cliptext.value = clip
+	end
+	local frame = pose.frame
+	if pose.sliders then
+		for k,v in pairs(pose.sliders) do		
+			local slider = not ((k == lock_world_bone and get_setting("lock_world")) or (bonelocks[character] ~= nil and bonelocks[character][k] ~= nil and not get_setting("unlock_bones"))) and character:getslider(k)
+			
+			if bonelocks[character] ~= nil and bonelocks[character][k] ~= nil then
+				log.spam("bonelock enabled [%s]: %s", k, bonelocks[character][k])
+			end
+			
+			if slider then
+				if version == 1 then
+					slider:SetValues(v[1], v[2], v[3])
+				else
+					slerpSlider(slider, { v[1], v[2], v[3], v[4] }, interpolation)
+				end
+				slider:translate(0, slider:translate(0) + (v[3 + version] - slider:translate(0)) * interpolation)
+				slider:translate(1, slider:translate(1) + (v[4 + version] - slider:translate(1)) * interpolation)
+				slider:translate(2, slider:translate(2) + (v[5 + version] - slider:translate(2)) * interpolation)
+				
+				slider:scale(0,slider:scale(0) + (v[6 + version] - slider:scale(0)) * interpolation)
+				slider:scale(1,slider:scale(1) + (v[7 + version] - slider:scale(1)) * interpolation)
+				slider:scale(2,slider:scale(2) + (v[8 + version] - slider:scale(2)) * interpolation)
+
+				slider:Apply()
+			end
+		end
+	end
+	local face = pose.face
+	if face and not get_setting("lock_face") then
+		if face.mouth then character.mouth = face.mouth end
+		if face.mouthopen then character.mouthopen = face.mouthopen end
+		if face.eye then character.eye = face.eye end
+		if face.eyeopen then character.eyeopen = face.eyeopen end
+		if face.eyebrow then character.eyebrow = face.eyebrow end
+
+		local facestruct = character.struct.m_xxFace
+		local material = facestruct:FindMaterial("A00_M_hoho") or facestruct:FindMaterial("S00_M_hoho") 
+		if material and face.blush then
+			material:m_lightingAttributes(3, face.blush / 9)
+		end
+		material = facestruct:FindMaterial("A00_M_hohosen") or facestruct:FindMaterial("S00_M_hohosen") 
+		if material and face.blushlines then
+			material:m_lightingAttributes(3, face.blushlines / 9)
+		end
+	end
 end
 
 local function table2pose(pose, character)
@@ -687,12 +753,11 @@ function _M.loadSceneData(scene)
 				local lightcount = skeleton.m_lightsCount
 				for i = 1, lightcount, 1 do
 					local light = skeleton:m_lightsArray(i - 1)
-					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4])
+					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4], 1.0)
 				end
 			end
 		end
-	end
-	
+	end	
 end
 
 local function loadscene(filename, dir)
@@ -844,7 +909,129 @@ function refreshscenelistbutton.action()
 	populatescenelist(scenelist1, scenesdir)
 end
 
--- == Anims ==
+
+_M.interpolateScene = function(scene)
+	if scene then
+		local characters = scene.characters or {}
+		local props = scene.props or {}
+		local interpolationValue = album_scene_interpolate_slider.value
+		
+		local loadedprops = {}
+		for i,v in pairs(propmgr.props) do
+			loadedprops[i] = v
+		end
+		
+		for i,readchara in ipairs(characters) do
+			local chara = charamgr.characters[i]
+			if chara then
+				table2poseInterpolated(readchara.pose, chara, interpolationValue)
+			end
+		end
+		
+		local not_found = {}
+
+		if not get_setting("lock_props") then
+			for i,readprop in ipairs(props) do
+				local find
+				for j,p in pairs(loadedprops) do
+					if p.name == readprop.name then
+						find = j
+						break
+					end
+				end
+				if not find then
+					table.insert(not_found, readprop.name)
+				else
+					find = table.remove(loadedprops, find)
+					if find then
+						for k,v in pairs(readprop.sliders) do
+							local slider = find:getslider(k)
+							if slider then
+								slerpSlider(slider, {v[1], v[2], v[3], v[4]}, interpolationValue);
+
+								slider:translate(0, slider:translate(0) + (v[5] - slider:translate(0)) * interpolationValue)
+								slider:translate(1, slider:translate(1) + (v[6] - slider:translate(1)) * interpolationValue)
+								slider:translate(2, slider:translate(2) + (v[7] - slider:translate(2)) * interpolationValue)
+								
+								slider:scale(0, slider:scale(0) + (v[8] - slider:scale(0)) * interpolationValue)
+								slider:scale(1, slider:scale(1) + (v[9] - slider:scale(1)) * interpolationValue)
+								slider:scale(2, slider:scale(2) + (v[10] - slider:scale(2)) * interpolationValue)
+
+								slider:Apply()
+							end
+						end
+					end
+				end
+			end
+			if #not_found > 0 then
+				log.warn("Load Scene: Props Not Found: %s", table.concat(not_found, ", "))
+			end
+		end
+		
+		if not get_setting("lock_camera") then
+			
+			log.spam("interpolateScene: original camera eu: [%s, %s, %s]", camera.rotx, camera.roty, camera.rotz);
+			log.spam("interpolateScene:   target camera eu: [%s, %s, %s]", scene.camera.rotx, scene.camera.roty, scene.camera.rotz);
+			local oldX, oldY, oldZ, oldW = charamgr.current:euler2quat({ camera.rotx, camera.roty, camera.rotz })
+			log.spam("interpolateScene: camera old qu: [%s, %s, %s, %s]", oldX, oldY, oldZ, oldW);
+			local newX, newY, newZ, newW = charamgr.current:euler2quat({ scene.camera.rotx, scene.camera.roty, scene.camera.rotz })
+			log.spam("interpolateScene: camera new qu: [%s, %s, %s, %s]", newX, newY, newZ, newW);
+			local outqX, outqY, outqZ, outqW = charamgr.current:quatslerp(
+				{ oldX, oldY, oldZ, oldW },
+				{ newX, newY, newZ, newW },
+				interpolationValue);
+			log.spam("interpolateScene: camera in: [%s, %s, %s, %s]", outqX, outqY, outqZ, outqW);
+			local qx, qy, qz = charamgr.current:quat2euler({outqX, outqY, outqZ, outqW});
+			camera.rotx = qx
+			camera.roty = qy
+			camera.rotz = qz
+			
+			log.spam("interpolateScene: result euler camera: [%s, %s, %s]", qx, qy, qz);
+
+			camera.shiftx = camera.shiftx + (scene.camera.shiftx - camera.shiftx) * interpolationValue
+			camera.shifty = camera.shifty + (scene.camera.shifty - camera.shifty) * interpolationValue
+			camera.shiftz = camera.shiftz + (scene.camera.shiftz - camera.shiftz) * interpolationValue
+
+			camera.fov = camera.fov + (scene.camera.fov - camera.fov) * interpolationValue
+			camera.dist_to_mid = camera.dist_to_mid + (scene.camera.dist_to_mid - camera.dist_to_mid) * interpolationValue -- use x scale ratio to modify current distance
+		end
+
+		if not get_setting("lock_light") and scene.light then
+			local direction = scene.light.direction
+			for _,character in pairs(charamgr.characters) do
+				local skeleton = character.struct.m_xxSkeleton
+				local lightcount = skeleton.m_lightsCount
+				for i = 1, lightcount, 1 do
+					local light = skeleton:m_lightsArray(i - 1)
+					light:SetLightDirection(direction[1], direction[2], direction[3], direction[4], interpolationValue)
+				end
+			end
+		end
+	end	
+end
+
+album_scene_interpolate_button.flat_action = function()
+	local filename = getalbumfilename();
+	local isPng = true
+	log.spam("Poser: Interpolating into scene %s\\%s", albumsdir or scenesdir, filename)
+	local data = readpng((albumsdir or scenesdir) .. "\\" .. filename .. ".png")
+	if data == nil then
+		isPng = false
+		data = readfile((albumsdir or scenesdir) .. "\\" .. filename .. ".scene")
+	end
+	if data then
+		local ok, scene = pcall(json.decode, data)
+		if not ok then
+			error("Error decoding scene %s data:" % filename)
+		end
+		_M.interpolateScene(scene)
+	else
+		log.spam("Couldn't find %s\\%s", (albumsdir or scenesdir), filename)
+	end
+	sceneloaded()
+end
+
+-- == Albums ==
 
 local album_playlist
 local album_playback_position = 1
@@ -1294,20 +1481,30 @@ _M.dialogposes = iup.dialog {
 							lock_light_toggle_album,
 							gap = 3,
 							expandchildren = "yes",
-							tabtitle = "Locks",
+							tabtitle = "Lock",
 						},
 						iup.vbox {
 							-- iup.label { title = "Auto" },
 							-- auto_play_toggle,
 							auto_repeat_album_toggle,
 							auto_load_scene_toggle,
-							auto_load_props_toggle,
-							auto_unload_props_toggle,
-							auto_load_chars_toggle,
-							auto_unload_chars_toggle,
+							-- auto_load_props_toggle,
+							-- auto_unload_props_toggle,
+							-- auto_load_chars_toggle,
+							-- auto_unload_chars_toggle,
 							gap = 3,
 							expandchildren = "yes",
 							tabtitle = "Auto",
+						},
+						iup.vbox {
+							iup.hbox {
+							album_scene_interpolate_slider_text,
+							album_scene_interpolate_slider,
+							},
+							album_scene_interpolate_button,
+							gap = 3,
+							expandchildren = "yes",
+							tabtitle = "Pro",
 						},
 						tabtype = "left",
 					},
