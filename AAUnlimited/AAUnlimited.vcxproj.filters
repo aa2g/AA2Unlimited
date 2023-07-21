@@ -607,5 +607,11 @@
     <None Include="Texts\mod\JMCP.lua">
       <Filter>Lua</Filter>
     </None>
+    <None Include="Texts\mod\poser\dlglight.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
+    <None Include="Texts\mod\poser\dlgemoji.lua">
+      <Filter>Lua\poser</Filter>
+    </None>
   </ItemGroup>
 </Project>

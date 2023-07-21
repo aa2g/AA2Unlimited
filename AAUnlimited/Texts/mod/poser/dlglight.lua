@@ -17,7 +17,7 @@ local function setlightdirection(x, y, z)
 			for i = 1, lightcount, 1 do
 				local light = skeleton:m_lightsArray(i - 1)
 				if lights[light.m_name] then
-					light:SetLightDirection(x, y, z, 0)
+					light:SetLightDirection(x, y, z, 0.0, 1.0)
 				end
 			end
 		end
