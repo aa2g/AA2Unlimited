@@ -12,6 +12,35 @@ namespace Poser {
 #define Z 2
 #define W 3
 
+	void PoserController::PoserCharacter::quat2euler(D3DXQUATERNION q, FLOAT* out)
+	{
+		float yy = q.y * q.y;
+
+		float t0 = 2.0f * (q.w * q.x + q.y * q.z);
+		float t1 = 1.0f - 2.0f * (q.x * q.x + yy);
+		out[0] = std::atan2(t0, t1);
+
+		float t2 = 2.0f * (q.w * q.y - q.z * q.x);
+		t2 = t2 > 1.0f ? 1.0f : t2;
+		t2 = t2 < -1.0f ? -1.0f : t2;
+		out[1] = std::asin(t2);
+
+		float t3 = 2.0f * (q.w * q.z + q.x * q.y);
+		float t4 = 1.0f - 2.0f * (yy + q.z * q.z);
+		out[2] = std::atan2(t3, t4);
+	}
+
+	D3DXQUATERNION PoserController::PoserCharacter::euler2quat(FLOAT* angle)
+	{
+		auto q = DirectX::XMQuaternionRotationRollPitchYaw(angle[X], angle[Y], angle[Z]);
+		D3DXQUATERNION ret;
+		ret.x = DirectX::XMVectorGetX(q);
+		ret.y = DirectX::XMVectorGetY(q);
+		ret.z = DirectX::XMVectorGetZ(q);
+		ret.w = DirectX::XMVectorGetW(q);
+		return ret;
+	}
+
 	void PoserController::SliderInfo::setValue(int axis, float value) {
 		if (currentOperation == Rotate) {
 			float angle[3];
@@ -113,7 +142,7 @@ namespace Poser {
 		m_characters.resize(25);
 	}
 
-	PoserController::~PoserController()	{
+	PoserController::~PoserController() {
 	}
 
 	void PoserController::StartPoser() {
@@ -216,7 +245,7 @@ namespace Poser {
 						bone->SetFrame(boneFrame->m_children);
 					}
 				}
-			});
+				});
 		}
 	}
 
@@ -293,7 +322,7 @@ namespace Poser {
 	void PoserController::PoserCharacter::FrameModTree(ExtClass::Frame* tree, ExtClass::CharacterStruct::Models source, const char* filter) {
 		PoserController::SliderInfo* slider;
 		ExtClass::Frame* modFrame;
-		size_t len = filter? strlen(filter) : 0;
+		size_t len = filter ? strlen(filter) : 0;
 
 		tree->EnumTreeLevelOrder([this, &slider, &modFrame, &source, &filter, &len](ExtClass::Frame* frame) {
 			// skip body slider bones
@@ -335,7 +364,7 @@ namespace Poser {
 				slider = nullptr;
 			}
 			return true;
-		});
+			});
 	}
 
 	void PoserController::PoserCharacter::FrameModSkeleton(ExtClass::XXFile* xxFile) {
@@ -358,7 +387,7 @@ namespace Poser {
 						slider->guide = frame;
 					}
 				}
-				if(isProp) {
+				if (isProp) {
 					// Search for this frame slider if it exists
 					slider = GetSlider(frame->m_name);
 					// If it doesn't exist we create a new one and claim it for this model source
@@ -383,7 +412,7 @@ namespace Poser {
 					slider = nullptr;
 				}
 				return true;
-			});
+				});
 		}
 
 		ExtClass::Frame* dankon = root->FindFrame("a_J_dan00");
@@ -463,7 +492,7 @@ namespace Poser {
 			root->EnumTreeLevelOrder([&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 				auto MakeSlider = [&prop, &slider, &modFrame](ExtClass::Frame* frame) {
 					// Search for this frame slider if it exists
-					SliderInfo *slider = prop->GetSlider(frame->m_name);
+					SliderInfo* slider = prop->GetSlider(frame->m_name);
 					// If it doesn't exist we create a new one and claim it for this model source
 					// A bone shall not be shared between different sources. The first one to claim it has priority. i.e. skeleton
 					if (!slider) {
@@ -496,7 +525,7 @@ namespace Poser {
 					MakeSlider(frame);
 				}
 				return true;
-			});
+				});
 		}
 	}
 
@@ -523,8 +552,8 @@ namespace Poser {
 		}
 		return poserCharacter;
 	}
-	
-	void PoserController::PoserCharacter::LoadCloth(const char *file) {
+
+	void PoserController::PoserCharacter::LoadCloth(const char* file) {
 		ClothFile load(file);
 		if (!load.IsValid()) return;
 		ExtClass::CharacterData::Clothes* cloth = &m_character->m_charData->m_clothes[m_character->m_currClothes];
@@ -558,6 +587,29 @@ namespace Poser {
 		cloth->shadowUnderwearLightness = load.m_underwearShadowBrightness;
 	}
 
+	void PoserController::PoserCharacter::QuatSliderSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value)
+	{
+		slider->rotation.setRotationQuaternion(QuatSlerp(slider->getRotation(), rotQ, value));
+	}
+
+	D3DXQUATERNION PoserController::PoserCharacter::QuatSlerp(D3DXQUATERNION q1, D3DXQUATERNION q2, float value)
+	{
+		DirectX::XMFLOAT4 dxq1(q1.x, q1.y, q1.z, q1.w);
+		DirectX::XMFLOAT4 dxq2(q2.x, q2.y, q2.z, q2.w);// get the target quat
+
+		auto ret = DirectX::XMQuaternionSlerp(
+			DirectX::XMQuaternionNormalize(XMLoadFloat4(&dxq1)),
+			DirectX::XMQuaternionNormalize(XMLoadFloat4(&dxq2)),
+			value);
+		D3DXQUATERNION out;
+		out.x = DirectX::XMVectorGetX(ret),
+		out.y = DirectX::XMVectorGetY(ret),
+		out.z = DirectX::XMVectorGetZ(ret),
+		out.w = DirectX::XMVectorGetW(ret);
+
+		return out;
+	}
+
 	std::wstring PoserController::GetOverride(const std::wstring& file) {
 		//A00_00_01_00h.xx - skeleton
 		/*if (m_useGuides && file.length() == 16 && General::StartsWith(file, L"A00_00") && file.substr(10, 6) == L"00h.xx") {
@@ -575,7 +627,7 @@ namespace Poser {
 		return std::wstring();
 	}
 
-	void PoserController::SetOverride(const std::wstring& file, const std::wstring& override) {
+	void PoserController::SetOverride(const std::wstring& file, const std::wstring & override) {
 		if (override.empty()) {
 			m_overrides.erase(file);
 		}

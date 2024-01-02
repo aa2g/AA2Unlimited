@@ -26,6 +26,7 @@
 #include "../Shared/Globals.h"
 #include "../../3rdparty/picojson/picojson.h"
 #include "Script/glua_stl.h"
+#include <DirectXMath.h>
 
 namespace Poser {
 
@@ -239,6 +240,13 @@ namespace Poser {
 				LUA_METHOD(StopSlide, {
 					_self->stopSlide();
 				});
+				LUA_METHOD(eulerangle, {
+					float angles[3];
+					_self->rotation.getEulerAngles(angles);
+					auto idx = _gl.get(2);
+					_gl.push(angles[idx]);
+					return 1;
+				});
 				LUA_BINDARRE(translate, .value, 3);
 				LUA_BINDARRE(scale, .value, 3);
 				GLUA_BIND(LUA_GLOBAL, METHOD, LUA_CLASS, rotation, { \
@@ -284,6 +292,12 @@ namespace Poser {
 
 			void LoadCloth(const char *file);
 
+			void quat2euler(D3DXQUATERNION q, FLOAT* out);
+			D3DXQUATERNION euler2quat(FLOAT* angle);
+
+			void QuatSliderSlerp(SliderInfo* slider, D3DXQUATERNION rotQ, float value);
+			D3DXQUATERNION QuatSlerp(D3DXQUATERNION q1, D3DXQUATERNION q2, float value);
+
 			ExtClass::CharacterStruct* m_character;
 			std::unordered_map<std::string, SliderInfo*> m_sliders;
 			std::unordered_map<std::string, SliderInfo*> m_transientSliders;
@@ -314,6 +328,57 @@ namespace Poser {
 						}
 					}
 					return 0;
+				});
+				LUA_METHOD(QuatSliderSlerp, {
+					auto a1 = _gl.get(2); // slider
+					auto a2 = _gl.get(3); // rotQ
+					D3DXQUATERNION q2;
+					q2.x = a2[1];
+					q2.y = a2[2];
+					q2.z = a2[3];
+					q2.w = a2[4];
+					auto val = _gl.get(4);// value
+					_self->QuatSliderSlerp(a1, q2, val);					
+				});
+				LUA_METHOD(QuatSlerp, {
+					auto a1 = _gl.get(2); //
+					D3DXQUATERNION q1;
+					q1.x = a1[1];
+					q1.y = a1[2];
+					q1.z = a1[3];
+					q1.w = a1[4];
+					auto a2 = _gl.get(3); // rotQ
+					D3DXQUATERNION q2;
+					q2.x = a2[1];
+					q2.y = a2[2];
+					q2.z = a2[3];
+					q2.w = a2[4];
+					auto val = _gl.get(4);// value
+					auto out = _self->QuatSlerp(q1, q2, val);
+					_gl.push(out.x).push(out.y).push(out.z).push(out.w);
+					return 4;
+				});
+				LUA_METHOD(quat2euler, {
+					auto q1 = _gl.get(2);
+					float angles[3];
+					D3DXQUATERNION q;
+					q.x = q1[1];
+					q.y = q1[2];
+					q.z = q1[3];
+					q.w = q1[4];
+					_self->quat2euler(q, angles);
+					_gl.push(angles[0]).push(angles[1]).push(angles[2]);
+					return 3;
+				});
+				LUA_METHOD(euler2quat, {
+					auto a = _gl.get(2);
+					float angles[3];
+					angles[0] = a[1];
+					angles[1] = a[2];
+					angles[2] = a[3];
+					auto q = _self->euler2quat(angles);
+					_gl.push(q.x).push(q.y).push(q.z).push(q.w);
+					return 4;
 				});
 				LUA_METHOD(SetHidden, {
 					_self->SetHidden(_gl.get(2), _gl.get(3));
