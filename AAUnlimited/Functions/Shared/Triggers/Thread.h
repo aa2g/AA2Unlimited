@@ -181,6 +181,8 @@ namespace Shared {
 			void SetNpcStatus(std::vector<Value>& params);
 			void ResetVoyeur(std::vector<Value>& params);
 
+			void EndHScene(std::vector<Value>& params);
+
 			void SetH_AI(std::vector<Value>& params);
 			void Set_H_AI_LOCK(std::vector<Value>& params);
 
