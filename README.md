@@ -30,7 +30,7 @@ For a full list of features, please read [this page](https://github.com/aa2g/AA2
 - **Various additions** - Unlocked homosexual sex scenes, added a subtitle overlay, built-in graphics settings, etc.
 
 ### Tech-Support (in order from most responsive to least responsive)
-- Try asking questions in our [discord server](https://discord.gg/N37M9Ny) (devs are here most of the time)
+- Try asking questions in our discord server (invite code: MqP8rwwSP4) (devs are here most of the time)
 - Ask questions in [/aa2g/](https://boards.4chan.org/vg/aa2g) (devs occasionally visit but regulars can help you out too)
 - Make an issue on github (good luck with that)
 
