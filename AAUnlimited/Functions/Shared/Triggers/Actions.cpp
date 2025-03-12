@@ -2097,6 +2097,15 @@ namespace Shared {
 
 		}
 
+		void Thread::EndHScene(std::vector<Value>& params)
+		{
+			if (Shared::GameState::getIsInH())
+			{
+				auto hInfo = Shared::GameState::getHInfo();
+				hInfo->m_btnExit->Press();
+			}
+		}
+
 		//H_AI
 		void Thread::SetH_AI(std::vector<Value>& params)
 		{
@@ -3146,6 +3155,12 @@ namespace Shared {
 				TEXT("Set the pregnancy risk on the specified day of the 14 day cycle. 2 = dangerous, 1 = safe, 0 = normal"),
 				{ TYPE_INT, TYPE_INT, TYPE_INT },
 				&Thread::SetPregnancyRisk
+			},
+			{
+				145, ACTIONCAT_NPCACTION, TEXT("End H Scene"), TEXT("EndHScene"),
+				TEXT("Ends the current H Scene"),
+				{},
+				&Thread::EndHScene
 			},
 		};
 
